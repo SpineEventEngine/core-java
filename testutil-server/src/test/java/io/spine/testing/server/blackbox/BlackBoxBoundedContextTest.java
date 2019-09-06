@@ -51,6 +51,7 @@ import io.spine.testing.server.blackbox.event.BbProjectDone;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
+import io.spine.testing.server.blackbox.event.BbUserDeleted;
 import io.spine.testing.server.blackbox.given.BbCommandDispatcher;
 import io.spine.testing.server.blackbox.given.BbDuplicateCommandDispatcher;
 import io.spine.testing.server.blackbox.given.BbEventDispatcher;
@@ -369,9 +370,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                     .receivesCommand(addProjectAssignee(projectId, user))
                     .receivesExternalEvent(newName("Users"), userDeleted(user, projectId))
                     .assertEvents();
-            assertEvents.hasSize(3);
+            assertEvents.hasSize(4);
             assertEvents.withType(BbProjectCreated.class).isNotEmpty();
             assertEvents.withType(BbAssigneeAdded.class).isNotEmpty();
+            assertEvents.withType(BbUserDeleted.class).isNotEmpty();
             assertEvents.withType(BbAssigneeRemoved.class).isNotEmpty();
         }
 
@@ -393,10 +395,11 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                                             userDeleted(user2, projectId),
                                             userDeleted(user3, projectId))
                     .assertEvents();
-            assertEvents.hasSize(7);
+            assertEvents.hasSize(10);
             assertEvents.withType(BbProjectCreated.class).hasSize(1);
             assertEvents.withType(BbAssigneeAdded.class).hasSize(3);
             assertEvents.withType(BbAssigneeRemoved.class).hasSize(3);
+            assertEvents.withType(BbUserDeleted.class).hasSize(3);
         }
     }
 
