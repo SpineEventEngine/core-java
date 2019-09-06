@@ -27,6 +27,11 @@ import io.spine.server.given.organizations.Organization;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * This class declares invalid subscriber because filtering of states is not allowed.
+ *
+ * @see FilteredStateSubscriber
+ */
 public class FilteredStateSubscriberWhere extends AbstractEventSubscriber {
 
     @Subscribe

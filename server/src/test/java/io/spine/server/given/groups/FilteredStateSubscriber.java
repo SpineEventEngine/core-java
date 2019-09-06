@@ -27,7 +27,15 @@ import io.spine.server.given.organizations.Organization;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-@SuppressWarnings("deprecation")
+/**
+ * This class declares invalid subscriber because filtering of states is not allowed.
+ *
+ * <p>{@code ByField}, which is deprecated, is still used to cover the negative case using
+ * this annotation.
+ *
+ * @see FilteredStateSubscriberWhere
+ */
+@SuppressWarnings("deprecation") // see Javadoc
 public class FilteredStateSubscriber extends AbstractEventSubscriber {
 
     @Subscribe(
