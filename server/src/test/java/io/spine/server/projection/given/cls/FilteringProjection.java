@@ -48,7 +48,7 @@ public final class FilteringProjection
 
     /** This method does not use the value passed in the event. */
     @Subscribe
-    void onReserved(@Where(field = VALUE_FIELD_PATH, equals = SET_A)StringImported event) {
+    void onReserved(@Where(field = VALUE_FIELD_PATH, equals = SET_A) StringImported event) {
         builder().setValue(VALUE_A);
     }
 
