@@ -419,7 +419,7 @@ public class EventBusTest {
     @MuteLogging
     @Test
     @DisplayName("not dispatch domestic event to external handler")
-    void domesticEventToExternalMetho() {
+    void domesticEventToExternalMethod() {
         EBExternalTaskAddedSubscriber subscriber = new EBExternalTaskAddedSubscriber();
         eventBus.register(subscriber);
 
