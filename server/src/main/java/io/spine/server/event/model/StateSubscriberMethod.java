@@ -24,12 +24,10 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.Environment;
 import io.spine.base.EventMessage;
+import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.base.FieldPaths;
 import io.spine.core.BoundedContext;
 import io.spine.core.BoundedContextName;
-import io.spine.core.ByField;
-import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
 import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.Model;
@@ -49,7 +47,7 @@ import static io.spine.core.BoundedContextNames.assumingTests;
 @Immutable
 public final class StateSubscriberMethod extends SubscriberMethod implements Logging {
 
-    private static final FieldPath ENTITY_TYPE_URL = FieldPaths.parse("entity.type_url");
+    private static final FieldPath ENTITY_TYPE_URL = Field.parse("entity.type_url").path();
 
     private final BoundedContextName contextOfSubscriber;
     private final Class<? extends Message> stateType;
@@ -62,9 +60,8 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     }
 
     private static Method checkNotFiltered(Method method) {
-        Subscribe subscribe = method.getAnnotation(Subscribe.class);
-        ByField filter = subscribe.filter();
-        checkState(filter.path().isEmpty() && filter.value().isEmpty(),
+        ArgumentFilter filter = ArgumentFilter.createFilter(method);
+        checkState(filter.acceptsAll(),
                    "A state subscriber method cannot declare filters but the method `%s` does.",
                    method);
         return method;

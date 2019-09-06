@@ -23,8 +23,8 @@ package io.spine.client;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.base.FieldPaths;
 import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;
@@ -222,7 +222,7 @@ public final class Filters {
     }
 
     private static Filter createFilter(String fieldPath, Object value, Operator operator) {
-        FieldPath path = FieldPaths.parse(fieldPath);
+        FieldPath path = Field.parse(fieldPath).path();
         Any wrappedValue = toAny(value);
         Filter filter = Filter
                 .newBuilder()

@@ -20,8 +20,8 @@
 
 package io.spine.server.projection.given.cls;
 
-import io.spine.core.ByField;
 import io.spine.core.Subscribe;
+import io.spine.core.Where;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.given.SavedString;
 import io.spine.test.projection.event.StringImported;
@@ -47,14 +47,14 @@ public final class FilteringProjection
     }
 
     /** This method does not use the value passed in the event. */
-    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = SET_A))
-    void onReserved(StringImported event) {
+    @Subscribe
+    void onReserved(@Where(field = VALUE_FIELD_PATH, equals = SET_A) StringImported event) {
         builder().setValue(VALUE_A);
     }
 
     /** This method does not use the value passed in the event either. */
-    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = SET_B))
-    void onSecret(StringImported event) {
+    @Subscribe
+    void onSecret(@Where(field = VALUE_FIELD_PATH, equals = SET_B) StringImported event) {
         builder().setValue(VALUE_B);
     }
 

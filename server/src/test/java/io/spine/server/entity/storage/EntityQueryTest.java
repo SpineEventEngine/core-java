@@ -27,8 +27,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.StringSubject;
+import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.base.FieldPaths;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.client.IdFilter;
@@ -204,7 +204,7 @@ class EntityQueryTest {
         Multimap<EntityColumn, Filter> filters = HashMultimap.create(values.size(), 1);
         for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
             EntityColumn column = param.getKey();
-            FieldPath fieldPath = FieldPaths.parse(column.name());
+            FieldPath fieldPath = Field.parse(column.name()).path();
             Filter filter = Filter
                     .newBuilder()
                     .setOperator(EQUAL)

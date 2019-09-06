@@ -20,8 +20,8 @@
 
 package io.spine.server.projection.given;
 
-import io.spine.core.ByField;
 import io.spine.core.Subscribe;
+import io.spine.core.Where;
 import io.spine.server.projection.Projection;
 import io.spine.test.projection.event.StringImported;
 
@@ -36,8 +36,8 @@ public final class NoDefaultOptionProjection
         super(id);
     }
 
-    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = ACCEPTED_VALUE))
-    void on(StringImported event) {
+    @Subscribe
+    void on(@Where(field = VALUE_FIELD_PATH, equals = ACCEPTED_VALUE) StringImported event) {
         builder().setValue(event.getValue());
     }
 }

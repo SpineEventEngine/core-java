@@ -21,18 +21,11 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.base.FieldPath;
-import io.spine.base.FieldPaths;
-import io.spine.core.ByField;
-import io.spine.core.Subscribe;
 import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
-
-import static io.spine.base.FieldPaths.typeOfFieldAt;
-import static io.spine.string.Stringifiers.fromString;
 
 /**
  * A wrapper for an event subscriber method.
@@ -47,16 +40,8 @@ public final class EventSubscriberMethod extends SubscriberMethod {
 
     @Override
     public ArgumentFilter createFilter() {
-        Subscribe annotation = rawMethod().getAnnotation(Subscribe.class);
-        ByField byFieldFilter = annotation.filter();
-        String rawFieldPath = byFieldFilter.path();
-        if (rawFieldPath.isEmpty()) {
-            return ArgumentFilter.acceptingAll();
-        }
-        FieldPath fieldPath = FieldPaths.parse(rawFieldPath);
-        Class<?> fieldType = typeOfFieldAt(rawMessageClass(), fieldPath);
-        Object expectedValue = fromString(byFieldFilter.value(), fieldType);
-        return ArgumentFilter.acceptingOnly(fieldPath, expectedValue);
+        ArgumentFilter result = ArgumentFilter.createFilter(rawMethod());
+        return result;
     }
 
     @Override

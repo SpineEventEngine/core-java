@@ -25,15 +25,23 @@ import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.given.organizations.Organization;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static io.spine.testing.Tests.halt;
 
+/**
+ * This class declares invalid subscriber because filtering of states is not allowed.
+ *
+ * <p>{@code ByField}, which is deprecated, is still used to cover the negative case using
+ * this annotation.
+ *
+ * @see FilteredStateSubscriberWhere
+ */
+@SuppressWarnings("deprecation") // see Javadoc
 public class FilteredStateSubscriber extends AbstractEventSubscriber {
 
     @Subscribe(
             filter = @ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
     )
     void on(Organization organization) {
-        fail(FilteredStateSubscriber.class.getSimpleName() +
-                     " should not be able to receive any updates.");
+        halt();
     }
 }
