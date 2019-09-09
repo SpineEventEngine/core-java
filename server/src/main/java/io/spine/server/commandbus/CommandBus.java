@@ -121,18 +121,18 @@ public class CommandBus
         return multitenant;
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
-    @Override
-    protected final Collection<BusFilter<CommandEnvelope>> filterChainTail() {
-        return ImmutableList.of(scheduler);
-    }
-
     @Override
     protected Collection<BusFilter<CommandEnvelope>> filterChainHead() {
         BusFilter<CommandEnvelope> tap = new CommandReceivedTap(this::systemFor);
         Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
         result.push(tap);
         return result;
+    }
+
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
+    @Override
+    protected final Collection<BusFilter<CommandEnvelope>> filterChainTail() {
+        return ImmutableList.of(scheduler);
     }
 
     @Override
@@ -316,19 +316,6 @@ public class CommandBus
             CommandBus commandBus = new CommandBus(this);
             commandBus.registry();
             return commandBus;
-        }
-    }
-
-    /**
-     * Produces an {@link UnsupportedCommandException} upon a dead command.
-     */
-    private static class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
-
-        @Override
-        public UnsupportedCommandException handle(CommandEnvelope message) {
-            Command command = message.command();
-            UnsupportedCommandException exception = new UnsupportedCommandException(command);
-            return exception;
         }
     }
 }

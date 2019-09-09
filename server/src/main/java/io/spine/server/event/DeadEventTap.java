@@ -1,0 +1,56 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.spine.server.event;
+
+import io.spine.base.EventMessage;
+import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.type.EventEnvelope;
+
+import java.util.function.Supplier;
+
+/**
+ * Handles a dead event by saving it to the {@link EventStore} and producing an
+ * {@link UnsupportedEventException}.
+ *
+ * <p> We must store dead events as they can still be emitted by some entities and therefore are
+ * a part of the history for the current Bounded Context.
+ */
+final class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
+
+    private final Supplier<EventStore> store;
+
+    DeadEventTap(Supplier<EventStore> store) {
+        this.store = store;
+    }
+
+    @Override
+    public UnsupportedEventException handle(EventEnvelope event) {
+        eventStore().append(event.outerObject());
+
+        EventMessage message = event.message();
+        UnsupportedEventException exception = new UnsupportedEventException(message);
+        return exception;
+    }
+
+    private EventStore eventStore() {
+        return store.get();
+    }
+}
