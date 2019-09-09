@@ -24,7 +24,15 @@ import io.spine.server.bus.MulticastDispatcher;
 /**
  * Delivers messages produced outside of the current {@code BoundedContext} to dispatchers
  * that are {@linkplain io.spine.core.Subscribe#external() configured} to receive external events.
+ *
+ * @apiNote An {@code ExternalMessageDispatcher} does not dispatch any messages. It merely tells
+ *         which message types are required by the associated event dispatcher.
  */
 public interface ExternalMessageDispatcher
         extends MulticastDispatcher<ExternalMessageClass, ExternalMessageEnvelope> {
+
+    @Override
+    default void dispatch(ExternalMessageEnvelope envelope) {
+        throw new UnsupportedOperationException("External messages cannot be dispatched directly.");
+    }
 }

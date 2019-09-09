@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Empty;
 import io.spine.base.Identifier;
@@ -170,13 +169,6 @@ public abstract class AbstractEventSubscriber
         @Override
         public Set<ExternalMessageClass> messageClasses() {
             return ExternalMessageClass.fromEventClasses(externalEventClasses());
-        }
-
-        @CanIgnoreReturnValue
-        @Override
-        public void dispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            AbstractEventSubscriber.this.dispatch(eventEnvelope);
         }
 
         @Override

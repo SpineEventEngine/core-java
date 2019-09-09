@@ -58,8 +58,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * messaging broker.
  *
  * <p>The messages from external components received by the {@code IntegrationBus} instance
- * via the transport are propagated into the bounded context. They are dispatched
- * to the subscribers and reactors marked with {@code external = true} on per-message-type basis.
+ * via the transport are propagated into the bounded context via the domestic {@code EventBus}.
  *
  * {@code IntegrationBus} is also responsible for publishing the messages
  * born within the current `BoundedContext` to external collaborators. To do that properly,
@@ -98,6 +97,13 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * <p>The integration bus of "Projects" context will receive the {@code UserDeleted}
  * external message. The event will be dispatched to the external event handler of
  * {@code ProjectListView} projection.
+ *
+ * @implNote An {@code IntegrationBus} never performs dispatching on its own. Instead, it
+ *         prepares and passes the message to the local {@code EventBus}. Hence,
+ *         {@code IntegrationBus} is unicast, as it always dispatches a message to a single target,
+ *         the {@code EventBus}. However, {@code IntegrationBus} is aware of the local dispatchers
+ *         and the types of external events they dispatch, so that it can tell if an event should be
+ *         posted to this Context or not.
  */
 @SuppressWarnings("OverlyCoupledClass")
 public class IntegrationBus

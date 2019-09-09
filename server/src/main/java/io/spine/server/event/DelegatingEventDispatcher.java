@@ -24,7 +24,6 @@ import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
@@ -120,12 +119,6 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
         public Set<ExternalMessageClass> messageClasses() {
             Set<EventClass> eventClasses = delegate.externalEvents();
             return ExternalMessageClass.fromEventClasses(eventClasses);
-        }
-
-        @Override
-        public void dispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            delegate.dispatchEvent(eventEnvelope);
         }
     }
 }

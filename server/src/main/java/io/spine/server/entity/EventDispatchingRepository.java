@@ -140,12 +140,6 @@ public abstract class EventDispatchingRepository<I,
             implements ExternalMessageDispatcher {
 
         @Override
-        public void dispatch(ExternalMessageEnvelope externalEvent) {
-            EventEnvelope event = externalEvent.toEventEnvelope();
-            EventDispatchingRepository.this.dispatch(event);
-        }
-
-        @Override
         public boolean canDispatch(ExternalMessageEnvelope externalEvent) {
             EventEnvelope event = externalEvent.toEventEnvelope();
             return EventDispatchingRepository.this.canDispatch(event);

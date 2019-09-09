@@ -22,13 +22,9 @@ package io.spine.server.integration;
 import io.spine.logging.Logging;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-import io.spine.string.Stringifiers;
 
 import java.util.Objects;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * An internal wrapper class, which exposes an {@link AbstractEventSubscriber}
@@ -49,15 +45,6 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher, Loggin
     public Set<ExternalMessageClass> messageClasses() {
         Set<EventClass> extSubscriptions = delegate.externalEventClasses();
         return ExternalMessageClass.fromEventClasses(extSubscriptions);
-    }
-
-    @Override
-    public void dispatch(ExternalMessageEnvelope envelope) {
-        EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-        checkArgument(eventEnvelope.isExternal(),
-                      "External event expected, but got %s",
-                      Stringifiers.toString(eventEnvelope.outerObject()));
-        delegate.dispatch(eventEnvelope);
     }
 
     @Override

@@ -38,7 +38,6 @@ import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -161,13 +160,6 @@ public abstract class AbstractEventReactor
         @Override
         public Set<ExternalMessageClass> messageClasses() {
             return ExternalMessageClass.fromEventClasses(externalEventClasses());
-        }
-
-        @CanIgnoreReturnValue
-        @Override
-        public void dispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            AbstractEventReactor.this.dispatch(eventEnvelope);
         }
     }
 }
