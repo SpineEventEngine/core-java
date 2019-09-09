@@ -408,4 +408,3 @@ public abstract class Bus<T extends Message,
         }
     }
 }
-
