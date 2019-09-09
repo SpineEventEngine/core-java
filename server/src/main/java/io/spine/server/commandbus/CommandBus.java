@@ -120,7 +120,7 @@ public class CommandBus
     }
 
     /**
-     * Places {@link CommandReceivedTap} first and {@link CommandScheduler} last
+     * Places a {@link CommandReceivedTap} first and a {@link CommandScheduler} last
      * in the filter chain.
      */
     @Override
