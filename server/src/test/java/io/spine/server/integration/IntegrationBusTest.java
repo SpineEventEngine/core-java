@@ -103,18 +103,18 @@ class IntegrationBusTest {
             BoundedContext sourceContext = newContext();
             contextWithExtEntitySubscribers();
 
-            assertNull(ProjectDetails.getExternalEvent());
-            assertNull(ProjectWizard.getExternalEvent());
-            assertNull(ProjectCountAggregate.getExternalEvent());
+            assertNull(ProjectDetails.externalEvent());
+            assertNull(ProjectWizard.externalEvent());
+            assertNull(ProjectCountAggregate.externalEvent());
 
             Event event = projectCreated();
             sourceContext.eventBus()
                          .post(event);
 
             Message expectedMessage = unpack(event.getMessage());
-            assertEquals(expectedMessage, ProjectDetails.getExternalEvent());
-            assertEquals(expectedMessage, ProjectWizard.getExternalEvent());
-            assertEquals(expectedMessage, ProjectCountAggregate.getExternalEvent());
+            assertEquals(expectedMessage, ProjectDetails.externalEvent());
+            assertEquals(expectedMessage, ProjectWizard.externalEvent());
+            assertEquals(expectedMessage, ProjectCountAggregate.externalEvent());
 
             sourceContext.close();
         }
@@ -125,13 +125,13 @@ class IntegrationBusTest {
             BoundedContext sourceContext = newContext();
             contextWithExternalSubscribers();
 
-            assertNull(ProjectEventsSubscriber.getExternalEvent());
+            assertNull(ProjectEventsSubscriber.externalEvent());
 
             Event event = projectCreated();
             sourceContext.eventBus()
                          .post(event);
             assertEquals(unpack(event.getMessage()),
-                         ProjectEventsSubscriber.getExternalEvent());
+                         ProjectEventsSubscriber.externalEvent());
 
             sourceContext.close();
         }
@@ -165,17 +165,17 @@ class IntegrationBusTest {
             BoundedContext destA = contextWithProjectCreatedNeeds();
             BoundedContext destB = contextWithProjectStartedNeeds();
 
-            assertNull(ProjectStartedExtSubscriber.getExternalEvent());
-            assertNull(ProjectEventsSubscriber.getExternalEvent());
+            assertNull(ProjectStartedExtSubscriber.externalEvent());
+            assertNull(ProjectEventsSubscriber.externalEvent());
 
             EventBus sourceEventBus = sourceContext.eventBus();
             Event created = projectCreated();
             sourceEventBus.post(created);
             Event started = projectStarted();
             sourceEventBus.post(started);
-            assertThat(ProjectEventsSubscriber.getExternalEvent())
+            assertThat(ProjectEventsSubscriber.externalEvent())
                     .isEqualTo(created.enclosedMessage());
-            assertThat(ProjectStartedExtSubscriber.getExternalEvent())
+            assertThat(ProjectStartedExtSubscriber.externalEvent())
                     .isEqualTo(started.enclosedMessage());
             sourceContext.close();
             destA.close();
@@ -193,18 +193,16 @@ class IntegrationBusTest {
             BoundedContext sourceContext = newContext();
             BoundedContext destContext = contextWithExtEntitySubscribers();
 
-            assertNull(ProjectDetails.getDomesticEvent());
+            assertNull(ProjectDetails.domesticEvent());
 
             Event event = projectStarted();
             sourceContext.eventBus()
                          .post(event);
-
-            assertNotEquals(unpack(event.getMessage()), ProjectDetails.getDomesticEvent());
-            assertNull(ProjectDetails.getDomesticEvent());
+            assertThat(ProjectDetails.domesticEvent()).isNull();
 
             destContext.eventBus()
                        .post(event);
-            assertEquals(unpack(event.getMessage()), ProjectDetails.getDomesticEvent());
+            assertThat(ProjectDetails.domesticEvent()).isEqualTo(unpack(event.getMessage()));
 
             sourceContext.close();
             destContext.close();
@@ -216,20 +214,20 @@ class IntegrationBusTest {
             BoundedContext sourceContext = newContext();
             BoundedContext destContext = contextWithExternalSubscribers();
 
-            assertNull(ProjectEventsSubscriber.getDomesticEvent());
+            assertNull(ProjectEventsSubscriber.domesticEvent());
 
             Event event = projectStarted();
             sourceContext.eventBus()
                          .post(event);
 
             assertNotEquals(unpack(event.getMessage()),
-                            ProjectEventsSubscriber.getDomesticEvent());
-            assertNull(ProjectEventsSubscriber.getDomesticEvent());
+                            ProjectEventsSubscriber.domesticEvent());
+            assertNull(ProjectEventsSubscriber.domesticEvent());
 
             destContext.eventBus()
                        .post(event);
             assertEquals(unpack(event.getMessage()),
-                         ProjectEventsSubscriber.getDomesticEvent());
+                         ProjectEventsSubscriber.domesticEvent());
 
             sourceContext.close();
             destContext.close();
@@ -270,18 +268,18 @@ class IntegrationBusTest {
         EventBus eventBus = context.eventBus();
         eventBus.register(eventSubscriber);
 
-        assertNull(ProjectEventsSubscriber.getExternalEvent());
-        assertNull(ProjectDetails.getExternalEvent());
-        assertNull(ProjectWizard.getExternalEvent());
-        assertNull(ProjectCountAggregate.getExternalEvent());
+        assertNull(ProjectEventsSubscriber.externalEvent());
+        assertNull(ProjectDetails.externalEvent());
+        assertNull(ProjectWizard.externalEvent());
+        assertNull(ProjectCountAggregate.externalEvent());
 
         Event projectCreated = projectCreated();
         assertThrows(SignalOriginMismatchError.class, () -> eventBus.post(projectCreated));
 
-        assertNull(ProjectEventsSubscriber.getExternalEvent());
-        assertNull(ProjectDetails.getExternalEvent());
-        assertNull(ProjectWizard.getExternalEvent());
-        assertNull(ProjectCountAggregate.getExternalEvent());
+        assertNull(ProjectEventsSubscriber.externalEvent());
+        assertNull(ProjectDetails.externalEvent());
+        assertNull(ProjectWizard.externalEvent());
+        assertNull(ProjectCountAggregate.externalEvent());
 
         context.close();
     }
