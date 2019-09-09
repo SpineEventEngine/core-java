@@ -259,7 +259,7 @@ public class EventBus
     }
 
     @Override
-    public synchronized void close() throws Exception {
+    public void close() throws Exception {
         super.close();
         eventStore().close();
     }

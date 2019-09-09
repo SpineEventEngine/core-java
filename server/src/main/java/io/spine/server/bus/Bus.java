@@ -194,7 +194,7 @@ public abstract class Bus<T extends Message,
      * <p>If the bus is closed posting to it is going to cause {@code IllegalStateException}.
      */
     @Override
-    public final synchronized boolean isOpen() {
+    public final boolean isOpen() {
         return filterChain().isOpen();
     }
 
@@ -205,7 +205,7 @@ public abstract class Bus<T extends Message,
      *         an exception
      */
     @Override
-    public synchronized void close() throws Exception {
+    public void close() throws Exception {
         filterChain().close();
         registry().unregisterAll();
     }

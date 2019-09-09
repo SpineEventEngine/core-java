@@ -133,8 +133,7 @@ public class IntegrationBus
     }
 
     @Override
-    @SuppressWarnings("AccessToStaticFieldLockedOnInstance") // accessing constants
-    public synchronized void registerWith(BoundedContext context) {
+    public void registerWith(BoundedContext context) {
         checkNotRegistered();
         this.boundedContextName = context.name();
         this.localBusAdapters = createAdapters(context);
@@ -147,7 +146,7 @@ public class IntegrationBus
     }
 
     @Override
-    public synchronized boolean isRegistered() {
+    public boolean isRegistered() {
         return boundedContextName != null;
     }
 
@@ -155,7 +154,7 @@ public class IntegrationBus
      * Creates an observer to react upon {@linkplain RequestForExternalMessages external request}
      * message arrival.
      */
-    private synchronized ConfigurationChangeObserver observeConfigurationChanges() {
+    private ConfigurationChangeObserver observeConfigurationChanges() {
         return new ConfigurationChangeObserver(this, boundedContextName, this::adapterFor);
     }
 
@@ -257,7 +256,7 @@ public class IntegrationBus
         return channelIdFor(targetType);
     }
 
-    private synchronized ExternalMessageObserver observerFor(ExternalMessageClass externalClass) {
+    private ExternalMessageObserver observerFor(ExternalMessageClass externalClass) {
         ExternalMessageObserver observer =
                 new ExternalMessageObserver(boundedContextName, externalClass.value(), this);
         return observer;
@@ -270,8 +269,7 @@ public class IntegrationBus
      * <p>Sends out an instance of {@linkplain RequestForExternalMessages
      * request for external messages} for that purpose.
      */
-    @SuppressWarnings("AccessToStaticFieldLockedOnInstance") // accessing the `EVENT` constant
-    private synchronized void notifyTypesChanged() {
+    private void notifyTypesChanged() {
         ImmutableSet<ExternalMessageType> needs = subscriberHub
                 .ids()
                 .stream()
@@ -291,7 +289,7 @@ public class IntegrationBus
      * triggers other Contexts to send their requests. As the result, all the Contexts know about
      * the needs of all the Contexts.
      */
-    synchronized void notifyOthers() {
+    void notifyOthers() {
         configurationBroadcast.send();
     }
 
@@ -321,7 +319,7 @@ public class IntegrationBus
      * Removes all subscriptions and closes all the underlying transport channels.
      */
     @Override
-    public synchronized void close() throws Exception {
+    public void close() throws Exception {
         super.close();
 
         configurationChangeObserver.close();
@@ -332,11 +330,11 @@ public class IntegrationBus
     }
 
     @Override
-    public synchronized String toString() {
+    public String toString() {
         return "Integration Bus of BoundedContext Name = " + boundedContextName.getValue();
     }
 
-    private synchronized BusAdapter<?, ?> adapterFor(Class<? extends Message> messageClass) {
+    private BusAdapter<?, ?> adapterFor(Class<? extends Message> messageClass) {
         for (BusAdapter<?, ?> localAdapter : localBusAdapters) {
             if (localAdapter.accepts(messageClass)) {
                 return localAdapter;
