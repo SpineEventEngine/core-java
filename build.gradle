@@ -187,8 +187,8 @@ subprojects {
         }
     }
 
-    apply from: deps.scripts.testOutput
     apply from: deps.scripts.slowTests
+    apply from: deps.scripts.testOutput
     apply from: deps.scripts.javadocOptions
     
     task sourceJar(type: Jar) {
