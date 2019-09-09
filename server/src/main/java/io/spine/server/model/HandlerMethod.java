@@ -129,7 +129,7 @@ public interface HandlerMethod<T,
      * matches the one set for the handler method.
      *
      * @param expectedValue an expected value of the {@code external} attribute
-     * @throws IllegalArgumentException is thrown if the value does not meet the expectation
+     * @throws SignalOriginMismatchError is thrown if the value does not meet the expectation
      * @see ExternalAttribute
      */
     default void ensureExternalMatch(boolean expectedValue) throws SignalOriginMismatchError {

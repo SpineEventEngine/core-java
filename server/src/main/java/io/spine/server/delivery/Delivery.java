@@ -31,6 +31,7 @@ import io.spine.base.Time;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -329,26 +330,22 @@ public final class Delivery {
         if (!toDeliver.isEmpty()) {
             ImmutableList<InboxMessage> idempotenceSource = classifier.idempotenceSource();
 
-            ImmutableList<RuntimeException> observedExceptions =
-                    deliverByType(toDeliver, idempotenceSource);
+            DeliveryErrors observedExceptions = deliverByType(toDeliver, idempotenceSource);
 
             deliveredInBatch = toDeliver.size();
 
-            if (!observedExceptions.isEmpty()) {
-                throw observedExceptions.iterator()
-                                        .next();
-            }
+            observedExceptions.throwIfAny();
         }
         return deliveredInBatch;
     }
 
-    private ImmutableList<RuntimeException>
+    private DeliveryErrors
     deliverByType(ImmutableList<InboxMessage> toDeliver, ImmutableList<InboxMessage> idmptSource) {
 
         Map<String, List<InboxMessage>> messagesByType = groupByTargetType(toDeliver);
         Map<String, List<InboxMessage>> idmptSourceByType = groupByTargetType(idmptSource);
 
-        ImmutableList.Builder<RuntimeException> exceptionsAccumulator = ImmutableList.builder();
+        DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
         for (String typeUrl : messagesByType.keySet()) {
             ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
             List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
@@ -357,12 +354,13 @@ public final class Delivery {
             try {
                 delivery.deliver(deliveryPackage, idempotenceWnd);
             } catch (RuntimeException e) {
-                exceptionsAccumulator.add(e);
+                errors.addException(e);
+            } catch (ModelError e) {
+                errors.addError(e);
             }
         }
-        ImmutableList<RuntimeException> exceptions = exceptionsAccumulator.build();
         inboxStorage.markDelivered(toDeliver);
-        return exceptions;
+        return errors.build();
     }
 
     /**

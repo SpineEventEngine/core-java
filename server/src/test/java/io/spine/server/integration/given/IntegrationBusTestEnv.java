@@ -19,6 +19,7 @@
  */
 package io.spine.server.integration.given;
 
+import com.google.common.base.Throwables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
@@ -84,7 +85,9 @@ public class IntegrationBusTestEnv {
     }
 
     public static Event projectCreated() {
-        ProjectId projectId = projectId();
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId(Throwables.getStackTraceAsString(new RuntimeException()))
+                                       .build();
         TestEventFactory eventFactory = newInstance(pack(projectId), IntegrationBusTestEnv.class);
         return eventFactory.createEvent(
                 ItgProjectCreated.newBuilder()
