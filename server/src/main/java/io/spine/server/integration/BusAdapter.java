@@ -20,65 +20,46 @@
 
 package io.spine.server.integration;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
-import io.spine.core.BoundedContextName;
+import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.transport.PublisherHub;
-import io.spine.server.transport.SubscriberHub;
 import io.spine.server.type.EventClass;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.core.Events.toExternal;
 
 /**
  * An adapter between the {@link IntegrationBus} and the {@link EventBus}.
  */
 final class BusAdapter {
 
+    private final IntegrationBus integrationBus;
+
     /**
      * The wrapped local event bus.
      */
     private final EventBus targetBus;
 
-    /**
-     * The name of the bounded context, to which the wrapped local bus belongs.
-     */
-    private final BoundedContextName boundedContextName;
-
-    /**
-     * The publisher hub, used publish the messages dispatched from the local buses to external
-     * collaborators.
-     */
-    private final PublisherHub publisherHub;
-
-    /**
-     * The subscriber hub, used to identify types of events received by this Context.
-     */
-    private final SubscriberHub subscriberHub;
-
-    private BusAdapter(Builder builder) {
-        this.targetBus = builder.targetBus;
-        this.boundedContextName = builder.boundedContextName;
-        this.publisherHub = builder.publisherHub;
-        this.subscriberHub = builder.subscriberHub;
+    BusAdapter(IntegrationBus integrationBus, EventBus targetBus) {
+        this.integrationBus = integrationBus;
+        this.targetBus = targetBus;
     }
 
-    /**
-     * Wraps a given {@code ExternalMessage} into an {@link ExternalMessageEnvelope}
-     * to allow its processing inside of the {@code IntegrationBus}.
-     *
-     * @param message
-     *         an external message to wrap
-     * @return an {@code ExternalMessageEnvelope}, containing the given message
-     */
-    ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
-        Event event = unpack(message.getOriginalMessage(), Event.class);
-        return ExternalMessageEnvelope.of(message, event.enclosedMessage());
+    void dispatch(Event event, StreamObserver<Ack> ackObserver) {
+        targetBus.post(toExternal(event), ackObserver);
+    }
+
+    void register(Class<? extends Message> messageClass) {
+        EventDispatcher dispatcher = createDispatcher(messageClass);
+        targetBus.register(dispatcher);
+    }
+
+    void unregister(Class<? extends Message> messageClass) {
+        EventDispatcher dispatcher = createDispatcher(messageClass);
+        targetBus.unregister(dispatcher);
     }
 
     /**
@@ -96,82 +77,7 @@ final class BusAdapter {
         @SuppressWarnings("unchecked") // Logically checked.
         Class<? extends EventMessage> eventClass = (Class<? extends EventMessage>) messageClass;
         EventClass eventType = EventClass.from(eventClass);
-        EventDispatcher result = new DomesticEventPublisher(
-                boundedContextName, publisherHub, subscriberHub, eventType
-        );
+        EventDispatcher result = new DomesticEventPublisher(integrationBus, eventType);
         return result;
-    }
-
-    void register(Class<? extends Message> messageClass) {
-        EventDispatcher dispatcher = createDispatcher(messageClass);
-        targetBus.register(dispatcher);
-    }
-
-    void unregister(Class<? extends Message> messageClass) {
-        EventDispatcher dispatcher = createDispatcher(messageClass);
-        targetBus.unregister(dispatcher);
-    }
-
-    void dispatch(ExternalMessageEnvelope envelope) {
-        Any message = envelope.outerObject().getOriginalMessage();
-        if (!message.is(Event.class)) {
-            throw messageUnsupported(message);
-        } else {
-            Event.Builder event = unpack(message, Event.class).toBuilder();
-            event.getContextBuilder()
-                 .setExternal(true);
-            targetBus.post(event.build());
-        }
-    }
-
-    private static IllegalArgumentException messageUnsupported(Any any) {
-        throw newIllegalArgumentException(
-                "The message of type `%s` isn't supported.", any.getTypeUrl()
-        );
-    }
-
-    static Builder newBuilder() {
-        return new Builder();
-    }
-
-    /**
-     * A builder for bus adapters.
-     */
-    static final class Builder {
-
-        private EventBus targetBus;
-        private BoundedContextName boundedContextName;
-        private PublisherHub publisherHub;
-        private SubscriberHub subscriberHub;
-
-        Builder setPublisherHub(PublisherHub publisherHub) {
-            this.publisherHub = checkNotNull(publisherHub);
-            return this;
-        }
-
-        Builder setSubscriberHub(SubscriberHub subscriberHub) {
-            this.subscriberHub = checkNotNull(subscriberHub);
-            return this;
-        }
-
-        Builder setTargetBus(EventBus targetBus) {
-            this.targetBus = checkNotNull(targetBus);
-            return this;
-        }
-
-        Builder setBoundedContextName(BoundedContextName boundedContextName) {
-            this.boundedContextName = checkNotNull(boundedContextName);
-            return this;
-        }
-
-        public BusAdapter build() {
-            checkNotNull(targetBus);
-            checkNotNull(boundedContextName);
-            checkNotNull(publisherHub);
-            checkNotNull(subscriberHub);
-
-            BusAdapter result = new BusAdapter(this);
-            return result;
-        }
     }
 }

@@ -19,20 +19,15 @@
  */
 package io.spine.server.integration;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
 import io.spine.core.Ack;
-import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.EventValidationError;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventBus;
@@ -58,11 +53,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Identifier.pack;
-import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Messages.defaultInstance;
-import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithProjectCreatedNeeds;
@@ -98,33 +90,6 @@ class IntegrationBusTest {
         ServerEnvironment.instance()
                          .reset();
         ModelTests.dropAllModels();
-    }
-
-    @Test
-    @DisplayName("not allow dispatching anything but `Event`s")
-    void notAllowNonEvents() throws Exception {
-        BoundedContext context = BoundedContextBuilder
-                .assumingTests()
-                .build();
-        IntegrationBus bus = context.integrationBus();
-
-        dispatchAndFail(bus, Command.class);
-        dispatchAndFail(bus, Empty.class);
-        dispatchAndFail(bus, StringValue.class);
-
-        context.close();
-    }
-
-    private static void dispatchAndFail(IntegrationBus bus, Class<? extends Message> messageType) {
-        Message message = defaultInstance(messageType);
-        ExternalMessage externalMessage = ExternalMessage
-                .newBuilder()
-                .setId(pack(42))
-                .setBoundedContextName(newName("Faulty sender"))
-                .setOriginalMessage(AnyPacker.pack(message))
-                .build();
-        assertThrows(IllegalArgumentException.class,
-                     () -> bus.dispatch(ExternalMessageEnvelope.of(externalMessage, message)));
     }
 
     @Nested
@@ -324,19 +289,16 @@ class IntegrationBusTest {
         BoundedContext context = newContext();
 
         Event event = projectCreated();
-        BoundedContextName name = newName("External context ID");
-        ExternalMessage externalMessage = ExternalMessages.of(event, name);
         MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
         context.integrationBus()
-               .post(externalMessage, observer);
+               .dispatchLocally(event, observer);
         Error error = observer.firstResponse()
                               .getStatus()
                               .getError();
         assertFalse(Validate.isDefault(error));
-        assertEquals(ExternalMessageValidationError.getDescriptor()
-                                                   .getFullName(),
+        assertEquals(EventValidationError.getDescriptor().getFullName(),
                      error.getType());
-        assertEquals(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber(), error.getCode());
+        assertEquals(UNSUPPORTED_EVENT_VALUE, error.getCode());
 
         context.close();
     }

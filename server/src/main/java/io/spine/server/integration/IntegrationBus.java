@@ -20,28 +20,28 @@
 package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
+import io.grpc.stub.StreamObserver;
+import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.bus.BusBuilder;
-import io.spine.server.bus.DeadMessageHandler;
-import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.bus.UnicastBus;
-import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
@@ -106,12 +106,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  *         posted to this Context or not.
  */
 @SuppressWarnings("OverlyCoupledClass")
-public class IntegrationBus
-        extends UnicastBus<ExternalMessage,
-                           ExternalMessageEnvelope,
-                           ExternalMessageClass,
-                           ExternalMessageDispatcher>
-        implements ContextAware {
+public class IntegrationBus implements ContextAware, AutoCloseable {
 
     private static final ChannelId CONFIG_EXCHANGE_CHANNEL_ID = channelIdFor(
             TypeUrl.of(RequestForExternalMessages.class)
@@ -121,12 +116,11 @@ public class IntegrationBus
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
     private @MonotonicNonNull BusAdapter busAdapter;
-    private @MonotonicNonNull BoundedContextName boundedContextName;
-    private @MonotonicNonNull ConfigurationChangeObserver configurationChangeObserver;
-    private @MonotonicNonNull ConfigurationBroadcast configurationBroadcast;
+    private @MonotonicNonNull BoundedContextName context;
+    private @MonotonicNonNull ConfigurationChangeObserver configurationObserver;
+    private @MonotonicNonNull ConfigurationBroadcast broadcast;
 
-    private IntegrationBus(Builder builder) {
-        super(builder);
+    public IntegrationBus() {
         TransportFactory transportFactory = ServerEnvironment
                 .instance()
                 .transportFactory();
@@ -137,64 +131,39 @@ public class IntegrationBus
     @Override
     public void registerWith(BoundedContext context) {
         checkNotRegistered();
-        this.busAdapter = buildBusAdapter(context);
-        this.boundedContextName = context.name();
-        this.configurationChangeObserver = observeConfigurationChanges();
+        BoundedContextName name = context.name();
+        this.busAdapter = new BusAdapter(this, context.eventBus());
+        this.context = name;
+        this.configurationObserver = new ConfigurationChangeObserver(this, name, busAdapter);
+        this.subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
+                          .addObserver(configurationObserver);
         Publisher configurationPublisher = publisherHub.get(CONFIG_EXCHANGE_CHANNEL_ID);
-        this.configurationBroadcast =
-                new ConfigurationBroadcast(boundedContextName, configurationPublisher);
-        subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
-                     .addObserver(configurationChangeObserver);
-    }
-
-    private BusAdapter buildBusAdapter(BoundedContext context) {
-        return BusAdapter
-                .newBuilder()
-                .setPublisherHub(publisherHub)
-                .setSubscriberHub(subscriberHub)
-                .setBoundedContextName(context.name())
-                .setTargetBus(context.eventBus())
-                .build();
+        this.broadcast = new ConfigurationBroadcast(name, configurationPublisher);
     }
 
     @Override
     public boolean isRegistered() {
-        return boundedContextName != null;
+        return context != null;
     }
 
-    /**
-     * Creates an observer to react upon {@linkplain RequestForExternalMessages external request}
-     * message arrival.
-     */
-    private ConfigurationChangeObserver observeConfigurationChanges() {
-
-        return new ConfigurationChangeObserver(this, boundedContextName, busAdapter);
+    void publish(EventEnvelope event) {
+        Event outerObject = event.outerObject();
+        ExternalMessage msg = ExternalMessages.of(outerObject, context);
+        EventClass eventClass = event.messageClass();
+        ChannelId channelId = toChannelId(eventClass);
+        boolean eventFromUpstream = subscriberHub.hasChannel(channelId);
+        if (!eventFromUpstream) {
+            Publisher channel = publisherHub.get(channelId);
+            channel.publish(AnyPacker.pack(event.id()), msg);
+        }
     }
 
-    @Override
-    protected DeadMessageHandler<ExternalMessageEnvelope> deadMessageHandler() {
-        return DeadExternalMessageHandler.INSTANCE;
+    void dispatchLocally(Event event) {
+        dispatchLocally(event, noOpObserver());
     }
 
-    @Override
-    protected EnvelopeValidator<ExternalMessageEnvelope> validator() {
-        return ExternalMessageValidator.INSTANCE;
-    }
-
-    @Override
-    protected ExternalMessageEnvelope toEnvelope(ExternalMessage message) {
-        ExternalMessageEnvelope result = busAdapter.toExternalEnvelope(message);
-        return result;
-    }
-
-    @Override
-    protected void dispatch(ExternalMessageEnvelope envelope) {
-        busAdapter.dispatch(envelope);
-    }
-
-    @Override
-    protected void store(Iterable<ExternalMessage> messages) {
-        // We don't store the incoming messages.
+    void dispatchLocally(Event event, StreamObserver<Ack> ackObserver) {
+        busAdapter.dispatch(event, ackObserver);
     }
 
     /**
@@ -203,11 +172,9 @@ public class IntegrationBus
      * @param dispatcher
      *         the dispatcher to register
      */
-    @Override
-    public void register(ExternalMessageDispatcher dispatcher) {
-        super.register(dispatcher);
-        Iterable<ExternalMessageClass> receivedTypes = dispatcher.messageClasses();
-        for (ExternalMessageClass cls : receivedTypes) {
+    public void register(EventDispatcher dispatcher) {
+        Iterable<EventClass> receivedTypes = dispatcher.externalEventClasses();
+        for (EventClass cls : receivedTypes) {
             ChannelId channelId = toChannelId(cls);
             Subscriber subscriber = subscriberHub.get(channelId);
             ExternalMessageObserver observer = observerFor(cls);
@@ -223,11 +190,9 @@ public class IntegrationBus
      * @param dispatcher
      *         the dispatcher to unregister
      */
-    @Override
-    public void unregister(ExternalMessageDispatcher dispatcher) {
-        super.unregister(dispatcher);
-        Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
-        for (ExternalMessageClass cls : transformed) {
+    public void unregister(EventDispatcher dispatcher) {
+        Iterable<EventClass> transformed = dispatcher.externalEventClasses();
+        for (EventClass cls : transformed) {
             ChannelId channelId = toChannelId(cls);
             Subscriber subscriber = subscriberHub.get(channelId);
             ExternalMessageObserver observer = observerFor(cls);
@@ -236,14 +201,14 @@ public class IntegrationBus
         subscriberHub.closeStaleChannels();
     }
 
-    private static ChannelId toChannelId(ExternalMessageClass cls) {
+    private static ChannelId toChannelId(EventClass cls) {
         TypeUrl targetType = TypeUrl.of(cls.value());
         return channelIdFor(targetType);
     }
 
-    private ExternalMessageObserver observerFor(ExternalMessageClass externalClass) {
+    private ExternalMessageObserver observerFor(EventClass externalClass) {
         ExternalMessageObserver observer =
-                new ExternalMessageObserver(boundedContextName, externalClass.value(), this);
+                new ExternalMessageObserver(context, externalClass.value(), this);
         return observer;
     }
 
@@ -264,7 +229,7 @@ public class IntegrationBus
                         .setWrapperTypeUrl(EVENT.value())
                         .buildPartial())
                 .collect(toImmutableSet());
-        configurationBroadcast.onTypesChanged(needs);
+        broadcast.onTypesChanged(needs);
     }
 
     /**
@@ -275,31 +240,7 @@ public class IntegrationBus
      * the needs of all the Contexts.
      */
     void notifyOthers() {
-        configurationBroadcast.send();
-    }
-
-    /**
-     * Registers the passed event subscriber as an external event dispatcher
-     * by taking only external subscriptions into account.
-     *
-     * @param eventSubscriber
-     *         the subscriber to register.
-     */
-    public void register(AbstractEventSubscriber eventSubscriber) {
-        ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
-        register(wrapped);
-    }
-
-    /**
-     * Unregisters the passed event subscriber as an external event dispatcher
-     * by taking only external subscriptions into account.
-     *
-     * @param eventSubscriber
-     *         the subscriber to register.
-     */
-    public void unregister(AbstractEventSubscriber eventSubscriber) {
-        ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
-        unregister(wrapped);
+        broadcast.send();
     }
 
     /**
@@ -307,9 +248,7 @@ public class IntegrationBus
      */
     @Override
     public void close() throws Exception {
-        super.close();
-
-        configurationChangeObserver.close();
+        configurationObserver.close();
         notifyTypesChanged();
 
         subscriberHub.close();
@@ -318,38 +257,6 @@ public class IntegrationBus
 
     @Override
     public String toString() {
-        return "Integration Bus of BoundedContext Name = " + boundedContextName.getValue();
-    }
-
-    /** Creates a new builder for this bus. */
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    /**
-     * A {@code Builder} for {@code IntegrationBus} instances.
-     */
-    @CanIgnoreReturnValue
-    public static class Builder extends BusBuilder<Builder,
-                                                   ExternalMessage,
-                                                   ExternalMessageEnvelope,
-                                                   ExternalMessageClass,
-                                                   ExternalMessageDispatcher> {
-
-        @Override
-        protected DomesticDispatcherRegistry newRegistry() {
-            return new DomesticDispatcherRegistry();
-        }
-
-        @Override
-        @CheckReturnValue
-        public IntegrationBus build() {
-            return new IntegrationBus(this);
-        }
-
-        @Override
-        protected Builder self() {
-            return this;
-        }
+        return "Integration Bus of BoundedContext Name = " + context.getValue();
     }
 }

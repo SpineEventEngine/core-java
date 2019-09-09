@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -63,18 +63,6 @@ public final class Events {
         return EventId.newBuilder()
                       .setValue(value)
                       .build();
-    }
-
-    /**
-     * Extract event messages from the passed events.
-     */
-    public static List<? extends EventMessage> toMessages(List<Event> events) {
-        checkNotNull(events);
-        List<EventMessage> result =
-                events.stream()
-                      .map(Event::enclosedMessage)
-                      .collect(toList());
-        return result;
     }
 
     /**
@@ -124,18 +112,19 @@ public final class Events {
         return ImmutableList.of();
     }
 
-    /**
-     * Analyzes the event context and determines if the event has been produced outside
-     * of the current {@code BoundedContext}.
-     *
-     * @param context
-     *         the context of event
-     * @return {@code true} if the event is external, {@code false} otherwise
-     */
     @Internal
-    public static boolean isExternal(EventContext context) {
-        checkNotNull(context);
-        return context.getExternal();
+    public static ImmutableList<Event> toExternal(List<Event> events) {
+        return events
+                .stream()
+                .map(Events::toExternal)
+                .collect(toImmutableList());
+    }
+
+    @Internal
+    public static Event toExternal(Event event) {
+        Event.Builder externalEvent = event.toBuilder();
+        externalEvent.getContextBuilder().setExternal(true);
+        return externalEvent.build();
     }
 
     /**

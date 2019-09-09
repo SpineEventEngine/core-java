@@ -40,8 +40,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.store.DefaultEventStore;
-import io.spine.server.integration.ExternalDispatcherFactory;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
@@ -55,7 +53,6 @@ import io.spine.type.TypeName;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -117,8 +114,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.stand = builder.stand();
         this.tenantIndex = builder.buildTenantIndex();
 
+        this.integrationBus = new IntegrationBus();
         this.commandBus = builder.buildCommandBus();
-        this.integrationBus = builder.buildIntegrationBus();
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
@@ -256,12 +253,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         }
     }
 
-    private void registerWithIntegrationBus(ExternalDispatcherFactory dispatcher) {
-        ExternalMessageDispatcher externalDispatcher =
-                dispatcher.createExternalDispatcher()
-                          .orElseThrow(missingExternalDispatcherFrom(dispatcher));
-
-        integrationBus().register(externalDispatcher);
+    private void registerWithIntegrationBus(EventDispatcher dispatcher) {
+        integrationBus().register(dispatcher);
     }
 
     /**
@@ -321,16 +314,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
                 contextAware.registerWith(this);
             }
         }
-    }
-
-    /**
-     * Supplies {@code IllegalStateException} for the cases when dispatchers or dispatcher
-     * delegates do not provide an external message dispatcher.
-     */
-    private static
-    Supplier<IllegalStateException> missingExternalDispatcherFrom(Object dispatcher) {
-        return () -> newIllegalStateException(
-                "No external dispatcher provided by `%s`.", dispatcher);
     }
 
     /**

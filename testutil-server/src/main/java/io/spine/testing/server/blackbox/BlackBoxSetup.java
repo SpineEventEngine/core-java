@@ -28,16 +28,14 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.Events;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessages;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
@@ -133,28 +131,22 @@ final class BlackBoxSetup {
     /**
      * Posts events to the bounded context.
      *
-     * @param sourceContext
-     *         a name of a Bounded Context external events come from
      * @param domainEvents
      *         a list of {@linkplain EventMessage event messages} or {@linkplain Event events}
      */
-    void postExternalEvents(BoundedContextName sourceContext,
-                            Collection<EventMessage> domainEvents) {
+    void postExternalEvents(Collection<EventMessage> domainEvents) {
         List<Event> events = toEvents(domainEvents, eventFactory);
-        postExternal(sourceContext, events);
+        postExternal(events);
     }
 
-    void postExternalEvent(BoundedContextName sourceContext, Message eventOrMessage) {
+    void postExternalEvent(Message eventOrMessage) {
         List<Event> event = ImmutableList.of(event(eventOrMessage, eventFactory));
-        postExternal(sourceContext, event);
+        postExternal(event);
     }
 
-    void postExternal(BoundedContextName sourceContext, List<Event> events) {
-        List<ExternalMessage> externalEvents = events
-                .stream()
-                .map(event -> ExternalMessages.of(event, sourceContext))
-                .collect(toList());
-        integrationBus.post(externalEvents, observer);
+    void postExternal(List<Event> events) {
+        ImmutableList<Event> external = Events.toExternal(events);
+        eventBus.post(external);
     }
 
     /**

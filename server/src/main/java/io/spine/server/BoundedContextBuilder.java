@@ -89,8 +89,6 @@ public final class BoundedContextBuilder implements Logging {
      */
     private final Collection<EventDispatcher> eventDispatchers = new ArrayList<>();
 
-    private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
-
     private final SystemFeatures systemFeatures;
 
     private Stand stand;
@@ -579,10 +577,6 @@ public final class BoundedContextBuilder implements Logging {
 
     CommandBus buildCommandBus() {
         return commandBus.build();
-    }
-
-    IntegrationBus buildIntegrationBus() {
-        return integrationBus.build();
     }
 
     private void registerRepositories(BoundedContext result) {
