@@ -47,7 +47,6 @@ import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
 import io.spine.server.model.SignalOriginMismatchError;
-import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
@@ -62,6 +61,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.pack;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.defaultInstance;
 import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscribers;
@@ -116,7 +116,7 @@ class IntegrationBusTest {
     }
 
     private static void dispatchAndFail(IntegrationBus bus, Class<? extends Message> messageType) {
-        Message message = Sample.messageOfType(messageType);
+        Message message = defaultInstance(messageType);
         ExternalMessage externalMessage = ExternalMessage
                 .newBuilder()
                 .setId(pack(42))
