@@ -20,14 +20,12 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -134,7 +132,7 @@ public class EventBus
         super(builder);
         this.enricher = builder.enricher;
         this.observer = checkNotNull(builder.observer);
-        this.deadMessageHandler = new DeadEventTap();
+        this.deadMessageHandler = new DeadEventTap(this::eventStore);
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -368,24 +366,6 @@ public class EventBus
         @Override
         protected Builder self() {
             return this;
-        }
-    }
-
-    /**
-     * Handles a dead event by saving it to the {@link EventStore} and producing an
-     * {@link UnsupportedEventException}.
-     *
-     * <p> We must store dead events as they can still be emitted by some entities and therefore are
-     * a part of the history for the current Bounded Context.
-     */
-    private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
-        @Override
-        public UnsupportedEventException handle(EventEnvelope event) {
-            store(ImmutableSet.of(event.outerObject()));
-
-            EventMessage message = event.message();
-            UnsupportedEventException exception = new UnsupportedEventException(message);
-            return exception;
         }
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.server.bus;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -32,8 +33,9 @@ import io.spine.system.server.SystemWriteSide;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Deque;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -59,7 +61,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
                                  C extends MessageClass<? extends Message>,
                                  D extends MessageDispatcher<C, E>> {
 
-    private final ChainBuilder<E> chainBuilder;
+    private final List<BusFilter<E>> filters = new ArrayList<>();
     private final Set<Listener<E>> listeners = new HashSet<>();
 
     private @Nullable SystemWriteSide systemWriteSide;
@@ -70,7 +72,6 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      * Creates a new instance of the bus builder.
      */
     protected BusBuilder() {
-        this.chainBuilder = FilterChain.newBuilder();
     }
 
     /**
@@ -83,7 +84,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      */
     public final B appendFilter(BusFilter<E> filter) {
         checkNotNull(filter);
-        chainBuilder.append(filter);
+        filters.add(filter);
         return self();
     }
 
@@ -92,8 +93,8 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      *
      * @see #appendFilter(BusFilter)
      */
-    public final Deque<BusFilter<E>> filters() {
-        return chainBuilder.filters();
+    public final Iterable<BusFilter<E>> filters() {
+        return ImmutableList.copyOf(filters);
     }
 
     /**
@@ -181,10 +182,6 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
     @Internal
     public Optional<TenantIndex> tenantIndex() {
         return ofNullable(tenantIndex);
-    }
-
-    ChainBuilder<E> chainBuilderCopy() {
-        return chainBuilder.copy();
     }
 
     protected abstract DispatcherRegistry<C, E, D> newRegistry();

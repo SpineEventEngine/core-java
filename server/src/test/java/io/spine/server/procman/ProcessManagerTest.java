@@ -29,24 +29,20 @@ import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.given.Given;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
-import io.spine.server.procman.given.pm.TestProcessManagerDispatcher;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.tenant.TenantIndex;
 import io.spine.server.test.shared.AnyProcess;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
@@ -77,7 +73,6 @@ import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -111,7 +106,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
 
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
@@ -132,17 +126,11 @@ class ProcessManagerTest {
         context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false);
-        CommandBus commandBus = spy(CommandBus.newBuilder()
-                                              .injectTenantIndex(tenantIndex)
-                                              .injectSystem(NoOpSystemWriteSide.INSTANCE)
-                                              .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
                               .withState(AnyProcess.getDefaultInstance())
                               .build();
-        commandBus.register(new TestProcessManagerDispatcher());
     }
 
     @AfterEach
