@@ -37,7 +37,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.system.SystemAwareStorageFactory.wrap;
 
@@ -203,11 +202,6 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public void configureStorage(StorageFactory productionStorageFactory) {
         checkNotNull(productionStorageFactory);
-        checkArgument(
-                !(productionStorageFactory instanceof InMemoryStorageFactory),
-                "%s cannot be used for production storage.",
-                InMemoryStorageFactory.class.getName()
-        );
         this.productionStorageFactory = wrap(productionStorageFactory);
     }
 

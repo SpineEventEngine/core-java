@@ -21,18 +21,12 @@
 package io.spine.server;
 
 import io.spine.base.Environment;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.Delivery;
-import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.UniformAcrossAllShards;
-import io.spine.server.entity.Entity;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.SystemAwareStorageFactory;
+import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
@@ -169,19 +163,9 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("do not allow setting `InMemoryStorageFactory`")
-        void seriousStorageForProduction() {
-            InMemoryStorageFactory inMemoryStorageFactory = InMemoryStorageFactory.newInstance();
-
-            assertThrows(IllegalArgumentException.class, () ->
-                    serverEnvironment.configureStorage(inMemoryStorageFactory)
-            );
-        }
-
-        @Test
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
-            StubStorageFactory factory = new StubStorageFactory();
+            StorageFactory factory = InMemoryStorageFactory.newInstance();
             serverEnvironment.configureStorage(factory);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
@@ -212,7 +196,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("returning it when explicitly set")
         void getSet() {
-            StorageFactory factory = new StubStorageFactory();
+            StorageFactory factory = new MemoizingStorageFactory();
 
             serverEnvironment.configureStorageForTests(factory);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
@@ -288,45 +272,6 @@ class ServerEnvironmentTest {
 
         void setGaeEnvironment(String value) {
             System.setProperty(APP_ENGINE_ENVIRONMENT_PATH, value);
-        }
-    }
-
-    /**
-     * Stub implementation of {@code StorageFactory} which acts like {@code InMemoryStorageFactory}
-     * but has different type.
-     */
-    private static class StubStorageFactory implements StorageFactory {
-
-        private final StorageFactory delegate = InMemoryStorageFactory.newInstance();
-
-        @Override
-        public <I> AggregateStorage<I>
-        createAggregateStorage(ContextSpec context,
-                               Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
-            return delegate.createAggregateStorage(context, aggregateClass);
-        }
-
-        @Override
-        public <I> RecordStorage<I>
-        createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
-            return delegate.createRecordStorage(context, entityClass);
-        }
-
-        @Override
-        public <I> ProjectionStorage<I>
-        createProjectionStorage(ContextSpec context,
-                                Class<? extends Projection<I, ?, ?>> projectionClass) {
-            return delegate.createProjectionStorage(context, projectionClass);
-        }
-
-        @Override
-        public InboxStorage createInboxStorage(boolean multitenant) {
-            return delegate.createInboxStorage(multitenant);
-        }
-
-        @Override
-        public void close() throws Exception {
-            delegate.close();
         }
     }
 
