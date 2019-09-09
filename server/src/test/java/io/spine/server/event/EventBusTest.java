@@ -46,6 +46,7 @@ import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.Task;
+import io.spine.test.event.TaskId;
 import io.spine.testdata.Sample;
 import io.spine.testing.SlowTest;
 import io.spine.testing.logging.MuteLogging;
@@ -425,7 +426,13 @@ public class EventBusTest {
         eventBus.register(subscriber);
 
         ProjectId projectId = Sample.messageOfType(ProjectId.class);
-        Task task = Sample.messageOfType(Task.class);
+        TaskId taskId = Sample.messageOfType(TaskId.class);
+        Task task = Task
+                .newBuilder()
+                .setTaskId(taskId)
+                .setTitle("Foo")
+                .setDescription("Foo bar")
+                .build();
         EBTaskAdded eventMessage = EBTaskAdded
                 .newBuilder()
                 .setProjectId(projectId)
