@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -45,14 +46,11 @@ import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.BusBuilder.FieldCheck.systemNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
@@ -121,18 +119,21 @@ public class CommandBus
         return multitenant;
     }
 
+    /**
+     * Places {@link CommandReceivedTap} first and {@link CommandScheduler} last
+     * in the filter chain.
+     */
     @Override
-    protected Collection<BusFilter<CommandEnvelope>> filterChainHead() {
-        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(this::systemFor);
-        Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
-        result.push(tap);
-        return result;
-    }
-
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
-    @Override
-    protected final Collection<BusFilter<CommandEnvelope>> filterChainTail() {
-        return ImmutableList.of(scheduler);
+    @OverridingMethodsMustInvokeSuper
+    protected Iterable<BusFilter<CommandEnvelope>>
+    setupFilters(Iterable<BusFilter<CommandEnvelope>> filters) {
+        Iterable<BusFilter<CommandEnvelope>> fromSuper = super.setupFilters(filters);
+        return ImmutableList
+                .<BusFilter<CommandEnvelope>>builder()
+                .add(new CommandReceivedTap(this::systemFor))
+                .addAll(fromSuper)
+                .add(scheduler)
+                .build();
     }
 
     @Override

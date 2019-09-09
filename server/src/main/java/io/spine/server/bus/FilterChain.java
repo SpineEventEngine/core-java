@@ -20,12 +20,12 @@
 
 package io.spine.server.bus;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.core.Ack;
 import io.spine.server.Closeable;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,16 +42,11 @@ import static java.util.stream.Collectors.joining;
  */
 final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E>, Closeable {
 
-    private final Deque<BusFilter<E>> chain;
-
+    private final ImmutableList<BusFilter<E>> chain;
     private volatile boolean closed;
 
-    FilterChain(ChainBuilder<E> builder) {
-        this.chain = builder.filters();
-    }
-
-    static <E extends MessageEnvelope<?, ?, ?>> ChainBuilder<E> newBuilder() {
-        return new ChainBuilder<>();
+    FilterChain(Iterable<BusFilter<E>> filters) {
+        this.chain = ImmutableList.copyOf(filters);
     }
 
     @Override
@@ -86,9 +81,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
     public void close() throws Exception {
         checkOpen();
         closed = true;
-        Iterator<BusFilter<E>> filters = chain.descendingIterator();
-        while (filters.hasNext()) {
-            BusFilter<?> filter = filters.next();
+        for (BusFilter<?> filter : chain.reverse()) {
             filter.close();
         }
     }
