@@ -42,6 +42,7 @@ import io.spine.server.integration.given.ProjectDetails;
 import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
+import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
@@ -275,7 +276,7 @@ class IntegrationBusTest {
         assertNull(ProjectCountAggregate.getExternalEvent());
 
         Event projectCreated = projectCreated();
-        assertThrows(IllegalArgumentException.class, () -> eventBus.post(projectCreated));
+        assertThrows(SignalOriginMismatchError.class, () -> eventBus.post(projectCreated));
 
         assertNull(ProjectEventsSubscriber.getExternalEvent());
         assertNull(ProjectDetails.getExternalEvent());

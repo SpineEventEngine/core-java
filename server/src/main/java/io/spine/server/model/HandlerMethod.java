@@ -33,8 +33,6 @@ import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 /**
  * Describes a method that accepts a message and optionally its context.
  *
@@ -134,12 +132,11 @@ public interface HandlerMethod<T,
      * @throws IllegalArgumentException is thrown if the value does not meet the expectation
      * @see ExternalAttribute
      */
-    default void ensureExternalMatch(boolean expectedValue) throws IllegalArgumentException {
+    default void ensureExternalMatch(boolean expectedValue) throws SignalOriginMismatchError {
         boolean actualValue = isExternal();
-        checkArgument(actualValue == expectedValue,
-                      "Mismatch of `external` value for the handler method %s. " +
-                              "Expected `external = %s`, but got `%s`.",
-                      this, expectedValue, actualValue);
+        if (actualValue != expectedValue) {
+            throw new SignalOriginMismatchError(this, expectedValue, actualValue);
+        }
     }
 
     default DispatchKey key() {

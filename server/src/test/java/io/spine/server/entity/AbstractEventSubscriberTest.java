@@ -38,6 +38,7 @@ import io.spine.server.given.groups.WronglyDomesticSubscriber;
 import io.spine.server.given.groups.WronglyExternalSubscriber;
 import io.spine.server.given.organizations.Organization;
 import io.spine.server.given.organizations.OrganizationId;
+import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.SystemBoundedContexts;
 import io.spine.system.server.event.EntityStateChanged;
@@ -142,13 +143,13 @@ class AbstractEventSubscriberTest {
     @Test
     @DisplayName("fail to subscribe to external events without `external = true`")
     void failIfNotExternal() {
-        assertThrows(IllegalArgumentException.class, WronglyDomesticSubscriber::new);
+        assertThrows(SignalOriginMismatchError.class, WronglyDomesticSubscriber::new);
     }
 
     @Test
     @DisplayName("fail to subscribe to domestic events without `external = false`")
     void failIfNotDomestic() {
-        assertThrows(IllegalArgumentException.class, WronglyExternalSubscriber::new);
+        assertThrows(SignalOriginMismatchError.class, WronglyExternalSubscriber::new);
     }
 
     @Test
