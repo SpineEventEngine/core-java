@@ -17,36 +17,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.transport;
 
-import io.spine.annotation.SPI;
-import io.spine.server.Closeable;
+package io.spine.server;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A factory for creating channel-based transport for {@code Message} inter-exchange between the
- * current deployment component and other application parts.
+ * Base interface for server-side objects that may hold resources that need to be released
+ * at the end of the lifecycle of the object.
  *
- * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
- * Publish-Subscriber Channel pattern.</a>
+ * <p>A class will benefit from implementing <em>this</em> interface instead of
+ * {@link AutoCloseable} if it needs to see if the instance is {@linkplain #isOpen() open}
+ * prior to making other calls.
+ *
+ * @see #isOpen()
+ * @see #checkOpen()
  */
-@SPI
-public interface TransportFactory extends Closeable {
+public interface Closeable extends AutoCloseable {
 
     /**
-     * Creates a {@link Publisher} channel with the given ID.
+     * Tells if the object is still open.
      *
-     * @param id
-     *         the identifier of the resulting channel
-     * @return a new {@code Publisher} instance
+     * <p>Implementations must return {@code false} after {@link #close()} is invoked.
      */
-    Publisher createPublisher(ChannelId id);
+    boolean isOpen();
 
     /**
-     * Creates a {@link Subscriber} channel with the given ID.
+     * Ensures that the object is {@linkplain #isOpen() open}.
      *
-     * @param id
-     *         the identifier of the resulting channel
-     * @return a new {@code Subscriber} instance
+     * @throws IllegalStateException otherwise
      */
-    Subscriber createSubscriber(ChannelId id);
+    default void checkOpen() throws IllegalStateException {
+        checkState(isOpen(), "`%s` is already closed.", this);
+    }
 }

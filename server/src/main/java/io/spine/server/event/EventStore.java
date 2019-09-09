@@ -23,12 +23,13 @@ package io.spine.server.event;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
+import io.spine.server.Closeable;
 import io.spine.server.ContextAware;
 
 /**
  * A store of all events in a Bounded Context.
  */
-public interface EventStore extends ContextAware, AutoCloseable {
+public interface EventStore extends ContextAware, Closeable {
 
     /**
      * Appends the passed event to the history of events.
@@ -56,12 +57,4 @@ public interface EventStore extends ContextAware, AutoCloseable {
      * @param responseObserver observer for the resulting stream
      */
     void read(EventStreamQuery request, StreamObserver<Event> responseObserver);
-
-    /**
-     * Tells if the store is open.
-     *
-     * @return {@code false} if the store is not initialized or is closed via {@code close()},
-     *         {@code true} otherwise
-     */
-    boolean isOpen();
 }

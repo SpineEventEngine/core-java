@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
+import io.spine.server.Closeable;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -51,12 +52,11 @@ import static java.util.Collections.singleton;
  * @param <D> the type of dispatches used by this bus
  */
 @Internal
-@SuppressWarnings("ClassWithTooManyMethods") // OK for this central class.
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
                           D extends MessageDispatcher<C, E>>
-        implements AutoCloseable {
+        implements Closeable {
 
     /** A queue of envelopes to post. */
     private final DispatchingQueue<E> queue;
@@ -193,6 +193,7 @@ public abstract class Bus<T extends Message,
      *
      * <p>If the bus is closed posting to it is going to cause {@code IllegalStateException}.
      */
+    @Override
     public final synchronized boolean isOpen() {
         return filterChain().isOpen();
     }

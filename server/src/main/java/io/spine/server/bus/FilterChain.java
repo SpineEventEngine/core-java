@@ -21,6 +21,7 @@
 package io.spine.server.bus;
 
 import io.spine.core.Ack;
+import io.spine.server.Closeable;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.Deque;
@@ -28,7 +29,6 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.joining;
  *
  * <p>The {@link #close() close()} method closes all the underlying filters.
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E> {
+final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E>, Closeable {
 
     private final Deque<BusFilter<E>> chain;
 
@@ -57,7 +57,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
     @Override
     public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
-        checkNotClosed();
+        checkOpen();
         for (BusFilter<E> filter : chain) {
             Optional<Ack> output = filter.accept(envelope);
             if (output.isPresent()) {
@@ -83,8 +83,8 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
      * @see #isOpen()
      */
     @Override
-    public void close() throws Exception {
-        checkNotClosed();
+    public synchronized void close() throws Exception {
+        checkOpen();
         closed = true;
         Iterator<BusFilter<E>> filters = chain.descendingIterator();
         while (filters.hasNext()) {
@@ -98,7 +98,8 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
      *
      * @see #close()
      */
-    public boolean isOpen() {
+    @Override
+    public synchronized boolean isOpen() {
         return !closed;
     }
 
@@ -109,9 +110,5 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
                               .map(Class::getSimpleName)
                               .collect(joining(", "));
         return format("%s[%s]", FilterChain.class.getName(), filters);
-    }
-
-    private void checkNotClosed() {
-        checkState(!closed, "FilterChain is already closed.");
     }
 }

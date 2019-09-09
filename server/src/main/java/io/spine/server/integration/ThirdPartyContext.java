@@ -26,6 +26,7 @@ import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.Closeable;
 import io.spine.server.event.EventFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -51,7 +52,7 @@ import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
  *         the instances of this class are reused and {@linkplain #close() closed} when they are
  *         no longer needed.
  */
-public final class ThirdPartyContext implements AutoCloseable {
+public final class ThirdPartyContext implements Closeable {
 
     private final BoundedContext context;
     private final Any producerId;
@@ -169,5 +170,10 @@ public final class ThirdPartyContext implements AutoCloseable {
     @Override
     public void close() throws Exception {
         context.close();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return context.isOpen();
     }
 }
