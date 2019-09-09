@@ -21,7 +21,9 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
@@ -32,8 +34,10 @@ import io.spine.test.model.ModCreateProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.model.MethodParams.findMatching;
 import static io.spine.server.model.MethodParams.firstIsCommand;
 import static io.spine.server.model.given.MethodParamsTestEnv.fiveParamMethodStringAnyEmptyInt32UserId;
@@ -51,7 +55,19 @@ class MethodParamsTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-            .testAllPublicStaticMethods(MethodParams.class);
+            .setDefault(Method.class, singleParamCommand())
+            .testStaticMethods(MethodParams.class, Visibility.PACKAGE);
+    }
+
+    @Test
+    @DisplayName("obtain the number of parameters")
+    void size() {
+        assertThat(MethodParams.of(singleParamCommand()).size())
+                .isEqualTo(1);
+        assertThat(MethodParams.of(twoParamCommandAndCtx()).size())
+                .isEqualTo(2);
+        assertThat(MethodParams.of(fiveParamMethodStringAnyEmptyInt32UserId()).size())
+                .isEqualTo(5);
     }
 
     @Test
@@ -114,5 +130,16 @@ class MethodParamsTest {
         assertTrue(firstIsCommand(singleParamCommand()));
         assertTrue(firstIsCommand(twoParamCommandAndCtx()));
         assertFalse(firstIsCommand(fiveParamMethodStringAnyEmptyInt32UserId()));
+    }
+
+    @Test
+    @DisplayName("provide `equals()` and `hashCode()`")
+    void equality() {
+        MethodParams oneParamMethod = MethodParams.of(singleParamCommand());
+        new EqualsTester().addEqualityGroup(oneParamMethod, oneParamMethod,
+                                            MethodParams.of(singleParamCommand()))
+                          .addEqualityGroup(firstIsCommand(twoParamCommandAndCtx()))
+                          .addEqualityGroup(MethodParams.of(fiveParamMethodStringAnyEmptyInt32UserId()))
+                          .testEquals();
     }
 }

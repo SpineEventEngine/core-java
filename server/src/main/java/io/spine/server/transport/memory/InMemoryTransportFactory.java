@@ -29,7 +29,6 @@ import io.spine.server.transport.TransportFactory;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
@@ -108,8 +107,13 @@ public class InMemoryTransportFactory implements TransportFactory {
         };
     }
 
+    @Override
+    public synchronized boolean isOpen() {
+        return !closed;
+    }
+
     private synchronized Multimap<ChannelId, Subscriber> subscribers() {
-        checkState(!closed, "`%s` is already closed.", getClass().getName());
+        checkOpen();
         return subscribers;
     }
 

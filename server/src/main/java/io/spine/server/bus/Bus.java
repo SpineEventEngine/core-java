@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
+import io.spine.server.Closeable;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -55,7 +56,7 @@ public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
                           D extends MessageDispatcher<C, E>>
-        implements AutoCloseable {
+        implements Closeable {
 
     /** A queue of envelopes to post. */
     private final DispatchingQueue<E> queue;
@@ -182,9 +183,19 @@ public abstract class Bus<T extends Message,
      * @param source   the source {@link StreamObserver} to be transformed
      * @return a transformed observer of {@link Ack} streams
      */
-    protected 
+    protected
     StreamObserver<Ack> prepareObserver(Iterable<T> messages, StreamObserver<Ack> source) {
         return source;
+    }
+
+    /**
+     * Tells if this bus can accept messages for posting.
+     *
+     * <p>If the bus is closed posting to it is going to cause {@code IllegalStateException}.
+     */
+    @Override
+    public final boolean isOpen() {
+        return filterChain().isOpen();
     }
 
     /**
@@ -219,7 +230,7 @@ public abstract class Bus<T extends Message,
     /**
      * Returns the filter chain for this bus.
      */
-    private BusFilter<E> filterChain() {
+    private FilterChain<E> filterChain() {
         return filterChain.get();
     }
 
@@ -247,7 +258,7 @@ public abstract class Bus<T extends Message,
 
     @VisibleForTesting
     public boolean hasFilter(BusFilter<E> filter) {
-        return filterChain.get().contains(filter);
+        return filterChain().contains(filter);
     }
 
     @VisibleForTesting

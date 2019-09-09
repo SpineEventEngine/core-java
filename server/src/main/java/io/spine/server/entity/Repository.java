@@ -32,6 +32,7 @@ import io.spine.base.MessageContext;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
+import io.spine.server.Closeable;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.model.EntityClass;
@@ -64,7 +65,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class Repository<I, E extends Entity<I, ?>>
-        implements ContextAware, AutoCloseable, Logging {
+        implements ContextAware, Closeable, Logging {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -364,6 +365,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Verifies if the repository is open.
      */
+    @Override
     public final boolean isOpen() {
         return context != null;
     }

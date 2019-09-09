@@ -349,6 +349,11 @@ class ServerEnvironmentTest {
         }
 
         @Override
+        public boolean isOpen() {
+            return delegate.isOpen();
+        }
+
+        @Override
         public void close() throws Exception {
             delegate.close();
         }

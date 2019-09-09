@@ -52,9 +52,6 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
 
     /**
      * Creates a new channel under the specified ID.
-     *
-     * @param id
-     * @return the created channel.
      */
     protected abstract C newChannel(ChannelId id);
 

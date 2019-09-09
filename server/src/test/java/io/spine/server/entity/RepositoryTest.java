@@ -73,7 +73,7 @@ class RepositoryTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        if (!context.isClosed()) {
+        if (context.isOpen()) {
             context.close();
         }
     }

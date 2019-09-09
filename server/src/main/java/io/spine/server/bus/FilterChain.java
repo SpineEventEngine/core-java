@@ -21,6 +21,7 @@
 package io.spine.server.bus;
 
 import io.spine.core.Ack;
+import io.spine.server.Closeable;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.Deque;
@@ -28,7 +29,6 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.joining;
  *
  * <p>The {@link #close() close()} method closes all the underlying filters.
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E> {
+final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E>, Closeable {
 
     private final Deque<BusFilter<E>> chain;
 
@@ -57,7 +57,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
     @Override
     public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
-        checkNotClosed();
+        checkOpen();
         for (BusFilter<E> filter : chain) {
             Optional<Ack> output = filter.accept(envelope);
             if (output.isPresent()) {
@@ -80,16 +80,27 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
      *         on a repetitive call
      * @throws Exception
      *         if a filter throws an {@link Exception}
+     * @see #isOpen()
      */
     @Override
     public void close() throws Exception {
-        checkNotClosed();
+        checkOpen();
         closed = true;
         Iterator<BusFilter<E>> filters = chain.descendingIterator();
         while (filters.hasNext()) {
             BusFilter<?> filter = filters.next();
             filter.close();
         }
+    }
+
+    /**
+     * Tells if this filter chain is open.
+     *
+     * @see #close()
+     */
+    @Override
+    public boolean isOpen() {
+        return !closed;
     }
 
     @Override
@@ -99,9 +110,5 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
                               .map(Class::getSimpleName)
                               .collect(joining(", "));
         return format("%s[%s]", FilterChain.class.getName(), filters);
-    }
-
-    private void checkNotClosed() {
-        checkState(!closed, "FilterChain is already closed.");
     }
 }
