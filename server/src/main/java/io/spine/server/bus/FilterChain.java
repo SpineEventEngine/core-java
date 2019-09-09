@@ -83,7 +83,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
      * @see #isOpen()
      */
     @Override
-    public synchronized void close() throws Exception {
+    public void close() throws Exception {
         checkOpen();
         closed = true;
         Iterator<BusFilter<E>> filters = chain.descendingIterator();
@@ -99,7 +99,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
      * @see #close()
      */
     @Override
-    public synchronized boolean isOpen() {
+    public boolean isOpen() {
         return !closed;
     }
 
