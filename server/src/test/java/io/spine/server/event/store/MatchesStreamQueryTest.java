@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("MatchesStreamQuery should")
 class MatchesStreamQueryTest {
 
-    private static final String FIELD_NAME = "spine.test.event.ProjectCreated.projectId";
+    private static final String FIELD_NAME = "spine.test.event.ProjectCreated.project_id";
 
     private static final TestEventFactory eventFactory =
             newInstance(MatchesStreamQueryTest.class);
@@ -61,45 +61,56 @@ class MatchesStreamQueryTest {
     @Test
     @DisplayName("match proper records")
     void matchProperRecords() {
-        ProjectId properField = ProjectId.newBuilder()
-                                         .setId(newUuid())
-                                         .build();
-        ProjectCreated eventMsg = ProjectCreated.newBuilder()
-                                                .setProjectId(properField)
-                                                .build();
-        Event event = eventFactory.createEvent(eventMsg);
-        MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
+        ProjectId properValue = generate();
+        Event event = eventWith(properValue);
+        MatchesStreamQuery predicate = queryWith(FIELD_NAME, properValue);
         assertTrue(predicate.test(event));
     }
 
     @Test
     @DisplayName("not match improper records")
     void notMatchImproperRecords() {
-        ProjectId properField = ProjectId.newBuilder()
-                                         .setId(newUuid())
-                                         .build();
-        ProjectId improperField = ProjectId.getDefaultInstance();
-        ProjectCreated eventMsg = ProjectCreated.newBuilder()
-                                                .setProjectId(improperField)
-                                                .build();
-        Event event = eventFactory.createEvent(eventMsg);
-        MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
+        ProjectId properField = generate();
+        ProjectId wrongValue = ProjectId.getDefaultInstance();
+        Event event = eventWith(wrongValue);
+        MatchesStreamQuery predicate = queryWith(FIELD_NAME, properField);
         assertFalse(predicate.test(event));
     }
 
-    private static MatchesStreamQuery eventWith(String fieldPath, Message field) {
-        FieldFilter filter = FieldFilter.newBuilder()
-                                        .setFieldPath(fieldPath)
-                                        .addValue(AnyPacker.pack(field))
-                                        .build();
-        EventFilter eventFilter = EventFilter.newBuilder()
-                                             .addEventFieldFilter(filter)
-                                             .build();
-        EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                 .addFilter(eventFilter)
-                                                 .build();
+    private static MatchesStreamQuery queryWith(String fieldPath, Message field) {
+        FieldFilter filter = FieldFilter
+                .newBuilder()
+                .setFieldPath(fieldPath)
+                .addValue(AnyPacker.pack(field))
+                .build();
+        EventFilter eventFilter = EventFilter
+                .newBuilder()
+                .addEventFieldFilter(filter)
+                .build();
+        EventStreamQuery query = EventStreamQuery
+                .newBuilder()
+                .addFilter(eventFilter)
+                .build();
         MatchesStreamQuery predicate = new MatchesStreamQuery(query);
         return predicate;
+    }
+
+    private static Event eventWith(ProjectId fieldValue) {
+        ProjectCreated eventMsg = eventMessage(fieldValue);
+        return eventFactory.createEvent(eventMsg);
+    }
+
+    private static ProjectCreated eventMessage(ProjectId value) {
+        return ProjectCreated
+                .newBuilder()
+                .setProjectId(value)
+                .build();
+    }
+
+    private static ProjectId generate() {
+        return ProjectId.newBuilder()
+                        .setId(newUuid())
+                        .build();
     }
 
 }

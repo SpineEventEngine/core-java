@@ -23,11 +23,11 @@ package io.spine.server.event.store;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.base.Field;
 import io.spine.base.FieldFilter;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.event.EventFilter;
-import io.spine.server.reflect.Field;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static io.spine.protobuf.AnyPacker.unpackFunc;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -143,32 +144,35 @@ final class MatchFilter implements Predicate<Event> {
     }
 
     private static boolean checkFields(Message object, FieldFilter filter) {
-        Optional<Field> fieldOptional = Field.forFilter(object.getClass(), filter);
-        if (!fieldOptional.isPresent()) {
-            return false;
-        }
-
-        Field field = fieldOptional.get();
-        Optional<Message> value;
-
-        try {
-            value = field.getValue(object);
-        } catch (IllegalStateException ignored) {
-            // Wrong Message class -> does not satisfy the criteria.
-            return false;
-        }
-        Collection<Message> expectedValues = filter.getValueList()
-                                                   .stream()
-                                                   .map(unpackFunc())
-                                                   .collect(toList());
+        Field field = fieldFrom(filter);
+        Optional<Object> value = field.findValue(object);
         if (!value.isPresent()) {
             /* If there is no value in the field return `true`
                if the list of required values is also empty. */
-            boolean nothingIsExpected = expectedValues.isEmpty();
+            boolean nothingIsExpected = filter.getValueList().isEmpty();
             return nothingIsExpected;
         }
-
-        boolean result = expectedValues.contains(value.get());
+        Collection<Message> expectedValues =
+                filter.getValueList()
+                      .stream()
+                      .map(unpackFunc())
+                      .collect(toList());
+        Message msg = (Message) value.get();
+        boolean result = expectedValues.contains(msg);
         return result;
+    }
+
+    /**
+     * Obtains the last component from a potentially fully-qualified field path
+     * from the passed filter.
+     */
+    private static Field fieldFrom(FieldFilter filter) {
+        String path = filter.getFieldPath();
+        String fieldName = path.substring(path.lastIndexOf('.') + 1);
+        if (fieldName.isEmpty()) {
+            throw newIllegalArgumentException(
+                    "Unable to get a field name from the field filter: `%s`.", filter);
+        }
+        return Field.named(fieldName);
     }
 }
