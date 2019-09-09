@@ -151,6 +151,8 @@ class ServerEnvironmentTest {
 
         @BeforeEach
         void turnToProduction() {
+            // Ensure the server environment is clear.
+            serverEnvironment.reset();
             environment.setToProduction();
         }
 
@@ -163,8 +165,6 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("throwing NPE if not configured in the Production mode")
         void throwsIfNotConfigured() {
-            // Ensure the server environment is clear.
-            serverEnvironment.reset();
             assertThrows(NullPointerException.class, serverEnvironment::storageFactory);
         }
 
@@ -228,6 +228,8 @@ class ServerEnvironmentTest {
 
         @BeforeEach
         void turnToProduction() {
+            // Ensure the instance is clear.
+            serverEnvironment.reset();
             environment.setToProduction();
         }
 
@@ -240,8 +242,6 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("throw NPE if not configured")
         void throwsIfNotConfigured() {
-            // Ensure the instance is clear.
-            serverEnvironment.reset();
             assertThrows(NullPointerException.class, serverEnvironment::transportFactory);
         }
 
