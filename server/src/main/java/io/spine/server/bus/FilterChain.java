@@ -80,6 +80,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
      *         on a repetitive call
      * @throws Exception
      *         if a filter throws an {@link Exception}
+     * @see #isOpen()
      */
     @Override
     public void close() throws Exception {
@@ -90,6 +91,15 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
             BusFilter<?> filter = filters.next();
             filter.close();
         }
+    }
+
+    /**
+     * Tells if this filter chain is open.
+     *
+     * @see #close()
+     */
+    public boolean isOpen() {
+        return !closed;
     }
 
     @Override

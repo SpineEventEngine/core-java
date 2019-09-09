@@ -462,7 +462,11 @@ public class EventBusTest {
             EventBus eventBus = context.eventBus();
             StreamObserver<Ack> observer = StreamObservers.noOpObserver();
             for (int j = 0; j < threadCount; j++) {
-                executor.execute(() -> eventBus.post(event, observer));
+                executor.execute(() -> {
+                    if (eventBus.isOpen()) {
+                        eventBus.post(event, observer);
+                    }
+                });
             }
             // Let the system destroy all the native threads, clean up, etc.
             Thread.sleep(100);

@@ -51,6 +51,7 @@ import static java.util.Collections.singleton;
  * @param <D> the type of dispatches used by this bus
  */
 @Internal
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this central class.
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
@@ -182,9 +183,18 @@ public abstract class Bus<T extends Message,
      * @param source   the source {@link StreamObserver} to be transformed
      * @return a transformed observer of {@link Ack} streams
      */
-    protected 
+    protected
     StreamObserver<Ack> prepareObserver(Iterable<T> messages, StreamObserver<Ack> source) {
         return source;
+    }
+
+    /**
+     * Tells if this bus can accept messages for posting.
+     *
+     * <p>If the bus is closed posting to it is going to cause {@code IllegalStateException}.
+     */
+    public final synchronized boolean isOpen() {
+        return filterChain().isOpen();
     }
 
     /**
@@ -194,7 +204,7 @@ public abstract class Bus<T extends Message,
      *         an exception
      */
     @Override
-    public void close() throws Exception {
+    public synchronized void close() throws Exception {
         filterChain().close();
         registry().unregisterAll();
     }
@@ -219,7 +229,7 @@ public abstract class Bus<T extends Message,
     /**
      * Returns the filter chain for this bus.
      */
-    private BusFilter<E> filterChain() {
+    private FilterChain<E> filterChain() {
         return filterChain.get();
     }
 
@@ -247,7 +257,7 @@ public abstract class Bus<T extends Message,
 
     @VisibleForTesting
     public boolean hasFilter(BusFilter<E> filter) {
-        return filterChain.get().contains(filter);
+        return filterChain().contains(filter);
     }
 
     @VisibleForTesting
@@ -397,3 +407,4 @@ public abstract class Bus<T extends Message,
         }
     }
 }
+
