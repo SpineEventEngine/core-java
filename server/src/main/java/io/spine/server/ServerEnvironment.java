@@ -72,7 +72,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * initialized with the {@linkplain Delivery#local() local} delivery by default.
      */
     @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
-      // No synchronization for a test-only method.
+      // No synchronization in `reset()` as it is test-only.
     private @MonotonicNonNull Delivery delivery;
 
     /**
