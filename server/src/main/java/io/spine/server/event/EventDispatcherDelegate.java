@@ -44,7 +44,7 @@ public interface EventDispatcherDelegate {
     /**
      * Obtains event classes dispatched by this delegate.
      */
-    Set<EventClass> domesticEvents();
+    Set<EventClass> events();
 
     /**
      * Obtains external event classes dispatched by this delegate.
@@ -73,7 +73,7 @@ public interface EventDispatcherDelegate {
      * Verifies if this instance dispatches at least one domestic event.
      */
     default boolean dispatchesEvents() {
-        return !domesticEvents().isEmpty();
+        return !events().isEmpty();
     }
 
     /**
