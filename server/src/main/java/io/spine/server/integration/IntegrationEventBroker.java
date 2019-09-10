@@ -21,6 +21,7 @@ package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
+import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
@@ -106,6 +107,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * of an event type may be changed between the versions of a system, but may not be changed while
  * events are travelling between the Contexts.
  */
+@Internal
 @SuppressWarnings("OverlyCoupledClass")
 public class IntegrationEventBroker implements ContextAware, AutoCloseable {
 
