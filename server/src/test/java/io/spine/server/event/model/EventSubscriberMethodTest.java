@@ -36,6 +36,7 @@ import io.spine.server.event.model.given.subscriber.InvalidTwoParamsSecondInvali
 import io.spine.server.event.model.given.subscriber.TestEventSubscriber;
 import io.spine.server.event.model.given.subscriber.ValidButPrivate;
 import io.spine.server.event.model.given.subscriber.ValidOneParam;
+import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.server.model.SignatureMismatchException;
 import io.spine.server.model.given.Given;
 import io.spine.server.type.EventEnvelope;
@@ -215,7 +216,7 @@ class EventSubscriberMethodTest {
                     .setContext(context)
                     .build();
             EventEnvelope envelope = EventEnvelope.of(event);
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(SignalOriginMismatchError.class,
                          () -> modelMethod.invoke(subscriber, envelope));
         }
     }

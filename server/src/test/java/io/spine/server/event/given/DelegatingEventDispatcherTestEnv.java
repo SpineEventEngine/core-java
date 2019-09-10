@@ -38,7 +38,7 @@ public class DelegatingEventDispatcherTestEnv {
             implements EventDispatcherDelegate {
 
         @Override
-        public Set<EventClass> domesticEvents() {
+        public Set<EventClass> events() {
             return ImmutableSet.of();
         }
 
@@ -58,7 +58,7 @@ public class DelegatingEventDispatcherTestEnv {
             implements EventDispatcherDelegate {
 
         @Override
-        public Set<EventClass> domesticEvents() {
+        public Set<EventClass> events() {
             return EventClass.setOf(EvTeamCreated.class);
         }
 

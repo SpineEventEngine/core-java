@@ -84,7 +84,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.BoundedContextNames.assumingTests;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.dispatch.PmDispatcher.dispatch;
@@ -354,7 +353,7 @@ class ProcessManagerTest {
             @Test
             @DisplayName("on incoming external event")
             void commandOnExternalEvent() {
-                boundedContext.receivesExternalEvent(assumingTests(), quizStarted())
+                boundedContext.receivesExternalEvent(quizStarted())
                               .assertCommands()
                               .withType(PmCreateProject.class)
                               .hasSize(1);

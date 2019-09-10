@@ -27,7 +27,6 @@ import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.Events;
 import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
@@ -155,7 +154,7 @@ public final class EventEnvelope
      * Returns {@code true} is the wrapped event is external, {@code false} otherwise.
      */
     public boolean isExternal() {
-        boolean external = Events.isExternal(context());
+        boolean external = context().getExternal();
         return external;
     }
 

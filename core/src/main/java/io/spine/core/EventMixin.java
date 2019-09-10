@@ -37,7 +37,7 @@ import static io.spine.validate.Validate.isDefault;
  * Mixin interface for event objects.
  */
 @Immutable
-public interface EventMixin extends Signal<EventId, EventMessage, EventContext>, FieldAwareMessage {
+interface EventMixin extends Signal<EventId, EventMessage, EventContext>, FieldAwareMessage {
 
     /**
      * Obtains the ID of the tenant of the event.

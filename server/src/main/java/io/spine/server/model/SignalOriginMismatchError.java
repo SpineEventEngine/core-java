@@ -17,21 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
 
-import io.spine.core.MessageInvalid;
-import io.spine.server.bus.EnvelopeValidator;
-
-import java.util.Optional;
+package io.spine.server.model;
 
 /**
- * A validator of the incoming external messages to use in {@code IntegrationBus}.
+ * An error which signifies that the {@code external} attribute was misplaced on a handler method.
  */
-enum ExternalMessageValidator implements EnvelopeValidator<ExternalMessageEnvelope> {
-    INSTANCE;
+public final class SignalOriginMismatchError extends ModelError {
 
-    @Override
-    public Optional<MessageInvalid> validate(ExternalMessageEnvelope envelope) {
-        return Optional.empty();
+    private static final long serialVersionUID = 0L;
+
+    private static final String ERROR_TEMPLATE =
+            "Mismatch of `external` value for the handler method %s. " +
+                    "Expected `external = %s`, but got `%s`.";
+
+    SignalOriginMismatchError(HandlerMethod<?, ?, ?, ?> method,
+                              boolean expectedExternal,
+                              boolean actualExternal) {
+        super(ERROR_TEMPLATE, method, expectedExternal, actualExternal);
     }
 }

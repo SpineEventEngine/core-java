@@ -351,8 +351,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
-        return aggregateClass().domesticEvents();
+    public Set<EventClass> events() {
+        return aggregateClass().events();
     }
 
     @Override

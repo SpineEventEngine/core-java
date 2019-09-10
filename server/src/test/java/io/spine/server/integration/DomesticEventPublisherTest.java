@@ -21,41 +21,46 @@
 package io.spine.server.integration;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.core.BoundedContextName;
-import io.spine.server.transport.PublisherHub;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.type.EventClass;
 import io.spine.test.integration.event.ItgProjectCreated;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.BoundedContextNames.assumingTests;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DisplayName("DomesticEventPublisher should")
 class DomesticEventPublisherTest {
 
     private static final EventClass TARGET_EVENT_CLASS = EventClass.from(ItgProjectCreated.class);
 
-    private PublisherHub publisherHub;
+    private IntegrationBroker broker;
+    private BoundedContext context;
 
     @BeforeEach
-    void setUp() {
-        publisherHub = new PublisherHub(InMemoryTransportFactory.newInstance());
+    void initBus() {
+        context = BoundedContextBuilder
+                .assumingTests()
+                .build();
+        broker = context.broker();
+    }
+
+    @AfterEach
+    void closeContext() throws Exception {
+        context.close();
     }
 
     @Test
     @DisplayName("not accept nulls on construction")
     void notAcceptNulls() {
         new NullPointerTester()
-                .setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
-                .setDefault(PublisherHub.class, publisherHub)
+                .setDefault(IntegrationBroker.class, broker)
                 .setDefault(EventClass.class, TARGET_EVENT_CLASS)
                 .testConstructors(DomesticEventPublisher.class, PACKAGE);
     }
@@ -63,9 +68,8 @@ class DomesticEventPublisherTest {
     @Test
     @DisplayName("dispatch only one event type")
     void dispatchSingleEvent() {
-        DomesticEventPublisher publisher = new DomesticEventPublisher(
-                assumingTests(), publisherHub, TARGET_EVENT_CLASS
-        );
+        DomesticEventPublisher publisher =
+                new DomesticEventPublisher(broker, TARGET_EVENT_CLASS);
         Set<EventClass> classes = publisher.messageClasses();
         assertThat(classes).containsExactly(TARGET_EVENT_CLASS);
     }
@@ -73,12 +77,9 @@ class DomesticEventPublisherTest {
     @Test
     @DisplayName("dispatch no external events")
     void dispatchNoExternalEvents() {
-        DomesticEventPublisher publisher = new DomesticEventPublisher(
-                assumingTests(), publisherHub, TARGET_EVENT_CLASS
-        );
+        DomesticEventPublisher publisher =
+                new DomesticEventPublisher(broker, TARGET_EVENT_CLASS);
         Set<EventClass> classes = publisher.externalEventClasses();
         assertThat(classes).isEmpty();
-        Optional<?> externalDispatcher = publisher.createExternalDispatcher();
-        assertFalse(externalDispatcher.isPresent());
     }
 }

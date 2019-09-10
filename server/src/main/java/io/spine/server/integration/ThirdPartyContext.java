@@ -26,14 +26,15 @@ import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Closeable;
 import io.spine.server.event.EventFactory;
+import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.BoundedContextBuilder.notStoringEvents;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
@@ -41,7 +42,7 @@ import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
  *
  * <p>{@code ThirdPartyContext} helps to represent an external system as a Bounded Context. Events
  * which occur in the external system are converted into domain events of the user's
- * Bounded Contexts and dispatched via {@link IntegrationBus}.
+ * Bounded Contexts and dispatched via {@link IntegrationBroker}.
  *
  * @implSpec Note that a {@code ThirdPartyContext} sends a request for external messages to
  *         other contexts. The {@code ThirdPartyContext} never consumes external messages itself,
@@ -79,9 +80,15 @@ public final class ThirdPartyContext implements Closeable {
 
     private static ThirdPartyContext newContext(String name, boolean multitenant) {
         checkNotEmptyOrBlank(name);
-        BoundedContext context = notStoringEvents(name, multitenant).build();
-        context.integrationBus()
-               .notifyOthers();
+
+        BoundedContextBuilder contextBuilder = multitenant
+                                 ? BoundedContext.multitenant(name)
+                                 : BoundedContext.singleTenant(name);
+        contextBuilder.systemFeatures()
+               .disableCommandLog()
+               .disableAggregateQuerying()
+               .forgetEvents();
+        BoundedContext context = contextBuilder.build();
         return new ThirdPartyContext(context);
     }
 
@@ -94,7 +101,7 @@ public final class ThirdPartyContext implements Closeable {
      * Emits an event from the third-party system.
      *
      * <p>If the event is required by another Context, posts the event into
-     * the {@link IntegrationBus} of the respective Context. Does nothing if the event is not
+     * the {@link IntegrationBroker} of the respective Context. Does nothing if the event is not
      * required by any Context.
      *
      * <p>The caller is required to supply the tenant ID via the {@code ActorContext.tenant_id} if
@@ -112,15 +119,15 @@ public final class ThirdPartyContext implements Closeable {
 
         EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
         Event event = eventFactory.createEvent(eventMessage, null);
-        context.eventBus()
-               .post(event);
+        context.broker()
+               .publish(EventEnvelope.of(event));
     }
 
     /**
      * Emits an event from the third-party system.
      *
      * <p>If the event is required by another Context, posts the event into
-     * the {@link IntegrationBus} of the respective Context. Does nothing if the event is not
+     * the {@link IntegrationBroker} of the respective Context. Does nothing if the event is not
      * required by any Context.
      *
      * <p>This overload may only be used for single-tenant third-party contexts. If this Context is

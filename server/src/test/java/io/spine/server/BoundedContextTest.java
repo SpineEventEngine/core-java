@@ -126,9 +126,9 @@ class BoundedContextTest {
         }
 
         @Test
-        @DisplayName("IntegrationBus")
-        void integrationBus() {
-            assertNotNull(context.integrationBus());
+        @DisplayName("IntegrationBroker")
+        void integrationBroker() {
+            assertNotNull(context.broker());
         }
 
         @Test

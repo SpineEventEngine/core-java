@@ -19,11 +19,11 @@
  */
 package io.spine.server.integration.given;
 
+import com.google.common.base.Throwables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
-import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
@@ -34,12 +34,12 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
 /**
- * Test environment for {@link io.spine.server.integration.IntegrationBusTest}.
+ * Test environment for {@link io.spine.server.integration.IntegrationBrokerTest}.
  */
-public class IntegrationBusTestEnv {
+public class IntegrationBrokerTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private IntegrationBusTestEnv() {
+    private IntegrationBrokerTestEnv() {
     }
 
     @CanIgnoreReturnValue
@@ -55,11 +55,7 @@ public class IntegrationBusTestEnv {
     @CanIgnoreReturnValue
     public static BoundedContext contextWithExternalSubscribers() {
         BoundedContext boundedContext = newContext();
-        AbstractEventSubscriber eventSubscriber = new ProjectEventsSubscriber();
-        boundedContext.integrationBus()
-                      .register(eventSubscriber);
-        boundedContext.eventBus()
-                      .register(eventSubscriber);
+        boundedContext.registerEventDispatcher(new ProjectEventsSubscriber());
         boundedContext.register(DefaultRepository.of(ProjectCountAggregate.class));
         boundedContext.register(DefaultRepository.of(ProjectWizard.class));
         return boundedContext;
@@ -73,22 +69,26 @@ public class IntegrationBusTestEnv {
     }
 
     public static BoundedContext contextWithProjectCreatedNeeds() {
-        BoundedContext result = newContext();
-        result.integrationBus()
-              .register(new ProjectEventsSubscriber());
+        BoundedContext result = BoundedContext
+                .singleTenant(newUuid())
+                .addEventDispatcher(new ProjectEventsSubscriber())
+                .build();
         return result;
     }
 
     public static BoundedContext contextWithProjectStartedNeeds() {
-        BoundedContext result = newContext();
-        result.integrationBus()
-              .register(new ProjectStartedExtSubscriber());
+        BoundedContext result = BoundedContext
+                .singleTenant(newUuid())
+                .addEventDispatcher(new ProjectStartedExtSubscriber())
+                .build();
         return result;
     }
 
     public static Event projectCreated() {
-        ProjectId projectId = projectId();
-        TestEventFactory eventFactory = newInstance(pack(projectId), IntegrationBusTestEnv.class);
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId(Throwables.getStackTraceAsString(new RuntimeException()))
+                                       .build();
+        TestEventFactory eventFactory = newInstance(pack(projectId), IntegrationBrokerTestEnv.class);
         return eventFactory.createEvent(
                 ItgProjectCreated.newBuilder()
                                  .setProjectId(projectId)
@@ -99,7 +99,7 @@ public class IntegrationBusTestEnv {
     public static Event projectStarted() {
         ProjectId projectId = projectId();
         TestEventFactory eventFactory =
-                newInstance(pack(projectId), IntegrationBusTestEnv.class);
+                newInstance(pack(projectId), IntegrationBrokerTestEnv.class);
         return eventFactory.createEvent(
                 ItgProjectStarted.newBuilder()
                                  .setProjectId(projectId)

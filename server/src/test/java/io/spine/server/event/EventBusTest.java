@@ -27,6 +27,7 @@ import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.bus.BareDispatcher;
@@ -38,14 +39,17 @@ import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectAggregate;
 import io.spine.server.event.given.bus.RememberingSubscriber;
 import io.spine.server.event.given.bus.TaskCreatedFilter;
+import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.Task;
+import io.spine.test.event.TaskId;
 import io.spine.testdata.Sample;
 import io.spine.testing.SlowTest;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.Validated;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -105,6 +109,8 @@ public class EventBusTest {
     @AfterEach
     void tearDown() throws Exception {
         context.close();
+        ServerEnvironment.instance()
+                         .reset();
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
@@ -413,6 +419,7 @@ public class EventBusTest {
         }
     }
 
+    @MuteLogging
     @Test
     @DisplayName("not dispatch domestic event to external handler")
     void domesticEventToExternalMethod() {
@@ -420,15 +427,21 @@ public class EventBusTest {
         eventBus.register(subscriber);
 
         ProjectId projectId = Sample.messageOfType(ProjectId.class);
-        Task task = Sample.messageOfType(Task.class);
+        TaskId taskId = Sample.messageOfType(TaskId.class);
+        Task task = Task
+                .newBuilder()
+                .setTaskId(taskId)
+                .setTitle("Foo")
+                .setDescription("Foo bar")
+                .build();
         EBTaskAdded eventMessage = EBTaskAdded
                 .newBuilder()
                 .setProjectId(projectId)
                 .setTask(task)
                 .build();
         Event event = eventFactory.createEvent(eventMessage);
-        eventBus.post(event, StreamObservers.noOpObserver());
-        assertFalse(subscriber.receivedExternalMessage());
+        assertThrows(SignalOriginMismatchError.class,
+                     () -> eventBus.post(event, StreamObservers.noOpObserver()));
     }
 
     /**

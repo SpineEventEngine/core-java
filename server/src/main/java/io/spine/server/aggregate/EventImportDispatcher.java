@@ -25,11 +25,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -79,10 +77,5 @@ public final class EventImportDispatcher<I> implements EventDispatcher, Logging 
     @Override
     public void dispatch(EventEnvelope event) {
         repository.importEvent(event);
-    }
-
-    @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        return Optional.empty();
     }
 }

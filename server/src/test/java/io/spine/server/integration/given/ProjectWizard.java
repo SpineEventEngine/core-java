@@ -53,7 +53,7 @@ public class ProjectWizard
         return Collections.emptyList();
     }
 
-    public static Message getExternalEvent() {
+    public static Message externalEvent() {
         return externalEvent;
     }
 

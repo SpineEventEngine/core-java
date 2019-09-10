@@ -34,7 +34,7 @@ public class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
         externalEvent = msg;
     }
 
-    public static ItgProjectStarted getExternalEvent() {
+    public static ItgProjectStarted externalEvent() {
         return externalEvent;
     }
 

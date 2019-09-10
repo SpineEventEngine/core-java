@@ -19,7 +19,6 @@
  */
 package io.spine.server.transport.memory;
 
-import io.grpc.Internal;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Subscriber;
 
@@ -28,10 +27,9 @@ import io.spine.server.transport.Subscriber;
  *
  * <p>To use only in scope of the same JVM as {@linkplain InMemoryPublisher publishers}.
  */
-@Internal
-public class InMemorySubscriber extends Subscriber {
+class InMemorySubscriber extends Subscriber {
 
-    public InMemorySubscriber(ChannelId id) {
+    InMemorySubscriber(ChannelId id) {
         super(id);
     }
 }
