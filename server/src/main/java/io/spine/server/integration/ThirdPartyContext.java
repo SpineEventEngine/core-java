@@ -42,7 +42,7 @@ import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
  *
  * <p>{@code ThirdPartyContext} helps to represent an external system as a Bounded Context. Events
  * which occur in the external system are converted into domain events of the user's
- * Bounded Contexts and dispatched via {@link IntegrationEventBroker}.
+ * Bounded Contexts and dispatched via {@link IntegrationBroker}.
  *
  * @implSpec Note that a {@code ThirdPartyContext} sends a request for external messages to
  *         other contexts. The {@code ThirdPartyContext} never consumes external messages itself,
@@ -101,7 +101,7 @@ public final class ThirdPartyContext implements Closeable {
      * Emits an event from the third-party system.
      *
      * <p>If the event is required by another Context, posts the event into
-     * the {@link IntegrationEventBroker} of the respective Context. Does nothing if the event is not
+     * the {@link IntegrationBroker} of the respective Context. Does nothing if the event is not
      * required by any Context.
      *
      * <p>The caller is required to supply the tenant ID via the {@code ActorContext.tenant_id} if
@@ -119,7 +119,7 @@ public final class ThirdPartyContext implements Closeable {
 
         EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
         Event event = eventFactory.createEvent(eventMessage, null);
-        context.integrationEventBroker()
+        context.IntegrationBroker()
                .publish(EventEnvelope.of(event));
     }
 
@@ -127,7 +127,7 @@ public final class ThirdPartyContext implements Closeable {
      * Emits an event from the third-party system.
      *
      * <p>If the event is required by another Context, posts the event into
-     * the {@link IntegrationEventBroker} of the respective Context. Does nothing if the event is not
+     * the {@link IntegrationBroker} of the respective Context. Does nothing if the event is not
      * required by any Context.
      *
      * <p>This overload may only be used for single-tenant third-party contexts. If this Context is

@@ -40,7 +40,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.store.DefaultEventStore;
-import io.spine.server.integration.IntegrationEventBroker;
+import io.spine.server.integration.IntegrationBroker;
 import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
@@ -85,7 +85,7 @@ public abstract class BoundedContext implements Closeable, Logging {
     private final ContextSpec spec;
     private final CommandBus commandBus;
     private final EventBus eventBus;
-    private final IntegrationEventBroker broker;
+    private final IntegrationBroker broker;
     private final ImportBus importBus;
     private final Stand stand;
 
@@ -114,7 +114,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         this.stand = builder.stand();
         this.tenantIndex = builder.buildTenantIndex();
 
-        this.broker = new IntegrationEventBroker();
+        this.broker = new IntegrationBroker();
         this.commandBus = builder.buildCommandBus();
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
@@ -259,7 +259,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      *
      * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
      * If the passed instance dispatches external events, registers it with
-     * the {@code IntegrationEventBroker}.
+     * the {@code IntegrationBroker}.
      *
      * @throws SecurityException
      *         if called from outside the framework
@@ -277,7 +277,7 @@ public abstract class BoundedContext implements Closeable, Logging {
             systemReadSide.register(dispatcher);
         }
         if (dispatcher.dispatchesExternalEvents()) {
-            integrationEventBroker().register(dispatcher);
+            IntegrationBroker().register(dispatcher);
         }
         if (dispatcher instanceof CommandDispatcherDelegate) {
             CommandDispatcherDelegate commandDispatcher = (CommandDispatcherDelegate) dispatcher;
@@ -392,9 +392,9 @@ public abstract class BoundedContext implements Closeable, Logging {
         return eventBus;
     }
 
-    /** Obtains instance of {@link IntegrationEventBroker} of this {@code BoundedContext}. */
+    /** Obtains instance of {@link IntegrationBroker} of this {@code BoundedContext}. */
     @Internal
-    public IntegrationEventBroker integrationEventBroker() {
+    public IntegrationBroker IntegrationBroker() {
         return this.broker;
     }
 
@@ -467,7 +467,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      *     <li>Closes associated {@link StorageFactory}.
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
-     *     <li>Closes {@link IntegrationEventBroker}.
+     *     <li>Closes {@link IntegrationBroker}.
      *     <li>Closes {@link DefaultEventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.

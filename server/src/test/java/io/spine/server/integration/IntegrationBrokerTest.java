@@ -55,13 +55,13 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.integration.given.IntegrationEventBrokerTestEnv.contextWithExtEntitySubscribers;
-import static io.spine.server.integration.given.IntegrationEventBrokerTestEnv.contextWithExternalSubscribers;
-import static io.spine.server.integration.given.IntegrationEventBrokerTestEnv.contextWithProjectCreatedNeeds;
-import static io.spine.server.integration.given.IntegrationEventBrokerTestEnv.contextWithProjectStartedNeeds;
-import static io.spine.server.integration.given.IntegrationEventBrokerTestEnv.newContext;
-import static io.spine.server.integration.given.IntegrationEventBrokerTestEnv.projectCreated;
-import static io.spine.server.integration.given.IntegrationEventBrokerTestEnv.projectStarted;
+import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithExtEntitySubscribers;
+import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithExternalSubscribers;
+import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithProjectCreatedNeeds;
+import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithProjectStartedNeeds;
+import static io.spine.server.integration.given.IntegrationBrokerTestEnv.newContext;
+import static io.spine.server.integration.given.IntegrationBrokerTestEnv.projectCreated;
+import static io.spine.server.integration.given.IntegrationBrokerTestEnv.projectStarted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -69,8 +69,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("IntegrationEventBroker should")
-class IntegrationEventBrokerTest {
+@DisplayName("IntegrationBroker should")
+class IntegrationBrokerTest {
 
     @BeforeEach
     void setUp() {
@@ -237,10 +237,10 @@ class IntegrationEventBrokerTest {
     @DisplayName("send messages between two contexts regardless of registration order")
     void mutual() {
         BlackBoxBoundedContext<?> photos = BlackBoxBoundedContext
-                .singleTenant("Photos-" + IntegrationEventBrokerTest.class.getSimpleName())
+                .singleTenant("Photos-" + IntegrationBrokerTest.class.getSimpleName())
                 .with(DefaultRepository.of(PhotosProcMan.class));
         BlackBoxBoundedContext<?> billing = BlackBoxBoundedContext
-                .singleTenant("Billing-" + IntegrationEventBrokerTest.class.getSimpleName())
+                .singleTenant("Billing-" + IntegrationBrokerTest.class.getSimpleName())
                 .with(DefaultRepository.of(BillingAggregate.class));
         photos.receivesCommand(UploadPhotos.generate());
         assertReceived(photos, PhotosUploaded.class);
@@ -290,7 +290,7 @@ class IntegrationEventBrokerTest {
 
         Event event = projectCreated();
         MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-        context.integrationEventBroker()
+        context.IntegrationBroker()
                .dispatchLocally(event, observer);
         Error error = observer.firstResponse()
                               .getStatus()

@@ -49,18 +49,18 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * Dispatches {@linkplain ExternalMessage external messages} from and to the Bounded Context
  * in which this bus operates.
  *
- * <p>An {@code IntegrationEventBroker} is available as a part of single {@code BoundedContext}.
+ * <p>An {@code IntegrationBroker} is available as a part of single {@code BoundedContext}.
  * In a multi-component environment messages may travel across components from one Bounded Context
  * to another.
  *
- * <p>An {@code IntegrationEventBroker} is always based upon {@linkplain TransportFactory transport}
+ * <p>An {@code IntegrationBroker} is always based upon {@linkplain TransportFactory transport}
  * that delivers the messages from and to it. For several Bounded Contexts to communicate,
  * their brokers have to share the transport. Typically that would be a single message queue.
  *
- * <p>The messages from external components received by an {@code IntegrationEventBroker} via
+ * <p>The messages from external components received by an {@code IntegrationBroker} via
  * the transport are propagated into the Bounded Context via the domestic {@code EventBus}.
  *
- * {@code IntegrationEventBroker} is also responsible for publishing the messages born within
+ * {@code IntegrationBroker} is also responsible for publishing the messages born within
  * the current Bounded Context to external collaborators. To do that properly, the broker listens
  * to a special document message called {@linkplain RequestForExternalMessages} that describes
  * the needs of other parties.
@@ -109,7 +109,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  */
 @Internal
 @SuppressWarnings("OverlyCoupledClass")
-public final class IntegrationEventBroker implements ContextAware, AutoCloseable {
+public final class IntegrationBroker implements ContextAware, AutoCloseable {
 
     private static final ChannelId CONFIG_EXCHANGE_CHANNEL_ID = channelIdFor(
             TypeUrl.of(RequestForExternalMessages.class)
@@ -123,7 +123,7 @@ public final class IntegrationEventBroker implements ContextAware, AutoCloseable
     private @MonotonicNonNull ConfigurationChangeObserver configurationObserver;
     private @MonotonicNonNull ConfigurationBroadcast broadcast;
 
-    public IntegrationEventBroker() {
+    public IntegrationBroker() {
         TransportFactory transportFactory = ServerEnvironment
                 .instance()
                 .transportFactory();
@@ -254,7 +254,7 @@ public final class IntegrationEventBroker implements ContextAware, AutoCloseable
     /**
      * Notifies other Bounded Contexts of the application about the types requested by this Context.
      *
-     * <p>The {@code IntegrationEventBroker} sends a {@link RequestForExternalMessages}. The request
+     * <p>The {@code IntegrationBroker} sends a {@link RequestForExternalMessages}. The request
      * triggers other Contexts to send their requests. As the result, all the Contexts know about
      * the needs of all the Contexts.
      */

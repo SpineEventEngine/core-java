@@ -40,7 +40,7 @@ class DomesticEventPublisherTest {
 
     private static final EventClass TARGET_EVENT_CLASS = EventClass.from(ItgProjectCreated.class);
 
-    private IntegrationEventBroker broker;
+    private IntegrationBroker broker;
     private BoundedContext context;
 
     @BeforeEach
@@ -48,7 +48,7 @@ class DomesticEventPublisherTest {
         context = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        broker = context.integrationEventBroker();
+        broker = context.IntegrationBroker();
     }
 
     @AfterEach
@@ -60,7 +60,7 @@ class DomesticEventPublisherTest {
     @DisplayName("not accept nulls on construction")
     void notAcceptNulls() {
         new NullPointerTester()
-                .setDefault(IntegrationEventBroker.class, broker)
+                .setDefault(IntegrationBroker.class, broker)
                 .setDefault(EventClass.class, TARGET_EVENT_CLASS)
                 .testConstructors(DomesticEventPublisher.class, PACKAGE);
     }

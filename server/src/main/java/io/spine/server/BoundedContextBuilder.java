@@ -39,7 +39,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.integration.IntegrationEventBroker;
+import io.spine.server.integration.IntegrationBroker;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
@@ -84,7 +84,7 @@ public final class BoundedContextBuilder implements Logging {
 
     /**
      * Event dispatchers to be registered with the context {@link EventBus} and/or
-     * {@link IntegrationEventBroker} after the Bounded Context creation.
+     * {@link IntegrationBroker} after the Bounded Context creation.
      */
     private final Collection<EventDispatcher> eventDispatchers = new ArrayList<>();
 

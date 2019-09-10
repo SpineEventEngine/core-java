@@ -34,12 +34,12 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
 /**
- * Test environment for {@link io.spine.server.integration.IntegrationEventBrokerTest}.
+ * Test environment for {@link io.spine.server.integration.IntegrationBrokerTest}.
  */
-public class IntegrationEventBrokerTestEnv {
+public class IntegrationBrokerTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private IntegrationEventBrokerTestEnv() {
+    private IntegrationBrokerTestEnv() {
     }
 
     @CanIgnoreReturnValue
@@ -88,7 +88,7 @@ public class IntegrationEventBrokerTestEnv {
         ProjectId projectId = ProjectId.newBuilder()
                                        .setId(Throwables.getStackTraceAsString(new RuntimeException()))
                                        .build();
-        TestEventFactory eventFactory = newInstance(pack(projectId), IntegrationEventBrokerTestEnv.class);
+        TestEventFactory eventFactory = newInstance(pack(projectId), IntegrationBrokerTestEnv.class);
         return eventFactory.createEvent(
                 ItgProjectCreated.newBuilder()
                                  .setProjectId(projectId)
@@ -99,7 +99,7 @@ public class IntegrationEventBrokerTestEnv {
     public static Event projectStarted() {
         ProjectId projectId = projectId();
         TestEventFactory eventFactory =
-                newInstance(pack(projectId), IntegrationEventBrokerTestEnv.class);
+                newInstance(pack(projectId), IntegrationBrokerTestEnv.class);
         return eventFactory.createEvent(
                 ItgProjectStarted.newBuilder()
                                  .setProjectId(projectId)

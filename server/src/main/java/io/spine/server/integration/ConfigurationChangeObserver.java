@@ -34,13 +34,13 @@ import static java.util.Collections.synchronizedSet;
 
 /**
  * An observer, which reacts to the configuration update messages sent by
- * external entities (such as {@code IntegrationEventBroker}es of other bounded contexts).
+ * external entities (such as {@code IntegrationBroker}es of other bounded contexts).
  */
 final class ConfigurationChangeObserver
         extends AbstractChannelObserver
         implements AutoCloseable {
 
-    private final IntegrationEventBroker broker;
+    private final IntegrationBroker broker;
     private final BoundedContextName boundedContextName;
     private final BusAdapter adapter;
 
@@ -59,7 +59,7 @@ final class ConfigurationChangeObserver
     private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ConfigurationChangeObserver(IntegrationEventBroker broker,
+    ConfigurationChangeObserver(IntegrationBroker broker,
                                 BoundedContextName boundedContextName,
                                 BusAdapter adapter) {
         super(boundedContextName, RequestForExternalMessages.class);
@@ -74,7 +74,7 @@ final class ConfigurationChangeObserver
      * types.
      *
      * <p>If the request originates from a previously unknown Bounded Context,
-     * {@linkplain IntegrationEventBroker#notifyOthers() publishes} the types requested by the current
+     * {@linkplain IntegrationBroker#notifyOthers() publishes} the types requested by the current
      * Context, since they may be unknown to the new Context.
      *
      * @param value
