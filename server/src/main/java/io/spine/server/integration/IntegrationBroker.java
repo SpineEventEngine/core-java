@@ -60,15 +60,12 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * <p>The messages from external components received by an {@code IntegrationBroker} via
  * the transport are propagated into the Bounded Context via the domestic {@code EventBus}.
  *
- * {@code IntegrationBroker} is also responsible for publishing the messages born within
+ * <p>{@code IntegrationBroker} is also responsible for publishing the messages born within
  * the current Bounded Context to external collaborators. To do that properly, the broker listens
  * to a special document message called {@linkplain RequestForExternalMessages} that describes
  * the needs of other parties.
  *
  * <p><b>Sample Usage.</b>
- *
- * <p>The Bounded Context named "Projects" has an external event handler method
- * in the projection as follows:
  *
  * <p>Bounded Context "Projects" has an external event handler method in a projection as follows:
  * <pre>
@@ -88,7 +85,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * context sends out a {@code RequestForExternalMessages} saying that the of {@code UserDeleted}
  * event is needed.
  *
- * <p>Let's say the second Bounded Context is "Users". Its broker will receive
+ * <p>Let's say the second Context is "Users". Its broker will receive
  * the {@code RequestForExternalMessages} request sent by "Projects". To handle it properly, it will
  * create a bridge between "Users"'s Event Bus (which may eventually be transmitting
  * a {@code UserDeleted} event) and the external message
@@ -97,15 +94,15 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * <p>Once {@code UserDeleted} is emitted locally in "Users" context, it will be received
  * by this bridge (as well as other local dispatchers) and published to the external transport.
  *
- * <p>The integration event broker on the "Projects" side will receive the {@code UserDeleted}
+ * <p>The integration broker on the "Projects" side will receive the {@code UserDeleted}
  * external message. The event will be dispatched to the external event handler of the projection.
  *
  * <p><b>Limitations</b>
  *
  * <p>An event type may be consumed by many Contexts but produced only by a single Context. This
- * means that an each given event type belongs to model of a specific Bounded Context. The ownership
- * of an event type may be changed between the versions of a system, but may not be changed while
- * events are travelling between the Contexts.
+ * means that each given event type belongs only to one Context. The ownership of an event type may
+ * be changed between the versions of a system, but may not be changed while events are travelling
+ * between the Contexts.
  */
 @Internal
 @SuppressWarnings("OverlyCoupledClass")
@@ -152,20 +149,20 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     /**
      * Publishes the given event for other Bounded Contexts.
      *
-     * <p>If this event may have been received from another context, does nothing. More formally, if
-     * there is a <b>subscriber</b> channel in this broker for events of such a type, those events
-     * cannot be <b>published</b> from this Context.
+     * <p>If this event belongs to another context, does nothing. More formally, if there is
+     * a <b>subscriber</b> channel in this broker for events of such a type, those events are
+     * NOT <b>published</b> from this Context.
      *
      * @param event
      *         the event to publish
      */
     void publish(EventEnvelope event) {
-        Event outerObject = event.outerObject();
-        ExternalMessage msg = ExternalMessages.of(outerObject, context);
         EventClass eventClass = event.messageClass();
         ChannelId channelId = toChannelId(eventClass);
         boolean eventFromUpstream = subscriberHub.hasChannel(channelId);
         if (!eventFromUpstream) {
+            Event outerObject = event.outerObject();
+            ExternalMessage msg = ExternalMessages.of(outerObject, context);
             Publisher channel = publisherHub.get(channelId);
             channel.publish(AnyPacker.pack(event.id()), msg);
         }
@@ -276,6 +273,6 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
 
     @Override
     public String toString() {
-        return "Integration Bus of BoundedContext Name = " + context.getValue();
+        return "Integration Broker of BoundedContext Name = " + context.getValue();
     }
 }
