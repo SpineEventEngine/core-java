@@ -22,7 +22,7 @@ package io.spine.core;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.base.EventMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
@@ -38,6 +38,7 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 /**
  * Utility class for working with {@link Event} objects.
  */
+@SPI
 public final class Events {
 
     /** The stringifier for event IDs. */
@@ -117,7 +118,6 @@ public final class Events {
      *
      * <p>The order of the events is preserved in the output list.
      */
-    @Internal
     public static ImmutableList<Event> toExternal(List<Event> events) {
         return events
                 .stream()
@@ -128,7 +128,6 @@ public final class Events {
     /**
      * Marks the given event as {@code external}.
      */
-    @Internal
     public static Event toExternal(Event event) {
         Event.Builder externalEvent = event.toBuilder();
         externalEvent.getContextBuilder().setExternal(true);

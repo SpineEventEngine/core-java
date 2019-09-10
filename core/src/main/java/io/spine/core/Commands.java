@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.util.Timestamps;
+import io.spine.annotation.SPI;
 import io.spine.base.CommandMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
@@ -34,6 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Client-side utilities for working with commands.
  */
+@SPI
 public final class Commands {
 
     private static final Stringifier<CommandId> idStringifier = new CommandIdStringifier();

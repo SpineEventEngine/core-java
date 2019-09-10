@@ -41,6 +41,7 @@ import "spine/core/version.proto";
 // Event identifier.
 message EventId {
     option (is).java_type = "io.spine.core.EventIdMixin";
+    option (SPI_type) = true;
 
     // A value of the event identifier.
     //
@@ -74,6 +75,7 @@ message EventId {
 //
 message Event {
     option (is).java_type = "io.spine.core.EventMixin";
+    option (SPI_type) = true;
 
     // The ID of the event.
     EventId id = 1 [(required) = true];
@@ -88,6 +90,7 @@ message Event {
 // Meta-information for an event.
 message EventContext {
     option (is).java_type = "io.spine.core.EventContextMixin";
+    option (SPI_type) = true;
 
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
@@ -160,6 +163,7 @@ message EventContext {
 // Meta-information about a rejection event.
 //
 message RejectionEventContext {
+    option (SPI_type) = true;
 
     core.Command command = 3;
 
