@@ -50,7 +50,8 @@ class DeliveryErrorsTest {
         DeliveryErrors errors = builder.build();
 
         ModelError error = assertThrows(ModelError.class, errors::throwIfAny);
-        assertThat(error).isEqualTo(mockError);
+        assertThat(error)
+                .isEqualTo(mockError);
     }
 
     @Test
@@ -63,7 +64,8 @@ class DeliveryErrorsTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                                                           errors::throwIfAny);
-        assertThat(exception).isEqualTo(mockException);
+        assertThat(exception)
+                .isEqualTo(mockException);
     }
 
     @Test
@@ -79,7 +81,10 @@ class DeliveryErrorsTest {
 
         DeliveryErrors errors = builder.build();
         ModelError error = assertThrows(ModelError.class, errors::throwIfAny);
-        assertThat(error).isEqualTo(mockError);
-        assertThat(error.getSuppressed()).asList().containsExactly(anotherMockError, mockException);
+        assertThat(error)
+                .isEqualTo(mockError);
+        assertThat(error.getSuppressed())
+                .asList()
+                .containsExactly(anotherMockError, mockException);
     }
 }
