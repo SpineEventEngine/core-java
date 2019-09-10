@@ -26,13 +26,14 @@ import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.EventFactory;
+import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.BoundedContextBuilder.notStoringEvents;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
@@ -78,7 +79,15 @@ public final class ThirdPartyContext implements AutoCloseable {
 
     private static ThirdPartyContext newContext(String name, boolean multitenant) {
         checkNotEmptyOrBlank(name);
-        BoundedContext context = notStoringEvents(name, multitenant).build();
+
+        BoundedContextBuilder contextBuilder = multitenant
+                                 ? BoundedContext.multitenant(name)
+                                 : BoundedContext.singleTenant(name);
+        contextBuilder.systemFeatures()
+               .disableCommandLog()
+               .disableAggregateQuerying()
+               .forgetEvents();
+        BoundedContext context = contextBuilder.build();
         context.integrationEventBroker()
                .notifyOthers();
         return new ThirdPartyContext(context);
@@ -111,8 +120,8 @@ public final class ThirdPartyContext implements AutoCloseable {
 
         EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
         Event event = eventFactory.createEvent(eventMessage, null);
-        context.eventBus()
-               .post(event);
+        context.integrationEventBroker()
+               .publish(EventEnvelope.of(event));
     }
 
     /**
