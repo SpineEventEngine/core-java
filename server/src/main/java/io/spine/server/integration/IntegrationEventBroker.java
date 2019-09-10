@@ -109,7 +109,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  */
 @Internal
 @SuppressWarnings("OverlyCoupledClass")
-public class IntegrationEventBroker implements ContextAware, AutoCloseable {
+public final class IntegrationEventBroker implements ContextAware, AutoCloseable {
 
     private static final ChannelId CONFIG_EXCHANGE_CHANNEL_ID = channelIdFor(
             TypeUrl.of(RequestForExternalMessages.class)
