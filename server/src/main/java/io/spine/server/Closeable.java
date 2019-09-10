@@ -18,24 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server;
 
-import com.google.common.collect.ImmutableList;
-import io.spine.server.type.EventEnvelope;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static com.google.common.base.Preconditions.checkState;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+/**
+ * Base interface for server-side objects that may hold resources that need to be released
+ * at the end of the lifecycle of the object.
+ *
+ * <p>A class will benefit from implementing <em>this</em> interface instead of
+ * {@link AutoCloseable} if it needs to see if the instance is {@linkplain #isOpen() open}
+ * prior to making other calls.
+ *
+ * @see #isOpen()
+ * @see #checkOpen()
+ */
+public interface Closeable extends AutoCloseable {
 
-@DisplayName("FilterChain should")
-class FilterChainTest {
+    /**
+     * Tells if the object is still open.
+     *
+     * <p>Implementations must return {@code false} after {@link #close()} is invoked.
+     */
+    boolean isOpen();
 
-    @Test
-    @DisplayName("not allow closing twice")
-    void notAllowClosingTwice() throws Exception {
-        FilterChain<EventEnvelope> chain = new FilterChain<>(ImmutableList.of());
-
-        chain.close();
-        assertThrows(IllegalStateException.class, chain::close);
+    /**
+     * Ensures that the object is {@linkplain #isOpen() open}.
+     *
+     * @throws IllegalStateException otherwise
+     */
+    default void checkOpen() throws IllegalStateException {
+        checkState(isOpen(), "`%s` is already closed.", this);
     }
 }

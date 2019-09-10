@@ -51,6 +51,7 @@ import io.spine.testdata.Sample;
 import io.spine.testing.SlowTest;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.validate.Validated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -462,10 +463,11 @@ public class EventBusTest {
     @DisplayName("store filters regarding possible concurrent modifications")
     void storeFiltersInConcurrentEnv() throws Exception {
         int threadCount = 50;
-        Event event = eventFactory.createEvent(DonationMade
-                                                       .newBuilder()
-                                                       .setUsdsDonated(3.14)
-                                                       .vBuild());
+        @Validated DonationMade eventMessage = DonationMade
+                .newBuilder()
+                .setUsdsDonated(3.14)
+                .vBuild();
+        Event event = eventFactory.createEvent(eventMessage);
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {
@@ -475,7 +477,11 @@ public class EventBusTest {
             EventBus eventBus = context.eventBus();
             StreamObserver<Ack> observer = StreamObservers.noOpObserver();
             for (int j = 0; j < threadCount; j++) {
-                executor.execute(() -> eventBus.post(event, observer));
+                executor.execute(() -> {
+                    if (eventBus.isOpen()) {
+                        eventBus.post(event, observer);
+                    }
+                });
             }
             // Let the system destroy all the native threads, clean up, etc.
             Thread.sleep(100);

@@ -80,7 +80,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         Martin Fowler on Bounded Contexts</a>
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
-public abstract class BoundedContext implements AutoCloseable, Logging {
+public abstract class BoundedContext implements Closeable, Logging {
 
     private final ContextSpec spec;
     private final CommandBus commandBus;
@@ -495,10 +495,18 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * <p>This is a test-only method which is needed for the tests that forcibly close a context,
      * so that cleanup methods do not call it again.
+     *
+     * @deprecated please use {@link #isOpen()} instead
      */
+    @Deprecated
     @VisibleForTesting
     public boolean isClosed() {
-        return guard.isClosed();
+        return !isOpen();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return !guard.isClosed();
     }
 
     final String nameForLogging() {

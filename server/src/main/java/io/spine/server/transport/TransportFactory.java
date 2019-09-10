@@ -20,6 +20,7 @@
 package io.spine.server.transport;
 
 import io.spine.annotation.SPI;
+import io.spine.server.Closeable;
 
 /**
  * A factory for creating channel-based transport for {@code Message} inter-exchange between the
@@ -29,7 +30,7 @@ import io.spine.annotation.SPI;
  * Publish-Subscriber Channel pattern.</a>
  */
 @SPI
-public interface TransportFactory extends AutoCloseable {
+public interface TransportFactory extends Closeable {
 
     /**
      * Creates a {@link Publisher} channel with the given ID.

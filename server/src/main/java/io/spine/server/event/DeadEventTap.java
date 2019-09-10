@@ -18,24 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server.event;
 
-import com.google.common.collect.ImmutableList;
+import io.spine.base.EventMessage;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.type.EventEnvelope;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.function.Supplier;
 
-@DisplayName("FilterChain should")
-class FilterChainTest {
+/**
+ * Handles a dead event by saving it to the {@link EventStore} and producing an
+ * {@link UnsupportedEventException}.
+ *
+ * <p> We must store dead events as they can still be emitted by some entities and therefore are
+ * a part of the history for the current Bounded Context.
+ */
+final class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
 
-    @Test
-    @DisplayName("not allow closing twice")
-    void notAllowClosingTwice() throws Exception {
-        FilterChain<EventEnvelope> chain = new FilterChain<>(ImmutableList.of());
+    private final Supplier<EventStore> store;
 
-        chain.close();
-        assertThrows(IllegalStateException.class, chain::close);
+    DeadEventTap(Supplier<EventStore> store) {
+        this.store = store;
+    }
+
+    @Override
+    public UnsupportedEventException handle(EventEnvelope event) {
+        eventStore().append(event.outerObject());
+
+        EventMessage message = event.message();
+        UnsupportedEventException exception = new UnsupportedEventException(message);
+        return exception;
+    }
+
+    private EventStore eventStore() {
+        return store.get();
     }
 }

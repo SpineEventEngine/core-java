@@ -26,6 +26,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
+import io.spine.server.Closeable;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.type.CommandEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,7 +45,7 @@ import static java.util.Optional.empty;
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
  */
-public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
+public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Closeable {
 
     private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
@@ -84,6 +85,11 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     @Override
+    public boolean isOpen() {
+        return active;
+    }
+
+    @Override
     public void close() {
         shutdown();
     }
@@ -99,7 +105,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      *         if the scheduler is shut down
      */
     public void schedule(Command command) {
-        checkState(active, "Scheduler is shut down.");
+        checkOpen();
         if (isScheduledAlready(command)) {
             return;
         }
@@ -119,7 +125,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      *         to calling this method
      */
     protected CommandBus commandBus() {
-        checkState(commandBus != null, "CommandBus is not set.");
+        checkState(commandBus != null, "`CommandBus` is not set.");
         return commandBus;
     }
 

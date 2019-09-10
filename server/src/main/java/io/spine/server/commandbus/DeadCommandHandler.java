@@ -18,24 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server.commandbus;
 
-import com.google.common.collect.ImmutableList;
-import io.spine.server.type.EventEnvelope;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.core.Command;
+import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.type.CommandEnvelope;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+/**
+ * Produces an {@link UnsupportedCommandException} upon a dead command.
+ */
+final class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
 
-@DisplayName("FilterChain should")
-class FilterChainTest {
-
-    @Test
-    @DisplayName("not allow closing twice")
-    void notAllowClosingTwice() throws Exception {
-        FilterChain<EventEnvelope> chain = new FilterChain<>(ImmutableList.of());
-
-        chain.close();
-        assertThrows(IllegalStateException.class, chain::close);
+    @Override
+    public UnsupportedCommandException handle(CommandEnvelope message) {
+        Command command = message.command();
+        UnsupportedCommandException exception = new UnsupportedCommandException(command);
+        return exception;
     }
 }

@@ -26,7 +26,6 @@ import io.spine.server.type.MessageEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Deque;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -64,12 +63,10 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
         B builder = builder();
         builder.appendFilter(first)
                .appendFilter(second);
-        Deque<BusFilter<E>> filters = builder.filters();
+        Iterable<BusFilter<E>> filters = builder.filters();
 
-        assertThat(filters.pop())
-                .isEqualTo(first);
-        assertThat(filters.pop())
-                .isEqualTo(second);
+        assertThat(filters)
+                .containsExactly(first, second);
     }
 
     @Test
