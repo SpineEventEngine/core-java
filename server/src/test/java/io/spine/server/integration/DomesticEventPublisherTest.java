@@ -30,12 +30,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DisplayName("DomesticEventPublisher should")
 class DomesticEventPublisherTest {
@@ -83,7 +81,5 @@ class DomesticEventPublisherTest {
                 new DomesticEventPublisher(integrationBus, TARGET_EVENT_CLASS);
         Set<EventClass> classes = publisher.externalEventClasses();
         assertThat(classes).isEmpty();
-        Optional<?> externalDispatcher = publisher.createExternalDispatcher();
-        assertFalse(externalDispatcher.isPresent());
     }
 }

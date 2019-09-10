@@ -26,7 +26,6 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -64,11 +63,6 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
     @Override
     public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
-    }
-
-    @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        return Optional.empty();
     }
 
     @Override

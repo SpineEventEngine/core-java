@@ -27,8 +27,6 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.route.EventRouting;
 import io.spine.server.type.EventEnvelope;
 
@@ -130,19 +128,5 @@ public abstract class EventDispatchingRepository<I,
     private Set<I> route(EventEnvelope event) {
         return route(eventRouting(), event)
                 .orElse(ImmutableSet.of());
-    }
-
-    /**
-     * An abstract base for the external message dispatchers, enabling
-     * the {@code EventDispatchingRepository} instances to handle external events.
-     */
-    protected abstract class AbstractExternalEventDispatcher
-            implements ExternalMessageDispatcher {
-
-        @Override
-        public boolean canDispatch(ExternalMessageEnvelope externalEvent) {
-            EventEnvelope event = externalEvent.toEventEnvelope();
-            return EventDispatchingRepository.this.canDispatch(event);
-        }
     }
 }

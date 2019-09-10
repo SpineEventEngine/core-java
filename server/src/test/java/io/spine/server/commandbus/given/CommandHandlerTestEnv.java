@@ -30,7 +30,6 @@ import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.tuple.Pair;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -52,7 +51,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.util.Exceptions.unsupported;
 
 public class CommandHandlerTestEnv {
 
@@ -76,11 +74,6 @@ public class CommandHandlerTestEnv {
         @Override
         public Set<EventClass> externalEventClasses() {
             return ImmutableSet.of();
-        }
-
-        @Override
-        public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-            throw unsupported();
         }
 
         @Override

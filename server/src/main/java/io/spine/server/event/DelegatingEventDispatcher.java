@@ -22,12 +22,9 @@ package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -78,18 +75,6 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
     }
 
     /**
-     * Wraps this dispatcher to an external event dispatcher.
-     *
-     * @return the external rejection dispatcher proxying calls to the underlying instance
-     */
-    @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        return dispatchesExternalEvents()
-               ? Optional.of(new ExternalDispatcher(delegate))
-               : Optional.empty();
-    }
-
-    /**
      * Returns the string representation of this dispatcher.
      *
      * <p>Includes an FQN of the {@code delegate} in order to allow distinguish
@@ -100,25 +85,5 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
         return MoreObjects.toStringHelper(this)
                           .add("eventDelegate", delegate.getClass())
                           .toString();
-    }
-
-    /**
-     * An implementation of {@link ExternalMessageDispatcher} which delegates all its calls to
-     * a given {@link EventDispatcherDelegate}.
-     */
-    private static final class ExternalDispatcher
-            implements ExternalMessageDispatcher {
-
-        private final EventDispatcherDelegate delegate;
-
-        private ExternalDispatcher(EventDispatcherDelegate delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public Set<ExternalMessageClass> messageClasses() {
-            Set<EventClass> eventClasses = delegate.externalEvents();
-            return ExternalMessageClass.fromEventClasses(eventClasses);
-        }
     }
 }

@@ -36,7 +36,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.integration.IntegrationBus;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
@@ -65,7 +64,6 @@ final class BlackBoxSetup {
     private final ImportBus importBus;
     private final TestActorRequestFactory requestFactory;
     private final TestEventFactory eventFactory;
-    private final IntegrationBus integrationBus;
     private final MemoizingObserver<Ack> observer;
 
     BlackBoxSetup(BoundedContext boundedContext,
@@ -74,7 +72,6 @@ final class BlackBoxSetup {
         this.commandBus = boundedContext.commandBus();
         this.eventBus = boundedContext.eventBus();
         this.importBus = boundedContext.importBus();
-        this.integrationBus = boundedContext.integrationBus();
         this.requestFactory = checkNotNull(requestFactory);
         this.eventFactory = eventFactory(requestFactory);
         this.observer = checkNotNull(observer);

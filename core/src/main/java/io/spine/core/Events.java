@@ -112,6 +112,11 @@ public final class Events {
         return ImmutableList.of();
     }
 
+    /**
+     * Marks all the given events as {@code external}.
+     *
+     * <p>The order of the events is preserved in the output list.
+     */
     @Internal
     public static ImmutableList<Event> toExternal(List<Event> events) {
         return events
@@ -120,6 +125,9 @@ public final class Events {
                 .collect(toImmutableList());
     }
 
+    /**
+     * Marks the given event as {@code external}.
+     */
     @Internal
     public static Event toExternal(Event event) {
         Event.Builder externalEvent = event.toBuilder();

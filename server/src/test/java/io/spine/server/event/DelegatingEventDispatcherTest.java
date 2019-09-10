@@ -26,7 +26,6 @@ import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.ExternalEven
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -46,7 +45,5 @@ class DelegatingEventDispatcherTest {
     void noExternalEvents() {
         EventDispatcherDelegate dispatcher = new DomesticEventDispatcherDelegate();
         assertFalse(dispatcher.dispatchesExternalEvents());
-        DelegatingEventDispatcher delegate = DelegatingEventDispatcher.of(dispatcher);
-        assertThat(delegate.createExternalDispatcher()).isEmpty();
     }
 }

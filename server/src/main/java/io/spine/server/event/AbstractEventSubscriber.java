@@ -25,7 +25,6 @@ import com.google.protobuf.Empty;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageId;
-import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.bus.MessageDispatcher;
@@ -33,9 +32,6 @@ import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Ignore;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.SubscriberMethod;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
@@ -154,27 +150,5 @@ public abstract class AbstractEventSubscriber
     @Override
     public Set<EventClass> externalEventClasses() {
         return thisClass.externalEvents();
-    }
-
-    @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        return Optional.of(new ExternalDispatcher());
-    }
-
-    /**
-     * Dispatches external events to this subscriber.
-     */
-    private final class ExternalDispatcher implements ExternalMessageDispatcher, Logging {
-
-        @Override
-        public Set<ExternalMessageClass> messageClasses() {
-            return ExternalMessageClass.fromEventClasses(externalEventClasses());
-        }
-
-        @Override
-        public boolean canDispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope event = envelope.toEventEnvelope();
-            return AbstractEventSubscriber.this.canDispatch(event);
-        }
     }
 }

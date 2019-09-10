@@ -21,7 +21,6 @@
 package io.spine.server.event;
 
 import io.spine.server.bus.MulticastDispatcher;
-import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
@@ -31,7 +30,7 @@ import java.util.Set;
  * {@code EventDispatcher} delivers events to {@linkplain EventReceiver receiving} objects.
  */
 public interface EventDispatcher
-        extends MulticastDispatcher<EventClass, EventEnvelope>, ExternalDispatcherFactory {
+        extends MulticastDispatcher<EventClass, EventEnvelope> {
 
     /**
      * Obtains classes of domestic events processed by this dispatcher.

@@ -46,8 +46,6 @@ import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
@@ -423,34 +421,12 @@ public abstract class ProcessManagerRepository<I,
         return procman;
     }
 
-    @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        if (!dispatchesExternalEvents()) {
-            return Optional.empty();
-        }
-        return Optional.of(new PmExternalEventDispatcher());
-    }
-
     @OverridingMethodsMustInvokeSuper
     @Override
     public void close() {
         super.close();
         if (inbox != null) {
             inbox.unregister();
-        }
-    }
-
-    /**
-     * An implementation of an external message dispatcher feeding external events
-     * to {@code ProcessManager} instances.
-     */
-    private class PmExternalEventDispatcher extends AbstractExternalEventDispatcher {
-
-        @Override
-        public Set<ExternalMessageClass> messageClasses() {
-            ProcessManagerClass<?> pmClass = asProcessManagerClass(entityClass());
-            Set<EventClass> eventClasses = pmClass.externalEvents();
-            return ExternalMessageClass.fromEventClasses(eventClasses);
         }
     }
 }
