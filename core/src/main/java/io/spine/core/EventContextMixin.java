@@ -32,9 +32,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * Mixin interface for {@link EventContext}s.
  */
 @Immutable
-public interface EventContextMixin extends EnrichableMessageContext,
-                                           EventContextOrBuilder,
-                                           FieldAwareMessage {
+interface EventContextMixin extends EnrichableMessageContext,
+                                    EventContextOrBuilder,
+                                    FieldAwareMessage {
 
     /**
      * Obtains an actor context for the event context.

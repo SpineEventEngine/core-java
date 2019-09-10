@@ -38,9 +38,9 @@ import static io.spine.validate.Validate.isNotDefault;
  * Mixin interface for command objects.
  */
 @Immutable
-public interface CommandMixin extends Signal<CommandId, CommandMessage, CommandContext>,
-                                      CommandOrBuilder,
-                                      FieldAwareMessage {
+interface CommandMixin extends Signal<CommandId, CommandMessage, CommandContext>,
+                               CommandOrBuilder,
+                               FieldAwareMessage {
 
     /**
      * Obtains the ID of the tenant of the command.
