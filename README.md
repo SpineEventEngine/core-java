@@ -14,7 +14,7 @@ Gradle is used as a build and dependency management system.
 ## Releases
 The project is under active ongoing development. You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.0.1][latest-release].  
+The latest stable version is [1.1.0][latest-release].  
 
 ## Quickstart and Examples
 
@@ -51,7 +51,7 @@ or provide custom storage implementations.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:spine-developers@teamdev.com
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.0.1
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.1.0
 [spine-site]: https://spine.io/
 [wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
 [java-code-style]: https://github.com/SpineEventEngine/core-java/wiki/Java-Code-Style 
