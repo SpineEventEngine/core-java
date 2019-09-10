@@ -490,10 +490,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *
      * @param messageOrEvent
      *         an event message or {@link Event}. If an instance of {@code Event} is
-     *         passed, it will be posted to {@link IntegrationBroker}
-     *         as is.
-     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
-     *         event message and posted to the bus.
+     *         passed, it will be posted to {@link IntegrationBroker} as is. Otherwise, an instance
+     *         of {@code Event} will be generated basing on the passed event message and posted to
+     *         the bus.
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
