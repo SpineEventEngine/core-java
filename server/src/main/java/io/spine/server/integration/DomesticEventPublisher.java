@@ -41,11 +41,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class DomesticEventPublisher implements EventDispatcher, Logging {
 
     private final Set<EventClass> eventClasses;
-    private final IntegrationBroker bus;
+    private final IntegrationBroker broker;
 
-    DomesticEventPublisher(IntegrationBroker bus,
-                           EventClass messageClass) {
-        this.bus = checkNotNull(bus);
+    DomesticEventPublisher(IntegrationBroker broker, EventClass messageClass) {
+        this.broker = checkNotNull(broker);
         this.eventClasses = ImmutableSet.of(messageClass);
     }
 
@@ -57,7 +56,7 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
 
     @Override
     public void dispatch(EventEnvelope event) {
-        bus.publish(event);
+        broker.publish(event);
     }
 
     @Override
