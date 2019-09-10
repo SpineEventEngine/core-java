@@ -20,23 +20,21 @@
 
 package io.spine.model.assemble;
 
+import io.spine.model.assemble.given.MemoizingMessager;
+import io.spine.model.assemble.given.MemoizingMessager.MemoizedMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
 import java.util.Set;
 
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.truth.Truth.assertThat;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.WARNING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("SpineAnnotationProcessor should")
 abstract class SpineAnnotationProcessorTest {
@@ -57,8 +55,9 @@ abstract class SpineAnnotationProcessorTest {
         assertNotNull(target);
         assertTrue(target.isAnnotation());
 
+        processor.setOptions(newHashMap());
+
         // Some actions that may change the processor's internal state.
-        processor.init(mock(ProcessingEnvironment.class));
         processor.onRoundStarted();
         processor.onRoundFinished();
 
@@ -78,28 +77,28 @@ abstract class SpineAnnotationProcessorTest {
     @Test
     @DisplayName("print error message")
     void printErrorMessage() {
-        ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
-        Messager messager = mock(Messager.class);
-        when(environment.getMessager()).thenReturn(messager);
-
-        processor.init(environment);
+        MemoizingMessager messager = new MemoizingMessager();
+        processor.setMessager(messager);
 
         String errorMessage = "custom error";
         processor.error(errorMessage);
-        verify(messager).printMessage(eq(ERROR), eq(errorMessage));
+
+        MemoizedMessage received = messager.firstMessage();
+        assertThat(received.kind()).isEqualTo(ERROR);
+        assertThat(received.messageAsString()).isEqualTo(errorMessage);
     }
 
     @Test
     @DisplayName("print warning message")
     void printWarningMessage() {
-        ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
-        Messager messager = mock(Messager.class);
-        when(environment.getMessager()).thenReturn(messager);
-
-        processor.init(environment);
+        MemoizingMessager messager = new MemoizingMessager();
+        processor.setMessager(messager);
 
         String message = "custom warning";
         processor.warn(message);
-        verify(messager).printMessage(eq(WARNING), eq(message));
+
+        MemoizedMessage received = messager.firstMessage();
+        assertThat(received.kind()).isEqualTo(WARNING);
+        assertThat(received.messageAsString()).isEqualTo(message);
     }
 }

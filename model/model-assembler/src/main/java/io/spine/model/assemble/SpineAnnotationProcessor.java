@@ -20,6 +20,7 @@
 
 package io.spine.model.assemble;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -30,6 +31,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -193,5 +195,15 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
     protected final Optional<String> getOption(String optName) {
         String optValue = options.get(optName);
         return Optional.ofNullable(optValue);
+    }
+
+    @VisibleForTesting
+    void setMessager(Messager messager) {
+        this.messager = messager;
+    }
+
+    @VisibleForTesting
+    void setOptions(Map<String, String> options) {
+        this.options = new HashMap<>(options);
     }
 }

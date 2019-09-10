@@ -26,4 +26,6 @@ group 'io.spine.tools'
 
 dependencies {
     implementation project(':server')
+
+    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
 }
