@@ -88,8 +88,6 @@ public final class ThirdPartyContext implements AutoCloseable {
                .disableAggregateQuerying()
                .forgetEvents();
         BoundedContext context = contextBuilder.build();
-        context.integrationEventBroker()
-               .notifyOthers();
         return new ThirdPartyContext(context);
     }
 
