@@ -53,6 +53,7 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.integration.IntegrationEventBroker;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.CommandErrored;
@@ -489,7 +490,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *
      * @param messageOrEvent
      *         an event message or {@link Event}. If an instance of {@code Event} is
-     *         passed, it will be posted to {@link io.spine.server.integration.IntegrationBus}
+     *         passed, it will be posted to {@link IntegrationEventBroker}
      *         as is.
      *         Otherwise, an instance of {@code Event} will be generated basing on the passed
      *         event message and posted to the bus.
@@ -507,7 +508,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *
      * <p>The method accepts event messages or instances of {@link io.spine.core.Event}.
      * If an instance of {@code Event} is passed, it will be posted to
-     * {@link io.spine.server.integration.IntegrationBus} as is.
+     * {@link IntegrationEventBroker} as is.
      * Otherwise, an instance of {@code Event} will be generated basing on the passed event
      * message and posted to the bus.
      *

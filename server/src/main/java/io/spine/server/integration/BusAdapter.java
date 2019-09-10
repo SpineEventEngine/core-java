@@ -32,19 +32,19 @@ import io.spine.server.type.EventClass;
 import static io.spine.core.Events.toExternal;
 
 /**
- * An adapter between the {@link IntegrationBus} and the {@link EventBus}.
+ * An adapter between the {@link IntegrationEventBroker} and the {@link EventBus}.
  */
 final class BusAdapter {
 
-    private final IntegrationBus integrationBus;
+    private final IntegrationEventBroker broker;
 
     /**
      * The wrapped local event bus.
      */
     private final EventBus targetBus;
 
-    BusAdapter(IntegrationBus integrationBus, EventBus targetBus) {
-        this.integrationBus = integrationBus;
+    BusAdapter(IntegrationEventBroker broker, EventBus targetBus) {
+        this.broker = broker;
         this.targetBus = targetBus;
     }
 
@@ -66,7 +66,7 @@ final class BusAdapter {
      * Creates a dispatcher suitable for the wrapped local bus, dispatching the messages of
      * the given class.
      *
-     * <p>The created dispatcher is serving as a listener, notifying the {@code IntegrationBus}
+     * <p>The created dispatcher is serving as a listener, notifying the {@code IntegrationEventBroker}
      * of the messages, that are requested by the collaborators outside of this bounded context.
      *
      * @param messageClass
@@ -77,7 +77,7 @@ final class BusAdapter {
         @SuppressWarnings("unchecked") // Logically checked.
         Class<? extends EventMessage> eventClass = (Class<? extends EventMessage>) messageClass;
         EventClass eventType = EventClass.from(eventClass);
-        EventDispatcher result = new DomesticEventPublisher(integrationBus, eventType);
+        EventDispatcher result = new DomesticEventPublisher(broker, eventType);
         return result;
     }
 }

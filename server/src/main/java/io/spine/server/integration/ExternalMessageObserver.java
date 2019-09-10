@@ -28,22 +28,22 @@ import io.spine.protobuf.AnyPacker;
  * An observer of the incoming external messages of the specified message class.
  *
  * <p>Responsible of receiving those from the transport layer and posting those to the local
- * instance of {@code IntegrationBus}.
+ * instance of {@code IntegrationEventBroker}.
  */
 final class ExternalMessageObserver extends AbstractChannelObserver {
 
-    private final IntegrationBus integrationBus;
+    private final IntegrationEventBroker broker;
 
     ExternalMessageObserver(BoundedContextName boundedContextName,
                             Class<? extends Message> messageClass,
-                            IntegrationBus integrationBus) {
+                            IntegrationEventBroker broker) {
         super(boundedContextName, messageClass);
-        this.integrationBus = integrationBus;
+        this.broker = broker;
     }
 
     @Override
     protected void handle(ExternalMessage message) {
         Event event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
-        integrationBus.dispatchLocally(event);
+        broker.dispatchLocally(event);
     }
 }

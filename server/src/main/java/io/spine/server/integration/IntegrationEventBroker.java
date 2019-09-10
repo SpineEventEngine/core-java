@@ -48,28 +48,30 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * Dispatches {@linkplain ExternalMessage external messages} from and to the Bounded Context
  * in which this bus operates.
  *
- * <p>This bus is available as a part of single {@code BoundedContext}.
+ * <p>An {@code IntegrationEventBroker} is available as a part of single {@code BoundedContext}.
  * In a multi-component environment messages may travel across components from one Bounded Context
  * to another.
  *
- * <p>{@code IntegrationBus} is always based upon some {@linkplain TransportFactory transport}
+ * <p>An {@code IntegrationEventBroker} is always based upon {@linkplain TransportFactory transport}
  * that delivers the messages from and to it. For several Bounded Contexts to communicate,
- * their integration buses have to share the transport. Typically that would be a single
- * messaging broker.
+ * their brokers have to share the transport. Typically that would be a single message queue.
  *
- * <p>The messages from external components received by the {@code IntegrationBus} instance
- * via the transport are propagated into the bounded context via the domestic {@code EventBus}.
+ * <p>The messages from external components received by an {@code IntegrationEventBroker} via
+ * the transport are propagated into the Bounded Context via the domestic {@code EventBus}.
  *
- * {@code IntegrationBus} is also responsible for publishing the messages
- * born within the current `BoundedContext` to external collaborators. To do that properly,
- * the bus listens to a special document message called {@linkplain RequestForExternalMessages}
- * that describes the needs of other parties.
+ * {@code IntegrationEventBroker} is also responsible for publishing the messages born within
+ * the current Bounded Context to external collaborators. To do that properly, the broker listens
+ * to a special document message called {@linkplain RequestForExternalMessages} that describes
+ * the needs of other parties.
  *
- * <p><b>Sample Usage.</b> The Bounded Context named Projects has an external event handler method
+ * <p><b>Sample Usage.</b>
+ *
+ * <p>The Bounded Context named "Projects" has an external event handler method
  * in the projection as follows:
  *
- * <p>Bounded context "Projects" has the external event handler method in the projection as follows:
+ * <p>Bounded Context "Projects" has an external event handler method in a projection as follows:
  * <pre>
+ * {@code
  * public class ProjectListView extends Projection ...  {
  *
  *     {@literal @}Subscribe(external = true)
@@ -77,36 +79,35 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  *          // Remove the projects that belong to this user.
  *          // ...
  *      }
- *
- *      // ...
+ *  }
  *  }
  * </pre>
  *
- * <p>Upon a registration of the corresponding repository, the integration bus of
- * "Projects" context sends out a {@code RequestForExternalMessages} saying that an {@code Event}
- * of {@code UserDeleted} type is needed from other parties.
+ * <p>Upon a registration of the corresponding repository, the broker associated with the "Projects"
+ * context sends out a {@code RequestForExternalMessages} saying that the of {@code UserDeleted}
+ * event is needed.
  *
- * <p>Let's say the second Bounded Context is "Users". Its integration bus will receive
- * the {@code RequestForExternalMessages} request sent out by "Projects". To handle it properly,
- * it will create a bridge between "Users"'s event bus (which may eventually be transmitting
- * a {@code UserDeleted} event) and an external transport.
+ * <p>Let's say the second Bounded Context is "Users". Its broker will receive
+ * the {@code RequestForExternalMessages} request sent by "Projects". To handle it properly, it will
+ * create a bridge between "Users"'s Event Bus (which may eventually be transmitting
+ * a {@code UserDeleted} event) and the external message
+ * {@linkplain ServerEnvironment#transportFactory() transport}.
  *
- * <p>Once {@code UserDeleted} is published locally in "Users" context, it will be received
+ * <p>Once {@code UserDeleted} is emitted locally in "Users" context, it will be received
  * by this bridge (as well as other local dispatchers) and published to the external transport.
  *
- * <p>The integration bus of "Projects" context will receive the {@code UserDeleted}
- * external message. The event will be dispatched to the external event handler of
- * {@code ProjectListView} projection.
+ * <p>The integration event broker on the "Projects" side will receive the {@code UserDeleted}
+ * external message. The event will be dispatched to the external event handler of the projection.
  *
- * @implNote An {@code IntegrationBus} never performs dispatching on its own. Instead, it
- *         prepares and passes the message to the local {@code EventBus}. Hence,
- *         {@code IntegrationBus} is unicast, as it always dispatches a message to a single target,
- *         the {@code EventBus}. However, {@code IntegrationBus} is aware of the local dispatchers
- *         and the types of external events they dispatch, so that it can tell if an event should be
- *         posted to this Context or not.
+ * <p><b>Limitations</b>
+ *
+ * <p>An event type may be consumed by many Contexts but produced only by a single Context. This
+ * means that an each given event type belongs to model of a specific Bounded Context. The ownership
+ * of an event type may be changed between the versions of a system, but may not be changed while
+ * events are travelling between the Contexts.
  */
 @SuppressWarnings("OverlyCoupledClass")
-public class IntegrationBus implements ContextAware, AutoCloseable {
+public class IntegrationEventBroker implements ContextAware, AutoCloseable {
 
     private static final ChannelId CONFIG_EXCHANGE_CHANNEL_ID = channelIdFor(
             TypeUrl.of(RequestForExternalMessages.class)
@@ -120,7 +121,7 @@ public class IntegrationBus implements ContextAware, AutoCloseable {
     private @MonotonicNonNull ConfigurationChangeObserver configurationObserver;
     private @MonotonicNonNull ConfigurationBroadcast broadcast;
 
-    public IntegrationBus() {
+    public IntegrationEventBroker() {
         TransportFactory transportFactory = ServerEnvironment
                 .instance()
                 .transportFactory();
@@ -146,6 +147,16 @@ public class IntegrationBus implements ContextAware, AutoCloseable {
         return context != null;
     }
 
+    /**
+     * Publishes the given event for other Bounded Contexts.
+     *
+     * <p>If this event may have been received from another context, does nothing. More formally, if
+     * there is a <b>subscriber</b> channel in this broker for events of such a type, those events
+     * cannot be <b>published</b> from this Context.
+     *
+     * @param event
+     *         the event to publish
+     */
     void publish(EventEnvelope event) {
         Event outerObject = event.outerObject();
         ExternalMessage msg = ExternalMessages.of(outerObject, context);
@@ -235,7 +246,7 @@ public class IntegrationBus implements ContextAware, AutoCloseable {
     /**
      * Notifies other Bounded Contexts of the application about the types requested by this Context.
      *
-     * <p>The {@code IntegrationBus} sends a {@link RequestForExternalMessages}. The request
+     * <p>The {@code IntegrationEventBroker} sends a {@link RequestForExternalMessages}. The request
      * triggers other Contexts to send their requests. As the result, all the Contexts know about
      * the needs of all the Contexts.
      */

@@ -135,7 +135,7 @@ public abstract class ProcessManagerRepository<I,
      * <p>Registers with the {@code CommandBus} for dispatching commands
      * (via {@linkplain DelegatingCommandDispatcher delegating dispatcher}).
      *
-     * <p>Registers with the {@code IntegrationBus} for dispatching external events and rejections.
+     * <p>Registers with the {@code IntegrationEventBroker} for dispatching external events and rejections.
      *
      * <p>Ensures there is at least one handler method declared by the class of the managed
      * process manager:

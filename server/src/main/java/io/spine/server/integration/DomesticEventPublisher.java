@@ -36,14 +36,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>The events to subscribe are those that are required by external application components
  * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
- * configuration messages}, received by this instance of {@code IntegrationBus}.
+ * configuration messages}, received by this instance of {@code IntegrationEventBroker}.
  */
 final class DomesticEventPublisher implements EventDispatcher, Logging {
 
     private final Set<EventClass> eventClasses;
-    private final IntegrationBus bus;
+    private final IntegrationEventBroker bus;
 
-    DomesticEventPublisher(IntegrationBus bus,
+    DomesticEventPublisher(IntegrationEventBroker bus,
                            EventClass messageClass) {
         this.bus = checkNotNull(bus);
         this.eventClasses = ImmutableSet.of(messageClass);

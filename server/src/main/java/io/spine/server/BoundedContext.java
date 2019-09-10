@@ -40,7 +40,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.store.DefaultEventStore;
-import io.spine.server.integration.IntegrationBus;
+import io.spine.server.integration.IntegrationEventBroker;
 import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
@@ -85,7 +85,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private final ContextSpec spec;
     private final CommandBus commandBus;
     private final EventBus eventBus;
-    private final IntegrationBus integrationBus;
+    private final IntegrationEventBroker broker;
     private final ImportBus importBus;
     private final Stand stand;
 
@@ -114,7 +114,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.stand = builder.stand();
         this.tenantIndex = builder.buildTenantIndex();
 
-        this.integrationBus = new IntegrationBus();
+        this.broker = new IntegrationEventBroker();
         this.commandBus = builder.buildCommandBus();
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
@@ -129,7 +129,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     protected final void init() {
         eventBus.registerWith(this);
         tenantIndex.registerWith(this);
-        integrationBus.registerWith(this);
+        broker.registerWith(this);
     }
     
     /**
@@ -253,17 +253,13 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         }
     }
 
-    private void registerWithIntegrationBus(EventDispatcher dispatcher) {
-        integrationBus().register(dispatcher);
-    }
-
     /**
      * Internal method for registering the passed event dispatcher with the buses of
      * this context.
      *
      * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
      * If the passed instance dispatches external events, registers it with
-     * the {@code IntegrationBus}.
+     * the {@code IntegrationEventBroker}.
      *
      * @throws SecurityException
      *         if called from outside the framework
@@ -281,7 +277,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
             systemReadSide.register(dispatcher);
         }
         if (dispatcher.dispatchesExternalEvents()) {
-            registerWithIntegrationBus(dispatcher);
+            integrationEventBroker().register(dispatcher);
         }
         if (dispatcher instanceof CommandDispatcherDelegate) {
             CommandDispatcherDelegate commandDispatcher = (CommandDispatcherDelegate) dispatcher;
@@ -396,9 +392,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return eventBus;
     }
 
-    /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
-    public IntegrationBus integrationBus() {
-        return this.integrationBus;
+    /** Obtains instance of {@link IntegrationEventBroker} of this {@code BoundedContext}. */
+    @Internal
+    public IntegrationEventBroker integrationEventBroker() {
+        return this.broker;
     }
 
     /** Obtains instance of {@link ImportBus} of this {@code BoundedContext}. */
@@ -470,7 +467,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *     <li>Closes associated {@link StorageFactory}.
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
-     *     <li>Closes {@link IntegrationBus}.
+     *     <li>Closes {@link IntegrationEventBroker}.
      *     <li>Closes {@link DefaultEventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
@@ -485,7 +482,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public void close() throws Exception {
         commandBus.close();
         eventBus.close();
-        integrationBus.close();
+        broker.close();
         stand.close();
         importBus.close();
         shutDownRepositories();

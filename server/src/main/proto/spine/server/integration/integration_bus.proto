@@ -26,7 +26,7 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.integration";
 option java_multiple_files = true;
-option java_outer_classname = "IntegrationBusProto";
+option java_outer_classname = "IntegrationEventBrokerProto";
 
 import "google/protobuf/any.proto";
 
