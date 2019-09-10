@@ -171,10 +171,16 @@ public final class IntegrationEventBroker implements ContextAware, AutoCloseable
         }
     }
 
+    /**
+     * Dispatches the given event via the local {@code EventBus}.
+     */
     void dispatchLocally(Event event) {
         dispatchLocally(event, noOpObserver());
     }
 
+    /**
+     * Dispatches the given event via the local {@code EventBus} and observes the acknowledgement.
+     */
     void dispatchLocally(Event event, StreamObserver<Ack> ackObserver) {
         busAdapter.dispatch(event, ackObserver);
     }
