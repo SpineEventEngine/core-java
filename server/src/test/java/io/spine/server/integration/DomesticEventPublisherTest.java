@@ -48,7 +48,7 @@ class DomesticEventPublisherTest {
         context = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        broker = context.IntegrationBroker();
+        broker = context.broker();
     }
 
     @AfterEach

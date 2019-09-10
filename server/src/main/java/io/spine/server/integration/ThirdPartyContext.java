@@ -119,7 +119,7 @@ public final class ThirdPartyContext implements Closeable {
 
         EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
         Event event = eventFactory.createEvent(eventMessage, null);
-        context.IntegrationBroker()
+        context.broker()
                .publish(EventEnvelope.of(event));
     }
 

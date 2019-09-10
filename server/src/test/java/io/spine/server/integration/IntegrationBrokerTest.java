@@ -290,7 +290,7 @@ class IntegrationBrokerTest {
 
         Event event = projectCreated();
         MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-        context.IntegrationBroker()
+        context.broker()
                .dispatchLocally(event, observer);
         Error error = observer.firstResponse()
                               .getStatus()

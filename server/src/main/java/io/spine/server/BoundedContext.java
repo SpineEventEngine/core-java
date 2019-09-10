@@ -277,7 +277,7 @@ public abstract class BoundedContext implements Closeable, Logging {
             systemReadSide.register(dispatcher);
         }
         if (dispatcher.dispatchesExternalEvents()) {
-            IntegrationBroker().register(dispatcher);
+            broker().register(dispatcher);
         }
         if (dispatcher instanceof CommandDispatcherDelegate) {
             CommandDispatcherDelegate commandDispatcher = (CommandDispatcherDelegate) dispatcher;
@@ -394,7 +394,7 @@ public abstract class BoundedContext implements Closeable, Logging {
 
     /** Obtains instance of {@link IntegrationBroker} of this {@code BoundedContext}. */
     @Internal
-    public IntegrationBroker IntegrationBroker() {
+    public IntegrationBroker broker() {
         return this.broker;
     }
 
