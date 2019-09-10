@@ -34,7 +34,7 @@ import static java.util.Collections.synchronizedSet;
 
 /**
  * An observer, which reacts to the configuration update messages sent by
- * external entities (such as {@code IntegrationBroker}es of other bounded contexts).
+ * external entities (such as {@code IntegrationBroker}s of other bounded contexts).
  */
 final class ConfigurationChangeObserver
         extends AbstractChannelObserver
