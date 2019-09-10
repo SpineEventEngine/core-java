@@ -243,7 +243,6 @@ public final class Delivery {
      * @param index
      *         the shard index to deliver the messages from.
      */
-    @SuppressWarnings("WeakerAccess")   // a part of the public API.
     public void deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
@@ -322,21 +321,29 @@ public final class Delivery {
     /**
      * Takes the messages classified as those to deliver and performs the actual delivery.
      *
-     * @return the number of messages delivered
+     * <p>If an exception is thrown during delivery, this method propagates it. If many exceptions
+     * are thrown, all of them are added to the first one as {@code suppressed}, and the first one
+     * is propagated.
+     *
+     * <p>In case of an exception, the messages are marked as delivered, in order to avoid
+     * repetitive delivery. However, if a JVM {@link Error} is thrown, only the messages which were
+     * delivered successfully are marked as delivered. Moreover, an JVM {@link Error} halts delivery
+     * for all the subsequent messages in the batch. However, this is not true for
+     * {@link ModelError}s, which are treated in the same way as exceptions.
+     *
+     * @return the number of messages delivered, {@code 0} if no messages are classified for
+     *         delivery
      */
     private int deliverClassified(MessageClassifier classifier) {
         ImmutableList<InboxMessage> toDeliver = classifier.toDeliver();
-        int deliveredInBatch = 0;
         if (!toDeliver.isEmpty()) {
             ImmutableList<InboxMessage> idempotenceSource = classifier.idempotenceSource();
-
             DeliveryErrors observedExceptions = deliverByType(toDeliver, idempotenceSource);
-
-            deliveredInBatch = toDeliver.size();
-
             observedExceptions.throwIfAny();
+            return toDeliver.size();
+        } else {
+            return 0;
         }
-        return deliveredInBatch;
     }
 
     private DeliveryErrors
@@ -353,10 +360,10 @@ public final class Delivery {
                                                                                ImmutableList.of());
             try {
                 delivery.deliver(deliveryPackage, idempotenceWnd);
-            } catch (RuntimeException e) {
-                errors.addException(e);
-            } catch (ModelError e) {
-                errors.addError(e);
+            } catch (RuntimeException exception) {
+                errors.addException(exception);
+            } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {
+                errors.addError(error);
             }
         }
         inboxStorage.markDelivered(toDeliver);
