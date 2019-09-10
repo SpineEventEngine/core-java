@@ -42,7 +42,7 @@ import static com.google.common.flogger.LazyArgs.lazy;
  * <p>This implementation should not be used in production environments, as it is not designed
  * to operate with external transport.
  */
-class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging {
+final class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
