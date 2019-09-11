@@ -82,9 +82,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("CommandHandlerMethod should")
 class CommandHandlerMethodTest {
@@ -125,7 +122,7 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("one Message")
         void returningMessage() {
-            ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
+            ValidHandlerTwoParams handlerObject = new ValidHandlerTwoParams();
 
             Optional<CommandHandlerMethod> createdMethod =
                     new CommandHandlerSignature().classify(handlerObject.method());
@@ -137,8 +134,8 @@ class CommandHandlerMethodTest {
             DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
             List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
 
-            verify(handlerObject, times(1))
-                    .handleTest(cmd, emptyContext);
+            assertThat(handlerObject.handledCommands())
+                    .containsExactly(cmd);
             assertEquals(1, events.size());
             RefProjectCreated event = (RefProjectCreated) events.get(0).enclosedMessage();
             assertEquals(cmd.getProjectId(), event.getProjectId());
@@ -148,7 +145,7 @@ class CommandHandlerMethodTest {
         @DisplayName("Message list")
         void returningMessageList() {
             ValidHandlerOneParamReturnsList handlerObject =
-                    spy(new ValidHandlerOneParamReturnsList());
+                    new ValidHandlerOneParamReturnsList();
             Optional<CommandHandlerMethod> method =
                     new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(method.isPresent());
@@ -159,7 +156,8 @@ class CommandHandlerMethodTest {
             DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
             List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
 
-            verify(handlerObject, times(1)).handleTest(cmd);
+            assertThat(handlerObject.handledCommands())
+                    .containsExactly(cmd);
             assertEquals(1, events.size());
             RefProjectCreated event = (RefProjectCreated) events.get(0).enclosedMessage();
             assertEquals(cmd.getProjectId(), event.getProjectId());

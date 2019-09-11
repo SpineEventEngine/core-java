@@ -30,17 +30,16 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
-import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.TaskId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -51,14 +50,15 @@ import static io.spine.client.Filters.eq;
 import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
 import static io.spine.server.entity.storage.TestEntityQueryFactory.createQuery;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
+import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.anyColumn;
+import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.anyValue;
+import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.booleanColumn;
+import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.booleanValue;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("EntityQueryMatcher should")
 class EntityQueryMatcherTest {
@@ -97,22 +97,18 @@ class EntityQueryMatcherTest {
         assertFalse(matcher.test(nonMatchingRecord));
     }
 
-    @SuppressWarnings("ConstantConditions") // Test data is constant
     @Test
     @DisplayName("match columns")
     void matchColumns() {
-        String targetName = "feature";
-        Serializable acceptedValue = true;
-        EntityColumn target = mock(EntityColumn.class);
-        when(target.isNullable()).thenReturn(true);
-        when(target.name()).thenReturn(targetName);
-        when(target.type()).thenReturn(Boolean.class);
-        when(target.toPersistedValue(any())).thenReturn(acceptedValue);
+        EntityColumn column = booleanColumn();
+        boolean actualValue = booleanValue();
+
+        String columnName = column.name();
 
         Collection<Object> ids = Collections.emptyList();
 
         Multimap<EntityColumn, Filter> filters =
-                ImmutableMultimap.of(target, eq(targetName, acceptedValue));
+                ImmutableMultimap.of(column, eq(columnName, actualValue));
         CompositeQueryParameter parameter = createParams(filters, ALL);
         QueryParameters params = QueryParameters.newBuilder()
                                                 .add(parameter)
@@ -129,11 +125,9 @@ class EntityQueryMatcherTest {
         EntityRecord nonMatching = EntityRecord.newBuilder()
                                                .setEntityId(nonMatchingId)
                                                .build();
-        EntityColumn.MemoizedValue storedValue = mock(EntityColumn.MemoizedValue.class);
-        when(storedValue.sourceColumn()).thenReturn(target);
-        when(storedValue.value()).thenReturn(acceptedValue);
-        Map<String, EntityColumn.MemoizedValue> matchingColumns =
-                ImmutableMap.of(targetName, storedValue);
+        MemoizedValue storedValue = new MemoizedValue(column, actualValue);
+        Map<String, MemoizedValue> matchingColumns =
+                ImmutableMap.of(columnName, storedValue);
         EntityRecordWithColumns nonMatchingRecord = EntityRecordWithColumns.of(nonMatching);
         EntityRecordWithColumns matchingRecord = createRecord(matching, matchingColumns);
 
@@ -144,22 +138,14 @@ class EntityQueryMatcherTest {
     @Test
     @DisplayName("match Any instances")
     void matchAnyInstances() {
-        String columnName = "column";
+        EntityColumn column = anyColumn();
+        Any actualValue = anyValue();
+        MemoizedValue value = new MemoizedValue(column, actualValue);
 
-        Project someMessage = Sample.messageOfType(Project.class);
-        Any actualValue = AnyPacker.pack(someMessage);
-
-        EntityColumn column = mock(EntityColumn.class);
-        when(column.type()).thenReturn(Any.class);
-        when(column.name()).thenReturn(columnName);
-        when(column.toPersistedValue(any())).thenReturn(actualValue);
-
-        EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
-        when(value.sourceColumn()).thenReturn(column);
-        when(value.value()).thenReturn(actualValue);
+        String columnName = column.name();
 
         EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        Map<String, EntityColumn.MemoizedValue> columns = singletonMap(columnName, value);
+        Map<String, MemoizedValue> columns = singletonMap(columnName, value);
         EntityRecordWithColumns recordWithColumns = createRecord(record, columns);
 
         Multimap<EntityColumn, Filter> filters =
@@ -178,7 +164,7 @@ class EntityQueryMatcherTest {
     @DisplayName("not match by wrong field name")
     void notMatchByWrongField() {
         String wrongName = "wrong";
-        EntityColumn target = mock(EntityColumn.class);
+        EntityColumn target = booleanColumn();
 
         Multimap<EntityColumn, Filter> filters =
                 ImmutableMultimap.of(target, eq(wrongName, "any"));

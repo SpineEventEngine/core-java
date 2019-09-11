@@ -20,6 +20,7 @@
 
 package io.spine.server.stand;
 
+import io.spine.system.server.NoOpSystemReadSide;
 import io.spine.system.server.SystemReadSide;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 @DisplayName("Stand.Builder should")
 class StandBuilderTest {
@@ -41,7 +41,7 @@ class StandBuilderTest {
         @DisplayName("with SystemReadSide only")
         void onlySystem() {
             Stand.Builder builder = Stand.newBuilder();
-            SystemReadSide readSide = mock(SystemReadSide.class);
+            SystemReadSide readSide = NoOpSystemReadSide.INSTANCE;
             builder.setSystemReadSide(readSide);
             Stand result = builder.build();
 

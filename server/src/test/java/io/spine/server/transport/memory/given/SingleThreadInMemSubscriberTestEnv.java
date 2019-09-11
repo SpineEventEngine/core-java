@@ -35,8 +35,11 @@ public final class SingleThreadInMemSubscriberTestEnv {
 
         private static final String ERROR_MESSAGE = "Observer failed";
 
+        private boolean onNextCalled = false;
+
         @Override
         public void onNext(ExternalMessage value) {
+            onNextCalled = true;
             throw newIllegalArgumentException(ERROR_MESSAGE);
         }
 
@@ -48,6 +51,10 @@ public final class SingleThreadInMemSubscriberTestEnv {
         @Override
         public void onCompleted() {
             // NO-OP.
+        }
+
+        public boolean onNextCalled() {
+            return onNextCalled;
         }
     }
 }

@@ -19,9 +19,11 @@
  */
 package io.spine.server.transport;
 
+import com.google.common.collect.ImmutableSet;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerServiceDefinition;
+import io.spine.server.CommandService;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,38 +33,24 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("GrpcContainer should")
 class GrpcContainerTest {
-    private Server server;
     private GrpcContainer grpcContainer;
 
     @BeforeEach
     void setUp() {
-        GrpcContainer.Builder builder = GrpcContainer.newBuilder();
-        grpcContainer = spy(builder.build());
-
-        server = mock(Server.class);
-        doReturn(server).when(grpcContainer)
-                        .createGrpcServer();
+        grpcContainer = GrpcContainer.newBuilder()
+                                     .build();
     }
 
     @AfterEach
@@ -85,25 +73,19 @@ class GrpcContainerTest {
         assertEquals(port, builder.getPort());
 
         int count = 3;
-        List<ServerServiceDefinition> definitions = new ArrayList<>(count);
-
         for (int i = 0; i < count; i++) {
-            BindableService mockService = mock(BindableService.class);
-            ServerServiceDefinition mockDefinition = ServerServiceDefinition
-                    .builder(format("service-%s", i))
-                    .build();
-            when(mockService.bindService()).thenReturn(mockDefinition);
-            definitions.add(mockDefinition);
-
-            builder.addService(mockService);
+            BindableService service = CommandService.newBuilder()
+                                                    .build();
+            builder.addService(service);
         }
 
-        count--;
+        ImmutableSet<ServerServiceDefinition> services = builder.getServices();
+
         // Perform removal and check that the return value is builder itself.
-        assertEquals(builder, builder.removeService(definitions.get(count)));
+        assertEquals(builder, builder.removeService(services.iterator().next()));
 
         Set<ServerServiceDefinition> serviceSet = builder.getServices();
-        assertThat(serviceSet).hasSize(count);
+        assertThat(serviceSet).hasSize(count - 1);
 
         GrpcContainer container = builder.build();
         assertNotNull(container);
@@ -114,16 +96,22 @@ class GrpcContainerTest {
     void startServer() throws IOException {
         grpcContainer.start();
 
-        verify(server).start();
+        assertThat(grpcContainer.grpcServer())
+                .isNotNull();
     }
 
     @Test
     @DisplayName("shutdown server")
     void shutdownItself() throws IOException {
         grpcContainer.start();
+
+        Server server = grpcContainer.grpcServer();
         grpcContainer.shutdown();
 
-        verify(server).shutdown();
+        assertThat(server.isShutdown())
+                .isTrue();
+        assertThat(grpcContainer.grpcServer())
+                .isNull();
     }
 
     @Test
@@ -136,15 +124,6 @@ class GrpcContainerTest {
     }
 
     @Test
-    @DisplayName("await termination")
-    void awaitTermination() throws IOException, InterruptedException {
-        grpcContainer.start();
-        grpcContainer.awaitTermination();
-
-        verify(server).awaitTermination();
-    }
-
-    @Test
     @MuteLogging
     @DisplayName("stop properly upon application shutdown")
     void stopUponAppShutdown()
@@ -154,19 +133,19 @@ class GrpcContainerTest {
         // Origin class: {@code java.lang.Runtime}.
         Field currentRuntimeValue = runtimeClass.getDeclaredField("currentRuntime");
         currentRuntimeValue.setAccessible(true);
-        Runtime runtimeSpy = (Runtime) spy(currentRuntimeValue.get(null));
+        Runtime runtimeSpy = (Runtime) currentRuntimeValue.get(null);
         currentRuntimeValue.set(null, runtimeSpy);
 
-        GrpcContainer container = spy(GrpcContainer.newBuilder()
-                                                   .setPort(8080)
-                                                   .build());
+        GrpcContainer container = GrpcContainer.newBuilder()
+                                               .setPort(8080)
+                                               .build();
         container.addShutdownHook();
-        verify(runtimeSpy).addShutdownHook(any(Thread.class));
 
         container.start();
         container.getOnShutdownCallback()
                  .run();
-        verify(container).shutdown();
+        assertThat(container.isShutdown())
+                .isTrue();
     }
 
     @Nested

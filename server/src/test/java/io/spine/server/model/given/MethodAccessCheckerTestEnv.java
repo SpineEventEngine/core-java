@@ -20,25 +20,30 @@
 
 package io.spine.server.model.given;
 
+import java.lang.reflect.Method;
+
 public class MethodAccessCheckerTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private MethodAccessCheckerTestEnv() {
     }
 
+    public static Method publicMethod() {
+        Method method;
+        Class<?> clazz = StubMethodContainer.class;
+        try {
+            method = clazz.getDeclaredMethod("publicMethod");
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
+        }
+        return method;
+    }
+
     @SuppressWarnings("unused") // Reflective access.
-    public static class StubMethodContainer {
+    private static class StubMethodContainer {
 
+        @SuppressWarnings("WeakerAccess") // Has to be `public` for the test.
         public void publicMethod() {
-        }
-
-        protected void protectedMethod() {
-        }
-
-        void packagePrivateMethod() {
-        }
-
-        private void privateMethod() {
         }
     }
 }

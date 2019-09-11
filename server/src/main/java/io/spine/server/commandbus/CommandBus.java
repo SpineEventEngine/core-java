@@ -61,7 +61,7 @@ import static io.spine.system.server.WriteSideFunction.delegatingTo;
  * Dispatches the incoming commands to the corresponding handler.
  */
 @Internal
-public class CommandBus
+public final class CommandBus
         extends UnicastBus<Command, CommandEnvelope, CommandClass, CommandDispatcher> {
 
     /** Consumes tenant IDs from incoming commands. */
@@ -272,6 +272,12 @@ public class CommandBus
             return this;
         }
 
+        @Internal
+        public Builder setFlowWatcher(CommandFlowWatcher flowWatcher) {
+            this.flowWatcher = flowWatcher;
+            return this;
+        }
+
         /**
          * Builds an instance of {@link CommandBus}.
          *
@@ -287,9 +293,12 @@ public class CommandBus
                                      .newCommandScheduler();
             @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
             SystemWriteSide writeSide = system().get();
-            flowWatcher = new CommandFlowWatcher(
-                    (tenantId) -> delegatingTo(writeSide).get(tenantId)
-            );
+
+            if (flowWatcher == null) {
+                flowWatcher = new CommandFlowRecorder(
+                        (tenantId) -> delegatingTo(writeSide).get(tenantId)
+                );
+            }
             commandScheduler.setWatcher(flowWatcher);
 
             TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
@@ -310,11 +319,8 @@ public class CommandBus
 
         @CheckReturnValue
         @SuppressWarnings("CheckReturnValue")
-            /* Calling registry() enforces creating the registry to make spying for CommandBus
-               instances in tests work. */
         private CommandBus createCommandBus() {
             CommandBus commandBus = new CommandBus(this);
-            commandBus.registry();
             return commandBus;
         }
     }

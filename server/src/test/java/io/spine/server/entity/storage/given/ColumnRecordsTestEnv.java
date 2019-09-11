@@ -22,6 +22,7 @@ package io.spine.server.entity.storage.given;
 
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.testing.Tests;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -32,44 +33,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static io.spine.server.entity.storage.given.SimpleColumn.stringColumn;
 
-public class ColumnRecordsTestEnv {
+public final class ColumnRecordsTestEnv {
 
-    public static final int MOCK_COLUMNS_COUNT = 3;
+    public static final int COLUMN_COUNT = 3;
 
     /** Prevents instantiation of this utility class. */
     private ColumnRecordsTestEnv() {
     }
 
-    public static Map<String, EntityColumn.MemoizedValue> setupMockColumnsAllowingNulls() {
-        EntityColumn mockColumn = mock(EntityColumn.class);
-        when(mockColumn.type()).thenReturn(Object.class);
-        when(mockColumn.persistedType()).thenReturn(Object.class);
-        Map<String, EntityColumn.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
-        for (int i = 0; i < MOCK_COLUMNS_COUNT; i++) {
-            Integer columnValueToPersist = (i % 2 != 0) ? null : i;
-
-            EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
-            when(value.sourceColumn()).thenReturn(mockColumn);
-            when(value.value()).thenReturn(columnValueToPersist);
-
-            columns.put(String.valueOf(i), value);
+    public static Map<String, MemoizedValue> nullableStorageFields() {
+        Map<String, MemoizedValue> columns = new HashMap<>(COLUMN_COUNT);
+        for (int i = 0; i < COLUMN_COUNT; i++) {
+            String columnValueToPersist = (i % 2 != 0) ? null : String.valueOf(i);
+            EntityColumn column = stringColumn();
+            MemoizedValue memoizedValue = new MemoizedValue(column, columnValueToPersist);
+            columns.put(String.valueOf(i), memoizedValue);
         }
         return columns;
     }
 
-    public static Collection getNonNullColumnValues() {
+    public static Collection<Object> getNonNullColumnValues() {
         List<Object> values = new ArrayList<>();
-        for (int i = 0; i < MOCK_COLUMNS_COUNT; i += 2) { // each second value is non-null
-            values.add(i);
+        for (int i = 0; i < COLUMN_COUNT; i += 2) { // each second value is non-null
+            values.add(String.valueOf(i));
         }
         return values;
     }
 
-    public static class CollectAnyColumnType
+    public static final class CollectAnyColumnType
             implements ColumnType<Object, Object, Collection<Object>, Object> {
+
         @Override
         public Object convertColumnValue(Object fieldValue) {
             return fieldValue;
@@ -87,7 +82,7 @@ public class ColumnRecordsTestEnv {
         }
     }
 
-    public static class NoOpColumnIdentifierMapper implements Function<String, Object> {
+    public static final class NoOpColumnIdentifierMapper implements Function<String, Object> {
         @Override
         public Object apply(@Nullable String s) {
             return s;

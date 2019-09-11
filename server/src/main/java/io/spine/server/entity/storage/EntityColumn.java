@@ -161,14 +161,11 @@ import static java.lang.String.format;
  *     }
  * </pre>
  *
- * @implNote This class is effectively {@code final} since it has a single {@code private}
- *         constructor. Though the modifier "{@code final}" is absent to make it possible to create
- *         mocks for testing.
  * @see ColumnType
  */
 @Immutable
 @Experimental
-public class EntityColumn implements Serializable {
+public final class EntityColumn implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -450,7 +447,7 @@ public class EntityColumn implements Serializable {
      * @see EntityColumn#memoizeFor(Entity)
      */
     @Internal
-    public static class MemoizedValue implements Serializable, Comparable<MemoizedValue> {
+    public static final class MemoizedValue implements Serializable, Comparable<MemoizedValue> {
 
         private static final long serialVersionUID = 0L;
         private static final Comparator<MemoizedValue> COMPARATOR = valueComparator();
@@ -460,7 +457,7 @@ public class EntityColumn implements Serializable {
         private final @Nullable Serializable value;
 
         @VisibleForTesting
-        MemoizedValue(EntityColumn sourceColumn, @Nullable Serializable value) {
+        public MemoizedValue(EntityColumn sourceColumn, @Nullable Serializable value) {
             this.sourceColumn = sourceColumn;
             this.value = value;
         }

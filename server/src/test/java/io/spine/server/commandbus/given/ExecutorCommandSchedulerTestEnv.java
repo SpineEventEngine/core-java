@@ -18,30 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.commandbus.given;
 
-import io.spine.annotation.Internal;
+import io.spine.server.commandbus.CommandFlowWatcher;
 import io.spine.server.type.CommandEnvelope;
 
-/**
- * A set of callbacks invoked when a command processing reaches a given point.
- */
-@Internal
-public interface CommandFlowWatcher {
+public final class ExecutorCommandSchedulerTestEnv {
 
-    /**
-     * A callback invoked when a command is dispatched.
-     *
-     * @param command
-     *         the dispatched command
-     */
-    void onDispatchCommand(CommandEnvelope command);
+    /** Prevents instantiation of this test env class. */
+    private ExecutorCommandSchedulerTestEnv() {
+    }
 
-    /**
-     * A callback invoked when a command is scheduled.
-     *
-     * @param command
-     *         the scheduled command
-     */
-    void onScheduled(CommandEnvelope command);
+    public static final class ThrowingFlowWatcher implements CommandFlowWatcher {
+
+        private boolean onDispatchCalled = false;
+
+        @Override
+        public void onDispatchCommand(CommandEnvelope command) {
+            onDispatchCalled = true;
+            throwException();
+        }
+
+        @Override
+        public void onScheduled(CommandEnvelope command) {
+            throwException();
+        }
+
+        public boolean onDispatchCalled() {
+            return onDispatchCalled;
+        }
+
+        private static void throwException() {
+            throw new IllegalStateException("Ignore this error");
+        }
+    }
 }

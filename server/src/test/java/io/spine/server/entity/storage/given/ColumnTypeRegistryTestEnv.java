@@ -86,11 +86,11 @@ public class ColumnTypeRegistryTestEnv {
         }
     }
 
-    public static class IntegerType
-            implements ColumnType<Integer, String, StringBuilder, String> {
+    public static class DoubleType
+            implements ColumnType<Double, String, StringBuilder, String> {
 
         @Override
-        public String convertColumnValue(Integer fieldValue) {
+        public String convertColumnValue(Double fieldValue) {
             return String.valueOf(fieldValue);
         }
 

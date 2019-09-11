@@ -48,14 +48,12 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"DuplicateStringLiteralInspection", /* Common test display names. */
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */})
@@ -79,8 +77,7 @@ class EventSubscriberMethodTest {
     @Test
     @DisplayName("invoke subscriber method")
     void invokeSubscriberMethod() {
-        ValidTwoParams subscriberObject;
-        subscriberObject = spy(new ValidTwoParams());
+        ValidTwoParams subscriberObject = new ValidTwoParams();
         Optional<SubscriberMethod> createdMethod = signature.classify(subscriberObject.getMethod());
         assertTrue(createdMethod.isPresent());
         SubscriberMethod subscriber = createdMethod.get();
@@ -94,8 +91,8 @@ class EventSubscriberMethodTest {
         EventEnvelope envelope = EventEnvelope.of(event);
         subscriber.invoke(subscriberObject, envelope);
 
-        verify(subscriberObject, times(1))
-                .handle(msg, EventContext.getDefaultInstance());
+        assertThat(subscriberObject.handledMessages())
+                .containsExactly(msg);
     }
 
     @Nested

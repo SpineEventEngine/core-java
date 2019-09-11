@@ -36,6 +36,7 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 public class ValidHandlerTwoParamsReturnsList extends TestCommandHandler {
     @Assign
     List<Message> handleTest(RefCreateProject cmd, CommandContext context) {
+        addHandledCommand(cmd);
         List<Message> result = newLinkedList();
         result.add(projectCreated(cmd.getProjectId()));
         return result;

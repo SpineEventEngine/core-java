@@ -22,9 +22,11 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
+import io.spine.client.ResponseFormat;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -36,6 +38,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.model.Nothing;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -58,6 +61,7 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
 import io.spine.time.Now;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -293,6 +297,20 @@ public class Given {
             extends ProjectionRepository<io.spine.test.commandservice.ProjectId,
                                          ProjectDetails,
                                          io.spine.test.projection.Project> {
+    }
+
+    /**
+     * A {@link ProjectDetailsRepository} which throws on attempt to
+     * {@link #loadAllRecords(ResponseFormat) load all records}.
+     */
+    static final class ThrowingProjectDetailsRepository
+            extends ProjectDetailsRepository {
+
+        @Internal
+        @Override
+        public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
+            throw new IllegalStateException("Ignore this error.");
+        }
     }
 
     static class ProjectDetails

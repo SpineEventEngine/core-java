@@ -21,31 +21,45 @@
 package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.model.given.MethodAccessCheckerTestEnv.StubMethodContainer;
+import io.spine.testing.logging.Interceptor;
 import io.spine.testing.logging.MuteLogging;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.logging.Level;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
+import static io.spine.server.model.given.MethodAccessCheckerTestEnv.publicMethod;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static java.lang.String.format;
 
 @DisplayName("MethodAccessChecker should")
 class MethodAccessCheckerTest {
 
-    private static final String STUB_WARNING_MESSAGE = "Stub warning message";
+    private static final String STUB_WARNING_MESSAGE = "Stub warning message %s";
+
+    private final Interceptor interceptor =
+            new Interceptor(MethodAccessChecker.class, Level.WARNING);
+
+    @BeforeEach
+    void interceptLog() {
+        interceptor.intercept();
+    }
+
+    @AfterEach
+    void releaseLog() {
+        interceptor.release();
+    }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodAccessChecker.class);
 
-        Method method = getMethod("publicMethod");
+        Method method = publicMethod();
         MethodAccessChecker checker = forMethod(method);
         new NullPointerTester().testAllPublicInstanceMethods(checker);
     }
@@ -54,41 +68,26 @@ class MethodAccessCheckerTest {
     @MuteLogging
     @DisplayName("log warning on incorrect access modifier")
     void warnOnIncorrectAccess() {
-        Method method = getMethod("protectedMethod");
-        MethodAccessChecker checker = spy(forMethod(method));
-        checker.checkPublic(STUB_WARNING_MESSAGE);
-        checker.checkPackagePrivate(STUB_WARNING_MESSAGE);
+        Method method = publicMethod();
+        MethodAccessChecker checker = forMethod(method);
+
         checker.checkPrivate(STUB_WARNING_MESSAGE);
-        verify(checker, times(3)).warnOnWrongModifier(STUB_WARNING_MESSAGE);
+
+        String anyMethodName = ".*";
+        String expected = format(STUB_WARNING_MESSAGE, anyMethodName);
+        interceptor.assertLog()
+                   .textOutput()
+                   .containsMatch(expected);
     }
 
     @Test
     @DisplayName("not log warning on correct access modifier")
     void recognizeCorrectAccess() {
-        Method publicMethod = getMethod("publicMethod");
-        MethodAccessChecker checkerPublic = spy(forMethod(publicMethod));
-        checkerPublic.checkPublic(STUB_WARNING_MESSAGE);
-        verify(checkerPublic, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
+        Method publicMethod = publicMethod();
+        MethodAccessChecker checker = forMethod(publicMethod);
+        checker.checkPublic(STUB_WARNING_MESSAGE);
 
-        Method packagePrivateMethod = getMethod("packagePrivateMethod");
-        MethodAccessChecker checkerPackagePrivate = spy(forMethod(packagePrivateMethod));
-        checkerPackagePrivate.checkPackagePrivate(STUB_WARNING_MESSAGE);
-        verify(checkerPackagePrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
-
-        Method privateMethod = getMethod("privateMethod");
-        MethodAccessChecker checkerPrivate = spy(forMethod(privateMethod));
-        checkerPrivate.checkPrivate(STUB_WARNING_MESSAGE);
-        verify(checkerPrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
-    }
-
-    private static Method getMethod(String methodName) {
-        Method method;
-        Class<?> clazz = StubMethodContainer.class;
-        try {
-            method = clazz.getDeclaredMethod(methodName);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
-        }
-        return method;
+        interceptor.assertLog()
+                   .isEmpty();
     }
 }

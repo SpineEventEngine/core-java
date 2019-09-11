@@ -28,8 +28,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv;
-import io.spine.test.storage.Project;
-import io.spine.testdata.Sample;
 import io.spine.testing.core.given.GivenVersion;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
@@ -58,10 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base for tests of record storages.
@@ -87,14 +81,6 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 .setVersion(GivenVersion.withNumber(0))
                 .build();
         return record;
-    }
-
-    private static EntityRecordWithColumns withRecordAndNoFields(EntityRecord record) {
-        return argThat(
-                argument -> argument.getRecord()
-                                    .equals(record)
-                        && !argument.hasColumns()
-        );
     }
 
     /**
@@ -169,21 +155,6 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         RecordReadRequest<I> readRequest = newReadRequest(id);
         assertFalse(storage.read(readRequest)
                            .isPresent());
-    }
-
-    @Test
-    @DisplayName("write none storage fields if none are passed")
-    void writeNoneFieldsIfNonePassed() {
-        RecordStorage<I> storage = spy(storage());
-        I id = newId();
-        Any state = pack(Sample.messageOfType(Project.class));
-        EntityRecord record =
-                Sample.<EntityRecord, EntityRecord.Builder>
-                        builderForType(EntityRecord.class)
-                        .setState(state)
-                        .build();
-        storage.write(id, record);
-        verify(storage).write(eq(id), withRecordAndNoFields(record));
     }
 
     @Test

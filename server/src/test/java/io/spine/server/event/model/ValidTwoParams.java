@@ -20,17 +20,29 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.event.model.given.subscriber.TestEventSubscriber;
 import io.spine.test.reflect.event.RefProjectCreated;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  * A class with a method that accepts event message and context.
  */
-class ValidTwoParams extends TestEventSubscriber {
+final class ValidTwoParams extends TestEventSubscriber {
+
+    private final Collection<Message> handledMessages = new ArrayList<>();
 
     @Subscribe
     void handle(RefProjectCreated event, EventContext context) {
+        handledMessages.add(event);
+    }
+
+    public ImmutableList<Message> handledMessages() {
+        return ImmutableList.copyOf(handledMessages);
     }
 }

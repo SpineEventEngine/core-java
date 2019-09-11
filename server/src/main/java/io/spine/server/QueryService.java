@@ -45,7 +45,7 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  *
  * <p>For asynchronous read-side updates please see {@link SubscriptionService}.
  */
-public class QueryService
+public final class QueryService
         extends QueryServiceGrpc.QueryServiceImplBase
         implements Logging {
 

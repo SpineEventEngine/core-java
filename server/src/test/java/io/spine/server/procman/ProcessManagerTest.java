@@ -111,7 +111,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
 
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
@@ -133,10 +132,10 @@ class ProcessManagerTest {
                 .assumingTests(true)
                 .build();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false);
-        CommandBus commandBus = spy(CommandBus.newBuilder()
-                                              .injectTenantIndex(tenantIndex)
-                                              .injectSystem(NoOpSystemWriteSide.INSTANCE)
-                                              .build());
+        CommandBus commandBus = CommandBus.newBuilder()
+                                          .injectTenantIndex(tenantIndex)
+                                          .injectSystem(NoOpSystemWriteSide.INSTANCE)
+                                          .build();
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)

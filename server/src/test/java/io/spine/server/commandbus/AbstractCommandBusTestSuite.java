@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.Error;
@@ -38,6 +37,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
+import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemWriteSide;
@@ -50,14 +50,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -67,9 +65,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.
@@ -85,6 +80,7 @@ abstract class AbstractCommandBusTestSuite {
     protected EventBus eventBus;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
+    protected MemoizingCommandFlowWatcher flowWatcher;
     protected TenantIndex tenantIndex;
     protected SystemWriteSide systemWriteSide;
     protected BoundedContext context;
@@ -165,12 +161,14 @@ abstract class AbstractCommandBusTestSuite {
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
 
         eventBus = context.eventBus();
+        flowWatcher = new MemoizingCommandFlowWatcher();
         commandBus = CommandBus
                 .newBuilder()
                 .setMultitenant(this.multitenant)
                 .injectContext(context)
                 .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
+                .setFlowWatcher(flowWatcher)
                 .build();
         requestFactory =
                 multitenant
@@ -208,16 +206,7 @@ abstract class AbstractCommandBusTestSuite {
         commandBus.unregister(createProjectHandler);
         commandBus.register(createProjectHandler);
 
-        CommandBus spy = spy(commandBus);
-        spy.post(commands, memoizingObserver());
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
-        verify(spy).store(storingCaptor.capture());
-        Iterable<Command> storingArgs = storingCaptor.getValue();
-        IterableSubject assertStoringArgs = assertThat(storingArgs);
-        assertStoringArgs.hasSize(commands.size());
-        assertStoringArgs.containsExactlyElementsIn(commands);
+        commandBus.post(commands, memoizingObserver());
 
         assertTrue(createProjectHandler.received(first.enclosedMessage()));
         assertTrue(createProjectHandler.received(second.enclosedMessage()));

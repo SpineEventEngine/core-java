@@ -30,14 +30,17 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
+import io.spine.server.ContextSpec;
+import io.spine.server.bc.given.ProjectProjection;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.test.bc.ProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +55,10 @@ import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.gt;
 import static io.spine.client.Filters.le;
 import static io.spine.server.entity.storage.Columns.findColumn;
-import static io.spine.server.entity.storage.given.QueryParametersTestEnv.mockColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.column;
+import static io.spine.server.entity.storage.given.SimpleColumn.doubleColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.stringColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.timestampColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -60,8 +66,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("QueryParameters should")
 class QueryParametersTest {
@@ -82,7 +86,8 @@ class QueryParametersTest {
     /**
      * Creates new {@code QueryParameters.Builder} instance.
      *
-     * @apiNote Provided for brevity of tests while avoiding {@code BadImport} ErrorProne warning.
+     * @apiNote Provided for brevity of tests while avoiding {@code BadImport} ErrorProne
+     *         warning.
      */
     static QueryParameters.Builder newBuilder() {
         return QueryParameters.newBuilder();
@@ -98,7 +103,7 @@ class QueryParametersTest {
 
         // --- Group B ---
         // Consists of 3 instances with a single filter targeting a String column
-        EntityColumn bColumn = mockColumn();
+        EntityColumn bColumn = column();
         Filter bFilter = Filters.eq("b", "c");
         QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                .build();
@@ -109,7 +114,7 @@ class QueryParametersTest {
 
         // --- Group C ---
         // Consists of an instance with a single filter targeting an integer number column
-        EntityColumn cColumn = mockColumn();
+        EntityColumn cColumn = column();
         Filter cFilter = Filters.eq("a", 42);
         QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
                                               .build();
@@ -136,9 +141,9 @@ class QueryParametersTest {
                 eq("secondFilter", 42),
                 gt("thirdFilter", currentTime())};
         Multimap<EntityColumn, Filter> filterMap =
-                ImmutableMultimap.of(mockColumn(), filters[0],
-                                     mockColumn(), filters[1],
-                                     mockColumn(), filters[2]);
+                ImmutableMultimap.of(column(), filters[0],
+                                     column(), filters[1],
+                                     column(), filters[2]);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filterMap, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
                                                  .build();
@@ -154,10 +159,10 @@ class QueryParametersTest {
     @DisplayName("retrieve filter by column")
     void retrieveFilterByColumn() {
         Filter[] filters = {
-                eq("$1nd", 42.0),
-                eq("$2st", "entityColumnValue"),
+                eq("$1st", "entityColumnValue"),
+                eq("$2nd", 42.0),
                 gt("$3d", currentTime())};
-        EntityColumn[] columns = {mockColumn(), mockColumn(), mockColumn()};
+        EntityColumn[] columns = {stringColumn(), doubleColumn(), timestampColumn()};
         Multimap<EntityColumn, Filter> filterMap =
                 ImmutableMultimap.of(columns[0], filters[0],
                                      columns[1], filters[1],
@@ -181,7 +186,7 @@ class QueryParametersTest {
     @DisplayName("keep multiple filters for single column")
     void keepManyFiltersForColumn() throws ParseException {
         String columnName = "time";
-        EntityColumn column = mock(EntityColumn.class);
+        EntityColumn column = column();
 
         // Some valid Timestamp values
         Timestamp startTime = Timestamps.parse("2000-01-01T10:00:00.000-05:00");
@@ -212,18 +217,10 @@ class QueryParametersTest {
     @Test
     @DisplayName("create parameters with active lifecycle flags")
     void createActiveParams() {
-        RecordStorage storage = mock(RecordStorage.class);
-        Map<String, EntityColumn> columns = new HashMap<>();
-
-        String archivedName = archived.name();
-        EntityColumn archivedColumn = mockColumn(archivedName);
-        columns.put(archivedName, archivedColumn);
-
-        String deletedName = deleted.name();
-        EntityColumn deletedColumn = mockColumn(deletedName);
-        columns.put(deletedName, deletedColumn);
-
-        when(storage.entityLifecycleColumns()).thenReturn(columns);
+        InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
+        ContextSpec spec = ContextSpec.multitenant("random name");
+        RecordStorage<ProjectId> storage =
+                factory.createRecordStorage(spec, ProjectProjection.class);
 
         QueryParameters parameters = QueryParameters.activeEntityQueryParams(storage);
 
@@ -235,6 +232,12 @@ class QueryParametersTest {
         assertTrue(lifecycleParameter.hasLifecycle());
         assertEquals(ALL, lifecycleParameter.getOperator());
         ImmutableMultimap<EntityColumn, Filter> filters = lifecycleParameter.getFilters();
+
+        Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
+        String archivedName = archived.name();
+        EntityColumn archivedColumn = lifecycleColumns.get(archivedName);
+        String deletedName = deleted.name();
+        EntityColumn deletedColumn = lifecycleColumns.get(deletedName);
 
         ImmutableCollection<Filter> archivedFilters = filters.get(archivedColumn);
         UnmodifiableIterator<Filter> archivedFilterIterator = archivedFilters.iterator();

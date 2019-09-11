@@ -20,8 +20,6 @@
 
 package io.spine.model.assemble.given;
 
-import com.google.common.collect.ImmutableList;
-
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -34,7 +32,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 /**
  * Memoizes the given message and its {@linkplain Diagnostic.Kind kind}.
  *
- * <p>Other parameters are ignored
+ * <p>Other parameters are ignored.
  */
 public final class MemoizingMessager implements Messager {
 

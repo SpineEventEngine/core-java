@@ -20,12 +20,17 @@
 
 package io.spine.server.command.model.given.handler;
 
+import com.google.common.collect.ImmutableList;
+import io.spine.base.CommandMessage;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.testing.server.model.ModelTests;
 
 import java.lang.reflect.Method;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * Abstract base for test environment command handlers.
@@ -36,6 +41,8 @@ import java.lang.reflect.Method;
 public abstract class TestCommandHandler extends AbstractCommandHandler {
 
     private static final String HANDLER_METHOD_NAME = "handleTest";
+
+    private final List<CommandMessage> handledCommands = newLinkedList();
 
     protected TestCommandHandler() {
         super();
@@ -50,7 +57,15 @@ public abstract class TestCommandHandler extends AbstractCommandHandler {
         super.registerWith(context);
     }
 
-    public Method method() {
+    public final Method method() {
         return ModelTests.getMethod(getClass(), HANDLER_METHOD_NAME);
+    }
+
+    protected final void addHandledCommand(CommandMessage cmd) {
+        handledCommands.add(cmd);
+    }
+
+    public final ImmutableList<CommandMessage> handledCommands() {
+        return ImmutableList.copyOf(handledCommands);
     }
 }

@@ -42,26 +42,26 @@ import static io.spine.server.bus.Buses.reject;
  * The {@code CommandService} allows client applications to post commands and
  * receive updates from the application backend.
  */
-public class CommandService
+public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
         implements Logging {
 
     private final ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
 
     /**
+     * Constructs new instance using the map from a {@code CommandClass} to
+     * a {@code BoundedContext} instance which handles the command.
+     */
+    private CommandService(Map<CommandClass, BoundedContext> map) {
+        super();
+        this.boundedContextMap = ImmutableMap.copyOf(map);
+    }
+
+    /**
      * Creates a new builder for {@code CommandService}.
      */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    /**
-     * Constructs new instance using the map from a {@code CommandClass} to
-     * a {@code BoundedContext} instance which handles the command.
-     */
-    protected CommandService(Map<CommandClass, BoundedContext> map) {
-        super();
-        this.boundedContextMap = ImmutableMap.copyOf(map);
     }
 
     @Override

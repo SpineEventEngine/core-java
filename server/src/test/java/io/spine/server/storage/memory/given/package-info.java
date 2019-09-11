@@ -18,30 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
-
-import io.spine.server.entity.storage.EntityColumn;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
- * A test environment for {@link io.spine.server.entity.storage.QueryParametersTest}.
+ * Test environment classes for the {@code io.spine.server.storage.memory} package.
  */
-public class QueryParametersTestEnv {
 
-    private QueryParametersTestEnv() {
-        // Prevent instantiation of this utility class.
-    }
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.memory.given;
 
-    public static EntityColumn mockColumn(String name) {
-        EntityColumn column = mock(EntityColumn.class);
-        when(column.name()).thenReturn(name);
-        return column;
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    public static EntityColumn mockColumn() {
-        EntityColumn column = mock(EntityColumn.class);
-        return column;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

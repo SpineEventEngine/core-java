@@ -40,6 +40,7 @@ public class ValidHandlerOneParamReturnsList extends TestCommandHandler {
     @Assign
     @VisibleForTesting
     public List<Message> handleTest(RefCreateProject cmd) {
+        addHandledCommand(cmd);
         List<Message> result = newLinkedList();
         result.add(projectCreated(cmd.getProjectId()));
         return result;

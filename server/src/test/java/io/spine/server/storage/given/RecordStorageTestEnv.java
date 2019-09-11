@@ -35,6 +35,7 @@ import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -58,8 +59,6 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class RecordStorageTestEnv {
 
@@ -108,7 +107,7 @@ public class RecordStorageTestEnv {
 
     public static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
         LifecycleFlags flags = record.getLifecycleFlags();
-        Map<String, EntityColumn.MemoizedValue> columns = ImmutableMap.of(
+        Map<String, MemoizedValue> columns = ImmutableMap.of(
                 LifecycleColumns.ARCHIVED.columnName(),
                 booleanColumn(LifecycleColumns.ARCHIVED.column(), flags.getArchived()),
                 LifecycleColumns.DELETED.columnName(),
@@ -118,10 +117,8 @@ public class RecordStorageTestEnv {
         return result;
     }
 
-    private static EntityColumn.MemoizedValue booleanColumn(EntityColumn column, boolean value) {
-        EntityColumn.MemoizedValue memoizedValue = mock(EntityColumn.MemoizedValue.class);
-        when(memoizedValue.sourceColumn()).thenReturn(column);
-        when(memoizedValue.value()).thenReturn(value);
+    private static MemoizedValue booleanColumn(EntityColumn column, boolean value) {
+        MemoizedValue memoizedValue = new MemoizedValue(column, value);
         return memoizedValue;
     }
 

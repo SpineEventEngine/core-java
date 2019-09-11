@@ -32,11 +32,13 @@ import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.entity.storage.given.TestProjection;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
 import io.spine.testing.UtilityClassTest;
@@ -56,7 +58,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @DisplayName("EntityQueries utility should")
 class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
@@ -68,9 +69,13 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
+        InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
+        ContextSpec spec = ContextSpec.singleTenant("some name");
+        RecordStorage<String> storage = factory.createRecordStorage(spec, TestEntity.class);
+
         tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
               .setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
-              .setDefault(RecordStorage.class, mock(RecordStorage.class))
+              .setDefault(RecordStorage.class, storage)
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 

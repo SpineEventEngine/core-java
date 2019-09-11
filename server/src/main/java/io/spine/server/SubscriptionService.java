@@ -51,7 +51,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * <p>For synchronous read-side updates please see {@link QueryService}.
  */
-public class SubscriptionService
+public final class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
         implements Logging {
 
