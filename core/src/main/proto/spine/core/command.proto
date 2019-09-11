@@ -38,6 +38,7 @@ import "spine/core/diagnostics.proto";
 // Command identifier.
 message CommandId {
     option (is).java_type = "io.spine.core.CommandIdMixin";
+    option (SPI_type) = true;
 
     string uuid = 1;
 }
@@ -59,6 +60,7 @@ message CommandId {
 //
 message Command {
     option (is).java_type = "io.spine.core.CommandMixin";
+    option (SPI_type) = true;
 
     // The ID of the command.
     CommandId id = 1 [(required) = true];
@@ -96,6 +98,7 @@ message Command {
 // Meta-information about the command and the environment, which generated the command.
 message CommandContext {
     option (is).java_type = "io.spine.base.MessageContext";
+    option (SPI_type) = true;
 
     // Information about the environment of the user who created the command.
     ActorContext actor_context = 1 [(required) = true];
@@ -157,16 +160,4 @@ enum CommandValidationError {
     // A command is considered a duplicate if its ID matches the ID of another command.
     //
     DUPLICATE_COMMAND = 6;
-}
-
-// Data from a `Command` which is accessible from the end user code to which
-// the command was dispatched.
-message DispatchedCommand {
-    option deprecated = true;
-
-    // The message of the command.
-    google.protobuf.Any message = 1 [(required) = true];
-
-    // Service information about the environment in which the command was created.
-    CommandContext context = 2 [(required) = true];
 }

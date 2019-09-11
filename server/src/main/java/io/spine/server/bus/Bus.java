@@ -21,7 +21,8 @@
 package io.spine.server.bus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -29,9 +30,7 @@ import io.spine.core.Ack;
 import io.spine.server.Closeable;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -39,8 +38,8 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.validate.Validate.isNotDefault;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 
 /**
@@ -67,13 +66,12 @@ public abstract class Bus<T extends Message,
     /** Listeners of the messages posted to the bus. */
     private final Listeners<E> listeners;
 
-    /** The supplier of filter chain for this bus. */
-    private final FilterChainSupplier filterChain;
+    private final Supplier<FilterChain<E>> filterChain;
 
     protected Bus(BusBuilder<?, T, E, C, D> builder) {
         super();
         this.listeners = new Listeners<>(builder);
-        this.filterChain = new FilterChainSupplier(builder);
+        this.filterChain = memoize(() -> this.createFilterChain(builder.filters()));
         this.queue = new DispatchingQueue<>(this::dispatch);
         this.registry = builder.newRegistry();
     }
@@ -234,28 +232,6 @@ public abstract class Bus<T extends Message,
         return filterChain.get();
     }
 
-    /**
-     * Obtains the {@link BusFilter}s to append to the chain tail.
-     *
-     * <p>By default, returns an empty collection.
-     *
-     * @see #filterChain()
-     */
-    protected Collection<BusFilter<E>> filterChainTail() {
-        return emptyList();
-    }
-
-    /**
-     * Obtains the {@link BusFilter}s to prepend to the chain head.
-     *
-     * <p>By default, returns an empty collection.
-     *
-     * @see #filterChain()
-     */
-    protected Collection<BusFilter<E>> filterChainHead() {
-        return emptyList();
-    }
-
     @VisibleForTesting
     public boolean hasFilter(BusFilter<E> filter) {
         return filterChain().contains(filter);
@@ -360,51 +336,28 @@ public abstract class Bus<T extends Message,
     protected abstract void store(Iterable<T> messages);
 
     /**
-     * Initializes the filter chain upon the first invocation and returns the initialized instance
-     * for all next calls.
+     * A callback for derived classes to modify the order of filters used by the bus.
      *
-     * <p>Adds the {@link DeadMessageFilter} and the {@link ValidatingFilter} to the chain, so that
-     * a chain always has the following format:
-     *
-     * <pre>
-     *     Chain head -> {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters from {@linkplain BusBuilder Builder} -> chain tail.
-     * </pre>
-     *
-     * <p>The head and the tail of the chain are created by the {@code Bus} itself. Those are
-     * typically empty. Override {@link #filterChainHead()} and {@link #filterChainHead()} to add
-     * some filters to the respective chain side.
+     * <p>Default implementation inserts:
+     * <ol>
+     *   <li>a filter which validates incoming messages
+     *   <li>a filter for unhandled messages
+     * </ol>
+     * before the passed filters.
      */
-    private class FilterChainSupplier implements Supplier<FilterChain<E>> {
+    @OverridingMethodsMustInvokeSuper
+    protected Iterable<BusFilter<E>> setupFilters(Iterable<BusFilter<E>> filters) {
+        return ImmutableList
+                .<BusFilter<E>>builder()
+                .add(new ValidatingFilter<>(validator()))
+                .add(new DeadMessageFilter<>(deadMessageHandler(), registry()))
+                .addAll(filters)
+                .build();
+    }
 
-        private final ChainBuilder<E> chainBuilder;
-
-        @LazyInit
-        private @MonotonicNonNull FilterChain<E> chain;
-
-        private FilterChainSupplier(BusBuilder<?, T, E, ?, ?> builder) {
-            this.chainBuilder = builder.chainBuilderCopy();
-        }
-
-        @Override
-        public FilterChain<E> get() {
-            if(chain == null) {
-                chain = buildChain();
-            }
-            return chain;
-        }
-        private FilterChain<E> buildChain() {
-            Collection<BusFilter<E>> tail = filterChainTail();
-            tail.forEach(chainBuilder::append);
-
-            BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(deadMessageHandler(), registry());
-            BusFilter<E> validatingFilter = new ValidatingFilter<>(validator());
-            chainBuilder.prepend(deadMsgFilter);
-            chainBuilder.prepend(validatingFilter);
-
-            Collection<BusFilter<E>> head = filterChainHead();
-            head.forEach(chainBuilder::prepend);
-
-            return chainBuilder.build();
-        }
+    private FilterChain<E> createFilterChain(Iterable<BusFilter<E>> filters) {
+        Iterable<BusFilter<E>> possiblyModifiedFilters = setupFilters(filters);
+        FilterChain<E> result = new FilterChain<>(possiblyModifiedFilters);
+        return result;
     }
 }

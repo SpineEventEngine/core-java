@@ -21,27 +21,29 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
-import io.spine.grpc.StreamObservers;
+import io.spine.core.Event;
+import io.spine.protobuf.AnyPacker;
 
 /**
  * An observer of the incoming external messages of the specified message class.
  *
  * <p>Responsible of receiving those from the transport layer and posting those to the local
- * instance of {@code IntegrationBus}.
+ * instance of {@code IntegrationBroker}.
  */
 final class ExternalMessageObserver extends AbstractChannelObserver {
 
-    private final IntegrationBus integrationBus;
+    private final IntegrationBroker broker;
 
     ExternalMessageObserver(BoundedContextName boundedContextName,
                             Class<? extends Message> messageClass,
-                            IntegrationBus integrationBus) {
+                            IntegrationBroker broker) {
         super(boundedContextName, messageClass);
-        this.integrationBus = integrationBus;
+        this.broker = broker;
     }
 
     @Override
     protected void handle(ExternalMessage message) {
-        integrationBus.post(message, StreamObservers.noOpObserver());
+        Event event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
+        broker.dispatchLocally(event);
     }
 }

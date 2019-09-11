@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.truth.Truth8;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.Time;
@@ -39,6 +38,7 @@ import io.spine.server.given.groups.WronglyDomesticSubscriber;
 import io.spine.server.given.groups.WronglyExternalSubscriber;
 import io.spine.server.given.organizations.Organization;
 import io.spine.server.given.organizations.OrganizationId;
+import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.SystemBoundedContexts;
 import io.spine.system.server.event.EntityStateChanged;
@@ -50,6 +50,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -103,9 +104,9 @@ class AbstractEventSubscriberTest {
                              .post(GivenEvent.withMessage(event));
         Optional<Group> receivedState = subscriber.domestic();
         assertTrue(receivedState.isPresent());
-        Truth8.assertThat(receivedState)
+        assertThat(receivedState)
               .hasValue(newState);
-        Truth8.assertThat(subscriber.external())
+        assertThat(subscriber.external())
               .isEmpty();
     }
 
@@ -133,22 +134,22 @@ class AbstractEventSubscriberTest {
                              .eventBus()
                              .post(GivenEvent.withMessage(event));
         Optional<Organization> receivedState = subscriber.external();
-        Truth8.assertThat(receivedState)
-              .hasValue(newState);
-        Truth8.assertThat(subscriber.domestic())
-              .isEmpty();
+        assertThat(receivedState)
+                .hasValue(newState);
+        assertThat(subscriber.domestic())
+                .isEmpty();
     }
 
     @Test
     @DisplayName("fail to subscribe to external events without `external = true`")
     void failIfNotExternal() {
-        assertThrows(IllegalArgumentException.class, WronglyDomesticSubscriber::new);
+        assertThrows(SignalOriginMismatchError.class, WronglyDomesticSubscriber::new);
     }
 
     @Test
     @DisplayName("fail to subscribe to domestic events without `external = false`")
     void failIfNotDomestic() {
-        assertThrows(IllegalArgumentException.class, WronglyExternalSubscriber::new);
+        assertThrows(SignalOriginMismatchError.class, WronglyExternalSubscriber::new);
     }
 
     @Test

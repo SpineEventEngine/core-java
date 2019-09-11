@@ -28,7 +28,6 @@ import io.spine.base.Identifier;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
@@ -36,9 +35,6 @@ import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.ProducedEvents;
 import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -48,7 +44,6 @@ import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -100,7 +95,7 @@ public abstract class AbstractEventReactor
 
     @Override
     public Set<EventClass> messageClasses() {
-        return thisClass.domesticEvents();
+        return thisClass.events();
     }
 
     @CanIgnoreReturnValue
@@ -129,16 +124,6 @@ public abstract class AbstractEventReactor
         }
     }
 
-    /**
-     * Obtains an external message dispatcher to deliver external messages.
-     *
-     * <p>Never returns an empty {@code Optional}.
-     */
-    @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        return Optional.of(new ExternalDispatcher());
-    }
-
     /** Obtains the name of this reactor, {@linkplain TypeConverter#toAny(Object) packed to Any}. */
     @Override
     public Any producerId() {
@@ -154,20 +139,5 @@ public abstract class AbstractEventReactor
     @Override
     public Set<EventClass> externalEventClasses() {
         return thisClass.externalEvents();
-    }
-
-    private final class ExternalDispatcher implements ExternalMessageDispatcher, Logging {
-
-        @Override
-        public Set<ExternalMessageClass> messageClasses() {
-            return ExternalMessageClass.fromEventClasses(externalEventClasses());
-        }
-
-        @CanIgnoreReturnValue
-        @Override
-        public void dispatch(ExternalMessageEnvelope envelope) {
-            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            AbstractEventReactor.this.dispatch(eventEnvelope);
-        }
     }
 }

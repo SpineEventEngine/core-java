@@ -19,26 +19,16 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.BoundedContextName;
-import io.spine.core.Event;
 import io.spine.logging.Logging;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.transport.ChannelId;
-import io.spine.server.transport.Publisher;
-import io.spine.server.transport.PublisherHub;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.TypeUrl;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
  * A subscriber to local {@code EventBus}, which publishes each matching domestic event to
@@ -46,20 +36,15 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  *
  * <p>The events to subscribe are those that are required by external application components
  * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
- * configuration messages}, received by this instance of {@code IntegrationBus}.
+ * configuration messages}, received by this instance of {@code IntegrationBroker}.
  */
 final class DomesticEventPublisher implements EventDispatcher, Logging {
 
-    private final BoundedContextName originContextName;
-    private final PublisherHub publisherHub;
     private final Set<EventClass> eventClasses;
+    private final IntegrationBroker broker;
 
-    DomesticEventPublisher(BoundedContextName originContextName,
-                           PublisherHub publisherHub,
-                           EventClass messageClass) {
-        super();
-        this.originContextName = checkNotNull(originContextName);
-        this.publisherHub = checkNotNull(publisherHub);
+    DomesticEventPublisher(IntegrationBroker broker, EventClass messageClass) {
+        this.broker = checkNotNull(broker);
         this.eventClasses = ImmutableSet.of(messageClass);
     }
 
@@ -71,14 +56,7 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
 
     @Override
     public void dispatch(EventEnvelope event) {
-        Event outerObject = event.outerObject();
-        ExternalMessage msg = ExternalMessages.of(outerObject, originContextName);
-        EventClass eventClass = event.messageClass();
-
-        TypeUrl eventType = TypeUrl.of(eventClass.value());
-        ChannelId channelId = channelIdFor(eventType);
-        Publisher channel = publisherHub.get(channelId);
-        channel.publish(AnyPacker.pack(event.id()), msg);
+        broker.publish(event);
     }
 
     @Override
@@ -87,33 +65,19 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
     }
 
     @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        return Optional.empty();
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("originContextName", originContextName)
-                          .add("eventClasses", eventClasses)
-                          .toString();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof DomesticEventPublisher)) {
             return false;
         }
-        DomesticEventPublisher that = (DomesticEventPublisher) o;
-        return Objects.equals(originContextName, that.originContextName) &&
-                Objects.equals(eventClasses, that.eventClasses);
+        DomesticEventPublisher publisher = (DomesticEventPublisher) o;
+        return Objects.equal(eventClasses, publisher.eventClasses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(originContextName, eventClasses);
+        return Objects.hashCode(eventClasses);
     }
 }

@@ -85,8 +85,8 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
-        return thisClass.domesticEvents();
+    public Set<EventClass> events() {
+        return thisClass.events();
     }
 
     @Override

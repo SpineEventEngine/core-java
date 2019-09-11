@@ -79,6 +79,8 @@ class SubscriptionServiceTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
+        ServerEnvironment.instance()
+                         .reset();
     }
 
     @Nested

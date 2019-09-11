@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -35,7 +34,6 @@ import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
 
-import java.util.Optional;
 import java.util.Set;
 
 public class Given {
@@ -101,11 +99,6 @@ public class Given {
         @Override
         public void dispatch(EventEnvelope envelope) {
             // Do nothing.
-        }
-
-        @Override
-        public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-            return Optional.empty();
         }
     }
 }

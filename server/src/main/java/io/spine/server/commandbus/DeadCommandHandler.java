@@ -17,24 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
 
-import io.spine.server.bus.DispatcherRegistry;
+package io.spine.server.commandbus;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.core.Command;
+import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.type.CommandEnvelope;
 
 /**
- * A registry of domestic subscribers which subscribe or react upon external messages.
+ * Produces an {@link UnsupportedCommandException} upon a dead command.
  */
-final class DomesticDispatcherRegistry
-        extends DispatcherRegistry<ExternalMessageClass,
-                                   ExternalMessageEnvelope,
-                                   ExternalMessageDispatcher> {
+final class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
+
     @Override
-    protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
-            throws IllegalArgumentException {
-        // Do not call `super()`, as long as we don't want to enforce
-        // non-empty message class set for an external message dispatcher.
-        checkNotNull(dispatcher);
+    public UnsupportedCommandException handle(CommandEnvelope message) {
+        Command command = message.command();
+        UnsupportedCommandException exception = new UnsupportedCommandException(command);
+        return exception;
     }
 }

@@ -95,7 +95,7 @@ class EventSubscriberTest {
     @Test
     @DisplayName("expose handled message classes")
     void exposeMessageClasses() {
-        assertEquals(3, subscriber.messageClasses()
+        assertEquals(4, subscriber.messageClasses()
                                   .size());
     }
 

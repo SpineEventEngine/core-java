@@ -28,13 +28,11 @@ import io.spine.server.DefaultRepository;
 import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -78,7 +76,6 @@ public final class ForeignContextConfig {
         };
     }
 
-    @SuppressWarnings("OverlyComplexAnonymousInnerClass")
     private static EventDispatcher newEventDispatcher() {
         return new EventDispatcher() {
             @Override
@@ -95,11 +92,6 @@ public final class ForeignContextConfig {
             @Override
             public void dispatch(EventEnvelope envelope) {
                 // Do nothing.
-            }
-
-            @Override
-            public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-                return Optional.empty();
             }
         };
     }

@@ -71,8 +71,8 @@ public final class CommanderClass<C extends Commander>
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
-        return delegate.domesticEvents();
+    public Set<EventClass> events() {
+        return delegate.events();
     }
 
     @Override

@@ -41,8 +41,6 @@ import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
@@ -240,14 +238,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projection;
     }
 
-    @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        if (!dispatchesExternalEvents()) {
-            return Optional.empty();
-        }
-        return Optional.of(new ProjectionExternalEventDispatcher());
-    }
-
     /**
      * Obtains event filters for event classes handled by projections of this repository.
      */
@@ -330,7 +320,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<EventClass> messageClasses() {
-        return projectionClass().domesticEvents();
+        return projectionClass().events();
     }
 
     @Override
@@ -387,19 +377,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         super.close();
         if (inbox != null) {
             inbox.unregister();
-        }
-    }
-
-    /**
-     * An implementation of an external message dispatcher feeding external events
-     * to {@code Projection} instances.
-     */
-    private class ProjectionExternalEventDispatcher extends AbstractExternalEventDispatcher {
-
-        @Override
-        public Set<ExternalMessageClass> messageClasses() {
-            Set<EventClass> eventClasses = projectionClass().externalEvents();
-            return ExternalMessageClass.fromEventClasses(eventClasses);
         }
     }
 }

@@ -46,7 +46,7 @@ public class ProjectCountAggregate
         return Collections.emptyList();
     }
 
-    public static ItgProjectCreated getExternalEvent() {
+    public static ItgProjectCreated externalEvent() {
         return externalEvent;
     }
 

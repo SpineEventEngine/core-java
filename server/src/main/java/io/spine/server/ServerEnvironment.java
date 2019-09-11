@@ -71,6 +71,8 @@ public final class ServerEnvironment implements AutoCloseable {
      * <p>If not {@linkplain #configureDelivery(Delivery) configured by the end-user},
      * initialized with the {@linkplain Delivery#local() local} delivery by default.
      */
+    @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
+      // No synchronization in `reset()` as it is test-only.
     private @MonotonicNonNull Delivery delivery;
 
     /**
@@ -299,6 +301,7 @@ public final class ServerEnvironment implements AutoCloseable {
         this.tracerFactory = null;
         this.productionStorageFactory = null;
         this.storageFactoryForTests = null;
+        this.delivery = Delivery.local();
         resetDeploymentType();
     }
 

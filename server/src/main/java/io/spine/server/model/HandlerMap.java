@@ -94,7 +94,7 @@ public final class HandlerMap<M extends MessageClass<?>,
     /**
      * Obtains classes of messages for which handlers are stored in this map.
      */
-    public Set<M> messageClasses() {
+    public ImmutableSet<M> messageClasses() {
         return messageClasses;
     }
 

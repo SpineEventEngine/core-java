@@ -38,16 +38,13 @@ public final class TestEntities {
     /**
      * Creates a new random {@code TestEntityId}.
      *
-     * <p>The numeric value of the ID is between {@code -1000} (inclusive)
-     * and {@code 1000} (exclusive) and is never equal to {@code 0};
+     * <p>The numeric value of the ID is between {@code 1} (inclusive)
+     * and {@code 100_000_000} (exclusive).
      *
      * @return new random ID
      */
     public static TestEntityId randomId() {
-        int randomNumber = current().nextInt(-1000, 1000);
-        randomNumber = randomNumber != 0
-                       ? randomNumber
-                       : 314;
+        int randomNumber = current().nextInt(1, 100_000_000);
         return TestEntityId.newBuilder()
                            .setValue(randomNumber)
                            .build();

@@ -24,26 +24,25 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
-import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static java.util.Collections.synchronizedSet;
 
 /**
  * An observer, which reacts to the configuration update messages sent by
- * external entities (such as {@code IntegrationBus}es of other bounded contexts).
+ * external entities (such as {@code IntegrationBroker}s of other bounded contexts).
  */
-final class ConfigurationChangeObserver extends AbstractChannelObserver implements AutoCloseable {
+final class ConfigurationChangeObserver
+        extends AbstractChannelObserver
+        implements AutoCloseable {
 
-    private final IntegrationBus integrationBus;
+    private final IntegrationBroker broker;
     private final BoundedContextName boundedContextName;
-    private final Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByClass;
+    private final BusAdapter adapter;
 
     /**
      * Names of Bounded Contexts already known to this observer.
@@ -60,13 +59,13 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ConfigurationChangeObserver(IntegrationBus integrationBus,
+    ConfigurationChangeObserver(IntegrationBroker broker,
                                 BoundedContextName boundedContextName,
-                                Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByCls) {
+                                BusAdapter adapter) {
         super(boundedContextName, RequestForExternalMessages.class);
-        this.integrationBus = integrationBus;
+        this.broker = broker;
         this.boundedContextName = boundedContextName;
-        this.adapterByClass = adapterByCls;
+        this.adapter = adapter;
         this.knownContexts.add(boundedContextName);
     }
 
@@ -75,10 +74,11 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
      * types.
      *
      * <p>If the request originates from a previously unknown Bounded Context,
-     * {@linkplain IntegrationBus#notifyOthers() publishes} the types requested by the current
+     * {@linkplain IntegrationBroker#notifyOthers() publishes} the types requested by the current
      * Context, since they may be unknown to the new Context.
      *
-     * @param value {@link RequestForExternalMessages} form another Bounded Context
+     * @param value
+     *         {@link RequestForExternalMessages} form another Bounded Context
      */
     @Override
     public void handle(ExternalMessage value) {
@@ -89,7 +89,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
         clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
         if (!knownContexts.contains(origin)) {
             knownContexts.add(origin);
-            integrationBus.notifyOthers();
+            broker.notifyOthers();
         }
     }
 
@@ -109,15 +109,8 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     }
 
     private void registerInAdapter(ExternalMessageType newType) {
-        Class<Message> wrapperCls = asClassOfMsg(newType.getWrapperTypeUrl());
-        Class<Message> messageCls = asClassOfMsg(newType.getMessageTypeUrl());
-        BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
-        adapter.register(messageCls);
-    }
-
-    private BusAdapter<?, ?> getAdapter(Class<Message> javaClass) {
-        BusAdapter<?, ?> adapter = adapterByClass.apply(javaClass);
-        return checkNotNull(adapter);
+        Class<? extends Message> messageClass = newType.asMessageClass();
+        adapter.register(messageClass);
     }
 
     private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
@@ -139,11 +132,8 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     }
 
     private void unregisterInAdapter(ExternalMessageType itemForRemoval) {
-        // It's now the time to remove the local bus subscription.
-        Class<Message> wrapperCls = asClassOfMsg(itemForRemoval.getWrapperTypeUrl());
-        Class<Message> messageCls = asClassOfMsg(itemForRemoval.getMessageTypeUrl());
-        BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
-        adapter.unregister(messageCls);
+        Class<? extends Message> messageClass = itemForRemoval.asMessageClass();
+        adapter.unregister(messageClass);
     }
 
     private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,
@@ -170,11 +160,6 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     public String toString() {
         return "Integration bus observer of `RequestedMessageTypes`. " +
                 "Bounded Context name = " + boundedContextName.getValue();
-    }
-
-    private static Class<Message> asClassOfMsg(String classStr) {
-        TypeUrl typeUrl = TypeUrl.parse(classStr);
-        return typeUrl.getMessageClass();
     }
 
     /**

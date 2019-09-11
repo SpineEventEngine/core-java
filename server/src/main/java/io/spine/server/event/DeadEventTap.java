@@ -17,19 +17,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.transport.memory;
 
-import io.spine.server.transport.ChannelId;
-import io.spine.server.transport.Subscriber;
+package io.spine.server.event;
+
+import io.spine.base.EventMessage;
+import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.type.EventEnvelope;
+
+import java.util.function.Supplier;
 
 /**
- * An in-memory implementation of the {@link Subscriber}.
+ * Handles a dead event by saving it to the {@link EventStore} and producing an
+ * {@link UnsupportedEventException}.
  *
- * <p>To use only in scope of the same JVM as {@linkplain InMemoryPublisher publishers}.
+ * <p> We must store dead events as they can still be emitted by some entities and therefore are
+ * a part of the history for the current Bounded Context.
  */
-class InMemorySubscriber extends Subscriber {
+final class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
 
-    InMemorySubscriber(ChannelId id) {
-        super(id);
+    private final Supplier<EventStore> store;
+
+    DeadEventTap(Supplier<EventStore> store) {
+        this.store = store;
+    }
+
+    @Override
+    public UnsupportedEventException handle(EventEnvelope event) {
+        eventStore().append(event.outerObject());
+
+        EventMessage message = event.message();
+        UnsupportedEventException exception = new UnsupportedEventException(message);
+        return exception;
+    }
+
+    private EventStore eventStore() {
+        return store.get();
     }
 }

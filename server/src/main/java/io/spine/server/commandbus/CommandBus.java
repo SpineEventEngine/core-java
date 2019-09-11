@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -45,14 +46,11 @@ import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.BusBuilder.FieldCheck.systemNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
@@ -121,18 +119,21 @@ public final class CommandBus
         return multitenant;
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
+    /**
+     * Places a {@link CommandReceivedTap} first and a {@link CommandScheduler} last
+     * in the filter chain.
+     */
     @Override
-    protected final Collection<BusFilter<CommandEnvelope>> filterChainTail() {
-        return ImmutableList.of(scheduler);
-    }
-
-    @Override
-    protected Collection<BusFilter<CommandEnvelope>> filterChainHead() {
-        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(this::systemFor);
-        Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
-        result.push(tap);
-        return result;
+    @OverridingMethodsMustInvokeSuper
+    protected Iterable<BusFilter<CommandEnvelope>>
+    setupFilters(Iterable<BusFilter<CommandEnvelope>> filters) {
+        Iterable<BusFilter<CommandEnvelope>> fromSuper = super.setupFilters(filters);
+        return ImmutableList
+                .<BusFilter<CommandEnvelope>>builder()
+                .add(new CommandReceivedTap(this::systemFor))
+                .addAll(fromSuper)
+                .add(scheduler)
+                .build();
     }
 
     @Override
@@ -322,19 +323,6 @@ public final class CommandBus
         private CommandBus createCommandBus() {
             CommandBus commandBus = new CommandBus(this);
             return commandBus;
-        }
-    }
-
-    /**
-     * Produces an {@link UnsupportedCommandException} upon a dead command.
-     */
-    private static class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
-
-        @Override
-        public UnsupportedCommandException handle(CommandEnvelope message) {
-            Command command = message.command();
-            UnsupportedCommandException exception = new UnsupportedCommandException(command);
-            return exception;
         }
     }
 }

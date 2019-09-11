@@ -39,8 +39,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.integration.IntegrationBus;
-import io.spine.server.security.Security;
+import io.spine.server.integration.IntegrationBroker;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
@@ -85,11 +84,9 @@ public final class BoundedContextBuilder implements Logging {
 
     /**
      * Event dispatchers to be registered with the context {@link EventBus} and/or
-     * {@link IntegrationBus} after the Bounded Context creation.
+     * {@link IntegrationBroker} after the Bounded Context creation.
      */
     private final Collection<EventDispatcher> eventDispatchers = new ArrayList<>();
-
-    private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
 
     private final SystemFeatures systemFeatures;
 
@@ -146,29 +143,6 @@ public final class BoundedContextBuilder implements Logging {
     @VisibleForTesting
     public static BoundedContextBuilder assumingTests() {
         return assumingTests(false);
-    }
-
-    /**
-     * Creates a new builder for a Bounded Context which does not store its events.
-     *
-     * <p>Such a Bounded Context should not be used general case. This method throws
-     * a {@link SecurityException} if called outside the framework core. Please use static factory
-     * methods in {@link BoundedContext} to create an instance of builder.
-     */
-    @Internal
-    public static BoundedContextBuilder notStoringEvents(String name, boolean multitenant) {
-        checkNotNull(name);
-        Security.allowOnlyFrameworkServer();
-
-        ContextSpec spec = multitenant
-                           ? multitenant(name)
-                           : singleTenant(name);
-        BoundedContextBuilder builder = new BoundedContextBuilder(spec.notStoringEvents());
-        builder.systemFeatures()
-               .forgetEvents()
-               .disableAggregateQuerying()
-               .disableCommandLog();
-        return builder;
     }
 
     /**
@@ -579,10 +553,6 @@ public final class BoundedContextBuilder implements Logging {
 
     CommandBus buildCommandBus() {
         return commandBus.build();
-    }
-
-    IntegrationBus buildIntegrationBus() {
-        return integrationBus.build();
     }
 
     private void registerRepositories(BoundedContext result) {

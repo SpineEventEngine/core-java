@@ -51,6 +51,7 @@ import io.spine.testing.server.blackbox.event.BbProjectDone;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
+import io.spine.testing.server.blackbox.event.BbUserDeleted;
 import io.spine.testing.server.blackbox.given.BbCommandDispatcher;
 import io.spine.testing.server.blackbox.given.BbDuplicateCommandDispatcher;
 import io.spine.testing.server.blackbox.given.BbEventDispatcher;
@@ -73,7 +74,6 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
 import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
@@ -367,11 +367,12 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             EventSubject assertEvents = context
                     .receivesCommand(createProject(projectId))
                     .receivesCommand(addProjectAssignee(projectId, user))
-                    .receivesExternalEvent(newName("Users"), userDeleted(user, projectId))
+                    .receivesExternalEvent(userDeleted(user, projectId))
                     .assertEvents();
-            assertEvents.hasSize(3);
+            assertEvents.hasSize(4);
             assertEvents.withType(BbProjectCreated.class).isNotEmpty();
             assertEvents.withType(BbAssigneeAdded.class).isNotEmpty();
+            assertEvents.withType(BbUserDeleted.class).isNotEmpty();
             assertEvents.withType(BbAssigneeRemoved.class).isNotEmpty();
         }
 
@@ -388,15 +389,15 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                     .receivesCommands(addProjectAssignee(projectId, user1),
                                       addProjectAssignee(projectId, user2),
                                       addProjectAssignee(projectId, user3))
-                    .receivesExternalEvents(newName("Users"),
-                                            userDeleted(user1, projectId),
+                    .receivesExternalEvents(userDeleted(user1, projectId),
                                             userDeleted(user2, projectId),
                                             userDeleted(user3, projectId))
                     .assertEvents();
-            assertEvents.hasSize(7);
+            assertEvents.hasSize(10);
             assertEvents.withType(BbProjectCreated.class).hasSize(1);
             assertEvents.withType(BbAssigneeAdded.class).hasSize(3);
             assertEvents.withType(BbAssigneeRemoved.class).hasSize(3);
+            assertEvents.withType(BbUserDeleted.class).hasSize(3);
         }
     }
 

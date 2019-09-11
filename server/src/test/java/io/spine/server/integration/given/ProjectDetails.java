@@ -49,11 +49,11 @@ public class ProjectDetails
         domesticEvent = event;
     }
 
-    public static ItgProjectCreated getExternalEvent() {
+    public static ItgProjectCreated externalEvent() {
         return externalEvent;
     }
 
-    public static ItgProjectStarted getDomesticEvent() {
+    public static ItgProjectStarted domesticEvent() {
         return domesticEvent;
     }
 

@@ -135,7 +135,7 @@ class AbstractEventReactorTest {
         @Test
         void receive() {
             OrderPaidFor orderPaidFor = someOrderPaidFor();
-            charityContext.receivesExternalEvent(restaurantContext.name(), orderPaidFor);
+            charityContext.receivesExternalEvent(orderPaidFor);
 
             double orderCost = orderPaidFor.getOrder()
                                            .getPriceInUsd();
@@ -147,7 +147,7 @@ class AbstractEventReactorTest {
         @Test
         void reactToOne() {
             OrderPaidFor orderPaidFor = someOrderPaidFor();
-            charityContext.receivesExternalEvent(deliveryContext.name(), orderPaidFor)
+            charityContext.receivesExternalEvent(orderPaidFor)
                           .assertEvents()
                           .withType(DonationMade.class)
                           .hasSize(1);
@@ -159,8 +159,8 @@ class AbstractEventReactorTest {
             OrderPaidFor paidInRestaurant = someOrderPaidFor();
             OrderPaidFor paidToDelivery = someOrderPaidFor();
 
-            charityContext.receivesExternalEvent(deliveryContext.name(), paidToDelivery)
-                          .receivesExternalEvent(restaurantContext.name(), paidInRestaurant)
+            charityContext.receivesExternalEvent(paidToDelivery)
+                          .receivesExternalEvent(paidInRestaurant)
                           .assertEvents()
                           .withType(DonationMade.class)
                           .hasSize(2);

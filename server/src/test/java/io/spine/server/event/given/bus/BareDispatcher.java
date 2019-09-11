@@ -22,15 +22,11 @@ package io.spine.server.event.given.bus;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCreated;
 
-import java.util.Optional;
 import java.util.Set;
-
-import static io.spine.util.Exceptions.unsupported;
 
 /**
  * A simple dispatcher class, which only dispatch and does not have own event
@@ -48,11 +44,6 @@ public class BareDispatcher implements EventDispatcher {
     @Override
     public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
-    }
-
-    @Override
-    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
-        throw unsupported();
     }
 
     @Override

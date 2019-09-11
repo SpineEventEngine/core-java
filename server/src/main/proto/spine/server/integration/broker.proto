@@ -26,7 +26,7 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.integration";
 option java_multiple_files = true;
-option java_outer_classname = "IntegrationBusProto";
+option java_outer_classname = "BrokerProto";
 
 import "google/protobuf/any.proto";
 
@@ -63,6 +63,7 @@ message RequestForExternalMessages {
 
 // The type of message requested by some part of the system.
 message ExternalMessageType {
+    option (is).java_type = "ExternalMessageTypeMixin";
 
     // Type URL of the message (e.g. `io.spine.examples.TaskCreated`).
     string message_type_url = 1 [(required) = true];

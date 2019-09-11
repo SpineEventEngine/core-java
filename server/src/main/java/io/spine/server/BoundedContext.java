@@ -40,9 +40,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.store.DefaultEventStore;
-import io.spine.server.integration.ExternalDispatcherFactory;
-import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.IntegrationBus;
+import io.spine.server.integration.IntegrationBroker;
 import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
@@ -55,7 +53,6 @@ import io.spine.type.TypeName;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -88,7 +85,7 @@ public abstract class BoundedContext implements Closeable, Logging {
     private final ContextSpec spec;
     private final CommandBus commandBus;
     private final EventBus eventBus;
-    private final IntegrationBus integrationBus;
+    private final IntegrationBroker broker;
     private final ImportBus importBus;
     private final Stand stand;
 
@@ -117,8 +114,8 @@ public abstract class BoundedContext implements Closeable, Logging {
         this.stand = builder.stand();
         this.tenantIndex = builder.buildTenantIndex();
 
+        this.broker = new IntegrationBroker();
         this.commandBus = builder.buildCommandBus();
-        this.integrationBus = builder.buildIntegrationBus();
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
@@ -132,7 +129,7 @@ public abstract class BoundedContext implements Closeable, Logging {
     protected final void init() {
         eventBus.registerWith(this);
         tenantIndex.registerWith(this);
-        integrationBus.registerWith(this);
+        broker.registerWith(this);
     }
     
     /**
@@ -256,21 +253,13 @@ public abstract class BoundedContext implements Closeable, Logging {
         }
     }
 
-    private void registerWithIntegrationBus(ExternalDispatcherFactory dispatcher) {
-        ExternalMessageDispatcher externalDispatcher =
-                dispatcher.createExternalDispatcher()
-                          .orElseThrow(missingExternalDispatcherFrom(dispatcher));
-
-        integrationBus().register(externalDispatcher);
-    }
-
     /**
      * Internal method for registering the passed event dispatcher with the buses of
      * this context.
      *
      * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
      * If the passed instance dispatches external events, registers it with
-     * the {@code IntegrationBus}.
+     * the {@code IntegrationBroker}.
      *
      * @throws SecurityException
      *         if called from outside the framework
@@ -288,7 +277,7 @@ public abstract class BoundedContext implements Closeable, Logging {
             systemReadSide.register(dispatcher);
         }
         if (dispatcher.dispatchesExternalEvents()) {
-            registerWithIntegrationBus(dispatcher);
+            broker().register(dispatcher);
         }
         if (dispatcher instanceof CommandDispatcherDelegate) {
             CommandDispatcherDelegate commandDispatcher = (CommandDispatcherDelegate) dispatcher;
@@ -321,16 +310,6 @@ public abstract class BoundedContext implements Closeable, Logging {
                 contextAware.registerWith(this);
             }
         }
-    }
-
-    /**
-     * Supplies {@code IllegalStateException} for the cases when dispatchers or dispatcher
-     * delegates do not provide an external message dispatcher.
-     */
-    private static
-    Supplier<IllegalStateException> missingExternalDispatcherFrom(Object dispatcher) {
-        return () -> newIllegalStateException(
-                "No external dispatcher provided by `%s`.", dispatcher);
     }
 
     /**
@@ -413,9 +392,10 @@ public abstract class BoundedContext implements Closeable, Logging {
         return eventBus;
     }
 
-    /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
-    public IntegrationBus integrationBus() {
-        return this.integrationBus;
+    /** Obtains instance of {@link IntegrationBroker} of this {@code BoundedContext}. */
+    @Internal
+    public IntegrationBroker broker() {
+        return this.broker;
     }
 
     /** Obtains instance of {@link ImportBus} of this {@code BoundedContext}. */
@@ -487,7 +467,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      *     <li>Closes associated {@link StorageFactory}.
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
-     *     <li>Closes {@link IntegrationBus}.
+     *     <li>Closes {@link IntegrationBroker}.
      *     <li>Closes {@link DefaultEventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
@@ -502,7 +482,7 @@ public abstract class BoundedContext implements Closeable, Logging {
     public void close() throws Exception {
         commandBus.close();
         eventBus.close();
-        integrationBus.close();
+        broker.close();
         stand.close();
         importBus.close();
         shutDownRepositories();

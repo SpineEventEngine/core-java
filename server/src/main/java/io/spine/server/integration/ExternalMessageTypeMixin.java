@@ -20,16 +20,22 @@
 
 package io.spine.server.integration;
 
-import java.util.Optional;
+import com.google.protobuf.Message;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.type.TypeUrl;
 
 /**
- * Creates external message dispatcher.
+ * A generated mixin interface for the {@code ExternalMessageType} type.
  */
-public interface ExternalDispatcherFactory {
+@GeneratedMixin
+interface ExternalMessageTypeMixin extends ExternalMessageTypeOrBuilder {
 
     /**
-     * Creates and returns new {@link ExternalMessageDispatcher} if implementing object
-     * dispatches at least one external message. Returns {@code Optional.empty()} otherwise.
+     * Obtains the message type as a Java class.
      */
-    Optional<ExternalMessageDispatcher> createExternalDispatcher();
+    default Class<? extends Message> asMessageClass() {
+        String url = getMessageTypeUrl();
+        TypeUrl typeUrl = TypeUrl.parse(url);
+        return typeUrl.getMessageClass();
+    }
 }
