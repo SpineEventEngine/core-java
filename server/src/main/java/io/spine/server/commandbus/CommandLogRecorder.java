@@ -31,7 +31,7 @@ import io.spine.system.server.event.CommandScheduled;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Forms a command log by posting system events in the corresponding {@link CommandFlowWatcher}
+ * Records a command log by posting system events in the corresponding {@link CommandFlowWatcher}
  * callbacks.
  */
 final class CommandLogRecorder implements CommandFlowWatcher {
