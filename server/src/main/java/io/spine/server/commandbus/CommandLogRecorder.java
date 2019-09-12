@@ -31,13 +31,14 @@ import io.spine.system.server.event.CommandScheduled;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Records all command flow steps as corresponding system events.
+ * Forms a command log by posting system events in the corresponding {@link CommandFlowWatcher}
+ * callbacks.
  */
-final class CommandFlowRecorder implements CommandFlowWatcher {
+final class CommandLogRecorder implements CommandFlowWatcher {
 
     private final WriteSideFunction function;
 
-    CommandFlowRecorder(WriteSideFunction function) {
+    CommandLogRecorder(WriteSideFunction function) {
         this.function = checkNotNull(function);
     }
 

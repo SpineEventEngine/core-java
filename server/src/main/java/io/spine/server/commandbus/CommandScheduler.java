@@ -133,7 +133,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
         checkState(
                 watcher != null,
                 "`%s` is not assigned. Please call `setWatcher()`.",
-                CommandFlowRecorder.class.getName()
+                CommandLogRecorder.class.getName()
         );
         return watcher;
     }
