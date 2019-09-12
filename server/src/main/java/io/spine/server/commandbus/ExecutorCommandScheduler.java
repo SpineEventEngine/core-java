@@ -20,6 +20,7 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Duration;
 import io.spine.core.Command;
 import io.spine.logging.Logging;
@@ -44,11 +45,16 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
     private static final int NANOS_IN_MILLISECOND = 1_000_000;
     private static final int MILLIS_IN_SECOND = 1_000;
 
-    private final ScheduledExecutorService executorService =
-            Executors.newScheduledThreadPool(MIN_THREAD_POOL_SIZE);
+    private final ScheduledExecutorService executorService;
+
+    @VisibleForTesting
+    public ExecutorCommandScheduler(ScheduledExecutorService executorService) {
+        super();
+        this.executorService = executorService;
+    }
 
     public ExecutorCommandScheduler() {
-        super();
+        this(Executors.newScheduledThreadPool(MIN_THREAD_POOL_SIZE));
     }
 
     @SuppressWarnings("FutureReturnValueIgnored") // Error handling is done manually.
@@ -72,7 +78,7 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
             post(command);
         } catch (Throwable t) {
             _error().withCause(t)
-                    .log("Error scheduling command `%s` with ID `%s`: `%s`.",
+                    .log("Error posting command `%s` with ID `%s`: `%s`.",
                          command.typeUrl(),
                          command.getId()
                                 .getUuid(),

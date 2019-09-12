@@ -29,10 +29,9 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandHandler;
-import io.spine.server.commandbus.given.ExecutorCommandSchedulerTestEnv.ThrowingFlowWatcher;
 import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
-import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.server.commandbus.given.ThreadPoolExecutors.NoOpScheduledThreadPoolExecutor;
+import io.spine.server.commandbus.given.ThreadPoolExecutors.ThrowingThreadPoolExecutor;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.logging.MuteLogging;
@@ -41,6 +40,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
@@ -72,7 +74,8 @@ class ExecutorCommandSchedulerTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        scheduler = new ExecutorCommandScheduler();
+        ScheduledExecutorService executorService = new NoOpScheduledThreadPoolExecutor();
+        scheduler = new ExecutorCommandScheduler(executorService);
         commandContext = GivenCommandContext.withScheduledDelayOf(DELAY);
 
         context = assumingTests()
@@ -124,22 +127,14 @@ class ExecutorCommandSchedulerTest {
     @MuteLogging
     @DisplayName("continue scheduling commands after error in `post`")
     void recoverFromPostFail() throws Exception {
-        // Inject a throwing watcher so the command `post` fails.
-        ThrowingFlowWatcher throwingWatcher = new ThrowingFlowWatcher();
 
-        CommandDispatcher handler = new TestCommandHandler();
-        BoundedContext context = assumingTests()
-                .addCommandDispatcher(handler)
-                .build();
-        CommandBus failingCommandBus = CommandBus
-                .newBuilder()
-                .injectContext(context)
-                .injectSystem(NoOpSystemWriteSide.INSTANCE)
-                .injectTenantIndex(TenantIndex.singleTenant())
-                .setFlowWatcher(throwingWatcher)
-                .build();
-        failingCommandBus.register(handler);
-        scheduler.setCommandBus(failingCommandBus);
+        // Inject a throwing executor service so the `post` operation fails.
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
+        ThrowingThreadPoolExecutor throwingExecutor = new ThrowingThreadPoolExecutor(service);
+        ExecutorCommandScheduler scheduler = new ExecutorCommandScheduler(throwingExecutor);
+
+        scheduler.setCommandBus(commandBus);
+        scheduler.setWatcher(watcher);
 
         Command cmd1 =
                 commandFactory.createBasedOnContext(createProjectMessage(), this.commandContext);
@@ -147,16 +142,17 @@ class ExecutorCommandSchedulerTest {
 
         waitForCommandProcessed();
 
-        assertThat(throwingWatcher.onDispatchCalled())
+        assertThat(throwingExecutor.throwScheduled())
                 .isTrue();
-
-        scheduler.setCommandBus(commandBus);
 
         Command cmd2 =
                 commandFactory.createBasedOnContext(createProjectMessage(), this.commandContext);
         scheduler.schedule(cmd2);
 
         assertScheduled(cmd2);
+
+        // Wait for the second command to be "processed" to avoid test output pollution.
+        waitForCommandProcessed();
     }
 
     @Test
