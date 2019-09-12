@@ -92,7 +92,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
         commandBus.postPreviouslyScheduled(command);
 
-        assertThat(flowWatcher.dispatched())
+        assertThat(watcher.dispatched())
                 .containsExactly(command);
     }
 

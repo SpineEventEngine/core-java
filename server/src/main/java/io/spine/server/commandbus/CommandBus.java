@@ -104,7 +104,7 @@ public final class CommandBus
         this.systemWriteSide = builder.system()
                                       .orElseThrow(systemNotSet());
         this.tenantConsumer = checkNotNull(builder.tenantConsumer);
-        this.watcher = checkNotNull(builder.flowWatcher);
+        this.watcher = checkNotNull(builder.watcher);
     }
 
     /**
@@ -253,7 +253,7 @@ public final class CommandBus
          * {@code BoundedContext}.
          */
         private @Nullable Boolean multitenant;
-        private CommandFlowWatcher flowWatcher;
+        private CommandFlowWatcher watcher;
         private Consumer<TenantId> tenantConsumer;
         private CommandScheduler commandScheduler;
 
@@ -274,8 +274,8 @@ public final class CommandBus
         }
 
         @Internal
-        public Builder setFlowWatcher(CommandFlowWatcher flowWatcher) {
-            this.flowWatcher = flowWatcher;
+        public Builder setWatcher(CommandFlowWatcher watcher) {
+            this.watcher = watcher;
             return this;
         }
 
@@ -295,12 +295,12 @@ public final class CommandBus
             @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
             SystemWriteSide writeSide = system().get();
 
-            if (flowWatcher == null) {
-                flowWatcher = new CommandFlowRecorder(
+            if (watcher == null) {
+                watcher = new CommandFlowRecorder(
                         (tenantId) -> delegatingTo(writeSide).get(tenantId)
                 );
             }
-            commandScheduler.setWatcher(flowWatcher);
+            commandScheduler.setWatcher(watcher);
 
             TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
             tenantConsumer = tenantIndex::keep;

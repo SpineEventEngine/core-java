@@ -82,7 +82,7 @@ abstract class AbstractCommandBusTestSuite {
     protected EventBus eventBus;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
-    protected MemoizingCommandFlowWatcher flowWatcher;
+    protected MemoizingCommandFlowWatcher watcher;
     protected TenantIndex tenantIndex;
     protected SystemWriteSide systemWriteSide;
     protected BoundedContext context;
@@ -169,14 +169,14 @@ abstract class AbstractCommandBusTestSuite {
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
 
         eventBus = context.eventBus();
-        flowWatcher = new MemoizingCommandFlowWatcher();
+        watcher = new MemoizingCommandFlowWatcher();
         commandBus = CommandBus
                 .newBuilder()
                 .setMultitenant(this.multitenant)
                 .injectContext(context)
                 .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
-                .setFlowWatcher(flowWatcher)
+                .setWatcher(watcher)
                 .build();
         requestFactory =
                 multitenant
