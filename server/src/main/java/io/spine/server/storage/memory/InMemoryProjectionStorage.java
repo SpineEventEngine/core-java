@@ -39,9 +39,10 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 /**
  * The in-memory implementation of {@link ProjectionStorage}.
  *
- * @param <I> the type of stream projection IDs
+ * @param <I>
+ *         the type of stream projection IDs
  */
-public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
+public final class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     /** The storage for projection entities. */
     private final InMemoryRecordStorage<I> recordStorage;

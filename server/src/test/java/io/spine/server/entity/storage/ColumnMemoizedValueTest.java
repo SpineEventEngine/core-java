@@ -61,9 +61,9 @@ class ColumnMemoizedValueTest {
             A - 3 values of the same column memoized on the same instance of Entity;
             A-mutated - the value of the same column on the same object but after the field change;
             B - the value of a different column on the same instance;
-            C - the value created "by hand" with a different column but same memoized value (used
-                to ensure that MemoizedValue#equals takes into account both the column and the
-                value).
+            C - the value of a different column but with the exact same memoized value (used
+                to ensure that MemoizedValue#equals takes into account both the value and the
+                column).
          */
 
         EntityColumn columnA = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);

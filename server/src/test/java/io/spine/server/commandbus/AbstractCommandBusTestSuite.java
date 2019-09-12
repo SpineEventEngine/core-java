@@ -38,8 +38,8 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
+import io.spine.server.commandbus.given.ExecutorServices.NoOpScheduledThreadPoolExecutor;
 import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
-import io.spine.server.commandbus.given.ThreadPoolExecutors.NoOpScheduledThreadPoolExecutor;
 import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemWriteSide;
@@ -55,6 +55,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -158,8 +159,8 @@ abstract class AbstractCommandBusTestSuite {
     void setUp() {
         ModelTests.dropAllModels();
 
-        NoOpScheduledThreadPoolExecutor executorService = new NoOpScheduledThreadPoolExecutor();
-        ExecutorCommandScheduler scheduler = new ExecutorCommandScheduler(executorService);
+        ScheduledExecutorService executorService = new NoOpScheduledThreadPoolExecutor();
+        CommandScheduler scheduler = new ExecutorCommandScheduler(executorService);
         ServerEnvironment.instance()
                          .scheduleCommandsUsing(() -> scheduler);
 

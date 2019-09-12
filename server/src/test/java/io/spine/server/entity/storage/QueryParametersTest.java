@@ -86,8 +86,7 @@ class QueryParametersTest {
     /**
      * Creates new {@code QueryParameters.Builder} instance.
      *
-     * @apiNote Provided for brevity of tests while avoiding {@code BadImport} ErrorProne
-     *         warning.
+     * @apiNote Provided for brevity of tests while avoiding {@code BadImport} ErrorProne warning.
      */
     static QueryParameters.Builder newBuilder() {
         return QueryParameters.newBuilder();

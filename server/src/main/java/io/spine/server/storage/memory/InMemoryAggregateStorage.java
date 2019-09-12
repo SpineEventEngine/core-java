@@ -35,7 +35,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * In-memory storage for aggregate events and snapshots.
  *
- * @param <I> the type of IDs of aggregates managed by this storage
+ * @param <I>
+ *         the type of IDs of aggregates managed by this storage
  *
  */
 final class InMemoryAggregateStorage<I> extends AggregateStorage<I> {

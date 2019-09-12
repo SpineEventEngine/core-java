@@ -33,14 +33,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Provides the different variations of {@link java.util.concurrent.ExecutorService}.
  */
-public final class ThreadPoolExecutors {
+public final class ExecutorServices {
 
     /** Prevents instantiation of this test env class. */
-    private ThreadPoolExecutors() {
+    private ExecutorServices() {
     }
 
     /**
-     * A NO-OP executor.
+     * A NO-OP executor service.
      *
      * <p>In tests, it's often necessary to check that the operation is scheduled, but its actual
      * execution is redundant and can even lead to errors.
@@ -51,7 +51,7 @@ public final class ThreadPoolExecutors {
     public static final class NoOpScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor {
 
         /**
-         * Construct a new instance.
+         * Constructs a new instance.
          *
          * <p>Specifies {@code 1} as a thread count because it doesn't play any part for this
          * executor.
@@ -63,7 +63,7 @@ public final class ThreadPoolExecutors {
         /**
          * Does nothing.
          *
-         * <p>Returns {@code null} as the result of {@code schedule} in command bus tests is
+         * <p>Returns {@code null} as the result of {@code schedule} for command bus is always
          * ignored.
          */
         @Override
@@ -74,7 +74,7 @@ public final class ThreadPoolExecutors {
         /**
          * Does nothing.
          *
-         * <p>Returns {@code null} as the result of {@code schedule} in command bus tests is
+         * <p>Returns {@code null} as the result of {@code schedule} for command bus is always
          * ignored.
          */
         @Override

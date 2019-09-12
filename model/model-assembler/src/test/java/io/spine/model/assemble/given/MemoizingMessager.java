@@ -30,9 +30,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 
 /**
- * Memoizes the given message and its {@linkplain Diagnostic.Kind kind}.
- *
- * <p>Other parameters are ignored.
+ * Memoizes the content of a given message and its {@linkplain Diagnostic.Kind kind}.
  */
 public final class MemoizingMessager implements Messager {
 
