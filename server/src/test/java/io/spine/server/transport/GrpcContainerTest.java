@@ -56,7 +56,7 @@ class GrpcContainerTest {
     @AfterEach
     void tearDown() {
         if (!grpcContainer.isShutdown()) {
-            grpcContainer.shutdown();
+            grpcContainer.shutdownNowAndWait();
         }
     }
 
