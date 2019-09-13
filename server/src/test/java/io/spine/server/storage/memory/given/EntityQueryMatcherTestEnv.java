@@ -50,7 +50,7 @@ public final class EntityQueryMatcherTestEnv {
     }
 
     /**
-     * The {@link Any} value hold by the corresponding {@linkplain #anyColumn() entity column}.
+     * The {@link Any} value held by the corresponding {@linkplain #anyColumn() entity column}.
      */
     public static Any anyValue() {
         Project someMessage = Sample.messageOfType(Project.class);
@@ -66,7 +66,7 @@ public final class EntityQueryMatcherTestEnv {
     }
 
     /**
-     * The {@code boolean} value hold by the corresponding {@linkplain #booleanColumn() entity
+     * The {@code boolean} value held by the corresponding {@linkplain #booleanColumn() entity
      * column}.
      */
     public static boolean booleanValue() {
