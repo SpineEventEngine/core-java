@@ -42,20 +42,33 @@ public final class EntityQueryMatcherTestEnv {
     private EntityQueryMatcherTestEnv() {
     }
 
+    /**
+     * An {@code EntityColumn} which holds an {@link Any} instance.
+     */
     public static EntityColumn anyColumn() {
         return column("getAny");
     }
 
+    /**
+     * The {@link Any} value hold by the corresponding {@linkplain #anyColumn() entity column}.
+     */
     public static Any anyValue() {
         Project someMessage = Sample.messageOfType(Project.class);
         Any value = AnyPacker.pack(someMessage);
         return value;
     }
 
+    /**
+     * An {@code EntityColumn} which holds a {@code boolean} value.
+     */
     public static EntityColumn booleanColumn() {
         return column("getBoolean");
     }
 
+    /**
+     * The {@code boolean} value hold by the corresponding {@linkplain #booleanColumn() entity
+     * column}.
+     */
     public static boolean booleanValue() {
         return true;
     }
