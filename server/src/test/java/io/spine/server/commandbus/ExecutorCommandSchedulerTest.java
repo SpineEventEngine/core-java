@@ -29,9 +29,9 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandHandler;
-import io.spine.server.commandbus.given.ExecutorServices.NoOpScheduledThreadPoolExecutor;
-import io.spine.server.commandbus.given.ExecutorServices.ThrowingThreadPoolExecutor;
+import io.spine.server.commandbus.given.DirectScheduledExecutor;
 import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
+import io.spine.server.commandbus.given.ThrowingScheduledExecutor;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.logging.MuteLogging;
@@ -74,7 +74,7 @@ class ExecutorCommandSchedulerTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        ScheduledExecutorService executorService = new NoOpScheduledThreadPoolExecutor();
+        ScheduledExecutorService executorService = new DirectScheduledExecutor();
         scheduler = new ExecutorCommandScheduler(executorService);
         commandContext = GivenCommandContext.withScheduledDelayOf(DELAY);
 
@@ -130,7 +130,7 @@ class ExecutorCommandSchedulerTest {
 
         // Inject a throwing executor service so the `post` operation fails.
         ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
-        ThrowingThreadPoolExecutor throwingExecutor = new ThrowingThreadPoolExecutor(service);
+        ThrowingScheduledExecutor throwingExecutor = new ThrowingScheduledExecutor(service);
         ExecutorCommandScheduler scheduler = new ExecutorCommandScheduler(throwingExecutor);
 
         scheduler.setCommandBus(commandBus);
