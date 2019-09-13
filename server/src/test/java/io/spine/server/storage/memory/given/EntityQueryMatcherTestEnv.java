@@ -30,6 +30,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 
+/**
+ * The test environment for {@link io.spine.server.storage.memory.EntityQueryMatcher} tests.
+ *
+ * <p>Provides various types of {@linkplain EntityColumn entity columns} that can be used to
+ * emulate a client-side query.
+ */
 public final class EntityQueryMatcherTestEnv {
 
     /** Prevents instantiation of this test env class. */
