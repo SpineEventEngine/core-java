@@ -296,7 +296,7 @@ public final class CommandBus
             SystemWriteSide writeSide = system().get();
 
             if (watcher == null) {
-                watcher = new CommandLogRecorder(
+                watcher = new CommandFlightRecorder(
                         (tenantId) -> delegatingTo(writeSide).get(tenantId)
                 );
             }
