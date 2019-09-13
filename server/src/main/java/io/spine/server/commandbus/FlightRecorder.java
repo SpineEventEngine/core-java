@@ -34,11 +34,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Records a command log by posting the corresponding events into the
  * {@link io.spine.system.server.SystemContext system context}.
  */
-final class CommandFlightRecorder implements CommandFlowWatcher {
+final class FlightRecorder implements CommandFlowWatcher {
 
     private final WriteSideFunction function;
 
-    CommandFlightRecorder(WriteSideFunction function) {
+    FlightRecorder(WriteSideFunction function) {
         this.function = checkNotNull(function);
     }
 
