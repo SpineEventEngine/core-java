@@ -85,7 +85,7 @@ abstract class SpineAnnotationProcessorTest {
 
         MemoizedMessage received = messager.firstMessage();
         assertThat(received.kind()).isEqualTo(ERROR);
-        assertThat(received.messageAsString()).isEqualTo(errorMessage);
+        assertThat(received.message()).isEqualTo(errorMessage);
     }
 
     @Test
@@ -99,6 +99,6 @@ abstract class SpineAnnotationProcessorTest {
 
         MemoizedMessage received = messager.firstMessage();
         assertThat(received.kind()).isEqualTo(WARNING);
-        assertThat(received.messageAsString()).isEqualTo(message);
+        assertThat(received.message()).isEqualTo(message);
     }
 }

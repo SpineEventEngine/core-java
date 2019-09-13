@@ -70,21 +70,28 @@ public final class MemoizingMessager implements Messager {
         messages.add(message);
     }
 
+    /**
+     * A message received by {@code MemoizingMessager}.
+     *
+     * <p>Only the message content and its {@linkplain Diagnostic.Kind kind} are memoized. Other
+     * {@code printMessage} params are ignored.
+     */
     public static final class MemoizedMessage {
+
         private final Diagnostic.Kind kind;
-        private final CharSequence message;
+        private final String message;
 
         private MemoizedMessage(Diagnostic.Kind kind, CharSequence message) {
             this.kind = kind;
-            this.message = message;
+            this.message = message.toString();
         }
 
         public Diagnostic.Kind kind() {
             return kind;
         }
 
-        public String messageAsString() {
-            return message.toString();
+        public String message() {
+            return message;
         }
     }
 }
