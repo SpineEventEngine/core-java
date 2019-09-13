@@ -59,7 +59,7 @@ import static io.spine.system.server.WriteSideFunction.delegatingTo;
  * Dispatches the incoming commands to the corresponding handler.
  */
 @Internal
-public class CommandBus
+public final class CommandBus
         extends UnicastBus<Command, CommandEnvelope, CommandClass, CommandDispatcher> {
 
     /** Consumes tenant IDs from incoming commands. */
@@ -104,7 +104,7 @@ public class CommandBus
         this.systemWriteSide = builder.system()
                                       .orElseThrow(systemNotSet());
         this.tenantConsumer = checkNotNull(builder.tenantConsumer);
-        this.watcher = checkNotNull(builder.flowWatcher);
+        this.watcher = checkNotNull(builder.watcher);
     }
 
     /**
@@ -253,7 +253,7 @@ public class CommandBus
          * {@code BoundedContext}.
          */
         private @Nullable Boolean multitenant;
-        private CommandFlowWatcher flowWatcher;
+        private CommandFlowWatcher watcher;
         private Consumer<TenantId> tenantConsumer;
         private CommandScheduler commandScheduler;
 
@@ -273,6 +273,12 @@ public class CommandBus
             return this;
         }
 
+        @Internal
+        public Builder setWatcher(CommandFlowWatcher watcher) {
+            this.watcher = watcher;
+            return this;
+        }
+
         /**
          * Builds an instance of {@link CommandBus}.
          *
@@ -288,10 +294,13 @@ public class CommandBus
                                      .newCommandScheduler();
             @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
             SystemWriteSide writeSide = system().get();
-            flowWatcher = new CommandFlowWatcher(
-                    (tenantId) -> delegatingTo(writeSide).get(tenantId)
-            );
-            commandScheduler.setWatcher(flowWatcher);
+
+            if (watcher == null) {
+                watcher = new FlightRecorder(
+                        (tenantId) -> delegatingTo(writeSide).get(tenantId)
+                );
+            }
+            commandScheduler.setWatcher(watcher);
 
             TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
             tenantConsumer = tenantIndex::keep;
@@ -311,11 +320,8 @@ public class CommandBus
 
         @CheckReturnValue
         @SuppressWarnings("CheckReturnValue")
-            /* Calling registry() enforces creating the registry to make spying for CommandBus
-               instances in tests work. */
         private CommandBus createCommandBus() {
             CommandBus commandBus = new CommandBus(this);
-            commandBus.registry();
             return commandBus;
         }
     }

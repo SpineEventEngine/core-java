@@ -21,20 +21,17 @@
 package io.spine.server.transport.memory;
 
 import com.google.protobuf.Any;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.transport.ChannelId;
-import io.spine.server.transport.memory.given.SingleThreadInMemSubscriberTestEnv.ThrowingObserver;
+import io.spine.server.transport.memory.given.ThrowingObserver;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("SingleThreadInMemSubscriber should")
 class SingleThreadInMemSubscriberTest {
@@ -44,15 +41,14 @@ class SingleThreadInMemSubscriberTest {
      */
     private static final int SYNC_TIMEOUT_MILLS = 500;
 
-    @SuppressWarnings("unchecked") // OK for testing mocks.
     @Test
     @MuteLogging
     @DisplayName("not halt after observer throws an error")
-    void recoverFromObserverError() {
+    void recoverFromObserverError() throws InterruptedException {
         SingleThreadInMemSubscriber subscriber =
                 new SingleThreadInMemSubscriber(ChannelId.getDefaultInstance());
 
-        StreamObserver<ExternalMessage> throwingObserver = spy(new ThrowingObserver());
+        ThrowingObserver throwingObserver = new ThrowingObserver();
         subscriber.addObserver(throwingObserver);
 
         Any id = Identifier.pack(newUuid());
@@ -61,13 +57,25 @@ class SingleThreadInMemSubscriberTest {
                 .setId(id)
                 .build();
         subscriber.onMessage(externalMessage);
-        verify(throwingObserver, timeout(SYNC_TIMEOUT_MILLS)).onNext(externalMessage);
+
+        waitForMessage();
+
+        assertThat(throwingObserver.onNextCalled())
+                .isTrue();
 
         subscriber.removeObserver(throwingObserver);
 
-        StreamObserver observerMock = mock(StreamObserver.class);
-        subscriber.addObserver(observerMock);
+        MemoizingObserver<ExternalMessage> memoizingObserver = new MemoizingObserver<>();
+        subscriber.addObserver(memoizingObserver);
         subscriber.onMessage(externalMessage);
-        verify(observerMock, timeout(SYNC_TIMEOUT_MILLS)).onNext(externalMessage);
+
+        waitForMessage();
+
+        assertThat(memoizingObserver.firstResponse())
+                .isEqualTo(externalMessage);
+    }
+
+    private static void waitForMessage() throws InterruptedException {
+        Thread.sleep(SYNC_TIMEOUT_MILLS);
     }
 }

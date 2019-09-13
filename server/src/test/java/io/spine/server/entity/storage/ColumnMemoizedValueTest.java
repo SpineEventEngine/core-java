@@ -34,7 +34,6 @@ import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Column MemoizedValue should")
@@ -62,13 +61,13 @@ class ColumnMemoizedValueTest {
             A - 3 values of the same column memoized on the same instance of Entity;
             A-mutated - the value of the same column on the same object but after the field change;
             B - the value of a different column on the same instance;
-            C - the value of a mock column (used to ensure that MemoizedValue#equals is decoupled
-                from the EntityColumn#equals).
+            C - the value of a different column but with the exact same memoized value (used
+                to ensure that MemoizedValue#equals takes into account both the value and the
+                column).
          */
 
         EntityColumn columnA = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
         EntityColumn columnB = findColumn(TestEntity.class, ARCHIVED_COLUMN);
-        EntityColumn columnC = mock(EntityColumn.class);
 
         TestEntity entity = new TestEntity("ID");
 
@@ -82,7 +81,7 @@ class ColumnMemoizedValueTest {
 
         MemoizedValue valueB = columnB.memoizeFor(entity);
 
-        MemoizedValue valueC = new MemoizedValue(columnC, entity.state());
+        MemoizedValue valueC = new MemoizedValue(columnB, entity.state());
 
         new EqualsTester().addEqualityGroup(valueA1, valueA2, valueA3)
                           .addEqualityGroup(valueAMutated)

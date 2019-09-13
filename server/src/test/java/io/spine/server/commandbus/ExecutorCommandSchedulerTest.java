@@ -20,36 +20,37 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.truth.Correspondence;
+import com.google.common.truth.Correspondence.BinaryPredicate;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.system.server.NoOpSystemWriteSide;
-import io.spine.system.server.SystemWriteSide;
+import io.spine.server.BoundedContext;
+import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandHandler;
+import io.spine.server.commandbus.given.DirectScheduledExecutor;
+import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
+import io.spine.server.commandbus.given.ThrowingScheduledExecutor;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.Durations2.milliseconds;
+import static io.spine.server.BoundedContextBuilder.assumingTests;
 import static io.spine.server.commandbus.Given.CommandMessage.addTask;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("ExecutorCommandScheduler should")
 class ExecutorCommandSchedulerTest {
@@ -58,7 +59,7 @@ class ExecutorCommandSchedulerTest {
 
     private static final Duration DELAY = milliseconds(DELAY_MS);
 
-    // Wait a bit longer in the verifier to ensure the command was processed.
+    // Wait a bit longer to ensure the command was processed.
     private static final int WAIT_FOR_PROPAGATION_MS = 300;
 
     private final CommandFactory commandFactory =
@@ -66,43 +67,41 @@ class ExecutorCommandSchedulerTest {
 
     private CommandBus commandBus;
     private CommandScheduler scheduler;
-    private CommandContext context;
+    private MemoizingCommandFlowWatcher watcher;
+    private CommandContext commandContext;
+    private BoundedContext context;
 
     @BeforeEach
     void setUp() {
-        scheduler = spy(ExecutorCommandScheduler.class);
-        context = GivenCommandContext.withScheduledDelayOf(DELAY);
+        ModelTests.dropAllModels();
+        ScheduledExecutorService executorService = new DirectScheduledExecutor();
+        scheduler = new ExecutorCommandScheduler(executorService);
+        commandContext = GivenCommandContext.withScheduledDelayOf(DELAY);
 
-        commandBus = mock(CommandBus.class);
+        context = assumingTests()
+                .addCommandDispatcher(new TestCommandHandler())
+                .build();
+        commandBus = context.commandBus();
+
+        watcher = new MemoizingCommandFlowWatcher();
         scheduler.setCommandBus(commandBus);
-
-        // System BC integration is NOT tested in this suite.
-        SystemWriteSide systemWriteSide = NoOpSystemWriteSide.INSTANCE;
-        CommandFlowWatcher flowWatcher = new CommandFlowWatcher((t) -> systemWriteSide);
-        scheduler.setWatcher(flowWatcher);
+        scheduler.setWatcher(watcher);
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws Exception {
         scheduler.shutdown();
+        context.close();
     }
 
     @Test
     @DisplayName("schedule command if delay is set")
     void scheduleCmdIfDelaySet() {
-        Command cmdPrimary =
-                commandFactory.createBasedOnContext(createProjectMessage(), context);
-        ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
+        Command command =
+                commandFactory.createBasedOnContext(createProjectMessage(), commandContext);
+        scheduler.schedule(command);
 
-        scheduler.schedule(cmdPrimary);
-
-        verify(scheduler, never()).post(any(Command.class));
-        verify(scheduler, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS))
-                .post(commandCaptor.capture());
-        Command actualCmd = commandCaptor.getValue();
-        Command expectedCmd =
-                CommandScheduler.setSchedulingTime(cmdPrimary, getSchedulingTime(actualCmd));
-        assertEquals(expectedCmd, actualCmd);
+        assertScheduledExactly(command);
     }
 
     @Test
@@ -110,40 +109,50 @@ class ExecutorCommandSchedulerTest {
     void notScheduleCmdWithSameId() {
         String id = newUuid();
 
-        Command expectedCmd = commandFactory.createBasedOnContext(createProjectMessage(id),
-                                                                  context);
+        Command firstCommand = commandFactory.createBasedOnContext(createProjectMessage(id),
+                                                                   commandContext);
 
-        Command extraCmd = commandFactory.createBasedOnContext(addTask(id), context)
-                                         .toBuilder()
-                                         .setId(expectedCmd.getId())
-                                         .build();
+        Command extraCommand = commandFactory.createBasedOnContext(addTask(id), commandContext)
+                                             .toBuilder()
+                                             .setId(firstCommand.getId())
+                                             .build();
 
-        scheduler.schedule(expectedCmd);
-        scheduler.schedule(extraCmd);
+        scheduler.schedule(firstCommand);
+        scheduler.schedule(extraCommand);
 
-        verify(scheduler, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).post(any(Command.class));
-        verify(scheduler, never()).post(extraCmd);
+        assertScheduledExactly(firstCommand);
     }
 
     @Test
     @MuteLogging
     @DisplayName("continue scheduling commands after error in `post`")
-    void recoverFromPostFail() {
-        doThrow(new IllegalStateException("Post failed"))
-                .when(commandBus)
-                .postPreviouslyScheduled(any());
-        Command cmd1 =
-                commandFactory.createBasedOnContext(createProjectMessage(), context);
-        scheduler.schedule(cmd1);
-        verify(scheduler, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).post(any(Command.class));
+    void recoverFromPostFail() throws Exception {
 
-        doCallRealMethod()
-                .when(commandBus)
-                .postPreviouslyScheduled(any());
+        // Inject a throwing executor service so the `post` operation fails.
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
+        ThrowingScheduledExecutor throwingExecutor = new ThrowingScheduledExecutor(service);
+        ExecutorCommandScheduler scheduler = new ExecutorCommandScheduler(throwingExecutor);
+
+        scheduler.setCommandBus(commandBus);
+        scheduler.setWatcher(watcher);
+
+        Command cmd1 =
+                commandFactory.createBasedOnContext(createProjectMessage(), this.commandContext);
+        scheduler.schedule(cmd1);
+
+        waitForCommandProcessed();
+
+        assertThat(throwingExecutor.throwScheduled())
+                .isTrue();
+
         Command cmd2 =
-                commandFactory.createBasedOnContext(createProjectMessage(), context);
+                commandFactory.createBasedOnContext(createProjectMessage(), this.commandContext);
         scheduler.schedule(cmd2);
-        verify(commandBus, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).dispatch(any());
+
+        assertScheduled(cmd2);
+
+        // Wait for the second command to be "processed" to avoid test output pollution.
+        waitForCommandProcessed();
     }
 
     @Test
@@ -159,9 +168,41 @@ class ExecutorCommandSchedulerTest {
         fail("Must throw an exception as it is shutdown.");
     }
 
+    private void assertScheduledExactly(Command expected) {
+        assertThat(watcher.scheduled())
+                .hasSize(1);
+
+        Command scheduled = watcher.scheduled()
+                                   .get(0);
+        Command expectedCmd =
+                CommandScheduler.setSchedulingTime(expected, getSchedulingTime(scheduled));
+        assertThat(scheduled)
+                .isEqualTo(expectedCmd);
+    }
+
+    private void assertScheduled(Command expected) {
+        BinaryPredicate<Command, Command> isScheduled =
+                ExecutorCommandSchedulerTest::isEqualToScheduled;
+        Correspondence<Command, Command> correspondence =
+                Correspondence.from(isScheduled, "is the scheduled command");
+        assertThat(watcher.scheduled())
+                .comparingElementsUsing(correspondence)
+                .contains(expected);
+    }
+
+    private static boolean isEqualToScheduled(Command scheduled, Command command) {
+        Command withSchedulingTime =
+                CommandScheduler.setSchedulingTime(command, getSchedulingTime(scheduled));
+        return withSchedulingTime.equals(scheduled);
+    }
+
     private static Timestamp getSchedulingTime(Command cmd) {
         Timestamp time = cmd.getSystemProperties()
                             .getSchedulingTime();
         return time;
+    }
+
+    private static void waitForCommandProcessed() throws InterruptedException {
+        Thread.sleep(DELAY_MS + WAIT_FOR_PROPAGATION_MS);
     }
 }

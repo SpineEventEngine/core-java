@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <p>Uses {@link ServerServiceDefinition}s of each service.
  */
-public class GrpcContainer {
+public final class GrpcContainer {
 
     private static final String SERVER_NOT_STARTED_MSG =
             "gRPC server was not started or is shut down already.";
@@ -56,7 +56,7 @@ public class GrpcContainer {
         return new Builder();
     }
 
-    protected GrpcContainer(Builder builder) {
+    private GrpcContainer(Builder builder) {
         this.port = builder.getPort();
         this.services = builder.getServices();
     }
@@ -198,6 +198,11 @@ public class GrpcContainer {
                 e.printStackTrace(System.err);
             }
         };
+    }
+
+    @VisibleForTesting
+    Server grpcServer() {
+        return grpcServer;
     }
 
     public static class Builder {

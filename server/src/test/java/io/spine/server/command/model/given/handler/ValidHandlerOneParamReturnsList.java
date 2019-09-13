@@ -32,14 +32,13 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
  * Provides a method which accepts one parameter and returns a list of messages.
- *
- * @apiNote Do not make this class {@code final} because it is spied on by Mockito.
  */
-public class ValidHandlerOneParamReturnsList extends TestCommandHandler {
+public final class ValidHandlerOneParamReturnsList extends TestCommandHandler {
 
     @Assign
     @VisibleForTesting
     public List<Message> handleTest(RefCreateProject cmd) {
+        addHandledCommand(cmd);
         List<Message> result = newLinkedList();
         result.add(projectCreated(cmd.getProjectId()));
         return result;

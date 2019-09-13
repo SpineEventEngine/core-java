@@ -35,6 +35,7 @@ public class ValidHandlerTwoParams extends TestCommandHandler {
     @Assign
     @VisibleForTesting
     public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
+        addHandledCommand(cmd);
         return projectCreated(cmd.getProjectId());
     }
 }

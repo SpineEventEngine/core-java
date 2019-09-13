@@ -49,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @DisplayName("EntityRecordWithColumns should")
 class EntityRecordWithColumnsTest {
@@ -90,7 +89,13 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        MemoizedValue mockValue = mock(MemoizedValue.class);
+        TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                   .withVersion(1)
+                                                   .build();
+        String columnName = archived.name();
+        EntityColumn column = findColumn(entity.getClass(), columnName);
+        boolean columnValue = false;
+        MemoizedValue memoizedValue = new MemoizedValue(column, columnValue);
         EntityRecordWithColumns noFieldsEnvelope = newEmptyRecord();
         EntityRecordWithColumns emptyFieldsEnvelope = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(),
@@ -99,7 +104,7 @@ class EntityRecordWithColumnsTest {
         EntityRecordWithColumns notEmptyFieldsEnvelope =
                 EntityRecordWithColumns.of(
                         EntityRecord.getDefaultInstance(),
-                        singletonMap("key", mockValue)
+                        singletonMap("key", memoizedValue)
                 );
         new EqualsTester()
                 .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
@@ -145,9 +150,14 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("column values")
         void columnValues() {
-            MemoizedValue mockValue = mock(MemoizedValue.class);
-            String columnName = "some-key";
-            Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, mockValue);
+            TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                       .withVersion(1)
+                                                       .build();
+            String columnName = archived.name();
+            EntityColumn column = findColumn(entity.getClass(), columnName);
+            boolean columnValue = false;
+            MemoizedValue memoizedValue = new MemoizedValue(column, columnValue);
+            Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, memoizedValue);
             EntityRecordWithColumns record = EntityRecordWithColumns.of(
                     Sample.messageOfType(EntityRecord.class),
                     columnsExpected
@@ -155,7 +165,7 @@ class EntityRecordWithColumnsTest {
             Collection<String> columnNames = record.getColumnNames();
             assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
-            assertEquals(mockValue, record.getColumnValue(columnName));
+            assertEquals(memoizedValue, record.getColumnValue(columnName));
         }
     }
 

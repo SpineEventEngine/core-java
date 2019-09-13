@@ -18,30 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
-
-import io.spine.annotation.Internal;
-import io.spine.server.type.CommandEnvelope;
-
 /**
- * A set of callbacks invoked when a command processing reaches a given point.
+ * Test environment for the {@link io.spine.model.assemble} package.
  */
-@Internal
-public interface CommandFlowWatcher {
 
-    /**
-     * A callback invoked when a command is dispatched.
-     *
-     * @param command
-     *         the dispatched command
-     */
-    void onDispatchCommand(CommandEnvelope command);
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.model.assemble.given;
 
-    /**
-     * A callback invoked when a command is scheduled.
-     *
-     * @param command
-     *         the scheduled command
-     */
-    void onScheduled(CommandEnvelope command);
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

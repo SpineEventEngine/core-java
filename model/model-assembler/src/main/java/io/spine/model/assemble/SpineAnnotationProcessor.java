@@ -20,6 +20,8 @@
 
 package io.spine.model.assemble;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.SPI;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -63,7 +65,7 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
 
     @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
         // Initialized in the synchronized `init` method.
-    private Map<String, String> options;
+    private ImmutableMap<String, String> options;
 
     /**
      * Retrieves the supported by this processor annotation type.
@@ -124,7 +126,7 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
     public final synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.messager = processingEnv.getMessager();
-        this.options = processingEnv.getOptions();
+        this.options = ImmutableMap.copyOf(processingEnv.getOptions());
     }
 
     @Override
@@ -193,5 +195,15 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
     protected final Optional<String> getOption(String optName) {
         String optValue = options.get(optName);
         return Optional.ofNullable(optValue);
+    }
+
+    @VisibleForTesting
+    void setMessager(Messager messager) {
+        this.messager = messager;
+    }
+
+    @VisibleForTesting
+    void setOptions(Map<String, String> options) {
+        this.options = ImmutableMap.copyOf(options);
     }
 }

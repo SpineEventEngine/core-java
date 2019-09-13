@@ -22,10 +22,10 @@ package io.spine.server;
 import com.google.common.truth.ThrowableSubject;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
-import io.spine.client.ResponseFormat;
 import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.Given.ProjectDetailsRepository;
+import io.spine.server.Given.ThrowingProjectDetailsRepository;
 import io.spine.server.model.UnknownEntityTypeException;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
@@ -47,8 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 @DisplayName("QueryService should")
 class QueryServiceTest {
@@ -56,40 +54,13 @@ class QueryServiceTest {
     private Set<BoundedContext> boundedContexts;
     private QueryService service;
     private MemoizingObserver<QueryResponse> responseObserver;
-    private ProjectDetailsRepository projectDetailsRepository;
 
     @SuppressWarnings("CheckReturnValue") // Calling builder.
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
 
-        boundedContexts = newHashSet();
-        responseObserver = memoizingObserver();
-        // Create Projects Bounded Context with one repository and one projection.
-        BoundedContext projectsContext = BoundedContext
-                .singleTenant(PROJECTS_CONTEXT_NAME)
-                .build();
-        Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
-        projectsContext.register(projectRepo);
-        projectDetailsRepository = spy(new ProjectDetailsRepository());
-        projectsContext.register(projectDetailsRepository);
-
-        boundedContexts.add(projectsContext);
-
-        // Create Customers Bounded Context with one repository.
-        BoundedContext customersContext = BoundedContext
-                .singleTenant("Customers")
-                .build();
-        Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
-        customersContext.register(customerRepo);
-        boundedContexts.add(customersContext);
-
-        QueryService.Builder queryService = QueryService.newBuilder();
-        for (BoundedContext context : boundedContexts) {
-            queryService.add(context);
-        }
-
-        service = spy(queryService.build());
+        setUpService(new ProjectDetailsRepository());
     }
 
     @AfterEach
@@ -137,8 +108,7 @@ class QueryServiceTest {
     @MuteLogging
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
-        when(projectDetailsRepository.loadAllRecords(ResponseFormat.getDefaultInstance()))
-                .thenThrow(RuntimeException.class);
+        setUpService(new ThrowingProjectDetailsRepository());
         Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
@@ -156,6 +126,38 @@ class QueryServiceTest {
         assertError.isInstanceOf(UnknownEntityTypeException.class);
         String unknownTypeUrl = typeOf(query).value();
         assertError.hasMessageThat().contains(unknownTypeUrl);
+    }
+
+    /**
+     * Sets up the {@link QueryService} based on a context with a single given repository.
+     */
+    private void setUpService(ProjectDetailsRepository repository) {
+        boundedContexts = newHashSet();
+        responseObserver = memoizingObserver();
+        // Create Projects Bounded Context with one repository and one projection.
+        BoundedContext projectsContext = BoundedContext
+                .singleTenant(PROJECTS_CONTEXT_NAME)
+                .build();
+        Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
+        projectsContext.register(projectRepo);
+        projectsContext.register(repository);
+
+        boundedContexts.add(projectsContext);
+
+        // Create Customers Bounded Context with one repository.
+        BoundedContext customersContext = BoundedContext
+                .singleTenant("Customers")
+                .build();
+        Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
+        customersContext.register(customerRepo);
+        boundedContexts.add(customersContext);
+
+        QueryService.Builder queryService = QueryService.newBuilder();
+        for (BoundedContext context : boundedContexts) {
+            queryService.add(context);
+        }
+
+        service = queryService.build();
     }
 
     private static void checkOkResponse(MemoizingObserver<QueryResponse> responseObserver) {

@@ -35,6 +35,7 @@ public class ValidHandlerButPrivate extends TestCommandHandler {
     // do not modify the state of the instance.
     @Assign
     private RefProjectCreated handleTest(RefCreateProject cmd) {
+        addHandledCommand(cmd);
         return projectCreated(cmd.getProjectId());
     }
 }

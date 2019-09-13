@@ -21,34 +21,24 @@
 package io.spine.server.entity.storage;
 
 import com.google.protobuf.AbstractMessage;
-import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AbstractMessageType;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AnyType;
+import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.DoubleType;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.GeneratedMessageType;
-import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.IntegerType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.entity.storage.given.SimpleColumn.doubleColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.doublePrimitiveColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.stringColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.timestampColumn;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("ColumnTypeRegistry should")
 class ColumnTypeRegistryTest {
-
-    private static <T> EntityColumn mockProperty(Class<T> cls) {
-        EntityColumn column = mock(EntityColumn.class);
-        when(column.type()).thenReturn(cls);
-        when(column.persistedType()).thenReturn(cls);
-        return column;
-    }
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
@@ -70,20 +60,19 @@ class ColumnTypeRegistryTest {
     @Test
     @DisplayName("store column types")
     void storeColumnTypes() {
-        Collection<Class> classes = Arrays.asList(String.class,
-                                                  Integer.class,
-                                                  Date.class);
+        EntityColumn[] columns = {stringColumn(), doubleColumn(), timestampColumn()};
+
         ColumnTypeRegistry.Builder<?> registryBuilder =
                 ColumnTypeRegistry.newBuilder();
-        for (Class<?> cls : classes) {
+        for (EntityColumn column : columns) {
             ColumnType type = new AnyType();
-            registryBuilder.put(cls, type);
+            registryBuilder.put(column.type(), type);
         }
 
         ColumnTypeRegistry<?> registry = registryBuilder.build();
 
-        for (Class<?> cls : classes) {
-            ColumnType type = registry.get(mockProperty(cls));
+        for (EntityColumn column : columns) {
+            ColumnType type = registry.get(column);
             assertThat(type).isInstanceOf(AnyType.class);
         }
     }
@@ -96,8 +85,8 @@ class ColumnTypeRegistryTest {
                                   .put(GeneratedMessageV3.class, new GeneratedMessageType())
                                   .put(AbstractMessage.class, new AbstractMessageType())
                                   .build();
-        EntityColumn column = mockProperty(Any.class);
-        ColumnType type = registry.get(column);
+        EntityColumn timestampColumn = timestampColumn();
+        ColumnType type = registry.get(timestampColumn);
         assertNotNull(type);
         assertThat(type).isInstanceOf(GeneratedMessageType.class);
     }
@@ -107,13 +96,13 @@ class ColumnTypeRegistryTest {
     void mapPrimitivesAutoboxed() {
         ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()
-                                  .put(Integer.class, new IntegerType())
+                                  .put(Double.class, new DoubleType())
                                   .build();
-        ColumnType integerColumnType = registry.get(mockProperty(Integer.class));
-        assertNotNull(integerColumnType);
-        ColumnType intColumnType = registry.get(mockProperty(int.class));
-        assertNotNull(intColumnType);
+        ColumnType doubleType = registry.get(doubleColumn());
+        assertNotNull(doubleType);
+        ColumnType doublePrimitiveType = registry.get(doublePrimitiveColumn());
+        assertNotNull(doublePrimitiveType);
 
-        assertEquals(integerColumnType, intColumnType);
+        assertEquals(doubleType, doublePrimitiveType);
     }
 }

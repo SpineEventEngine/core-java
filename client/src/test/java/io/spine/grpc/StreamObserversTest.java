@@ -32,13 +32,13 @@ import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.truth.Truth.assertThat;
 import static io.grpc.Status.INVALID_ARGUMENT;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.grpc.StreamObservers.fromStreamError;
@@ -52,10 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("StreamObservers utility should")
 class StreamObserversTest {
@@ -80,8 +76,7 @@ class StreamObserversTest {
     @Test
     @DisplayName("create proper error-forwarding observer")
     void createErrorForwardingObserver() {
-        @SuppressWarnings("unchecked")  // to make the mock creation look simpler.
-        StreamObserver<Object> delegate = mock(StreamObserver.class);
+        MemoizingObserver delegate = new MemoizingObserver<>();
 
         StreamObserver<Object> forwardingInstance = forwardErrorsOnly(delegate);
 
@@ -90,9 +85,9 @@ class StreamObserversTest {
         RuntimeException errorToForward = new RuntimeException("Sample exception");
         forwardingInstance.onError(errorToForward);
 
-        verify(delegate, times(1)).onError(ArgumentMatchers.eq(errorToForward));
-        verify(delegate, never()).onNext(ArgumentMatchers.any());
-        verify(delegate, never()).onCompleted();
+        assertThat(delegate.getError()).isEqualTo(errorToForward);
+        assertThat(delegate.responses()).isEmpty();
+        assertThat(delegate.isCompleted()).isFalse();
     }
 
     @Test

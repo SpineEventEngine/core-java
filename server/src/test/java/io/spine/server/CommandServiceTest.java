@@ -50,7 +50,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
 
 @DisplayName("CommandService should")
 class CommandServiceTest {
@@ -83,7 +82,7 @@ class CommandServiceTest {
         for (BoundedContext context : boundedContexts) {
             builder.add(context);
         }
-        service = spy(builder.build());
+        service = builder.build();
     }
 
     @AfterEach

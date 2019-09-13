@@ -35,13 +35,9 @@ import static com.google.common.flogger.LazyArgs.lazy;
  *
  * <p>If the access level check fails, the warning message will be put to the log.
  * If the check passes, no action is performed.
- *
- * @implNote This class is effectively {@code final} since it has a single {@code private}
- *           constructor. Though, the modifier "{@code final}" is absent to make it possible to
- *           create mocks for testing.
  */
 @Internal
-public class MethodAccessChecker implements Logging {
+public final class MethodAccessChecker implements Logging {
 
     private final Method method;
 

@@ -88,16 +88,9 @@ import static java.lang.String.format;
  * @see io.spine.core.Subscribe @Subscribe
  */
 @Internal
-public class EventBus
+public final class EventBus
         extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher>
         implements ContextAware {
-
-    /*
-     * NOTE: Even though the EventBus has a private constructor and
-     * is not supposed to be derived, we do not make this class final
-     * in order to be able to spy() on it from Mockito which cannot
-     * spy on final or anonymous classes.
-     */
 
     /**
      * The {@code EventStore} to store events before they get handled.

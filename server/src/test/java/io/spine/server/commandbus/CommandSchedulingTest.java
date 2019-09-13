@@ -26,13 +26,13 @@ import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.type.CommandEnvelope;
 import io.spine.test.commandbus.ProjectId;
 import io.spine.test.commandbus.command.CmdBusStartProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.Durations2.minutes;
@@ -42,9 +42,6 @@ import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Command scheduling mechanism should")
@@ -90,13 +87,13 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("post previously scheduled command")
     void postPreviouslyScheduled() {
-        CommandBus spy = spy(commandBus);
-        spy.register(createProjectHandler);
+        commandBus.register(createProjectHandler);
         Command command = createScheduledCommand();
 
-        spy.postPreviouslyScheduled(command);
+        commandBus.postPreviouslyScheduled(command);
 
-        verify(spy).dispatch(eq(CommandEnvelope.of(command)));
+        assertThat(watcher.dispatched())
+                .containsExactly(command);
     }
 
     @Test

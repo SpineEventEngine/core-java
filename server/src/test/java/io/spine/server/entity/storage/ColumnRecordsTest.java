@@ -34,26 +34,16 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.MOCK_COLUMNS_COUNT;
+import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.COLUMN_COUNT;
 import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.getNonNullColumnValues;
-import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.setupMockColumnsAllowingNulls;
+import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.nullableStorageFields;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("ColumnRecords utility should")
 class ColumnRecordsTest {
-
-    private static final int MOCK_NULL_COLUMNS_COUNT = MOCK_COLUMNS_COUNT / 2;
-    private static final int MOCK_NON_NULL_COLUMNS_COUNT =
-            MOCK_COLUMNS_COUNT - MOCK_NULL_COLUMNS_COUNT;
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
@@ -81,12 +71,11 @@ class ColumnRecordsTest {
     @Test
     @DisplayName("feed entity columns to database record")
     void feedColumnsToDbRecord() {
-        // Set up mocks and arguments
-        List<Object> destination = new ArrayList<>(MOCK_COLUMNS_COUNT);
+        List<Object> destination = new ArrayList<>(COLUMN_COUNT);
 
-        Map<String, EntityColumn.MemoizedValue> columns = setupMockColumnsAllowingNulls();
+        Map<String, EntityColumn.MemoizedValue> columns = nullableStorageFields();
 
-        CollectAnyColumnType type = spy(CollectAnyColumnType.class);
+        CollectAnyColumnType type = new CollectAnyColumnType();
         ColumnTypeRegistry<CollectAnyColumnType> registry =
                 ColumnTypeRegistry.<CollectAnyColumnType>newBuilder()
                         .put(Object.class, type)
@@ -94,16 +83,10 @@ class ColumnRecordsTest {
         EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(), columns);
 
-        Function<String, Object> colIdMapper = spy(new NoOpColumnIdentifierMapper());
+        Function<String, Object> colIdMapper = new NoOpColumnIdentifierMapper();
 
         // Invoke the pre-persistence action
         ColumnRecords.feedColumnsTo(destination, recordWithColumns, registry, colIdMapper);
-
-        // Verify calls
-        verify(colIdMapper, times(MOCK_COLUMNS_COUNT)).apply(anyString());
-        verify(type, times(MOCK_NON_NULL_COLUMNS_COUNT))
-                .setColumnValue(eq(destination), any(Object.class), anyString());
-        verify(type, times(MOCK_NULL_COLUMNS_COUNT)).setNull(eq(destination), anyString());
 
         int indexOfNull = destination.indexOf(null);
         assertTrue(indexOfNull >= 0, "Null value was not saved to the destination");

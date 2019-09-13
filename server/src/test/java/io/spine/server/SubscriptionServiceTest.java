@@ -63,10 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("SubscriptionService should")
 class SubscriptionServiceTest {
@@ -348,7 +344,7 @@ class SubscriptionServiceTest {
         subscriptionService.subscribe(topic, subscribeObserver);
 
         // Activate subscription.
-        MemoizingObserver<SubscriptionUpdate> activateSubscription = spy(new MemoizingObserver<>());
+        MemoizingObserver<SubscriptionUpdate> activateSubscription = new MemoizingObserver<>();
         subscriptionService.activate(subscribeObserver.firstResponse(), activateSubscription);
 
         // Cancel subscription.
@@ -362,8 +358,10 @@ class SubscriptionServiceTest {
         createProject(context, projectId);
 
         // The update must not be handled by the observer.
-        verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
-        verify(activateSubscription, never()).onCompleted();
+        assertThat(activateSubscription.responses())
+                .isEmpty();
+        assertThat(activateSubscription.isCompleted())
+                .isFalse();
     }
 
     @Nested

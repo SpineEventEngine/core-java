@@ -19,6 +19,7 @@
  */
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
@@ -28,6 +29,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.entity.given.MemoizingTransactionListener;
 import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
@@ -52,10 +54,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Base class for testing the {@linkplain Transaction transactions} for different
@@ -293,22 +291,23 @@ public abstract class TransactionTest<I,
                 .isEqualTo(modifiedVersion);
     }
 
-    @SuppressWarnings("unchecked")  // OK for a test method.
     @Test
     @DisplayName("notify listener during transaction execution")
     void notifyListenerDuringExecution() {
-        TransactionListener<I> listener = mock(TransactionListener.class);
+        MemoizingTransactionListener<I> listener = new MemoizingTransactionListener<>();
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity, listener);
         Event event = withMessage(createEventMessage());
 
-        verifyZeroInteractions(listener);
         DispatchOutcome outcome = applyEvent(tx, event);
         assertTrue(outcome.hasSuccess());
 
-        verify(listener).onAfterPhase(argThat(
-                phase -> phase.messageId().equals(event.id())
-        ));
+        ImmutableList<Phase<I>> phases = listener.phasesOnAfter();
+        assertThat(phases)
+                .hasSize(1);
+        Phase<I> phase = phases.get(0);
+        assertThat(phase.messageId())
+                .isEqualTo(event.getId());
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore new entity version in this test.

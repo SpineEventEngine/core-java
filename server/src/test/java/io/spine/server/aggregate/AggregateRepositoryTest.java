@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
@@ -42,6 +43,7 @@ import io.spine.server.aggregate.given.repo.RejectingRepository;
 import io.spine.server.aggregate.given.repo.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.repo.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.CommandClass;
@@ -76,7 +78,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
 import java.util.List;
@@ -103,8 +104,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
@@ -273,68 +272,109 @@ public class AggregateRepositoryTest {
     @DisplayName("pass snapshot trigger + 1 to AggregateReadRequest")
     class PassSnapshotTrigger {
 
-        @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
         @Test
         @DisplayName("when it's set to default value")
         void whenItsDefault() {
             ProjectAggregateRepository repository = repository();
-            AggregateStorage<ProjectId> storageSpy = spy(repository.aggregateStorage());
-            repository.injectStorage(storageSpy);
+            TestAggregateStorage storage = new TestAggregateStorage(repository.aggregateStorage());
+            repository.injectStorage(storage);
 
             ProjectId id = Sample.messageOfType(ProjectId.class);
             loadOrCreate(repository, id);
 
-            ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
-                    ArgumentCaptor.forClass(AggregateReadRequest.class);
-            verify(storageSpy).read(requestCaptor.capture());
+            AggregateReadRequest<ProjectId> passedRequest = storage.memoizedRequest();
+            assertThat(passedRequest)
+                    .isNotNull();
 
-            AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
-            assertEquals(id, passedRequest.recordId());
-            assertEquals(repository.snapshotTrigger() + 1, passedRequest.batchSize());
+            assertThat(passedRequest.recordId())
+                    .isEqualTo(id);
+            int snapshotTrigger = repository.snapshotTrigger();
+            assertThat(passedRequest.batchSize())
+                    .isEqualTo(snapshotTrigger + 1);
         }
 
-        @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
         @Test
         @DisplayName("when it's set to non-default value")
         void whenItsNonDefault() {
             ProjectAggregateRepository repository = repository();
-            AggregateStorage<ProjectId> storageSpy = spy(repository.aggregateStorage());
-            repository.injectStorage(storageSpy);
+            TestAggregateStorage storage = new TestAggregateStorage(repository.aggregateStorage());
+            repository.injectStorage(storage);
 
             int nonDefaultSnapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER * 2;
             repository.setSnapshotTrigger(nonDefaultSnapshotTrigger);
             ProjectId id = Sample.messageOfType(ProjectId.class);
             loadOrCreate(repository, id);
 
-            ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
-                    ArgumentCaptor.forClass(AggregateReadRequest.class);
-            verify(storageSpy).read(requestCaptor.capture());
+            AggregateReadRequest<ProjectId> passedRequest = storage.memoizedRequest();
+            assertThat(passedRequest)
+                    .isNotNull();
 
-            AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
-            assertEquals(id, passedRequest.recordId());
-            assertEquals(nonDefaultSnapshotTrigger + 1, passedRequest.batchSize());
+            assertThat(passedRequest.recordId())
+                    .isEqualTo(id);
+            assertThat(passedRequest.batchSize())
+                    .isEqualTo(nonDefaultSnapshotTrigger + 1);
         }
-    }
 
-    @Test
-    @DisplayName("pass snapshot trigger + 1 to `AggregateReadRequest`")
-    void useSnapshotTriggerForRead() {
-        ProjectAggregateRepository repository = repository();
-        AggregateStorage<ProjectId> storageSpy = spy(repository.aggregateStorage());
-        repository.injectStorage(storageSpy);
-        int snapshotTrigger = repository.snapshotTrigger();
+        /**
+         * An {@link AggregateStorage} whose purpose is to intercept the incoming
+         * {@linkplain AggregateReadRequest read request}.
+         */
+        private final class TestAggregateStorage extends AggregateStorage<ProjectId> {
 
-        ProjectId id = Sample.messageOfType(ProjectId.class);
-        loadOrCreate(repository, id);
+            private final AggregateStorage<ProjectId> delegate;
+            private AggregateReadRequest<ProjectId> memoizedRequest;
 
-        @SuppressWarnings("unchecked") // Reflective mock creation.
-                ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
-                ArgumentCaptor.forClass(AggregateReadRequest.class);
-        verify(storageSpy).read(requestCaptor.capture());
+            private TestAggregateStorage(AggregateStorage<ProjectId> delegate) {
+                super(delegate.isMultitenant());
+                this.delegate = delegate;
+            }
 
-        AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
-        assertEquals(id, passedRequest.recordId());
-        assertEquals(snapshotTrigger + 1, passedRequest.batchSize());
+            @Override
+            public Optional<AggregateHistory> read(AggregateReadRequest<ProjectId> request) {
+                memoizedRequest = request;
+                return Optional.empty();
+            }
+
+            @Override
+            protected void writeRecord(ProjectId id, AggregateEventRecord record) {
+                delegate.writeRecord(id, record);
+            }
+
+            @Override
+            protected Iterator<AggregateEventRecord>
+            historyBackward(AggregateReadRequest<ProjectId> request) {
+                return delegate.historyBackward(request);
+            }
+
+            @Override
+            protected void truncate(int snapshotIndex) {
+                delegate.truncate(snapshotIndex);
+            }
+
+            @Override
+            protected void truncate(int snapshotIndex, Timestamp date) {
+                delegate.truncate(snapshotIndex, date);
+            }
+
+            @Override
+            protected Iterator<ProjectId> distinctAggregateIds() {
+                return delegate.distinctAggregateIds();
+            }
+
+            @Override
+            public Optional<LifecycleFlags> readLifecycleFlags(ProjectId id) {
+                return delegate.readLifecycleFlags(id);
+            }
+
+            @Override
+            public void writeLifecycleFlags(ProjectId id, LifecycleFlags flags) {
+                delegate.writeLifecycleFlags(id, flags);
+            }
+
+            private AggregateReadRequest<ProjectId> memoizedRequest() {
+                return memoizedRequest;
+            }
+        }
     }
 
     private static void loadOrCreate(AggregateRepository<ProjectId, ProjectAggregate> repository,

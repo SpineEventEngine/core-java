@@ -40,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandBus Builder should")
@@ -120,7 +119,7 @@ class CommandBusBuilderTest
         @Test
         @DisplayName("system write side")
         void system() {
-            SystemWriteSide systemWriteSide = mock(SystemWriteSide.class);
+            SystemWriteSide systemWriteSide = NoOpSystemWriteSide.INSTANCE;
             CommandBus.Builder builder = builder().injectSystem(systemWriteSide);
             Optional<SystemWriteSide> actual = builder.system();
             assertTrue(actual.isPresent());
@@ -130,7 +129,7 @@ class CommandBusBuilderTest
         @Test
         @DisplayName("tenant index")
         void tenantIndex() {
-            TenantIndex index = mock(TenantIndex.class);
+            TenantIndex index = TenantIndex.singleTenant();
             CommandBus.Builder builder = builder().injectTenantIndex(index);
             Optional<TenantIndex> actual = builder.tenantIndex();
             assertTrue(actual.isPresent());

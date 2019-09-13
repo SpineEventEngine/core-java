@@ -32,6 +32,7 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 public class ValidHandlerOneParam extends TestCommandHandler {
     @Assign
     RefProjectCreated handleTest(RefCreateProject cmd) {
+        addHandledCommand(cmd);
         return projectCreated(cmd.getProjectId());
     }
 }

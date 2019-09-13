@@ -145,7 +145,6 @@ subprojects {
 
         testImplementation (
             deps.test.hamcrest,
-            deps.test.mockito,
             deps.test.guavaTestlib,
             deps.test.junit5Api,
             deps.test.junit5Runner,

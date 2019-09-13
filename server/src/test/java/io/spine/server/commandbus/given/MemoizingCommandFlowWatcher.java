@@ -18,30 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.commandbus.given;
 
-import io.spine.annotation.Internal;
+import com.google.common.collect.ImmutableList;
+import io.spine.core.Command;
+import io.spine.server.commandbus.CommandFlowWatcher;
 import io.spine.server.type.CommandEnvelope;
 
-/**
- * A set of callbacks invoked when a command processing reaches a given point.
- */
-@Internal
-public interface CommandFlowWatcher {
+import java.util.List;
 
-    /**
-     * A callback invoked when a command is dispatched.
-     *
-     * @param command
-     *         the dispatched command
-     */
-    void onDispatchCommand(CommandEnvelope command);
+import static com.google.common.collect.Lists.newLinkedList;
 
-    /**
-     * A callback invoked when a command is scheduled.
-     *
-     * @param command
-     *         the scheduled command
-     */
-    void onScheduled(CommandEnvelope command);
+public final class MemoizingCommandFlowWatcher implements CommandFlowWatcher {
+
+    private final List<Command> dispatched = newLinkedList();
+    private final List<Command> scheduled = newLinkedList();
+
+    @Override
+    public void onDispatchCommand(CommandEnvelope command) {
+        dispatched.add(command.command());
+    }
+
+    @Override
+    public void onScheduled(CommandEnvelope command) {
+        scheduled.add(command.command());
+    }
+
+    public ImmutableList<Command> dispatched() {
+        return ImmutableList.copyOf(dispatched);
+    }
+
+    public ImmutableList<Command> scheduled() {
+        return ImmutableList.copyOf(scheduled);
+    }
 }

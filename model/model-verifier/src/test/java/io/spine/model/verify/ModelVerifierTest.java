@@ -39,9 +39,6 @@ import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
-import org.gradle.api.initialization.dsl.ScriptHandler;
-import org.gradle.api.tasks.TaskCollection;
-import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -61,20 +58,12 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import static io.spine.tools.gradle.TaskName.compileJava;
-import static java.util.Collections.emptyIterator;
-import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("ModelVerifier should")
 class ModelVerifierTest {
-
-    private static final Object[] EMPTY_ARRAY = new Object[0];
 
     private Project project = null;
 
@@ -84,30 +73,15 @@ class ModelVerifierTest {
         return result;
     }
 
-    @SuppressWarnings("unchecked") // OK for test mocks.
     @BeforeEach
     void setUp() {
-        project = mock(Project.class);
-        ScriptHandler buildScript = mock(ScriptHandler.class);
-        when(buildScript.getClassLoader()).thenReturn(ModelVerifierTest.class.getClassLoader());
-        when(project.getSubprojects()).thenReturn(emptySet());
-        when(project.getRootProject()).thenReturn(project);
-        when(project.getBuildscript()).thenReturn(buildScript);
-
-        TaskContainer tasks = mock(TaskContainer.class);
-        TaskCollection emptyTaskCollection = mock(TaskCollection.class);
-        when(emptyTaskCollection.iterator()).thenReturn(emptyIterator());
-        when(emptyTaskCollection.toArray()).thenReturn(EMPTY_ARRAY);
-        when(tasks.withType(any(Class.class))).thenReturn(emptyTaskCollection);
-        when(project.getTasks()).thenReturn(tasks);
+       project = actualProject();
     }
 
     @Test
     @DisplayName("verify model from classpath")
     void verifyModel() {
         ModelVerifier verifier = new ModelVerifier(project);
-
-        verify(project).getSubprojects();
 
         String commandHandlerTypeName = UploadCommandHandler.class.getName();
         String aggregateTypeName = EditAggregate.class.getName();
@@ -244,7 +218,10 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve null if destination directory is null")
     void getNullDestDir() {
-        JavaCompile compileTask = mock(JavaCompile.class);
+        JavaCompile compileTask = actualProject().getTasks()
+                                                 .withType(JavaCompile.class)
+                                                 .getByName(compileJava.name());
+        compileTask.setDestinationDir((File) null);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));
     }

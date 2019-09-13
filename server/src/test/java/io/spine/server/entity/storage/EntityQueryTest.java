@@ -52,14 +52,13 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filter.Operator.EQUAL;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.server.entity.storage.Columns.findColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.column;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("EntityQuery should")
@@ -97,7 +96,7 @@ class EntityQueryTest {
     void supportToString() {
         Object someId = Sample.messageOfType(ProjectId.class);
         Collection<Object> ids = singleton(someId);
-        EntityColumn someColumn = mockColumn();
+        EntityColumn someColumn = column();
         Object someValue = "something";
 
         Map<EntityColumn, Object> params = new HashMap<>(1);
@@ -145,8 +144,8 @@ class EntityQueryTest {
     private static void addEqualityGroupA(EqualsTester tester) {
         Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
         Map<EntityColumn, Object> params = new IdentityHashMap<>(2);
-        params.put(mockColumn(), "anything");
-        params.put(mockColumn(), 5);
+        params.put(column(), "anything");
+        params.put(column(), 5);
         EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query);
     }
@@ -158,7 +157,7 @@ class EntityQueryTest {
     private static void addEqualityGroupB(EqualsTester tester) {
         Collection<?> ids = emptyList();
         Map<EntityColumn, Object> params = new HashMap<>(1);
-        params.put(mockColumn(), 5);
+        params.put(column(), 5);
         EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
         EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
@@ -173,7 +172,7 @@ class EntityQueryTest {
      */
     private static void addEqualityGroupC(EqualsTester tester) {
         Collection<?> ids = emptySet();
-        EntityColumn column = mockColumn();
+        EntityColumn column = column();
         Object value = 42;
         Map<EntityColumn, Object> params = new HashMap<>(1);
         params.put(column, value);
@@ -191,12 +190,6 @@ class EntityQueryTest {
         Map<EntityColumn, Object> columns = Collections.emptyMap();
         EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
-    }
-
-    private static EntityColumn mockColumn() {
-        EntityColumn column = mock(EntityColumn.class);
-        when(column.name()).thenReturn("mockColumn");
-        return column;
     }
 
     private static QueryParameters paramsFromValues(Map<EntityColumn, Object> values) {
