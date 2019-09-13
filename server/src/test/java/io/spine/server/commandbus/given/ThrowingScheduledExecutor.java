@@ -32,9 +32,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * An executor service which always schedules an operation to throw exception.
  *
  * <p>Can be used to emulate the failure in the scheduled operation.
- *
- * <p>All other methods besides {@code schedule(...)} are inherited from
- * {@link ScheduledThreadPoolExecutor} for convenience.
  */
 public final class ThrowingScheduledExecutor extends ScheduledThreadPoolExecutor {
 

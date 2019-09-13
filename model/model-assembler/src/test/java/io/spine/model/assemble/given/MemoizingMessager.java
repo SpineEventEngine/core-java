@@ -71,10 +71,10 @@ public final class MemoizingMessager implements Messager {
     }
 
     /**
-     * A message received by {@code MemoizingMessager}.
+     * A message received by the {@code MemoizingMessager}.
      *
      * <p>Only the message content and its {@linkplain Diagnostic.Kind kind} are memoized. Other
-     * {@code printMessage} params are ignored.
+     * {@code printMessage} arguments are ignored.
      */
     public static final class MemoizedMessage {
 

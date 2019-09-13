@@ -36,7 +36,7 @@ import java.util.concurrent.TimeoutException;
 import static com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService;
 
 /**
- * A {@link ScheduledExecutorService} that immediately invokes all scheduled actions in the caller
+ * A {@link ScheduledExecutorService} which immediately invokes all scheduled actions in the caller
  * thread.
  *
  * <p>In tests, the delayed execution of operations can often lead to errors and test output
