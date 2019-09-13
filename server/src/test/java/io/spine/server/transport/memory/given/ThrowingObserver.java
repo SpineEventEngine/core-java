@@ -23,38 +23,35 @@ package io.spine.server.transport.memory.given;
 import io.grpc.stub.StreamObserver;
 import io.spine.server.integration.ExternalMessage;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
-public final class SingleThreadInMemSubscriberTestEnv {
+/**
+ * A {@link StreamObserver} which always throws an {@link IllegalStateException} in
+ * {@code onNext(...)}.
+ */
+public final class ThrowingObserver implements StreamObserver<ExternalMessage> {
 
-    /** Prevents instantiation of this test env class. */
-    private SingleThreadInMemSubscriberTestEnv() {
+    private static final String ERROR_MESSAGE = "Ignore this observer error.";
+
+    private boolean onNextCalled = false;
+
+    @Override
+    public void onNext(ExternalMessage value) {
+        onNextCalled = true;
+        throw newIllegalStateException(ERROR_MESSAGE);
     }
 
-    public static class ThrowingObserver implements StreamObserver<ExternalMessage> {
+    @Override
+    public void onError(Throwable t) {
+        // NO-OP.
+    }
 
-        private static final String ERROR_MESSAGE = "Observer failed";
+    @Override
+    public void onCompleted() {
+        // NO-OP.
+    }
 
-        private boolean onNextCalled = false;
-
-        @Override
-        public void onNext(ExternalMessage value) {
-            onNextCalled = true;
-            throw newIllegalArgumentException(ERROR_MESSAGE);
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            // NO-OP.
-        }
-
-        @Override
-        public void onCompleted() {
-            // NO-OP.
-        }
-
-        public boolean onNextCalled() {
-            return onNextCalled;
-        }
+    public boolean onNextCalled() {
+        return onNextCalled;
     }
 }
