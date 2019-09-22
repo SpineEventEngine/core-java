@@ -83,6 +83,7 @@ import java.lang.annotation.Target;
  * {@literal @}React
  * {@literal Pair<ProjectOwnerAssigned, ProjectDueDateChanged>} on(ProjectCreated event) { ... }
  *  </pre>
+ *
  * </ul>
  *
  * <p>If the annotation is applied to a method which does not satisfy either of these requirements,
