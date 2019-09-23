@@ -55,7 +55,7 @@ import java.lang.annotation.Target;
  * </pre>
  *
  * <li>an event message along with its {@link io.spine.core.EventContext context}; the context
- * brings some system properties related to event, such as an actor ID and the timestamp of
+ * brings some system properties related to event, such as the actor ID and the timestamp of
  * the event emission:
  * <pre>
  *
