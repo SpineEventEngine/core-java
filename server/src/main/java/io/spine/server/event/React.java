@@ -34,8 +34,51 @@ import java.lang.annotation.Target;
  * <ul>
  *     <li>be annotated with {@link React @React};
  *     <li>have package-private visibility;
- *     <li>accept an event message (derived from {@link io.spine.base.EventMessage EventMessage})
- *         as the first parameter.
+ * </ul>
+ *
+ * <h1>Accepted Parameters</h1>
+ *
+ * <p>Each reacting method <strong>must</strong> accept an event message
+ * derived from {@link io.spine.base.EventMessage EventMessage} as the first parameter.
+ * Optionally, one may pass some additional parameters putting the incoming message into
+ * some perspective.
+ *
+ * <p>Here are the available sets of parameters:
+ *
+ * <ul>
+ *
+ * <li>single event message:
+ * <pre>
+ *
+ * {@literal @}React
+ *  EngineStopped on(CarStopped event) { ... }
+ * </pre>
+ *
+ * <li>an event message along with its {@link io.spine.core.EventContext context}; the context
+ * brings some system properties related to event, such as an actor ID and the timestamp of
+ * the event emission:
+ * <pre>
+ *
+ * {@literal @}React
+ *  ProjectOwnerAssigned on(ProjectCreated event, EventContext context) { ... }
+ * </pre>
+ *
+ * <li>if an event is a rejection event, one may additionally specify the command message, which
+ * led to this event; this will act like a filter:
+ * <pre>
+ *
+ * // Only rejections of `CannotAllocateCargo` type caused by the rejected `DeliverOrder` command will be dispatched.
+ * {@literal @}React
+ *  OrderDeliveryFailed on(CannotAllocateCargo event, DeliverOrder command) { ... }
+ * </pre>
+ *
+ * <p>It is also possible to add the context of the origin command to access even more properties:
+ * <pre>
+ *
+ * {@literal @}React
+ *  ProjectRenameFailed on(ProjectAlreadyCompleted event, RenameProject command, CommandContext ctx) { ... }
+ * </pre>
+ *
  * </ul>
  *
  * <h1>Returning Values</h1>
