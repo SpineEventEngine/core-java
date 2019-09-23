@@ -52,12 +52,14 @@ import java.lang.annotation.Target;
  *
  * <li>an event message:
  * <pre>
+ *
  * {@literal @}React
  *  TaskReassigned on(UserDeactivated event) { ... }
  * </pre>
  *
  *  <li>an {@code Optional} event message:
  *  <pre>
+ *
  * {@literal @}React
  * {@literal Optional<PersonAllowedToBuyAlcohol>} on(PersonAgeChanged event) { ... }
  *  </pre>
@@ -66,6 +68,7 @@ import java.lang.annotation.Target;
  *  it also allows to use a special {@link io.spine.server.model.Nothing Nothing} event stating
  *  that the entity may choose not to react at all:
  *  <pre>
+ *
  * {@literal @}React
  * {@literal EitherOf3<ProjectCompleted, ProjectEstimateUpdated, Nothing>} on(TaskCompleted event) { ... }
  *  </pre>
@@ -73,6 +76,7 @@ import java.lang.annotation.Target;
  *
  *  <li>an {@code Iterable} of event messages:
  *  <pre>
+ *
  * {@literal @}React
  * {@literal Iterable<StoryMovedToBacklog>} on(SprintCompleted event) { ... }
  *  </pre>
@@ -80,6 +84,7 @@ import java.lang.annotation.Target;
  *  <li>a {@link io.spine.server.tuple.Tuple tuple} of event messages; being similar
  *  to {@code Iterable}, tuples allow to declare the exact types of returning values:
  *  <pre>
+ *
  * {@literal @}React
  * {@literal Pair<ProjectOwnerAssigned, ProjectDueDateChanged>} on(ProjectCreated event) { ... }
  *  </pre>
