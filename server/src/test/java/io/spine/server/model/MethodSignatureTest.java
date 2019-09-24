@@ -31,7 +31,9 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @TestInstance(PER_CLASS)
@@ -60,6 +62,15 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
 
     private Optional<? extends HandlerMethod> wrap(Method method) {
         Optional<? extends HandlerMethod> result = signature().classify(method);
+        return result;
+    }
+
+    public static Method findMethod(Class<?> declaringClass, String name) {
+        Method result = Stream.of(declaringClass.getDeclaredMethods())
+                              .filter(method -> method.getName()
+                                                      .equals(name))
+                              .findAny()
+                              .orElseGet(() -> fail(format("Method %s not found.", name)));
         return result;
     }
 }

@@ -32,9 +32,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.stream.Stream;
 
-import static java.lang.String.format;
+import static io.spine.server.model.MethodSignatureTest.findMethod;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -102,15 +101,6 @@ public class SubscriberSignatureTestEnv {
 
     private static Method findInvalidMethod(String name) {
         return findMethod(InvalidEventReceiver.class, name);
-    }
-
-    private static Method findMethod(Class<?> declaringClass, String name) {
-        Method result = Stream.of(declaringClass.getDeclaredMethods())
-                              .filter(method -> method.getName()
-                                                      .equals(name))
-                              .findAny()
-                              .orElseGet(() -> fail(format("Method %s not found.", name)));
-        return result;
     }
 
     @SuppressWarnings("unused") // Reflective method access.
