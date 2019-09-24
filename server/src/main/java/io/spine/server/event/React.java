@@ -38,9 +38,9 @@ import java.lang.annotation.Target;
  *
  * <h1>Accepted Parameters</h1>
  *
- * <p>Each reacting method <strong>must</strong> accept an event message
- * derived from {@link io.spine.base.EventMessage EventMessage} as the first parameter.
- * Optionally, one may pass some additional parameters putting the incoming message into
+ * <p>Each reacting method <strong>must</strong> accept an event message derived
+ * from {@link io.spine.base.EventMessage EventMessage} as the first parameter.
+ * Optionally, one may pass some additional parameters and put the incoming message into
  * some perspective.
  *
  * <p>Here are the available sets of parameters:
