@@ -31,8 +31,6 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
  */
 public class ValidHandlerButPrivate extends TestCommandHandler {
 
-    @SuppressWarnings("MethodMayBeStatic") // Handler methods are instance methods, even if they
-    // do not modify the state of the instance.
     @Assign
     private RefProjectCreated handleTest(RefCreateProject cmd) {
         addHandledCommand(cmd);
