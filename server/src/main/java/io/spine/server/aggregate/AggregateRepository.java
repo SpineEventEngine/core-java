@@ -307,7 +307,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public Set<CommandClass> messageClasses() {
+    public final Set<CommandClass> messageClasses() {
         return aggregateClass().commands();
     }
 
@@ -323,7 +323,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         the command to dispatch
      */
     @Override
-    public void dispatch(CommandEnvelope cmd) {
+    public final void dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
         Optional<I> target = route(cmd);
         target.ifPresent(id -> inbox().send(cmd)
