@@ -142,15 +142,15 @@ public class SubscriberSignatureTestEnv {
 
         @Subscribe
         void messageAndCommand(ProjectAlreadyExists rejection,
-                                      CreateProject command) {
+                               CreateProject command) {
             this.event = rejection;
             this.command = command;
         }
 
         @Subscribe
         void messageAndCommandMessageAndContext(ProjectAlreadyExists rejection,
-                                                       CreateProject command,
-                                                       CommandContext commandContext) {
+                                                CreateProject command,
+                                                CommandContext commandContext) {
             this.event = rejection;
             this.command = command;
             this.commandContext = commandContext;
@@ -202,8 +202,9 @@ public class SubscriberSignatureTestEnv {
         /**
          * Always fail a test.
          *
-         * @param <T> generic parameter used for covariance of return type for failing a test
-         *            from methods that return a value
+         * @param <T>
+         *         generic parameter used for covariance of return type for failing a test
+         *         from methods that return a value
          * @return nothing ever
          */
         @CanIgnoreReturnValue
