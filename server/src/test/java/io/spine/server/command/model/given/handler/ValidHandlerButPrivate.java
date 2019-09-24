@@ -27,7 +27,7 @@ import io.spine.test.reflect.event.RefProjectCreated;
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
- * Provides a
+ * A handler which signature is valid, but the visibility level is {@code private}.
  */
 public class ValidHandlerButPrivate extends TestCommandHandler {
 
