@@ -26,7 +26,6 @@ import com.google.common.collect.Sets.SetView;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -39,11 +38,11 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.Route;
@@ -57,7 +56,6 @@ import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorRepository;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -84,7 +82,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
-        implements CommandDispatcher, EventDispatcherDelegate {
+        implements CommandDispatcher, EventProducingRepository,  EventDispatcherDelegate {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -155,6 +153,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         initCache(context.isMultitenant());
         initInbox();
         initMirror();
+    }
+
+    @Override
+    public EventBus eventBus() {
+        return context().eventBus();
     }
 
     private void initCache(boolean multitenant) {
@@ -340,14 +343,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
         super.onRoutingFailed(envelope, cause);
-        if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
-            // TODO:2019-07-08:dmytro.dashenkov: Extract.
-            //  https://github.com/SpineEventEngine/core-java/issues/1109
-            CommandEnvelope command = (CommandEnvelope) envelope;
-            ThrowableMessage rejection = (ThrowableMessage) cause;
-            RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
-            postEvents(ImmutableSet.of(rejectionEnvelope.outerObject()));
-        }
+        postRejectionIfCommand(envelope, cause);
     }
 
     @Override
@@ -458,15 +454,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private EventRouting<I> eventRouting() {
         return eventRouting;
-    }
-
-    /**
-     * Posts passed events to {@link EventBus}.
-     */
-    final void postEvents(Collection<Event> events) {
-        Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = context().eventBus();
-        bus.post(filteredEvents);
     }
 
     /**

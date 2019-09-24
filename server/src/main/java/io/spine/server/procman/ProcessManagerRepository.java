@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -42,10 +41,10 @@ import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
@@ -85,7 +84,7 @@ public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
         extends EventDispatchingRepository<I, P, S>
-        implements CommandDispatcherDelegate {
+        implements CommandDispatcherDelegate, EventProducingRepository {
 
     /** The command routing schema used by this repository. */
     private final Supplier<CommandRouting<I>> commandRouting;
@@ -163,6 +162,11 @@ public abstract class ProcessManagerRepository<I,
         checkNotDeaf();
         initCache(context.isMultitenant());
         initInbox();
+    }
+
+    @Override
+    public EventBus eventBus() {
+        return context().eventBus();
     }
 
     private void initCache(boolean multitenant) {
@@ -313,7 +317,7 @@ public abstract class ProcessManagerRepository<I,
      *         a request to dispatch
      */
     @Override
-    public void dispatchCommand(CommandEnvelope command) {
+    public final void dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         Optional<I> target = route(command);
         target.ifPresent(id -> inbox().send(command)
@@ -336,14 +340,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
         super.onRoutingFailed(envelope, cause);
-        if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
-            // TODO:2019-07-08:dmytro.dashenkov: Extract.
-            //  https://github.com/SpineEventEngine/core-java/issues/1109
-            CommandEnvelope command = (CommandEnvelope) envelope;
-            ThrowableMessage rejection = (ThrowableMessage) cause;
-            RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
-            postEvent(rejectionEnvelope.outerObject());
-        }
+        postRejectionIfCommand(envelope, cause);
     }
 
     /**
@@ -368,15 +365,6 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Posts passed events to {@link EventBus}.
-     */
-    void postEvents(Collection<Event> events) {
-        Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = context().eventBus();
-        bus.post(filteredEvents);
-    }
-
-    /**
      * Posts the passed event to {@link EventBus}.
      */
     void postEvent(Event event) {
@@ -397,7 +385,7 @@ public abstract class ProcessManagerRepository<I,
      * <p>Overrides to expose the method to the package.
      */
     @Override
-    protected P findOrCreate(I id) {
+    protected final P findOrCreate(I id) {
         return cache.load(id);
     }
 

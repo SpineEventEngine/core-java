@@ -29,6 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.base.MessageContext;
+import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
@@ -49,6 +50,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -453,6 +455,14 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         return EntityStateChangedFilter.forType(entityClass);
     }
 
+    /**
+     * Filters passed events using the {@linkplain #eventFilter()} filter} of this repository.
+     */
+    public final Iterable<Event> filter(Collection<Event> events) {
+        Iterable<Event> filtered = eventFilter().filter(events);
+        return filtered;
+    }
+    
     /**
      * Enumeration of generic type parameters of this class.
      */

@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -51,7 +52,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -130,7 +130,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
         Iterator<E> allEntities = loadAll(ResponseFormat.getDefaultInstance());
-        Iterator<E> result = filter(allEntities, filter::test);
+        Iterator<E> result = Iterators.filter(allEntities, filter::test);
         return result;
     }
 
@@ -257,7 +257,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         RecordStorage<I> storage = recordStorage();
         Iterator<@Nullable EntityRecord> records = storage.readMultiple(ids, fieldMask);
-        Iterator<EntityRecord> presentRecords = filter(records, Objects::nonNull);
+        Iterator<EntityRecord> presentRecords = Iterators.filter(records, Objects::nonNull);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(presentRecords, toEntity::apply);
         return result;
