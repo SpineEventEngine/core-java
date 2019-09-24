@@ -414,6 +414,7 @@ public abstract class ProcessManagerRepository<I,
         super.store(entity);
     }
 
+    @OverridingMethodsMustInvokeSuper
     @Override
     public P create(I id) {
         P procman = super.create(id);

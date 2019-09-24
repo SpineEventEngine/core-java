@@ -231,6 +231,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return asProjectionClass(cls);
     }
 
+    @OverridingMethodsMustInvokeSuper
     @Override
     public P create(I id) {
         P projection = super.create(id);
@@ -286,7 +287,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /**
      * {@inheritDoc}
      *
-     * //TODO:2019-08-25:alex.tymchenko: document.
+     * <p>Overrides to perform finding using the cache.
      */
     @Override
     protected P findOrCreate(I id) {

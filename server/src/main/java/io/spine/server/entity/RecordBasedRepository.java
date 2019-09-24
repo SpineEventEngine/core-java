@@ -113,6 +113,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         cacheEntityColumns();
     }
 
+    @OverridingMethodsMustInvokeSuper
     @Override
     public E create(I id) {
         E result = entityFactory().create(id);
