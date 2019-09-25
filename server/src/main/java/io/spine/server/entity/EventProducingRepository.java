@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
 import io.spine.server.event.EventBus;
@@ -35,7 +34,6 @@ import java.util.Collection;
 /**
  * Operations common for repositories that can post to {@link #eventBus() EventBus}.
  */
-@Internal
 public interface EventProducingRepository {
 
     /**
@@ -49,9 +47,17 @@ public interface EventProducingRepository {
     EventBus eventBus();
 
     /**
-     * Filters events before they are posted to the bus.
+     * Declared for mixing-in with {@link Repository#eventFilter()}.
      */
-    Iterable<Event> filter(Collection<Event> events);
+    EventFilter eventFilter();
+
+    /**
+     * Filters passed events using the {@linkplain #eventFilter()} filter} of this repository.
+     */
+    default Iterable<Event> filter(Collection<Event> events) {
+        Iterable<Event> filtered = eventFilter().filter(events);
+        return filtered;
+    }
 
     /**
      * Filters the passed events and posts the result to the EventBus.

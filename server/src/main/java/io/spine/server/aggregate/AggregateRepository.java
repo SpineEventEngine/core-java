@@ -82,7 +82,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
-        implements CommandDispatcher, EventProducingRepository,  EventDispatcherDelegate {
+        implements CommandDispatcher, EventProducingRepository, EventDispatcherDelegate {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -156,7 +156,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public EventBus eventBus() {
+    public final EventBus eventBus() {
         return context().eventBus();
     }
 

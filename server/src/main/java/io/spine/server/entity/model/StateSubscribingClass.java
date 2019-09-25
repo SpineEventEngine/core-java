@@ -32,13 +32,11 @@ public interface StateSubscribingClass {
 
     /**
      * Obtains domestic entity states to which the class is subscribed.
-     * @return
      */
     ImmutableSet<StateClass> domesticStates();
 
     /**
      * Obtains external entity states to which the class is subscribed.
-     * @return
      */
     ImmutableSet<StateClass> externalStates();
 

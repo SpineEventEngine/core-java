@@ -41,7 +41,7 @@ public final class EventDiscardingProcManRepository
     private static final EventFilter eventFilter = anyEvent -> Optional.empty();
 
     @Override
-    protected EventFilter eventFilter() {
+    public EventFilter eventFilter() {
         return eventFilter;
     }
 }
