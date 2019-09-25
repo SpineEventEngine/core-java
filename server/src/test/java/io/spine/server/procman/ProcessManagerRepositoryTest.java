@@ -123,7 +123,7 @@ class ProcessManagerRepositoryTest
             new TestActorRequestFactory(getClass(), TenantId.newBuilder()
                                                             .setValue(newUuid())
                                                             .build());
-    private BoundedContext boundedContext;
+    private BoundedContext context;
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
@@ -207,17 +207,18 @@ class ProcessManagerRepositoryTest
     protected void setUp() {
         super.setUp();
         setCurrentTenant(requestFactory.tenantId());
-        boundedContext = BoundedContextBuilder
+        context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        boundedContext.register(repository());
+        context.register(repository());
         TestProcessManager.clearMessageDeliveryHistory();
+        repository().clearConfigureCalledFlag();
     }
 
     @Override
     @AfterEach
     protected void tearDown() throws Exception {
-        boundedContext.close();
+        context.close();
         super.tearDown();
     }
 
@@ -274,7 +275,7 @@ class ProcessManagerRepositoryTest
     @DisplayName("allow customizing command routing")
     void setupOfCommandRouting() {
         ProjectCompletion.Repository repo = new ProjectCompletion.Repository();
-        boundedContext.register(repo);
+        context.register(repo);
         assertTrue(repo.callbackCalled());
     }
 
@@ -299,7 +300,7 @@ class ProcessManagerRepositoryTest
     @DisplayName("dispatch command and post events")
     void dispatchCommandAndPostEvents() {
         RememberingSubscriber subscriber = new RememberingSubscriber();
-        boundedContext.registerEventDispatcher(subscriber);
+        context.registerEventDispatcher(subscriber);
 
         testDispatchCommand(addTask());
 
@@ -318,7 +319,7 @@ class ProcessManagerRepositoryTest
         @DisplayName("events")
         void events() {
             DiagnosticMonitor monitor = new DiagnosticMonitor();
-            boundedContext.registerEventDispatcher(monitor);
+            context.registerEventDispatcher(monitor);
             Event event = GivenMessage.projectStarted();
 
             dispatchEvent(event);
@@ -338,7 +339,7 @@ class ProcessManagerRepositoryTest
         @DisplayName("commands")
         void commands() {
             DiagnosticMonitor monitor = new DiagnosticMonitor();
-            boundedContext.registerEventDispatcher(monitor);
+            context.registerEventDispatcher(monitor);
             Command command = GivenMessage.createProject();
 
             dispatchCommand(command);
@@ -481,7 +482,7 @@ class ProcessManagerRepositoryTest
         CommandEnvelope command = CommandEnvelope.of(unknownCommand);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        boundedContext.registerEventDispatcher(monitor);
+        context.registerEventDispatcher(monitor);
         repo.dispatchCommand(command);
         List<RoutingFailed> failures = monitor.routingFailures();
         assertThat(failures).hasSize(1);
@@ -643,6 +644,32 @@ class ProcessManagerRepositoryTest
         private TestProcessManager processManager(ProjectId id) {
             TestProcessManager result = repository().findOrCreate(id);
             return result;
+        }
+    }
+
+    @DisplayName("call `configure()` callback when a `ProcessManager` instance is created")
+    @Nested
+    class CallingConfigure {
+
+        @Test
+        void whenFinding() {
+            TestProcessManagerRepository repository = repository();
+            assertFalse(repository.configureCalled());
+
+            TestProcessManager created = repository.create(ID);
+            repository.store(created);
+
+            repository.findOrCreate(ID);
+            assertTrue(repository.configureCalled());
+        }
+
+        @Test
+        void whenCreating() {
+            TestProcessManagerRepository repository = repository();
+            assertFalse(repository.configureCalled());
+
+            repository.create(ID);
+            assertTrue(repository.configureCalled());
         }
     }
 }

@@ -39,6 +39,7 @@ import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.RepositoryCache;
@@ -372,13 +373,50 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
+     * Creates {@linkplain #configure(ProcessManager) configures} an instance of the process manager
+     * by the passed record.
+     */
+    @Override
+    protected final P toEntity(EntityRecord record) {
+        P result = super.toEntity(record);
+        configure(result);
+        return result;
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public P create(I id) {
+        P procman = super.create(id);
+        lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
+        configure(procman);
+        return procman;
+    }
+
+    /**
+     * A callback method for configuring a recently created {@code ProcessManager} instance
+     * before it is returned by the repository as the result of creating a new process manager
+     * instance or finding existing one.
+     *
+     * <p>Default implementation does nothing. Overriding repositories may use this method for
+     * injecting dependencies that process managers need to have.
+     *
+     * @param processManager
+     *         the process manager to configure
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void configure(@SuppressWarnings("unused") P processManager) {
+        // Do nothing.
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Overrides to expose the method to the package.
      */
     @Override
     protected final P findOrCreate(I id) {
-        return cache.load(id);
+        P result = cache.load(id);
+        return result;
     }
 
     private P doFindOrCreate(I id) {
@@ -392,14 +430,6 @@ public abstract class ProcessManagerRepository<I,
 
     private void doStore(P entity) {
         super.store(entity);
-    }
-
-    @OverridingMethodsMustInvokeSuper
-    @Override
-    public P create(I id) {
-        P procman = super.create(id);
-        lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
-        return procman;
     }
 
     @OverridingMethodsMustInvokeSuper

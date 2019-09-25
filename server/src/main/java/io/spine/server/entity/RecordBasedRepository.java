@@ -352,7 +352,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
-    private E toEntity(EntityRecord record) {
+    /**
+     * Converts the passed record into an entity.
+     */
+    @OverridingMethodsMustInvokeSuper
+    protected E toEntity(EntityRecord record) {
         E result = storageConverter().reverse()
                                      .convert(record);
         checkNotNull(result);
