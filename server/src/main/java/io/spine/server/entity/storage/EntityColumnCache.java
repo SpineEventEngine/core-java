@@ -58,7 +58,7 @@ public final class EntityColumnCache {
     /**
      * A container of {@link EntityColumn entity column} name and its data.
      *
-     * Each {@link EntityColumn entity column} data instance can be accessed by the
+     * <p>Each {@link EntityColumn entity column} data instance can be accessed by the
      * corresponding entity column {@linkplain EntityColumn#name() name}.
      *
      * <p>The data is stored this way for convenient querying of the specific columns.
