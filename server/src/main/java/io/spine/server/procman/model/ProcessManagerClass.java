@@ -124,7 +124,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     /**
-     * Obtains a method which generates one or more commands in response to incoming
+     * Obtains a method which may generate one or more commands in response to incoming
      * event with the passed class.
      */
     public CommandReactionMethod commanderOf(EventClass eventClass) {
