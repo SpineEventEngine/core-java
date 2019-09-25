@@ -207,6 +207,11 @@ public final class CommandSubstituteTestEnv {
         EitherOf3<CdrAssignTask, CdrStartTask, Nothing> eitherWithNothing(CmdAddTask command) {
             return EitherOf3.withC(nothing());
         }
+
+        @Command
+        Iterable<Nothing> wrongIterable(CmdAddTask command) {
+            return ImmutableList.of();
+        }
     }
 
     private static CdrAssignTask assignTask() {
