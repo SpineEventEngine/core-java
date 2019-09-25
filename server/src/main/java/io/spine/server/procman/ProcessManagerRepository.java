@@ -373,8 +373,8 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Creates {@linkplain #configure(ProcessManager) configures} an instance of the process manager
-     * by the passed record.
+     * Creates and {@linkplain #configure(ProcessManager) configures} an instance of
+     * the process manager by the passed record.
      */
     @Override
     protected final P toEntity(EntityRecord record) {
