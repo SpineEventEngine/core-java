@@ -37,7 +37,7 @@ import java.util.Collection;
 public interface EventProducingRepository {
 
     /**
-     * Obtains classes of the events produced by this {@code Repository}.
+     * Obtains classes of the events produced by this repository.
      */
     ImmutableSet<EventClass> outgoingEvents();
 
