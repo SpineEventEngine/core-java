@@ -93,7 +93,7 @@ abstract class CommandAcceptingSignature
             @Override
             public boolean matches(MethodParams params) {
                 return params.are(CommandMessage.class, CommandContext.class)
-                        && GeneratedMessageV3.class.isAssignableFrom(params.type(0));
+                        && params.firstIs(GeneratedMessageV3.class);
             }
 
             @Override

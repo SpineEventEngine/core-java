@@ -113,6 +113,16 @@ public final class MethodParams {
         if (size() != 1) {
             return false;
         }
+        return firstIs(type);
+    }
+
+    /**
+     * Verifies if the first parameter of the method is of the passed type.
+     */
+    public boolean firstIs(Class<?> type) {
+        if(size() == 0) {
+            return false;
+        }
         Class<?> firstParam = type(0);
         return type.isAssignableFrom(firstParam);
     }
