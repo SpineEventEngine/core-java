@@ -33,7 +33,7 @@ import io.spine.type.MessageClass;
  * @param <C>
  *         the type of a command handling class
  * @param <R>
- *         the type of the produced message classes
+ *         the type of the class of produced messages
  * @param <H>
  *         the type of methods performing the command handle
  */
