@@ -17,30 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.command.model;
+package spine.test.command.rejection;
 
-import io.spine.server.command.Command;
-import io.spine.server.command.model.given.commander.CommandSubstituteTestEnv;
-import io.spine.server.model.MethodSignatureTest;
+import "spine/options.proto";
 
-import java.lang.reflect.Method;
-import java.util.stream.Stream;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.test.command.rejection";
+option java_outer_classname = "CommandRejections";
+option java_multiple_files = false;
 
-class CommandSubstituteSignatureTest extends MethodSignatureTest<CommandSubstituteSignature> {
+import "spine/core/user_id.proto";
+import "spine/test/command/project.proto";
 
-    @Override
-    protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(CommandSubstituteTestEnv.ValidCommander.class, Command.class).stream();
-    }
+//
+// Rejections for `CommandSubstitutionSignatureTest`.
+////////////////
 
-    @Override
-    protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(CommandSubstituteTestEnv.InvalidCommander.class, Command.class).stream();
-    }
-
-    @Override
-    protected CommandSubstituteSignature signature() {
-        return new CommandSubstituteSignature();
-    }
+message CsCannotCreateProject {
+    ProjectId project_id = 1;
 }

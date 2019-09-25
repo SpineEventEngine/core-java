@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -27,10 +28,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -57,7 +60,18 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
     @ParameterizedTest
     @MethodSource("invalidMethods")
     protected final void testInvalid(Method method) {
-        assertThrows(SignatureMismatchException.class, () -> wrap(method));
+
+        //TODO:2019-09-24:alex.tymchenko: a workaround to detect invalid `@Command`-er methods.
+        try {
+            Optional<? extends HandlerMethod> result = wrap(method);
+            if(result.isPresent()) {
+                fail(String.format(
+                        "Handler method `%s` should have had an invalid signature.", method
+                ));
+            }
+        } catch (SignatureMismatchException ignored) {
+            assertThrows(SignatureMismatchException.class, () -> wrap(method));
+        }
     }
 
     private Optional<? extends HandlerMethod> wrap(Method method) {
@@ -65,12 +79,38 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
         return result;
     }
 
+    /**
+     * Finds the method by its name.
+     *
+     * <p>Throws {@link org.opentest4j.AssertionFailedError assertion error} if no such method
+     * found.
+     *
+     * @param declaringClass
+     *         the class in which to search for the method
+     * @param name
+     *         the name of the method;
+     *         expected to be without the class name, visibility level or parameters
+     * @return the method
+     */
     public static Method findMethod(Class<?> declaringClass, String name) {
+
         Method result = Stream.of(declaringClass.getDeclaredMethods())
                               .filter(method -> method.getName()
                                                       .equals(name))
                               .findAny()
                               .orElseGet(() -> fail(format("Method %s not found.", name)));
+        return result;
+    }
+
+    /**
+     * Returns all methods of the class which are annotated by the specified annotation.
+     */
+    protected static ImmutableSet<Method>
+    methodsAnnotatedWith(Class<?> declaringCls, Class<? extends Annotation> annotationCls) {
+        ImmutableSet<Method> result =
+                Stream.of(declaringCls.getDeclaredMethods())
+                      .filter(m -> m.getDeclaredAnnotation(annotationCls) != null)
+                      .collect(toImmutableSet());
         return result;
     }
 }

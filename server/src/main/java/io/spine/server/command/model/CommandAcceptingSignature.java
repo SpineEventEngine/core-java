@@ -22,6 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.GeneratedMessageV3;
 import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
@@ -79,7 +80,7 @@ abstract class CommandAcceptingSignature
         MESSAGE {
             @Override
             public boolean matches(MethodParams params) {
-                return params.is(CommandMessage.class);
+                return params.is(CommandMessage.class) && params.is(GeneratedMessageV3.class);
             }
 
             @Override
