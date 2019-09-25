@@ -100,74 +100,74 @@ message CmdEmpty {
 }
 
 //
-// Commands for `CommandSubstitutionSignatureTest`.
+// Commands for tests of `Command`-ing method signatures.
 ////////////////
 
-message CsCreateProject {
-    option (is).java_type="io.spine.server.command.model.given.commander.SubstitutionTestCommand";
+message CdrCreateProject {
+    option (is).java_type="io.spine.server.command.model.given.commander.CommanderTestCommand";
 
     ProjectId id = 1;
 }
 
-message CsStartProject {
-    option (is).java_type="io.spine.server.command.model.given.commander.SubstitutionTestCommand";
+message CdrStartProject {
+    option (is).java_type="io.spine.server.command.model.given.commander.CommanderTestCommand";
 
     ProjectId id = 1;
 }
 
-message CsStopProject {
+message CdrStopProject {
 
     ProjectId id = 1;
 }
 
-message CsCreateTask {
+message CdrCreateTask {
 
     TaskId id = 1;
     Task task = 2;
     bool start = 3;
 }
 
-message CsStartTask {
+message CdrStartTask {
 
     TaskId id = 1;
 }
 
-message CsPauseTask {
+message CdrPauseTask {
 
     TaskId id = 1;
 }
 
-message CsStopTask {
+message CdrStopTask {
 
     TaskId id = 1;
 }
 
-message CsAddTaskToProject {
+message CdrAddTaskToProject {
     ProjectId id = 1;
     TaskId task = 2;
 }
 
-message CsRemoveTaskFromProject {
+message CdrRemoveTaskFromProject {
     ProjectId id = 1;
     TaskId task = 2;
 }
 
-message CsMoveTask {
+message CdrMoveTask {
     TaskId id = 1;
     ProjectId from_project = 2;
     ProjectId to_project = 3;
 }
 
-message CsDeleteTask {
+message CdrDeleteTask {
     TaskId id = 2;
 }
 
-message CsAssignTask {
+message CdrAssignTask {
     TaskId task_id = 1;
     core.UserId assignee = 2;
 }
 
-message CsSetProjectOwner {
+message CdrSetProjectOwner {
     ProjectId id = 1;
     core.UserId owner = 2;
 }

@@ -27,16 +27,17 @@ import io.spine.core.CommandContext;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
 import io.spine.server.model.Nothing;
+import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
+import io.spine.test.command.CdrAddTaskToProject;
+import io.spine.test.command.CdrAssignTask;
+import io.spine.test.command.CdrCreateTask;
+import io.spine.test.command.CdrPauseTask;
+import io.spine.test.command.CdrRemoveTaskFromProject;
+import io.spine.test.command.CdrStartTask;
+import io.spine.test.command.CdrStopTask;
 import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CsAssignTask;
-import io.spine.test.command.CsCreateTask;
-import io.spine.test.command.CsPauseTask;
-import io.spine.test.command.CsRemoveTaskFromProject;
-import io.spine.test.command.CsStartTask;
-import io.spine.test.command.CsStopTask;
-import io.spine.test.commandservice.command.CsAddTask;
 
 import java.util.Optional;
 
@@ -61,74 +62,74 @@ public final class CommandSubstituteTestEnv {
     public static final class ValidCommander extends AbstractCommander {
 
         @Command
-        CsStartTask singleMsgSingleResult(CsAssignTask command) {
+        CdrStartTask singleMsgSingleResult(CdrAssignTask command) {
             return startTask();
         }
 
         @Command
-        CsStartTask msgWithCtxSingleResult(CsAssignTask command, CommandContext ctx) {
+        CdrStartTask msgWithCtxSingleResult(CdrAssignTask command, CommandContext ctx) {
             return startTask();
         }
 
         @Command
-        Pair<CsAssignTask, CsStartTask> singleMsgPairResult(CmdAddTask command) {
+        Pair<CdrAssignTask, CdrStartTask> singleMsgPairResult(CmdAddTask command) {
             return Pair.of(assignTask(), startTask());
         }
 
         @Command
-        Pair<CsAssignTask, CsStartTask>
+        Pair<CdrAssignTask, CdrStartTask>
         msgWithCtxPairResult(CmdAddTask command, CommandContext ctx) {
             return Pair.of(assignTask(), startTask());
         }
 
         @Command
-        Pair<CsAddTask, Optional<CsStartTask>> singleMsgPairWithOptional(CsCreateTask command) {
+        Pair<CdrAddTaskToProject, Optional<CdrStartTask>>
+        pairWithOptionalResult(CdrCreateTask command) {
             return Pair.withNullable(addTask(), null);
         }
 
         @Command
-        Pair<CsAddTask, Optional<CsStartTask>>
-        msgWithCtxPairWithOptional(CsCreateTask command, CommandContext ctx) {
+        Pair<CdrAddTaskToProject, Optional<CdrStartTask>>
+        msgWithCtxPairWithOptional(CdrCreateTask command, CommandContext ctx) {
             return Pair.withNullable(addTask(), null);
         }
 
         @Command
-        EitherOf3<CsStopTask, CsPauseTask, Nothing>
-        singleMsgEitherOf3(CsRemoveTaskFromProject cmd) {
-            return EitherOf3.withC(nothing());
+        EitherOf2<CdrStopTask, CdrPauseTask> singleMsgEitherOf2(CdrRemoveTaskFromProject cmd) {
+            return EitherOf2.withB(pauseTask());
         }
 
         @Command
-        EitherOf3<CsStopTask, CsPauseTask, Nothing>
-        msgWithCtxEitherOf3(CsRemoveTaskFromProject cmd, CommandContext ctx) {
-            return EitherOf3.withC(nothing());
+        EitherOf2<CdrStopTask, CdrPauseTask>
+        msgWithCtxEitherOf2(CdrRemoveTaskFromProject cmd, CommandContext ctx) {
+            return EitherOf2.withB(pauseTask());
         }
 
         @Command
-        Iterable<CommandMessage> singleMsgIterableResult(CsAssignTask command) {
+        Iterable<CommandMessage> singleMsgIterableResult(CdrAssignTask command) {
             return ImmutableList.of(startTask());
         }
 
         @Command
         Iterable<CommandMessage>
-        msgWithCtxIterableResult(CsAssignTask command, CommandContext ctx) {
+        msgWithCtxIterableResult(CdrAssignTask command, CommandContext ctx) {
             return ImmutableList.of(startTask());
         }
 
         @SuppressWarnings("MethodMayBeStatic")              // testing the visibility level.
         @Command
-        private CsStartTask privateHandler(CsAssignTask command) {
+        private CdrStartTask privateHandler(CdrAssignTask command) {
             return startTask();
         }
 
         @SuppressWarnings("ProtectedMemberInFinalClass")    // testing the visibility level.
         @Command
-        protected CsStartTask protectedHandler(CsAssignTask command) {
+        protected CdrStartTask protectedHandler(CdrAssignTask command) {
             return startTask();
         }
 
         @Command
-        public CsStartTask publicHandler(CsAssignTask command) {
+        public CdrStartTask publicHandler(CdrAssignTask command) {
             return startTask();
         }
     }
@@ -143,75 +144,84 @@ public final class CommandSubstituteTestEnv {
     public static final class InvalidCommander extends AbstractCommander {
 
         @Command
-        CsStartTask noParams() {
+        CdrStartTask noParams() {
             return startTask();
         }
 
         @Command
-        CsStartTask nonCommandMessageParam(Nothing command) {
+        CdrStartTask nonCommandMessageParam(Nothing command) {
             return startTask();
         }
 
         @Command
-        CsStartTask nonMessageParam(int command) {
+        CdrStartTask nonMessageParam(int command) {
             return startTask();
         }
 
         @Command
-        Optional<CsStartTask> optionalResult(CsAssignTask command) {
+        Optional<CdrStartTask> optionalResult(CdrAssignTask command) {
             return Optional.empty();
         }
 
         @Command
-        CsStartTask threeParams(CsAssignTask command, CommandContext ctx, CsAssignTask third) {
+        CdrStartTask threeParams(CdrAssignTask command, CommandContext ctx, CdrAssignTask third) {
             return startTask();
         }
 
         @Command
-        CsStartTask wrongSecondParam(CsAssignTask command, Nothing message) {
+        CdrStartTask wrongSecondParam(CdrAssignTask command, Nothing message) {
             return startTask();
         }
 
         @Command
-        CsStartTask wrongContext(CsAssignTask command, MessageContext msg) {
+        CdrStartTask wrongContext(CdrAssignTask command, MessageContext msg) {
             return startTask();
         }
 
         @Command
-        void voidMethod(CsAssignTask command) {
+        void voidMethod(CdrAssignTask command) {
             // do nothing.
         }
 
         @Command
-        Nothing eventResult(CsAssignTask command) {
+        Nothing eventResult(CdrAssignTask command) {
             return nothing();
         }
 
         @Command
-        int nonMessageResult(CsAssignTask command) {
+        int nonMessageResult(CdrAssignTask command) {
             return 42;
         }
 
         @Command
-        CsStartTask justInterface(SubstitutionTestCommand command) {
+        CdrStartTask justInterface(CommanderTestCommand command) {
             return startTask();
         }
 
         @Command
-        CsStartTask interfaceAndContext(SubstitutionTestCommand command, CommandContext context) {
+        CdrStartTask interfaceAndContext(CommanderTestCommand command, CommandContext context) {
             return startTask();
+        }
+
+        @Command
+        EitherOf3<CdrAssignTask, CdrStartTask, Nothing> eitherWithNothing(CmdAddTask command) {
+            return EitherOf3.withC(nothing());
         }
     }
 
-    private static CsAssignTask assignTask() {
-        return CsAssignTask.getDefaultInstance();
+    private static CdrAssignTask assignTask() {
+        return CdrAssignTask.getDefaultInstance();
     }
 
-    private static CsAddTask addTask() {
-        return CsAddTask.getDefaultInstance();
+    private static CdrAddTaskToProject addTask() {
+        return CdrAddTaskToProject.getDefaultInstance();
     }
 
-    private static CsStartTask startTask() {
-        return CsStartTask.getDefaultInstance();
+    private static CdrStartTask startTask() {
+        return CdrStartTask.getDefaultInstance();
+    }
+
+    private static CdrPauseTask pauseTask() {
+        return CdrPauseTask.getDefaultInstance();
     }
 }

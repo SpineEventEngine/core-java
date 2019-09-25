@@ -71,3 +71,69 @@ message MandatoryFieldEvent {
 message DCmdProjectCreated {
     ProjectId project_id = 1;
 }
+
+//
+// Events for tests of `Command`-ing method signatures.
+////////////////
+
+message CdrProjectCreated {
+    option (is).java_type="io.spine.server.command.model.given.reaction.CommanderTestEvent";
+    ProjectId id = 1;
+}
+
+message CdrProjectStarted {
+    option (is).java_type="io.spine.server.command.model.given.reaction.CommanderTestEvent";
+    ProjectId id = 1;
+}
+
+message CdrProjectStopped {
+    ProjectId id = 1;
+}
+
+message CdrTaskCreated {
+    TaskId id = 1;
+    Task task = 2;
+    bool start = 3;
+}
+
+message CdrTaskStarted {
+    TaskId id = 1;
+}
+
+message CdrTaskPaused {
+    TaskId id = 1;
+}
+
+message CdrTaskStopped {
+    TaskId id = 1;
+}
+
+message CdrTaskAddedToProject {
+    ProjectId id = 1;
+    TaskId task = 2;
+}
+
+message CdrTaskRemovedFromProject {
+    ProjectId id = 1;
+    TaskId task = 2;
+}
+
+message CdrTaskMoved {
+    TaskId id = 1;
+    ProjectId from_project = 2;
+    ProjectId to_project = 3;
+}
+
+message CdrTaskDeleted {
+    TaskId id = 2;
+}
+
+message CdrTaskAssigned {
+    TaskId task_id = 1;
+    core.UserId assignee = 2;
+}
+
+message CdrProjectOwnerSet {
+    ProjectId id = 1;
+    core.UserId owner = 2;
+}
