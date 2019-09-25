@@ -34,7 +34,7 @@ public class EventDiscardingAggregateRepository
     private static final EventFilter discardAll = anyEvent -> empty();
 
     @Override
-    protected EventFilter eventFilter() {
+    public EventFilter eventFilter() {
         return discardAll;
     }
 }

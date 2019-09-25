@@ -33,7 +33,7 @@ public class PersonProcmanRepository
 
     // Allow all events for the test purposes.
     @Override
-    protected EventFilter eventFilter() {
+    public EventFilter eventFilter() {
         return EventFilter.allowAll();
     }
 }

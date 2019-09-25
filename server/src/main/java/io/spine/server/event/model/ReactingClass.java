@@ -20,10 +20,9 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
-
-import java.util.Set;
 
 /**
  * Provides message handling information on a class that reacts on messages.
@@ -38,5 +37,5 @@ public interface ReactingClass extends EventReceiverClass {
     /**
      * Obtains the classes of events produced from the event reaction.
      */
-    Set<EventClass> reactionOutput();
+    ImmutableSet<EventClass> reactionOutput();
 }

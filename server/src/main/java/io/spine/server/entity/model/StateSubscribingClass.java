@@ -20,7 +20,7 @@
 
 package io.spine.server.entity.model;
 
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * A class which can {@linkplain io.spine.core.Subscribe subscribe} to updates of entity states.
@@ -33,12 +33,12 @@ public interface StateSubscribingClass {
     /**
      * Obtains domestic entity states to which the class is subscribed.
      */
-    Set<StateClass> domesticStates();
+    ImmutableSet<StateClass> domesticStates();
 
     /**
      * Obtains external entity states to which the class is subscribed.
      */
-    Set<StateClass> externalStates();
+    ImmutableSet<StateClass> externalStates();
 
     /**
      * Verifies if this class is {@linkplain io.spine.core.Subscribe subscribed} to updates of
