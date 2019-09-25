@@ -21,7 +21,6 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
@@ -165,7 +164,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public EventBus eventBus() {
+    public final EventBus eventBus() {
         return context().eventBus();
     }
 
@@ -250,7 +249,7 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public Set<EventClass> messageClasses() {
+    public final Set<EventClass> messageClasses() {
         return processManagerClass().events();
     }
 
@@ -262,7 +261,7 @@ public abstract class ProcessManagerRepository<I,
      *         external events
      */
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public final Set<EventClass> externalEventClasses() {
         return processManagerClass().externalEvents();
     }
 
@@ -272,8 +271,7 @@ public abstract class ProcessManagerRepository<I,
      * @return a set of command classes or empty set if process managers do not handle commands
      */
     @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<CommandClass> commandClasses() {
+    public final Set<CommandClass> commandClasses() {
         return processManagerClass().commands();
     }
 
@@ -333,7 +331,8 @@ public abstract class ProcessManagerRepository<I,
     private void onCommandTargetSet(I id, CommandEnvelope cmd) {
         EntityLifecycle lifecycle = lifecycleOf(id);
         CommandId commandId = cmd.id();
-        with(cmd.tenantId()).run(() -> lifecycle.onTargetAssignedToCommand(commandId));
+        with(cmd.tenantId())
+                .run(() -> lifecycle.onTargetAssignedToCommand(commandId));
     }
 
     @Internal
@@ -365,16 +364,9 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Posts the passed event to {@link EventBus}.
-     */
-    void postEvent(Event event) {
-        postEvents(ImmutableList.of(event));
-    }
-
-    /**
      * Posts passed commands to {@link CommandBus}.
      */
-    void postCommands(Collection<Command> commands) {
+    final void postCommands(Collection<Command> commands) {
         CommandBus bus = context().commandBus();
         bus.post(commands, noOpObserver());
     }
@@ -394,7 +386,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public void store(P entity) {
+    public final void store(P entity) {
         cache.store(entity);
     }
 
