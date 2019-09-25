@@ -150,53 +150,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Obtains an instance of {@link EntityLifecycle} for the entity with the given ID.
-     *
-     * <p>It is necessary that a tenant ID is set when calling this method in a multitenant
-     * environment.
-     *
-     * @param id the ID of the target entity
-     * @return {@link EntityLifecycle} of the given entity
-     */
-    @Internal
-    public EntityLifecycle lifecycleOf(I id) {
-        checkNotNull(id);
-        SystemWriteSide writeSide = context().systemClient().writeSide();
-        EventFilter eventFilter = eventFilter();
-        EntityLifecycle lifecycle = EntityLifecycle
-                .newBuilder()
-                .setEntityId(id)
-                .setEntityType(entityModelClass())
-                .setSystemWriteSide(writeSide)
-                .setEventFilter(eventFilter)
-                .build();
-        return lifecycle;
-    }
-
-    /**
-     * Creates an {@link EventFilter} for this repository.
-     *
-     * <p>All the events posted by this repository, domain, and system are first passed through this
-     * filter.
-     *
-     * <p>By default, the filter allows all the events to be posted. For entities which do not allow
-     * state subscription, the {@link io.spine.system.server.event.EntityStateChanged} event is
-     * filtered out. Override this method to change this behaviour.
-     *
-     * @return an {@link EventFilter} to apply to all posted events
-     * @implNote This method may be called many times for a single repository. It is reasonable that
-     *           it does not re-initialize the filter each time. Also, it is necessary that
-     *           the filter returned from this method is always (at least effectively) the same.
-     *           See {@link Pure @Pure} for the details on the expected behaviour.
-     */
-    @SPI
-    @Pure
-    public EventFilter eventFilter() {
-        EntityClass<E> entityClass = entityModelClass();
-        return EntityStateChangedFilter.forType(entityClass);
-    }
-
-    /**
      * Obtains a model class for the passed entity class value.
      */
     @Internal
@@ -329,7 +282,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>In order to create a custom storage, please override {@link #createStorage()} providing
      * custom implementation.
-     * 
+     *
      * @see #createStorage()
      */
     @Internal
@@ -438,6 +391,53 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         context().systemClient()
                  .writeSide()
                  .postEvent(systemEvent, envelope.asMessageOrigin());
+    }
+
+    /**
+     * Obtains an instance of {@link EntityLifecycle} for the entity with the given ID.
+     *
+     * <p>It is necessary that a tenant ID is set when calling this method in a multitenant
+     * environment.
+     *
+     * @param id the ID of the target entity
+     * @return {@link EntityLifecycle} of the given entity
+     */
+    @Internal
+    public EntityLifecycle lifecycleOf(I id) {
+        checkNotNull(id);
+        SystemWriteSide writeSide = context().systemClient().writeSide();
+        EventFilter eventFilter = eventFilter();
+        EntityLifecycle lifecycle = EntityLifecycle
+                .newBuilder()
+                .setEntityId(id)
+                .setEntityType(entityModelClass())
+                .setSystemWriteSide(writeSide)
+                .setEventFilter(eventFilter)
+                .build();
+        return lifecycle;
+    }
+
+    /**
+     * Creates an {@link EventFilter} for this repository.
+     *
+     * <p>All the events posted by this repository, domain, and system are first passed through this
+     * filter.
+     *
+     * <p>By default, the filter allows all the events to be posted. For entities which do not allow
+     * state subscription, the {@link io.spine.system.server.event.EntityStateChanged} event is
+     * filtered out. Override this method to change this behaviour.
+     *
+     * @return an {@link EventFilter} to apply to all posted events
+     * @implNote This method may be called many times for a single repository. It is reasonable that
+     *           it does not re-initialize the filter each time. Also, it is necessary that
+     *           the filter returned from this method is always (at least effectively) the same.
+     *           See {@link Pure @Pure} for the details on the expected behaviour.
+     */
+    @SPI
+    @Pure
+    public EventFilter eventFilter() {
+        EntityClass<E> entityClass = entityModelClass();
+        return EntityStateChangedFilter.forType(entityClass);
     }
 
     /**
