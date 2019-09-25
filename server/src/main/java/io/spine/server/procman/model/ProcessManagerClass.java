@@ -20,6 +20,7 @@
 
 package io.spine.server.procman.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
@@ -33,8 +34,6 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
-
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
@@ -72,33 +71,33 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<CommandClass> commands() {
+    public ImmutableSet<CommandClass> commands() {
         SetView<CommandClass> result =
                 union(super.commands(), commanderDelegate.commands());
-        return result;
+        return result.immutableCopy();
     }
 
     @Override
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         SetView<EventClass> result =
                 union(reactorDelegate.events(), commanderDelegate.events());
-        return result;
+        return result.immutableCopy();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         SetView<EventClass> result =
                 union(reactorDelegate.externalEvents(),
                       commanderDelegate.externalEvents());
-        return result;
+        return result.immutableCopy();
     }
 
     /**
      * Obtains event classes produced by this process manager class.
      */
-    public Set<EventClass> outgoingEvents() {
+    public ImmutableSet<EventClass> outgoingEvents() {
         SetView<EventClass> result = union(commandOutput(), reactionOutput());
-        return result;
+        return result.immutableCopy();
     }
 
     @Override
@@ -107,31 +106,50 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<EventClass> reactionOutput() {
+    public ImmutableSet<EventClass> reactionOutput() {
         return reactorDelegate.reactionOutput();
     }
 
     @Override
-    public Set<CommandClass> outgoingCommands() {
+    public ImmutableSet<CommandClass> outgoingCommands() {
         return commanderDelegate.outgoingCommands();
     }
 
+    /**
+     * Obtains a method which handles the passed class of commands by producing
+     * one or more other commands.
+     */
     public CommandSubstituteMethod commanderOf(CommandClass commandClass) {
         return commanderDelegate.handlerOf(commandClass);
     }
 
+    /**
+     * Obtains a method which generates one or more commands in response to incoming
+     * event with the passed class.
+     */
     public CommandReactionMethod commanderOf(EventClass eventClass) {
         return commanderDelegate.getCommander(eventClass);
     }
 
+    /**
+     * Verifies if the process manager class has a method which generates one or more
+     * commands in response to a command of the passed class.
+     */
     public boolean substitutesCommand(CommandClass commandClass) {
         return commanderDelegate.substitutesCommand(commandClass);
     }
 
+    /**
+     * Verifies if the class of process managers react on an event of the passed class.
+     */
     public boolean reactsOnEvent(EventClass eventClass) {
         return reactorDelegate.contains(eventClass);
     }
 
+    /**
+     * Verifies if the process manager class generates a command in response to
+     * an event of the passed class.
+     */
     public boolean producesCommandsOn(EventClass eventClass) {
         return commanderDelegate.producesCommandsOn(eventClass);
     }

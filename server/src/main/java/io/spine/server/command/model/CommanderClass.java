@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Commander;
@@ -71,12 +72,12 @@ public final class CommanderClass<C extends Commander>
     }
 
     @Override
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return delegate.events();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
     }
 
@@ -96,9 +97,9 @@ public final class CommanderClass<C extends Commander>
     }
 
     @Override
-    public Set<CommandClass> outgoingCommands() {
+    public ImmutableSet<CommandClass> outgoingCommands() {
         SetView<CommandClass> result = union(commandOutput(), delegate.producedTypes());
-        return result;
+        return result.immutableCopy();
     }
 
     /**

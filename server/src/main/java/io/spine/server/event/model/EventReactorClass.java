@@ -28,8 +28,6 @@ import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -69,17 +67,17 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     @Override
-    public Set<EventClass> reactionOutput() {
+    public ImmutableSet<EventClass> reactionOutput() {
         return reactors.producedTypes();
     }
 
     @Override
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return events;
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return externalEvents;
     }
 }
