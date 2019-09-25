@@ -27,6 +27,7 @@ import io.spine.core.Event;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
 import io.spine.server.type.SignalEnvelope;
 
 import java.util.Collection;
@@ -36,6 +37,11 @@ import java.util.Collection;
  */
 @Internal
 public interface EventProducingRepository {
+
+    /**
+     * Obtains classes of the events produced by this {@code Repository}.
+     */
+    ImmutableSet<EventClass> outgoingEvents();
 
     /**
      * Obtains the {@code EventBus} to which the repository posts.

@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
@@ -40,7 +39,6 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.route.Route;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.type.EventClass;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.SystemWriteSide;
@@ -178,16 +176,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     public final TypeUrl entityStateType() {
         return entityModelClass().stateType();
-    }
-
-    /**
-     * Obtains classes of the events produced by this {@code Repository}.
-     *
-     * <p>For convenience purposes the default version returns an empty set.
-     * This method should be overridden by repositories which actually produce events.
-     */
-    public ImmutableSet<EventClass> outgoingEvents() {
-        return ImmutableSet.of();
     }
 
     /**
