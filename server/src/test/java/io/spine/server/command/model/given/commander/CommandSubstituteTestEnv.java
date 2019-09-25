@@ -30,8 +30,6 @@ import io.spine.server.model.Nothing;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
 import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CmdAssignTask;
-import io.spine.test.command.CmdStartTask;
 import io.spine.test.command.CsAssignTask;
 import io.spine.test.command.CsCreateTask;
 import io.spine.test.command.CsPauseTask;
@@ -46,11 +44,15 @@ import java.util.Optional;
  * A test environment for {@link io.spine.server.command.model.CommandSubstituteSignatureTest
  * CommandSubstituteSignatureTest}.
  */
-public class CommandSubstituteTestEnv {
+@SuppressWarnings("MethodOnlyUsedFromInnerClass")
+public final class CommandSubstituteTestEnv {
+
+    /** Prevents instantiation of this test environment utility. */
+    private CommandSubstituteTestEnv() {
+    }
 
     /**
-     * A standalone commander which declares valid {@link io.spine.server.command.Command
-     * Command} substitution methods.
+     * A standalone commander which declares valid {@link Command} substitution methods.
      *
      * <p>This class declares the duplicate handlers for some commands, hence it cannot be
      * registered in any Bounded Context. This is done for simplicity of enumerating all possible
@@ -60,36 +62,34 @@ public class CommandSubstituteTestEnv {
 
         @Command
         CsStartTask singleMsgSingleResult(CsAssignTask command) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
         CsStartTask msgWithCtxSingleResult(CsAssignTask command, CommandContext ctx) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
-        Pair<CmdAssignTask, CmdStartTask> singleMsgPairResult(CmdAddTask command) {
-            return Pair.of(CmdAssignTask.getDefaultInstance(), CmdStartTask.getDefaultInstance());
+        Pair<CsAssignTask, CsStartTask> singleMsgPairResult(CmdAddTask command) {
+            return Pair.of(assignTask(), startTask());
         }
 
         @Command
-        Pair<CmdAssignTask, CmdStartTask>
+        Pair<CsAssignTask, CsStartTask>
         msgWithCtxPairResult(CmdAddTask command, CommandContext ctx) {
-            return Pair.of(CmdAssignTask.getDefaultInstance(), CmdStartTask.getDefaultInstance());
+            return Pair.of(assignTask(), startTask());
         }
 
         @Command
         Pair<CsAddTask, Optional<CsStartTask>> singleMsgPairWithOptional(CsCreateTask command) {
-            CsAddTask addTask = CsAddTask.getDefaultInstance();
-            return Pair.withNullable(addTask, null);
+            return Pair.withNullable(addTask(), null);
         }
 
         @Command
         Pair<CsAddTask, Optional<CsStartTask>>
         msgWithCtxPairWithOptional(CsCreateTask command, CommandContext ctx) {
-            CsAddTask addTask = CsAddTask.getDefaultInstance();
-            return Pair.withNullable(addTask, null);
+            return Pair.withNullable(addTask(), null);
         }
 
         @Command
@@ -106,36 +106,35 @@ public class CommandSubstituteTestEnv {
 
         @Command
         Iterable<CommandMessage> singleMsgIterableResult(CsAssignTask command) {
-            return ImmutableList.of(CsStartTask.getDefaultInstance());
+            return ImmutableList.of(startTask());
         }
 
         @Command
         Iterable<CommandMessage>
         msgWithCtxIterableResult(CsAssignTask command, CommandContext ctx) {
-            return ImmutableList.of(CsStartTask.getDefaultInstance());
+            return ImmutableList.of(startTask());
         }
 
         @SuppressWarnings("MethodMayBeStatic")              // testing the visibility level.
         @Command
         private CsStartTask privateHandler(CsAssignTask command) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @SuppressWarnings("ProtectedMemberInFinalClass")    // testing the visibility level.
         @Command
         protected CsStartTask protectedHandler(CsAssignTask command) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
         public CsStartTask publicHandler(CsAssignTask command) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
     }
 
     /**
-     * A standalone commander which declares invalid {@link Command
-     * Command} substitution methods.
+     * A standalone commander which declares invalid {@link Command} substitution methods.
      *
      * <p>Being similar to {@link ValidCommander}, this class also declares duplicate handlers
      * for the same commands. Again, this seems to be the simplest way to test invalid signatures
@@ -145,17 +144,17 @@ public class CommandSubstituteTestEnv {
 
         @Command
         CsStartTask noParams() {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
         CsStartTask nonCommandMessageParam(Nothing command) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
         CsStartTask nonMessageParam(int command) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
@@ -165,17 +164,17 @@ public class CommandSubstituteTestEnv {
 
         @Command
         CsStartTask threeParams(CsAssignTask command, CommandContext ctx, CsAssignTask third) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
         CsStartTask wrongSecondParam(CsAssignTask command, Nothing message) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
         CsStartTask wrongContext(CsAssignTask command, MessageContext msg) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
@@ -195,12 +194,24 @@ public class CommandSubstituteTestEnv {
 
         @Command
         CsStartTask justInterface(SubstitutionTestCommand command) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
 
         @Command
         CsStartTask interfaceAndContext(SubstitutionTestCommand command, CommandContext context) {
-            return CsStartTask.getDefaultInstance();
+            return startTask();
         }
+    }
+
+    private static CsAssignTask assignTask() {
+        return CsAssignTask.getDefaultInstance();
+    }
+
+    private static CsAddTask addTask() {
+        return CsAddTask.getDefaultInstance();
+    }
+
+    private static CsStartTask startTask() {
+        return CsStartTask.getDefaultInstance();
     }
 }
