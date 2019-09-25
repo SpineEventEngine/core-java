@@ -62,10 +62,10 @@ public interface EventProducingRepository {
     }
 
     /**
-     * If the passed signal is command and the error occurred is a rejection, posts
-     * it to the associated {@link #eventBus() EventBus}.
+     * If the passed signal is a command and the thrown cause is a rejection,
+     * posts the rejection to the associated {@link #eventBus() EventBus}.
      */
-    default void postRejectionIfCommand(SignalEnvelope<?, ?, ?> signal, Throwable cause) {
+    default void postIfCommandRejected(SignalEnvelope<?, ?, ?> signal, Throwable cause) {
         if (signal instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
             CommandEnvelope command = (CommandEnvelope) signal;
             ThrowableMessage rejection = (ThrowableMessage) cause;

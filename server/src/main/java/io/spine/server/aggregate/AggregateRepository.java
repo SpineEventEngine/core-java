@@ -343,7 +343,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
         super.onRoutingFailed(envelope, cause);
-        postRejectionIfCommand(envelope, cause);
+        postIfCommandRejected(envelope, cause);
     }
 
     @Override
