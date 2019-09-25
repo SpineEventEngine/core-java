@@ -197,5 +197,10 @@ public class CommandSubstituteTestEnv {
         CsStartTask justInterface(SubstitutionTestCommand command) {
             return CsStartTask.getDefaultInstance();
         }
+
+        @Command
+        CsStartTask interfaceAndContext(SubstitutionTestCommand command, CommandContext context) {
+            return CsStartTask.getDefaultInstance();
+        }
     }
 }
