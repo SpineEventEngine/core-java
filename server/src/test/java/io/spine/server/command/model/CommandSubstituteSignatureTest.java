@@ -31,12 +31,14 @@ class CommandSubstituteSignatureTest extends MethodSignatureTest<CommandSubstitu
 
     @Override
     protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(CommandSubstituteTestEnv.ValidCommander.class, Command.class).stream();
+        return methodsAnnotatedWith(CommandSubstituteTestEnv.ValidCommander.class,
+                                    Command.class).stream();
     }
 
     @Override
     protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(CommandSubstituteTestEnv.InvalidCommander.class, Command.class).stream();
+        return methodsAnnotatedWith(CommandSubstituteTestEnv.InvalidCommander.class,
+                                    Command.class).stream();
     }
 
     @Override
