@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
@@ -30,8 +31,6 @@ import io.spine.server.model.HandlerMap;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
-
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
@@ -73,7 +72,7 @@ public class AggregateClass<A extends Aggregate>
      * Obtains the set of event classes on which this aggregate class reacts.
      */
     @Override
-    public final Set<EventClass> events() {
+    public final ImmutableSet<EventClass> events() {
         return delegate.events();
     }
 
@@ -81,16 +80,16 @@ public class AggregateClass<A extends Aggregate>
      * Obtains the set of <em>external</em> event classes on which this aggregate class reacts.
      */
     @Override
-    public final Set<EventClass> externalEvents() {
+    public final ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
     }
 
     /**
      * Obtains event types produced by this aggregate class.
      */
-    public Set<EventClass> outgoingEvents() {
-        Set<EventClass> result = union(commandOutput(), reactionOutput());
-        return result;
+    public ImmutableSet<EventClass> outgoingEvents() {
+        Sets.SetView<EventClass> result = union(commandOutput(), reactionOutput());
+        return result.immutableCopy();
     }
 
     /**
@@ -98,7 +97,7 @@ public class AggregateClass<A extends Aggregate>
      *
      * @see #importableEvents()
      */
-    public final Set<EventClass> stateEvents() {
+    public final ImmutableSet<EventClass> stateEvents() {
         return stateEvents.messageClasses();
     }
 
@@ -109,7 +108,7 @@ public class AggregateClass<A extends Aggregate>
      *
      * @see #stateEvents()
      */
-    public final Set<EventClass> importableEvents() {
+    public final ImmutableSet<EventClass> importableEvents() {
         return importableEvents;
     }
 
@@ -128,7 +127,7 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<EventClass> reactionOutput() {
+    public ImmutableSet<EventClass> reactionOutput() {
         return delegate.reactionOutput();
     }
 

@@ -71,11 +71,8 @@ public final class DirectScheduledExecutor implements ScheduledExecutorService {
      * <p>Returns {@code null} as the result of {@code schedule} for command bus is always
      * ignored.
      */
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"
-            /* In these tests, we do not really care about the `submit` result. */,
-            "FutureReturnValueIgnored"
-            /* It's safe to ignore the returned `Future` as the execution continues on the same
-            thread. */})
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored", "FutureReturnValueIgnored"})
+    // In these tests, we do not really care about the schedule result.
     @Override
     public <V> @Nullable ScheduledFuture<V>
     schedule(Callable<V> callable, long delay, TimeUnit unit) {

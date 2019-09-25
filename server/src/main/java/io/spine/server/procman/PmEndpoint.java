@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.base.Error;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
@@ -90,7 +91,7 @@ abstract class PmEndpoint<I,
                                                          .getEventList());
                 break;
             case REJECTION:
-                repository().postEvent(successfulOutcome.getRejection());
+                repository().postEvents(ImmutableList.of(successfulOutcome.getRejection()));
                 break;
             case PRODUCED_COMMANDS:
                 repository().postCommands(successfulOutcome.getProducedCommands()

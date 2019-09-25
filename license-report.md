@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine:spine-client:1.1.2`
+# Dependencies of `io.spine:spine-client:1.1.1-SNAPSHOT+2`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -301,6 +301,14 @@
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** net.java.dev.javacc **Name:** javacc **Version:** 5.0
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
@@ -394,6 +402,15 @@
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
@@ -432,12 +449,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Sep 25 15:30:54 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Sep 24 20:22:17 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-core:1.1.2`
+# Dependencies of `io.spine:spine-core:1.1.1-SNAPSHOT+2`
 
 ## Runtime
 1. **Group:** com.google.code.findbugs **Name:** jsr305 **Version:** 3.0.2
@@ -684,6 +701,14 @@ This report was generated on **Wed Sep 25 15:30:54 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** net.java.dev.javacc **Name:** javacc **Version:** 5.0
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
@@ -777,6 +802,15 @@ This report was generated on **Wed Sep 25 15:30:54 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
@@ -815,12 +849,12 @@ This report was generated on **Wed Sep 25 15:30:54 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Sep 25 15:30:57 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Sep 24 20:22:17 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-model-assembler:1.1.2`
+# Dependencies of `io.spine.tools:spine-model-assembler:1.1.1-SNAPSHOT+2`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -1115,6 +1149,14 @@ This report was generated on **Wed Sep 25 15:30:57 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** net.java.dev.javacc **Name:** javacc **Version:** 5.0
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
@@ -1208,6 +1250,15 @@ This report was generated on **Wed Sep 25 15:30:57 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
@@ -1246,12 +1297,12 @@ This report was generated on **Wed Sep 25 15:30:57 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Sep 25 15:31:00 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Sep 24 20:22:18 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-model-verifier:1.1.2`
+# Dependencies of `io.spine.tools:spine-model-verifier:1.1.1-SNAPSHOT+2`
 
 ## Runtime
 1. **Group:** aopalliance **Name:** aopalliance **Version:** 1.0
@@ -1660,6 +1711,14 @@ This report was generated on **Wed Sep 25 15:31:00 EEST 2019** using [Gradle-Lic
 1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.4.0.Final
      * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** net.java.dev.javacc **Name:** javacc **Version:** 5.0
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
@@ -1796,6 +1855,15 @@ This report was generated on **Wed Sep 25 15:31:00 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
@@ -1839,12 +1907,12 @@ This report was generated on **Wed Sep 25 15:31:00 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Sep 25 15:31:05 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Sep 24 20:22:19 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-server:1.1.2`
+# Dependencies of `io.spine:spine-server:1.1.1-SNAPSHOT+2`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2205,6 +2273,14 @@ This report was generated on **Wed Sep 25 15:31:05 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** net.java.dev.javacc **Name:** javacc **Version:** 5.0
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
@@ -2298,6 +2374,15 @@ This report was generated on **Wed Sep 25 15:31:05 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
@@ -2336,12 +2421,12 @@ This report was generated on **Wed Sep 25 15:31:05 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Sep 25 15:31:08 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Sep 24 20:22:20 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-testutil-client:1.1.2`
+# Dependencies of `io.spine:spine-testutil-client:1.1.1-SNAPSHOT+2`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2474,6 +2559,14 @@ This report was generated on **Wed Sep 25 15:31:08 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.apiguardian **Name:** apiguardian-api **Version:** 1.0.0
      * **POM Project URL:** [https://github.com/apiguardian-team/apiguardian](https://github.com/apiguardian-team/apiguardian)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2508,6 +2601,15 @@ This report was generated on **Wed Sep 25 15:31:08 EEST 2019** using [Gradle-Lic
 1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
+
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
@@ -2695,6 +2797,14 @@ This report was generated on **Wed Sep 25 15:31:08 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** net.java.dev.javacc **Name:** javacc **Version:** 5.0
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
@@ -2788,6 +2898,15 @@ This report was generated on **Wed Sep 25 15:31:08 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
@@ -2826,12 +2945,12 @@ This report was generated on **Wed Sep 25 15:31:08 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Sep 25 15:31:11 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Sep 24 20:22:20 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-testutil-core:1.1.2`
+# Dependencies of `io.spine:spine-testutil-core:1.1.1-SNAPSHOT+2`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2964,6 +3083,14 @@ This report was generated on **Wed Sep 25 15:31:11 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.apiguardian **Name:** apiguardian-api **Version:** 1.0.0
      * **POM Project URL:** [https://github.com/apiguardian-team/apiguardian](https://github.com/apiguardian-team/apiguardian)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3006,6 +3133,15 @@ This report was generated on **Wed Sep 25 15:31:11 EEST 2019** using [Gradle-Lic
 1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
+
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
@@ -3193,6 +3329,14 @@ This report was generated on **Wed Sep 25 15:31:11 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** net.java.dev.javacc **Name:** javacc **Version:** 5.0
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
@@ -3286,6 +3430,15 @@ This report was generated on **Wed Sep 25 15:31:11 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
@@ -3324,12 +3477,12 @@ This report was generated on **Wed Sep 25 15:31:11 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Sep 25 15:31:15 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Sep 24 20:22:21 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-testutil-server:1.1.2`
+# Dependencies of `io.spine:spine-testutil-server:1.1.1-SNAPSHOT+2`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -3462,6 +3615,14 @@ This report was generated on **Wed Sep 25 15:31:15 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.apiguardian **Name:** apiguardian-api **Version:** 1.0.0
      * **POM Project URL:** [https://github.com/apiguardian-team/apiguardian](https://github.com/apiguardian-team/apiguardian)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3496,6 +3657,15 @@ This report was generated on **Wed Sep 25 15:31:15 EEST 2019** using [Gradle-Lic
 1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
+
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
@@ -3737,6 +3907,14 @@ This report was generated on **Wed Sep 25 15:31:15 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** net.bytebuddy **Name:** byte-buddy **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** net.java.dev.javacc **Name:** javacc **Version:** 5.0
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
@@ -3830,6 +4008,15 @@ This report was generated on **Wed Sep 25 15:31:15 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
+1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
+     * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+     * **POM License: The MIT License** - [https://github.com/mockito/mockito/blob/master/LICENSE](https://github.com/mockito/mockito/blob/master/LICENSE)
+
+1. **Group:** org.objenesis **Name:** objenesis **Version:** 2.6
+     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
+     * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
      * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
@@ -3868,4 +4055,4 @@ This report was generated on **Wed Sep 25 15:31:15 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Sep 25 15:31:18 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Sep 24 20:22:21 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).

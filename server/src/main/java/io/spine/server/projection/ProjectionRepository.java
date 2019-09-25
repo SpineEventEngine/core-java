@@ -214,7 +214,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
-    EventStore eventStore() {
+    final EventStore eventStore() {
         return context()
                 .eventBus()
                 .eventStore();
@@ -231,6 +231,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return asProjectionClass(cls);
     }
 
+    @OverridingMethodsMustInvokeSuper
     @Override
     public P create(I id) {
         P projection = super.create(id);
@@ -268,14 +269,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @throws IllegalStateException if the storage is null
      */
     @Override
-    protected RecordStorage<I> recordStorage() {
+    protected final RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // ensured by the type returned by `createdStorage()`.
         RecordStorage<I> recordStorage = ((ProjectionStorage<I>) storage()).recordStorage();
         return checkStorage(recordStorage);
     }
 
     @Override
-    protected ProjectionStorage<I> createStorage() {
+    protected final ProjectionStorage<I> createStorage() {
         StorageFactory sf = defaultStorageFactory();
         Class<P> projectionClass = entityClass();
         ProjectionStorage<I> projectionStorage =
@@ -286,10 +287,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /**
      * {@inheritDoc}
      *
-     * //TODO:2019-08-25:alex.tymchenko: document.
+     * <p>Overrides to perform finding using the cache.
      */
     @Override
-    protected P findOrCreate(I id) {
+    protected final P findOrCreate(I id) {
         return cache.load(id);
     }
 
@@ -298,7 +299,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    public void store(P entity) {
+    public final void store(P entity) {
         cache.store(entity);
     }
 
@@ -319,18 +320,18 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    public Set<EventClass> messageClasses() {
+    public final Set<EventClass> messageClasses() {
         return projectionClass().events();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public final Set<EventClass> externalEventClasses() {
         return projectionClass().externalEvents();
     }
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public boolean canDispatch(EventEnvelope event) {
+    public final boolean canDispatch(EventEnvelope event) {
         Optional<SubscriberMethod> subscriber = projectionClass().subscriberOf(event);
         return subscriber.isPresent();
     }
@@ -341,7 +342,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * <p>Sends a system command to dispatch the given event to a subscriber.
      */
     @Override
-    protected void dispatchTo(I id, Event event) {
+    protected final void dispatchTo(I id, Event event) {
         inbox().send(EventEnvelope.of(event))
                .toSubscriber(id);
     }
@@ -359,7 +360,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @VisibleForTesting
-    EventStreamQuery createStreamQuery() {
+    final EventStreamQuery createStreamQuery() {
         Set<EventFilter> eventFilters = createEventFilters();
 
         // Gets the timestamp of the last event. This also ensures we have the storage.
