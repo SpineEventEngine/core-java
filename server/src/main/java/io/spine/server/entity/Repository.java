@@ -405,7 +405,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Internal
     public EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
-        SystemWriteSide writeSide = context().systemClient().writeSide();
+        SystemWriteSide writeSide = context().systemClient()
+                                             .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
