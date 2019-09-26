@@ -52,6 +52,9 @@ public final class GrpcContainer {
 
     private @Nullable Server grpcServer;
 
+    @VisibleForTesting
+    private @Nullable Server injectedServer;
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -171,8 +174,10 @@ public final class GrpcContainer {
                .addShutdownHook(new Thread(getOnShutdownCallback()));
     }
 
-    @VisibleForTesting
-    Server createGrpcServer() {
+    private Server createGrpcServer() {
+        if (injectedServer != null) {
+            return injectedServer;
+        }
         ServerBuilder builder = ServerBuilder.forPort(port);
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
@@ -203,6 +208,18 @@ public final class GrpcContainer {
     @VisibleForTesting
     Server grpcServer() {
         return grpcServer;
+    }
+
+    /**
+     * Injects a server to this container.
+     *
+     * <p>All calls to {@link #createGrpcServer()} will resolve to the given server instance.
+     *
+     * <p>A test-only method.
+     */
+    @VisibleForTesting
+    public void injectServer(Server server) {
+        this.injectedServer = server;
     }
 
     public static class Builder {

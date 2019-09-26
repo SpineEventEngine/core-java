@@ -24,8 +24,8 @@ import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerServiceDefinition;
 import io.spine.server.CommandService;
+import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.testing.logging.MuteLogging;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,22 +46,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("GrpcContainer should")
 class GrpcContainerTest {
 
-    private static final int PORT = 50052;
-
     private GrpcContainer grpcContainer;
 
     @BeforeEach
     void setUp() {
         grpcContainer = GrpcContainer.newBuilder()
-                                     .setPort(PORT)
                                      .build();
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (!grpcContainer.isShutdown()) {
-            grpcContainer.shutdownNowAndWait();
-        }
+        grpcContainer.injectServer(new TestGrpcServer());
     }
 
     @SuppressWarnings("MagicNumber")
