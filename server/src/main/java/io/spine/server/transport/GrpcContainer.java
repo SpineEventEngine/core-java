@@ -67,7 +67,8 @@ public final class GrpcContainer {
     /**
      * Starts the service.
      *
-     * @throws IOException if unable to bind
+     * @throws IOException
+     *         if unable to bind
      */
     public void start() throws IOException {
         checkState(grpcServer == null, "gRPC server is started already.");
@@ -129,7 +130,8 @@ public final class GrpcContainer {
      * <p>To find out whether the service is already available for calls,
      * use {@link #isLive(BindableService)} method.
      *
-     * @param service the gRPC service to check
+     * @param service
+     *         the gRPC service to check
      * @return {@code true}, if the given gRPC service for deployment and {@code false} otherwise
      */
     public boolean isScheduledForDeployment(BindableService service) {
@@ -153,7 +155,8 @@ public final class GrpcContainer {
      * <p>  a. the service has been previously scheduled for the deployment,
      * <p>  b. the container has been started.
      *
-     * @param service the gRPC service
+     * @param service
+     *         the gRPC service
      * @return {@code true}, if the service is available for interaction within this container and
      *         {@code false} otherwise
      */
