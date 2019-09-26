@@ -45,11 +45,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("GrpcContainer should")
 class GrpcContainerTest {
+
+    private static final int PORT = 50052;
+
     private GrpcContainer grpcContainer;
 
     @BeforeEach
     void setUp() {
         grpcContainer = GrpcContainer.newBuilder()
+                                     .setPort(PORT)
                                      .build();
     }
 
