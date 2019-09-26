@@ -19,5 +19,4 @@ option java_multiple_files = true;
 // An applier for a `Nothing` event is never called.
 //
 message Nothing {
-    option (experimental_type) = true;
 }
