@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package spine.server.model;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.model";
+option java_outer_classname = "StandardCommandsProto";
+option java_multiple_files = true;
+
+// A system command that implies no action.
+//
+// Use this command type when a commanding method does not produce any output in response to
+// an event.
+//
+// This type is treated by the framework in a special way. A `DoNothing` command is never posted
+// for processing after being emitted. Neither is it stored.
+//
+// There can be no handlers for a `DoNothing` command.
+//
+message DoNothing {
+}

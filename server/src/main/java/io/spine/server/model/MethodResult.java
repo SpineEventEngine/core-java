@@ -46,6 +46,7 @@ final class MethodResult {
      */
     private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
             Nothing.getDefaultInstance(),
+            DoNothing.getDefaultInstance(),
             Empty.getDefaultInstance()
     );
 

@@ -21,7 +21,7 @@
 package io.spine.server.command.model.given.reaction;
 
 import io.spine.server.command.Command;
-import io.spine.server.model.Nothing;
+import io.spine.server.model.DoNothing;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdStartTask;
@@ -36,12 +36,12 @@ import io.spine.test.command.event.CmdProjectCreated;
 public class ReEitherWithNothing extends TestCommandReactor {
 
     @Command
-    EitherOf3<CmdAddTask, CmdStartTask, Nothing> commandOn(CmdProjectCreated event) {
+    EitherOf3<CmdAddTask, CmdStartTask, DoNothing> commandOn(CmdProjectCreated event) {
         if (event.getInitialize()) {
             return EitherOf3.withA(CmdAddTask.newBuilder()
                                          .setProjectId(event.getProjectId())
                                          .build());
         }
-        return EitherOf3.withC(Nothing.getDefaultInstance());
+        return EitherOf3.withC(DoNothing.getDefaultInstance());
     }
 }

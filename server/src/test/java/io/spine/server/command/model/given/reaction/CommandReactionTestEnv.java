@@ -28,6 +28,7 @@ import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
+import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
@@ -101,8 +102,9 @@ public final class CommandReactionTestEnv {
         }
 
         @Command
-        EitherOf3<CdrPauseTask, CdrStopTask, Nothing> eitherOf3Result(CdrTaskAddedToProject event) {
-            return EitherOf3.withC(nothing());
+        EitherOf3<CdrPauseTask, CdrStopTask, DoNothing>
+        eitherOf3Result(CdrTaskAddedToProject event) {
+            return EitherOf3.withC(doNothing());
         }
 
         @Command
@@ -191,7 +193,7 @@ public final class CommandReactionTestEnv {
         }
 
         @Command
-        Iterable<Nothing> wrongIterable(CdrTaskAddedToProject event) {
+        Iterable<UserId> wrongIterable(CdrTaskAddedToProject event) {
             return ImmutableList.of();
         }
     }
