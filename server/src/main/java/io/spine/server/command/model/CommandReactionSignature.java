@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.GeneratedMessageV3;
 import io.spine.base.CommandMessage;
@@ -45,8 +46,13 @@ public class CommandReactionSignature
 
     private static final ImmutableSet<CommandReactionParams>
             PARAM_SPECS = ImmutableSet.copyOf(CommandReactionParams.values());
-    private static final ImmutableSet<Class<?>>
-            RETURN_TYPES = ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
+
+    private static final ImmutableSet<TypeToken<?>>
+            RETURN_TYPES = ImmutableSet.of(
+                    TypeToken.of(CommandMessage.class),
+                    new TypeToken<Iterable<CommandMessage>>() {},
+                    new TypeToken<Optional<CommandMessage>>() {}
+                    );
 
     CommandReactionSignature() {
         super(Command.class);
@@ -58,7 +64,7 @@ public class CommandReactionSignature
     }
 
     @Override
-    protected ImmutableSet<Class<?>> returnTypes() {
+    protected ImmutableSet<TypeToken<?>> returnTypes() {
         return RETURN_TYPES;
     }
 

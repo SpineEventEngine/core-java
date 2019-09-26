@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
 import io.spine.server.model.ParameterSpec;
@@ -34,15 +35,17 @@ import java.lang.reflect.Method;
 public final class CommandHandlerSignature
         extends CommandAcceptingSignature<CommandHandlerMethod> {
 
-    private static final ImmutableSet<Class<?>>
-            RETURN_TYPES = ImmutableSet.of(EventMessage.class, Iterable.class);
+    private static final ImmutableSet<TypeToken<?>>
+            RETURN_TYPES = ImmutableSet.of(
+                    TypeToken.of(EventMessage.class),
+                    new TypeToken<Iterable<EventMessage>>() {});
 
     public CommandHandlerSignature() {
         super(Assign.class);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> returnTypes() {
+    protected ImmutableSet<TypeToken<?>> returnTypes() {
         return RETURN_TYPES;
     }
 

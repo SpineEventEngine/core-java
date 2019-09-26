@@ -21,6 +21,7 @@
 package io.spine.server.model.given.method;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import io.spine.server.model.AccessModifier;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
@@ -51,8 +52,8 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    protected ImmutableSet<Class<?>> returnTypes() {
-        return ImmutableSet.of(void.class);
+    protected ImmutableSet<TypeToken<?>> returnTypes() {
+        return ImmutableSet.of(TypeToken.of(void.class));
     }
 
     @Override

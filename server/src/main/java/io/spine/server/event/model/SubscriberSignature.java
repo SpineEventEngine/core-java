@@ -22,6 +22,7 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import io.spine.base.EventMessage;
 import io.spine.core.Subscribe;
 import io.spine.server.model.ParameterSpec;
@@ -40,15 +41,16 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
             .addAll(EventAcceptingSignature.PARAM_SPEC)
             .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
             .build();
-    private static final ImmutableSet<Class<?>>
-            RETURN_TYPE = ImmutableSet.of(void.class);
+
+    private static final ImmutableSet<TypeToken<?>>
+            RETURN_TYPE = ImmutableSet.of(TypeToken.of(void.class));
 
     public SubscriberSignature() {
         super(Subscribe.class);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> returnTypes() {
+    protected ImmutableSet<TypeToken<?>> returnTypes() {
         return RETURN_TYPE;
     }
 

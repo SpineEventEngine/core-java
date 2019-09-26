@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import io.spine.logging.Logging;
 import io.spine.server.type.MessageEnvelope;
 
@@ -92,7 +93,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<Class<?>> returnTypes();
+    protected abstract ImmutableSet<TypeToken<?>> returnTypes();
 
     /**
      * Obtains the type of a {@code Throwable} which a method can declare.

@@ -18,39 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.model;
 
-import io.spine.base.EventMessage;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.event.React;
-import io.spine.server.test.shared.Int32Aggregate;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
+import com.google.common.reflect.TypeToken;
+import com.google.common.testing.NullPointerTester;
+import io.spine.testing.UtilityClassTest;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.List;
+@DisplayName("`Types` utility class should")
+class TypesTest extends UtilityClassTest<Types> {
 
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectCountAggregate
-        extends Aggregate<ProjectId, Int32Aggregate, Int32Aggregate.Builder> {
-
-    private static ItgProjectCreated externalEvent = null;
-
-    protected ProjectCountAggregate(ProjectId id) {
-        super(id);
+    TypesTest() {
+        super(Types.class);
     }
 
-    @React(external = true)
-    List<EventMessage> on(ItgProjectCreated event) {
-        externalEvent = event;
-        return Collections.emptyList();
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(TypeToken.class, TypeToken.of(TypesTest.class));
     }
 
-    public static ItgProjectCreated externalEvent() {
-        return externalEvent;
-    }
-
-    public static void clear() {
-        externalEvent = null;
+    @Test
+    @DisplayName("not accept nulls in package-private static methods")
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert") /* Asserting via `NullPointerTester. */
+    void nullCheckPublicStaticMethods() {
+        NullPointerTester tester = new NullPointerTester();
+        configure(tester);
+        tester.testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 }

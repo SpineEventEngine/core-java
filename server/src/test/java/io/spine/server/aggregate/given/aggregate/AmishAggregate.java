@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import com.google.common.collect.Lists;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
@@ -57,7 +57,7 @@ public class AmishAggregate extends Aggregate<ProjectId, Project, Project.Builde
     }
 
     @Assign
-    List<Message> handle(AggCancelProject cmd, CommandContext ctx) {
+    List<EventMessage> handle(AggCancelProject cmd, CommandContext ctx) {
         AggProjectPaused firstPaused = projectPaused(cmd.getProjectId());
         AggProjectCancelled thenCancelled = projectCancelled(cmd.getProjectId());
         return Lists.newArrayList(firstPaused, thenCancelled);

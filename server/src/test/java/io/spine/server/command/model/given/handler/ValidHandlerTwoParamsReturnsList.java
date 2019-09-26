@@ -20,7 +20,7 @@
 
 package io.spine.server.command.model.given.handler;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
@@ -35,9 +35,9 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
  */
 public class ValidHandlerTwoParamsReturnsList extends TestCommandHandler {
     @Assign
-    List<Message> handleTest(RefCreateProject cmd, CommandContext context) {
+    List<EventMessage> handleTest(RefCreateProject cmd, CommandContext context) {
         addHandledCommand(cmd);
-        List<Message> result = newLinkedList();
+        List<EventMessage> result = newLinkedList();
         result.add(projectCreated(cmd.getProjectId()));
         return result;
     }

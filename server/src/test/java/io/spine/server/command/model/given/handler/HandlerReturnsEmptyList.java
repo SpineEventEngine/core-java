@@ -20,7 +20,7 @@
 
 package io.spine.server.command.model.given.handler;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
 
@@ -33,7 +33,7 @@ import static java.util.Collections.emptyList;
  */
 public class HandlerReturnsEmptyList extends TestCommandHandler {
     @Assign
-    List<Message> handleTest(RefCreateProject cmd) {
+    List<EventMessage> handleTest(RefCreateProject cmd) {
         return emptyList();
     }
 }

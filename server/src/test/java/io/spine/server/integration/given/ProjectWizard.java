@@ -21,6 +21,7 @@
 package io.spine.server.integration.given;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.integration.Project;
@@ -42,13 +43,13 @@ public class ProjectWizard
     private static Message externalEvent = null;
 
     @React(external = true)
-    List<Message> on(ItgProjectCreated event) {
+    List<EventMessage> on(ItgProjectCreated event) {
         externalEvent = event;
         return Collections.emptyList();
     }
 
     @React(external = true)
-    List<Message> on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
+    List<EventMessage> on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
         externalEvent = rejection;
         return Collections.emptyList();
     }
