@@ -26,6 +26,7 @@ import io.spine.base.MessageContext;
 import io.spine.core.CommandContext;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
+import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.EitherOf3;
@@ -204,8 +205,8 @@ public final class CommandSubstituteTestEnv {
         }
 
         @Command
-        EitherOf3<CdrAssignTask, CdrStartTask, Nothing> eitherWithNothing(CmdAddTask command) {
-            return EitherOf3.withC(nothing());
+        EitherOf3<CdrAssignTask, CdrStartTask, DoNothing> eitherWithNothing(CmdAddTask command) {
+            return EitherOf3.withC(doNothing());
         }
 
         @Command

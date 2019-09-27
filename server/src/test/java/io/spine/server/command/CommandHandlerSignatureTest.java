@@ -18,30 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command;
 
-import io.spine.server.command.Command;
-import io.spine.server.command.model.given.commander.CommandSubstituteTestEnv.InvalidCommander;
-import io.spine.server.command.model.given.commander.CommandSubstituteTestEnv.ValidCommander;
+import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.server.command.model.given.handler.CommandHandlerSignatureTestEnv.InvalidHandler;
+import io.spine.server.command.model.given.handler.CommandHandlerSignatureTestEnv.ValidHandler;
 import io.spine.server.model.MethodSignatureTest;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-class CommandSubstituteSignatureTest extends MethodSignatureTest<CommandSubstituteSignature> {
+class CommandHandlerSignatureTest extends MethodSignatureTest<CommandHandlerSignature> {
 
     @Override
     protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(Command.class, ValidCommander.class).stream();
+        return methodsAnnotatedWith(Assign.class, ValidHandler.class).stream();
     }
 
     @Override
     protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(Command.class, InvalidCommander.class).stream();
+        return methodsAnnotatedWith(Assign.class, InvalidHandler.class).stream();
     }
 
     @Override
-    protected CommandSubstituteSignature signature() {
-        return new CommandSubstituteSignature();
+    protected CommandHandlerSignature signature() {
+        return new CommandHandlerSignature();
     }
 }

@@ -21,7 +21,8 @@
 package io.spine.server.command.model;
 
 import io.spine.server.command.Command;
-import io.spine.server.command.model.given.reaction.CommandReactionTestEnv;
+import io.spine.server.command.model.given.reaction.CommandReactionTestEnv.InvalidCommander;
+import io.spine.server.command.model.given.reaction.CommandReactionTestEnv.ValidCommander;
 import io.spine.server.model.MethodSignatureTest;
 
 import java.lang.reflect.Method;
@@ -31,14 +32,12 @@ class CommandReactionSignatureTest extends MethodSignatureTest<CommandReactionSi
 
     @Override
     protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(CommandReactionTestEnv.ValidCommander.class,
-                                    Command.class).stream();
+        return methodsAnnotatedWith(Command.class, ValidCommander.class).stream();
     }
 
     @Override
     protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(CommandReactionTestEnv.InvalidCommander.class,
-                                    Command.class).stream();
+        return methodsAnnotatedWith(Command.class, InvalidCommander.class).stream();
     }
 
     @Override

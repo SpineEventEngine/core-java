@@ -106,7 +106,7 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
      * Returns all methods of the class which are annotated by the specified annotation.
      */
     protected static ImmutableSet<Method>
-    methodsAnnotatedWith(Class<?> declaringCls, Class<? extends Annotation> annotationCls) {
+    methodsAnnotatedWith(Class<? extends Annotation> annotationCls, Class<?> declaringCls) {
         ImmutableSet<Method> result =
                 Stream.of(declaringCls.getDeclaredMethods())
                       .filter(m -> m.getDeclaredAnnotation(annotationCls) != null)
