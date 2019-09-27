@@ -20,9 +20,12 @@
 
 package io.spine.server.command.model.given.handler;
 
+import com.google.common.collect.ImmutableList;
+import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
-import io.spine.server.model.Nothing;
 import io.spine.test.reflect.command.RefCreateProject;
+
+import java.util.List;
 
 /**
  * Provides a handler method that returns {@link io.spine.server.model.Nothing}.
@@ -30,7 +33,7 @@ import io.spine.test.reflect.command.RefCreateProject;
 public class HandlerReturnsNothing extends TestCommandHandler {
 
     @Assign
-    Nothing handleTest(RefCreateProject cmd) {
-        return nothing();
+    List<EventMessage> handleTest(RefCreateProject cmd) {
+        return ImmutableList.of(nothing());
     }
 }
