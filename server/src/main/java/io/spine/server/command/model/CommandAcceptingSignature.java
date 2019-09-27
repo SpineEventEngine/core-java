@@ -72,6 +72,14 @@ abstract class CommandAcceptingSignature
     }
 
     /**
+     * Tells that a command-accepting method never returns an ignored result.
+     */
+    @Override
+    public boolean mayReturnIgnored() {
+        return false;
+    }
+
+    /**
      * Allowed combinations of parameters in the methods, that accept {@code Command}s.
      */
     @Immutable

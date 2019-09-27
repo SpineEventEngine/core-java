@@ -55,4 +55,13 @@ final class EventReactorSignature extends EventAcceptingSignature<EventReactorMe
     public EventReactorMethod create(Method method, ParameterSpec<EventEnvelope> params) {
         return new EventReactorMethod(method, params);
     }
+
+    /**
+     * Tells that the method may state that a reaction isn't needed by returning
+     * {@link io.spine.server.model Nothing Nothing}.
+     */
+    @Override
+    public boolean mayReturnIgnored() {
+        return true;
+    }
 }

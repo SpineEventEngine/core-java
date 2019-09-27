@@ -69,7 +69,11 @@ public enum MatchCriterion {
             boolean conforms = signature
                     .returnTypes()
                     .stream()
-                    .anyMatch(type -> Types.matches(type, returnType)
+                    .anyMatch(type -> Types.matches(type, returnType) &&
+                            (signature.mayReturnIgnored() ||
+                                    Types.messagesFitting(returnType)
+                                         .stream()
+                                         .noneMatch(MethodResult::isIgnored))
                     );
             if (!conforms) {
                 SignatureMismatch mismatch =

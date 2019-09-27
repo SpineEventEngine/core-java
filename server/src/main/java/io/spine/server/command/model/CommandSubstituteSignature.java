@@ -34,8 +34,7 @@ import java.lang.reflect.Method;
  * A signature of {@link io.spine.server.command.model.CommandSubstituteMethod
  * CommandSubstituteMethod}.
  */
-public class CommandSubstituteSignature
-        extends CommandAcceptingSignature<CommandSubstituteMethod> {
+public class CommandSubstituteSignature extends CommandAcceptingSignature<CommandSubstituteMethod> {
 
     private static final ImmutableSet<TypeToken<?>>
             RETURN_TYPES = ImmutableSet.of(

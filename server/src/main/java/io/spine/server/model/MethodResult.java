@@ -104,6 +104,15 @@ final class MethodResult {
     }
 
     /**
+     * Tells if a result of a given {@code resultType} should be ignored.
+     */
+    static boolean isIgnored(Class<? extends Message> resultType) {
+        return IGNORED_MESSAGES.stream()
+                               .anyMatch(m -> m.getClass()
+                                               .isAssignableFrom(resultType));
+    }
+
+    /**
      * Obtains the method result as a list of messages.
      *
      * @param messageType

@@ -61,6 +61,11 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
         return new OneParamMethod(method, params);
     }
 
+    @Override
+    public boolean mayReturnIgnored() {
+        return true;
+    }
+
     private static ImmutableSet<AccessModifier> allModifiers() {
         return ImmutableSet.of(PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE);
     }

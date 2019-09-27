@@ -71,6 +71,14 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
     }
 
     /**
+     * This method never returns any results.
+     */
+    @Override
+    public boolean mayReturnIgnored() {
+        return true;
+    }
+
+    /**
      * Allowed combinations of parameters for {@link Applier} methods.
      */
     @VisibleForTesting

@@ -66,6 +66,14 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
                : new EventSubscriberMethod(method, params);
     }
 
+    /**
+     * This method never returns any results.
+     */
+    @Override
+    public boolean mayReturnIgnored() {
+        return true;
+    }
+
     private static boolean isEntitySubscriber(Method method) {
         Class<?> firstParam = method.getParameterTypes()[0];
         return !EventMessage.class.isAssignableFrom(firstParam);

@@ -20,10 +20,14 @@
 
 package io.spine.server.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
+import com.google.protobuf.Message;
 
 import java.lang.reflect.TypeVariable;
 import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A utility for working with the types used in method signatures.
@@ -96,7 +100,6 @@ final class Types {
     }
 
     private static boolean matchOneToOne(TypeToken<?> expected, TypeToken<?> actual) {
-
         TypeVariable<? extends Class<?>>[] expectedTypeParams = genericTypesOf(expected);
         TypeVariable<? extends Class<?>>[] actualTypeParams = genericTypesOf(actual);
         for (int paramIndex = 0; paramIndex < expectedTypeParams.length; paramIndex++) {
@@ -126,5 +129,38 @@ final class Types {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns a set of {@link Message} types that are declared by the given type.
+     *
+     * <p>The types returned are the most narrow possible.
+     *
+     * <p>E.g. {@code Pair<TaskCreated, TaskAssigned>} returns {@literal Class<TaskCreated>} and
+     * {@code Class<TaskAssigned>}.
+     */
+    static ImmutableSet<Class<? extends Message>> messagesFitting(TypeToken<?> type) {
+        checkNotNull(type);
+        Class<?> rawType = type.getRawType();
+        TypeVariable<? extends Class<?>>[] parameters = rawType.getTypeParameters();
+        if (0 == parameters.length) {
+            return type.isSubtypeOf(Message.class)
+                   ? ImmutableSet.of(asMessageType(rawType))
+                   : ImmutableSet.of();
+        }
+
+        ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
+        for (TypeVariable<? extends Class<?>> parameter : parameters) {
+            TypeToken<?> genericType = resolve(type, parameter);
+            if (genericType.isSubtypeOf(Message.class)) {
+                builder.add(asMessageType(genericType.getRawType()));
+            }
+        }
+        return builder.build();
+    }
+
+    @SuppressWarnings("unchecked")  // Previously checked {@code cls} is a {@code Message} subtype.
+    private static Class<? extends Message> asMessageType(Class<?> cls) {
+        return (Class<? extends Message>) cls;
     }
 }
