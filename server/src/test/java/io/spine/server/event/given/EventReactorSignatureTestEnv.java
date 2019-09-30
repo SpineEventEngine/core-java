@@ -132,7 +132,7 @@ public class EventReactorSignatureTestEnv {
     }
 
     /**
-     * A standalone commander which declares invalid {@link React event-reacting handlers}.
+     * A standalone reactor which declares invalid {@link React event-reacting handlers}.
      *
      * <p>Being similar to {@link ValidReactor}, this class also declares duplicate handlers
      * for the same events. This is the way to avoid lots of small classes enumerating
