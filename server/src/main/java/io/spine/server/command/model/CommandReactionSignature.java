@@ -75,7 +75,7 @@ public class CommandReactionSignature
 
     /**
      * Tells that the method may state that a reaction isn't needed by returning
-     * {@link io.spine.server.model DoNothing DoNothing}.
+     * {@link io.spine.server.model.DoNothing DoNothing}.
      */
     @Override
     public boolean mayReturnIgnored() {
