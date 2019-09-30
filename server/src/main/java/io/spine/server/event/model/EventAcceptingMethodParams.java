@@ -22,6 +22,7 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -45,12 +46,22 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[]{event.message()};
         }
+
+        @Override
+        public boolean matches(MethodParams params) {
+            return super.matches(params) && params.is(GeneratedMessageV3.class);
+        }
     },
 
     MESSAGE_EVENT_CTX(EventMessage.class, EventContext.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
-            return new Object[] {event.message(), event.context()};
+            return new Object[]{event.message(), event.context()};
+        }
+
+        @Override
+        public boolean matches(MethodParams params) {
+            return super.matches(params) && params.firstIs(GeneratedMessageV3.class);
         }
     },
 
@@ -62,7 +73,12 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             CommandContext context =
                     rejection.getOrigin()
                              .getContext();
-            return new Object[] {message, context};
+            return new Object[]{message, context};
+        }
+
+        @Override
+        public boolean matches(MethodParams params) {
+            return super.matches(params) && params.firstIs(GeneratedMessageV3.class);
         }
     },
 
@@ -72,7 +88,13 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             Message message = event.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(event);
             Message commandMessage = rejection.getOriginMessage();
-            return new Object[] {message, commandMessage};
+            return new Object[]{message, commandMessage};
+        }
+
+        @Override
+        public boolean matches(MethodParams params) {
+            return super.matches(params)
+                    && params.are(GeneratedMessageV3.class, GeneratedMessageV3.class);
         }
     },
 
@@ -85,7 +107,14 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             Command origin = rejection.getOrigin();
             CommandMessage commandMessage = origin.enclosedMessage();
             CommandContext context = origin.context();
-            return new Object[] {message, commandMessage, context};
+            return new Object[]{message, commandMessage, context};
+        }
+
+        @Override
+        public boolean matches(MethodParams params) {
+            return super.matches(params) && params.are(GeneratedMessageV3.class,
+                                                       GeneratedMessageV3.class,
+                                                       CommandContext.class);
         }
     };
 
