@@ -46,8 +46,8 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
- * A test environment for {@link io.spine.server.event.model.ReactorSignatureTest
- * ReactorSignatureTest}.
+ * A test environment for {@link io.spine.server.event.model.EventReactorSignatureTest
+ * EventReactorSignatureTest}.
  */
 @SuppressWarnings(
         {"MethodOnlyUsedFromInnerClass", "Unused", "MethodMayBeStatic"})  // reflective access.
