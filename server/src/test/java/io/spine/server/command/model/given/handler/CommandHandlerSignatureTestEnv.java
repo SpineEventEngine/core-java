@@ -24,27 +24,27 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.EventMessage;
 import io.spine.base.MessageContext;
 import io.spine.core.CommandContext;
+import io.spine.model.contexts.projects.command.SigAddTaskToProject;
+import io.spine.model.contexts.projects.command.SigAssignTask;
+import io.spine.model.contexts.projects.command.SigCreateProject;
+import io.spine.model.contexts.projects.command.SigPauseTask;
+import io.spine.model.contexts.projects.command.SigRemoveTaskFromProject;
+import io.spine.model.contexts.projects.command.SigStartTask;
+import io.spine.model.contexts.projects.event.SigProjectCreated;
+import io.spine.model.contexts.projects.event.SigProjectStarted;
+import io.spine.model.contexts.projects.event.SigTaskAssigned;
+import io.spine.model.contexts.projects.event.SigTaskPaused;
+import io.spine.model.contexts.projects.event.SigTaskStarted;
+import io.spine.model.contexts.projects.event.SigTaskStopped;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.model.given.commander.CommanderTestCommand;
-import io.spine.server.command.model.given.reaction.CommanderTestEvent;
 import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
+import io.spine.server.model.given.SignatureTestCommand;
+import io.spine.server.model.given.SignatureTestEvent;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
-import io.spine.test.command.CdrAssignTask;
-import io.spine.test.command.CdrCreateProject;
-import io.spine.test.command.CdrPauseTask;
-import io.spine.test.command.CdrRemoveTaskFromProject;
-import io.spine.test.command.CdrStartTask;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.event.CdrProjectCreated;
-import io.spine.test.command.event.CdrProjectStarted;
-import io.spine.test.command.event.CdrTaskAssigned;
-import io.spine.test.command.event.CdrTaskPaused;
-import io.spine.test.command.event.CdrTaskStarted;
-import io.spine.test.command.event.CdrTaskStopped;
 import io.spine.test.reflect.command.RefCreateProject;
 
 import java.util.Optional;
@@ -70,79 +70,79 @@ public final class CommandHandlerSignatureTestEnv {
     public static final class ValidHandler extends AbstractCommandHandler {
 
         @Assign
-        CdrProjectCreated singleMsgSingleResult(CdrCreateProject command) {
+        SigProjectCreated singleMsgSingleResult(SigCreateProject command) {
             return projectCreated();
         }
 
         @Assign
-        CommanderTestEvent interfaceResult(CdrCreateProject command) {
+        SignatureTestEvent interfaceResult(SigCreateProject command) {
             return projectCreated();
         }
 
         @Assign
-        CdrProjectCreated msgWithCtxSingleResult(RefCreateProject command, CommandContext ctx) {
+        SigProjectCreated msgWithCtxSingleResult(RefCreateProject command, CommandContext ctx) {
             return projectCreated();
         }
 
         @Assign
-        Pair<CdrProjectCreated, CdrProjectStarted> singleMsgPairResult(RefCreateProject command) {
+        Pair<SigProjectCreated, SigProjectStarted> singleMsgPairResult(RefCreateProject command) {
             return Pair.of(projectCreated(), projectStarted());
         }
 
         @Assign
-        Pair<CdrProjectCreated, CdrProjectStarted>
+        Pair<SigProjectCreated, SigProjectStarted>
         msgWithCtxPairResult(RefCreateProject command, CommandContext ctx) {
             return Pair.of(projectCreated(), projectStarted());
         }
 
         @Assign
-        Pair<CdrProjectCreated, Optional<CdrProjectStarted>>
+        Pair<SigProjectCreated, Optional<SigProjectStarted>>
         pairWithOptionalResult(RefCreateProject command) {
             return Pair.withNullable(projectCreated(), null);
         }
 
         @Assign
-        Pair<CdrProjectCreated, Optional<CdrProjectStarted>>
+        Pair<SigProjectCreated, Optional<SigProjectStarted>>
         msgWithCtxPairWithOptional(RefCreateProject command, CommandContext ctx) {
             return Pair.withNullable(projectCreated(), null);
         }
 
         @Assign
-        EitherOf2<CdrTaskStopped, CdrTaskPaused> singleMsgEitherOf2(CdrRemoveTaskFromProject cmd) {
+        EitherOf2<SigTaskStopped, SigTaskPaused> singleMsgEitherOf2(SigRemoveTaskFromProject cmd) {
             return EitherOf2.withB(taskPaused());
         }
 
         @Assign
-        EitherOf2<CdrTaskStopped, CdrTaskPaused>
-        msgWithCtxEitherOf2(CdrRemoveTaskFromProject cmd, CommandContext ctx) {
+        EitherOf2<SigTaskStopped, SigTaskPaused>
+        msgWithCtxEitherOf2(SigRemoveTaskFromProject cmd, CommandContext ctx) {
             return EitherOf2.withB(taskPaused());
         }
 
         @Assign
-        Iterable<EventMessage> singleMsgIterableResult(CdrStartTask command) {
+        Iterable<EventMessage> singleMsgIterableResult(SigStartTask command) {
             return ImmutableList.of(taskStarted());
         }
 
         @Assign
         Iterable<EventMessage>
-        msgWithCtxIterableResult(CdrStartTask command, CommandContext ctx) {
+        msgWithCtxIterableResult(SigStartTask command, CommandContext ctx) {
             return ImmutableList.of(taskStarted());
         }
 
         @SuppressWarnings("MethodMayBeStatic")              // testing the visibility level.
         @Assign
-        private CdrTaskPaused privateHandler(CdrPauseTask command) {
+        private SigTaskPaused privateHandler(SigPauseTask command) {
             return taskPaused();
         }
 
         @SuppressWarnings("ProtectedMemberInFinalClass")    // testing the visibility level.
         @Assign
-        protected CdrTaskPaused protectedHandler(CdrPauseTask command) {
+        protected SigTaskPaused protectedHandler(SigPauseTask command) {
             return taskPaused();
         }
 
         @Assign
-        public CdrTaskPaused publicHandler(CdrPauseTask command) {
+        public SigTaskPaused publicHandler(SigPauseTask command) {
             return taskPaused();
         }
     }
@@ -157,94 +157,95 @@ public final class CommandHandlerSignatureTestEnv {
     public static final class InvalidHandler extends AbstractCommandHandler {
 
         @Assign
-        CdrTaskStarted noParams() {
+        SigTaskStarted noParams() {
             return taskStarted();
         }
 
         @Assign
-        CdrTaskStarted nonCommandMessageParam(Nothing command) {
+        SigTaskStarted nonCommandMessageParam(Nothing command) {
             return taskStarted();
         }
 
         @Assign
-        CdrTaskStarted nonMessageParam(int command) {
+        SigTaskStarted nonMessageParam(int command) {
             return taskStarted();
         }
 
         @Assign
-        Optional<CdrTaskStarted> optionalResult(CdrAssignTask command) {
+        Optional<SigTaskStarted> optionalResult(SigAssignTask command) {
             return Optional.empty();
         }
 
         @Assign
-        CdrTaskStarted threeParams(CdrAssignTask command, CommandContext ctx, CdrAssignTask third) {
+        SigTaskStarted threeParams(SigAssignTask command, CommandContext ctx, SigAssignTask third) {
             return taskStarted();
         }
 
         @Assign
-        CdrTaskStarted wrongFirstParam(Nothing command, MessageContext msg) {
+        SigTaskStarted wrongFirstParam(Nothing command, MessageContext msg) {
             return taskStarted();
         }
 
         @Assign
-        CdrTaskStarted wrongSecondParam(CdrAssignTask command, Nothing message) {
+        SigTaskStarted wrongSecondParam(SigAssignTask command, Nothing message) {
             return taskStarted();
         }
 
         @Assign
-        CdrTaskStarted wrongContext(CdrAssignTask command, MessageContext msg) {
+        SigTaskStarted wrongContext(SigAssignTask command, MessageContext msg) {
             return taskStarted();
         }
 
         @Assign
-        void voidMethod(CdrAssignTask command) {
+        void voidMethod(SigAssignTask command) {
             // do nothing.
         }
 
         @Assign
-        DoNothing commandResult(CdrAssignTask command) {
+        DoNothing commandResult(SigAssignTask command) {
             return DoNothing.getDefaultInstance();
         }
 
         @Assign
-        int nonMessageResult(CdrAssignTask command) {
+        int nonMessageResult(SigAssignTask command) {
             return 42;
         }
 
         @Assign
-        CdrProjectStarted justInterface(CommanderTestCommand command) {
+        SigProjectStarted justInterface(SignatureTestCommand command) {
             return projectStarted();
         }
 
         @Assign
-        CdrTaskStarted interfaceAndContext(CommanderTestCommand command, CommandContext context) {
+        SigTaskStarted interfaceAndContext(SignatureTestCommand command, CommandContext context) {
             return taskStarted();
         }
 
         @Assign
-        EitherOf3<CdrTaskAssigned, CdrTaskStarted, Nothing> eitherWithNothing(CmdAddTask command) {
+        EitherOf3<SigTaskAssigned, SigTaskStarted, Nothing>
+        eitherWithNothing(SigAddTaskToProject command) {
             return EitherOf3.withC(nothing());
         }
 
         @Assign
-        Iterable<DoNothing> wrongIterable(CmdAddTask command) {
+        Iterable<DoNothing> wrongIterable(SigAddTaskToProject command) {
             return ImmutableList.of();
         }
     }
 
-    private static CdrTaskStarted taskStarted() {
-        return CdrTaskStarted.getDefaultInstance();
+    private static SigTaskStarted taskStarted() {
+        return SigTaskStarted.getDefaultInstance();
     }
 
-    private static CdrTaskPaused taskPaused() {
-        return CdrTaskPaused.getDefaultInstance();
+    private static SigTaskPaused taskPaused() {
+        return SigTaskPaused.getDefaultInstance();
     }
 
-    private static CdrProjectStarted projectStarted() {
-        return CdrProjectStarted.getDefaultInstance();
+    private static SigProjectStarted projectStarted() {
+        return SigProjectStarted.getDefaultInstance();
     }
 
-    private static CdrProjectCreated projectCreated() {
-        return CdrProjectCreated.getDefaultInstance();
+    private static SigProjectCreated projectCreated() {
+        return SigProjectCreated.getDefaultInstance();
     }
 }

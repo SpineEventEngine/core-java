@@ -19,82 +19,87 @@
  */
 syntax = "proto3";
 
-package spine.test.command;
+package spine.test.model;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.command";
-option java_outer_classname = "CommandCommandsProto";
+option java_package="io.spine.model.contexts.projects.command";
+option java_outer_classname = "ProjectCommandsProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
-import "spine/test/command/project.proto";
+import "spine/test/model/contexts/projects/project.proto";
 
-message CmdCreateProject {
-    ProjectId project_id = 1;
-}
-
-message CmdStartProject {
-    ProjectId project_id = 1;
-}
-
-message CmdAddTask {
-    ProjectId project_id = 1;
-    Task task = 2;
-}
-
-message CmdRemoveTask {
-    ProjectId project_id = 1;
-    Task task = 2;
-}
-
-// A command to create a project for duplicate command tests.
 //
-message DCmdCreateProject {
-    ProjectId project_id = 1;
-}
+// Commands for the method signature tests.
+////////////////
 
-// A command to create a project to test the command posting order.
-//
-// This command is to be sent first.
-//
-message FirstCmdCreateProject {
-
-    ProjectId id = 1;
-
-    string name = 2;
-}
-
-// A command to start a project to test the command posting order.
-//
-// This command is to be sent second, as a part of the `FirstCmdCreateProject` handling.
-//
-message SecondCmdStartProject {
+message SigCreateProject {
+    option (is).java_type="io.spine.server.model.given.SignatureTestCommand";
 
     ProjectId id = 1;
 }
 
-message CmdCreateTask {
-    TaskId task_id = 1;
+message SigStartProject {
+    option (is).java_type="io.spine.server.model.given.SignatureTestCommand";
+
+    ProjectId id = 1;
+}
+
+message SigStopProject {
+
+    ProjectId id = 1;
+}
+
+message SigCreateTask {
+
+    TaskId id = 1;
     Task task = 2;
     bool start = 3;
 }
 
-message CmdAssignTask {
+message SigStartTask {
+
+    TaskId id = 1;
+}
+
+message SigPauseTask {
+
+    TaskId id = 1;
+}
+
+message SigStopTask {
+
+    TaskId id = 1;
+}
+
+message SigAddTaskToProject {
+    ProjectId id = 1;
+    TaskId task = 2;
+}
+
+message SigRemoveTaskFromProject {
+    ProjectId id = 1;
+    TaskId task = 2;
+}
+
+message SigMoveTask {
+    TaskId id = 1;
+    ProjectId from_project = 2;
+    ProjectId to_project = 3;
+}
+
+message SigDeleteTask {
+    TaskId id = 2;
+}
+
+message SigAssignTask {
     TaskId task_id = 1;
     core.UserId assignee = 2;
 }
 
-message CmdStartTask {
-    TaskId task_id = 1;
-}
-
-message CmdSetTaskDescription {
-    TaskId task_id = 1;
-    string description = 3;
-}
-
-// Invalid command message which does not contain any fields.
-message CmdEmpty {
+message SigSetProjectOwner {
+    ProjectId id = 1;
+    core.UserId owner = 2;
 }

@@ -17,24 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.command.rejection;
+package io.spine.server.model.given;
 
-import "spine/options.proto";
+import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.base.CommandMessage;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.command.rejection";
-option java_outer_classname = "CommandRejections";
-option java_multiple_files = false;
-
-import "spine/core/user_id.proto";
-import "spine/test/command/project.proto";
-
-//
-// Rejections for tests of `Command`-ing method signatures.
-////////////////
-
-message CdrCannotCreateProject {
-    ProjectId project_id = 1;
+/**
+ * Common interface for some of the commands that are used in tests of
+ * {@link io.spine.server.model.MethodSignature MethodSignature}s.
+ */
+@GeneratedMixin
+@Immutable
+public interface SignatureTestCommand extends CommandMessage {
 }

@@ -24,21 +24,21 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.base.MessageContext;
 import io.spine.core.CommandContext;
+import io.spine.model.contexts.projects.command.SigAddTaskToProject;
+import io.spine.model.contexts.projects.command.SigAssignTask;
+import io.spine.model.contexts.projects.command.SigCreateTask;
+import io.spine.model.contexts.projects.command.SigPauseTask;
+import io.spine.model.contexts.projects.command.SigRemoveTaskFromProject;
+import io.spine.model.contexts.projects.command.SigStartTask;
+import io.spine.model.contexts.projects.command.SigStopTask;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
 import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
+import io.spine.server.model.given.SignatureTestCommand;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
-import io.spine.test.command.CdrAddTaskToProject;
-import io.spine.test.command.CdrAssignTask;
-import io.spine.test.command.CdrCreateTask;
-import io.spine.test.command.CdrPauseTask;
-import io.spine.test.command.CdrRemoveTaskFromProject;
-import io.spine.test.command.CdrStartTask;
-import io.spine.test.command.CdrStopTask;
-import io.spine.test.command.CmdAddTask;
 
 import java.util.Optional;
 
@@ -63,74 +63,74 @@ public final class CommandSubstituteTestEnv {
     public static final class ValidCommander extends AbstractCommander {
 
         @Command
-        CdrStartTask singleMsgSingleResult(CdrAssignTask command) {
+        SigStartTask singleMsgSingleResult(SigAssignTask command) {
             return startTask();
         }
 
         @Command
-        CdrStartTask msgWithCtxSingleResult(CdrAssignTask command, CommandContext ctx) {
+        SigStartTask msgWithCtxSingleResult(SigAssignTask command, CommandContext ctx) {
             return startTask();
         }
 
         @Command
-        Pair<CdrAssignTask, CdrStartTask> singleMsgPairResult(CmdAddTask command) {
+        Pair<SigAssignTask, SigStartTask> singleMsgPairResult(SigAddTaskToProject command) {
             return Pair.of(assignTask(), startTask());
         }
 
         @Command
-        Pair<CdrAssignTask, CdrStartTask>
-        msgWithCtxPairResult(CmdAddTask command, CommandContext ctx) {
+        Pair<SigAssignTask, SigStartTask>
+        msgWithCtxPairResult(SigAddTaskToProject command, CommandContext ctx) {
             return Pair.of(assignTask(), startTask());
         }
 
         @Command
-        Pair<CdrAddTaskToProject, Optional<CdrStartTask>>
-        pairWithOptionalResult(CdrCreateTask command) {
+        Pair<SigAddTaskToProject, Optional<SigStartTask>>
+        pairWithOptionalResult(SigCreateTask command) {
             return Pair.withNullable(addTask(), null);
         }
 
         @Command
-        Pair<CdrAddTaskToProject, Optional<CdrStartTask>>
-        msgWithCtxPairWithOptional(CdrCreateTask command, CommandContext ctx) {
+        Pair<SigAddTaskToProject, Optional<SigStartTask>>
+        msgWithCtxPairWithOptional(SigCreateTask command, CommandContext ctx) {
             return Pair.withNullable(addTask(), null);
         }
 
         @Command
-        EitherOf2<CdrStopTask, CdrPauseTask> singleMsgEitherOf2(CdrRemoveTaskFromProject cmd) {
+        EitherOf2<SigStopTask, SigPauseTask> singleMsgEitherOf2(SigRemoveTaskFromProject cmd) {
             return EitherOf2.withB(pauseTask());
         }
 
         @Command
-        EitherOf2<CdrStopTask, CdrPauseTask>
-        msgWithCtxEitherOf2(CdrRemoveTaskFromProject cmd, CommandContext ctx) {
+        EitherOf2<SigStopTask, SigPauseTask>
+        msgWithCtxEitherOf2(SigRemoveTaskFromProject cmd, CommandContext ctx) {
             return EitherOf2.withB(pauseTask());
         }
 
         @Command
-        Iterable<CommandMessage> singleMsgIterableResult(CdrAssignTask command) {
+        Iterable<CommandMessage> singleMsgIterableResult(SigAssignTask command) {
             return ImmutableList.of(startTask());
         }
 
         @Command
         Iterable<CommandMessage>
-        msgWithCtxIterableResult(CdrAssignTask command, CommandContext ctx) {
+        msgWithCtxIterableResult(SigAssignTask command, CommandContext ctx) {
             return ImmutableList.of(startTask());
         }
 
         @SuppressWarnings("MethodMayBeStatic")              // testing the visibility level.
         @Command
-        private CdrStartTask privateHandler(CdrAssignTask command) {
+        private SigStartTask privateHandler(SigAssignTask command) {
             return startTask();
         }
 
         @SuppressWarnings("ProtectedMemberInFinalClass")    // testing the visibility level.
         @Command
-        protected CdrStartTask protectedHandler(CdrAssignTask command) {
+        protected SigStartTask protectedHandler(SigAssignTask command) {
             return startTask();
         }
 
         @Command
-        public CdrStartTask publicHandler(CdrAssignTask command) {
+        public SigStartTask publicHandler(SigAssignTask command) {
             return startTask();
         }
     }
@@ -145,89 +145,90 @@ public final class CommandSubstituteTestEnv {
     public static final class InvalidCommander extends AbstractCommander {
 
         @Command
-        CdrStartTask noParams() {
+        SigStartTask noParams() {
             return startTask();
         }
 
         @Command
-        CdrStartTask nonCommandMessageParam(Nothing command) {
+        SigStartTask nonCommandMessageParam(Nothing command) {
             return startTask();
         }
 
         @Command
-        CdrStartTask nonMessageParam(int command) {
+        SigStartTask nonMessageParam(int command) {
             return startTask();
         }
 
         @Command
-        Optional<CdrStartTask> optionalResult(CdrAssignTask command) {
+        Optional<SigStartTask> optionalResult(SigAssignTask command) {
             return Optional.empty();
         }
 
         @Command
-        CdrStartTask threeParams(CdrAssignTask command, CommandContext ctx, CdrAssignTask third) {
+        SigStartTask threeParams(SigAssignTask command, CommandContext ctx, SigAssignTask third) {
             return startTask();
         }
 
         @Command
-        CdrStartTask wrongSecondParam(CdrAssignTask command, Nothing message) {
+        SigStartTask wrongSecondParam(SigAssignTask command, Nothing message) {
             return startTask();
         }
 
         @Command
-        CdrStartTask wrongContext(CdrAssignTask command, MessageContext msg) {
+        SigStartTask wrongContext(SigAssignTask command, MessageContext msg) {
             return startTask();
         }
 
         @Command
-        void voidMethod(CdrAssignTask command) {
+        void voidMethod(SigAssignTask command) {
             // do nothing.
         }
 
         @Command
-        Nothing eventResult(CdrAssignTask command) {
+        Nothing eventResult(SigAssignTask command) {
             return nothing();
         }
 
         @Command
-        int nonMessageResult(CdrAssignTask command) {
+        int nonMessageResult(SigAssignTask command) {
             return 42;
         }
 
         @Command
-        CdrStartTask justInterface(CommanderTestCommand command) {
+        SigStartTask justInterface(SignatureTestCommand command) {
             return startTask();
         }
 
         @Command
-        CdrStartTask interfaceAndContext(CommanderTestCommand command, CommandContext context) {
+        SigStartTask interfaceAndContext(SignatureTestCommand command, CommandContext context) {
             return startTask();
         }
 
         @Command
-        EitherOf3<CdrAssignTask, CdrStartTask, DoNothing> eitherWithNothing(CmdAddTask command) {
+        EitherOf3<SigAssignTask, SigStartTask, DoNothing>
+        eitherWithNothing(SigAddTaskToProject command) {
             return EitherOf3.withC(doNothing());
         }
 
         @Command
-        Iterable<Nothing> wrongIterable(CmdAddTask command) {
+        Iterable<Nothing> wrongIterable(SigAddTaskToProject command) {
             return ImmutableList.of();
         }
     }
 
-    private static CdrAssignTask assignTask() {
-        return CdrAssignTask.getDefaultInstance();
+    private static SigAssignTask assignTask() {
+        return SigAssignTask.getDefaultInstance();
     }
 
-    private static CdrAddTaskToProject addTask() {
-        return CdrAddTaskToProject.getDefaultInstance();
+    private static SigAddTaskToProject addTask() {
+        return SigAddTaskToProject.getDefaultInstance();
     }
 
-    private static CdrStartTask startTask() {
-        return CdrStartTask.getDefaultInstance();
+    private static SigStartTask startTask() {
+        return SigStartTask.getDefaultInstance();
     }
 
-    private static CdrPauseTask pauseTask() {
-        return CdrPauseTask.getDefaultInstance();
+    private static SigPauseTask pauseTask() {
+        return SigPauseTask.getDefaultInstance();
     }
 }

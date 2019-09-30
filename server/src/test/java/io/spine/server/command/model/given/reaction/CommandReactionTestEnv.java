@@ -26,20 +26,21 @@ import io.spine.base.MessageContext;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.UserId;
+import io.spine.model.contexts.projects.command.SigAddTaskToProject;
+import io.spine.model.contexts.projects.command.SigCreateProject;
+import io.spine.model.contexts.projects.command.SigPauseTask;
+import io.spine.model.contexts.projects.command.SigStartTask;
+import io.spine.model.contexts.projects.command.SigStopTask;
+import io.spine.model.contexts.projects.event.SigTaskAddedToProject;
+import io.spine.model.contexts.projects.event.SigTaskStarted;
+import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
 import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
+import io.spine.server.model.given.SignatureTestEvent;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
-import io.spine.test.command.CdrAddTaskToProject;
-import io.spine.test.command.CdrCreateProject;
-import io.spine.test.command.CdrPauseTask;
-import io.spine.test.command.CdrStartTask;
-import io.spine.test.command.CdrStopTask;
-import io.spine.test.command.event.CdrTaskAddedToProject;
-import io.spine.test.command.event.CdrTaskStarted;
-import io.spine.test.command.rejection.CommandRejections;
 
 import java.util.Optional;
 
@@ -65,65 +66,65 @@ public final class CommandReactionTestEnv {
     public static final class ValidCommander extends AbstractCommander {
 
         @Command
-        CdrStartTask singleMsgSingleResult(CdrTaskAddedToProject event) {
+        SigStartTask singleMsgSingleResult(SigTaskAddedToProject event) {
             return startTask();
         }
 
         @Command
-        Optional<CdrStartTask> singleMsgOptionalResult(CdrTaskAddedToProject event) {
+        Optional<SigStartTask> singleMsgOptionalResult(SigTaskAddedToProject event) {
             return Optional.empty();
         }
 
         @Command
-        CdrStartTask msgWithCtxSingleResult(CdrTaskAddedToProject event, EventContext ctx) {
+        SigStartTask msgWithCtxSingleResult(SigTaskAddedToProject event, EventContext ctx) {
             return startTask();
         }
 
         @Command
-        CdrCreateProject justRejection(CommandRejections.CdrCannotCreateProject rejection) {
+        SigCreateProject justRejection(ProjectRejections.SigCannotCreateProject rejection) {
             return createProject();
         }
 
         @Command
-        CdrCreateProject rejectionWithCtx(CommandRejections.CdrCannotCreateProject rejection,
+        SigCreateProject rejectionWithCtx(ProjectRejections.SigCannotCreateProject rejection,
                                           CommandContext context) {
             return createProject();
         }
 
         @Command
-        Pair<CdrAddTaskToProject, CdrStartTask> singleMsgPairResult(CdrTaskAddedToProject event) {
+        Pair<SigAddTaskToProject, SigStartTask> singleMsgPairResult(SigTaskAddedToProject event) {
             return Pair.of(addTaskToProject(), startTask());
         }
 
         @Command
-        Pair<CdrAddTaskToProject, Optional<CdrStartTask>>
-        pairWithOptionalResult(CdrTaskAddedToProject event) {
+        Pair<SigAddTaskToProject, Optional<SigStartTask>>
+        pairWithOptionalResult(SigTaskAddedToProject event) {
             return Pair.withNullable(addTaskToProject(), null);
         }
 
         @Command
-        EitherOf3<CdrPauseTask, CdrStopTask, DoNothing>
-        eitherOf3Result(CdrTaskAddedToProject event) {
+        EitherOf3<SigPauseTask, SigStopTask, DoNothing>
+        eitherOf3Result(SigTaskAddedToProject event) {
             return EitherOf3.withC(doNothing());
         }
 
         @Command
-        Iterable<CommandMessage> iterableResult(CdrTaskAddedToProject event) {
+        Iterable<CommandMessage> iterableResult(SigTaskAddedToProject event) {
             return ImmutableList.of(startTask());
         }
 
         @Command
-        private CdrStartTask privateHandler(CdrTaskAddedToProject event) {
+        private SigStartTask privateHandler(SigTaskAddedToProject event) {
             return startTask();
         }
 
         @Command
-        private CdrStartTask protectedHandler(CdrTaskAddedToProject event) {
+        private SigStartTask protectedHandler(SigTaskAddedToProject event) {
             return startTask();
         }
 
         @Command
-        public CdrStartTask publicHandler(CdrTaskAddedToProject event) {
+        public SigStartTask publicHandler(SigTaskAddedToProject event) {
             return startTask();
         }
     }
@@ -138,79 +139,79 @@ public final class CommandReactionTestEnv {
     public static final class InvalidCommander extends AbstractCommander {
 
         @Command
-        CdrStartTask noParams() {
+        SigStartTask noParams() {
             return startTask();
         }
 
         @Command
-        CdrStartTask nonEventMessageParam(UserId user) {
+        SigStartTask nonEventMessageParam(UserId user) {
             return startTask();
         }
 
         @Command
-        CdrStartTask nonMessageParam(int event) {
+        SigStartTask nonMessageParam(int event) {
             return startTask();
         }
 
         @Command
-        CdrStartTask threeParams(CdrTaskAddedToProject event, EventContext ctx, Nothing third) {
+        SigStartTask threeParams(SigTaskAddedToProject event, EventContext ctx, Nothing third) {
             return startTask();
         }
 
         @Command
-        CdrStartTask wrongSecondParam(CdrTaskAddedToProject event, Nothing message) {
+        SigStartTask wrongSecondParam(SigTaskAddedToProject event, Nothing message) {
             return startTask();
         }
 
         @Command
-        CdrStartTask wrongContext(CdrTaskAddedToProject event, MessageContext msg) {
+        SigStartTask wrongContext(SigTaskAddedToProject event, MessageContext msg) {
             return startTask();
         }
 
         @Command
-        void voidMethod(CdrTaskAddedToProject event) {
+        void voidMethod(SigTaskAddedToProject event) {
             // do nothing.
         }
 
         @Command
-        CdrTaskStarted eventResult(CdrTaskAddedToProject event) {
+        SigTaskStarted eventResult(SigTaskAddedToProject event) {
             return taskStarted();
         }
 
         @Command
-        int nonMessageResult(CdrTaskAddedToProject event) {
+        int nonMessageResult(SigTaskAddedToProject event) {
             return 18;
         }
 
         @Command
-        CdrStartTask justInterface(CommanderTestEvent event) {
+        SigStartTask justInterface(SignatureTestEvent event) {
             return startTask();
         }
 
         @Command
-        CdrStartTask interfaceAndContext(CommanderTestEvent event, EventContext context) {
+        SigStartTask interfaceAndContext(SignatureTestEvent event, EventContext context) {
             return startTask();
         }
 
         @Command
-        Iterable<UserId> wrongIterable(CdrTaskAddedToProject event) {
+        Iterable<UserId> wrongIterable(SigTaskAddedToProject event) {
             return ImmutableList.of();
         }
     }
 
-    private static CdrTaskStarted taskStarted() {
-        return CdrTaskStarted.getDefaultInstance();
+    private static SigTaskStarted taskStarted() {
+        return SigTaskStarted.getDefaultInstance();
     }
 
-    private static CdrCreateProject createProject() {
-        return CdrCreateProject.getDefaultInstance();
+    private static SigCreateProject createProject() {
+        return SigCreateProject.getDefaultInstance();
     }
 
-    private static CdrAddTaskToProject addTaskToProject() {
-        return CdrAddTaskToProject.getDefaultInstance();
+    private static SigAddTaskToProject addTaskToProject() {
+        return SigAddTaskToProject.getDefaultInstance();
     }
 
-    private static CdrStartTask startTask() {
-        return CdrStartTask.getDefaultInstance();
+    private static SigStartTask startTask() {
+        return SigStartTask.getDefaultInstance();
     }
 }

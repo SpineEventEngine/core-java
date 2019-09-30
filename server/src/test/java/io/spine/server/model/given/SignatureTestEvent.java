@@ -18,17 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.commander;
+package io.spine.server.model.given;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.GeneratedMixin;
-import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 
 /**
- * Common interface for some of the commands that are used in tests of
- * {@link io.spine.server.command.Command Command}-ing handlers.
+ * Common interface for some of the events that are used in tests of
+ * {@link io.spine.server.model.MethodSignature MethodSignature}s.
  */
 @GeneratedMixin
 @Immutable
-public interface CommanderTestCommand extends CommandMessage {
+public interface SignatureTestEvent extends EventMessage {
 }

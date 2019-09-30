@@ -17,18 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.command.model.given.reaction;
+package spine.test.model;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.GeneratedMixin;
-import io.spine.base.EventMessage;
+import "spine/options.proto";
 
-/**
- * Common interface for some of the events that are used in tests of
- * {@link io.spine.server.command.Command Command}-ing handlers.
- */
-@GeneratedMixin
-@Immutable
-public interface CommanderTestEvent extends EventMessage {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.model.contexts.projects.rejection";
+option java_outer_classname = "ProjectRejections";
+
+import "spine/test/model/contexts/projects/project.proto";
+
+//
+// Rejections for tests of the method signatures.
+////////////////
+
+message SigCannotCreateProject {
+    ProjectId project_id = 1;
 }

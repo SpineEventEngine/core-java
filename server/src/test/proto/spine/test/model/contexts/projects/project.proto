@@ -19,55 +19,42 @@
  */
 syntax = "proto3";
 
-package spine.test.command.event;
+package spine.test.model;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.command.event";
-option java_outer_classname = "CommandEventsProto";
+option java_package="io.spine.model.contexts.projects";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
-import "spine/test/command/project.proto";
 
-message CmdProjectCreated {
-    ProjectId project_id = 1;
-
-    // If true a command for adding a first task will be created.
-    // See `CommandReactionMethodTest.java`
-    bool initialize = 2;
+message ProjectId {
+    string id = 1;
 }
 
-message CmdTaskAdded {
-    ProjectId project_id = 1;
-    Task task = 2;
+message Project {
+    ProjectId id = 1;
+    string name = 2;
+    repeated Task task = 3;
+
+    enum Status {
+        UNDEFINED = 0;
+        CREATED = 1;
+        STARTED = 2;
+        DONE = 3;
+        CANCELLED = 4;
+    }
+    Status status = 4;
 }
 
-message CmdTaskRemoved {
-    ProjectId project_id = 1;
-    Task task = 2;
+message TaskId {
+    int32 id = 1;
 }
 
-message CmdTaskAssigned {
+message Task {
     TaskId task_id = 1;
-    core.UserId assignee = 2;
-}
-
-message CmdTaskStarted {
-    TaskId task_id = 1;
-}
-
-message CmdProjectStarted {
-    ProjectId project_id = 1;
-}
-
-message MandatoryFieldEvent {
-    ProjectId project_id = 1 [(required) = true];
-}
-
-// An event emitted when a project is created for duplicate command tests.
-//
-message DCmdProjectCreated {
-    ProjectId project_id = 1;
+    string title = 2;
+    string description = 3;
+    core.UserId assignee = 4;
 }
