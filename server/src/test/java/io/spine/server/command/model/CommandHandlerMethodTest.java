@@ -36,23 +36,14 @@ import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.model.given.handler.HandlerReturnsEmptyList;
 import io.spine.server.command.model.given.handler.HandlerReturnsNothing;
 import io.spine.server.command.model.given.handler.InvalidHandlerNoAnnotation;
-import io.spine.server.command.model.given.handler.InvalidHandlerNoParams;
-import io.spine.server.command.model.given.handler.InvalidHandlerOneNotMsgParam;
-import io.spine.server.command.model.given.handler.InvalidHandlerReturnsVoid;
-import io.spine.server.command.model.given.handler.InvalidHandlerTooManyParams;
-import io.spine.server.command.model.given.handler.InvalidHandlerTwoParamsFirstInvalid;
-import io.spine.server.command.model.given.handler.InvalidHandlerTwoParamsSecondInvalid;
 import io.spine.server.command.model.given.handler.ProcessManagerDoingNothing;
 import io.spine.server.command.model.given.handler.RejectingAggregate;
 import io.spine.server.command.model.given.handler.RejectingHandler;
-import io.spine.server.command.model.given.handler.ValidHandlerButPrivate;
 import io.spine.server.command.model.given.handler.ValidHandlerOneParam;
 import io.spine.server.command.model.given.handler.ValidHandlerOneParamReturnsList;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
-import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsList;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.model.IllegalOutcomeException;
-import io.spine.server.model.SignatureMismatchException;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.given.dispatch.PmDispatcher;
 import io.spine.server.type.CommandEnvelope;
@@ -225,54 +216,6 @@ class CommandHandlerMethodTest {
     }
 
     @Nested
-    @DisplayName("consider handler valid with")
-    class ConsiderHandlerValidWith {
-
-        @Test
-        @DisplayName("one Message param")
-        void messageParam() {
-            Method handler = new ValidHandlerOneParam().method();
-
-            assertIsCommandHandler(handler);
-        }
-
-        @Test
-        @MuteLogging /* Signature mismatch warnings are expected. */
-        @DisplayName("one Message param and `List` return type")
-        void messageParamAndListReturn() {
-            Method handler = new ValidHandlerOneParamReturnsList().method();
-
-            assertIsCommandHandler(handler);
-        }
-
-        @Test
-        @MuteLogging /* Signature mismatch warnings are expected. */
-        @DisplayName("Message and Context params")
-        void messageAndContextParam() {
-            Method handler = new ValidHandlerTwoParams().method();
-
-            assertIsCommandHandler(handler);
-        }
-
-        @Test
-        @DisplayName("Message and Context params, and `List` return type")
-        void messageAndContextParamAndListReturn() {
-            Method handler = new ValidHandlerTwoParamsReturnsList().method();
-
-            assertIsCommandHandler(handler);
-        }
-
-        @Test
-        @MuteLogging /* Signature mismatch warnings are expected. */
-        @DisplayName("non-public access")
-        void nonPublicAccess() {
-            Method method = new ValidHandlerButPrivate().method();
-
-            assertIsCommandHandler(method);
-        }
-    }
-
-    @Nested
     @DisplayName("consider handler invalid with")
     class ConsiderHandlerInvalidWith {
 
@@ -281,44 +224,6 @@ class CommandHandlerMethodTest {
         void noAnnotation() {
             Method handler = new InvalidHandlerNoAnnotation().method();
             assertFalse(new CommandHandlerSignature().matches(handler));
-        }
-
-        @Test
-        @DisplayName("no params")
-        void noParams() {
-            assertThrows(SignatureMismatchException.class, InvalidHandlerNoParams::new);
-        }
-
-        @Test
-        @DisplayName("too many params")
-        void tooManyParams() {
-            assertThrows(SignatureMismatchException.class, InvalidHandlerTooManyParams::new);
-        }
-
-        @Test
-        @DisplayName("one invalid param")
-        void oneInvalidParam() {
-            assertThrows(SignatureMismatchException.class, InvalidHandlerOneNotMsgParam::new);
-        }
-
-        @Test
-        @DisplayName("first non-Message param")
-        void firstNonMessageParam() {
-            assertThrows(SignatureMismatchException.class,
-                         InvalidHandlerTwoParamsFirstInvalid::new);
-        }
-
-        @Test
-        @DisplayName("second non-Context param")
-        void secondNonContextParam() {
-            assertThrows(SignatureMismatchException.class,
-                         InvalidHandlerTwoParamsSecondInvalid::new);
-        }
-
-        @Test
-        @DisplayName("void return type")
-        void voidReturnType() {
-            assertThrows(SignatureMismatchException.class, InvalidHandlerReturnsVoid::new);
         }
     }
 
@@ -374,10 +279,6 @@ class CommandHandlerMethodTest {
         CommandEnvelope cmd = newCommand(startProject());
 
         assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
-    }
-
-    private static void assertIsCommandHandler(Method handler) {
-        assertTrue(new CommandHandlerSignature().matches(handler));
     }
 
     private static CommandEnvelope envelope(Message commandMessage) {

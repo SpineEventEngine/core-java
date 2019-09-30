@@ -182,6 +182,11 @@ public final class CommandHandlerSignatureTestEnv {
         }
 
         @Assign
+        CdrTaskStarted wrongFirstParam(Nothing command, MessageContext msg) {
+            return taskStarted();
+        }
+
+        @Assign
         CdrTaskStarted wrongSecondParam(CdrAssignTask command, Nothing message) {
             return taskStarted();
         }
