@@ -29,6 +29,7 @@ import io.spine.model.contexts.projects.command.SigAssignTask;
 import io.spine.model.contexts.projects.command.SigCreateProject;
 import io.spine.model.contexts.projects.command.SigPauseTask;
 import io.spine.model.contexts.projects.command.SigRemoveTaskFromProject;
+import io.spine.model.contexts.projects.command.SigSetProjectOwner;
 import io.spine.model.contexts.projects.command.SigStartTask;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.model.contexts.projects.event.SigProjectStarted;
@@ -36,8 +37,10 @@ import io.spine.model.contexts.projects.event.SigTaskAssigned;
 import io.spine.model.contexts.projects.event.SigTaskPaused;
 import io.spine.model.contexts.projects.event.SigTaskStarted;
 import io.spine.model.contexts.projects.event.SigTaskStopped;
+import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
+import io.spine.server.command.Command;
 import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
 import io.spine.server.model.given.SignatureTestCommand;
@@ -48,6 +51,8 @@ import io.spine.server.tuple.Pair;
 import io.spine.test.reflect.command.RefCreateProject;
 
 import java.util.Optional;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A test environment for {@link io.spine.server.command.CommandHandlerSignatureTest
@@ -72,6 +77,12 @@ public final class CommandHandlerSignatureTestEnv {
         @Assign
         SigProjectCreated singleMsgSingleResult(SigCreateProject command) {
             return projectCreated();
+        }
+
+        @Command
+        SigProjectCreated declaredRejection(SigCreateProject cmd) throws SigCannotCreateProject {
+            throw SigCannotCreateProject.newBuilder()
+                                        .build();
         }
 
         @Assign
@@ -230,6 +241,12 @@ public final class CommandHandlerSignatureTestEnv {
         @Assign
         Iterable<DoNothing> wrongIterable(SigAddTaskToProject command) {
             return ImmutableList.of();
+        }
+
+        @Command
+        SigSetProjectOwner wrongThrowable(SigCreateProject command) throws RuntimeException {
+            throw newIllegalStateException("Command handler method " +
+                                                   "has declared an illegal exception.");
         }
     }
 

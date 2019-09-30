@@ -33,7 +33,8 @@ import io.spine.model.contexts.projects.event.SigTaskPaused;
 import io.spine.model.contexts.projects.event.SigTaskRemovedFromProject;
 import io.spine.model.contexts.projects.event.SigTaskStarted;
 import io.spine.model.contexts.projects.event.SigTaskStopped;
-import io.spine.model.contexts.projects.rejection.ProjectRejections.SigCannotCreateProject;
+import io.spine.model.contexts.projects.rejection.ProjectRejections;
+import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
@@ -41,6 +42,7 @@ import io.spine.server.model.given.SignatureTestEvent;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
 
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -80,12 +82,13 @@ public class EventReactorSignatureTestEnv {
         }
 
         @React
-        SigProjectCreated justRejection(SigCannotCreateProject rejection) {
+        SigProjectCreated justRejection(ProjectRejections.SigCannotCreateProject rejection) {
             return projectCreated();
         }
 
         @React
-        SigProjectCreated rejectionWithCtx(SigCannotCreateProject rejection, CommandContext ctx) {
+        SigProjectCreated
+        rejectionWithCtx(ProjectRejections.SigCannotCreateProject rejection, CommandContext ctx) {
             return projectCreated();
         }
 
@@ -196,6 +199,21 @@ public class EventReactorSignatureTestEnv {
         Iterable<UserId> wrongIterable(SigTaskAddedToProject event) {
             return ImmutableList.of();
         }
+
+        @React
+        SigTaskStarted declaredThrowable(SigTaskAddedToProject event) throws IOException {
+            throw new IOException("An invalid reactor method has thrown an exception");
+        }
+
+        @React
+        SigTaskStarted declaredRejection(SigTaskAddedToProject e) throws SigCannotCreateProject {
+            throw cannotCreateProject();
+        }
+    }
+
+    private static SigCannotCreateProject cannotCreateProject() {
+        return SigCannotCreateProject.newBuilder()
+                                     .build();
     }
 
     private static SigStartTask startTask() {

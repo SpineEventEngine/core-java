@@ -26,11 +26,14 @@ import io.spine.base.MessageContext;
 import io.spine.core.CommandContext;
 import io.spine.model.contexts.projects.command.SigAddTaskToProject;
 import io.spine.model.contexts.projects.command.SigAssignTask;
+import io.spine.model.contexts.projects.command.SigCreateProject;
 import io.spine.model.contexts.projects.command.SigCreateTask;
 import io.spine.model.contexts.projects.command.SigPauseTask;
 import io.spine.model.contexts.projects.command.SigRemoveTaskFromProject;
+import io.spine.model.contexts.projects.command.SigSetProjectOwner;
 import io.spine.model.contexts.projects.command.SigStartTask;
 import io.spine.model.contexts.projects.command.SigStopTask;
+import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
 import io.spine.server.model.DoNothing;
@@ -41,6 +44,8 @@ import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
 
 import java.util.Optional;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A test environment for {@link io.spine.server.command.model.CommandSubstituteSignatureTest
@@ -65,6 +70,13 @@ public final class CommandSubstituteTestEnv {
         @Command
         SigStartTask singleMsgSingleResult(SigAssignTask command) {
             return startTask();
+        }
+
+        @Command
+        SigSetProjectOwner declaredRejection(SigCreateProject command)
+                throws SigCannotCreateProject {
+            throw SigCannotCreateProject.newBuilder()
+                                        .build();
         }
 
         @Command
@@ -213,6 +225,12 @@ public final class CommandSubstituteTestEnv {
         @Command
         Iterable<Nothing> wrongIterable(SigAddTaskToProject command) {
             return ImmutableList.of();
+        }
+
+        @Command
+        SigSetProjectOwner wrongThrowable(SigCreateProject command) throws RuntimeException {
+            throw newIllegalStateException("Command substitution method has thrown " +
+                                                   "an illegal exception.");
         }
     }
 
