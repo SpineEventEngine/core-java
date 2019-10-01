@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Message;
+import io.spine.core.Event;
 import io.spine.option.EntityOption;
 import io.spine.test.entity.AccountDetails;
 import io.spine.test.entity.LastSeen;
@@ -55,26 +56,40 @@ class EntityVisibilityTest {
     @Test
     @DisplayName("not accept null `Visibility` values")
     void notAcceptNulls() {
+        Optional<EntityVisibility> value = EntityVisibility.of(Password.class);
+        Truth8.assertThat(value).isPresent();
+        EntityVisibility instance = value.get();
         new NullPointerTester()
-                .testAllPublicInstanceMethods(EntityVisibility.of(Password.class));
+                .testAllPublicInstanceMethods(instance);
     }
 
     @Test
     @DisplayName("report NONE level for `Aggregate`s by default")
     void aggregateDefaults() {
-        assertVisibility(Password.class, NONE);
+        EntityVisibility actual = assertVisibility(Password.class, NONE);
+        assertFalse(actual.isNotNone());
     }
 
     @Test
     @DisplayName("report NONE level for `Process Manager`s by default")
     void pmDefaults() {
-        assertVisibility(UserSignIn.class, NONE);
+        EntityVisibility actual = assertVisibility(UserSignIn.class, NONE);
+        assertFalse(actual.isNotNone());
     }
 
     @Test
-    @DisplayName("report FULL level for projections by default")
+    @DisplayName("report FULL level for `Projection`s by default")
     void projectionDefaults() {
-        assertVisibility(UserFeed.class, FULL);
+        EntityVisibility actual = assertVisibility(UserFeed.class, FULL);
+        assertTrue(actual.isNotNone());
+    }
+
+    @Test
+    @DisplayName("report NONE level for `Event.class`")
+    void eventDefault() {
+        EntityVisibility visibility = visibilityOf(Event.class);
+        assertTrue(visibility.is(NONE));
+        assertFalse(visibility.isNotNone());
     }
 
     @Test
@@ -114,11 +129,11 @@ class EntityVisibilityTest {
         assertTrue(visibility.isAsLeast(NONE));
     }
 
-    private static void
+    private static EntityVisibility
     assertVisibility(Class<? extends Message> stateClass, EntityOption.Visibility expected) {
         EntityVisibility actual = visibilityOf(stateClass);
         assertTrue(actual.is(expected));
-        assertFalse(actual.isNotNone());
+        return actual;
     }
 
     private static EntityVisibility visibilityOf(Class<? extends Message> stateClass) {
