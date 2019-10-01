@@ -20,12 +20,12 @@
 
 package io.spine.server.entity.given.entity;
 
-import com.google.protobuf.StringValue;
 import io.spine.server.entity.AbstractEntity;
+import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 
-public class EntityWithMessageId extends AbstractEntity<ProjectId, StringValue> {
+public class EntityWithMessageId extends AbstractEntity<ProjectId, Project> {
 
     public EntityWithMessageId() {
         super(Sample.messageOfType(ProjectId.class));
