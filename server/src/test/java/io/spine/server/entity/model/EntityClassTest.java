@@ -49,8 +49,8 @@ class EntityClassTest {
     @DisplayName("return ID class")
     void returnIdClass() {
         @SuppressWarnings("unchecked")
-        Class<Long> actual = (Class<Long>) entityClass.idClass();
-        assertEquals(Long.class, actual);
+        Class<TaskId> actual = (Class<TaskId>) entityClass.idClass();
+        assertEquals(TaskId.class, actual);
     }
 
     @Test
