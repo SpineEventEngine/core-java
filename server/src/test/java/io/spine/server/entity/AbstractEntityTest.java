@@ -128,11 +128,12 @@ class AbstractEntityTest {
     void supportEquality() {
         ProjectId id = AvEntity.projectId("88");
         AvEntity entity = new AvEntity(id);
-        AvEntity another = new AvEntity(id);
-        another.updateState(entity.state(), entity.version());
+        AvEntity similarEntity = new AvEntity(id);
+        similarEntity.updateState(entity.state(), entity.version());
 
-        new EqualsTester().addEqualityGroup(entity, another)
-                          .addEqualityGroup(new AvEntity(AvEntity.projectId("42")))
+        AvEntity different = new AvEntity(AvEntity.projectId("42"));
+        new EqualsTester().addEqualityGroup(entity, similarEntity)
+                          .addEqualityGroup(different)
                           .testEquals();
     }
 
@@ -157,6 +158,7 @@ class AbstractEntityTest {
 
         private AvEntity(ProjectId id) {
             super(id);
+            updateState(Project.newBuilder().setId(id).vBuild());
         }
 
         static ProjectId projectId(String value) {
