@@ -460,7 +460,7 @@ public class EventBusTest {
     @SuppressWarnings({"MethodWithMultipleLoops", "BusyWait"}) // OK for such test case.
     @SlowTest
     @Test
-    @DisplayName("store filters regarding possible concurrent modifications")
+    @DisplayName("store filters as expected if initialized concurrently")
     void storeFiltersInConcurrentEnv() throws Exception {
         int threadCount = 50;
         @Validated DonationMade eventMessage = DonationMade
