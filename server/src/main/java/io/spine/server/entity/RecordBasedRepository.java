@@ -64,6 +64,10 @@ import static io.spine.validate.Validate.checkValid;
  * <p>Such a repository is backed by {@link RecordStorage}.
  * Entity states are stored as {@link EntityRecord}s.
  *
+ * @param <I>
+ *         the type of entity identifiers
+ * @param <E>
+ *         the type of stored entities
  * @param <S>
  *         the type of entity state messages
  */
