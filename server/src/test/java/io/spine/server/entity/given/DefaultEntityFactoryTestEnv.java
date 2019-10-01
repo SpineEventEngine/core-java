@@ -20,10 +20,10 @@
 
 package io.spine.server.entity.given;
 
-import com.google.protobuf.DoubleValue;
-import com.google.protobuf.StringValue;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.server.given.groups.GroupName;
+import io.spine.test.entity.Project;
 
 public class DefaultEntityFactoryTestEnv {
 
@@ -32,26 +32,26 @@ public class DefaultEntityFactoryTestEnv {
     }
 
     /** A test entity class which is not versionable. */
-    public static class TestEntity1 extends AbstractEntity<Long, StringValue> {
-        private TestEntity1(Long id) {
+    public static class TestEntity1 extends AbstractEntity<String, Project> {
+        private TestEntity1(String id) {
             super(id);
         }
     }
 
     /** A test repository. */
     public static class TestRepository1
-            extends DefaultRecordBasedRepository<Long, TestEntity1, StringValue> {
+            extends DefaultRecordBasedRepository<String, TestEntity1, Project> {
     }
 
     /** Another entity with the same ID and different state. */
-    public static class TestEntity2 extends AbstractEntity<Long, DoubleValue> {
-        protected TestEntity2(Long id) {
+    public static class TestEntity2 extends AbstractEntity<String, GroupName> {
+        protected TestEntity2(String id) {
             super(id);
         }
     }
 
     /** A repository for {@link TestEntity2}. */
     public static class TestRepository2
-            extends DefaultRecordBasedRepository<Long, TestEntity2, DoubleValue> {
+            extends DefaultRecordBasedRepository<String, TestEntity2, GroupName> {
     }
 }
