@@ -32,6 +32,8 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeName;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.protobuf.AnyPacker.unpack;
 
@@ -68,7 +70,11 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         }
         @SuppressWarnings("unchecked") // Checked above.
         Class<? extends Message> firstParameter = (Class<? extends Message>) params.type(0);
-        EntityVisibility visibility = EntityVisibility.of(firstParameter);
+        Optional<EntityVisibility> visibilityOption = EntityVisibility.of(firstParameter);
+        if(!visibilityOption.isPresent()) {
+            return false;
+        }
+        EntityVisibility visibility = visibilityOption.get();
         if (visibility.canSubscribe()) {
             return true;
         } else {

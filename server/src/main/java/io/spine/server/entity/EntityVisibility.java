@@ -27,13 +27,15 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.code.proto.EntityStateOption;
+import io.spine.core.Event;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.option.EntityOption.Visibility;
-import io.spine.option.OptionsProto;
 import io.spine.type.TypeName;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -84,22 +86,40 @@ public final class EntityVisibility implements Serializable {
     /**
      * Obtains an instance of {@code EntityVisibility} for the given entity state class.
      *
+     * <p>Returns {@code Optional.empty()}, if the given message is not an Entity,
+     * i.e. has no corresponding option defined.
+     *
      * @param stateClass
      *         the entity state class
      * @return new instance
+     * @implNote The framework treats an {@code Event} as a state of a system {@code
+     *         EEntity}. Therefore, {@code Event.class} is one of the potential arguments passed
+     *         into this method.
+     *         We don't want to define {@code (entity)} option for the {@code Event} message,
+     *         therefore this method handles {@code Event.class} as a special case and returns
+     *         {@code NONE} visibility level for it.
      */
-    public static EntityVisibility of(Class<? extends Message> stateClass) {
+    public static Optional<EntityVisibility> of(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);
+
+        if(Event.class.equals(stateClass)) {
+            return Optional.of(new EntityVisibility(NONE));
+        }
+
         Descriptor descriptor = TypeName.of(stateClass)
                                         .messageDescriptor();
-        EntityOption entityOption = descriptor.getOptions()
-                                              .getExtension(OptionsProto.entity);
+        Optional<EntityOption> option = EntityStateOption.valueOf(descriptor);
+        if(!option.isPresent()) {
+            return Optional.empty();
+        }
+        EntityOption entityOption = option.get();
         Visibility visibility = entityOption.getVisibility();
         if (visibility == DEFAULT) {
             Kind kind = entityOption.getKind();
             visibility = kind == PROJECTION ? FULL : NONE;
         }
-        return new EntityVisibility(visibility);
+        EntityVisibility result = new EntityVisibility(visibility);
+        return Optional.of(result);
     }
 
     /**

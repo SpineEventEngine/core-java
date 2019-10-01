@@ -38,6 +38,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.Messages.defaultInstance;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A class of entities.
@@ -75,7 +76,13 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         this.idClass = idClass(cls);
         this.stateClass = stateClassOf(cls);
         this.entityStateType = TypeUrl.of(stateClass);
-        this.visibility = EntityVisibility.of(stateClass);
+        this.visibility = EntityVisibility.of(stateClass)
+                                          .orElseThrow(this::noOptionDefined);
+    }
+
+    private IllegalStateException noOptionDefined() {
+        throw newIllegalStateException("The message corresponding to class `%s` " +
+                                               "has no `entity` option defined.", stateClass);
     }
 
     /**

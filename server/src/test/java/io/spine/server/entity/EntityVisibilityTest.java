@@ -21,6 +21,9 @@
 package io.spine.server.entity;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Truth8;
+import com.google.protobuf.Message;
+import io.spine.option.EntityOption;
 import io.spine.test.entity.AccountDetails;
 import io.spine.test.entity.LastSeen;
 import io.spine.test.entity.Password;
@@ -29,6 +32,8 @@ import io.spine.test.entity.UserFeed;
 import io.spine.test.entity.UserSignIn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.option.EntityOption.Visibility.FULL;
 import static io.spine.option.EntityOption.Visibility.NONE;
@@ -41,47 +46,41 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EntityVisibilityTest {
 
     @Test
-    @DisplayName("not accept nulls on construction")
+    @DisplayName("not accept `null`s on construction")
     void notAcceptNullsOnConstruction() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(EntityVisibility.class);
     }
 
     @Test
-    @DisplayName("not accept null `Visibility`-s")
+    @DisplayName("not accept null `Visibility` values")
     void notAcceptNulls() {
         new NullPointerTester()
                 .testAllPublicInstanceMethods(EntityVisibility.of(Password.class));
     }
 
     @Test
-    @DisplayName("report NONE level for aggregates by default")
+    @DisplayName("report NONE level for `Aggregate`s by default")
     void aggregateDefaults() {
-        EntityVisibility visibility = EntityVisibility.of(Password.class);
-        assertTrue(visibility.is(NONE));
-        assertFalse(visibility.isNotNone());
+        assertVisibility(Password.class, NONE);
     }
 
     @Test
-    @DisplayName("report NONE level for procmans by default")
+    @DisplayName("report NONE level for `Process Manager`s by default")
     void pmDefaults() {
-        EntityVisibility visibility = EntityVisibility.of(UserSignIn.class);
-        assertTrue(visibility.is(NONE));
-        assertFalse(visibility.isNotNone());
+        assertVisibility(UserSignIn.class, NONE);
     }
 
     @Test
     @DisplayName("report FULL level for projections by default")
     void projectionDefaults() {
-        EntityVisibility visibility = EntityVisibility.of(UserFeed.class);
-        assertTrue(visibility.is(FULL));
-        assertTrue(visibility.isNotNone());
+        assertVisibility(UserFeed.class, FULL);
     }
 
     @Test
     @DisplayName("report QUERY level")
     void findQuery() {
-        EntityVisibility visibility = EntityVisibility.of(AccountDetails.class);
+        EntityVisibility visibility = visibilityOf(AccountDetails.class);
         assertTrue(visibility.is(QUERY));
         assertTrue(visibility.canQuery());
         assertTrue(visibility.isAsLeast(QUERY));
@@ -93,7 +92,7 @@ class EntityVisibilityTest {
     @Test
     @DisplayName("report SUBSCRIBE level")
     void findSubscribe() {
-        EntityVisibility visibility = EntityVisibility.of(UserActivity.class);
+        EntityVisibility visibility = visibilityOf(UserActivity.class);
         assertTrue(visibility.is(SUBSCRIBE));
         assertTrue(visibility.canSubscribe());
         assertTrue(visibility.isAsLeast(SUBSCRIBE));
@@ -105,7 +104,7 @@ class EntityVisibilityTest {
     @Test
     @DisplayName("report FULL level")
     void findFull() {
-        EntityVisibility visibility = EntityVisibility.of(LastSeen.class);
+        EntityVisibility visibility = visibilityOf(LastSeen.class);
         assertTrue(visibility.is(FULL));
         assertTrue(visibility.canQuery());
         assertTrue(visibility.canSubscribe());
@@ -113,5 +112,19 @@ class EntityVisibilityTest {
         assertTrue(visibility.isAsLeast(QUERY));
         assertTrue(visibility.isAsLeast(SUBSCRIBE));
         assertTrue(visibility.isAsLeast(NONE));
+    }
+
+    private static void
+    assertVisibility(Class<? extends Message> stateClass, EntityOption.Visibility expected) {
+        EntityVisibility actual = visibilityOf(stateClass);
+        assertTrue(actual.is(expected));
+        assertFalse(actual.isNotNone());
+    }
+
+    private static EntityVisibility visibilityOf(Class<? extends Message> stateClass) {
+        Optional<EntityVisibility> visibility = EntityVisibility.of(stateClass);
+        Truth8.assertThat(visibility)
+              .isPresent();
+        return visibility.get();
     }
 }
