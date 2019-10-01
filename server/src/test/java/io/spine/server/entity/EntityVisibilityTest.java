@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
+import io.spine.core.Signal;
 import io.spine.option.EntityOption;
 import io.spine.test.entity.AccountDetails;
 import io.spine.test.entity.LastSeen;
@@ -61,6 +62,13 @@ class EntityVisibilityTest {
         EntityVisibility instance = value.get();
         new NullPointerTester()
                 .testAllPublicInstanceMethods(instance);
+    }
+
+    @Test
+    @DisplayName("return `Optional.empty()` if no `GeneratedMessageV3` descendant passed")
+    void returnEmptyForNonGeneratedMessageV3() {
+        Optional<EntityVisibility> value = EntityVisibility.of(Signal.class);
+        Truth8.assertThat(value).isEmpty();
     }
 
     @Test

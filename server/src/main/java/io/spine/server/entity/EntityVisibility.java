@@ -25,6 +25,7 @@ import com.google.common.graph.ImmutableGraph;
 import com.google.common.graph.MutableGraph;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.code.proto.EntityStateOption;
@@ -104,6 +105,9 @@ public final class EntityVisibility implements Serializable {
 
         if(Event.class.equals(stateClass)) {
             return Optional.of(new EntityVisibility(NONE));
+        }
+        if(!GeneratedMessageV3.class.isAssignableFrom(stateClass)) {
+            return Optional.empty();
         }
 
         Descriptor descriptor = TypeName.of(stateClass)
