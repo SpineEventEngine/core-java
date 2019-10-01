@@ -26,6 +26,7 @@ import io.spine.base.MessageContext;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.UserId;
+import io.spine.model.contexts.projects.command.SigCreateProject;
 import io.spine.model.contexts.projects.command.SigStartTask;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.model.contexts.projects.event.SigTaskAddedToProject;
@@ -93,6 +94,19 @@ public class EventReactorSignatureTestEnv {
         }
 
         @React
+        SigProjectCreated rejectionWithCommand(ProjectRejections.SigCannotCreateProject rejection,
+                                               SigCreateProject command) {
+            return projectCreated();
+        }
+
+        @React
+        SigProjectCreated rejectionWithCommandAndCtx(ProjectRejections.SigCannotCreateProject r,
+                                                     SigCreateProject cmd,
+                                                     CommandContext ctx) {
+            return projectCreated();
+        }
+
+        @React
         Pair<SigTaskAddedToProject, SigTaskStarted>
         singleMsgPairResult(SigTaskAddedToProject event) {
             return Pair.of(taskAddedToProject(), taskStarted());
@@ -156,8 +170,16 @@ public class EventReactorSignatureTestEnv {
         }
 
         @React
-        SigTaskStarted threeParams(SigTaskAddedToProject event, EventContext ctx, Nothing third) {
+        SigTaskStarted wrongThreeParams(SigTaskAddedToProject e, EventContext ctx, Nothing third) {
             return taskStarted();
+        }
+
+        @React
+        SigProjectCreated rejectionAndThreeMoreParams(ProjectRejections.SigCannotCreateProject r,
+                                                      SigCreateProject cmd,
+                                                      CommandContext ctx,
+                                                      UserId user) {
+            return projectCreated();
         }
 
         @React
