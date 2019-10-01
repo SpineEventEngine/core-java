@@ -77,12 +77,13 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         this.stateClass = stateClassOf(cls);
         this.entityStateType = TypeUrl.of(stateClass);
         this.visibility = EntityVisibility.of(stateClass)
-                                          .orElseThrow(this::noOptionDefined);
+                                          .orElseThrow(() -> noOptionDefined(cls));
     }
 
-    private IllegalStateException noOptionDefined() {
-        throw newIllegalStateException("The message corresponding to class `%s` " +
-                                               "has no `entity` option defined.", stateClass);
+    private IllegalStateException noOptionDefined(Class<E> cls) {
+        throw newIllegalStateException("The state message of type `%s` " +
+                                               "corresponding to the entity `%s` " +
+                                               "has no `entity` option defined.", stateClass, cls);
     }
 
     /**
