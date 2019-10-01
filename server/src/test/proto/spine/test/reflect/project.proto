@@ -32,6 +32,9 @@ message ProjectId {
 }
 
 message Project {
+
+    option (entity).kind = AGGREGATE;
+
     ProjectId id = 1;
     string name = 2;
     repeated Task task = 3;

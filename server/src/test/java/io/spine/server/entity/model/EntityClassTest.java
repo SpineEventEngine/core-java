@@ -21,10 +21,11 @@
 package io.spine.server.entity.model;
 
 import com.google.common.collect.Range;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.entity.AbstractEntity;
+import io.spine.test.model.contexts.tasks.Task;
+import io.spine.test.model.contexts.tasks.TaskId;
 import io.spine.time.InstantConverter;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
@@ -38,11 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EntityClass should")
+@DisplayName("`EntityClass` should")
 class EntityClassTest {
 
-    private final EntityClass<NanoEntity> entityClass =
-            new EntityClass<>(NanoEntity.class);
+    private final EntityClass<TaskEntity> entityClass =
+            new EntityClass<>(TaskEntity.class);
 
     @Test
     @DisplayName("return ID class")
@@ -55,19 +56,19 @@ class EntityClassTest {
     @Test
     @DisplayName("obtain entity constructor")
     void getEntityConstructor() {
-        Constructor<NanoEntity> ctor = entityClass.constructor();
+        Constructor<TaskEntity> ctor = entityClass.constructor();
         assertNotNull(ctor);
     }
 
     @Test
     @DisplayName("create and initialize entity instance")
     void createEntityInstance() {
-        Long id = 100L;
+        TaskId id = TaskId.generate();
         Timestamp before = TimeTests.Past.secondsAgo(1);
 
         // Create and init the entity.
-        EntityClass<NanoEntity> entityClass = new EntityClass<>(NanoEntity.class);
-        AbstractEntity<Long, StringValue> entity = entityClass.create(id);
+        EntityClass<TaskEntity> entityClass = new EntityClass<>(TaskEntity.class);
+        AbstractEntity<TaskId, Task> entity = entityClass.create(id);
 
         Timestamp after = Time.currentTime();
 
@@ -78,14 +79,14 @@ class EntityClassTest {
         assertEquals(0, entity.version()
                               .getNumber());
         assertTrue(whileWeCreate.contains(toInstant(entity.whenModified())));
-        assertEquals(StringValue.getDefaultInstance(), entity.state());
+        assertEquals(Task.getDefaultInstance(), entity.state());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());
     }
 
     /** A test entity which defines ID and state. */
-    private static class NanoEntity extends AbstractEntity<Long, StringValue> {
-        private NanoEntity(Long id) {
+    private static class TaskEntity extends AbstractEntity<TaskId, Task> {
+        private TaskEntity(TaskId id) {
             super(id);
         }
     }

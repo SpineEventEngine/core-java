@@ -24,7 +24,7 @@ package spine.test.model;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.model.contexts.projects";
+option java_package = "io.spine.model.contexts.projects";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
@@ -34,6 +34,8 @@ message ProjectId {
 }
 
 message Project {
+    option (entity).kind = AGGREGATE;
+
     ProjectId id = 1;
     string name = 2;
     repeated Task task = 3;

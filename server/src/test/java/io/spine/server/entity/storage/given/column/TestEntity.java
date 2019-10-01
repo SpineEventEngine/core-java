@@ -20,10 +20,10 @@
 
 package io.spine.server.entity.storage.given.column;
 
-import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.Enumerated;
+import io.spine.test.storage.Project;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.server.entity.storage.EnumType.STRING;
@@ -31,7 +31,7 @@ import static io.spine.server.entity.storage.given.column.TaskStatus.SUCCESS;
 import static io.spine.testing.Tests.nullRef;
 
 @SuppressWarnings("unused") // Reflective access
-public class TestEntity extends AbstractEntity<String, Any> {
+public class TestEntity extends AbstractEntity<String, Project> {
 
     private @Nullable Integer mutableState = 0;
 

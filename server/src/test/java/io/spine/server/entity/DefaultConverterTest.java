@@ -22,9 +22,10 @@ package io.spine.server.entity;
 
 import com.google.common.testing.SerializableTester;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.StringValue;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.given.organizations.Organization;
+import io.spine.server.given.organizations.OrganizationId;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,17 +37,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("DefaultConverter should")
 class DefaultConverterTest {
 
-    private StorageConverter<Long, TestEntity, StringValue> converter;
+    private StorageConverter<OrganizationId, TestEntity, Organization> converter;
 
     @BeforeEach
     void setUp() {
-        BoundedContext bc = BoundedContextBuilder.assumingTests().build();
-        RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
-        bc.register(repository);
+        BoundedContext bc = BoundedContextBuilder.assumingTests()
+                                                 .build();
+        RecordBasedRepository<OrganizationId, TestEntity, Organization> repo = new TestRepository();
+        bc.register(repo);
 
-        TypeUrl stateType = repository.entityModelClass()
-                                      .stateType();
-        converter = forAllFields(stateType, repository.entityFactory());
+        TypeUrl stateType = repo.entityModelClass()
+                                .stateType();
+        converter = forAllFields(stateType, repo.entityFactory());
     }
 
     @Test
@@ -62,13 +64,13 @@ class DefaultConverterTest {
                                        .addPaths("foo.bar")
                                        .build();
 
-        StorageConverter<Long, TestEntity, StringValue> withMasks =
+        StorageConverter<OrganizationId, TestEntity, Organization> withMasks =
                 converter.withFieldMask(fieldMask);
 
         assertEquals(fieldMask, withMasks.fieldMask());
     }
 
-    private static TestEntity createEntity(Long id, StringValue state) {
+    private static TestEntity createEntity(OrganizationId id, Organization state) {
         TestEntity result = new TestEntity(id);
         result.setState(state);
         return result;
@@ -77,8 +79,13 @@ class DefaultConverterTest {
     @Test
     @DisplayName("convert forward and backward")
     void convertForwardAndBackward() {
-        StringValue entityState = StringValue.of("back and forth");
-        TestEntity entity = createEntity(100L, entityState);
+        OrganizationId id = OrganizationId.generate();
+        Organization entityState = Organization
+                .newBuilder()
+                .setName("back and forth")
+                .setId(id)
+                .vBuild();
+        TestEntity entity = createEntity(id, entityState);
 
         EntityRecord out = converter.convert(entity);
         TestEntity back = converter.reverse()
@@ -95,8 +102,9 @@ class DefaultConverterTest {
     /**
      * A test entity class which is not versionable.
      */
-    private static class TestEntity extends AbstractEntity<Long, StringValue> {
-        private TestEntity(Long id) {
+    private static class TestEntity extends AbstractEntity<OrganizationId, Organization> {
+
+        private TestEntity(OrganizationId id) {
             super(id);
         }
     }
@@ -105,6 +113,7 @@ class DefaultConverterTest {
      * A test repository.
      */
     private static class TestRepository
-            extends DefaultRecordBasedRepository<Long, TestEntity, StringValue> {
+            extends DefaultRecordBasedRepository<OrganizationId, TestEntity, Organization> {
+
     }
 }
