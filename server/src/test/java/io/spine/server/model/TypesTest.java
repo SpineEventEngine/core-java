@@ -140,7 +140,7 @@ class TypesTest extends UtilityClassTest<Types> {
     @DisplayName(", if expected and actual types have `Optional` generic parameters," +
             "unpack the generic type of `Optional`s and take them into account")
     @Test
-    void unpackOptionalForIterables() {
+    void unpackOptionalIfBothDefineGenericParams() {
         assertThat(
                 matches(new TypeToken<Optional<EventMessage>>() {},
                         new TypeToken<Optional<Nothing>>() {})
@@ -170,7 +170,7 @@ class TypesTest extends UtilityClassTest<Types> {
     @DisplayName(", if the expected type has no generic parameters`, " +
             "not take `Optional` generic parameter of actual type into account")
     @Test
-    void notUnpackOptionalForNonIterables() {
+    void notUnpackOptionalIfExpectedHasNoGenerics() {
         assertThat(
                 matches(TypeToken.of(EventMessage.class),
                         new TypeToken<Optional<Nothing>>() {})

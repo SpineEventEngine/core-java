@@ -40,24 +40,43 @@ final class Types {
     }
 
     /**
-     * Tells whether the {@code expected} type is the same or can be reduced to {@code actual}.
-     *
-     * <p>E.g. {@literal Iterable<EventMessage>} can be reduced to {@code List<TaskAdded>}.
+     * Tells whether the {@code actual} type matches the {@code expected}.
      *
      * <h1>Use Cases</h1>
      *
      * <h2>Legend</h2>
      *
-     * <p>Examples refer to the types for simplicity; in fact, the respective {@code TypeToken}s
-     * for the types are passed into this method.
+     * <p>Examples below refer to the types for simplicity;
+     * in fact, the respective {@code TypeToken}s for the types are passed into the method.
      *
      * <h2>Rules</h2>
      *
      * <ul>
      *      <li> The same types always match;
-     *      e.g. {@code UserId.class} always matches {@code UserId.class};
-     *      <li> Different types always don't match;
+     *      e.g. {@code UserId.class} always matches {@code UserId.class}.
+     *
+     *      <li> Different types always don't match.
      *      e.g. {@code UserId.class} always does not match {@code Nothing.class};
+     *
+     *      <li> If {@code actual} is a subtype of {@code expected}, they match.
+     *      e.g. {@code matches(EventMessage, Nothing)} returns {@code true}.
+     *
+     *      <li> The generic parameters are taken into account in a similar manner:
+     *      same always match, a subtype matches a parent type, different types aren't matching;
+     *      e.g.
+     *          {@literal matches(Collection<EventMessage>, Set<ProjectEvent>)} is {@code true};
+     *          {@literal matches(Collection<EventMessage>, Set<CommandMessage>)} is {@code false}.
+     *
+     *      <li> If both {@code expected} and {@code actual} types define generic parameters,
+     *      and the parameters contain {@code Optional<T>}, the latter is "unpacked" for comparison.
+     *      e.g.
+     *          {@literal matches(
+     *                  Iterable<EventMessage>,
+     *                  Triplet<ProjectCreated, ProjectAssigned, Optional<ProjectStarted>
+     *              )} is {@code true},
+     *          {@literal matches(Optional<EventMessage>, Optional<AddTask>)} is {@code false}.
+     *
+     *      <li> Generic parameters with wildcard are <em>not</em> supported.
      *</ul>
      */
     static boolean matches(TypeToken<?> expected, TypeToken<?> actual) {
