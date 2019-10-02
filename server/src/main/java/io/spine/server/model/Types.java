@@ -44,7 +44,20 @@ final class Types {
      *
      * <p>E.g. {@literal Iterable<EventMessage>} can be reduced to {@code List<TaskAdded>}.
      *
-     * //TODO:2019-09-26:alex.tymchenko: add better docs.
+     * <h1>Use Cases</h1>
+     *
+     * <h2>Legend</h2>
+     *
+     * <p>{@code class Parent} is a parent class of {@code class Child}.
+     *
+     * <p>Examples refer to the types for simplicity; in fact, the respective {@code TypeToken}s
+     * for the types are passed into this method.
+     *
+     * <h2>Rules</h2>
+     *
+     * <ul>
+     *      <li> The same types always match; e.g. {@code Parent} always matches {@code Parent};
+     *</ul>
      */
     static boolean matches(TypeToken<?> expected, TypeToken<?> actual) {
         if (expected.equals(actual)) {

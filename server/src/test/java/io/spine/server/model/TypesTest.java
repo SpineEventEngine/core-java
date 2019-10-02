@@ -22,9 +22,19 @@ package io.spine.server.model;
 
 import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
+import io.spine.base.EventMessage;
+import io.spine.core.UserId;
+import io.spine.server.tuple.Pair;
+import io.spine.server.tuple.Triplet;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.model.Types.matches;
 
 @DisplayName("`Types` utility class should")
 class TypesTest extends UtilityClassTest<Types> {
@@ -46,5 +56,21 @@ class TypesTest extends UtilityClassTest<Types> {
         NullPointerTester tester = new NullPointerTester();
         configure(tester);
         tester.testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+            "SerializableInnerClassWithNonSerializableOuterClass"})
+    @Test
+    @DisplayName("match the same type against itself")
+    void matchSameTypes() {
+        assertSameTypeMatches(TypeToken.of(UserId.class));
+        assertSameTypeMatches(new TypeToken<List<EventMessage>>() {});
+        assertSameTypeMatches(new TypeToken<Pair<UserId, EventMessage>>() {});
+        assertSameTypeMatches(
+                new TypeToken<Triplet<UserId, EventMessage, Optional<EventMessage>>>() {});
+    }
+
+    private static void assertSameTypeMatches(TypeToken<?> type) {
+        assertThat(matches(type, type)).isTrue();
     }
 }
