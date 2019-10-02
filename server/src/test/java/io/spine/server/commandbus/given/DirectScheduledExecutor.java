@@ -71,7 +71,7 @@ public final class DirectScheduledExecutor implements ScheduledExecutorService {
      * <p>Returns {@code null} as the result of {@code schedule} for command bus is always
      * ignored.
      */
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored", "FutureReturnValueIgnored"})
     // In these tests, we do not really care about the schedule result.
     @Override
     public <V> @Nullable ScheduledFuture<V>
