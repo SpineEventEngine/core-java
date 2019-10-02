@@ -167,7 +167,7 @@ class TypesTest extends UtilityClassTest<Types> {
         ).isTrue();
     }
 
-    @DisplayName(", if the expected type has no generic parameters`, " +
+    @DisplayName(", if the expected type has no generic parameters, " +
             "not take `Optional` generic parameter of actual type into account")
     @Test
     void notUnpackOptionalIfExpectedHasNoGenerics() {
