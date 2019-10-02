@@ -22,6 +22,8 @@ package io.spine.server.model;
 
 import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.UserId;
 import io.spine.server.tuple.Pair;
@@ -30,13 +32,18 @@ import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.model.Types.matches;
 
 @DisplayName("`Types` utility class should")
+@SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+        "SerializableInnerClassWithNonSerializableOuterClass"})     // using anonymous `TypeToken`s.
 class TypesTest extends UtilityClassTest<Types> {
 
     TypesTest() {
@@ -58,8 +65,6 @@ class TypesTest extends UtilityClassTest<Types> {
         tester.testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
-    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-            "SerializableInnerClassWithNonSerializableOuterClass"})
     @Test
     @DisplayName("match the same type against itself")
     void matchSameTypes() {
@@ -68,6 +73,108 @@ class TypesTest extends UtilityClassTest<Types> {
         assertSameTypeMatches(new TypeToken<Pair<UserId, EventMessage>>() {});
         assertSameTypeMatches(
                 new TypeToken<Triplet<UserId, EventMessage, Optional<EventMessage>>>() {});
+    }
+
+    @Test
+    @DisplayName("do not match the type against " +
+            "another one being neither a subclass nor of the same type")
+    void notMatchDifferentTypes() {
+        assertThat(matches(TypeToken.of(UserId.class),
+                           TypeToken.of(Nothing.class))
+        ).isFalse();
+
+        assertThat(matches(new TypeToken<List<EventMessage>>() {},
+                           new TypeToken<Set<EventMessage>>() {})
+        ).isFalse();
+    }
+
+    @Test
+    @DisplayName("match the same type against subtypes")
+    void matchSubtypes() {
+        assertThat(matches(TypeToken.of(Message.class),
+                           TypeToken.of(UserId.class))
+        ).isTrue();
+
+        assertThat(matches(new TypeToken<Collection<EventMessage>>() {},
+                           new TypeToken<Set<EventMessage>>() {})
+        ).isTrue();
+    }
+
+    @Test
+    @DisplayName("do not match a type against the same type or its descendant, " +
+            "but with an incompatible generic parameter")
+    void doNotMatchSubtypesWithDifferentGenerics() {
+
+        assertThat(matches(new TypeToken<Collection<EventMessage>>() {},
+                           new TypeToken<Collection<CommandMessage>>() {})
+        ).isFalse();
+
+        assertThat(matches(new TypeToken<Collection<EventMessage>>() {},
+                           new TypeToken<Set<CommandMessage>>() {})
+        ).isFalse();
+
+        assertThat(
+                matches(new TypeToken<Iterable<Message>>() {},
+                        new TypeToken<Pair<UserId, Object>>() {})
+        ).isFalse();
+    }
+
+    @Test
+    @DisplayName(", if the expected type has more than one generic," +
+            " match the generics of actual type position by position")
+    void matchGenericByGeneric() {
+
+        assertThat(matches(new TypeToken<Map<Object, EventMessage>>() {},
+                           new TypeToken<Map<String, Nothing>>() {})
+        ).isTrue();
+
+        assertThat(matches(new TypeToken<Map<Object, EventMessage>>() {},
+                           new TypeToken<Map<String, CommandMessage>>() {})
+        ).isFalse();
+
+        assertThat(matches(new TypeToken<Triplet<EventMessage, EventMessage, EventMessage>>() {},
+                           new TypeToken<Triplet<Nothing, Object, Object>>() {})
+        ).isFalse();
+    }
+
+    @DisplayName(", if expected and actual types have `Optional` generic parameters," +
+            "unpack the generic type of `Optional`s and take them into account")
+    @Test
+    void unpackOptionalForIterables() {
+        assertThat(
+                matches(new TypeToken<Optional<EventMessage>>() {},
+                        new TypeToken<Optional<Nothing>>() {})
+        ).isTrue();
+
+        assertThat(
+                matches(new TypeToken<Optional<EventMessage>>() {},
+                        new TypeToken<Optional<DoNothing>>() {})
+        ).isFalse();
+
+        assertThat(
+                matches(new TypeToken<Iterable<Message>>() {},
+                        new TypeToken<Triplet<UserId, EventMessage, Optional<EventMessage>>>() {})
+        ).isTrue();
+
+        assertThat(
+                matches(new TypeToken<Iterable<Message>>() {},
+                        new TypeToken<Triplet<UserId, EventMessage, Optional<Object>>>() {})
+        ).isFalse();
+
+        assertThat(
+                matches(new TypeToken<Triplet<EventMessage, EventMessage, EventMessage>>() {},
+                        new TypeToken<Triplet<EventMessage, EventMessage, Optional<Nothing>>>() {})
+        ).isTrue();
+    }
+
+    @DisplayName(", if the expected type has no generic parameters`, " +
+            "not take `Optional` generic parameter of actual type into account")
+    @Test
+    void notUnpackOptionalForNonIterables() {
+        assertThat(
+                matches(TypeToken.of(EventMessage.class),
+                        new TypeToken<Optional<Nothing>>() {})
+        ).isFalse();
     }
 
     private static void assertSameTypeMatches(TypeToken<?> type) {

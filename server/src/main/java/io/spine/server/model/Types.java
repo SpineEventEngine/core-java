@@ -48,15 +48,16 @@ final class Types {
      *
      * <h2>Legend</h2>
      *
-     * <p>{@code class Parent} is a parent class of {@code class Child}.
-     *
      * <p>Examples refer to the types for simplicity; in fact, the respective {@code TypeToken}s
      * for the types are passed into this method.
      *
      * <h2>Rules</h2>
      *
      * <ul>
-     *      <li> The same types always match; e.g. {@code Parent} always matches {@code Parent};
+     *      <li> The same types always match;
+     *      e.g. {@code UserId.class} always matches {@code UserId.class};
+     *      <li> Different types always don't match;
+     *      e.g. {@code UserId.class} always does not match {@code Nothing.class};
      *</ul>
      */
     static boolean matches(TypeToken<?> expected, TypeToken<?> actual) {
@@ -116,8 +117,8 @@ final class Types {
         TypeVariable<? extends Class<?>>[] expectedTypeParams = genericTypesOf(expected);
         TypeVariable<? extends Class<?>>[] actualTypeParams = genericTypesOf(actual);
         for (int paramIndex = 0; paramIndex < expectedTypeParams.length; paramIndex++) {
-            TypeToken<?> expectedGeneric = expected.resolveType(expectedTypeParams[paramIndex]);
-            TypeToken<?> actualGeneric = actual.resolveType(actualTypeParams[paramIndex]);
+            TypeToken<?> expectedGeneric = resolve(expected, expectedTypeParams[paramIndex]);
+            TypeToken<?> actualGeneric = resolve(actual, actualTypeParams[paramIndex]);
             if (differs(actualGeneric, expectedGeneric)) {
                 return false;
             }
