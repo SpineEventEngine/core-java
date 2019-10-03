@@ -38,9 +38,9 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import static io.spine.tools.gradle.TaskName.classes;
-import static io.spine.tools.gradle.TaskName.compileJava;
-import static io.spine.tools.gradle.TaskName.verifyModel;
+import static io.spine.tools.gradle.JavaTaskName.classes;
+import static io.spine.tools.gradle.JavaTaskName.compileJava;
+import static io.spine.tools.gradle.ModelVerifierTaskName.verifyModel;
 import static io.spine.tools.gradle.compiler.Extension.getMainDescriptorSet;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newInputStream;
@@ -59,7 +59,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         Path rawModelStorage = rawModelPath(project);
         // Ensure right environment (`main` scope sources with the `java` plugin)
         if (project.getTasks()
-                   .findByPath(classes.value()) != null) {
+                   .findByPath(classes.name()) != null) {
             createTask(rawModelStorage, project);
         }
     }
