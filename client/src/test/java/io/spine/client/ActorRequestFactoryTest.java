@@ -185,8 +185,8 @@ class ActorRequestFactoryTest {
 
         @BeforeEach
         void generateIds() {
-            tenant = TenantId.newBuilder().setValue(randomString()).build();
-            systemUser = UserId.newBuilder().setValue(randomString()).build();
+            tenant = TenantId.newBuilder().setValue(randomString()).vBuild();
+            systemUser = UserId.newBuilder().setValue(randomString()).vBuild();
         }
 
         @Test
