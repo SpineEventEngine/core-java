@@ -92,7 +92,7 @@ import java.lang.annotation.Target;
  *  </pre>
  *
  *
- *  <li>an {@code Iterable} of event messages::
+ *  <li>an {@code Iterable} of event messages:
  *  <pre>
  *
  * {@literal @}Assign
@@ -113,7 +113,7 @@ import java.lang.annotation.Target;
  *  </pre>
  *
  *
- *  <li>{@linkplain io.spine.server.tuple.Either one of} particular events;
+ *  <li>{@linkplain io.spine.server.tuple.Either one of} particular events:
  *  <pre>
  *
  * {@literal @}Assign
