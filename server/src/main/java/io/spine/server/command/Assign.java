@@ -130,7 +130,8 @@ import java.lang.annotation.Target;
  * <p>Declaring two methods that handle the same command class will result in run-time error.
  *
  * @see io.spine.server.tuple.Tuple Returning Two or More Event Messages
- * @see io.spine.server.command.Command Converting Commands
+ * @see io.spine.server.tuple.Either Returning One of Event Messages
+ * @see io.spine.server.command.Command Transforming Commands
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
