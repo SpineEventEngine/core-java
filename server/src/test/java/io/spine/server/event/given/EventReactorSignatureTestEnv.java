@@ -134,8 +134,9 @@ public class EventReactorSignatureTestEnv {
             return taskStarted();
         }
 
+        @SuppressWarnings("ProtectedMemberInFinalClass")    // It is a use-case-under-test.
         @React
-        private SigTaskStarted protectedHandler(SigTaskAddedToProject event) {
+        protected SigTaskStarted protectedHandler(SigTaskAddedToProject event) {
             return taskStarted();
         }
 
