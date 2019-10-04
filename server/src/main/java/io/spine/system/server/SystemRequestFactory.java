@@ -33,14 +33,20 @@ import static io.spine.system.server.DefaultSystemWriteSide.SYSTEM_USER;
  */
 final class SystemRequestFactory {
 
-    private static final ActorRequestFactory SINGLE_TENANT =
-            newFactoryFor(TenantId.getDefaultInstance());
+    private static final ActorRequestFactory SINGLE_TENANT = newFactoryFor(null);
 
     /** Prevents instantiation of this utility class. */
     private SystemRequestFactory() {
     }
 
-    static ActorRequestFactory requestFactory(boolean multitenant) {
+    /**
+     * Obtains the instance depending on the multitenancy context.
+     *
+     * <p>In single-tenant context the same instance is returned.
+     * In multitenant context, a new request factory is created with
+     * the ID of the current tenant.
+     */
+    static ActorRequestFactory instance(boolean multitenant) {
         return multitenant
                ? newForCurrentTenant()
                : SINGLE_TENANT;
@@ -60,10 +66,7 @@ final class SystemRequestFactory {
         return result;
     }
 
-    private static ActorRequestFactory newFactoryFor(TenantId tenantId) {
-        return ActorRequestFactory.newBuilder()
-                                  .setActor(SYSTEM_USER)
-                                  .setTenantId(tenantId)
-                                  .build();
+    private static ActorRequestFactory newFactoryFor(@Nullable TenantId tenantId) {
+        return ActorRequestFactory.forSystemRequests(SYSTEM_USER, tenantId);
     }
 }
