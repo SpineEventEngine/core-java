@@ -25,7 +25,7 @@
  *  as we want to manage the versions in a single source.
  */
 
-final def spineVersion = '1.1.2'
+final def spineVersion = '1.1.4'
 
 ext {
     // The version of the modules in this project.
@@ -35,5 +35,5 @@ ext {
     spineBaseVersion = spineVersion
 
     // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = spineVersion
+    spineTimeVersion = '1.1.2'
 }

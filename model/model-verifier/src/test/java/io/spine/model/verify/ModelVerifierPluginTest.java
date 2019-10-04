@@ -39,7 +39,7 @@ import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
 import java.nio.file.Path;
 
-import static io.spine.tools.gradle.TaskName.verifyModel;
+import static io.spine.tools.gradle.ModelVerifierTaskName.verifyModel;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
