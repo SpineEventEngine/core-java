@@ -30,11 +30,15 @@ import java.lang.annotation.Target;
  * Marks a method of an entity as one that <em>may</em> modify the state of the entity in
  * response to some domain event.
  *
- * <p>A reacting method <strong>must:</strong>
- * <ul>
- *     <li>be annotated with {@link React @React};
- *     <li>have package-private visibility;
- * </ul>
+ * <p>A reacting method must be annotated {@link React @React}.
+ *
+ * <p>Like other message-handling methods, event reactors are designed to be called by
+ * the framework only. Therefore, it is recommended to declare a them as package-private.
+ * It discourages a developer from calling these methods directly from anywhere.
+ *
+ * <p>Package-private access level still declares that an event reactor method is a part
+ * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
+ * @BoundedContext} description on how the packages and Bounded Contexts relate.
  *
  * <h1>Accepted Parameters</h1>
  *
