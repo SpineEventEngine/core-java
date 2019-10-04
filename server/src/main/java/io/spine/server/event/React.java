@@ -129,11 +129,15 @@ import java.lang.annotation.Target;
  *  </pre>
  *
  *  <li>a {@link io.spine.server.tuple.Tuple tuple} of event messages; being similar
- *  to {@code Iterable}, tuples allow to declare the exact types of returning values:
+ *  to {@code Iterable}, tuples allow to declare the exact types of returning values, including
+ *  {@code Optional} values:
  *  <pre>
  *
  * {@literal @}React
  * {@literal Pair<ProjectOwnerAssigned, ProjectDueDateChanged>} on(ProjectCreated event) { ... }
+ *
+ * {@literal @}React
+ * {@literal Pair<TaskAssigned, Optional<TaskStarted>>} on(TaskAdded event) { ... }
  *  </pre>
  *
  * </ul>
