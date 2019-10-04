@@ -97,12 +97,13 @@ import java.lang.annotation.Target;
  * <p>A reacting method must return either
  * <ul>
  *
- * <li>an event message:
- * <pre>
+ *  <li>an event message:
+ *  <pre>
  *
  * {@literal @}React
  *  TaskReassigned on(UserDeactivated event) { ... }
- * </pre>
+ *  </pre>
+ *
  *
  *  <li>an {@code Optional} event message:
  *  <pre>
@@ -110,6 +111,7 @@ import java.lang.annotation.Target;
  * {@literal @}React
  * {@literal Optional<PersonAllowedToBuyAlcohol>} on(PersonAgeChanged event) { ... }
  *  </pre>
+ *
  *
  *  <li>{@linkplain io.spine.server.tuple.Either one of} particular events;
  *  it also allows to use a special {@link io.spine.server.model.Nothing Nothing} event stating
@@ -127,6 +129,7 @@ import java.lang.annotation.Target;
  * {@literal @}React
  * {@literal Iterable<StoryMovedToBacklog>} on(SprintCompleted event) { ... }
  *  </pre>
+ *
  *
  *  <li>a {@link io.spine.server.tuple.Tuple tuple} of event messages; being similar
  *  to {@code Iterable}, tuples allow to declare the exact types of returning values, including
