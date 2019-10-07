@@ -95,34 +95,32 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * filters. Though, all the field filters must target the same field. For example, this event
  * handling is valid:
  * <pre>
- *     {@code
- *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
+ *
+ *    {@literal @Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))}
  *     void onExpired(UserLoggedIn event) {
  *         // Handle expired subscription.
  *     }
  *
- *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "INACTIVE"))
+ *    {@literal @Subscribe(filter = @ByField(path = "subscription.status", value = "INACTIVE"))}
  *     void onInactive(UserLoggedIn event) {
  *         // Handle inactive subscription.
  *     }
  *
- *     \@Subscribe
+ *    {@literal @Subscribe}
  *     void on(UserLoggedIn event) {
  *         // Handle other cases.
  *     }
- *     }
+ *
  * </pre>
  * <p>And this one is not:
  * <pre>
- *     {@code
- *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
+ *    {@literal @Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))}
  *     void onExpired(UserLoggedIn event) {
  *     }
  *
- *     \@Subscribe(filter = @ByField(path = "payment_method.status", value = "UNSET"))
+ *    {@literal @Subscribe(filter = @ByField(path = "payment_method.status", value = "UNSET"))}
  *     void onUnknownBilling(UserLoggedIn event) {
  *         // Error, different field paths used in the same class for the same event type.
- *     }
  *     }
  * </pre>
  *
