@@ -92,7 +92,8 @@ public enum MatchCriterion {
      * {@linkplain MethodSignature#modifiers() expected}.
      */
     ACCESS_MODIFIER(WARN,
-                    "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
+                    "The access modifier of `%s` method is `%s`. We recommend it to be `%s`. " +
+                            "Refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             ImmutableSet<AccessModifier> allowedModifiers = signature.modifiers();
@@ -103,8 +104,10 @@ public enum MatchCriterion {
                 SignatureMismatch mismatch =
                         create(this,
                                methodAsString(method),
+                               AccessModifier.fromMethod(method),
                                AccessModifier.asString(allowedModifiers),
-                               AccessModifier.fromMethod(method));
+                               signature.annotation()
+                                        .getSimpleName());
                 return Optional.of(mismatch);
 
             }
