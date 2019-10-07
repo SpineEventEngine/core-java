@@ -138,6 +138,7 @@ import java.lang.annotation.Target;
  * <p>Throwing {@linkplain Throwable other types} of {@code Throwable}s is not allowed in
  * the command-transforming methods.
  *
+ *
  * <h1>Command Reaction</h1>
  *
  * <p>A commanding method may serve to emit commands in response to an incoming event. In this case
@@ -235,7 +236,7 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p>If the annotation is applied to a method which doesn't satisfy either of these requirements,
- * this method is not considered a command handler and is <strong>not</strong> registered for
+ * this method is not considered a commanding method and is <strong>not</strong> registered for
  * command generation.
  *
  * @see io.spine.server.tuple.Tuple Returning Two or More Command Messages
