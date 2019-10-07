@@ -37,7 +37,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>An event subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
- *     <li>is package-private;
  *     <li>returns {@code void};
  *     <li>accepts an event derived from {@link io.spine.base.EventMessage EventMessage}
  *          as the first parameter;
@@ -50,7 +49,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>A rejection subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
- *     <li>is package-private;
  *     <li>returns {@code void};
  *     <li>accepts a rejection message derived from {@link io.spine.base.RejectionMessage
  *         RejectionMessage} as the first parameter;
@@ -75,18 +73,17 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *         by the subscriber.
  * </ul>
  *
- * <h1>Subscribing to entity state updates</h1>
+ * <h1>Subscribing to Entity State Updates</h1>
  *
  * <p>An entity state subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
- *     <li>is package-private;
  *     <li>returns {@code void};
  *     <li>accepts an entity state message marked with the {@code (entity)} option as the only
  *         parameter.
  * </ul>
  *
- * <h1>Filtering events by a field value</h1>
+ * <h1>Filtering Events by a Field Value</h1>
  * <p>If a {@linkplain ByField field filter} is defined, only the events matching this filter are
  * passed to the subscriber.
  *
@@ -129,9 +126,17 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *     }
  * </pre>
  *
- * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
+ * <p>If the annotation is applied to a method which doesn't satisfy either of these requirements,
  * this method is not considered as a subscriber and is not registered for the command output
  * delivery.
+ *
+ * <p>Event subscriber methods are designed to be called by the framework only.
+ * Therefore, it is recommended to declare a them as package-private.
+ * It discourages a developer from calling these methods directly from anywhere.
+ *
+ * <p>Package-private access level still declares that an event reactor method is a part
+ * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
+ * @BoundedContext} description on how the packages and Bounded Contexts relate.
  */
 @Retention(RUNTIME)
 @Target(METHOD)
