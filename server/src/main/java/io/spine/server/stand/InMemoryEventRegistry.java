@@ -21,6 +21,7 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.EventClass;
 import io.spine.type.TypeUrl;
@@ -45,8 +46,11 @@ final class InMemoryEventRegistry implements EventRegistry {
 
     @Override
     public void register(Repository<?, ?> repository) {
-        repository.outgoingEvents()
-                  .forEach(this::putIntoMap);
+        if (repository instanceof EventProducingRepository) {
+            EventProducingRepository repo = (EventProducingRepository) repository;
+            repo.outgoingEvents()
+                .forEach(this::putIntoMap);
+        }
     }
 
     @Override

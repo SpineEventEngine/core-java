@@ -20,31 +20,30 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.CommandClass;
 import io.spine.type.MessageClass;
-
-import java.util.Set;
 
 /**
  * A common interface for classes that handle commands.
  *
- * @param <P>
+ * @param <R>
  *         the type of message classes produced from the command handling
  * @param <H>
  *         the type of methods which perform command handling
  */
-public interface CommandHandlingClass<P extends MessageClass<?>,
-                                      H extends CommandAcceptingMethod<?, P>> {
+public interface CommandHandlingClass<R extends MessageClass<?>,
+                                      H extends CommandAcceptingMethod<?, R>> {
 
     /**
      * Obtains classes of commands handled by the class.
      */
-    Set<CommandClass> commands();
+    ImmutableSet<CommandClass> commands();
 
     /**
      * Obtains classes of all messages produced as a result of command handling.
      */
-    Set<P> commandOutput();
+    ImmutableSet<R> commandOutput();
 
     /**
      * Obtains the handler method for the passed command class.

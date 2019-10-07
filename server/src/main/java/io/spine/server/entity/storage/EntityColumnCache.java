@@ -58,7 +58,7 @@ public final class EntityColumnCache {
     /**
      * A container of {@link EntityColumn entity column} name and its data.
      *
-     * Each {@link EntityColumn entity column} data instance can be accessed by the
+     * <p>Each {@link EntityColumn entity column} data instance can be accessed by the
      * corresponding entity column {@linkplain EntityColumn#name() name}.
      *
      * <p>The data is stored this way for convenient querying of the specific columns.
@@ -79,8 +79,9 @@ public final class EntityColumnCache {
      * Instead, the cache instance will wait for the first access to it to cache
      * {@linkplain EntityColumn entity columns}.
      *
-     * @param entityClass the class for which {@linkplain EntityColumn entity columns} should
-     *                    be obtained and cached
+     * @param entityClass
+     *         the class for which {@linkplain EntityColumn entity columns} should be obtained and
+     *         cached
      * @return new instance
      */
     public static EntityColumnCache initializeFor(Class<? extends Entity<?, ?>> entityClass) {
@@ -97,9 +98,11 @@ public final class EntityColumnCache {
      * <p>If there is no {@link EntityColumn column} with the given name in the {@link Entity}
      * class managed by this cache, the method will throw {@link IllegalArgumentException}.
      *
-     * @param columnName the {@linkplain EntityColumn#name() name} of the searched column
+     * @param columnName
+     *         the {@linkplain EntityColumn#name() name} of the searched column
      * @return {@linkplain EntityColumn found entity column}
-     * @throws IllegalArgumentException if the {@link EntityColumn} is not found
+     * @throws IllegalArgumentException
+     *         if the {@link EntityColumn} is not found
      */
     public EntityColumn findColumn(String columnName) {
         checkColumnName(columnName);
@@ -160,8 +163,8 @@ public final class EntityColumnCache {
      * <p>If {@link Column} definitions are incorrect for the given {@link Entity} class this method
      * will throw {@link IllegalStateException}.
      *
-     * @throws IllegalStateException if entity column definitions for the managed {@link Entity}
-     * class are incorrect
+     * @throws IllegalStateException
+     *         if entity column definitions for the managed {@link Entity} class are incorrect
      */
     private void obtainAndCacheColumns() {
         Collection<EntityColumn> columns = Columns.getAllColumns(entityClass);
@@ -172,7 +175,8 @@ public final class EntityColumnCache {
      * Stores {@linkplain EntityColumn entity columns} from the {@link Iterable} to the inner
      * {@link EntityColumnCache#entityColumnData cache}.
      *
-     * @param columns {@linkplain EntityColumn columns} to store
+     * @param columns
+     *         {@linkplain EntityColumn columns} to store
      */
     private void cacheEntityColumns(Iterable<EntityColumn> columns) {
         for (EntityColumn column : columns) {

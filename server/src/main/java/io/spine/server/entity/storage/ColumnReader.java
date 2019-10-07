@@ -109,7 +109,8 @@ final class ColumnReader {
      * <p>If the check for correctness fails, throws {@link IllegalStateException}.
      *
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
-     * @throws IllegalStateException if entity column definitions are incorrect
+     * @throws IllegalStateException
+     *         if entity column definitions are incorrect
      */
     Collection<EntityColumn> readColumns() {
         ImmutableSet<EntityColumn> columns = scanColumns();

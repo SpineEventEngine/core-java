@@ -20,11 +20,10 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
-
-import java.util.Set;
 
 /**
  * The helper class for holding messaging information on behalf of another model class.
@@ -48,7 +47,7 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     }
 
     @Override
-    public Set<EventClass> reactionOutput() {
+    public ImmutableSet<EventClass> reactionOutput() {
         return producedTypes();
     }
 }

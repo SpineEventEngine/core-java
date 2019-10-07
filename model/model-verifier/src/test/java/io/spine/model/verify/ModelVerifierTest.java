@@ -57,7 +57,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
-import static io.spine.tools.gradle.TaskName.compileJava;
+import static io.spine.tools.gradle.JavaTaskName.compileJava;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
@@ -39,7 +38,6 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.route.Route;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.type.EventClass;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.SystemWriteSide;
@@ -179,16 +177,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Obtains classes of the events produced by this {@code Repository}.
-     *
-     * <p>For convenience purposes the default version returns an empty set.
-     * This method should be overridden by repositories which actually produce events.
-     */
-    public ImmutableSet<EventClass> outgoingEvents() {
-        return ImmutableSet.of();
-    }
-
-    /**
      * Assigns a {@code BoundedContext} to this repository.
      *
      * <p>A context for a repository can be set only once. Passing the same second time will have
@@ -294,7 +282,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>In order to create a custom storage, please override {@link #createStorage()} providing
      * custom implementation.
-     * 
+     *
      * @see #createStorage()
      */
     @Internal
@@ -448,7 +436,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @SPI
     @Pure
-    protected EventFilter eventFilter() {
+    public EventFilter eventFilter() {
         EntityClass<E> entityClass = entityModelClass();
         return EntityStateChangedFilter.forType(entityClass);
     }

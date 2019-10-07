@@ -32,6 +32,8 @@ import static io.spine.server.route.EventRoute.withId;
 public final class TestProcessManagerRepository
         extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
+    private boolean configureCalled;
+
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {
         super.setupEventRouting(routing);
@@ -42,5 +44,19 @@ public final class TestProcessManagerRepository
     @Override
     public EventFilter eventFilter() {
         return super.eventFilter();
+    }
+
+    @Override
+    protected void configure(TestProcessManager processManager) {
+        super.configure(processManager);
+        configureCalled = true;
+    }
+
+    public boolean configureCalled() {
+        return configureCalled;
+    }
+
+    public void clearConfigureCalledFlag() {
+        configureCalled = false;
     }
 }

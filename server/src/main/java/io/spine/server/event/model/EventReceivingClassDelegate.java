@@ -31,8 +31,6 @@ import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Set;
-
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
@@ -79,35 +77,35 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains domestic event classes handled by the delegating class.
      */
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return events;
     }
 
     /**
      * Obtains external event classes handled by the delegating class.
      */
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return externalEvents;
     }
 
     /**
      * Obtains domestic entity states to which the delegating class is subscribed.
      */
-    public Set<StateClass> domesticStates() {
+    public ImmutableSet<StateClass> domesticStates() {
         return domesticStates;
     }
 
     /**
      * Obtains external entity states to which the delegating class is subscribed.
      */
-    public Set<StateClass> externalStates() {
+    public ImmutableSet<StateClass> externalStates() {
         return externalStates;
     }
 
     /**
      * Obtains the classes of messages produced by handler methods of this class.
      */
-    public Set<P> producedTypes() {
+    public ImmutableSet<P> producedTypes() {
         return handlers.producedTypes();
     }
 

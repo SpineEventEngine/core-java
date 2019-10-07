@@ -34,8 +34,6 @@ import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -67,22 +65,22 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public final Set<EventClass> events() {
+    public final ImmutableSet<EventClass> events() {
         return delegate.events();
     }
 
     @Override
-    public final Set<StateClass> domesticStates() {
+    public final ImmutableSet<StateClass> domesticStates() {
         return delegate.domesticStates();
     }
 
     @Override
-    public final Set<EventClass> externalEvents() {
+    public final ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
     }
 
     @Override
-    public final Set<StateClass> externalStates() {
+    public final ImmutableSet<StateClass> externalStates() {
         return delegate.externalStates();
     }
 

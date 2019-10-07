@@ -18,30 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.repo;
-
-import io.spine.server.entity.EventFilter;
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.procman.Project;
-import io.spine.test.procman.ProjectId;
-
-import java.util.Optional;
-
 /**
- * A repository managing {@link TestProcessManager}s and discarding all the events from being
- * posted.
- *
- * <p>Note that this behaviour is not expected in production PM repositories, since
- * the "discard all" strategy breaks event PM dispatching. The same is true for
- * the {@link io.spine.server.projection.ProjectionRepository ProjectionRepository}-s.
+ * The test environment for tests that rely on Spine transport.
  */
-public final class EventDiscardingProcManRepository
-        extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
-    private static final EventFilter eventFilter = anyEvent -> Optional.empty();
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.given.transport;
 
-    @Override
-    public EventFilter eventFilter() {
-        return eventFilter;
-    }
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

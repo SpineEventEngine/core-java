@@ -52,6 +52,9 @@ public final class GrpcContainer {
 
     private @Nullable Server grpcServer;
 
+    @VisibleForTesting
+    private @Nullable Server injectedServer;
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -64,7 +67,8 @@ public final class GrpcContainer {
     /**
      * Starts the service.
      *
-     * @throws IOException if unable to bind
+     * @throws IOException
+     *         if unable to bind
      */
     public void start() throws IOException {
         checkState(grpcServer == null, "gRPC server is started already.");
@@ -126,7 +130,8 @@ public final class GrpcContainer {
      * <p>To find out whether the service is already available for calls,
      * use {@link #isLive(BindableService)} method.
      *
-     * @param service the gRPC service to check
+     * @param service
+     *         the gRPC service to check
      * @return {@code true}, if the given gRPC service for deployment and {@code false} otherwise
      */
     public boolean isScheduledForDeployment(BindableService service) {
@@ -150,7 +155,8 @@ public final class GrpcContainer {
      * <p>  a. the service has been previously scheduled for the deployment,
      * <p>  b. the container has been started.
      *
-     * @param service the gRPC service
+     * @param service
+     *         the gRPC service
      * @return {@code true}, if the service is available for interaction within this container and
      *         {@code false} otherwise
      */
@@ -171,8 +177,10 @@ public final class GrpcContainer {
                .addShutdownHook(new Thread(getOnShutdownCallback()));
     }
 
-    @VisibleForTesting
-    Server createGrpcServer() {
+    private Server createGrpcServer() {
+        if (injectedServer != null) {
+            return injectedServer;
+        }
         ServerBuilder builder = ServerBuilder.forPort(port);
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
@@ -203,6 +211,18 @@ public final class GrpcContainer {
     @VisibleForTesting
     Server grpcServer() {
         return grpcServer;
+    }
+
+    /**
+     * Injects a server to this container.
+     *
+     * <p>All calls to {@link #createGrpcServer()} will resolve to the given server instance.
+     *
+     * <p>A test-only method.
+     */
+    @VisibleForTesting
+    public void injectServer(Server server) {
+        this.injectedServer = server;
     }
 
     public static class Builder {

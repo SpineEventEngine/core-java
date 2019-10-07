@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.command.model.CommandHandlingClass;
@@ -27,8 +28,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.model.HandlerMap;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
-
-import java.util.Set;
 
 /**
  * Abstract base for entity classes that handle commands.
@@ -46,12 +45,12 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     }
 
     @Override
-    public Set<CommandClass> commands() {
+    public ImmutableSet<CommandClass> commands() {
         return commands.messageClasses();
     }
 
     @Override
-    public Set<EventClass> commandOutput() {
+    public ImmutableSet<EventClass> commandOutput() {
         return commands.producedTypes();
     }
 

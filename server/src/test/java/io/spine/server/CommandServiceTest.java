@@ -29,6 +29,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.server.transport.GrpcContainer;
 import io.spine.test.commandservice.CmdServDontHandle;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -153,18 +154,13 @@ class CommandServiceTest {
         GrpcContainer grpcContainer = GrpcContainer.newBuilder()
                                                    .addService(service)
                                                    .build();
-        try {
-            assertTrue(grpcContainer.isScheduledForDeployment(service));
+        grpcContainer.injectServer(new TestGrpcServer());
+        assertTrue(grpcContainer.isScheduledForDeployment(service));
 
-            grpcContainer.start();
-            assertTrue(grpcContainer.isLive(service));
+        grpcContainer.start();
+        assertTrue(grpcContainer.isLive(service));
 
-            grpcContainer.shutdown();
-            assertFalse(grpcContainer.isLive(service));
-        } finally {
-            if (!grpcContainer.isShutdown()) {
-                grpcContainer.shutdown();
-            }
-        }
+        grpcContainer.shutdown();
+        assertFalse(grpcContainer.isLive(service));
     }
 }

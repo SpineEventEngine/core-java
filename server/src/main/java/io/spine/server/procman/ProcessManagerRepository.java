@@ -21,12 +21,10 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -41,11 +39,12 @@ import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
@@ -85,7 +84,7 @@ public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
         extends EventDispatchingRepository<I, P, S>
-        implements CommandDispatcherDelegate {
+        implements CommandDispatcherDelegate, EventProducingRepository {
 
     /** The command routing schema used by this repository. */
     private final Supplier<CommandRouting<I>> commandRouting;
@@ -163,6 +162,11 @@ public abstract class ProcessManagerRepository<I,
         checkNotDeaf();
         initCache(context.isMultitenant());
         initInbox();
+    }
+
+    @Override
+    public final EventBus eventBus() {
+        return context().eventBus();
     }
 
     private void initCache(boolean multitenant) {
@@ -246,7 +250,7 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public Set<EventClass> messageClasses() {
+    public final Set<EventClass> messageClasses() {
         return processManagerClass().events();
     }
 
@@ -258,7 +262,7 @@ public abstract class ProcessManagerRepository<I,
      *         external events
      */
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public final Set<EventClass> externalEventClasses() {
         return processManagerClass().externalEvents();
     }
 
@@ -268,8 +272,7 @@ public abstract class ProcessManagerRepository<I,
      * @return a set of command classes or empty set if process managers do not handle commands
      */
     @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<CommandClass> commandClasses() {
+    public final Set<CommandClass> commandClasses() {
         return processManagerClass().commands();
     }
 
@@ -313,7 +316,7 @@ public abstract class ProcessManagerRepository<I,
      *         a request to dispatch
      */
     @Override
-    public void dispatchCommand(CommandEnvelope command) {
+    public final void dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         Optional<I> target = route(command);
         target.ifPresent(id -> inbox().send(command)
@@ -329,21 +332,15 @@ public abstract class ProcessManagerRepository<I,
     private void onCommandTargetSet(I id, CommandEnvelope cmd) {
         EntityLifecycle lifecycle = lifecycleOf(id);
         CommandId commandId = cmd.id();
-        with(cmd.tenantId()).run(() -> lifecycle.onTargetAssignedToCommand(commandId));
+        with(cmd.tenantId())
+                .run(() -> lifecycle.onTargetAssignedToCommand(commandId));
     }
 
     @Internal
     @Override
     protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
         super.onRoutingFailed(envelope, cause);
-        if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
-            // TODO:2019-07-08:dmytro.dashenkov: Extract.
-            //  https://github.com/SpineEventEngine/core-java/issues/1109
-            CommandEnvelope command = (CommandEnvelope) envelope;
-            ThrowableMessage rejection = (ThrowableMessage) cause;
-            RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
-            postEvent(rejectionEnvelope.outerObject());
-        }
+        postIfCommandRejected(envelope, cause);
     }
 
     /**
@@ -368,27 +365,47 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Posts passed events to {@link EventBus}.
-     */
-    void postEvents(Collection<Event> events) {
-        Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = context().eventBus();
-        bus.post(filteredEvents);
-    }
-
-    /**
-     * Posts the passed event to {@link EventBus}.
-     */
-    void postEvent(Event event) {
-        postEvents(ImmutableList.of(event));
-    }
-
-    /**
      * Posts passed commands to {@link CommandBus}.
      */
-    void postCommands(Collection<Command> commands) {
+    final void postCommands(Collection<Command> commands) {
         CommandBus bus = context().commandBus();
         bus.post(commands, noOpObserver());
+    }
+
+    /**
+     * Creates and {@linkplain #configure(ProcessManager) configures} an instance of
+     * the process manager by the passed record.
+     */
+    @Override
+    protected final P toEntity(EntityRecord record) {
+        P result = super.toEntity(record);
+        configure(result);
+        return result;
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public P create(I id) {
+        P procman = super.create(id);
+        lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
+        configure(procman);
+        return procman;
+    }
+
+    /**
+     * A callback method for configuring a recently created {@code ProcessManager} instance
+     * before it is returned by the repository as the result of creating a new process manager
+     * instance or finding existing one.
+     *
+     * <p>Default implementation does nothing. Overriding repositories may use this method for
+     * injecting dependencies that process managers need to have.
+     *
+     * @param processManager
+     *         the process manager to configure
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void configure(@SuppressWarnings("unused") P processManager) {
+        // Do nothing.
     }
 
     /**
@@ -397,8 +414,9 @@ public abstract class ProcessManagerRepository<I,
      * <p>Overrides to expose the method to the package.
      */
     @Override
-    protected P findOrCreate(I id) {
-        return cache.load(id);
+    protected final P findOrCreate(I id) {
+        P result = cache.load(id);
+        return result;
     }
 
     private P doFindOrCreate(I id) {
@@ -406,19 +424,12 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public void store(P entity) {
+    public final void store(P entity) {
         cache.store(entity);
     }
 
     private void doStore(P entity) {
         super.store(entity);
-    }
-
-    @Override
-    public P create(I id) {
-        P procman = super.create(id);
-        lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
-        return procman;
     }
 
     @OverridingMethodsMustInvokeSuper

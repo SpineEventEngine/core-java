@@ -27,8 +27,6 @@ import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -61,12 +59,12 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return delegate.events();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
     }
 

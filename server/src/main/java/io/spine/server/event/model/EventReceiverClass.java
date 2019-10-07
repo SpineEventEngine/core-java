@@ -20,10 +20,9 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.type.EventClass;
-
-import java.util.Set;
 
 /**
  * Describes a class of objects that receive events.
@@ -41,7 +40,7 @@ public interface EventReceiverClass {
      *
      * <p>For only the external events, please see {@link #externalEvents()}.
      */
-    Set<EventClass> events();
+    ImmutableSet<EventClass> events();
 
     /**
      * Obtains a set of external events which this class receives.
@@ -49,5 +48,5 @@ public interface EventReceiverClass {
      * <p>External events are those that are delivered to the {@code BoundedContext}
      * to which this class belongs from outside.
      */
-    Set<EventClass> externalEvents();
+    ImmutableSet<EventClass> externalEvents();
 }
