@@ -134,7 +134,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <p>Package-private access level still declares that an event reactor method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
- * @BoundedContext} description on how the packages and Bounded Contexts relate.
+ * BoundedContext} description on how the packages and Bounded Contexts relate.
  */
 @Retention(RUNTIME)
 @Target(METHOD)

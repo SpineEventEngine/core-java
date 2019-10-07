@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  *
  * <p>Package-private access level still declares that an event reactor method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
- * @BoundedContext} description on how the packages and Bounded Contexts relate.
+ * BoundedContext} description on how the packages and Bounded Contexts relate.
  *
  * <h1>Accepted Parameters</h1>
  *
