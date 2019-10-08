@@ -23,7 +23,6 @@ package io.spine.server.command.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.GeneratedMessageV3;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
@@ -109,7 +108,7 @@ public class CommandReactionSignature
         MESSAGE {
             @Override
             public boolean matches(MethodParams params) {
-                return params.is(EventMessage.class) && params.is(GeneratedMessageV3.class);
+                return params.is(EventMessage.class) && params.declaredAsClasses();
             }
 
             @Override
@@ -122,7 +121,7 @@ public class CommandReactionSignature
             @Override
             public boolean matches(MethodParams params) {
                 return params.are(EventMessage.class, EventContext.class)
-                        && params.firstIs(GeneratedMessageV3.class);
+                        && params.declaredAsClasses();
             }
 
             @Override
@@ -135,7 +134,7 @@ public class CommandReactionSignature
             @Override
             public boolean matches(MethodParams params) {
                 return params.are(RejectionMessage.class, CommandContext.class)
-                        && params.firstIs(GeneratedMessageV3.class);
+                        && params.declaredAsClasses();
             }
 
             @Override

@@ -119,12 +119,20 @@ public final class MethodParams {
     /**
      * Verifies if the first parameter of the method is of the passed type.
      */
-    public boolean firstIs(Class<?> type) {
+    private boolean firstIs(Class<?> type) {
         if(size() == 0) {
             return false;
         }
         Class<?> firstParam = type(0);
         return type.isAssignableFrom(firstParam);
+    }
+
+    /**
+     * Verifies if all the parameters of the method are declared as classes,
+     * not {@linkplain Class#isInterface() interfaces}.
+     */
+    public boolean declaredAsClasses() {
+        return params.stream().noneMatch(Class::isInterface);
     }
 
     /**
