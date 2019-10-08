@@ -56,15 +56,25 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
         wrap(method).orElseGet(Assertions::fail);
     }
 
+    /**
+     * Tests that the handlers are not created from the methods, which signatures do not satisfy
+     * the requirements implied by the method annotation, such as {@literal @Assign}.
+     *
+     * @implNote The classification API of {@link MethodSignature} declares
+     *         a {@link SignatureMismatchException} thrown. In most of the cases, the exception is
+     *         thrown if the given method does not satisfy the requirements.
+     *         However, {@link io.spine.server.command.Command Command}-ing methods are used in two
+     *         different scenarios by handling either a {@code Command} or {@code Event} message.
+     *         Their behavior is to return {@code Optional.empty()} if no match is found.
+     *         All these cases are covered by the implementation of this test.
+     */
     @DisplayName("not create handlers from invalid methods")
     @ParameterizedTest
     @MethodSource("invalidMethods")
     protected final void testInvalid(Method method) {
-
-        //TODO:2019-09-24:alex.tymchenko: a workaround to detect invalid `@Command`-er methods.
         try {
             Optional<? extends HandlerMethod> result = wrap(method);
-            if(result.isPresent()) {
+            if (result.isPresent()) {
                 fail(String.format(
                         "Handler method `%s` should have had an invalid signature.", method
                 ));
