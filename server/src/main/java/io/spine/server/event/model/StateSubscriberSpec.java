@@ -71,7 +71,7 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         @SuppressWarnings("unchecked") // Checked above.
         Class<? extends Message> firstParameter = (Class<? extends Message>) params.type(0);
         Optional<EntityVisibility> visibilityOption = EntityVisibility.of(firstParameter);
-        if(!visibilityOption.isPresent()) {
+        if (!visibilityOption.isPresent()) {
             return false;
         }
         EntityVisibility visibility = visibilityOption.get();
