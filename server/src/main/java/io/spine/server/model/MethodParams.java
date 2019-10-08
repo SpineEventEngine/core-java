@@ -120,7 +120,7 @@ public final class MethodParams {
      * Verifies if the first parameter of the method is of the passed type.
      */
     private boolean firstIs(Class<?> type) {
-        if(size() == 0) {
+        if (size() == 0) {
             return false;
         }
         Class<?> firstParam = type(0);
