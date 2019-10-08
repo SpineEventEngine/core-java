@@ -171,7 +171,9 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Command
- *  CreateProject on(Rejections.CannotCreateProject rejection) { {@literal // change the parameters and try again...} }
+ *  CreateProject on(Rejections.CannotCreateProject rejection) {
+ *  {@literal // Change the parameters and try again.}
+ *  }
  * </pre>
  *
  * <li>a rejection message along with the context of the command which caused it:
