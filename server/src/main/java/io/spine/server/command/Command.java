@@ -100,7 +100,7 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Command
- *  {@literal EitherOf2<StopTask, PauseTask>} on(RemoveTaskFromProject command) { ... }
+ * {@literal EitherOf2<StopTask, PauseTask>} on(RemoveTaskFromProject command) { ... }
  * </pre>
  *
  *
@@ -108,7 +108,7 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Command
- *  {@literal Iterable<PauseTask>} on(PauseProject command) { ... }
+ * {@literal Iterable<PauseTask>} on(PauseProject command) { ... }
  * </pre>
  *
  *
@@ -119,7 +119,7 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Command
- *  {@literal Pair<AssignTask, Optional<StartTask>>} on(AddTaskToProject command) { ... }
+ * {@literal Pair<AssignTask, Optional<StartTask>>} on(AddTaskToProject command) { ... }
  * </pre>
  * </ul>
  *
@@ -213,7 +213,7 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Command
- *  {@literal EitherOf2<StopTask, PauseTask>} on(TaskReassigned event) { ... }
+ * {@literal EitherOf2<StopTask, PauseTask>} on(TaskReassigned event) { ... }
  * </pre>
  *
  *
@@ -231,7 +231,7 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Command
- *  {@literal Triplet<AssignTask, UpdateTaskDueDate, Optional<StartTask>>} on(TaskCreated command) { ... }
+ * {@literal Triplet<AssignTask, UpdateTaskDueDate, Optional<StartTask>>} on(TaskCreated command) { ... }
  * </pre>
  * </ul>
  *
