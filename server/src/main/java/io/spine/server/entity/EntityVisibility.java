@@ -103,10 +103,10 @@ public final class EntityVisibility implements Serializable {
     public static Optional<EntityVisibility> of(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);
 
-        if(Event.class.equals(stateClass)) {
+        if (Event.class.equals(stateClass)) {
             return Optional.of(new EntityVisibility(NONE));
         }
-        if(!GeneratedMessageV3.class.isAssignableFrom(stateClass)) {
+        if (!GeneratedMessageV3.class.isAssignableFrom(stateClass)) {
             return Optional.empty();
         }
 
