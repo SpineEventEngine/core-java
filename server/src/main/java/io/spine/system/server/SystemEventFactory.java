@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.client.ActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.EventContext;
 import io.spine.core.Origin;
@@ -34,7 +35,6 @@ import io.spine.server.route.EventRoute;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.spine.system.server.SystemRequestFactory.requestFactory;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -62,7 +62,8 @@ final class SystemEventFactory extends EventFactory {
         if (isNotDefault(origin)) {
             eventOrigin = EventOrigin.from(origin);
         } else {
-            ActorContext importContext = requestFactory(multitenant).newActorContext();
+            ActorRequestFactory factory = SystemRequestFactory.instance(multitenant);
+            ActorContext importContext = factory.newActorContext();
             eventOrigin = EventOrigin.forImport(importContext);
         }
         return new SystemEventFactory(eventOrigin, producerId);
@@ -73,10 +74,10 @@ final class SystemEventFactory extends EventFactory {
                 EventRoute.byFirstMessageField(Object.class)
                           .apply(systemEvent, EventContext.getDefaultInstance());
         checkArgument(routingOut.size() == 1,
-                      "System event message must have aggregate ID in the first field.");
+                      "System event message must have entity ID in the first field.");
         Object id = routingOut.iterator()
                               .next();
-        checkArgument(id instanceof Message, "System aggregate ID must be a `Message`.");
+        checkArgument(id instanceof Message, "System entity ID must be a `Message`.");
         return (Message) id;
     }
 }

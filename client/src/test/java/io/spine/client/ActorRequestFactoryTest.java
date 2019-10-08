@@ -23,6 +23,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.core.TenantId;
+import io.spine.core.UserId;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
@@ -36,12 +38,15 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.client.ActorRequestFactory.forSystemRequests;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.ACTOR;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.ZONE_ID;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.ZONE_OFFSET;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -63,17 +68,15 @@ class ActorRequestFactoryTest {
     }
 
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-                       "SerializableInnerClassWithNonSerializableOuterClass"})
+                       "SerializableInnerClassWithNonSerializableOuterClass"}) // for TypeToken
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, TestEntity.getDefaultInstance())
-                .setDefault(new TypeToken<Class<? extends Message>>() {
-                            }.getRawType(),
+                .setDefault(new TypeToken<Class<? extends Message>>() {}.getRawType(),
                             TestEntity.class)
-                .setDefault(new TypeToken<Set<? extends Message>>() {
-                            }.getRawType(),
+                .setDefault(new TypeToken<Set<? extends Message>>() {}.getRawType(),
                             newHashSet(Any.getDefaultInstance()))
                 .setDefault(ZoneId.class, ZoneIds.systemDefault())
                 .setDefault(ZoneOffset.class, ZoneOffsets.getDefault())
@@ -170,6 +173,47 @@ class ActorRequestFactoryTest {
             assertNotEquals(factory.zoneOffset(), movedFactory.zoneOffset());
             assertNotEquals(factory.zoneId(), movedFactory.zoneId());
             assertEquals(zoneId, movedFactory.zoneId());
+        }
+    }
+
+    @Nested
+    @DisplayName("provide instance for system requests")
+    class SystemRequests {
+
+        private TenantId tenant;
+        private UserId systemUser;
+
+        @BeforeEach
+        void generateIds() {
+            tenant = TenantId.newBuilder().setValue(randomString()).vBuild();
+            systemUser = UserId.newBuilder().setValue(randomString()).vBuild();
+        }
+
+        @Test
+        @DisplayName("for a class")
+        void forClass() {
+            Class<?> cls = getClass();
+            ActorRequestFactory factory = forSystemRequests(cls, tenant);
+            assertThat(factory.actor().getValue())
+                    .isEqualTo(cls.getName());
+            assertThat(factory.tenantId())
+                    .isEqualTo(tenant);
+        }
+
+        @Test
+        @DisplayName("for a system user")
+        void forUserId() {
+            ActorRequestFactory factory = forSystemRequests(systemUser, tenant);
+
+            assertThat(factory.actor()).isEqualTo(systemUser);
+            assertThat(factory.tenantId()).isEqualTo(tenant);
+        }
+
+        @Test
+        @DisplayName("rejecting empty tenant ID")
+        void rejectEmptyTenantId() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> forSystemRequests(systemUser, TenantId.getDefaultInstance()));
         }
     }
 }
