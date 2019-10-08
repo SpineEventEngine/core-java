@@ -53,7 +53,7 @@ import java.lang.annotation.Target;
  * In this case the first method parameter must extend {@linkplain io.spine.base.CommandMessage}.
  * The returning values must derive from the {@linkplain io.spine.base.CommandMessage} as well.
  *
- <p>If a commanding method accepts a command type which is also handled by the application
+ * <p>If a commanding method accepts a command type which is also handled by the application
  * by another method, a run-time error will occur. This also means that an application cannot have
  * two command-handling methods that accept the same command type.
  *
