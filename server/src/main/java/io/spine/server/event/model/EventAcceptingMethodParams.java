@@ -20,7 +20,6 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -32,7 +31,11 @@ import io.spine.core.EventContext;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
+
+import static io.spine.server.model.TypeMatcher.classImplementing;
+import static io.spine.server.model.TypeMatcher.exactly;
 
 /**
  * Allowed combinations of parameters for the methods, that accept {@code Event}s.
@@ -40,21 +43,24 @@ import io.spine.server.type.EventEnvelope;
 @Immutable
 enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(EventMessage.class) {
+    MESSAGE(classImplementing(EventMessage.class)) {
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[]{event.message()};
         }
     },
 
-    MESSAGE_EVENT_CTX(EventMessage.class, EventContext.class) {
+    MESSAGE_EVENT_CTX(classImplementing(EventMessage.class), exactly(EventContext.class)) {
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[]{event.message(), event.context()};
         }
     },
 
-    MESSAGE_COMMAND_CTX(RejectionMessage.class, CommandContext.class) {
+    MESSAGE_COMMAND_CTX(classImplementing(RejectionMessage.class), exactly(CommandContext.class)) {
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -66,7 +72,14 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
     },
 
-    MESSAGE_COMMAND_MSG(RejectionMessage.class, CommandMessage.class) {
+    MESSAGE_COMMAND_MSG(classImplementing(RejectionMessage.class),
+                        classImplementing(CommandMessage.class)) {
+
+        @Override
+        public boolean acceptsCommand() {
+            return true;
+        }
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -76,8 +89,15 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
     },
 
-    MESSAGE_COMMAND_MSG_COMMAND_CTX(
-            RejectionMessage.class, CommandMessage.class, CommandContext.class) {
+    MESSAGE_COMMAND_MSG_COMMAND_CTX(classImplementing(RejectionMessage.class),
+                                    classImplementing(CommandMessage.class),
+                                    exactly(CommandContext.class)) {
+
+        @Override
+        public boolean acceptsCommand() {
+            return true;
+        }
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -89,21 +109,21 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
     };
 
-    private final ImmutableList<Class<?>> expectedParameters;
+    private final TypeMatcher[] criteria;
 
-    EventAcceptingMethodParams(Class<?>... parameters) {
-        this.expectedParameters = ImmutableList.copyOf(parameters);
+    EventAcceptingMethodParams(TypeMatcher... criteria) {
+        this.criteria = criteria;
     }
 
     @Override
     public boolean matches(MethodParams params) {
-        return params.match(expectedParameters) && params.declaredAsClasses();
+        return params.match(criteria);
     }
 
     /**
      * Verifies if command message is one of the expected parameters.
      */
     public boolean acceptsCommand() {
-        return expectedParameters.contains(CommandMessage.class);
+        return false;
     }
 }

@@ -23,20 +23,38 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 
 import java.lang.reflect.TypeVariable;
 import java.util.Optional;
+import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A utility for working with the types used in method signatures.
+ * Tells if a passed class satisfies some particular criterion.
  */
 @SuppressWarnings("UnstableApiUsage")   // Using Guava's `TypeToken`.
-final class Types {
+@Internal
+public interface TypeMatcher extends Predicate<Class<?>> {
 
-    /** Prevents this utility class from instantiation. */
-    private Types() {
+    /**
+     * Creates a type matcher which matches the type if it is a class (i.e. not an interface)
+     * implementing the given interface.
+     */
+    static TypeMatcher classImplementing(Class<?> iface) {
+        checkNotNull(iface);
+        checkArgument(iface.isInterface());
+        return input -> !input.isInterface() && iface.isAssignableFrom(input);
+    }
+
+    /**
+     * Creates a type matcher which matches the type is equal to the passed type.
+     */
+    static TypeMatcher exactly(Class<?> type) {
+        checkNotNull(type);
+        return input -> input.equals(type);
     }
 
     /**
@@ -77,9 +95,11 @@ final class Types {
      *          {@literal matches(Optional<EventMessage>, Optional<AddTask>)} is {@code false}.
      *
      *      <li> Generic parameters with wildcard are <em>not</em> supported.
-     *</ul>
+     * </ul>
      */
     static boolean matches(TypeToken<?> expected, TypeToken<?> actual) {
+        checkNotNull(expected);
+        checkNotNull(actual);
         if (expected.equals(actual)) {
             return true;
         }
@@ -115,7 +135,9 @@ final class Types {
      * and returns the result. In case the {@code Optional} does not have the generic parameter,
      * returns the type of {@code Optional} itself.
      */
-    private static TypeToken<?> resolve(TypeToken<?> type, TypeVariable<? extends Class<?>> param) {
+    static TypeToken<?> resolve(TypeToken<?> type, TypeVariable<? extends Class<?>> param) {
+        checkNotNull(type);
+        checkNotNull(param);
         TypeToken<?> actualGenericType = type.resolveType(param);
         Class<?> rawType = actualGenericType.getRawType();
         TypeVariable<? extends Class<?>>[] parameters = rawType.getTypeParameters();
@@ -128,11 +150,15 @@ final class Types {
     /**
      * Tells whether the {@code type} is not the same nor a descendant as {@code expectedSuper}.
      */
-    private static boolean differs(TypeToken<?> type, TypeToken<?> expectedSuper) {
+    static boolean differs(TypeToken<?> type, TypeToken<?> expectedSuper) {
+        checkNotNull(type);
+        checkNotNull(expectedSuper);
         return !type.equals(expectedSuper) && !type.isSubtypeOf(expectedSuper);
     }
 
-    private static boolean matchOneToOne(TypeToken<?> expected, TypeToken<?> actual) {
+    static boolean matchOneToOne(TypeToken<?> expected, TypeToken<?> actual) {
+        checkNotNull(expected);
+        checkNotNull(actual);
         TypeVariable<? extends Class<?>>[] expectedTypeParams = genericTypesOf(expected);
         TypeVariable<? extends Class<?>>[] actualTypeParams = genericTypesOf(actual);
         for (int paramIndex = 0; paramIndex < expectedTypeParams.length; paramIndex++) {
@@ -145,13 +171,16 @@ final class Types {
         return true;
     }
 
-    private static TypeVariable<? extends Class<?>>[] genericTypesOf(TypeToken<?> type) {
+    static TypeVariable<? extends Class<?>>[] genericTypesOf(TypeToken<?> type) {
+        checkNotNull(type);
         return type.getRawType()
                    .getTypeParameters();
     }
 
-    private static boolean
+    static boolean
     matchActualGenericsToOne(TypeToken<?> whoseGenerics, TypeToken<?> expectedGenericType) {
+        checkNotNull(whoseGenerics);
+        checkNotNull(expectedGenericType);
         TypeVariable<? extends Class<?>>[] actualTypeParams = genericTypesOf(whoseGenerics);
         if (actualTypeParams.length > 0) {
             for (TypeVariable<? extends Class<?>> param : actualTypeParams) {
@@ -193,7 +222,8 @@ final class Types {
     }
 
     @SuppressWarnings("unchecked")  // Previously checked {@code cls} is a {@code Message} subtype.
-    private static Class<? extends Message> asMessageType(Class<?> cls) {
+    static Class<? extends Message> asMessageType(Class<?> cls) {
+        checkNotNull(cls);
         return (Class<? extends Message>) cls;
     }
 }

@@ -20,7 +20,6 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
@@ -28,6 +27,7 @@ import io.spine.core.EventContext;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeName;
@@ -36,6 +36,8 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.model.TypeMatcher.classImplementing;
+import static io.spine.server.model.TypeMatcher.exactly;
 
 /**
  * A {@link ParameterSpec} of an entity state subscriber method.
@@ -43,29 +45,29 @@ import static io.spine.protobuf.AnyPacker.unpack;
 @Immutable
 enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(ImmutableList.of(Message.class)) {
+    MESSAGE(classImplementing(Message.class)) {
         @Override
         protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
             return new Object[]{entityState};
         }
     },
 
-    MESSAGE_AND_EVENT_CONTEXT(ImmutableList.of(Message.class, EventContext.class)) {
+    MESSAGE_AND_EVENT_CONTEXT(classImplementing(Message.class), exactly(EventContext.class)) {
         @Override
         protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
             return new Object[]{entityState, event.context()};
         }
     };
 
-    private final ImmutableList<Class<?>> parameters;
+    private final TypeMatcher[] criteria;
 
-    StateSubscriberSpec(ImmutableList<Class<?>> parameters) {
-        this.parameters = parameters;
+    StateSubscriberSpec(TypeMatcher... criteria) {
+        this.criteria = criteria;
     }
 
     @Override
     public boolean matches(MethodParams params) {
-        if (!params.match(parameters)) {
+        if (!params.match(criteria)) {
             return false;
         }
         @SuppressWarnings("unchecked") // Checked above.

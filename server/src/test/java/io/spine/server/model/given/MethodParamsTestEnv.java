@@ -36,6 +36,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static io.spine.server.model.TypeMatcher.classImplementing;
+import static io.spine.server.model.TypeMatcher.exactly;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -88,7 +90,8 @@ public class MethodParamsTestEnv {
         MESSAGE_AND_CONTEXT {
             @Override
             public boolean matches(MethodParams params) {
-                return params.are(CommandMessage.class, CommandContext.class);
+                return params.match(classImplementing(CommandMessage.class),
+                                    exactly(CommandContext.class));
             }
 
             @Override

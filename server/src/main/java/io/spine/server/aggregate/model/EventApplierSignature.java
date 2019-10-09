@@ -34,6 +34,8 @@ import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
+import static io.spine.server.model.TypeMatcher.classImplementing;
+
 /**
  * The signature of the {@link Applier} method.
  */
@@ -88,7 +90,7 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
         MESSAGE {
             @Override
             public boolean matches(MethodParams params) {
-                return params.is(EventMessage.class);
+                return params.is(classImplementing(EventMessage.class));
             }
 
             @Override

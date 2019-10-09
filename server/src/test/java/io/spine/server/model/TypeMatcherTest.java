@@ -28,7 +28,6 @@ import io.spine.base.EventMessage;
 import io.spine.core.UserId;
 import io.spine.server.tuple.Pair;
 import io.spine.server.tuple.Triplet;
-import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,30 +38,19 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.model.Types.matches;
+import static io.spine.server.model.TypeMatcher.matches;
 
-@DisplayName("`Types` utility class should")
+@DisplayName("`TypeMatcher` should")
 @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
         "SerializableInnerClassWithNonSerializableOuterClass"})     // using anonymous `TypeToken`s.
-class TypesTest extends UtilityClassTest<Types> {
-
-    TypesTest() {
-        super(Types.class);
-    }
-
-    @Override
-    protected void configure(NullPointerTester tester) {
-        super.configure(tester);
-        tester.setDefault(TypeToken.class, TypeToken.of(TypesTest.class));
-    }
+class TypeMatcherTest {
 
     @Test
     @DisplayName("not accept nulls in package-private static methods")
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert") /* Asserting via `NullPointerTester. */
-    void nullCheckPublicStaticMethods() {
+    void nullCheckStaticMethods() {
         NullPointerTester tester = new NullPointerTester();
-        configure(tester);
-        tester.testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
+        tester.setDefault(TypeToken.class, TypeToken.of(TypeMatcherTest.class));
+        tester.testStaticMethods(TypeMatcher.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test

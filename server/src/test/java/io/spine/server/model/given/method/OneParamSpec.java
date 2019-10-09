@@ -26,6 +26,8 @@ import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
+import static io.spine.server.model.TypeMatcher.classImplementing;
+
 @Immutable
 public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
 
@@ -33,7 +35,7 @@ public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
 
     @Override
     public boolean matches(MethodParams params) {
-        return params.is(EventMessage.class);
+        return params.is(classImplementing(EventMessage.class));
     }
 
     @Override
