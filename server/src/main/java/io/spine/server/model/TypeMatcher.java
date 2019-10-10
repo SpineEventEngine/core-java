@@ -22,6 +22,7 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 
@@ -37,6 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @SuppressWarnings("UnstableApiUsage")   // Using Guava's `TypeToken`.
 @Internal
+@Immutable
 public interface TypeMatcher extends Predicate<Class<?>> {
 
     /**
