@@ -93,7 +93,7 @@ class EntityTest {
             assertEquals(Project.getDefaultInstance(), entityNew.defaultState());
 
             EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
-            StringValue expected = StringValue.getDefaultInstance();
+            Project expected = Project.getDefaultInstance();
             assertEquals(expected, entityWithMessageId.defaultState());
         }
     }

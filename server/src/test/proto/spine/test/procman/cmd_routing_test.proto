@@ -32,5 +32,7 @@ message ProcessId {
 }
 
 message ProcessState {
+    option (entity).kind = PROCESS_MANAGER;
+
     ProcessId id = 1 [(required) = false];
 }

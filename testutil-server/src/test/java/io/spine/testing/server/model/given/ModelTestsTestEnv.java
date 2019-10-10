@@ -20,10 +20,13 @@
 
 package io.spine.testing.server.model.given;
 
+import com.google.common.collect.ImmutableList;
+import io.spine.base.EventMessage;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.model.Nothing;
 import io.spine.testing.server.given.entity.command.TuRemoveProject;
+
+import java.util.List;
 
 public class ModelTestsTestEnv {
 
@@ -37,8 +40,8 @@ public class ModelTestsTestEnv {
         }
 
         @Assign
-        Nothing handle(TuRemoveProject cmd) {
-            return nothing();
+        List<EventMessage> handle(TuRemoveProject cmd) {
+            return ImmutableList.of(nothing());
         }
     }
 
@@ -51,8 +54,8 @@ public class ModelTestsTestEnv {
          * Handles the same command as {@link TestCommandHandler#handle(TuRemoveProject)}.
          */
         @Assign
-        Nothing handle(TuRemoveProject cmd) {
-            return nothing();
+        List<EventMessage> handle(TuRemoveProject cmd) {
+            return ImmutableList.of(nothing());
         }
     }
 }

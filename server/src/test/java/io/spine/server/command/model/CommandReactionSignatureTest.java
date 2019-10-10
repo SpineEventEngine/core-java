@@ -18,17 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
+package io.spine.server.command.model;
 
-import io.spine.server.command.Assign;
-import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.server.command.Command;
+import io.spine.server.command.model.given.reaction.CommandReactionTestEnv.InvalidCommander;
+import io.spine.server.command.model.given.reaction.CommandReactionTestEnv.ValidCommander;
+import io.spine.server.model.MethodSignatureTest;
 
-/**
- * Provides a method with incorrect type of the parameter.
- */
-public class InvalidHandlerOneNotMsgParam extends TestCommandHandler {
-    @Assign
-    RefProjectCreated handleTest(Exception invalid) {
-        return RefProjectCreated.getDefaultInstance();
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+class CommandReactionSignatureTest extends MethodSignatureTest<CommandReactionSignature> {
+
+    @Override
+    protected Stream<Method> validMethods() {
+        return methodsAnnotatedWith(Command.class, ValidCommander.class).stream();
+    }
+
+    @Override
+    protected Stream<Method> invalidMethods() {
+        return methodsAnnotatedWith(Command.class, InvalidCommander.class).stream();
+    }
+
+    @Override
+    protected CommandReactionSignature signature() {
+        return new CommandReactionSignature();
     }
 }

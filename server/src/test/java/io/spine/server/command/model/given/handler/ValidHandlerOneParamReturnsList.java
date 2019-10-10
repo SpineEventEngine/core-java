@@ -21,7 +21,7 @@
 package io.spine.server.command.model.given.handler;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
 
@@ -37,9 +37,9 @@ public final class ValidHandlerOneParamReturnsList extends TestCommandHandler {
 
     @Assign
     @VisibleForTesting
-    public List<Message> handleTest(RefCreateProject cmd) {
+    public List<EventMessage> handleTest(RefCreateProject cmd) {
         addHandledCommand(cmd);
-        List<Message> result = newLinkedList();
+        List<EventMessage> result = newLinkedList();
         result.add(projectCreated(cmd.getProjectId()));
         return result;
     }

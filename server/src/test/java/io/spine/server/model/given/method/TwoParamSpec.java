@@ -27,6 +27,9 @@ import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
+import static io.spine.server.model.TypeMatcher.classImplementing;
+import static io.spine.server.model.TypeMatcher.exactly;
+
 @Immutable
 public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
 
@@ -34,7 +37,7 @@ public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
 
     @Override
     public boolean matches(MethodParams params) {
-        return params.are(Message.class, EventContext.class);
+        return params.match(classImplementing(Message.class), exactly(EventContext.class));
     }
 
     @Override

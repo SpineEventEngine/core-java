@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import io.spine.base.EventMessage;
 import io.spine.server.event.React;
 import io.spine.server.model.ParameterSpec;
@@ -34,20 +35,33 @@ import java.util.Optional;
  */
 final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
 
-    private static final ImmutableSet<Class<?>>
-            RETURN_TYPES = ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
+    private static final ImmutableSet<TypeToken<?>>
+            RETURN_TYPES = ImmutableSet.of(
+                    TypeToken.of(EventMessage.class),
+                    new TypeToken<Iterable<EventMessage>>() {},
+                    new TypeToken<Optional<EventMessage>>() {}
+                    );
 
     EventReactorSignature() {
         super(React.class);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> returnTypes() {
+    protected ImmutableSet<TypeToken<?>> returnTypes() {
         return RETURN_TYPES;
     }
 
     @Override
     public EventReactorMethod create(Method method, ParameterSpec<EventEnvelope> params) {
         return new EventReactorMethod(method, params);
+    }
+
+    /**
+     * Tells that the method may state that a reaction isn't needed by returning
+     * {@link io.spine.server.model Nothing Nothing}.
+     */
+    @Override
+    public boolean mayReturnIgnored() {
+        return true;
     }
 }

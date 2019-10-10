@@ -28,6 +28,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.client.TargetFilters;
 import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
@@ -94,7 +95,9 @@ public class RecordStorageTestEnv {
      * Creates new instance of the test entity.
      */
     public static TestCounterEntity newEntity(ProjectId id) {
-        return new TestCounterEntity(id);
+        TestCounterEntity entity = new TestCounterEntity(id);
+        injectState(entity, Project.newBuilder().setId(id).build(), Versions.zero());
+        return entity;
     }
 
     public static void archive(TransactionalEntity<ProjectId, ?, ?> entity) {

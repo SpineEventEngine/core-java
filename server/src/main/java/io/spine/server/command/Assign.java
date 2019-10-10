@@ -28,10 +28,9 @@ import java.lang.annotation.Target;
 /**
  * Marks a method as command handler.
  *
- * <p>A command handler method <strong>must</strong>:
+ * <p>A command handler method <em>must</em>:
  * <ul>
  *     <li>be annotated with {@link Assign @Assign};
- *     <li>have package-private visibility;
  *     <li>return an event message derived from {@link io.spine.base.EventMessage EventMessage}
  *         if there is only one event generated;
  *         <strong>or</strong> an {@code Iterable} of event messages for two or
@@ -40,16 +39,87 @@ import java.lang.annotation.Target;
  *         as the first parameter.
  * </ul>
  *
+ * <p>Like other message-handling methods, command handlers are designed to be called by
+ * the framework only. Therefore, it is recommended to declare a them as package-private.
+ * It discourages a developer from calling these methods directly from anywhere.
+ *
+ * <p>Package-private access level still declares that a command handler method is a part
+ * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
+ * BoundedContext} description on how the packages and Bounded Contexts relate.
+ *
+ * <h1>Accepted Parameters</h1>
+ *
+ * <p>The first parameter of the command handler always declares a type of the handled command.
+ *
  * <p>A command handler method <strong>may</strong> accept a {@link io.spine.core.CommandContext
  * CommandContext} as the second parameter, if handling of the command requires its context.
-
+ *
+ * <pre>
+ *
+ * {@literal @}Assign
+ *  TaskCreated handler(CreateTask command) { ... }
+ *
+ * {@literal @}Assign
+ *  TaskCompleted handler(CompleteTask command, CommandContext context) { ... }
+ * </pre>
+ *
+ * <p>In case a command may be rejected, a corresponding {@code Throwable} should be declared:
+ *
+ * <pre>
+ *
+ * {@literal @}Assign
+ *  TaskStarted handler(StartTask command) throws TaskAlreadyInProgress { ... }
+ * </pre>
+ *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
  * this method is not considered a command handler and is <strong>not</strong> registered for
  * command dispatching.
  *
- * <p>A command handler method <strong>should</strong> have package-private access. It will allow
- * calling this method from tests. The method should not be {@code public} because it is not
- * supposed to be called directly.
+ * <h1>Returning Values</h1>
+ *
+ * <p>As a command is an imperative, it must lead to some outcome. Typically, a command results
+ * in an emission of one or more events. Each of them must derive
+ * from {@link io.spine.base.EventMessage EventMessage} in order to make the code less error-prone.
+ *
+ * <p>A command handler method must return either
+ * <ul>
+ *
+ *  <li>an event message:
+ *  <pre>
+ *
+ * {@literal @}Assign
+ *  TaskReassigned on(ReassignTask command) { ... }
+ *  </pre>
+ *
+ *
+ *  <li>an {@code Iterable} of event messages:
+ *  <pre>
+ *
+ * {@literal @}Assign
+ * {@literal Iterable<TaskCompleted>} handler(CompleteProject event) { ... }
+ *  </pre>
+ *
+ *
+ *  <li>a {@link io.spine.server.tuple.Tuple tuple} of event messages; being similar
+ *  to {@code Iterable}, tuples allow to declare the exact types of returning values, including
+ *  {@code Optional} values:
+ *  <pre>
+ *
+ * {@literal @}Assign
+ * {@literal Pair<ProjectCreated, ProjectAssigned>} handlerCreateProject event) { ... }
+ *
+ * {@literal @}Assign
+ * {@literal Pair<TaskCreated, Optional<TaskAssigned>>} handler(CreateTask event) { ... }
+ *  </pre>
+ *
+ *
+ *  <li>{@linkplain io.spine.server.tuple.Either one of} particular events:
+ *  <pre>
+ *
+ * {@literal @}Assign
+ * {@literal EitherOf2<TaskRemovedFromProject, TaskDeleted>} handler(RemoveTask command) { ... }
+ *  </pre>
+ * </ul>
  *
  * <h1>One Handler per Command</h1>
  *
@@ -60,7 +130,8 @@ import java.lang.annotation.Target;
  * <p>Declaring two methods that handle the same command class will result in run-time error.
  *
  * @see io.spine.server.tuple.Tuple Returning Two or More Event Messages
- * @see io.spine.server.command.Command Converting Commands
+ * @see io.spine.server.tuple.Either Returning One of Event Messages
+ * @see io.spine.server.command.Command Transforming Commands
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

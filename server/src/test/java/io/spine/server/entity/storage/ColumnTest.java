@@ -21,7 +21,6 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
-import com.google.protobuf.Any;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
@@ -31,6 +30,7 @@ import io.spine.server.entity.storage.given.column.EntityWithDefaultColumnNameFo
 import io.spine.server.entity.storage.given.column.EntityWithNotAnnotatedMethod;
 import io.spine.server.entity.storage.given.column.TestAggregate;
 import io.spine.server.entity.storage.given.column.TestEntity;
+import io.spine.test.storage.Project;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -273,7 +273,7 @@ class ColumnTest {
         @DisplayName("referencing column itself")
         void referencingColumn() {
             EntityColumn column = forMethod("getMutableState", TestEntity.class);
-            Entity<String, Any> entity = new TestEntity("");
+            Entity<String, Project> entity = new TestEntity("");
             MemoizedValue memoizedValue = column.memoizeFor(entity);
             assertSame(column, memoizedValue.sourceColumn());
         }

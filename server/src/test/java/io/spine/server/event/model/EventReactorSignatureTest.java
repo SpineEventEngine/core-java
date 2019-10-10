@@ -18,21 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
+package io.spine.server.event.model;
 
-import io.spine.core.CommandContext;
-import io.spine.server.command.Assign;
-import io.spine.test.reflect.command.RefCreateProject;
-import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.server.event.React;
+import io.spine.server.event.given.EventReactorSignatureTestEnv.InvalidReactor;
+import io.spine.server.event.given.EventReactorSignatureTestEnv.ValidReactor;
+import io.spine.server.model.MethodSignatureTest;
 
-import static io.spine.server.model.given.Given.EventMessage.projectCreated;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
-/**
- * Provides a method which accepts an extra parameter after two valid.
- */
-public final class InvalidHandlerTooManyParams extends TestCommandHandler {
-    @Assign
-    RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context, Object redundant) {
-        return projectCreated(cmd.getProjectId());
+class EventReactorSignatureTest extends MethodSignatureTest<EventReactorSignature> {
+
+    @Override
+    protected Stream<Method> validMethods() {
+        return methodsAnnotatedWith(React.class, ValidReactor.class).stream();
+    }
+
+    @Override
+    protected Stream<Method> invalidMethods() {
+        return methodsAnnotatedWith(React.class, InvalidReactor.class).stream();
+    }
+
+    @Override
+    protected EventReactorSignature signature() {
+        return new EventReactorSignature();
     }
 }

@@ -18,17 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
+package io.spine.server.event.model;
 
 import io.spine.core.Subscribe;
-import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.server.event.model.given.subscriber.EventSubscriberSignatureTestEnv.InvalidSubscriber;
+import io.spine.server.event.model.given.subscriber.EventSubscriberSignatureTestEnv.ValidSubscriber;
+import io.spine.server.model.MethodSignatureTest;
 
-/**
- * The class with event subscriber that returns {@code Object} instead of {@code void}.
- */
-public class InvalidNotVoid extends TestEventSubscriber {
-    @Subscribe
-    public Object handle(RefProjectCreated event) {
-        return event;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+class EventSubscriberSignatureTest extends MethodSignatureTest<SubscriberSignature> {
+
+    @Override
+    protected Stream<Method> validMethods() {
+        return methodsAnnotatedWith(Subscribe.class, ValidSubscriber.class).stream();
+    }
+
+    @Override
+    protected Stream<Method> invalidMethods() {
+        return methodsAnnotatedWith(Subscribe.class, InvalidSubscriber.class).stream();
+    }
+
+    @Override
+    protected SubscriberSignature signature() {
+        return new SubscriberSignature();
     }
 }

@@ -22,6 +22,7 @@ package io.spine.server.aggregate.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Apply;
@@ -33,13 +34,15 @@ import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
+import static io.spine.server.model.TypeMatcher.classImplementing;
+
 /**
  * The signature of the {@link Applier} method.
  */
 final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
 
-    private static final ImmutableSet<Class<?>>
-            RETURN_TYPES = ImmutableSet.of(void.class);
+    private static final ImmutableSet<TypeToken<?>>
+            RETURN_TYPES = ImmutableSet.of(TypeToken.of(void.class));
     private static final ImmutableSet<AccessModifier>
             MODIFIERS = ImmutableSet.of(AccessModifier.PRIVATE);
     private static final ImmutableSet<EventApplierParams>
@@ -50,7 +53,7 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
     }
 
     @Override
-    protected ImmutableSet<Class<?>> returnTypes() {
+    protected ImmutableSet<TypeToken<?>> returnTypes() {
         return RETURN_TYPES;
     }
 
@@ -70,6 +73,14 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
     }
 
     /**
+     * This method never returns any results.
+     */
+    @Override
+    public boolean mayReturnIgnored() {
+        return true;
+    }
+
+    /**
      * Allowed combinations of parameters for {@link Applier} methods.
      */
     @VisibleForTesting
@@ -79,7 +90,7 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
         MESSAGE {
             @Override
             public boolean matches(MethodParams params) {
-                return params.is(EventMessage.class);
+                return params.is(classImplementing(EventMessage.class));
             }
 
             @Override

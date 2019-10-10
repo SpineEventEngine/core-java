@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import io.spine.core.TenantId;
+import io.spine.core.Versions;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.given.repository.ProjectEntity;
@@ -30,6 +31,7 @@ import io.spine.server.model.ModelError;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantAwareRunner;
+import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -243,8 +245,14 @@ class RepositoryTest {
         return result;
     }
 
-    private void createAndStore(String entityId) {
-        ProjectEntity entity = repository.create(createId(entityId));
+    private void createAndStore(String idValue) {
+        ProjectId id = createId(idValue);
+        ProjectEntity entity = repository.create(id);
+        Project stateWithVersion = entity.state()
+                                         .toBuilder()
+                                         .setId(id)
+                                         .vBuild();
+        TestTransaction.injectState(entity, stateWithVersion, Versions.zero());
         repository.store(entity);
     }
 }

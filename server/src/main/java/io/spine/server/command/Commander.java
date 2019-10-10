@@ -21,6 +21,7 @@
 package io.spine.server.command;
 
 import io.spine.server.event.EventReceiver;
+import io.spine.server.model.DoNothing;
 
 /**
  * An interface common for objects that post one or more command in response to an incoming message.
@@ -37,4 +38,19 @@ import io.spine.server.event.EventReceiver;
  * @see Command @Command
  */
 public interface Commander extends CommandReceiver, EventReceiver {
+
+    /**
+     * Obtains the {@link io.spine.server.model.DoNothing} command message.
+     *
+     * <p>This command should be returned if there is no value for the domain to produce an actual
+     * command in response to an event.
+     *
+     * <p>This command is never posted into the {@link io.spine.server.commandbus.CommandBus
+     * CommandBus}.
+     *
+     * @return the default instance of {@link io.spine.server.model.DoNothing}
+     */
+    default DoNothing doNothing() {
+        return DoNothing.getDefaultInstance();
+    }
 }

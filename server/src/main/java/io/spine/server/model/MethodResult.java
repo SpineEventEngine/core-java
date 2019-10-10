@@ -46,6 +46,7 @@ final class MethodResult {
      */
     private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
             Nothing.getDefaultInstance(),
+            DoNothing.getDefaultInstance(),
             Empty.getDefaultInstance()
     );
 
@@ -100,6 +101,15 @@ final class MethodResult {
                 .filter(message -> !IGNORED_MESSAGES.contains(message))
                 .collect(toImmutableList());
         return result;
+    }
+
+    /**
+     * Tells if a result of a given {@code resultType} should be ignored.
+     */
+    static boolean isIgnored(Class<? extends Message> resultType) {
+        return IGNORED_MESSAGES.stream()
+                               .anyMatch(m -> m.getClass()
+                                               .isAssignableFrom(resultType));
     }
 
     /**

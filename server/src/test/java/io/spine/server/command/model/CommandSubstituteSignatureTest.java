@@ -18,17 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
+package io.spine.server.command.model;
 
-import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
-import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.server.command.Command;
+import io.spine.server.command.model.given.commander.CommandSubstituteTestEnv.InvalidCommander;
+import io.spine.server.command.model.given.commander.CommandSubstituteTestEnv.ValidCommander;
+import io.spine.server.model.MethodSignatureTest;
 
-/**
- * The subscriber which has too many parameters.
- */
-public class InvalidTooManyParams extends TestEventSubscriber {
-    @Subscribe
-    void handle(RefProjectCreated event, EventContext context, Object redundant) {
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+class CommandSubstituteSignatureTest extends MethodSignatureTest<CommandSubstituteSignature> {
+
+    @Override
+    protected Stream<Method> validMethods() {
+        return methodsAnnotatedWith(Command.class, ValidCommander.class).stream();
+    }
+
+    @Override
+    protected Stream<Method> invalidMethods() {
+        return methodsAnnotatedWith(Command.class, InvalidCommander.class).stream();
+    }
+
+    @Override
+    protected CommandSubstituteSignature signature() {
+        return new CommandSubstituteSignature();
     }
 }

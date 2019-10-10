@@ -18,17 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
+package io.spine.server.model.given;
 
-import io.spine.server.command.Assign;
-import io.spine.test.reflect.event.RefProjectCreated;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.base.CommandMessage;
 
 /**
- * Provides a method which is annotated, but does not accept parameters.
+ * Common interface for some of the commands that are used in tests of
+ * {@link io.spine.server.model.MethodSignature MethodSignature}s.
  */
-public final class InvalidHandlerNoParams extends TestCommandHandler {
-    @Assign
-    RefProjectCreated handleTest() {
-        return RefProjectCreated.getDefaultInstance();
-    }
+@GeneratedMixin
+@Immutable
+public interface SignatureTestCommand extends CommandMessage {
 }

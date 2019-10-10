@@ -24,15 +24,15 @@ package spine.test.entity;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.entity";
+option java_package = "io.spine.test.entity";
 option java_multiple_files = true;
-
 
 message ProjectId {
     string id = 1;
 }
 
 message Project {
+    option (.entity) = { kind: AGGREGATE visibility: FULL };
 
     ProjectId id = 1;
 

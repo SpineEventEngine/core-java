@@ -20,11 +20,11 @@
 
 package io.spine.server.entity.given.repository;
 
-import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.TransactionalEntity;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 
-public class ProjectEntity extends AbstractEntity<ProjectId, Project> {
+public class ProjectEntity extends TransactionalEntity<ProjectId, Project, Project.Builder> {
     private ProjectEntity(ProjectId id) {
         super(id);
     }

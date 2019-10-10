@@ -18,27 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
+package io.spine.server.command;
 
-import com.google.protobuf.Message;
-import io.spine.core.CommandContext;
-import io.spine.server.command.Assign;
-import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.server.command.model.given.handler.CommandHandlerSignatureTestEnv.InvalidHandler;
+import io.spine.server.command.model.given.handler.CommandHandlerSignatureTestEnv.ValidHandler;
+import io.spine.server.model.MethodSignatureTest;
 
-import java.util.List;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
-import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.server.model.given.Given.EventMessage.projectCreated;
+class CommandHandlerSignatureTest extends MethodSignatureTest<CommandHandlerSignature> {
 
-/**
- * Provides a method with two parameters which returns a list of event messages.
- */
-public class ValidHandlerTwoParamsReturnsList extends TestCommandHandler {
-    @Assign
-    List<Message> handleTest(RefCreateProject cmd, CommandContext context) {
-        addHandledCommand(cmd);
-        List<Message> result = newLinkedList();
-        result.add(projectCreated(cmd.getProjectId()));
-        return result;
+    @Override
+    protected Stream<Method> validMethods() {
+        return methodsAnnotatedWith(Assign.class, ValidHandler.class).stream();
+    }
+
+    @Override
+    protected Stream<Method> invalidMethods() {
+        return methodsAnnotatedWith(Assign.class, InvalidHandler.class).stream();
+    }
+
+    @Override
+    protected CommandHandlerSignature signature() {
+        return new CommandHandlerSignature();
     }
 }

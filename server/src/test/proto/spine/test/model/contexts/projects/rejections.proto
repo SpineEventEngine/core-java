@@ -17,17 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.event.model.given.subscriber;
+package spine.test.model;
 
-import io.spine.core.Subscribe;
-import io.spine.test.reflect.event.RefProjectCreated;
+import "spine/options.proto";
 
-/**
- * The subscriber which has invalid second parameter.
- */
-public class InvalidTwoParamsSecondInvalid extends TestEventSubscriber {
-    @Subscribe
-    void handle(RefProjectCreated event, Exception invalid) {
-    }
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.model.contexts.projects.rejection";
+option java_outer_classname = "ProjectRejections";
+
+import "spine/test/model/contexts/projects/project.proto";
+
+//
+// Rejections for tests of the method signatures.
+////////////////
+
+message SigCannotCreateProject {
+    ProjectId project_id = 1;
 }

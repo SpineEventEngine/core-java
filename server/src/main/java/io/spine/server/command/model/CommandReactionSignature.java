@@ -20,7 +20,9 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -31,10 +33,14 @@ import io.spine.server.command.Command;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
+
+import static io.spine.server.model.TypeMatcher.classImplementing;
+import static io.spine.server.model.TypeMatcher.exactly;
 
 /**
  * A signature of {@link CommandReactionMethod}.
@@ -44,8 +50,13 @@ public class CommandReactionSignature
 
     private static final ImmutableSet<CommandReactionParams>
             PARAM_SPECS = ImmutableSet.copyOf(CommandReactionParams.values());
-    private static final ImmutableSet<Class<?>>
-            RETURN_TYPES = ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
+
+    private static final ImmutableSet<TypeToken<?>>
+            RETURN_TYPES = ImmutableSet.of(
+                    TypeToken.of(CommandMessage.class),
+                    new TypeToken<Iterable<CommandMessage>>() {},
+                    new TypeToken<Optional<CommandMessage>>() {}
+                    );
 
     CommandReactionSignature() {
         super(Command.class);
@@ -57,13 +68,22 @@ public class CommandReactionSignature
     }
 
     @Override
-    protected ImmutableSet<Class<?>> returnTypes() {
+    protected ImmutableSet<TypeToken<?>> returnTypes() {
         return RETURN_TYPES;
     }
 
     @Override
     public CommandReactionMethod create(Method method, ParameterSpec<EventEnvelope> params) {
         return new CommandReactionMethod(method, params);
+    }
+
+    /**
+     * Tells that the method may state that a reaction isn't needed by returning
+     * {@link io.spine.server.model.DoNothing DoNothing}.
+     */
+    @Override
+    public boolean mayReturnIgnored() {
+        return true;
     }
 
     /**
@@ -90,11 +110,7 @@ public class CommandReactionSignature
     @Immutable
     private enum CommandReactionParams implements ParameterSpec<EventEnvelope> {
 
-        MESSAGE {
-            @Override
-            public boolean matches(MethodParams params) {
-                return params.is(EventMessage.class);
-            }
+        MESSAGE(classImplementing(EventMessage.class)) {
 
             @Override
             public Object[] extractArguments(EventEnvelope event) {
@@ -102,11 +118,8 @@ public class CommandReactionSignature
             }
         },
 
-        EVENT_AND_EVENT_CONTEXT {
-            @Override
-            public boolean matches(MethodParams params) {
-                return params.are(EventMessage.class, EventContext.class);
-            }
+        EVENT_AND_EVENT_CONTEXT(classImplementing(EventMessage.class),
+                                exactly(EventContext.class)) {
 
             @Override
             public Object[] extractArguments(EventEnvelope event) {
@@ -114,11 +127,8 @@ public class CommandReactionSignature
             }
         },
 
-        REJECTION_AND_COMMAND_CONTEXT {
-            @Override
-            public boolean matches(MethodParams params) {
-                return params.are(RejectionMessage.class, CommandContext.class);
-            }
+        REJECTION_AND_COMMAND_CONTEXT(classImplementing(RejectionMessage.class),
+                                      exactly(CommandContext.class)) {
 
             @Override
             public Object[] extractArguments(EventEnvelope event) {
@@ -129,6 +139,17 @@ public class CommandReactionSignature
                              .getContext();
                 return new Object[]{event.message(), originContext};
             }
+        };
+
+        private final ImmutableList<TypeMatcher> criteria;
+
+        CommandReactionParams(TypeMatcher... criteria) {
+            this.criteria = ImmutableList.copyOf(criteria);
+        }
+
+        @Override
+        public boolean matches(MethodParams params) {
+            return params.match(criteria);
         }
     }
 }

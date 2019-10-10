@@ -19,44 +19,87 @@
  */
 syntax = "proto3";
 
-package spine.test.commandbus;
+package spine.test.model;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.commandbus";
+option java_package="io.spine.model.contexts.projects.command";
+option java_outer_classname = "ProjectCommandsProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
+import "spine/test/model/contexts/projects/project.proto";
 
-message ProjectId {
-    string id = 1;
-}
+//
+// Commands for the method signature tests.
+////////////////
 
-message Project {
-    option (entity).kind = PROCESS_MANAGER;
+message SigCreateProject {
+    option (is).java_type="io.spine.server.model.given.SignatureTestCommand";
 
     ProjectId id = 1;
-    string name = 2;
-    repeated Task task = 3;
-
-    enum Status {
-        UNDEFINED = 0;
-        CREATED = 1;
-        STARTED = 2;
-        DONE = 3;
-        CANCELLED = 4;
-    }
-    Status status = 4;
 }
 
-message TaskId {
-    int32 id = 1;
+message SigStartProject {
+    option (is).java_type="io.spine.server.model.given.SignatureTestCommand";
+
+    ProjectId id = 1;
 }
 
-message Task {
+message SigStopProject {
+
+    ProjectId id = 1;
+}
+
+message SigCreateTask {
+
+    TaskId id = 1;
+    Task task = 2;
+    bool start = 3;
+}
+
+message SigStartTask {
+
+    TaskId id = 1;
+}
+
+message SigPauseTask {
+
+    TaskId id = 1;
+}
+
+message SigStopTask {
+
+    TaskId id = 1;
+}
+
+message SigAddTaskToProject {
+    ProjectId id = 1;
+    TaskId task = 2;
+}
+
+message SigRemoveTaskFromProject {
+    ProjectId id = 1;
+    TaskId task = 2;
+}
+
+message SigMoveTask {
+    TaskId id = 1;
+    ProjectId from_project = 2;
+    ProjectId to_project = 3;
+}
+
+message SigDeleteTask {
+    TaskId id = 2;
+}
+
+message SigAssignTask {
     TaskId task_id = 1;
-    string title = 2;
-    string description = 3;
-    core.UserId assignee = 4;
+    core.UserId assignee = 2;
+}
+
+message SigSetProjectOwner {
+    ProjectId id = 1;
+    core.UserId owner = 2;
 }

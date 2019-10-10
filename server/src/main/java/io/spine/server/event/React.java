@@ -30,12 +30,59 @@ import java.lang.annotation.Target;
  * Marks a method of an entity as one that <em>may</em> modify the state of the entity in
  * response to some domain event.
  *
- * <p>A reacting method <strong>must:</strong>
+ * <p>A reacting method must be annotated {@link React @React}.
+ *
+ * <p>Like other message-handling methods, event reactors are designed to be called by
+ * the framework only. Therefore, it is recommended to declare a them as package-private.
+ * It discourages a developer from calling these methods directly from anywhere.
+ *
+ * <p>Package-private access level still declares that an event reactor method is a part
+ * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
+ * BoundedContext} description on how the packages and Bounded Contexts relate.
+ *
+ * <h1>Accepted Parameters</h1>
+ *
+ * <p>Each reacting method <strong>must</strong> accept an event message derived
+ * from {@link io.spine.base.EventMessage EventMessage} as the first parameter.
+ * Optionally, one may pass some additional parameters and put the incoming message into
+ * some perspective.
+ *
+ * <p>Here are the available sets of parameters:
+ *
  * <ul>
- *     <li>be annotated with {@link React @React};
- *     <li>have package-private visibility;
- *     <li>accept an event message (derived from {@link io.spine.base.EventMessage EventMessage})
- *         as the first parameter.
+ *
+ * <li>single event message:
+ * <pre>
+ *
+ * {@literal @}React
+ *  EngineStopped on(CarStopped event) { ... }
+ * </pre>
+ *
+ * <li>an event message along with its {@link io.spine.core.EventContext context}; the context
+ * brings some system properties related to event, such as the actor ID and the timestamp of
+ * the event emission:
+ * <pre>
+ *
+ * {@literal @}React
+ *  ProjectOwnerAssigned on(ProjectCreated event, EventContext context) { ... }
+ * </pre>
+ *
+ * <li>if an event is a rejection event, one may additionally specify the command message, which
+ * led to this event; this will act like a filter:
+ * <pre>
+ *
+ * // Only rejections of `CannotAllocateCargo` type caused by the rejected `DeliverOrder` command will be dispatched.
+ * {@literal @}React
+ *  OrderDeliveryFailed on(CannotAllocateCargo event, DeliverOrder command) { ... }
+ * </pre>
+ *
+ * <p>It is also possible to add the context of the origin command to access even more properties:
+ * <pre>
+ *
+ * {@literal @}React
+ *  ProjectRenameFailed on(ProjectAlreadyCompleted event, RenameProject command, CommandContext ctx) { ... }
+ * </pre>
+ *
  * </ul>
  *
  * <h1>Returning Values</h1>
@@ -50,22 +97,27 @@ import java.lang.annotation.Target;
  * <p>A reacting method must return either
  * <ul>
  *
- * <li>an event message:
- * <pre>
+ *  <li>an event message:
+ *  <pre>
+ *
  * {@literal @}React
  *  TaskReassigned on(UserDeactivated event) { ... }
- * </pre>
+ *  </pre>
+ *
  *
  *  <li>an {@code Optional} event message:
  *  <pre>
+ *
  * {@literal @}React
  * {@literal Optional<PersonAllowedToBuyAlcohol>} on(PersonAgeChanged event) { ... }
  *  </pre>
+ *
  *
  *  <li>{@linkplain io.spine.server.tuple.Either one of} particular events;
  *  it also allows to use a special {@link io.spine.server.model.Nothing Nothing} event stating
  *  that the entity may choose not to react at all:
  *  <pre>
+ *
  * {@literal @}React
  * {@literal EitherOf3<ProjectCompleted, ProjectEstimateUpdated, Nothing>} on(TaskCompleted event) { ... }
  *  </pre>
@@ -73,15 +125,22 @@ import java.lang.annotation.Target;
  *
  *  <li>an {@code Iterable} of event messages:
  *  <pre>
+ *
  * {@literal @}React
  * {@literal Iterable<StoryMovedToBacklog>} on(SprintCompleted event) { ... }
  *  </pre>
  *
+ *
  *  <li>a {@link io.spine.server.tuple.Tuple tuple} of event messages; being similar
- *  to {@code Iterable}, tuples allow to declare the exact types of returning values:
+ *  to {@code Iterable}, tuples allow to declare the exact types of returning values, including
+ *  {@code Optional} values:
  *  <pre>
+ *
  * {@literal @}React
  * {@literal Pair<ProjectOwnerAssigned, ProjectDueDateChanged>} on(ProjectCreated event) { ... }
+ *
+ * {@literal @}React
+ * {@literal Pair<TaskAssigned, Optional<TaskStarted>>} on(TaskAdded event) { ... }
  *  </pre>
  *
  * </ul>

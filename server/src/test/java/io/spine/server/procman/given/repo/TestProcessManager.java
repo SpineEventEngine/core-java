@@ -23,6 +23,7 @@ package io.spine.server.procman.given.repo;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.command.Assign;
@@ -175,7 +176,7 @@ public class TestProcessManager
     }
 
     @Assign
-    List<Message> handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
+    List<EventMessage> handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
         keep(command);
         throw EntityAlreadyArchived
                 .newBuilder()

@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.TypeMatcher.exactly;
 
 /**
  * Provides information about parameters of a method.
@@ -107,46 +108,53 @@ public final class MethodParams {
     }
 
     /**
-     * Verifies if the method has only one parameter of the passed type.
+     * Verifies if the method has only one parameter matching the passed criterion.
      */
-    public boolean is(Class<?> type) {
+    public boolean is(TypeMatcher type) {
         if (size() != 1) {
             return false;
         }
         Class<?> firstParam = type(0);
-        return type.isAssignableFrom(firstParam);
+        return type.test(firstParam);
     }
 
     /**
-     * Verifies if the method has only two parameters and they match the passed types.
-     */
-    public boolean are(Class<?> type1, Class<?> type2) {
-        if (size() != 2) {
-            return false;
-        }
-        boolean firstMatches = type1.isAssignableFrom(type(0));
-        boolean secondMatches = type2.isAssignableFrom(type(1));
-        return firstMatches && secondMatches;
-    }
-
-    /**
-     * Verifies if these parameters match the passed types.
+     * Verifies if these parameters are exactly of the respective passed types.
      */
     public boolean are(Class<?>... types) {
-        return match(ImmutableList.copyOf(types));
+        if (size() != types.length) {
+            return false;
+        }
+
+        for (int i = 0; i < size(); i++) {
+            Class<?> actual = type(i);
+            Class<?> expected = types[i];
+            if (!exactly(expected).test(actual)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
-     * Verifies if these parameters match the passed types.
+     * Verifies if these parameters satisfy the respective type matchers.
      */
-    public boolean match(List<Class<?>> types) {
-        if (size() != types.size()) {
+    public boolean match(TypeMatcher... criteria) {
+        return match(ImmutableList.copyOf(criteria));
+    }
+
+    /**
+     * Verifies if these parameters satisfy the respective type matchers.
+     */
+    public boolean match(List<TypeMatcher> criteria) {
+        if (size() != criteria.size()) {
             return false;
         }
+
         for (int i = 0; i < size(); i++) {
             Class<?> actual = type(i);
-            Class<?> expected = types.get(i);
-            if (!expected.isAssignableFrom(actual)) {
+            TypeMatcher matcher = criteria.get(i);
+            if (!matcher.test(actual)) {
                 return false;
             }
         }

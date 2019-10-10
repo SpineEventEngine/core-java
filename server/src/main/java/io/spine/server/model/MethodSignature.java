@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import io.spine.logging.Logging;
 import io.spine.server.type.MessageEnvelope;
 
@@ -49,7 +50,9 @@ import static java.util.stream.Collectors.toList;
  *     <li>{@linkplain #modifiers() the set of allowed access modifiers},
  *     <li>{@linkplain #returnTypes() the set of valid return types},
  *     <li>{@linkplain #allowedThrowable() the set of allowed exceptions}, that the method
- * declares to throw (empty by default),
+ *          declares to throw (empty by default),
+ *     <li>whether an {@linkplain #mayReturnIgnored() ignored result}, such as {@link Nothing},
+ *          may be returned.
  * </ul>
  *
  * @param <H>
@@ -92,7 +95,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<Class<?>> returnTypes();
+    protected abstract ImmutableSet<TypeToken<?>> returnTypes();
 
     /**
      * Obtains the type of a {@code Throwable} which a method can declare.
@@ -232,4 +235,10 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                       .collect(toList());
         return result;
     }
+
+    /**
+     * Determines if a method with this signature may return an
+     * {@linkplain MethodResult#isIgnored(Class)} ignored} result.
+     */
+    public abstract boolean mayReturnIgnored();
 }

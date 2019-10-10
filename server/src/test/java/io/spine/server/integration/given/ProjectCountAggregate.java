@@ -20,7 +20,7 @@
 
 package io.spine.server.integration.given;
 
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.Int32Aggregate;
@@ -41,7 +41,7 @@ public class ProjectCountAggregate
     }
 
     @React(external = true)
-    List<Message> on(ItgProjectCreated event) {
+    List<EventMessage> on(ItgProjectCreated event) {
         externalEvent = event;
         return Collections.emptyList();
     }

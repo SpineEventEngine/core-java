@@ -26,6 +26,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.server.entity.given.entity.AnEntity;
 import io.spine.server.entity.given.entity.NaturalNumberEntity;
+import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.number.NaturalNumber;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -124,12 +126,14 @@ class AbstractEntityTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        AvEntity entity = new AvEntity(88L);
-        AvEntity another = new AvEntity(88L);
-        another.updateState(entity.state(), entity.version());
+        ProjectId id = AvEntity.projectId("88");
+        AvEntity entity = new AvEntity(id);
+        AvEntity similarEntity = new AvEntity(id);
+        similarEntity.updateState(entity.state(), entity.version());
 
-        new EqualsTester().addEqualityGroup(entity, another)
-                          .addEqualityGroup(new AvEntity(42L))
+        AvEntity different = new AvEntity(AvEntity.projectId("42"));
+        new EqualsTester().addEqualityGroup(entity, similarEntity)
+                          .addEqualityGroup(different)
                           .testEquals();
     }
 
@@ -150,9 +154,17 @@ class AbstractEntityTest {
                    "Cannot check 'updateState(...)' in " + AbstractEntity.class);
     }
 
-    private static class AvEntity extends AbstractEntity<Long, StringValue> {
-        private AvEntity(Long id) {
+    private static class AvEntity extends AbstractEntity<ProjectId, Project> {
+
+        private AvEntity(ProjectId id) {
             super(id);
+            updateState(Project.newBuilder().setId(id).vBuild());
+        }
+
+        static ProjectId projectId(String value) {
+            return ProjectId.newBuilder()
+                            .setId(value)
+                            .build();
         }
     }
 

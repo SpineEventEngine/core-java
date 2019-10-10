@@ -24,24 +24,14 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.server.event.model.given.subscriber.ARejectionSubscriber;
 import io.spine.server.event.model.given.subscriber.ExternalSubscriber;
 import io.spine.server.event.model.given.subscriber.InvalidNoAnnotation;
-import io.spine.server.event.model.given.subscriber.InvalidNoParams;
-import io.spine.server.event.model.given.subscriber.InvalidNotVoid;
-import io.spine.server.event.model.given.subscriber.InvalidOneNotMsgParam;
-import io.spine.server.event.model.given.subscriber.InvalidTooManyParams;
-import io.spine.server.event.model.given.subscriber.InvalidTwoParamsFirstInvalid;
-import io.spine.server.event.model.given.subscriber.InvalidTwoParamsSecondInvalid;
 import io.spine.server.event.model.given.subscriber.TestEventSubscriber;
-import io.spine.server.event.model.given.subscriber.ValidButPrivate;
 import io.spine.server.event.model.given.subscriber.ValidOneParam;
 import io.spine.server.model.SignalOriginMismatchError;
-import io.spine.server.model.SignatureMismatchException;
 import io.spine.server.model.given.Given;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
-import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -97,42 +87,6 @@ class EventSubscriberMethodTest {
     }
 
     @Nested
-    @DisplayName("consider subscriber valid with")
-    class ConsiderSubscriberValidWith {
-
-        @Test
-        @DisplayName("one Message parameter")
-        void oneMessageParam() {
-            Method subscriber = new ValidOneParam().getMethod();
-            assertValid(subscriber);
-        }
-
-        @Test
-        @DisplayName("Message and Context parameters")
-        void messageAndContextParams() {
-            Method subscriber = new ValidTwoParams().getMethod();
-            assertValid(subscriber);
-        }
-
-        @Test
-        @MuteLogging /* Signature mismatch warnings are expected. */
-        @DisplayName("non-public access")
-        void nonPublicAccess() {
-            Method method = new ValidButPrivate().getMethod();
-
-            assertValid(method);
-        }
-
-        @Test
-        @DisplayName("rejection event type")
-        void rejectionClassType() {
-            Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
-
-            assertValid(rejectionSubscriber);
-        }
-    }
-
-    @Nested
     @DisplayName("consider subscriber invalid with")
     class ConsiderSubscriberInvalidWith {
 
@@ -141,42 +95,6 @@ class EventSubscriberMethodTest {
         void noAnnotation() {
             Method method = new InvalidNoAnnotation().getMethod();
             assertFalse(signature.matches(method));
-        }
-
-        @Test
-        @DisplayName("no params")
-        void noParams() {
-            assertInvalid(new InvalidNoParams().getMethod());
-        }
-
-        @Test
-        @DisplayName("too many params")
-        void tooManyParams() {
-            assertInvalid(new InvalidTooManyParams().getMethod());
-        }
-
-        @Test
-        @DisplayName("one invalid param")
-        void oneInvalidParam() {
-            assertInvalid(new InvalidOneNotMsgParam().getMethod());
-        }
-
-        @Test
-        @DisplayName("first non-Message param")
-        void firstNonMessageParam() {
-            assertInvalid(new InvalidTwoParamsFirstInvalid().getMethod());
-        }
-
-        @Test
-        @DisplayName("second non-Context param")
-        void secondNonContextParam() {
-            assertInvalid(new InvalidTwoParamsSecondInvalid().getMethod());
-        }
-
-        @Test
-        @DisplayName("non-void return type")
-        void nonVoidReturnType() {
-            assertInvalid(new InvalidNotVoid().getMethod());
         }
     }
 
@@ -216,14 +134,5 @@ class EventSubscriberMethodTest {
             assertThrows(SignalOriginMismatchError.class,
                          () -> modelMethod.invoke(subscriber, envelope));
         }
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")  // It's fine as it throws an exception.
-    private static void assertInvalid(Method method) {
-        assertThrows(SignatureMismatchException.class, () -> signature.matches(method));
-    }
-
-    private static void assertValid(Method subscriber) {
-        assertTrue(signature.matches(subscriber));
     }
 }

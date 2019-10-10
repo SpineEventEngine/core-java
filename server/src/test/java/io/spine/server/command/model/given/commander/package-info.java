@@ -18,20 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
-
-import io.spine.server.command.Assign;
-import io.spine.test.reflect.command.RefCreateProject;
-import io.spine.test.reflect.event.RefProjectCreated;
-
-import static io.spine.server.model.given.Given.EventMessage.projectCreated;
-
 /**
- * Provides a method with two parameters with the second parameter of incorrect type.
+ * Test-environment classes for tests of {@link io.spine.server.command.Command Command}-ing
+ * method signatures.
  */
-public class InvalidHandlerTwoParamsSecondInvalid extends TestCommandHandler {
-    @Assign
-    RefProjectCreated handleTest(RefCreateProject cmd, Exception invalid) {
-        return projectCreated(cmd.getProjectId());
-    }
-}
+package io.spine.server.command.model.given.commander;

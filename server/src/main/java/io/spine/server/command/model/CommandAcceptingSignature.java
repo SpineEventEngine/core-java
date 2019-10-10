@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
@@ -29,11 +30,15 @@ import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
+
+import static io.spine.server.model.TypeMatcher.classImplementing;
+import static io.spine.server.model.TypeMatcher.exactly;
 
 /**
  * The signature of a method, that accepts {@code Command} envelopes as parameter values.
@@ -71,16 +76,20 @@ abstract class CommandAcceptingSignature
     }
 
     /**
+     * Tells that a command-accepting method never returns an ignored result.
+     */
+    @Override
+    public boolean mayReturnIgnored() {
+        return false;
+    }
+
+    /**
      * Allowed combinations of parameters in the methods, that accept {@code Command}s.
      */
     @Immutable
     public enum CommandAcceptingMethodParams implements ParameterSpec<CommandEnvelope> {
 
-        MESSAGE {
-            @Override
-            public boolean matches(MethodParams params) {
-                return params.is(CommandMessage.class);
-            }
+        MESSAGE(classImplementing(CommandMessage.class)) {
 
             @Override
             public Object[] extractArguments(CommandEnvelope envelope) {
@@ -88,16 +97,23 @@ abstract class CommandAcceptingSignature
             }
         },
 
-        MESSAGE_AND_CONTEXT {
-            @Override
-            public boolean matches(MethodParams params) {
-                return params.are(CommandMessage.class, CommandContext.class);
-            }
-
+        MESSAGE_AND_CONTEXT(classImplementing(CommandMessage.class),
+                            exactly(CommandContext.class)) {
             @Override
             public Object[] extractArguments(CommandEnvelope cmd) {
                 return new Object[]{cmd.message(), cmd.context()};
             }
+        };
+
+        private final ImmutableList<TypeMatcher> criteria;
+
+        CommandAcceptingMethodParams(TypeMatcher... criteria) {
+            this.criteria = ImmutableList.copyOf(criteria);
+        }
+
+        @Override
+        public boolean matches(MethodParams params) {
+            return params.match(criteria);
         }
     }
 }

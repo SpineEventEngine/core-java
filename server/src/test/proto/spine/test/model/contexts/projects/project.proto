@@ -17,16 +17,46 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.event.model.given.subscriber;
+package spine.test.model;
 
-import io.spine.core.Subscribe;
+import "spine/options.proto";
 
-/**
- * The subscriber with a method which does not have parameters.
- */
-public class InvalidNoParams extends TestEventSubscriber {
-    @Subscribe
-    void handle() {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.model.contexts.projects";
+option java_multiple_files = true;
+
+import "spine/core/user_id.proto";
+
+message ProjectId {
+    string id = 1;
+}
+
+message Project {
+    option (entity).kind = AGGREGATE;
+
+    ProjectId id = 1;
+    string name = 2;
+    repeated Task task = 3;
+
+    enum Status {
+        UNDEFINED = 0;
+        CREATED = 1;
+        STARTED = 2;
+        DONE = 3;
+        CANCELLED = 4;
     }
+    Status status = 4;
+}
+
+message TaskId {
+    int32 id = 1;
+}
+
+message Task {
+    TaskId task_id = 1;
+    string title = 2;
+    string description = 3;
+    core.UserId assignee = 4;
 }

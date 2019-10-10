@@ -18,15 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
-
-import io.spine.core.Subscribe;
-
 /**
- * The subscriber which has invalid single argument.
+ * This package defines the {@code Projects} context used in tests of
+ * {@link io.spine.server.model.MethodSignature MethodSignature} implementations.
  */
-public class InvalidOneNotMsgParam extends TestEventSubscriber {
-    @Subscribe
-    void handle(Exception invalid) {
-    }
-}
+
+@BoundedContext("Projects")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.contexts.projects;
+
+import io.spine.core.BoundedContext;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.ParametersAreNonnullByDefault;

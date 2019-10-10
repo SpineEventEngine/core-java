@@ -20,9 +20,9 @@
 
 package io.spine.server.aggregate.given.repo;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.server.aggregate.Aggregate;
@@ -83,7 +83,7 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregate.
 
     /** Invalid command handler, which does not produce events. */
     @Assign
-    List<Message> on(DoNothing value) {
+    List<EventMessage> on(DoNothing value) {
         return emptyList();
     }
 

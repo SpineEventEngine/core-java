@@ -21,6 +21,8 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.Invokable;
+import com.google.common.reflect.TypeToken;
 import io.spine.annotation.Internal;
 import io.spine.string.Diags;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,13 +61,20 @@ public enum MatchCriterion {
     RETURN_TYPE(ERROR,
                 "The return type of `%s` method does not match the constraints " +
                         "set for `%s`-annotated method.") {
+        @SuppressWarnings("UnstableApiUsage")   // Using Guava's `TypeToken`.
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            Class<?> returnType = method.getReturnType();
+            TypeToken<?> returnType = Invokable.from(method)
+                                               .getReturnType();
             boolean conforms = signature
                     .returnTypes()
                     .stream()
-                    .anyMatch(type -> type.isAssignableFrom(returnType));
+                    .anyMatch(type -> TypeMatcher.matches(type, returnType) &&
+                            (signature.mayReturnIgnored() ||
+                                    TypeMatcher.messagesFitting(returnType)
+                                               .stream()
+                                               .noneMatch(MethodResult::isIgnored))
+                    );
             if (!conforms) {
                 SignatureMismatch mismatch =
                         create(this,
@@ -83,7 +92,8 @@ public enum MatchCriterion {
      * {@linkplain MethodSignature#modifiers() expected}.
      */
     ACCESS_MODIFIER(WARN,
-                    "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
+                    "The access modifier of `%s` method is `%s`. We recommend it to be `%s`. " +
+                            "Refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             ImmutableSet<AccessModifier> allowedModifiers = signature.modifiers();
@@ -94,8 +104,10 @@ public enum MatchCriterion {
                 SignatureMismatch mismatch =
                         create(this,
                                methodAsString(method),
+                               AccessModifier.fromMethod(method),
                                AccessModifier.asString(allowedModifiers),
-                               AccessModifier.fromMethod(method));
+                               signature.annotation()
+                                        .getSimpleName());
                 return Optional.of(mismatch);
 
             }

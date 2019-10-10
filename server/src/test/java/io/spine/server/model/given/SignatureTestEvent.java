@@ -18,17 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
+package io.spine.server.model.given;
 
-import io.spine.core.Subscribe;
-import io.spine.test.reflect.event.RefProjectCreated;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.base.EventMessage;
 
 /**
- * A class with subscriber method declared {@code private}.
+ * Common interface for some of the events that are used in tests of
+ * {@link io.spine.server.model.MethodSignature MethodSignature}s.
  */
-public class ValidButPrivate extends TestEventSubscriber {
-
-    @Subscribe
-    private void handle(RefProjectCreated event) {
-    }
+@GeneratedMixin
+@Immutable
+public interface SignatureTestEvent extends EventMessage {
 }

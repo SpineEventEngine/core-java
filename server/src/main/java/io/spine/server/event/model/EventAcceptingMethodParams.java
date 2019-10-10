@@ -32,7 +32,11 @@ import io.spine.core.EventContext;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
+
+import static io.spine.server.model.TypeMatcher.classImplementing;
+import static io.spine.server.model.TypeMatcher.exactly;
 
 /**
  * Allowed combinations of parameters for the methods, that accept {@code Event}s.
@@ -40,21 +44,24 @@ import io.spine.server.type.EventEnvelope;
 @Immutable
 enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(EventMessage.class) {
+    MESSAGE(classImplementing(EventMessage.class)) {
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[]{event.message()};
         }
     },
 
-    MESSAGE_EVENT_CTX(EventMessage.class, EventContext.class) {
+    MESSAGE_EVENT_CTX(classImplementing(EventMessage.class), exactly(EventContext.class)) {
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
-            return new Object[] {event.message(), event.context()};
+            return new Object[]{event.message(), event.context()};
         }
     },
 
-    MESSAGE_COMMAND_CTX(RejectionMessage.class, CommandContext.class) {
+    MESSAGE_COMMAND_CTX(classImplementing(RejectionMessage.class), exactly(CommandContext.class)) {
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -62,22 +69,36 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             CommandContext context =
                     rejection.getOrigin()
                              .getContext();
-            return new Object[] {message, context};
+            return new Object[]{message, context};
         }
     },
 
-    MESSAGE_COMMAND_MSG(RejectionMessage.class, CommandMessage.class) {
+    MESSAGE_COMMAND_MSG(classImplementing(RejectionMessage.class),
+                        classImplementing(CommandMessage.class)) {
+
+        @Override
+        public boolean acceptsCommand() {
+            return true;
+        }
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(event);
             Message commandMessage = rejection.getOriginMessage();
-            return new Object[] {message, commandMessage};
+            return new Object[]{message, commandMessage};
         }
     },
 
-    MESSAGE_COMMAND_MSG_COMMAND_CTX(
-            RejectionMessage.class, CommandMessage.class, CommandContext.class) {
+    MESSAGE_COMMAND_MSG_COMMAND_CTX(classImplementing(RejectionMessage.class),
+                                    classImplementing(CommandMessage.class),
+                                    exactly(CommandContext.class)) {
+
+        @Override
+        public boolean acceptsCommand() {
+            return true;
+        }
+
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -85,25 +106,25 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             Command origin = rejection.getOrigin();
             CommandMessage commandMessage = origin.enclosedMessage();
             CommandContext context = origin.context();
-            return new Object[] {message, commandMessage, context};
+            return new Object[]{message, commandMessage, context};
         }
     };
 
-    private final ImmutableList<Class<?>> expectedParameters;
+    private final ImmutableList<TypeMatcher> criteria;
 
-    EventAcceptingMethodParams(Class<?>... parameters) {
-        this.expectedParameters = ImmutableList.copyOf(parameters);
+    EventAcceptingMethodParams(TypeMatcher... criteria) {
+        this.criteria = ImmutableList.copyOf(criteria);
     }
 
     @Override
     public boolean matches(MethodParams params) {
-        return params.match(expectedParameters);
+        return params.match(criteria);
     }
 
     /**
      * Verifies if command message is one of the expected parameters.
      */
     public boolean acceptsCommand() {
-        return expectedParameters.contains(CommandMessage.class);
+        return false;
     }
 }
