@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
@@ -140,10 +141,10 @@ public class CommandReactionSignature
             }
         };
 
-        private final TypeMatcher[] criteria;
+        private final ImmutableList<TypeMatcher> criteria;
 
         CommandReactionParams(TypeMatcher... criteria) {
-            this.criteria = criteria;
+            this.criteria = ImmutableList.copyOf(criteria);
         }
 
         @Override

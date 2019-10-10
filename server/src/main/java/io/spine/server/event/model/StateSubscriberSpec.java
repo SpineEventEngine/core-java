@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
@@ -59,10 +60,10 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         }
     };
 
-    private final TypeMatcher[] criteria;
+    private final ImmutableList<TypeMatcher> criteria;
 
     StateSubscriberSpec(TypeMatcher... criteria) {
-        this.criteria = criteria;
+        this.criteria = ImmutableList.copyOf(criteria);
     }
 
     @Override

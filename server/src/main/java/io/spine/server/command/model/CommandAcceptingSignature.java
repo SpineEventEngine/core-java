@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
@@ -104,10 +105,10 @@ abstract class CommandAcceptingSignature
             }
         };
 
-        private final TypeMatcher[] criteria;
+        private final ImmutableList<TypeMatcher> criteria;
 
         CommandAcceptingMethodParams(TypeMatcher... criteria) {
-            this.criteria = criteria;
+            this.criteria = ImmutableList.copyOf(criteria);
         }
 
         @Override

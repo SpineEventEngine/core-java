@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -139,13 +140,20 @@ public final class MethodParams {
      * Verifies if these parameters satisfy the respective type matchers.
      */
     public boolean match(TypeMatcher... criteria) {
-        if (size() != criteria.length) {
+        return match(ImmutableList.copyOf(criteria));
+    }
+
+    /**
+     * Verifies if these parameters satisfy the respective type matchers.
+     */
+    public boolean match(List<TypeMatcher> criteria) {
+        if (size() != criteria.size()) {
             return false;
         }
 
         for (int i = 0; i < size(); i++) {
             Class<?> actual = type(i);
-            TypeMatcher matcher = criteria[i];
+            TypeMatcher matcher = criteria.get(i);
             if (!matcher.test(actual)) {
                 return false;
             }
