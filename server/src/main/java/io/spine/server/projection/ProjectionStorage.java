@@ -28,6 +28,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,8 +48,8 @@ import java.util.Optional;
 @SPI
 public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
-    protected ProjectionStorage(boolean multitenant,
-                                Class<? extends Projection<?, ?, ?>> projectionClass) {
+    protected ProjectionStorage(ProjectionClass<?> projectionClass,
+                                boolean multitenant) {
         super(projectionClass, multitenant);
     }
 

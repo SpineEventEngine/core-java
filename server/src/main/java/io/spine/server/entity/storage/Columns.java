@@ -20,7 +20,9 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
 import java.util.Collection;
@@ -80,12 +82,9 @@ final class Columns {
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
      * @throws IllegalStateException if entity column definitions are incorrect
      */
-    static Collection<EntityColumn> getAllColumns(Class<? extends Entity<?, ?>> entityClass) {
+    static Collection<EntityColumn> getAllColumns(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
-
-        ColumnReader columnReader = ColumnReader.forClass(entityClass);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-        return entityColumns;
+        return ImmutableList.of();
     }
 
     /**
@@ -98,17 +97,9 @@ final class Columns {
      * @return an instance of {@link EntityColumn} with the given name
      * @throws IllegalArgumentException if the {@link EntityColumn} is not found
      */
-    static EntityColumn findColumn(Class<? extends Entity<?, ?>> entityClass, String columnName) {
+    static EntityColumn findColumn(EntityClass<?> entityClass, String columnName) {
         checkNotNull(entityClass);
         checkColumnName(columnName);
-
-        ColumnReader columnReader = ColumnReader.forClass(entityClass);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-        for (EntityColumn column : entityColumns) {
-            if (columnName.equals(column.name())) {
-                return column;
-            }
-        }
 
         throw couldNotFindColumn(entityClass, columnName);
     }
@@ -117,13 +108,14 @@ final class Columns {
         checkNotEmptyOrBlank(columnName, "entity column name");
     }
 
-    static IllegalArgumentException couldNotFindColumn(Class<? extends Entity> entityClass,
+    static IllegalArgumentException couldNotFindColumn(EntityClass<?> entityClass,
                                                        String columnName) {
         checkNotNull(entityClass);
         checkNotNull(columnName);
         throw new IllegalArgumentException(
                 format("Could not find an `EntityColumn` description for `%s.%s`.",
-                        entityClass.getCanonicalName(),
+                        entityClass.value()
+                                   .getCanonicalName(),
                         columnName));
     }
 
@@ -145,8 +137,8 @@ final class Columns {
      *         {@linkplain EntityColumn entity columns} which values should be extracted
      * @param  <E>           
      *         the type of the {@link Entity}
-     * @return a {@code Map} of the column {@linkplain EntityColumn#storedName()
-     *         names for storing} to their {@linkplain MemoizedValue memoized values}
+     * @return a {@code Map} of the column names to their {
+     * @linkplain MemoizedValue memoized values}
      * @see MemoizedValue
      */
     static <E extends Entity<?, ?>> Map<String, MemoizedValue>

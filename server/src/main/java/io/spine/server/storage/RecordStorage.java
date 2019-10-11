@@ -31,6 +31,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnCache;
 import io.spine.server.entity.storage.EntityColumn;
@@ -64,7 +65,7 @@ public abstract class RecordStorage<I>
     /**
      * The class of entities stored in this {@code RecordStorage}.
      */
-    private final Class<? extends Entity<?, ?>> entityClass;
+    private final EntityClass<?> entityClass;
 
     /**
      * The cache for entity columns.
@@ -79,7 +80,7 @@ public abstract class RecordStorage<I>
     /**
      * Creates an instance of {@code RecordStorage}.
      */
-    protected RecordStorage(Class<? extends Entity<?, ?>> entityClass, boolean multitenant) {
+    protected RecordStorage(EntityClass<?> entityClass, boolean multitenant) {
         super(multitenant);
         this.entityClass = entityClass;
     }
@@ -329,7 +330,7 @@ public abstract class RecordStorage<I>
         return columnCache;
     }
 
-    public Class<? extends Entity<?, ?>> entityClass() {
+    public EntityClass<?> entityClass() {
         return entityClass;
     }
 

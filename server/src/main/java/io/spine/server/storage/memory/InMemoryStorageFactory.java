@@ -65,7 +65,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
     createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
         EntityClass<?> modelClass = asEntityClass(entityClass);
         StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
-        return new InMemoryRecordStorage<>(storageSpec, entityClass, context.isMultitenant());
+        return new InMemoryRecordStorage<>(storageSpec, modelClass, context.isMultitenant());
     }
 
     @Override
@@ -75,7 +75,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
         EntityClass<?> modelClass = asProjectionClass(projectionClass);
         StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
         InMemoryRecordStorage<I> recordStorage =
-                new InMemoryRecordStorage<>(storageSpec, projectionClass, context.isMultitenant());
+                new InMemoryRecordStorage<>(storageSpec, modelClass, context.isMultitenant());
         return new InMemoryProjectionStorage<>(recordStorage);
     }
 

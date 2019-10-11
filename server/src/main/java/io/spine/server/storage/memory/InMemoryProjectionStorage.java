@@ -25,8 +25,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.client.ResponseFormat;
 import io.spine.core.TenantId;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -51,10 +51,9 @@ public final class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     /** The time of the last handled event per tenant. */
     private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
 
-    @SuppressWarnings("unchecked") // We know for sure the record storage holds a projection class.
     InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
-        super(recordStorage.isMultitenant(),
-              (Class<? extends Projection<?, ?, ?>>) recordStorage.entityClass());
+        super((ProjectionClass<?>) recordStorage.entityClass(),
+              recordStorage.isMultitenant());
         this.recordStorage = recordStorage;
     }
 

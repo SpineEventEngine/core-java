@@ -85,7 +85,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      * and then combines it with the given {@link EntityRecord}.
      *
      * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction.
-     * This way the {@linkplain Columns#getAllColumns(Class) column retrieval operation} can be
+     * This way the {@linkplain Columns#getAllColumns(io.spine.server.entity.model.EntityClass) column retrieval operation} can be
      * omitted when calling this method.
      *
      * @param record  the {@link EntityRecord} to create value from

@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.model.EntityClass;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -52,7 +53,7 @@ import static java.util.Collections.synchronizedMap;
 @Experimental
 public final class ColumnCache {
 
-    private final Class<? extends Entity<?, ?>> entityClass;
+    private final EntityClass<?> entityClass;
     private boolean columnsCached = false;
 
     /**
@@ -68,7 +69,7 @@ public final class ColumnCache {
     private final Map<String, EntityColumn> entityColumnData =
             synchronizedMap(new LinkedHashMap<>());
 
-    private ColumnCache(Class<? extends Entity<?, ?>> entityClass) {
+    private ColumnCache(EntityClass<?> entityClass) {
         this.entityClass = entityClass;
     }
 
@@ -84,7 +85,7 @@ public final class ColumnCache {
      *         cached
      * @return new instance
      */
-    public static ColumnCache initializeFor(Class<? extends Entity<?, ?>> entityClass) {
+    public static ColumnCache initializeFor(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
         return new ColumnCache(entityClass);
     }
@@ -133,7 +134,7 @@ public final class ColumnCache {
     }
 
     /**
-     * {@linkplain Columns#getAllColumns(Class) Obtains} and caches {@link EntityColumn} data if it
+     * {@linkplain Columns#getAllColumns(EntityClass) Obtains} and caches {@link EntityColumn} data if it
      * is not yet cached.
      *
      * <p>If the data is already retrieved and cached, this method does nothing.
@@ -157,7 +158,7 @@ public final class ColumnCache {
     }
 
     /**
-     * {@linkplain Columns#getAllColumns(Class) Obtains} and caches {@link EntityColumn}
+     * {@linkplain Columns#getAllColumns(EntityClass) Obtains} and caches {@link EntityColumn}
      * column metadata.
      *
      * <p>If {@link Column} definitions are incorrect for the given {@link Entity} class this method
