@@ -21,8 +21,8 @@
 package io.spine.server.entity.storage.given;
 
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.TheOldColumn;
 
 import java.lang.reflect.Method;
 
@@ -62,22 +62,22 @@ public final class SimpleColumn {
         }
     }
 
-    @Column
+    @TheOldColumn
     public String getString() {
         return "42";
     }
 
-    @Column
+    @TheOldColumn
     public Double getDouble() {
         return 42.0;
     }
 
-    @Column
+    @TheOldColumn
     public double getDoublePrimitive() {
         return 42.0;
     }
 
-    @Column
+    @TheOldColumn
     public Timestamp getTimestamp() {
         return Timestamp.getDefaultInstance();
     }

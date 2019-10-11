@@ -34,13 +34,13 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.Enumerated;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
@@ -160,55 +160,55 @@ public class RecordStorageTestEnv {
         }
 
         @CanIgnoreReturnValue
-        @Column
+        @TheOldColumn
         public int getCounter() {
             return counter;
         }
 
-        @Column
+        @TheOldColumn
         public long getBigCounter() {
             return getCounter();
         }
 
-        @Column
+        @TheOldColumn
         public boolean isCounterEven() {
             return counter % 2 == 0;
         }
 
-        @Column
+        @TheOldColumn
         public String getCounterName() {
             return id().toString();
         }
 
-        @Column
+        @TheOldColumn
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(counter)
                           .build();
         }
 
-        @Column
+        @TheOldColumn
         public Timestamp getNow() {
             return Time.currentTime();
         }
 
-        @Column
+        @TheOldColumn
         public Project getCounterState() {
             return state();
         }
 
-        @Column
+        @TheOldColumn
         public int getProjectStatusValue() {
             return state().getStatusValue();
         }
 
-        @Column
+        @TheOldColumn
         public Project.Status getProjectStatusOrdinal() {
             return Enum.valueOf(Project.Status.class, state().getStatus()
                                                              .name());
         }
 
-        @Column
+        @TheOldColumn
         @Enumerated(STRING)
         public Project.Status getProjectStatusString() {
             return Enum.valueOf(Project.Status.class, state().getStatus()

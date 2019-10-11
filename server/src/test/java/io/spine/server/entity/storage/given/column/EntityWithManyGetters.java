@@ -22,7 +22,7 @@ package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,47 +38,47 @@ public class EntityWithManyGetters extends AbstractEntity<String, Any> {
         super(id);
     }
 
-    @Column
+    @TheOldColumn
     public boolean isBoolean() {
         return true;
     }
 
-    @Column
+    @TheOldColumn
     public @Nullable Boolean isBooleanWrapper() {
         return true;
     }
 
-    @Column
+    @TheOldColumn
     public int isNonBoolean() {
         return 1;
     }
 
-    @Column(name = CUSTOM_COLUMN_NAME)
+    @TheOldColumn(name = CUSTOM_COLUMN_NAME)
     public int getIntegerFieldValue() {
         return 0;
     }
 
-    @Column
+    @TheOldColumn
     public @Nullable Float getFloatNull() {
         return null;
     }
 
-    @Column
+    @TheOldColumn
     public Project getSomeMessage() {
         return someMessage;
     }
 
-    @Column
+    @TheOldColumn
     int getSomeNonPublicMethod() {
         throw new AssertionError("getSomeNonPublicMethod invoked");
     }
 
-    @Column
+    @TheOldColumn
     public void getSomeVoid() {
         throw new AssertionError("getSomeVoid invoked");
     }
 
-    @Column
+    @TheOldColumn
     public static int getStaticMember() {
         return 1024;
     }

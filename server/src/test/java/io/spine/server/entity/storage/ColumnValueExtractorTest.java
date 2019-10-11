@@ -131,7 +131,7 @@ class ColumnValueExtractorTest {
             super(id);
         }
 
-        @Column
+        @TheOldColumn
         public int getIntValue() {
             return 42;
         }

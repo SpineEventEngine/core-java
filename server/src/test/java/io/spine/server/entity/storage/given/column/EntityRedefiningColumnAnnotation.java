@@ -22,7 +22,7 @@ package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 
 public class EntityRedefiningColumnAnnotation extends AbstractEntity<String, Any>
         implements WithColumn<String, Any> {
@@ -35,7 +35,7 @@ public class EntityRedefiningColumnAnnotation extends AbstractEntity<String, Any
      * This annotation {@code @Column} should not be used in the derived class,
      * which is tested by {@code ColumnTest}.
      */
-    @Column
+    @TheOldColumn
     @Override
     public String getCustomColumn() {
         return getClass().getCanonicalName();

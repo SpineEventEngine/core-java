@@ -22,8 +22,8 @@ package io.spine.server.storage.memory.given;
 
 import com.google.protobuf.Any;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -83,12 +83,12 @@ public final class EntityQueryMatcherTestEnv {
         }
     }
 
-    @Column
+    @TheOldColumn
     public @Nullable Boolean getBoolean() {
         return booleanValue();
     }
 
-    @Column
+    @TheOldColumn
     public Any getAny() {
         Any actualValue = anyValue();
         return actualValue;

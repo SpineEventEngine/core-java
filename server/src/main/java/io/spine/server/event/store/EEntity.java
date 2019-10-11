@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -66,7 +66,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, Event.Bui
      * @return the time when the underlying event was fired
      * @see ColumnName#created
      */
-    @Column
+    @TheOldColumn
     public Timestamp getCreated() {
         return state().context()
                       .getTimestamp();
@@ -80,7 +80,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, Event.Bui
      * @return the {@link TypeName} value of the event represented by this entity
      * @see ColumnName#type
      */
-    @Column
+    @TheOldColumn
     public String getType() {
         if (typeName == null) {
             typeName = EventEnvelope.of(state())

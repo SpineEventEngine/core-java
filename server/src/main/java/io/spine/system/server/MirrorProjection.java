@@ -31,7 +31,7 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Subscribe;
 import io.spine.core.Version;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.server.projection.Projection;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
@@ -223,7 +223,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.
      *
      * @return the state {@link TypeUrl} as a {@code String}
      */
-    @Column(name = TYPE_COLUMN_NAME)
+    @TheOldColumn(name = TYPE_COLUMN_NAME)
     public String getAggregateType() {
         return aggregateState().getTypeUrl();
     }

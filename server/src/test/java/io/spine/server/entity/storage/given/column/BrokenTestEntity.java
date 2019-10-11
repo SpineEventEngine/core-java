@@ -22,7 +22,7 @@ package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -33,7 +33,7 @@ public class BrokenTestEntity extends AbstractEntity<String, Any> {
     }
 
     // non-serializable Entity EntityColumn
-    @Column
+    @TheOldColumn
     public Object getFoo() {
         fail("Invoked a getter for a non-serializable EntityColumn BrokenTestEntity.foo");
         return new Object();

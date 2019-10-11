@@ -88,7 +88,7 @@ final class ColumnValueConverters {
      * @param getter the getter to obtain the enum type from
      * @return the {@code EnumType} specified for the getter
      * @see Enumerated
-     * @see Column
+     * @see TheOldColumn
      */
     private static EnumType getEnumType(Method getter) {
         if (!getter.isAnnotationPresent(Enumerated.class)) {

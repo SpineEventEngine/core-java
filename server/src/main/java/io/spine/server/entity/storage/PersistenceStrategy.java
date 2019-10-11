@@ -20,30 +20,7 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.protobuf.Message;
-import io.spine.server.entity.Entity;
-
 import java.util.function.Function;
 
-public final class Column {
-
-    public String name() {
-        return null;
-    }
-
-    public Class<?> type() {
-        return null;
-    }
-
-    public Object valueIn(Entity<?, ? extends Message> entity) {
-        return null;
-    }
-
-    public PersistenceStrategy persistenceStrategy() {
-        return null;
-    }
-
-    private interface Getter extends Function<Entity<?, ? extends Message>, Object> {
-
-    }
+public interface PersistenceStrategy extends Function<Object, Object> {
 }

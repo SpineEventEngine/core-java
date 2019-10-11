@@ -20,11 +20,11 @@
 
 package io.spine.server.entity.storage.given.column;
 
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 
 public interface InterfaceWithEntityColumn {
 
     // The column annotation from the interface should be taken into account.
-    @Column
+    @TheOldColumn
     int getIntegerFieldValue();
 }

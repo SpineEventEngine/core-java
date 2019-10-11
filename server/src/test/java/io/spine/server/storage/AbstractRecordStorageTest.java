@@ -264,7 +264,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 initial.values()
                        .stream()
                        .map(recordWithColumns -> recordWithColumns != null
-                                                 ? recordWithColumns.getRecord()
+                                                 ? recordWithColumns.record()
                                                  : null)
                        .collect(toList());
         assertThat(actual).containsExactlyElementsIn(expected);

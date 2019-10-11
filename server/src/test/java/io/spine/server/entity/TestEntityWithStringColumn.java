@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 
 /**
  * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
@@ -32,6 +32,6 @@ import io.spine.server.entity.storage.Column;
 public interface TestEntityWithStringColumn<I, S extends Message> extends Entity<I, S> {
 
     @SuppressWarnings("unused") // Reflective access
-    @Column
+    @TheOldColumn
     String getIdString();
 }

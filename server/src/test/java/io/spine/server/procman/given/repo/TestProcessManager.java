@@ -31,7 +31,7 @@ import io.spine.server.command.Command;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
@@ -220,7 +220,7 @@ public class TestProcessManager
         return nothing();
     }
 
-    @Column
+    @TheOldColumn
     public String getName() {
         return state().getName();
     }

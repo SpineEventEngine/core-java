@@ -73,7 +73,7 @@ final class Methods {
     }
 
     static Optional<String> nameFromAnnotation(Method getter) {
-        String trimmedName = getter.getAnnotation(Column.class)
+        String trimmedName = getter.getAnnotation(TheOldColumn.class)
                                    .name()
                                    .trim();
         return trimmedName.isEmpty()
@@ -122,9 +122,9 @@ final class Methods {
                               || boolean.class.isAssignableFrom(returnType)
                               || Boolean.class.isAssignableFrom(returnType),
                       "Getter with an `is` prefix should have `boolean` or `Boolean` return type.");
-        checkArgument(method.isAnnotationPresent(Column.class),
+        checkArgument(method.isAnnotationPresent(TheOldColumn.class),
                       "Entity column getter should be annotated with `%s`.",
-                      Column.class.getName());
+                      TheOldColumn.class.getName());
         int modifiers = method.getModifiers();
         checkArgument(isPublic(modifiers) && !isStatic(modifiers),
                       "Entity column getter should be public instance method.");
@@ -136,7 +136,7 @@ final class Methods {
     }
 
     /**
-     * Obtains the method version annotated with {@link Column} for the specified method.
+     * Obtains the method version annotated with {@link TheOldColumn} for the specified method.
      *
      * <p>Scans the specified method, the methods with the same signature
      * from the super classes and interfaces.
@@ -153,7 +153,7 @@ final class Methods {
     static Optional<Method> annotatedVersion(Class<? extends Entity<?, ?>> entityClass,
                                              Method method) {
         Set<Method> annotatedVersions = newHashSet();
-        if (method.isAnnotationPresent(Column.class)) {
+        if (method.isAnnotationPresent(TheOldColumn.class)) {
             annotatedVersions.add(method);
         }
         Iterable<Class<?>> ascendants = superTypesOf(entityClass);
@@ -161,7 +161,7 @@ final class Methods {
             Optional<Method> optionalMethod = findMethodBySignature(ascendant, method);
             if (optionalMethod.isPresent()) {
                 Method ascendantMethod = optionalMethod.get();
-                if (ascendantMethod.isAnnotationPresent(Column.class)) {
+                if (ascendantMethod.isAnnotationPresent(TheOldColumn.class)) {
                     annotatedVersions.add(ascendantMethod);
                 }
             }

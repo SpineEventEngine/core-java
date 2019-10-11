@@ -21,7 +21,7 @@
 package io.spine.server.stand.given;
 
 import io.spine.core.Subscribe;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.server.projection.Projection;
 import io.spine.test.stand.Dish;
 import io.spine.test.stand.DishAdded;
@@ -52,7 +52,7 @@ public final class MenuProjection extends Projection<MenuId, Menu, Menu.Builder>
         }
     }
 
-    @Column(name = UUID)
+    @TheOldColumn(name = UUID)
     public String getUuid() {
         return id().getUuid();
     }

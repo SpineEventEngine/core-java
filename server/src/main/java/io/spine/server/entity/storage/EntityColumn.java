@@ -50,12 +50,12 @@ import static java.lang.String.format;
  * An {@link Entity} field stored in a way allowing ordering and filtering.
  *
  * <p>The value stored in an entity column is retrieved from an {@link Entity} getter method
- * marked with {@link Column} annotation.
+ * marked with {@link TheOldColumn} annotation.
  *
  * <p>An entity can inherit the columns from its parent classes and interfaces.
  * In this case column getter is annotated only once when it is first declared.
  *
- * <p>The {@linkplain #name() name} of a column is determined by the {@link Column#name()}
+ * <p>The {@linkplain #name() name} of a column is determined by the {@link TheOldColumn#name()}
  * annotation property. If the property is not defined, the name is extracted from the column getter
  * method, for example, {@code value} for {@code getValue()}.
  *
@@ -224,7 +224,7 @@ public final class EntityColumn implements Serializable {
     /**
      * Creates a new instance of the {@code EntityColumn} from the given getter method.
      *
-     * <p>The given method must be annotated with the {@link Column} annotation.
+     * <p>The given method must be annotated with the {@link TheOldColumn} annotation.
      * An {@code IllegalArgumentException} is thrown otherwise.
      *
      * @param getter

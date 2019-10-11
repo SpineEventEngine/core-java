@@ -22,7 +22,7 @@ package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 
 public class EntityWithCustomColumnNameForStoring extends AbstractEntity<String, Any> {
 
@@ -32,7 +32,7 @@ public class EntityWithCustomColumnNameForStoring extends AbstractEntity<String,
         super(id);
     }
 
-    @Column(name = CUSTOM_COLUMN_NAME)
+    @TheOldColumn(name = CUSTOM_COLUMN_NAME)
     public int getValue() {
         return 0;
     }

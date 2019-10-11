@@ -22,7 +22,7 @@ package io.spine.server.entity.storage.given.column;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 
 /**
  * This interface attempts to re-define already defined column.
@@ -32,6 +32,6 @@ import io.spine.server.entity.storage.Column;
 public interface WithColumn<I, S extends Message> extends Entity<I, S> {
 
     @SuppressWarnings("unused")
-    @Column
+    @TheOldColumn
     String getCustomColumn();
 }

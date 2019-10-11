@@ -25,7 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.ColumnCache;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.model.ProjectionClass;
@@ -55,8 +55,8 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
     @Internal
     @Override
-    public final ColumnCache columnCache() {
-        return recordStorage().columnCache();
+    public Columns columns() {
+        return recordStorage().columns();
     }
 
     @Override

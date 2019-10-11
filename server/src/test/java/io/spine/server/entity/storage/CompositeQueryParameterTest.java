@@ -88,9 +88,9 @@ class CompositeQueryParameterTest {
                 );
 
         // Check
-        assertEquals(lifecycle.getOperator(), ALL);
+        assertEquals(lifecycle.operator(), ALL);
 
-        Multimap<EntityColumn, Filter> asMultimap = lifecycle.getFilters();
+        Multimap<EntityColumn, Filter> asMultimap = lifecycle.filters();
 
         assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
         assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);
@@ -117,9 +117,9 @@ class CompositeQueryParameterTest {
                 );
 
         // Check
-        assertEquals(lifecycle.getOperator(), ALL);
+        assertEquals(lifecycle.operator(), ALL);
 
-        Multimap<EntityColumn, Filter> asMultimap = lifecycle.getFilters();
+        Multimap<EntityColumn, Filter> asMultimap = lifecycle.filters();
 
         assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
         assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);

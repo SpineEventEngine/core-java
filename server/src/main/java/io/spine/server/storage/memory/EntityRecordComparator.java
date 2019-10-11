@@ -73,12 +73,14 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
 
     @Override
     public int compare(EntityRecordWithColumns a, EntityRecordWithColumns b) {
-        return comparator.compare(value(a), value(b));
+        // TODO:2019-10-11:dmitry.kuzmin:WIP Implement a decent column value comparator.
+        //  This is an in-memory only stuff.
+        return +1;
     }
 
-    private MemoizedValue value(EntityRecordWithColumns b) {
+    private Object value(EntityRecordWithColumns b) {
         checkNotNull(column, "The column can only be null for when no ordering is performed.");
-        return b.getColumnValue(column);
+        return b.storageField(column);
     }
 
     /**

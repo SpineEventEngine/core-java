@@ -30,12 +30,10 @@ import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -46,60 +44,41 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     private static final long serialVersionUID = 0L;
 
     private final EntityRecord record;
-    private final ImmutableMap<String, EntityColumn.MemoizedValue> storageFields;
-    private final boolean hasStorageFields;
+    private final ImmutableMap<String, Object> storageFields;
 
     /**
-     * Creates a new instance with columns.
+     * Creates a new instance with storage fields.
      *
-     * @param record the record to pack
-     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} to pack
+     * @param record
+     *         the record to pack
+     * @param storageFields
+     *         the storage fields to pack
      */
-    private EntityRecordWithColumns(EntityRecord record,
-                                    Map<String, EntityColumn.MemoizedValue> columns) {
+    private EntityRecordWithColumns(EntityRecord record, Map<String, Object> storageFields) {
         this.record = checkNotNull(record);
-        this.storageFields = ImmutableMap.copyOf(columns);
-        this.hasStorageFields = !columns.isEmpty();
+        this.storageFields = ImmutableMap.copyOf(storageFields);
     }
 
     /**
      * Creates an instance with no {@linkplain EntityColumn columns}.
      *
-     * <p>An object created with this constructor will always return {@code false} on
-     * {@link #hasColumns()}.
-     *
-     * @param record {@link EntityRecord} to pack
+     * @param record
+     *         {@link EntityRecord} to pack
      * @see #hasColumns()
      */
     private EntityRecordWithColumns(EntityRecord record) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.of();
-        this.hasStorageFields = false;
     }
 
     /**
-     * Creates a new instance of the {@code EntityRecordWithColumns} with
-     * {@link EntityColumn} values from the given {@linkplain Entity}.
-     *
-     * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
-     * and then combines it with the given {@link EntityRecord}.
-     *
-     * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction.
-     * This way the {@linkplain Columns#getAllColumns(io.spine.server.entity.model.EntityClass) column retrieval operation} can be
-     * omitted when calling this method.
-     *
-     * @param record  the {@link EntityRecord} to create value from
-     * @param entity  the {@link Entity} to extract {@linkplain EntityColumn column} values from
-     * @param storage the {@linkplain RecordStorage storage} for which the record is created
-     * @return new instance
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
                                                  RecordStorage<?> storage) {
-        Collection<EntityColumn> entityColumns = storage.columns();
-        Map<String, EntityColumn.MemoizedValue> columns =
-                extractColumnValues(entity, entityColumns);
-        return of(record, columns);
+        Columns columns = storage.columns();
+        Map<String, Object> storageFields = columns.valuesForPersistence(entity);
+        return of(record, storageFields);
     }
 
     /**
@@ -118,12 +97,11 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      * Creates a new instance.
      */
     @VisibleForTesting
-    static EntityRecordWithColumns of(EntityRecord record,
-                                      Map<String, EntityColumn.MemoizedValue> storageFields) {
+    static EntityRecordWithColumns of(EntityRecord record, Map<String, Object> storageFields) {
         return new EntityRecordWithColumns(record, storageFields);
     }
 
-    public EntityRecord getRecord() {
+    public EntityRecord record() {
         return record;
     }
 
@@ -132,21 +110,22 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      *
      * @return the entity column names
      */
-    public Set<String> getColumnNames() {
+    public Set<String> columnNames() {
         return storageFields.keySet();
     }
 
     /**
-     * Obtains the memoized value of the entity column
-     * by the specified {@linkplain EntityColumn#name() name}.
+     * Obtains the memoized value of the entity column by the specified
+     * {@linkplain Column#name() name}.
      *
-     * @param columnName the stored column name
+     * @param columnName
+     *         the column name
      * @return the memoized value of the column
-     * @throws IllegalStateException if there is no column with the specified name
-     * @see ColumnRecords for the recommended way of working with the column values
+     * @throws IllegalStateException
+     *         if there is no column with the specified name
      */
     @Internal
-    public EntityColumn.MemoizedValue getColumnValue(String columnName) {
+    public Object storageField(String columnName) {
         checkNotNull(columnName);
         if (!storageFields.containsKey(columnName)) {
             throw newIllegalStateException("Column with the stored name `%s` was not found.",
@@ -166,7 +145,12 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      *  {@code false} otherwise
      */
     public boolean hasColumns() {
-        return hasStorageFields;
+        return !storageFields.isEmpty();
+    }
+
+    public boolean hasColumn(String name) {
+        boolean result = storageFields.containsKey(name);
+        return result;
     }
 
     @Override
@@ -200,11 +184,11 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
 
         EntityRecordWithColumns other = (EntityRecordWithColumns) o;
 
-        return getRecord().equals(other.getRecord());
+        return record().equals(other.record());
     }
 
     @Override
     public int hashCode() {
-        return getRecord().hashCode();
+        return record().hashCode();
     }
 }

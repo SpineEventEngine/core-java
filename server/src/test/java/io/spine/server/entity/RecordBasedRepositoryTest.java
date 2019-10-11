@@ -35,9 +35,7 @@ import io.spine.client.Filter;
 import io.spine.client.IdFilter;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
-import io.spine.server.entity.storage.ColumnCache;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.RecordStorage;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.entity.given.GivenLifecycleFlags;
 import io.spine.testing.server.model.ModelTests;
@@ -388,7 +386,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
 
             for (E entity : entities) {
                 EntityRecordWithColumns record = repository.toRecord(entity);
-                assertThat(found).contains(record.getRecord());
+                assertThat(found).contains(record.record());
             }
         }
 
@@ -571,15 +569,5 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         IterableSubject assertFoundList = assertThat(foundList);
         assertFoundList.hasSize(2);
         assertFoundList.containsExactly(activeEntity, deletedEntity);
-    }
-
-    @Test
-    @DisplayName("cache entity columns on registration")
-    void cacheColumnsOnRegister() {
-        RecordStorage<I> storage = repository().recordStorage();
-        ColumnCache columnCache = storage.columnCache();
-
-        // Verify that cache contains searched column
-        assertNotNull(columnCache.findColumn("idString"));
     }
 }

@@ -23,7 +23,7 @@ package io.spine.server.entity.storage.given.column;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 
@@ -35,12 +35,12 @@ public class RealLifeEntity extends AbstractEntity<ProjectId, Project> {
         super(id);
     }
 
-    @Column
+    @TheOldColumn
     public Timestamp getSomeTime() {
         return Time.currentTime();
     }
 
-    @Column
+    @TheOldColumn
     public boolean isVisible() {
         return true;
     }

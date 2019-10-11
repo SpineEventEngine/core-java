@@ -262,7 +262,7 @@ class ColumnReaderTest {
             super(id);
         }
 
-        @Column(name = ANSWER_COLUMN)
+        @TheOldColumn(name = ANSWER_COLUMN)
         public String get42() {
             return "42";
         }

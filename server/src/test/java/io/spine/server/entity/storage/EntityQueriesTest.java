@@ -169,9 +169,9 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         assertThat(values).hasSize(1);
 
         CompositeQueryParameter singleParam = values.get(0);
-        Collection<Filter> columnFilters = singleParam.getFilters()
+        Collection<Filter> columnFilters = singleParam.filters()
                                                       .values();
-        assertEquals(EITHER, singleParam.getOperator());
+        assertEquals(EITHER, singleParam.operator());
         IterableSubject assertColumnFilters = assertThat(columnFilters);
         assertColumnFilters.contains(archivedFilter);
     }

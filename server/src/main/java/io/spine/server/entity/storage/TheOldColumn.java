@@ -20,38 +20,40 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.annotation.Experimental;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static io.spine.server.entity.storage.EnumType.ORDINAL;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Mark an {@linkplain TheOldColumn entity column} as an enumerated value.
+ * An annotation which is used to mark getters for {@linkplain EntityColumn entity columns}.
  *
- * <p>This annotation takes effect only when used in conjunction with the {@link
- * TheOldColumn} annotation.
+ * <p>The properties of the annotation affect how the column is seen by the storage and clients.
  *
- * <p>Entity columns storing enumerated types (i.e. {@linkplain Enum Java Enum}) are persisted
- * differently to all other types. This annotation can be used to control the way the enumerated
- * value is persisted in the data storage.
+ * <p>The annotation will have effect only if it's applied to a {@code public} instance getter,
+ * meaning a method without parameters and with {@code get-} prefix. The {@code is-} prefix is
+ * supported for primitive {@code boolean} or boxed {@code Boolean} columns.
  *
- * <p>If this annotation is omitted for the column which stores {@link Enum} type, it is still
- * considered enumerated and is assumed to be of the {@linkplain EnumType#ORDINAL ordinal enum
- * type}.
+ * <p>A {@link #name()} allows to specify a custom column name to be persisted in a {@code Storage}.
  *
- * @see EnumType
+ * <p>If there are repeated column names within an {@code Entity},
+ * the exception will be raised when a repository serving the entity is added to
+ * its {@code BoundedContext}.
+ *
+ * <p>Please note this feature is experimental.
  */
 @Target(METHOD)
 @Retention(RUNTIME)
-public @interface Enumerated {
+@Experimental
+public @interface TheOldColumn {
 
     /**
-     * The {@link EnumType} of the enumerated value which defines how the value will be persisted
-     * in the data storage.
+     * The custom {@linkplain EntityColumn#name() name} of the column.
      *
-     * <p>For the detailed information about the persistence methods, see {@link EnumType}.
+     * <p>Defaults to the name extracted from the getter which is used for querying.
      */
-    EnumType value() default ORDINAL;
+    String name() default "";
 }

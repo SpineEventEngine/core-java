@@ -33,7 +33,6 @@ import io.spine.client.Filter;
 import io.spine.client.TargetFilters;
 import io.spine.server.storage.RecordStorage;
 
-import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -42,7 +41,6 @@ import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
-import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 
@@ -73,14 +71,13 @@ public final class EntityQueries {
         checkNotNull(filters);
         checkNotNull(storage);
 
-        Collection<EntityColumn> entityColumns = storage.columns();
+        Columns entityColumns = storage.columns();
         EntityQuery<I> result = from(filters, entityColumns);
         return result;
     }
 
     @VisibleForTesting
-    static <I> EntityQuery<I> from(TargetFilters filters,
-                                   Collection<EntityColumn> columns) {
+    static <I> EntityQuery<I> from(TargetFilters filters, Columns columns) {
         checkNotNull(filters);
         checkNotNull(columns);
 
@@ -91,18 +88,17 @@ public final class EntityQueries {
         return result;
     }
 
-    private static QueryParameters toQueryParams(TargetFilters filters,
-                                                 Collection<EntityColumn> entityColumns) {
+    private static QueryParameters toQueryParams(TargetFilters filters, Columns columns) {
 
-        List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, entityColumns);
+        List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, columns);
         return newQueryParameters(parameters);
     }
 
     private static List<CompositeQueryParameter>
-    getFiltersQueryParams(TargetFilters filters, Collection<EntityColumn> entityColumns) {
+    getFiltersQueryParams(TargetFilters filters, Columns columns) {
         return filters.getFilterList()
                       .stream()
-                      .map(filter -> queryParameterFromFilter(filter, entityColumns))
+                      .map(filter -> queryParameterFromFilter(filter, columns))
                       .collect(toList());
     }
 
@@ -113,43 +109,33 @@ public final class EntityQueries {
     }
 
     private static CompositeQueryParameter
-    queryParameterFromFilter(CompositeFilter filter, Collection<EntityColumn> entityColumns) {
-        Multimap<EntityColumn, Filter> filters = splitFilters(filter, entityColumns);
+    queryParameterFromFilter(CompositeFilter filter, Columns columns) {
+        Multimap<Column, Filter> filters = splitFilters(filter, columns);
         CompositeOperator operator = filter.getOperator();
         return CompositeQueryParameter.from(filters, operator);
     }
 
-    private static Multimap<EntityColumn, Filter>
-    splitFilters(CompositeFilter filter, Collection<EntityColumn> entityColumns) {
-        Multimap<EntityColumn, Filter> filters = create(filter.getFilterCount(), 1);
+    private static Multimap<Column, Filter>
+    splitFilters(CompositeFilter filter, Columns columns) {
+        Multimap<Column, Filter> filters = create(filter.getFilterCount(), 1);
         for (Filter columnFilter : filter.getFilterList()) {
-            EntityColumn column = findMatchingColumn(columnFilter, entityColumns);
+            Column column = findMatchingColumn(columnFilter, columns);
             checkFilterType(column, columnFilter);
             filters.put(column, columnFilter);
         }
         return filters;
     }
 
-    private static EntityColumn findMatchingColumn(Filter filter,
-                                                   Collection<EntityColumn> entityColumns) {
+    private static Column findMatchingColumn(Filter filter, Columns columns) {
         FieldPath fieldPath = filter.getFieldPath();
         checkArgument(fieldPath.getFieldNameCount() == 1,
                       "Incorrect Entity Column name in Entity Filter: %s",
                       join(".", fieldPath.getFieldNameList()));
         String columnName = fieldPath.getFieldName(0);
-        for (EntityColumn column : entityColumns) {
-            if (column.name()
-                      .equals(columnName)) {
-                return column;
-            }
-        }
-
-        throw new IllegalArgumentException(
-                format("Could not find an EntityColumn description for column with name %s.",
-                       columnName));
+        return columns.get(columnName);
     }
 
-    private static void checkFilterType(EntityColumn column, Filter filter) {
+    private static void checkFilterType(Column column, Filter filter) {
         Class<?> expectedType = column.type();
         Any filterConvent = filter.getValue();
         Object filterValue = toObject(filterConvent, expectedType);

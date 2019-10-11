@@ -148,7 +148,7 @@ class QueryParametersTest {
                                                  .build();
         Collection<Filter> results = newLinkedList();
         for (CompositeQueryParameter queryParameter : parameters) {
-            results.addAll(queryParameter.getFilters()
+            results.addAll(queryParameter.filters()
                                          .values());
         }
         assertArrayEquals(filters, results.toArray());
@@ -171,7 +171,7 @@ class QueryParametersTest {
                                                  .build();
         CompositeQueryParameter singleParameter = parameters.iterator()
                                                             .next();
-        Multimap<EntityColumn, Filter> actualFilters = singleParameter.getFilters();
+        Multimap<EntityColumn, Filter> actualFilters = singleParameter.filters();
         for (int i = 0; i < columns.length; i++) {
             EntityColumn column = columns[i];
             Collection<Filter> readFilters = actualFilters.get(column);
@@ -205,7 +205,7 @@ class QueryParametersTest {
         assertThat(aggregatingParameters).hasSize(1);
         Multimap<EntityColumn, Filter> actualFilters =
                 aggregatingParameters.get(0)
-                                     .getFilters();
+                                     .filters();
         Collection<Filter> timeFilters = actualFilters.get(column);
 
         IterableSubject assertTimeFilters = assertThat(timeFilters);
@@ -229,10 +229,10 @@ class QueryParametersTest {
         CompositeQueryParameter lifecycleParameter = paramsIterator.next();
         assertFalse(paramsIterator.hasNext());
         assertTrue(lifecycleParameter.hasLifecycle());
-        assertEquals(ALL, lifecycleParameter.getOperator());
-        ImmutableMultimap<EntityColumn, Filter> filters = lifecycleParameter.getFilters();
+        assertEquals(ALL, lifecycleParameter.operator());
+        ImmutableMultimap<EntityColumn, Filter> filters = lifecycleParameter.filters();
 
-        Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
+        Map<String, EntityColumn> lifecycleColumns = storage.lifecycleColumns();
         String archivedName = archived.name();
         EntityColumn archivedColumn = lifecycleColumns.get(archivedName);
         String deletedName = deleted.name();

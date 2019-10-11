@@ -20,133 +20,78 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableList;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.ColumnValueExtractor.create;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
-import static java.lang.String.format;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.stream.Collectors.toMap;
 
-/**
- * A utility class for working with {@linkplain EntityColumn entity columns}.
- *
- * <p>The methods of all {@link Entity entities} that fit
- * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec and annotated with {@link Column} are considered
- * {@linkplain EntityColumn columns}.
- *
- * <p>Additionally, the {@code Boolean} getters starting with {@code is-} are allowed (contrary to
- * the Java Bean spec), to enable situations like
- * <pre>
- *     {@code
- *             \@Nullable
- *             \@Column
- *             public Boolean isMale() {
- *                 return null;
- *             }
- *     }
- * </pre>
- *
- * <p>Inherited columns are taken into account too, but building entity hierarchies is strongly
- * discouraged.
- *
- * <p>Note that the returned type of an {@link EntityColumn} getter must either be primitive or
- * serializable, otherwise a runtime exception is thrown when trying to get an instance of
- * {@link EntityColumn}.
- *
- * @see EntityColumn
- */
-final class Columns {
+@Internal
+public final class Columns {
 
     /**
-     * Prevents instantiation of this utility class.
+     * A map of entity columns by their name.
      */
-    private Columns() {
+    // TODO:2019-10-11:dmitry.kuzmin:WIP Think of creating a tiny type for column name.
+    private final Map<String, Column> columns;
+
+    private final EntityClass<?> entityClass;
+
+    private Columns(Map<String, Column> columns, EntityClass<?> entityClass) {
+        this.columns = columns;
+        this.entityClass = entityClass;
     }
 
-    /**
-     * Retrieves {@linkplain EntityColumn columns} for the given {@link Entity} class.
-     *
-     * <p>Performs checks for the entity column definitions correctness along the way.
-     *
-     * <p>If the check for correctness fails, throws {@link IllegalStateException}.
-     *
-     * @param entityClass the class containing the {@link EntityColumn} definition
-     * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
-     * @throws IllegalStateException if entity column definitions are incorrect
-     */
-    static Collection<EntityColumn> getAllColumns(EntityClass<?> entityClass) {
-        checkNotNull(entityClass);
-        return ImmutableList.of();
+    public static Columns of(EntityClass<?> entityClass) {
+        Map<String, Column> columns = new HashMap<>();
+        return new Columns(columns, entityClass);
     }
 
-    /**
-     * Retrieves an {@link EntityColumn} instance of the given name and from the given entity class.
-     *
-     * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
-     *
-     * @param entityClass the class containing the {@link EntityColumn} definition
-     * @param columnName  the entity column {@linkplain EntityColumn#name() name}
-     * @return an instance of {@link EntityColumn} with the given name
-     * @throws IllegalArgumentException if the {@link EntityColumn} is not found
-     */
-    static EntityColumn findColumn(EntityClass<?> entityClass, String columnName) {
-        checkNotNull(entityClass);
-        checkColumnName(columnName);
-
-        throw couldNotFindColumn(entityClass, columnName);
+    public Column get(String columnName) {
+        Column result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
+        return result;
     }
 
-    static void checkColumnName(String columnName) {
-        checkNotEmptyOrBlank(columnName, "entity column name");
+    public Optional<Column> find(String columnName) {
+        Column column = columns.get(columnName);
+        Optional<Column> result = Optional.ofNullable(column);
+        return result;
     }
 
-    static IllegalArgumentException couldNotFindColumn(EntityClass<?> entityClass,
-                                                       String columnName) {
-        checkNotNull(entityClass);
-        checkNotNull(columnName);
-        throw new IllegalArgumentException(
-                format("Could not find an `EntityColumn` description for `%s.%s`.",
-                        entityClass.value()
-                                   .getCanonicalName(),
-                        columnName));
+    public Map<Column, Object> valuesIn(Entity<?, ?> source) {
+        Map<Column, Object> result =
+                columns.values()
+                       .stream()
+                       .collect(toMap(column -> column,
+                                      column -> column.valueIn(source)));
+        return result;
     }
 
-    /**
-     * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}, 
-     * using given {@linkplain EntityColumn entity columns}.
-     *
-     * <p>By using predefined {@linkplain EntityColumn entity columns} the process of
-     * {@linkplain ColumnReader#readColumns() obtaining columns} from the given {@link Entity} class
-     * can be skipped.
-     *
-     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for 
-     * {@link Entity} classes that are non-public or cannot be subjected to column extraction 
-     * for some other reason.
-     *
-     * @param  entity        
-     *         an {@link Entity} to get the {@linkplain EntityColumn column} values from
-     * @param  entityColumns 
-     *         {@linkplain EntityColumn entity columns} which values should be extracted
-     * @param  <E>           
-     *         the type of the {@link Entity}
-     * @return a {@code Map} of the column names to their {
-     * @linkplain MemoizedValue memoized values}
-     * @see MemoizedValue
-     */
-    static <E extends Entity<?, ?>> Map<String, MemoizedValue>
-    extractColumnValues(E entity, Collection<EntityColumn> entityColumns) {
-        checkNotNull(entity);
-        checkNotNull(entityColumns);
+    public Map<String, Object> valuesForPersistence(Entity<?, ?> source) {
+        Map<String, Object> result =
+                columns.values()
+                       .stream()
+                       .collect(toMap(Column::name,
+                                      column -> valueForPersistence(source, column)));
+        return result;
+    }
 
-        ColumnValueExtractor columnValueExtractor = create(entity, entityColumns);
-        return columnValueExtractor.extractColumnValues();
+    private static Object valueForPersistence(Entity<?, ?> source, Column column) {
+        Object columnValue = column.valueIn(source);
+        Object result = column.persistenceStrategy()
+                              .apply(columnValue);
+        return result;
+    }
+
+    private IllegalStateException columnNotFound(String columnName) {
+        throw newIllegalStateException(
+                "A column with name '%s' not found in entity state class `%s`.",
+                columnName, entityClass.stateClass()
+                                       .getCanonicalName());
     }
 }

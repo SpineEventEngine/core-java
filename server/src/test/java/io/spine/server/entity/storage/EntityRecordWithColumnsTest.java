@@ -143,7 +143,7 @@ class EntityRecordWithColumnsTest {
         @DisplayName("record")
         void record() {
             EntityRecordWithColumns recordWithFields = newRecord();
-            EntityRecord record = recordWithFields.getRecord();
+            EntityRecord record = recordWithFields.record();
             assertNotNull(record);
         }
 
@@ -162,10 +162,10 @@ class EntityRecordWithColumnsTest {
                     Sample.messageOfType(EntityRecord.class),
                     columnsExpected
             );
-            Collection<String> columnNames = record.getColumnNames();
+            Collection<String> columnNames = record.columnNames();
             assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
-            assertEquals(memoizedValue, record.getColumnValue(columnName));
+            assertEquals(memoizedValue, record.storageField(columnName));
         }
     }
 
@@ -174,7 +174,7 @@ class EntityRecordWithColumnsTest {
     void returnEmptyColumns() {
         EntityRecordWithColumns record = newEmptyRecord();
         assertFalse(record.hasColumns());
-        Collection<String> names = record.getColumnNames();
+        Collection<String> names = record.columnNames();
         assertTrue(names.isEmpty());
     }
 
@@ -183,7 +183,7 @@ class EntityRecordWithColumnsTest {
     void throwOnNonExistentColumn() {
         EntityRecordWithColumns record = newEmptyRecord();
 
-        assertThrows(IllegalStateException.class, () -> record.getColumnValue(""));
+        assertThrows(IllegalStateException.class, () -> record.storageField(""));
     }
 
     @Test
@@ -200,6 +200,6 @@ class EntityRecordWithColumnsTest {
                 EntityRecord.getDefaultInstance(),
                 columnValues
         );
-        assertThat(record.getColumnNames()).containsExactlyElementsIn(defaultColumns);
+        assertThat(record.columnNames()).containsExactlyElementsIn(defaultColumns);
     }
 }

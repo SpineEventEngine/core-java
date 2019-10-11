@@ -20,46 +20,46 @@
 
 package io.spine.server.entity.storage.given.column;
 
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.TheOldColumn;
 
 public class EntityWithBooleanColumns {
 
-    @Column
+    @TheOldColumn
     public Boolean isBooleanWrapperColumn() {
         return true;
     }
 
-    @Column
+    @TheOldColumn
     public Boolean getBooleanWrapperColumn() {
         return true;
     }
 
-    @Column
+    @TheOldColumn
     public int isNonBoolean() {
         return 1;
     }
 
-    @Column
+    @TheOldColumn
     public int getNonBoolean() {
         return 1;
     }
 
-    @Column
+    @TheOldColumn
     public Boolean isBooleanWithParam(int param) {
         return true;
     }
 
-    @Column
+    @TheOldColumn
     public Boolean getBooleanWithParam(int param) {
         return true;
     }
 
-    @Column
+    @TheOldColumn
     public int isNonBooleanWithParam(int param) {
         return 1;
     }
 
-    @Column
+    @TheOldColumn
     public int getNonBooleanWithParam(int param) {
         return 1;
     }

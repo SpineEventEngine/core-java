@@ -21,8 +21,8 @@
 package io.spine.server.entity.storage.given.column;
 
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.Enumerated;
+import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.test.storage.Project;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -44,7 +44,7 @@ public class TestEntity extends AbstractEntity<String, Project> {
         this.mutableState = state;
     }
 
-    @Column
+    @TheOldColumn
     public @Nullable Integer getMutableState() {
         return mutableState;
     }
@@ -53,65 +53,65 @@ public class TestEntity extends AbstractEntity<String, Project> {
         this.mutableState = mutableState;
     }
 
-    @Column
+    @TheOldColumn
     public boolean isBoolean() {
         return true;
     }
 
-    @Column
+    @TheOldColumn
     public @Nullable Boolean isBooleanWrapper() {
         return true;
     }
 
-    @Column
+    @TheOldColumn
     public int isNonBoolean() {
         return 1;
     }
 
-    @Column
+    @TheOldColumn
     public String getNotNull() {
         return nullRef();
     }
 
-    @Column
+    @TheOldColumn
     public @Nullable String getNull() {
         return null;
     }
 
-    @Column
+    @TheOldColumn
     public long getLong() {
         return 0;
     }
 
-    @Column
+    @TheOldColumn
     public TaskStatus getEnumNotAnnotated() {
         return SUCCESS;
     }
 
-    @Column
+    @TheOldColumn
     @Enumerated
     public TaskStatus getEnumOrdinal() {
         return SUCCESS;
     }
 
-    @Column
+    @TheOldColumn
     @Enumerated(STRING)
     public TaskStatus getEnumString() {
         return SUCCESS;
     }
 
     @SuppressWarnings("MethodMayBeStatic") // A column method cannot be static.
-    @Column
+    @TheOldColumn
     private long getFortyTwoLong() {
         return 42L;
     }
 
-    @Column
+    @TheOldColumn
     public String getParameter(String param) {
         return param;
     }
 
-    @Column
+    @TheOldColumn
     public static String getStatic() {
         return "";
     }
