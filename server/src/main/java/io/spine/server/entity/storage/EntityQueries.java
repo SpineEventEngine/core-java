@@ -73,7 +73,7 @@ public final class EntityQueries {
         checkNotNull(filters);
         checkNotNull(storage);
 
-        Collection<EntityColumn> entityColumns = storage.entityColumns();
+        Collection<EntityColumn> entityColumns = storage.columns();
         EntityQuery<I> result = from(filters, entityColumns);
         return result;
     }

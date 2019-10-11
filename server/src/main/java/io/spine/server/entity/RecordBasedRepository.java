@@ -33,7 +33,7 @@ import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.EntityColumnCache;
+import io.spine.server.entity.storage.ColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -368,15 +368,15 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Retrieves the {@link EntityColumnCache} used by this repository's
+     * Retrieves the {@link ColumnCache} used by this repository's
      * {@linkplain RecordStorage storage}.
      *
      * @return the entity column cache from the storage
      * @throws IllegalStateException
-     *         if the {@link EntityColumnCache} is not supported by this repository's storage
+     *         if the {@link ColumnCache} is not supported by this repository's storage
      */
-    private EntityColumnCache columnCache() {
-        return recordStorage().entityColumnCache();
+    private ColumnCache columnCache() {
+        return recordStorage().columnCache();
     }
 
     /**

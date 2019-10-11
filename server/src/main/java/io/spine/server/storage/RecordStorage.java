@@ -32,11 +32,10 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.ColumnCache;
 import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -63,36 +62,26 @@ public abstract class RecordStorage<I>
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
     /**
+     * The class of entities stored in this {@code RecordStorage}.
+     */
+    private final Class<? extends Entity<?, ?>> entityClass;
+
+    /**
      * The cache for entity columns.
      *
-     * <p>Is {@code null} for instances that do not support entity columns.
+     * <p>Is {@code null} on storage creation and initialized when
+     * {@linkplain #columnCache() queried}.
      *
      * @see RecordStorage(boolean)
      */
-    private final @MonotonicNonNull EntityColumnCache entityColumnCache;
+    private @MonotonicNonNull ColumnCache columnCache;
 
     /**
-     * Creates an instance of {@code RecordStorage} which does not support
-     * the {@link EntityColumnCache}.
-     *
-     * <p>This creation method should only be used for the {@code RecordStorage} descendants,
-     * that are containers for another {@code RecordStorage} instance, which actually supports
-     * {@link EntityColumnCache}, for example, a {@link ProjectionStorage}.
-     *
-     * <p>Instances created by this constructor should override
-     * {@link RecordStorage#entityColumnCache()} method.
+     * Creates an instance of {@code RecordStorage}.
      */
-    protected RecordStorage(boolean multitenant) {
+    protected RecordStorage(Class<? extends Entity<?, ?>> entityClass, boolean multitenant) {
         super(multitenant);
-        this.entityColumnCache = null;
-    }
-
-    /**
-     * Creates an instance of {@code RecordStorage} which supports the {@link EntityColumnCache}.
-     */
-    protected RecordStorage(boolean multitenant, Class<? extends Entity<?, ?>> entityClass) {
-        super(multitenant);
-        this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);
+        this.entityClass = entityClass;
     }
 
     /**
@@ -302,8 +291,8 @@ public abstract class RecordStorage<I>
      * @see EntityColumn
      */
     @Internal
-    public Collection<EntityColumn> entityColumns() {
-        return entityColumnCache().getColumns();
+    public Collection<EntityColumn> columns() {
+        return columnCache().columns();
     }
 
     /**
@@ -323,7 +312,7 @@ public abstract class RecordStorage<I>
         Map<String, EntityColumn> lifecycleColumns = new HashMap<>();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
             String name = field.name();
-            EntityColumn column = entityColumnCache().findColumn(name);
+            EntityColumn column = columnCache().findColumn(name);
             lifecycleColumns.put(name, column);
         }
         return lifecycleColumns;
@@ -331,20 +320,17 @@ public abstract class RecordStorage<I>
 
     /**
      * Obtains the entity column cache.
-     *
-     * @throws IllegalStateException
-     *         if the storage {@linkplain RecordStorage#RecordStorage(boolean) does not support}
-     *         the cache
      */
     @Internal
-    public EntityColumnCache entityColumnCache() {
-        if (entityColumnCache == null) {
-            throw newIllegalStateException(
-                    "Entity column cache is not initialized for the storage %s.",
-                    this
-            );
+    public ColumnCache columnCache() {
+        if (columnCache == null) {
+            columnCache = ColumnCache.initializeFor(entityClass);
         }
-        return entityColumnCache;
+        return columnCache;
+    }
+
+    public Class<? extends Entity<?, ?>> entityClass() {
+        return entityClass;
     }
 
     /*

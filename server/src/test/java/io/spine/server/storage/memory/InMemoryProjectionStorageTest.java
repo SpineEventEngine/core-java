@@ -40,7 +40,7 @@ class InMemoryProjectionStorageTest extends ProjectionStorageTest {
                                ProjectId.class);
         InMemoryProjectionStorage<ProjectId> storage =
                 new InMemoryProjectionStorage<>(
-                        new InMemoryRecordStorage<>(spec, false, cls)
+                        new InMemoryRecordStorage<>(spec, cls, false)
                 );
         return storage;
     }

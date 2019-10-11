@@ -40,38 +40,38 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EntityColumnCache should")
-class EntityColumnCacheTest {
+class ColumnCacheTest {
 
     private static final String STRING_ID = "some-string-id-never-used";
 
     private Class<? extends Entity<?, ?>> entityClass;
-    private EntityColumnCache entityColumnCache;
+    private ColumnCache columnCache;
 
     @BeforeEach
     void setUp() {
         EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         entityClass = entity.getClass();
-        entityColumnCache = EntityColumnCache.initializeFor(entityClass);
+        columnCache = ColumnCache.initializeFor(entityClass);
     }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        new NullPointerTester().testAllPublicStaticMethods(EntityColumnCache.class);
-        new NullPointerTester().testAllPublicInstanceMethods(entityColumnCache);
+        new NullPointerTester().testAllPublicStaticMethods(ColumnCache.class);
+        new NullPointerTester().testAllPublicInstanceMethods(columnCache);
     }
 
     @Test
     @DisplayName("be empty on creation")
     void beEmptyOnCreation() {
-        assertEmpty(entityColumnCache);
+        assertEmpty(columnCache);
     }
 
-    private static void assertEmpty(EntityColumnCache cache) {
+    private static void assertEmpty(ColumnCache cache) {
         assertTrue(cache.isEmpty());
     }
 
-    private static void assertNotEmpty(EntityColumnCache cache) {
+    private static void assertNotEmpty(ColumnCache cache) {
         assertFalse(cache.isEmpty());
     }
 
@@ -80,11 +80,11 @@ class EntityColumnCacheTest {
     @Test
     @DisplayName("cache columns on first access")
     void cacheOnFirstAccess() {
-        EntityColumnCache cacheForGetAll = EntityColumnCache.initializeFor(entityClass);
-        cacheForGetAll.getColumns();
+        ColumnCache cacheForGetAll = ColumnCache.initializeFor(entityClass);
+        cacheForGetAll.columns();
         assertNotEmpty(cacheForGetAll);
 
-        EntityColumnCache cacheForFind = EntityColumnCache.initializeFor(entityClass);
+        ColumnCache cacheForFind = ColumnCache.initializeFor(entityClass);
         cacheForFind.findColumn("floatNull");
         assertNotEmpty(cacheForFind);
     }
@@ -92,15 +92,15 @@ class EntityColumnCacheTest {
     @Test
     @DisplayName("allow to forcefully cache columns")
     void forcefullyCache() {
-        entityColumnCache.ensureColumnsCached();
-        assertNotEmpty(entityColumnCache);
+        columnCache.ensureColumnsCached();
+        assertNotEmpty(columnCache);
     }
 
     @Test
     @DisplayName("retrieve column metadata from given class")
     void getColumnMetadata() {
         String existingColumnName = "floatNull";
-        EntityColumn retrievedColumn = entityColumnCache.findColumn(existingColumnName);
+        EntityColumn retrievedColumn = columnCache.findColumn(existingColumnName);
         assertNotNull(retrievedColumn);
         assertEquals(existingColumnName, retrievedColumn.name());
     }
@@ -110,13 +110,13 @@ class EntityColumnCacheTest {
     void notGetNonExisting() {
         String nonExistingColumnName = "foo";
         assertThrows(IllegalArgumentException.class,
-                     () -> entityColumnCache.findColumn(nonExistingColumnName));
+                     () -> columnCache.findColumn(nonExistingColumnName));
     }
 
     @Test
     @DisplayName("retain stored columns order")
     void retainOrder() {
-        Collection<EntityColumn> columnsFromCache = entityColumnCache.getColumns();
+        Collection<EntityColumn> columnsFromCache = columnCache.columns();
         assertNotNull(columnsFromCache);
 
         Collection<EntityColumn> columnsViaUtil = getAllColumns(entityClass);

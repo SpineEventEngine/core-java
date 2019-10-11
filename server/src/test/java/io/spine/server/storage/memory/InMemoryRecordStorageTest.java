@@ -45,7 +45,7 @@ public class InMemoryRecordStorageTest
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(Project.class),
                                ProjectId.class);
-        return new InMemoryRecordStorage<>(spec, false, cls);
+        return new InMemoryRecordStorage<>(spec, cls, false);
     }
 
     @Override

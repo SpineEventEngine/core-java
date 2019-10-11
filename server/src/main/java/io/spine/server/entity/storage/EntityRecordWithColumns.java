@@ -96,7 +96,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
                                                  RecordStorage<?> storage) {
-        Collection<EntityColumn> entityColumns = storage.entityColumns();
+        Collection<EntityColumn> entityColumns = storage.columns();
         Map<String, EntityColumn.MemoizedValue> columns =
                 extractColumnValues(entity, entityColumns);
         return of(record, columns);
@@ -137,7 +137,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Obtains the memorized value of the entity column
+     * Obtains the memoized value of the entity column
      * by the specified {@linkplain EntityColumn#name() name}.
      *
      * @param columnName the stored column name

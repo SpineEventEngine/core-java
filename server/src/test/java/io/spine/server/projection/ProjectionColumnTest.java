@@ -21,8 +21,8 @@
 package io.spine.server.projection;
 
 import io.spine.core.Version;
+import io.spine.server.entity.storage.ColumnCache;
 import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.projection.given.SavingProjection;
 import io.spine.server.storage.StorageField;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +54,7 @@ class ProjectionColumnTest {
     private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
                                         StorageField columnName,
                                         Class<?> columnType) {
-        EntityColumnCache cache = EntityColumnCache.initializeFor(projectionType);
+        ColumnCache cache = ColumnCache.initializeFor(projectionType);
         EntityColumn column = cache.findColumn(columnName.toString());
         assertThat(column).isNotNull();
         assertThat(column.type()).isEqualTo(columnType);

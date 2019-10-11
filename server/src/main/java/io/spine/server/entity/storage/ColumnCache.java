@@ -39,7 +39,7 @@ import static java.util.Collections.synchronizedMap;
  * {@link Entity} class.
  *
  * <p>The cache remains empty on creation. The {@linkplain EntityColumn column metadata} is
- * retrieved on the first access to the {@linkplain EntityColumnCache cache} instance and then
+ * retrieved on the first access to the {@linkplain ColumnCache cache} instance and then
  * stored in it.
  *
  * <p>The order in which {@link EntityColumn entity columns} are stored, is retained for
@@ -50,7 +50,7 @@ import static java.util.Collections.synchronizedMap;
  */
 @Internal
 @Experimental
-public final class EntityColumnCache {
+public final class ColumnCache {
 
     private final Class<? extends Entity<?, ?>> entityClass;
     private boolean columnsCached = false;
@@ -68,7 +68,7 @@ public final class EntityColumnCache {
     private final Map<String, EntityColumn> entityColumnData =
             synchronizedMap(new LinkedHashMap<>());
 
-    private EntityColumnCache(Class<? extends Entity<?, ?>> entityClass) {
+    private ColumnCache(Class<? extends Entity<?, ?>> entityClass) {
         this.entityClass = entityClass;
     }
 
@@ -84,16 +84,16 @@ public final class EntityColumnCache {
      *         cached
      * @return new instance
      */
-    public static EntityColumnCache initializeFor(Class<? extends Entity<?, ?>> entityClass) {
+    public static ColumnCache initializeFor(Class<? extends Entity<?, ?>> entityClass) {
         checkNotNull(entityClass);
-        return new EntityColumnCache(entityClass);
+        return new ColumnCache(entityClass);
     }
 
     /**
      * Finds cached {@linkplain EntityColumn metadata} for the entity column with a given name.
      *
      * <p>If the {@linkplain EntityColumn column metadata} is not yet obtained and cached, this method
-     * will {@linkplain EntityColumnCache#ensureColumnsCached() retrieve and cache it}.
+     * will {@linkplain ColumnCache#ensureColumnsCached() retrieve and cache it}.
      *
      * <p>If there is no {@link EntityColumn column} with the given name in the {@link Entity}
      * class managed by this cache, the method will throw {@link IllegalArgumentException}.
@@ -122,12 +122,12 @@ public final class EntityColumnCache {
      * by this cache.
      *
      * <p>If the {@linkplain EntityColumn column metadata} is not yet obtained and cached, this
-     * method will {@linkplain EntityColumnCache#ensureColumnsCached() retrieve and cache it}.
+     * method will {@linkplain ColumnCache#ensureColumnsCached() retrieve and cache it}.
      *
      * @return {@linkplain EntityColumn entity column} {@link Collection} for the managed
      *         {@link Entity} class
      */
-    public Collection<EntityColumn> getColumns() {
+    public Collection<EntityColumn> columns() {
         ensureColumnsCached();
         return entityColumnData.values();
     }
@@ -173,7 +173,7 @@ public final class EntityColumnCache {
 
     /**
      * Stores {@linkplain EntityColumn entity columns} from the {@link Iterable} to the inner
-     * {@link EntityColumnCache#entityColumnData cache}.
+     * {@link ColumnCache#entityColumnData cache}.
      *
      * @param columns
      *         {@linkplain EntityColumn columns} to store
