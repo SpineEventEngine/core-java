@@ -125,7 +125,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      *         if there is no column with the specified name
      */
     @Internal
-    public Object storageField(String columnName) {
+    public Object columnValue(String columnName) {
         checkNotNull(columnName);
         if (!storageFields.containsKey(columnName)) {
             throw newIllegalStateException("Column with the stored name `%s` was not found.",

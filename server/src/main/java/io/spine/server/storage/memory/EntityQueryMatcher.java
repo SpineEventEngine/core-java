@@ -168,7 +168,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
             return Optional.empty();
         }
 
-        Object value = record.storageField(columnName);
+        Object value = record.columnValue(columnName);
         return Optional.of(value);
     }
 }
