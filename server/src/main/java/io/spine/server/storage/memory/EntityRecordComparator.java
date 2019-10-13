@@ -33,6 +33,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A comparator for sorting the contents of {@link TenantRecords}
  * in a provided {@link OrderBy order}.
+ *
+ * ...
+ *
+ * @implNote While more sophisticated storage implementations can order records by
+ *         non-{@link Comparable} fields like {@link com.google.protobuf.Message message}-type
+ *         fields, the in-memory implementation stores all entity records "as-is" which means
+ *         trying to {@linkplain OrderBy order by} non-comparable fields will lead to an exception
+ *         being thrown.
  */
 @SuppressWarnings("ComparatorNotSerializable")
 final class EntityRecordComparator implements Comparator<EntityRecordWithColumns> {
