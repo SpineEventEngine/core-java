@@ -25,25 +25,43 @@ import io.spine.server.entity.Entity;
 
 import java.util.function.Function;
 
+import static io.spine.util.Exceptions.newIllegalStateException;
+
 public final class Column {
 
+    private final String name;
+    private final Class<?> type;
+    private final Getter getter;
+
+    Column(String name, Class<?> type, Getter getter) {
+        this.name = name;
+        this.type = type;
+        this.getter = getter;
+    }
+
     public String name() {
-        return null;
+        return name;
     }
 
     public Class<?> type() {
-        return null;
+        return type;
     }
 
     public Object valueIn(Entity<?, ? extends Message> entity) {
-        return null;
+        return getter.apply(entity);
     }
 
-    public PersistenceStrategy persistenceStrategy() {
-        return null;
-    }
+    public interface Getter extends Function<Entity<?, ? extends Message>, Object> {
 
-    private interface Getter extends Function<Entity<?, ? extends Message>, Object> {
+        Object invoke(Entity<?, ? extends Message> entity) throws Exception;
 
+        @Override
+        default Object apply(Entity<?, ? extends Message> entity) {
+             try {
+                 return invoke(entity);
+             } catch (Exception e) {
+                 throw newIllegalStateException(e, "Error on column getter invocation.");
+             }
+        }
     }
 }

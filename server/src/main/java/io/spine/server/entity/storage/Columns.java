@@ -20,11 +20,11 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,7 +39,6 @@ public final class Columns {
      */
     // TODO:2019-10-11:dmitry.kuzmin:WIP Think of creating a tiny type for column name.
     private final Map<String, Column> columns;
-
     private final EntityClass<?> entityClass;
 
     private Columns(Map<String, Column> columns, EntityClass<?> entityClass) {
@@ -48,7 +47,7 @@ public final class Columns {
     }
 
     public static Columns of(EntityClass<?> entityClass) {
-        Map<String, Column> columns = new HashMap<>();
+        ImmutableMap<String, Column> columns = ColumnIntrospector.columnsOf(entityClass);
         return new Columns(columns, entityClass);
     }
 
@@ -63,28 +62,12 @@ public final class Columns {
         return result;
     }
 
-    public Map<Column, Object> valuesIn(Entity<?, ?> source) {
-        Map<Column, Object> result =
-                columns.values()
-                       .stream()
-                       .collect(toMap(column -> column,
-                                      column -> column.valueIn(source)));
-        return result;
-    }
-
-    public Map<String, Object> valuesForPersistence(Entity<?, ?> source) {
+    public Map<String, Object> valuesIn(Entity<?, ?> source) {
         Map<String, Object> result =
                 columns.values()
                        .stream()
                        .collect(toMap(Column::name,
-                                      column -> valueForPersistence(source, column)));
-        return result;
-    }
-
-    private static Object valueForPersistence(Entity<?, ?> source, Column column) {
-        Object columnValue = column.valueIn(source);
-        Object result = column.persistenceStrategy()
-                              .apply(columnValue);
+                                      column -> column.valueIn(source)));
         return result;
     }
 

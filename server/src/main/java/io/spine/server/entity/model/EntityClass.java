@@ -21,6 +21,7 @@
 package io.spine.server.entity.model;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.server.entity.DefaultEntityFactory;
@@ -30,6 +31,7 @@ import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.system.server.EntityTypeName;
+import io.spine.type.MessageType;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -159,6 +161,12 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public final Class<? extends Message> stateClass() {
         return stateClass;
+    }
+
+    public final MessageType stateMessageType() {
+        Descriptor descriptor = defaultState.getDescriptorForType();
+        MessageType result = new MessageType(descriptor);
+        return result;
     }
 
     /**

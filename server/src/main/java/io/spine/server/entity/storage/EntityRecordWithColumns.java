@@ -77,7 +77,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
                                                  Entity<?, ?> entity,
                                                  RecordStorage<?> storage) {
         Columns columns = storage.columns();
-        Map<String, Object> storageFields = columns.valuesForPersistence(entity);
+        Map<String, Object> storageFields = columns.valuesIn(entity);
         return of(record, storageFields);
     }
 

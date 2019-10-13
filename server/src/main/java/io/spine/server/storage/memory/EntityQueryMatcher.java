@@ -157,9 +157,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         } else {
             filterValue = wrappedValue;
         }
-        Object columnValue = column.persistenceStrategy()
-                                   .apply(filterValue);
-        boolean result = eval(actualValue, filter.getOperator(), columnValue);
+        boolean result = eval(actualValue, filter.getOperator(), filterValue);
         return result;
     }
 
