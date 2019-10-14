@@ -22,9 +22,8 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.code.java.PackageName;
+import io.spine.base.EntityWithColumns;
 import io.spine.code.proto.ColumnOption;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.model.EntityClass;
@@ -32,13 +31,10 @@ import io.spine.type.MessageType;
 
 import java.lang.reflect.Method;
 
-import static io.spine.reflect.Types.allImplementedInterfaces;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 final class ColumnIntrospector {
-
-    private static final String ENTITY_WITH_COLUMNS_NAME_PATTERN = "%sWithColumns";
 
     private final EntityClass<?> entityClass;
 
@@ -67,20 +63,11 @@ final class ColumnIntrospector {
         String columnName = field.name()
                                  .value();
         Class<?> theEntityClass = entityClass.value();
-        ImmutableSet<Class<?>> interfaces = allImplementedInterfaces(theEntityClass);
         Class<? extends Message> stateClass = entityClass.stateClass();
-        String interfaceName =
-                format(ENTITY_WITH_COLUMNS_NAME_PATTERN, stateClass.getSimpleName());
-
-        // The generated `...WithColumns` interface will have the same package as the state type.
-        PackageName javaPackage = entityClass.stateType()
-                                             .javaPackage();
-        String fullyQualifiedName = format("%s.%s", javaPackage, interfaceName);
 
         @SuppressWarnings("LocalVariableNamingConvention")
-        boolean implementsEntityWithColumns = interfaces
-                .stream()
-                .anyMatch(clazz -> fullyQualifiedName.equals(clazz.getSimpleName()));
+        boolean implementsEntityWithColumns =
+                EntityWithColumns.class.isAssignableFrom(theEntityClass);
         String getterName = getterName(field);
         try {
             Method method = implementsEntityWithColumns
