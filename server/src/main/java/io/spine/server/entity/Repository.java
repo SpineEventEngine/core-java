@@ -173,7 +173,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * managed by this repository.
      */
     public final TypeUrl entityStateType() {
-        return entityModelClass().stateType();
+        return entityModelClass().stateTypeUrl();
     }
 
     /**

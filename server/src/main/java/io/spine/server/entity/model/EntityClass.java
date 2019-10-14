@@ -163,7 +163,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         return stateClass;
     }
 
-    public final MessageType stateMessageType() {
+    public final MessageType stateType() {
         Descriptor descriptor = defaultState.getDescriptorForType();
         MessageType result = new MessageType(descriptor);
         return result;
@@ -198,7 +198,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains type URL of the state of entities of this class.
      */
-    public final TypeUrl stateType() {
+    public final TypeUrl stateTypeUrl() {
         return entityStateType;
     }
 

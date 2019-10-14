@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
+import io.spine.code.java.PackageName;
 import io.spine.code.proto.ColumnOption;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.model.EntityClass;
@@ -52,7 +53,7 @@ final class ColumnIntrospector {
 
     private ImmutableMap<String, Column> columns() {
         ImmutableMap.Builder<String, Column> columns = ImmutableMap.builder();
-        MessageType stateType = entityClass.stateMessageType();
+        MessageType stateType = entityClass.stateType();
         ImmutableList<FieldDeclaration> columnFields = ColumnOption.columnsOf(stateType);
         columnFields.forEach(field -> addToMap(field, columns, entityClass));
         ImmutableMap<String, Column> result = columns.build();
@@ -70,18 +71,19 @@ final class ColumnIntrospector {
         String interfaceName =
                 format(ENTITY_WITH_COLUMNS_NAME_PATTERN, stateClass.getSimpleName());
 
+        // The generated `...WithColumns` interface will have the same package as the state type.
+        PackageName javaPackage = entityClass.stateType()
+                                             .javaPackage();
+        String fullyQualifiedName = format("%s.%s", javaPackage, interfaceName);
+
         @SuppressWarnings("LocalVariableNamingConvention")
         boolean implementsEntityWithColumns = stream(interfaces)
-                .anyMatch(clazz -> interfaceName.equals(clazz.getSimpleName()));
-
+                .anyMatch(clazz -> fullyQualifiedName.equals(clazz.getSimpleName()));
         String getterName = getterName(field);
         try {
-            Method method;
-            if (implementsEntityWithColumns) {
-                method = theEntityClass.getMethod(getterName);
-             } else {
-                method = stateClass.getMethod(getterName);
-            }
+            Method method = implementsEntityWithColumns
+                            ? theEntityClass.getMethod(getterName)
+                            : stateClass.getMethod(getterName);
             Class<?> columnType = method.getReturnType();
             Column.Getter columnGetter = entity -> method.invoke(entity);
             Column column = new Column(columnName, columnType, columnGetter);
