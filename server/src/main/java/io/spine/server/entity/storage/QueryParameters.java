@@ -32,7 +32,7 @@ import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Optional;
 
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.eq;
@@ -89,12 +89,16 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      *         lifecycle flags} filters
      */
     public static QueryParameters activeEntityQueryParams(RecordStorage<?> storage) {
-        Map<String, Column> lifecycleColumns = storage.lifecycleColumns();
-        Column archivedColumn = lifecycleColumns.get(archived.name());
-        Column deletedColumn = lifecycleColumns.get(deleted.name());
+        Columns lifecycleColumns = storage.lifecycleColumns();
+        Optional<Column> archivedColumn = lifecycleColumns.find(archived.name());
+        Optional<Column> deletedColumn = lifecycleColumns.find(deleted.name());
+        boolean entityHasLifecycle = archivedColumn.isPresent() && deletedColumn.isPresent();
+        if (!entityHasLifecycle) {
+            return newBuilder().build();
+        }
         CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(archivedColumn, eq(archivedColumn.name(), false),
-                                     deletedColumn, eq(deletedColumn.name(), false)),
+                ImmutableMultimap.of(archivedColumn.get(), eq(archivedColumn.get().name(), false),
+                                     deletedColumn.get(), eq(deletedColumn.get().name(), false)),
                 ALL
         );
         return newBuilder().add(lifecycleParameter).build();

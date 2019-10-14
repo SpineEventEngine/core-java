@@ -18,9 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.entity;
 
-import java.util.function.Function;
+import com.google.protobuf.Message;
+import io.spine.server.entity.storage.SystemColumn;
 
-public interface PersistenceStrategy extends Function<Object, Object> {
+public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> {
+
+    @SystemColumn
+    default boolean getArchived() {
+        return isArchived();
+    }
+
+    @SystemColumn
+    default boolean getDeleted() {
+        return isDeleted();
+    }
 }

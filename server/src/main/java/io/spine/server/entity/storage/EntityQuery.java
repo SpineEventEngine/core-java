@@ -46,7 +46,7 @@ import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryPa
  * {@link io.spine.server.storage.RecordStorage RecordStorage}.
  *
  * <p>The query contains the acceptable values of the record IDs and the
- * {@linkplain EntityColumn entity columns}.
+ * {@linkplain Column entity columns}.
  *
  * <p>A storage may ignore the query or throw an exception if it's specified. By default,
  * {@link io.spine.server.storage.RecordStorage RecordStorage} supports the Entity queries.
@@ -57,7 +57,7 @@ import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryPa
  * <p>Empty {@linkplain EntityQuery#getParameters() query parameters} are not considered when
  * the actual data query is performed as well as the parameters which have no accepted values.
  *
- * <p>If the {@link EntityColumn} specified in the query is absent in a record,
+ * <p>If the {@link Column} specified in the query is absent in a record,
  * the record is considered <b>not matching</b>.
  *
  * <p>If both the {@linkplain EntityQuery#getIds() accepted IDs set} and
@@ -86,8 +86,8 @@ public final class EntityQuery<I> implements Serializable {
      * @param ids
      *         the accepted ID values
      * @param parameters
-     *         the values of the {@link EntityColumn}s stored in a mapping of the
-     *         {@link EntityColumn}'s metadata to the (multiple) acceptable values;
+     *         the values of the {@link Column}s stored in a mapping of the
+     *         {@link Column}'s metadata to the (multiple) acceptable values;
      *         if there are no values, all the values are matched upon such a column
      * @return new instance of {@code EntityQuery}
      */
@@ -111,7 +111,7 @@ public final class EntityQuery<I> implements Serializable {
     }
 
     /**
-     * Obtains a {@link Map} of the {@link EntityColumn} metadata to the column required value.
+     * Obtains a {@link Map} of the {@link Column} metadata to the column required value.
      */
     public QueryParameters getParameters() {
         return parameters;

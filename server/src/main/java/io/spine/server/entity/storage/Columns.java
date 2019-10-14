@@ -24,7 +24,9 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.storage.LifecycleFlagField;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -47,8 +49,11 @@ public final class Columns {
     }
 
     public static Columns of(EntityClass<?> entityClass) {
-        ImmutableMap<String, Column> columns = ColumnIntrospector.columnsOf(entityClass);
-        return new Columns(columns, entityClass);
+        ColumnIntrospector introspector = new ColumnIntrospector(entityClass);
+        ImmutableMap.Builder<String, Column> columns = ImmutableMap.builder();
+        columns.putAll(introspector.systemColumns());
+        columns.putAll(introspector.protoColumns());
+        return new Columns(columns.build(), entityClass);
     }
 
     public Column get(String columnName) {
@@ -69,6 +74,19 @@ public final class Columns {
                        .collect(toMap(Column::name,
                                       column -> column.valueIn(source)));
         return result;
+    }
+
+    /**
+     * Returns a subset of columns corresponding to the lifecycle of the entity.
+     */
+    public Columns lifecycleColumns() {
+        Map<String, Column> result = new HashMap<>();
+        for (LifecycleFlagField field : LifecycleFlagField.values()) {
+            String name = field.name();
+            Optional<Column> column = find(name);
+            column.ifPresent(col -> result.put(name, col));
+        }
+        return new Columns(result, entityClass);
     }
 
     private IllegalStateException columnNotFound(String columnName) {

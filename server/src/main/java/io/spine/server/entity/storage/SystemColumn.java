@@ -20,26 +20,26 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.annotation.Internal;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 /**
- * Enumeration of persistence methods for the {@linkplain Enumerated enumerated values}.
+ * ...
  *
- * <p>The methods define the form in which the {@link Enum} objects are persisted in the data
- * storage as well as the conversion function between the {@link Enum} value and the persistence
- * value.
+ * <p>A number of Spine-custom columns is shared between different entities or can't be stored to
+ * Protobuf for some other reasons. These columns are marked with this annotation and are processed
+ * by the column introspector separately.
  *
- * @see Enumerated
+ * <p>The methods annotated with this annotation should conform to the same {@code get...()} syntax
+ * as the Protobuf-based columns.
  */
-public enum EnumType {
-
-    /**
-     * A persistence method which uses Java {@link Enum}'s {@linkplain Enum#ordinal() ordinal} to
-     * convert the {@link Enum} into the {@link Integer} value to save in the storage.
-     */
-    ORDINAL,
-
-    /**
-     * A persistence method which uses {@link Enum}'s {@linkplain Enum#name() name} property to
-     * store the {@link Enum} value in the form of Java {@link String}.
-     */
-    STRING
+@Target(METHOD)
+@Retention(RUNTIME)
+@Internal
+public @interface SystemColumn {
 }

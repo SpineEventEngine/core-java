@@ -22,10 +22,10 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.TheOldColumn;
+import io.spine.server.entity.storage.SystemColumn;
 
 /**
- * Applies {@link TheOldColumn} annotation to {@code getVersion} method.
+ * Applies the {@link SystemColumn} annotation to {@code getVersion} method.
  *
  * <p>The interface is implemented by {@link Entity entities} that have a stored version.
  */
@@ -34,9 +34,9 @@ public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
     /**
      * {@inheritDoc}
      *
-     * <p>Overrides to add the {@code Column} annotation.
+     * <p>Overrides to add the {@link SystemColumn} annotation.
      */
     @Override
-    @TheOldColumn
+    @SystemColumn
     Version getVersion();
 }

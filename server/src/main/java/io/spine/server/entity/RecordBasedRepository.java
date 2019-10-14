@@ -31,11 +31,9 @@ import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
-import io.spine.server.BoundedContext;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.TheOldColumn;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -99,20 +97,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         RecordStorage<I> storage = (RecordStorage<I>) storage();
         return storage;
-    }
-
-    /**
-     * Initializes the repository by caching {@link TheOldColumn} definitions of
-     * the {@link Entity} class managed by this repository.
-     *
-     * @param context
-     *         the Bounded Context of this repository
-     */
-    @Override
-    @OverridingMethodsMustInvokeSuper
-    public void registerWith(BoundedContext context) {
-        checkNotNull(context);
-        super.registerWith(context);
     }
 
     @OverridingMethodsMustInvokeSuper

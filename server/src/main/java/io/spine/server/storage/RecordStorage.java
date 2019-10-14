@@ -34,15 +34,11 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.Columns;
-import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.TheOldColumn;
-import io.spine.server.stand.AggregateStateId;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -125,7 +121,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Writes a record and its {@linkplain EntityColumn entity columns} into the storage.
+     * Writes a record and its {@linkplain Column columns} into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
@@ -148,7 +144,7 @@ public abstract class RecordStorage<I>
 
     @Override
     public void write(I id, EntityRecord record) {
-        EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
+        EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record, this);
         write(id, recordWithStorageFields);
     }
 
@@ -187,10 +183,7 @@ public abstract class RecordStorage<I>
                                          .build();
             write(id, updated);
         } else {
-            // The AggregateStateId is a special case which is not handled by the Identifier class.
-            String idStr = id instanceof AggregateStateId
-                           ? id.toString()
-                           : Identifier.toString(id);
+            String idStr = Identifier.toString(id);
             throw newIllegalStateException("Unable to load record for entity with ID: %s", idStr);
         }
     }
@@ -277,11 +270,10 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Returns a {@code Collection} of {@linkplain TheOldColumn columns} of the {@link Entity} managed
-     * by this storage.
+     * Returns the columns of the managed {@link Entity}.
      *
-     * @return a {@code Collection} of managed {@link Entity} columns
-     * @see EntityColumn
+     * @see Column
+     * @see io.spine.code.proto.ColumnOption
      */
     @Internal
     public Columns columns() {
@@ -292,7 +284,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Returns a {@code Map} of {@linkplain EntityColumn columns} corresponded to the
+     * Returns a {@code Map} of {@linkplain Column columns} corresponded to the
      * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed
      * by this storage.
      *
@@ -303,14 +295,8 @@ public abstract class RecordStorage<I>
      * @see LifecycleFlagField
      */
     @Internal
-    public Map<String, Column> lifecycleColumns() {
-        Map<String, Column> result = new HashMap<>();
-        for (LifecycleFlagField field : LifecycleFlagField.values()) {
-            String name = field.name();
-            Column column = columns().get(name);
-            result.put(name, column);
-        }
-        return result;
+    public Columns lifecycleColumns() {
+        return columns().lifecycleColumns();
     }
 
     public EntityClass<?> entityClass() {
@@ -367,7 +353,7 @@ public abstract class RecordStorage<I>
     readAllRecords(EntityQuery<I> query, ResponseFormat format);
 
     /**
-     * Writes a record and the associated {@link EntityColumn} values into the storage.
+     * Writes a record and the associated {@link Column} values into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *

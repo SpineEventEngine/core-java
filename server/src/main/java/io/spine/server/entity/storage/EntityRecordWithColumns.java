@@ -30,14 +30,18 @@ import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.storage.VersionField.version;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A value of {@link EntityRecord} associated with its {@linkplain EntityColumn columns}.
+ * A value of {@link EntityRecord} associated with the values of its {@linkplain Column columns}.
  */
 public final class EntityRecordWithColumns implements WithLifecycle, Serializable {
 
@@ -60,18 +64,6 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Creates an instance with no {@linkplain EntityColumn columns}.
-     *
-     * @param record
-     *         {@link EntityRecord} to pack
-     * @see #hasColumns()
-     */
-    private EntityRecordWithColumns(EntityRecord record) {
-        this.record = checkNotNull(record);
-        this.storageFields = ImmutableMap.of();
-    }
-
-    /**
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
@@ -82,15 +74,49 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Creates an instance with no {@linkplain EntityColumn columns}.
+     * ...
      *
-     * <p>An object created with this factory method will always return {@code false} on
-     * {@link #hasColumns()}.
-     *
-     * @see #hasColumns()
+     * <p>Manually updates the entity lifecycle and version storage fields based on the passed
+     * {@link EntityRecord}.
      */
-    public static EntityRecordWithColumns of(EntityRecord record) {
-        return new EntityRecordWithColumns(record);
+    public static EntityRecordWithColumns of(EntityRecord record, RecordStorage<?> storage) {
+        Map<String, Object> storageFields = new HashMap<>();
+        storeLifecycle(storageFields, record, storage);
+        storeVersion(storageFields, record, storage);
+        return new EntityRecordWithColumns(record, storageFields);
+    }
+
+    private static void storeLifecycle(Map<String, Object> storageFields,
+                                       EntityRecord record,
+                                       RecordStorage<?> storage) {
+        Columns columns = storage.lifecycleColumns();
+        String archivedColumn = archived.name();
+        boolean archivedPresent = columns.find(archivedColumn)
+                                         .isPresent();
+        String deletedColumn = deleted.name();
+        boolean deletedPresent = columns.find(deletedColumn)
+                                        .isPresent();
+        if (archivedPresent && deletedPresent) {
+            boolean archived = record.getLifecycleFlags()
+                                     .getArchived();
+            storageFields.put(archivedColumn, archived);
+
+            boolean deleted = record.getLifecycleFlags()
+                                    .getDeleted();
+            storageFields.put(deletedColumn, deleted);
+        }
+    }
+
+    private static void storeVersion(Map<String, Object> storageFields,
+                                     EntityRecord record,
+                                     RecordStorage<?> storage) {
+        String versionColumn = version.name();
+        boolean versionPresent = storage.columns()
+                                        .find(versionColumn)
+                                        .isPresent();
+        if (versionPresent) {
+            storageFields.put(versionColumn, record.getVersion());
+        }
     }
 
     /**
@@ -106,7 +132,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Obtains entity column {@linkplain EntityColumn#name() names} for the record.
+     * Obtains entity column {@linkplain Column#name() names} for the record.
      *
      * @return the entity column names
      */
@@ -135,10 +161,9 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Determines if there are any {@linkplain EntityColumn columns} associated with this record.
+     * Determines if there are any {@linkplain Column columns} associated with this record.
      *
-     * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
-     * by the storage.
+     * <p>If returns {@code false}, the columns are not considered by the storage.
      *
      * @return {@code true} if the object was constructed using
      *  {@link #create(EntityRecord, Entity, RecordStorage)} and the entity has columns;

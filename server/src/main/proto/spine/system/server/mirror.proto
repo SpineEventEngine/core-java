@@ -36,6 +36,8 @@ message Mirror {
 
     // The version of the aggregate.
     core.Version version = 5;
+
+    string aggregate_type = 6 [(column) = true];
 }
 
 // An ID of a mirror projection.

@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.TheOldColumn;
+import io.spine.server.entity.storage.SystemColumn;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,12 +35,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * An entity for storing an event.
  *
  * <p>An underlying event doesn't contain {@linkplain Event#clearEnrichments() enrichments}.
- *
- * @apiNote This class is public so that {@link io.spine.server.entity.storage.EntityColumn
- *         EntityColumn} can access its column declarations.
  */
 @Internal
-public final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
+final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
 
     /** Cached value of the event message type name. */
     private @Nullable TypeName typeName;
@@ -66,7 +63,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, Event.Bui
      * @return the time when the underlying event was fired
      * @see ColumnName#created
      */
-    @TheOldColumn
+    @SystemColumn
     public Timestamp getCreated() {
         return state().context()
                       .getTimestamp();
@@ -80,7 +77,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, Event.Bui
      * @return the {@link TypeName} value of the event represented by this entity
      * @see ColumnName#type
      */
-    @TheOldColumn
+    @SystemColumn
     public String getType() {
         if (typeName == null) {
             typeName = EventEnvelope.of(state())

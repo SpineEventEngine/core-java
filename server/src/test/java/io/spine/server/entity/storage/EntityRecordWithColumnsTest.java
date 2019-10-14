@@ -44,7 +44,6 @@ import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static java.util.Collections.singletonMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -165,7 +164,7 @@ class EntityRecordWithColumnsTest {
             Collection<String> columnNames = record.columnNames();
             assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
-            assertEquals(memoizedValue, record.storageField(columnName));
+            assertEquals(memoizedValue, record.columnValue(columnName));
         }
     }
 
@@ -183,7 +182,7 @@ class EntityRecordWithColumnsTest {
     void throwOnNonExistentColumn() {
         EntityRecordWithColumns record = newEmptyRecord();
 
-        assertThrows(IllegalStateException.class, () -> record.storageField(""));
+        assertThrows(IllegalStateException.class, () -> record.columnValue(""));
     }
 
     @Test
