@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.code.java.PackageName;
 import io.spine.code.proto.ColumnOption;
@@ -31,9 +32,9 @@ import io.spine.type.MessageType;
 
 import java.lang.reflect.Method;
 
+import static io.spine.reflect.Types.allImplementedInterfaces;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
-import static java.util.Arrays.stream;
 
 final class ColumnIntrospector {
 
@@ -66,7 +67,7 @@ final class ColumnIntrospector {
         String columnName = field.name()
                                  .value();
         Class<?> theEntityClass = entityClass.value();
-        Class<?>[] interfaces = theEntityClass.getInterfaces();
+        ImmutableSet<Class<?>> interfaces = allImplementedInterfaces(theEntityClass);
         Class<? extends Message> stateClass = entityClass.stateClass();
         String interfaceName =
                 format(ENTITY_WITH_COLUMNS_NAME_PATTERN, stateClass.getSimpleName());
@@ -77,7 +78,8 @@ final class ColumnIntrospector {
         String fullyQualifiedName = format("%s.%s", javaPackage, interfaceName);
 
         @SuppressWarnings("LocalVariableNamingConvention")
-        boolean implementsEntityWithColumns = stream(interfaces)
+        boolean implementsEntityWithColumns = interfaces
+                .stream()
                 .anyMatch(clazz -> fullyQualifiedName.equals(clazz.getSimpleName()));
         String getterName = getterName(field);
         try {
