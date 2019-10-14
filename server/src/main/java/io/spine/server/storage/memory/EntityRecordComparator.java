@@ -26,9 +26,9 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import java.util.Comparator;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkNotDefault;
 
 /**
  * A comparator for sorting the contents of {@link TenantRecords}
@@ -63,9 +63,8 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
      *         if the provided {@code OrderBy} is a default instance
      */
     static Comparator<EntityRecordWithColumns> orderedBy(OrderBy orderBy) {
-        checkNotNull(orderBy);
-        checkArgument(!orderIsEmpty(orderBy),
-                      "An empty OrderBy instance cannot be mapped to an EntityRecordComparator.");
+        checkNotDefault(orderBy,
+                        "An empty OrderBy instance cannot be mapped to an EntityRecordComparator.");
         Direction direction = orderBy.getDirection();
         String columnName = orderBy.getColumn();
         if (direction == Direction.ASCENDING) {
@@ -82,10 +81,6 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
         return ascending(columnName).reversed();
     }
 
-    private static boolean orderIsEmpty(OrderBy orderBy) {
-        return orderBy.equals(OrderBy.getDefaultInstance());
-    }
-
     @Override
     public int compare(EntityRecordWithColumns a, EntityRecordWithColumns b) {
         checkNotNull(a);
@@ -99,7 +94,7 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
             return +1;
         }
         if (aValue instanceof Comparable) {
-            @SuppressWarnings({"unchecked", "rawtypes"}) // Logically correct.
+            @SuppressWarnings({"unchecked", "rawtypes"}) // For convenience.
                     int result = ((Comparable) aValue).compareTo(bValue);
             return result;
         }
