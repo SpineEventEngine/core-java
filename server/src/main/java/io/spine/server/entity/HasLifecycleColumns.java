@@ -25,11 +25,17 @@ import io.spine.server.entity.storage.SystemColumn;
 
 public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> {
 
+    /**
+     * Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#archived}.
+     */
     @SystemColumn
     default boolean getArchived() {
         return isArchived();
     }
 
+    /**
+     * Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#archived}.
+     */
     @SystemColumn
     default boolean getDeleted() {
         return isDeleted();

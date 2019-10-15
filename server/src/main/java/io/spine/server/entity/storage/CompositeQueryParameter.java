@@ -47,8 +47,8 @@ public final class CompositeQueryParameter implements Serializable {
 
     private static final Predicate<Column> isLifecycleColumn = column -> {
         checkNotNull(column);
-        boolean result = archived.name().equals(column.name())
-                || deleted.name().equals(column.name());
+        boolean result = archived.name().equals(column.name().value())
+                || deleted.name().equals(column.name().value());
         return result;
     };
 

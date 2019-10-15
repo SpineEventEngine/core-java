@@ -131,7 +131,8 @@ public final class EntityQueries {
         checkArgument(fieldPath.getFieldNameCount() == 1,
                       "Incorrect Entity Column name in Entity Filter: %s",
                       join(".", fieldPath.getFieldNameList()));
-        String columnName = fieldPath.getFieldName(0);
+        String column = fieldPath.getFieldName(0);
+        ColumnName columnName = ColumnName.of(column);
         return columns.get(columnName);
     }
 

@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -32,7 +33,6 @@ import io.spine.server.storage.RecordStorage;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -48,7 +48,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     private static final long serialVersionUID = 0L;
 
     private final EntityRecord record;
-    private final ImmutableMap<String, Object> storageFields;
+    private final ImmutableMap<ColumnName, Object> storageFields;
 
     /**
      * Creates a new instance with storage fields.
@@ -58,7 +58,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      * @param storageFields
      *         the storage fields to pack
      */
-    private EntityRecordWithColumns(EntityRecord record, Map<String, Object> storageFields) {
+    private EntityRecordWithColumns(EntityRecord record, Map<ColumnName, Object> storageFields) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(storageFields);
     }
@@ -69,7 +69,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
                                                  Entity<?, ?> entity,
                                                  RecordStorage<?> storage) {
         Columns columns = storage.columns();
-        Map<String, Object> storageFields = columns.valuesIn(entity);
+        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
         return of(record, storageFields);
     }
 
@@ -80,20 +80,20 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      * {@link EntityRecord}.
      */
     public static EntityRecordWithColumns of(EntityRecord record, RecordStorage<?> storage) {
-        Map<String, Object> storageFields = new HashMap<>();
+        Map<ColumnName, Object> storageFields = new HashMap<>();
         storeLifecycle(storageFields, record, storage);
         storeVersion(storageFields, record, storage);
         return new EntityRecordWithColumns(record, storageFields);
     }
 
-    private static void storeLifecycle(Map<String, Object> storageFields,
+    private static void storeLifecycle(Map<ColumnName, Object> storageFields,
                                        EntityRecord record,
                                        RecordStorage<?> storage) {
-        Columns columns = storage.lifecycleColumns();
-        String archivedColumn = archived.name();
+        Columns columns = storage.columns();
+        ColumnName archivedColumn = ColumnName.of(archived);
         boolean archivedPresent = columns.find(archivedColumn)
                                          .isPresent();
-        String deletedColumn = deleted.name();
+        ColumnName deletedColumn = ColumnName.of(deleted);
         boolean deletedPresent = columns.find(deletedColumn)
                                         .isPresent();
         if (archivedPresent && deletedPresent) {
@@ -107,10 +107,10 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
         }
     }
 
-    private static void storeVersion(Map<String, Object> storageFields,
+    private static void storeVersion(Map<ColumnName, Object> storageFields,
                                      EntityRecord record,
                                      RecordStorage<?> storage) {
-        String versionColumn = version.name();
+        ColumnName versionColumn = ColumnName.of(version);
         boolean versionPresent = storage.columns()
                                         .find(versionColumn)
                                         .isPresent();
@@ -123,7 +123,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      * Creates a new instance.
      */
     @VisibleForTesting
-    static EntityRecordWithColumns of(EntityRecord record, Map<String, Object> storageFields) {
+    static EntityRecordWithColumns of(EntityRecord record, Map<ColumnName, Object> storageFields) {
         return new EntityRecordWithColumns(record, storageFields);
     }
 
@@ -132,29 +132,28 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Obtains entity column {@linkplain Column#name() names} for the record.
+     * Obtains the names of storage fields in the record.
      *
-     * @return the entity column names
+     * @return the storage field names
      */
-    public Set<String> columnNames() {
+    public ImmutableSet<ColumnName> columnNames() {
         return storageFields.keySet();
     }
 
     /**
-     * Obtains the memoized value of the entity column by the specified
-     * {@linkplain Column#name() name}.
+     * Obtains the value of the storage field by the specified column name.
      *
      * @param columnName
      *         the column name
-     * @return the memoized value of the column
+     * @return the storage field value
      * @throws IllegalStateException
      *         if there is no column with the specified name
      */
     @Internal
-    public Object columnValue(String columnName) {
+    public Object columnValue(ColumnName columnName) {
         checkNotNull(columnName);
         if (!storageFields.containsKey(columnName)) {
-            throw newIllegalStateException("Column with the stored name `%s` was not found.",
+            throw newIllegalStateException("Column with the name `%s` was not found.",
                                            columnName);
         }
         return storageFields.get(columnName);
@@ -173,7 +172,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
         return !storageFields.isEmpty();
     }
 
-    public boolean hasColumn(String name) {
+    public boolean hasColumn(ColumnName name) {
         boolean result = storageFields.containsKey(name);
         return result;
     }

@@ -39,36 +39,35 @@ public final class Columns {
     /**
      * A map of entity columns by their name.
      */
-    // TODO:2019-10-11:dmitry.kuzmin:WIP Think of creating a tiny type for column name.
-    private final Map<String, Column> columns;
+    private final Map<ColumnName, Column> columns;
     private final EntityClass<?> entityClass;
 
-    private Columns(Map<String, Column> columns, EntityClass<?> entityClass) {
+    private Columns(Map<ColumnName, Column> columns, EntityClass<?> entityClass) {
         this.columns = columns;
         this.entityClass = entityClass;
     }
 
     public static Columns of(EntityClass<?> entityClass) {
         ColumnIntrospector introspector = new ColumnIntrospector(entityClass);
-        ImmutableMap.Builder<String, Column> columns = ImmutableMap.builder();
+        ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
         columns.putAll(introspector.systemColumns());
         columns.putAll(introspector.protoColumns());
         return new Columns(columns.build(), entityClass);
     }
 
-    public Column get(String columnName) {
+    public Column get(ColumnName columnName) {
         Column result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
         return result;
     }
 
-    public Optional<Column> find(String columnName) {
+    public Optional<Column> find(ColumnName columnName) {
         Column column = columns.get(columnName);
         Optional<Column> result = Optional.ofNullable(column);
         return result;
     }
 
-    public Map<String, Object> valuesIn(Entity<?, ?> source) {
-        Map<String, Object> result =
+    public Map<ColumnName, Object> valuesIn(Entity<?, ?> source) {
+        Map<ColumnName, Object> result =
                 columns.values()
                        .stream()
                        .collect(toMap(Column::name,
@@ -80,16 +79,16 @@ public final class Columns {
      * Returns a subset of columns corresponding to the lifecycle of the entity.
      */
     public Columns lifecycleColumns() {
-        Map<String, Column> result = new HashMap<>();
+        Map<ColumnName, Column> result = new HashMap<>();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
-            String name = field.name();
+            ColumnName name = ColumnName.of(field.name());
             Optional<Column> column = find(name);
             column.ifPresent(col -> result.put(name, col));
         }
         return new Columns(result, entityClass);
     }
 
-    private IllegalStateException columnNotFound(String columnName) {
+    private IllegalStateException columnNotFound(ColumnName columnName) {
         throw newIllegalStateException(
                 "A column with name '%s' not found in entity state class `%s`.",
                 columnName, entityClass.stateClass()

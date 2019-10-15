@@ -35,6 +35,8 @@ public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
      * {@inheritDoc}
      *
      * <p>Overrides to add the {@link SystemColumn} annotation.
+     *
+     * <p>Corresponds to the {@link io.spine.server.storage.VersionField#version}.
      */
     @Override
     @SystemColumn

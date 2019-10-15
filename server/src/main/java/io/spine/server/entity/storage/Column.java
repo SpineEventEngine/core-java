@@ -23,23 +23,32 @@ package io.spine.server.entity.storage;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 
+import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 public final class Column {
 
-    private final String name;
+    private final ColumnName name;
     private final Class<?> type;
     private final Getter getter;
 
-    Column(String name, Class<?> type, Getter getter) {
+    private Column(ColumnName name, Class<?> type, Getter getter) {
         this.name = name;
         this.type = type;
         this.getter = getter;
     }
 
-    public String name() {
+    static Column of(Method getter) {
+        ColumnName name = ColumnName.from(getter);
+        Class<?> type = getter.getReturnType();
+        Getter columnGetter = entity -> getter.invoke(entity);
+        Column column = new Column(name, type, columnGetter);
+        return column;
+    }
+
+    public ColumnName name() {
         return name;
     }
 

@@ -22,6 +22,7 @@ package io.spine.server.storage.memory;
 
 import io.spine.client.OrderBy;
 import io.spine.client.OrderBy.Direction;
+import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import java.util.Comparator;
@@ -85,8 +86,9 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
     public int compare(EntityRecordWithColumns a, EntityRecordWithColumns b) {
         checkNotNull(a);
         checkNotNull(b);
-        Object aValue = a.columnValue(column);
-        Object bValue = b.columnValue(column);
+        ColumnName columnName = ColumnName.of(column);
+        Object aValue = a.columnValue(columnName);
+        Object bValue = b.columnValue(columnName);
         if (aValue == null) {
             return bValue == null ? 0 : -1;
         }

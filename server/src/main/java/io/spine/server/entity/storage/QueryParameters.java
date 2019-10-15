@@ -90,15 +90,18 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      */
     public static QueryParameters activeEntityQueryParams(RecordStorage<?> storage) {
         Columns lifecycleColumns = storage.lifecycleColumns();
-        Optional<Column> archivedColumn = lifecycleColumns.find(archived.name());
-        Optional<Column> deletedColumn = lifecycleColumns.find(deleted.name());
+        ColumnName archivedColumnName = ColumnName.of(archived);
+        ColumnName deletedColumnName = ColumnName.of(deleted);
+
+        Optional<Column> archivedColumn = lifecycleColumns.find(archivedColumnName);
+        Optional<Column> deletedColumn = lifecycleColumns.find(deletedColumnName);
         boolean entityHasLifecycle = archivedColumn.isPresent() && deletedColumn.isPresent();
         if (!entityHasLifecycle) {
             return newBuilder().build();
         }
         CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(archivedColumn.get(), eq(archivedColumn.get().name(), false),
-                                     deletedColumn.get(), eq(deletedColumn.get().name(), false)),
+                ImmutableMultimap.of(archivedColumn.get(), eq(archivedColumnName.value(), false),
+                                     deletedColumn.get(), eq(deletedColumnName.value(), false)),
                 ALL
         );
         return newBuilder().add(lifecycleParameter).build();

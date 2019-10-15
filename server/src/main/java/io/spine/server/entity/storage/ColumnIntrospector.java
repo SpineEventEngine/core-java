@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.spine.base.EntityWithColumns;
 import io.spine.code.proto.ColumnOption;
 import io.spine.code.proto.FieldDeclaration;
-import io.spine.code.proto.FieldName;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.MessageType;
 
@@ -45,36 +44,32 @@ final class ColumnIntrospector {
         entityClass = aClass;
     }
 
-    ImmutableMap<String, Column> systemColumns() {
-        ImmutableMap.Builder<String, Column> columns = ImmutableMap.builder();
+    ImmutableMap<ColumnName, Column> systemColumns() {
+        ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
         Class<?> entityClazz = entityClass.value();
         Method[] methods = entityClazz.getMethods();
         for (Method method : methods) {
             boolean isSystemColumn = method.isAnnotationPresent(SystemColumn.class);
             if (isSystemColumn) {
-                String columnName = columnNameOf(method);
-                Class<?> columnType = method.getReturnType();
-                Column.Getter columnGetter = entity -> method.invoke(entity);
-                Column column = new Column(columnName, columnType, columnGetter);
-                columns.put(columnName, column);
+                Column column = Column.of(method);
+                columns.put(column.name(), column);
             }
         }
-        ImmutableMap<String, Column> result = columns.build();
+        ImmutableMap<ColumnName, Column> result = columns.build();
         return result;
     }
 
-    ImmutableMap<String, Column> protoColumns() {
-        ImmutableMap.Builder<String, Column> columns = ImmutableMap.builder();
+    ImmutableMap<ColumnName, Column> protoColumns() {
+        ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
         MessageType stateType = entityClass.stateType();
         ImmutableList<FieldDeclaration> columnFields = ColumnOption.columnsOf(stateType);
         columnFields.forEach(field -> addToMap(field, columns));
-        ImmutableMap<String, Column> result = columns.build();
+        ImmutableMap<ColumnName, Column> result = columns.build();
         return result;
     }
 
-    private void addToMap(FieldDeclaration field, ImmutableMap.Builder<String, Column> columns) {
-        String columnName = field.name()
-                                 .value();
+    private void
+    addToMap(FieldDeclaration field, ImmutableMap.Builder<ColumnName, Column> columns) {
         Class<?> entityClazz = entityClass.value();
         Class<? extends Message> stateClass = entityClass.stateClass();
 
@@ -86,23 +81,15 @@ final class ColumnIntrospector {
             Method method = implementsEntityWithColumns
                             ? entityClazz.getMethod(getterName)
                             : stateClass.getMethod(getterName);
-            Class<?> columnType = method.getReturnType();
-            Column.Getter columnGetter = entity -> method.invoke(entity);
-            Column column = new Column(columnName, columnType, columnGetter);
-            columns.put(columnName, column);
+            Column column = Column.of(method);
+            columns.put(column.name(), column);
         } catch (NoSuchMethodException e) {
             throw newIllegalStateException(
                     e,
                     "Expected to find a getter with name %s in entity class %s according to the " +
                             "declaration of column %s.",
-                    getterName, entityClass.typeName(), columnName);
+                    getterName, entityClass.typeName(), field.name());
         }
-    }
-
-    private static String columnNameOf(Method method) {
-        FieldName name = FieldName.fromGetter(method);
-        String result = name.value();
-        return result;
     }
 
     private static String getterName(FieldDeclaration field) {
