@@ -23,18 +23,24 @@ import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.test.client.TestEntity;
+import io.spine.time.Temporals;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -176,6 +182,8 @@ class ActorRequestFactoryTest {
         }
     }
 
+    @SuppressWarnings("deprecation")
+        // Include deprecated methods into coverage, until their cycle finishes.
     @Nested
     @DisplayName("provide instance for system requests")
     class SystemRequests {
@@ -214,6 +222,54 @@ class ActorRequestFactoryTest {
         void rejectEmptyTenantId() {
             assertThrows(IllegalArgumentException.class,
                          () -> forSystemRequests(systemUser, TenantId.getDefaultInstance()));
+        }
+    }
+
+    @Nested
+    @DisplayName("obtain time-zone and offset from current `Time.Provider`")
+    class UsingTimeProvider {
+
+        private final Time.Provider provider = new CustomTimeProvider();
+
+        @BeforeEach
+        void setCustomProvider() {
+            Time.setProvider(provider);
+        }
+
+        @AfterEach
+        void clearProvider() {
+            Time.resetProvider();
+        }
+
+        @Test
+        @DisplayName("when no set directly")
+        void zoneIdAndOffset() {
+            ActorRequestFactory factory =
+                    ActorRequestFactory.newBuilder()
+                                       .setActor(ACTOR)
+                                       .build();
+
+            ZoneId expected = ZoneIds.of(CustomTimeProvider.ZONE);
+            assertThat(factory.zoneId())
+                    .isEqualTo(expected);
+        }
+    }
+
+    private static class CustomTimeProvider implements Time.Provider {
+
+        private static final java.time.ZoneId ZONE = java.time.ZoneId.of("Pacific/Galapagos");
+
+        @Override
+        public Timestamp currentTime() {
+            Instant nowThere = ZonedDateTime.now(ZONE)
+                                           .toInstant();
+            return Temporals.from(nowThere)
+                            .toTimestamp();
+        }
+
+        @Override
+        public java.time.ZoneId currentZone() {
+            return ZONE;
         }
     }
 }
