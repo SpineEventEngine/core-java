@@ -103,7 +103,10 @@ public class ActorRequestFactory {
      * @param tenant
      *         the ID of the tenant in a multi-tenant application, {@code null} for single-tenant
      * @return new instance of the factory
+     * @deprecated please always use factories on behalf of the current user,
+     *         or with a guest user ID, if the user is not logged in
      */
+    @Deprecated
     public static
     ActorRequestFactory forSystemRequests(Class<?> cls, @Nullable TenantId tenant) {
         checkNotNull(cls);
@@ -122,7 +125,10 @@ public class ActorRequestFactory {
      * @param tenant
      *         the ID of the tenant in a multi-tenant application, {@code null} for single-tenant
      * @return new instance of the factory
+     * @deprecated please always use factories on behalf of the current user,
+     *         or with a guest user ID, if the user is not logged in
      */
+    @Deprecated
     public static
     ActorRequestFactory forSystemRequests(UserId systemUser, @Nullable TenantId tenant) {
         checkNotNull(systemUser);
