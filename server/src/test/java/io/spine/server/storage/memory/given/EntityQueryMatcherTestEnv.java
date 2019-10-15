@@ -21,14 +21,20 @@
 package io.spine.server.storage.memory.given;
 
 import com.google.protobuf.Any;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.TheOldColumn;
-import io.spine.test.entity.Project;
+import io.spine.server.entity.model.EntityClass;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.Columns;
+import io.spine.server.projection.Projection;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.ProjectWithColumns;
 import io.spine.testdata.Sample;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.reflect.Method;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
  * The test environment for {@link io.spine.server.storage.memory.EntityQueryMatcher} tests.
@@ -43,10 +49,10 @@ public final class EntityQueryMatcherTestEnv {
     }
 
     /**
-     * An {@code EntityColumn} which holds an {@link Any} instance.
+     * A {@code Column} which holds an {@link Any} instance.
      */
-    public static EntityColumn anyColumn() {
-        return column("getAny");
+    public static Column anyColumn() {
+        return column("wrapped_state");
     }
 
     /**
@@ -59,10 +65,10 @@ public final class EntityQueryMatcherTestEnv {
     }
 
     /**
-     * An {@code EntityColumn} which holds a {@code boolean} value.
+     * A {@code Column} which holds a {@code boolean} value.
      */
-    public static EntityColumn booleanColumn() {
-        return column("getBoolean");
+    public static Column booleanColumn() {
+        return column("doable");
     }
 
     /**
@@ -73,24 +79,36 @@ public final class EntityQueryMatcherTestEnv {
         return true;
     }
 
-    private static EntityColumn column(String name) {
-        try {
-            Method method = EntityQueryMatcherTestEnv.class.getDeclaredMethod(name);
-            EntityColumn column = EntityColumn.from(method);
-            return column;
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
+    private static Column column(String name) {
+        EntityClass<ProjectView> entityClass = asEntityClass(ProjectView.class);
+        Columns columns = Columns.of(entityClass);
+        ColumnName columnName = ColumnName.of(name);
+        Column column = columns.get(columnName);
+        return column;
+    }
+
+    private static class ProjectView
+            extends Projection<ProjectId, Project, Project.Builder>
+            implements ProjectWithColumns {
+
+        @Override
+        public boolean getDoable() {
+            return booleanValue();
         }
-    }
 
-    @TheOldColumn
-    public @Nullable Boolean getBoolean() {
-        return booleanValue();
-    }
+        @Override
+        public Any getWrappedState() {
+            return anyValue();
+        }
 
-    @TheOldColumn
-    public Any getAny() {
-        Any actualValue = anyValue();
-        return actualValue;
+        @Override
+        public int getProjectStatusValue() {
+            return 0;
+        }
+
+        @Override
+        public Version getCounterVersion() {
+            return Versions.zero();
+        }
     }
 }

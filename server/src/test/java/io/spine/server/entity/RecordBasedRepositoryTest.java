@@ -76,8 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
  *
  * @param <E>
- *         the type of the {@link Entity} of this repository; the type is checked to implement
- *         {@link TestEntityWithStringColumn} at runtime
+ *         the type of the {@link Entity} of this repository
  */
 public abstract
 class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Message>

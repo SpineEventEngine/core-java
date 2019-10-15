@@ -17,14 +17,41 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/**
- * Provides test environment classes for testing columns.
- */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.entity.storage.given.column;
+package spine.test.entity;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import "spine/options.proto";
 
-import javax.annotation.ParametersAreNonnullByDefault;
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.entity";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+message TaskView {
+    option (.entity).kind = PROJECTION;
+
+    TaskViewId id = 1;
+
+    string name = 2 [(column) = true];
+
+    float estimate_in_days = 3 [(column) = true];
+
+    Status status = 4 [(column) = true];
+
+    google.protobuf.Timestamp due_date = 5 [(column) = true];
+
+    enum Status {
+        UNDEFINED = 0;
+        CREATED = 1;
+        STARTED = 2;
+        DONE = 3;
+        CANCELLED = 4;
+    }
+}
+
+message TaskViewId {
+    int32 id = 1;
+}
+

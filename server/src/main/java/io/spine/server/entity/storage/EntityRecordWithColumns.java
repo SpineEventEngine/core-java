@@ -123,7 +123,8 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      * Creates a new instance.
      */
     @VisibleForTesting
-    static EntityRecordWithColumns of(EntityRecord record, Map<ColumnName, Object> storageFields) {
+    public static EntityRecordWithColumns
+    of(EntityRecord record, Map<ColumnName, Object> storageFields) {
         return new EntityRecordWithColumns(record, storageFields);
     }
 

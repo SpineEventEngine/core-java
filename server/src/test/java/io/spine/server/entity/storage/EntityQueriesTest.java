@@ -34,6 +34,7 @@ import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.entity.storage.given.TestProjection;
 import io.spine.server.storage.LifecycleFlagField;
@@ -52,6 +53,7 @@ import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -81,8 +83,9 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
 
     private static EntityQuery<?> createEntityQuery(TargetFilters filters,
                                                     Class<? extends Entity<?, ?>> entityClass) {
-        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return EntityQueries.from(filters, entityColumns);
+        EntityClass<? extends Entity<?, ?>> cls = asEntityClass(entityClass);
+        Columns columns = Columns.of(cls);
+        return EntityQueries.from(filters, columns);
     }
 
     @Test

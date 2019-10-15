@@ -170,20 +170,6 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
     }
 
     @Test
-    @DisplayName("filter records by ordinal enum columns")
-    protected void filterByOrdinalEnumColumns() {
-        String columnPath = "projectStatusOrdinal";
-        checkEnumFilter(columnPath);
-    }
-
-    @Test
-    @DisplayName("filter records by string enum columns")
-    protected void filterByStringEnumColumns() {
-        String columnPath = "projectStatusString";
-        checkEnumFilter(columnPath);
-    }
-
-    @Test
     @DisplayName("filter records by ID and not use columns")
     void filterByIdAndNoColumns() {
         // Create the test data
@@ -498,49 +484,6 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 fail("RecordStorageTest.newState() should return unique messages.");
             }
         }
-    }
-
-    /**
-     * A complex test case to check the correct {@link TestCounterEntity} filtering by the
-     * enumerated column returning {@link Project.Status}.
-     */
-    private void checkEnumFilter(String columnPath) {
-        Project.Status requiredValue = DONE;
-        Project.Status value = Enum.valueOf(Project.Status.class, requiredValue.name());
-        Filter status = eq(columnPath, value);
-        CompositeFilter aggregatingFilter = CompositeFilter
-                .newBuilder()
-                .setOperator(ALL)
-                .addFilter(status)
-                .build();
-        TargetFilters filters = TargetFilters
-                .newBuilder()
-                .addFilter(aggregatingFilter)
-                .build();
-
-        RecordStorage<ProjectId> storage = storage();
-
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
-        ProjectId idMatching = newId();
-        ProjectId idWrong = newId();
-
-        TestCounterEntity matchingEntity = newEntity(idMatching);
-        TestCounterEntity wrongEntity = newEntity(idWrong);
-
-        matchingEntity.assignStatus(requiredValue);
-        wrongEntity.assignStatus(CANCELLED);
-
-        EntityRecord fineRecord = buildStorageRecord(idMatching, newState(idMatching));
-        EntityRecord notFineRecord = buildStorageRecord(idWrong, newState(idWrong));
-
-        EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
-        EntityRecordWithColumns recordWrong = create(notFineRecord, wrongEntity, storage);
-
-        storage.write(idMatching, recordRight);
-        storage.write(idWrong, recordWrong);
-
-        Iterator<EntityRecord> readRecords = storage.readAll(query);
-        assertSingleRecord(fineRecord, readRecords);
     }
 
     private void write(Entity<ProjectId, ?> entity) {

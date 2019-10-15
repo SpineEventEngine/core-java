@@ -28,6 +28,7 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 @DisplayName("InMemoryProjectionStorage should")
 class InMemoryProjectionStorageTest extends ProjectionStorageTest {
@@ -40,7 +41,7 @@ class InMemoryProjectionStorageTest extends ProjectionStorageTest {
                                ProjectId.class);
         InMemoryProjectionStorage<ProjectId> storage =
                 new InMemoryProjectionStorage<>(
-                        new InMemoryRecordStorage<>(spec, cls, false)
+                        new InMemoryRecordStorage<>(spec, asEntityClass(cls), false)
                 );
         return storage;
     }

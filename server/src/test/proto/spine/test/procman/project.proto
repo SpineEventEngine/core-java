@@ -39,7 +39,7 @@ message Project {
     // Allow empty ID to avoid verbose test set up.
     //
     ProjectId id = 1 [(required) = false];
-    string name = 2;
+    string name = 2 [(column) = true];
     repeated Task task = 3;
 
     enum Status {
@@ -50,6 +50,8 @@ message Project {
         CANCELLED = 4;
     }
     Status status = 4;
+
+    string id_string = 5 [(column) = true];
 }
 
 message TaskId {

@@ -32,7 +32,6 @@ import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.server.ContextSpec;
 import io.spine.server.bc.given.ProjectProjection;
-import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.bc.ProjectId;
@@ -43,7 +42,6 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -54,9 +52,8 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.gt;
 import static io.spine.client.Filters.le;
-import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.SimpleColumn.column;
-import static io.spine.server.entity.storage.given.SimpleColumn.doubleColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.floatColumn;
 import static io.spine.server.entity.storage.given.SimpleColumn.stringColumn;
 import static io.spine.server.entity.storage.given.SimpleColumn.timestampColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -73,9 +70,8 @@ class QueryParametersTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        String columnName = archived.name();
-        EntityColumn column = findColumn(TestEntity.class, columnName);
-        Filter filter = Filters.eq(columnName, 1);
+        Column column = stringColumn();
+        Filter filter = Filters.eq(column.name().value(), 1);
         CompositeQueryParameter parameter = aggregatingParameter(column, filter);
         QueryParameters parameters = QueryParameters.newBuilder()
                                                     .add(parameter)
@@ -102,7 +98,7 @@ class QueryParametersTest {
 
         // --- Group B ---
         // Consists of 3 instances with a single filter targeting a String column
-        EntityColumn bColumn = column();
+        Column bColumn = column();
         Filter bFilter = Filters.eq("b", "c");
         QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                .build();
@@ -113,7 +109,7 @@ class QueryParametersTest {
 
         // --- Group C ---
         // Consists of an instance with a single filter targeting an integer number column
-        EntityColumn cColumn = column();
+        Column cColumn = column();
         Filter cFilter = Filters.eq("a", 42);
         QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
                                               .build();
@@ -139,7 +135,7 @@ class QueryParametersTest {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
                 gt("thirdFilter", currentTime())};
-        Multimap<EntityColumn, Filter> filterMap =
+        Multimap<Column, Filter> filterMap =
                 ImmutableMultimap.of(column(), filters[0],
                                      column(), filters[1],
                                      column(), filters[2]);
@@ -161,8 +157,8 @@ class QueryParametersTest {
                 eq("$1st", "entityColumnValue"),
                 eq("$2nd", 42.0),
                 gt("$3d", currentTime())};
-        EntityColumn[] columns = {stringColumn(), doubleColumn(), timestampColumn()};
-        Multimap<EntityColumn, Filter> filterMap =
+        Column[] columns = {stringColumn(), floatColumn(), timestampColumn()};
+        Multimap<Column, Filter> filterMap =
                 ImmutableMultimap.of(columns[0], filters[0],
                                      columns[1], filters[1],
                                      columns[2], filters[2]);
@@ -171,9 +167,9 @@ class QueryParametersTest {
                                                  .build();
         CompositeQueryParameter singleParameter = parameters.iterator()
                                                             .next();
-        Multimap<EntityColumn, Filter> actualFilters = singleParameter.filters();
+        Multimap<Column, Filter> actualFilters = singleParameter.filters();
         for (int i = 0; i < columns.length; i++) {
-            EntityColumn column = columns[i];
+            Column column = columns[i];
             Collection<Filter> readFilters = actualFilters.get(column);
             assertThat(readFilters).hasSize(1);
             assertEquals(filters[i], readFilters.iterator()
@@ -185,7 +181,7 @@ class QueryParametersTest {
     @DisplayName("keep multiple filters for single column")
     void keepManyFiltersForColumn() throws ParseException {
         String columnName = "time";
-        EntityColumn column = column();
+        Column column = column();
 
         // Some valid Timestamp values
         Timestamp startTime = Timestamps.parse("2000-01-01T10:00:00.000-05:00");
@@ -193,8 +189,8 @@ class QueryParametersTest {
 
         Filter startTimeFilter = gt(columnName, startTime);
         Filter deadlineFilter = le(columnName, deadline);
-        Multimap<EntityColumn, Filter> filterMap =
-                ImmutableMultimap.<EntityColumn, Filter>builder()
+        Multimap<Column, Filter> filterMap =
+                ImmutableMultimap.<Column, Filter>builder()
                         .put(column, startTimeFilter)
                         .put(column, deadlineFilter)
                         .build();
@@ -203,7 +199,7 @@ class QueryParametersTest {
                                                  .build();
         List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
         assertThat(aggregatingParameters).hasSize(1);
-        Multimap<EntityColumn, Filter> actualFilters =
+        Multimap<Column, Filter> actualFilters =
                 aggregatingParameters.get(0)
                                      .filters();
         Collection<Filter> timeFilters = actualFilters.get(column);
@@ -230,28 +226,28 @@ class QueryParametersTest {
         assertFalse(paramsIterator.hasNext());
         assertTrue(lifecycleParameter.hasLifecycle());
         assertEquals(ALL, lifecycleParameter.operator());
-        ImmutableMultimap<EntityColumn, Filter> filters = lifecycleParameter.filters();
+        ImmutableMultimap<Column, Filter> filters = lifecycleParameter.filters();
 
-        Map<String, EntityColumn> lifecycleColumns = storage.lifecycleColumns();
-        String archivedName = archived.name();
-        EntityColumn archivedColumn = lifecycleColumns.get(archivedName);
-        String deletedName = deleted.name();
-        EntityColumn deletedColumn = lifecycleColumns.get(deletedName);
+        Columns lifecycleColumns = storage.lifecycleColumns();
+        ColumnName archivedName = ColumnName.of(archived);
+        Column archivedColumn = lifecycleColumns.get(archivedName);
+        ColumnName deletedName = ColumnName.of(deleted);
+        Column deletedColumn = lifecycleColumns.get(deletedName);
 
         ImmutableCollection<Filter> archivedFilters = filters.get(archivedColumn);
         UnmodifiableIterator<Filter> archivedFilterIterator = archivedFilters.iterator();
-        assertEquals(eq(archivedName, false), archivedFilterIterator.next());
+        assertEquals(eq(archivedName.value(), false), archivedFilterIterator.next());
         assertFalse(archivedFilterIterator.hasNext());
 
         ImmutableCollection<Filter> deletedFilters = filters.get(deletedColumn);
         UnmodifiableIterator<Filter> deletedFilterIterator = deletedFilters.iterator();
-        assertEquals(eq(deletedName, false), deletedFilterIterator.next());
+        assertEquals(eq(deletedName.value(), false), deletedFilterIterator.next());
         assertFalse(deletedFilterIterator.hasNext());
     }
 
-    private static CompositeQueryParameter aggregatingParameter(EntityColumn column,
+    private static CompositeQueryParameter aggregatingParameter(Column column,
                                                                 Filter filter) {
-        Multimap<EntityColumn, Filter> filters = ImmutableMultimap.of(column, filter);
+        Multimap<Column, Filter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter result = CompositeQueryParameter.from(filters, ALL);
         return result;
     }

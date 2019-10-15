@@ -21,10 +21,17 @@
 package io.spine.server.entity.storage.given;
 
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.TheOldColumn;
+import io.spine.server.entity.model.EntityClass;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.Columns;
+import io.spine.server.projection.Projection;
+import io.spine.test.entity.TaskView;
+import io.spine.test.entity.TaskViewId;
+import io.spine.test.entity.TaskViewWithColumns;
 
-import java.lang.reflect.Method;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.test.entity.TaskView.Status.CREATED;
 
 public final class SimpleColumn {
 
@@ -32,53 +39,56 @@ public final class SimpleColumn {
     private SimpleColumn() {
     }
 
-    public static EntityColumn column() {
+    public static Column column() {
         return stringColumn();
     }
 
-    public static EntityColumn stringColumn() {
-        return column("getString");
+    public static Column stringColumn() {
+        return column("name");
     }
 
-    public static EntityColumn doubleColumn() {
-        return column("getDouble");
+    public static Column floatColumn() {
+        return column("estimate_in_days");
     }
 
-    public static EntityColumn doublePrimitiveColumn() {
-        return column("getDoublePrimitive");
+    public static Column enumColumn() {
+        return column("status");
     }
 
-    public static EntityColumn timestampColumn() {
-        return column("getTimestamp");
+    public static Column timestampColumn() {
+        return column("due_date");
     }
 
-    private static EntityColumn column(String name) {
-        try {
-            Method method = SimpleColumn.class.getDeclaredMethod(name);
-            EntityColumn column = EntityColumn.from(method);
-            return column;
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
+    private static Column column(String name) {
+        EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
+        Columns columns = Columns.of(entityClass);
+        ColumnName columnName = ColumnName.of(name);
+        Column column = columns.get(columnName);
+        return column;
+    }
+
+    private static class TaskViewProjection
+            extends Projection<TaskViewId, TaskView, TaskView.Builder>
+            implements TaskViewWithColumns {
+
+        @Override
+        public String getName() {
+            return "some-name";
         }
-    }
 
-    @TheOldColumn
-    public String getString() {
-        return "42";
-    }
+        @Override
+        public float getEstimateInDays() {
+            return 42.0F;
+        }
 
-    @TheOldColumn
-    public Double getDouble() {
-        return 42.0;
-    }
+        @Override
+        public TaskView.Status getStatus() {
+            return CREATED;
+        }
 
-    @TheOldColumn
-    public double getDoublePrimitive() {
-        return 42.0;
-    }
-
-    @TheOldColumn
-    public Timestamp getTimestamp() {
-        return Timestamp.getDefaultInstance();
+        @Override
+        public Timestamp getDueDate() {
+            return Timestamp.getDefaultInstance();
+        }
     }
 }

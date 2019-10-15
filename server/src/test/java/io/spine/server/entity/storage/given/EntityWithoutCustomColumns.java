@@ -22,8 +22,11 @@ package io.spine.server.entity.storage.given;
 
 import com.google.protobuf.Any;
 import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.HasLifecycleColumns;
 
-public class EntityWithoutCustomColumns extends AbstractEntity<String, Any> {
+public class EntityWithoutCustomColumns
+        extends AbstractEntity<String, Any>
+        implements HasLifecycleColumns<String, Any> {
 
     public EntityWithoutCustomColumns(String id) {
         super(id);
