@@ -20,13 +20,13 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.LifecycleFlagField;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,10 +39,10 @@ public final class Columns {
     /**
      * A map of entity columns by their name.
      */
-    private final Map<ColumnName, Column> columns;
+    private final ImmutableMap<ColumnName, Column> columns;
     private final EntityClass<?> entityClass;
 
-    private Columns(Map<ColumnName, Column> columns, EntityClass<?> entityClass) {
+    private Columns(ImmutableMap<ColumnName, Column> columns, EntityClass<?> entityClass) {
         this.columns = columns;
         this.entityClass = entityClass;
     }
@@ -66,6 +66,10 @@ public final class Columns {
         return result;
     }
 
+    public ImmutableCollection<Column> columnList() {
+        return columns.values();
+    }
+
     public Map<ColumnName, Object> valuesIn(Entity<?, ?> source) {
         Map<ColumnName, Object> result =
                 columns.values()
@@ -79,13 +83,13 @@ public final class Columns {
      * Returns a subset of columns corresponding to the lifecycle of the entity.
      */
     public Columns lifecycleColumns() {
-        Map<ColumnName, Column> result = new HashMap<>();
+        ImmutableMap.Builder<ColumnName, Column> lifecycleColumns = ImmutableMap.builder();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
             ColumnName name = ColumnName.of(field.name());
             Optional<Column> column = find(name);
-            column.ifPresent(col -> result.put(name, col));
+            column.ifPresent(col -> lifecycleColumns.put(name, col));
         }
-        return new Columns(result, entityClass);
+        return new Columns(lifecycleColumns.build(), entityClass);
     }
 
     private IllegalStateException columnNotFound(ColumnName columnName) {
