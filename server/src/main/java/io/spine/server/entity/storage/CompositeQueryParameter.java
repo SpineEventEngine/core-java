@@ -30,7 +30,6 @@ import com.google.common.collect.Streams;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
 
-import java.io.Serializable;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -43,7 +42,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * A set of {@link Filter} instances joined by a logical
  * {@link CompositeOperator composite operator}.
  */
-public final class CompositeQueryParameter implements Serializable {
+public final class CompositeQueryParameter {
 
     private static final Predicate<Column> isLifecycleColumn = column -> {
         checkNotNull(column);
@@ -51,8 +50,6 @@ public final class CompositeQueryParameter implements Serializable {
                 || deleted.name().equals(column.name().value());
         return result;
     };
-
-    private static final long serialVersionUID = 0L;
 
     private final CompositeOperator operator;
 

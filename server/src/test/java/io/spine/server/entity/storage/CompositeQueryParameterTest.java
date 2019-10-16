@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.testing.SerializableTester;
 import io.spine.client.Filter;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.TestEntity;
@@ -50,14 +49,6 @@ class CompositeQueryParameterTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testStaticMethods(CompositeQueryParameter.class, PACKAGE);
-    }
-
-    @Test
-    @DisplayName("be serializable")
-    void beSerializable() {
-        ImmutableMultimap<Column, Filter> filters = ImmutableMultimap.of();
-        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
-        SerializableTester.reserializeAndAssert(parameter);
     }
 
     @Test

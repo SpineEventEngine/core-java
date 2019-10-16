@@ -30,7 +30,6 @@ import io.spine.annotation.SPI;
 import io.spine.client.Filter;
 import io.spine.server.storage.RecordStorage;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -46,9 +45,8 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * implementations.
  */
 @SPI /* Available to SPI users providing own {@code Storage} implementations. */
-public final class QueryParameters implements Iterable<CompositeQueryParameter>, Serializable {
+public final class QueryParameters implements Iterable<CompositeQueryParameter> {
 
-    private static final long serialVersionUID = 0L;
     static final String FIELD_PARAMETERS = "parameters";
 
     private final ImmutableCollection<CompositeQueryParameter> parameters;

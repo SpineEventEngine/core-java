@@ -45,7 +45,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
@@ -66,18 +65,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("QueryParameters should")
 class QueryParametersTest {
-
-    @Test
-    @DisplayName("be serializable")
-    void beSerializable() {
-        Column column = stringColumn();
-        Filter filter = Filters.eq(column.name().value(), 1);
-        CompositeQueryParameter parameter = aggregatingParameter(column, filter);
-        QueryParameters parameters = QueryParameters.newBuilder()
-                                                    .add(parameter)
-                                                    .build();
-        reserializeAndAssert(parameters);
-    }
 
     /**
      * Creates new {@code QueryParameters.Builder} instance.

@@ -30,7 +30,6 @@ import com.google.common.truth.StringSubject;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.TestEntity;
@@ -45,9 +44,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 
-import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filter.Operator.EQUAL;
@@ -73,25 +70,6 @@ class EntityQueryTest {
                 .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                   .build())
                 .testStaticMethods(EntityQuery.class, NullPointerTester.Visibility.PACKAGE);
-    }
-
-    @Test
-    @DisplayName("be serializable")
-    void beSerializable() {
-        ColumnName columnName = ColumnName.of(deleted);
-        Filter filter = Filters.eq(columnName.value(), false);
-        EntityClass<TestEntity> entityClass = asEntityClass(TestEntity.class);
-        Columns columns = Columns.of(entityClass);
-        Column column = columns.get(columnName);
-        Multimap<Column, Filter> filters = ImmutableMultimap.of(column, filter);
-        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
-        QueryParameters parameters = QueryParameters
-                .newBuilder()
-                .add(parameter)
-                .build();
-        Set<String> ids = singleton("my-awesome-ID");
-        EntityQuery<String> query = EntityQuery.of(ids, parameters);
-        reserializeAndAssert(query);
     }
 
     @Test

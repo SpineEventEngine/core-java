@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.RecordStorage;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -73,9 +72,7 @@ import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryPa
  *         the type of the IDs of the query target
  * @see EntityRecordWithColumns
  */
-public final class EntityQuery<I> implements Serializable {
-
-    private static final long serialVersionUID = 0L;
+public final class EntityQuery<I> {
 
     private final ImmutableSet<I> ids;
     private final QueryParameters parameters;

@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
@@ -68,26 +67,6 @@ class EntityRecordWithColumnsTest {
                 .setDefault(EntityRecord.class, EntityRecord.getDefaultInstance())
                 .testAllPublicConstructors(EntityRecordWithColumns.class);
     }
-
-    @Test
-    @DisplayName("be serializable")
-    void beSerializable() {
-        EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                   .withVersion(1)
-                                                   .build();
-        EntityClass<? extends TestEntity> entityClass = asEntityClass(entity.getClass());
-        Columns columns = Columns.of(entityClass);
-        ColumnName columnName = ColumnName.of(archived.name());
-        Column column = columns.get(columnName);
-        Object value = column.valueIn(entity);
-
-        Map<ColumnName, Object> storageFields = singletonMap(columnName, value);
-        EntityRecordWithColumns recordWithColumns =
-                EntityRecordWithColumns.of(record, storageFields);
-        reserializeAndAssert(recordWithColumns);
-    }
-
     @Test
     @DisplayName("support equality")
     void supportEquality() {

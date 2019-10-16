@@ -30,7 +30,6 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.RecordStorage;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,9 +42,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A value of {@link EntityRecord} associated with the values of its {@linkplain Column columns}.
  */
-public final class EntityRecordWithColumns implements WithLifecycle, Serializable {
-
-    private static final long serialVersionUID = 0L;
+public final class EntityRecordWithColumns implements WithLifecycle {
 
     private final EntityRecord record;
     private final ImmutableMap<ColumnName, Object> storageFields;
