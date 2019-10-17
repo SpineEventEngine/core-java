@@ -29,6 +29,11 @@ public interface PersistenceStrategyOfNull<R> extends PersistenceStrategy<Object
     @Nullable R nullValue();
 
     @Override
+    default @Nullable R applyTo(@Nullable Object object) {
+        return nullValue();
+    }
+
+    @Override
     default @Nullable R apply(@Nullable Object value) {
         checkArgument(value == null);
         return nullValue();
