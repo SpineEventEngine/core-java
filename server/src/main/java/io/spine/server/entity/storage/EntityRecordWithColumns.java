@@ -21,9 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
@@ -45,7 +43,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public final class EntityRecordWithColumns implements WithLifecycle {
 
     private final EntityRecord record;
-    private final ImmutableMap<ColumnName, Object> storageFields;
+    private final Map<ColumnName, Object> storageFields;
 
     /**
      * Creates a new instance with storage fields.
@@ -57,7 +55,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      */
     private EntityRecordWithColumns(EntityRecord record, Map<ColumnName, Object> storageFields) {
         this.record = checkNotNull(record);
-        this.storageFields = ImmutableMap.copyOf(storageFields);
+        this.storageFields = new HashMap<>(storageFields);
     }
 
     /**
@@ -76,7 +74,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      * <p>Manually updates the entity lifecycle and version storage fields based on the passed
      * {@link EntityRecord}.
      */
-    public static EntityRecordWithColumns of(EntityRecord record, RecordStorage<?> storage) {
+    public static EntityRecordWithColumns create(EntityRecord record, RecordStorage<?> storage) {
         Map<ColumnName, Object> storageFields = new HashMap<>();
         storeLifecycle(storageFields, record, storage);
         storeVersion(storageFields, record, storage);
@@ -135,7 +133,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      * @return the storage field names
      */
     public ImmutableSet<ColumnName> columnNames() {
-        return storageFields.keySet();
+        return ImmutableSet.copyOf(storageFields.keySet());
     }
 
     /**
@@ -147,14 +145,26 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      * @throws IllegalStateException
      *         if there is no column with the specified name
      */
-    @Internal
     public Object columnValue(ColumnName columnName) {
+        return columnValue(columnName, DefaultTypeRegistry.INSTANCE);
+    }
+
+    public <R> R columnValue(ColumnName columnName, TypeRegistry<R> typeRegistry) {
         checkNotNull(columnName);
+        checkNotNull(typeRegistry);
         if (!storageFields.containsKey(columnName)) {
             throw newIllegalStateException("Column with the name `%s` was not found.",
                                            columnName);
         }
-        return storageFields.get(columnName);
+        Object columnValue = storageFields.get(columnName);
+        if (columnValue == null) {
+            R result = typeRegistry.persistenceStrategyOfNull()
+                                   .apply(null);
+            return result;
+        }
+        R result = typeRegistry.persistenceStrategyOf(columnValue.getClass())
+                               .applyTo(columnValue);
+        return result;
     }
 
     /**

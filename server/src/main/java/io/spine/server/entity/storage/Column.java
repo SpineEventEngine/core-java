@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.function.Function;
@@ -56,7 +57,7 @@ public final class Column {
         return type;
     }
 
-    public Object valueIn(Entity<?, ? extends Message> entity) {
+    public @Nullable Object valueIn(Entity<?, ? extends Message> entity) {
         return getter.apply(entity);
     }
 

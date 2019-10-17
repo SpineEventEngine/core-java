@@ -27,11 +27,11 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.LifecycleFlagField;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.util.stream.Collectors.toMap;
 
 @Internal
 public final class Columns {
@@ -71,11 +71,10 @@ public final class Columns {
     }
 
     public Map<ColumnName, Object> valuesIn(Entity<?, ?> source) {
-        Map<ColumnName, Object> result =
-                columns.values()
-                       .stream()
-                       .collect(toMap(Column::name,
-                                      column -> column.valueIn(source)));
+        Map<ColumnName, Object> result = new HashMap<>();
+        for (Column column : columns.values()) {
+            result.put(column.name(), column.valueIn(source));
+        }
         return result;
     }
 
