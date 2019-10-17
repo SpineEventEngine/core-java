@@ -41,7 +41,7 @@ public final class Column {
         this.getter = getter;
     }
 
-    static Column of(Method getter) {
+    static Column from(Method getter) {
         ColumnName name = ColumnName.from(getter);
         Class<?> type = getter.getReturnType();
         Getter columnGetter = entity -> getter.invoke(entity);
@@ -61,7 +61,7 @@ public final class Column {
         return getter.apply(entity);
     }
 
-    public interface Getter extends Function<Entity<?, ? extends Message>, Object> {
+    private interface Getter extends Function<Entity<?, ? extends Message>, Object> {
 
         Object invoke(Entity<?, ? extends Message> entity) throws Exception;
 
