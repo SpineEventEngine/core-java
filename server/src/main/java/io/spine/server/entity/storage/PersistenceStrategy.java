@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface PersistenceStrategy<T, R> extends Function<T, R> {
 
     /**
-     * The shortcut...
+     * A convenience shortcut.
      */
     @SuppressWarnings("unchecked") // The object is implied to be of type`T`.
     default R applyTo(Object object) {
