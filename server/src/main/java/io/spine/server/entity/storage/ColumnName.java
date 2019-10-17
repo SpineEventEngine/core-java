@@ -25,7 +25,9 @@ import io.spine.server.storage.StorageField;
 import io.spine.value.StringTypeValue;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -58,16 +60,18 @@ public final class ColumnName extends StringTypeValue {
     }
 
     private static String underscoredNameWithoutPrefix(MethodName methodName) {
-        List<String> words = methodName.words();
-        words.remove(1);
-        String result = String.join("_", words);
+        List<String> words = new ArrayList<>(methodName.words());
+        words.remove(0);
+        String result = words.stream()
+                             .map(String::toLowerCase)
+                             .collect(Collectors.joining("_"));
         return result;
     }
 
     private static void checkIsGetter(MethodName methodName) {
         checkState(methodName.isGetter(),
                    "A column name can only be extracted from getter method, " +
-                           "the name of the method `%s` is unsuitable for column extraction",
+                           "the name of the method `%s` is unsuitable for column extraction.",
                    methodName.fullyQualifiedName());
     }
 }
