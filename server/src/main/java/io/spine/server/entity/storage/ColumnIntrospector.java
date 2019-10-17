@@ -51,7 +51,7 @@ final class ColumnIntrospector {
         for (Method method : methods) {
             boolean isSystemColumn = method.isAnnotationPresent(SystemColumn.class);
             if (isSystemColumn) {
-                Column column = Column.from(method);
+                Column column = Column.create(method, false);
                 columns.put(column.name(), column);
             }
         }
@@ -81,7 +81,7 @@ final class ColumnIntrospector {
             Method method = implementsEntityWithColumns
                             ? entityClazz.getMethod(getterName)
                             : stateClass.getMethod(getterName);
-            Column column = Column.from(method);
+            Column column = Column.create(method, !implementsEntityWithColumns);
             columns.put(column.name(), column);
         } catch (NoSuchMethodException e) {
             throw newIllegalStateException(

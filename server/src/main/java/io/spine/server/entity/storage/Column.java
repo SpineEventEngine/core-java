@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
@@ -41,12 +42,26 @@ public final class Column {
         this.getter = getter;
     }
 
-    static Column from(Method getter) {
+    static Column create(Method getter, boolean ofState) {
         ColumnName name = ColumnName.from(getter);
         Class<?> type = getter.getReturnType();
-        Getter columnGetter = entity -> getter.invoke(entity);
+        Getter columnGetter = entity -> setAccessibleAndInvoke(getter, entity, ofState);
         Column column = new Column(name, type, columnGetter);
         return column;
+    }
+
+    private static Object
+    setAccessibleAndInvoke(Method getter, Entity<?, ? extends Message> entity, boolean ofState)
+            throws IllegalAccessException, InvocationTargetException {
+        getter.setAccessible(true);
+        Object result;
+        if (ofState) {
+            result = getter.invoke(entity.state());
+        } else {
+            result = getter.invoke(entity);
+        }
+        getter.setAccessible(false);
+        return result;
     }
 
     public ColumnName name() {
@@ -67,11 +82,11 @@ public final class Column {
 
         @Override
         default Object apply(Entity<?, ? extends Message> entity) {
-             try {
-                 return invoke(entity);
-             } catch (Exception e) {
-                 throw newIllegalStateException(e, "Error on column getter invocation.");
-             }
+            try {
+                return invoke(entity);
+            } catch (Exception e) {
+                throw newIllegalStateException(e, "Error on column getter invocation.");
+            }
         }
     }
 }
