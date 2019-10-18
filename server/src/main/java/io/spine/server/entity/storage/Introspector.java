@@ -68,13 +68,13 @@ final class Introspector {
         ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
         MessageType stateType = entityClass.stateType();
         columnsOf(stateType)
-                .forEach(field -> addToMap(field, columns));
+                .forEach(field -> addColumn(field, columns));
         ImmutableMap<ColumnName, Column> result = columns.build();
         return result;
     }
 
     private void
-    addToMap(FieldDeclaration field, ImmutableMap.Builder<ColumnName, Column> columns) {
+    addColumn(FieldDeclaration field, ImmutableMap.Builder<ColumnName, Column> columns) {
 
         @SuppressWarnings("LocalVariableNamingConvention")
         boolean implementsEntityWithColumns =
