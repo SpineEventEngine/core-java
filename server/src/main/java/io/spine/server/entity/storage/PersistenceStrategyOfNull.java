@@ -30,7 +30,7 @@ public interface PersistenceStrategyOfNull<R> extends PersistenceStrategy<Object
 
     @Override
     default @Nullable R applyTo(@Nullable Object object) {
-        return nullValue();
+        return apply(object);
     }
 
     @Override
