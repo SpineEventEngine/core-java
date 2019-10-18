@@ -33,9 +33,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface PersistenceStrategy<T, R> extends Function<T, R> {
 
     /**
-     * A convenience shortcut.
+     * A convenience shortcut for {@link #apply(T)}.
+     *
+     * <p>Can be used when the object is known of being of type {@code T} but can't be cast to it
+     * explicitly (e.g. in case of wildcard arguments).
      */
-    @SuppressWarnings("unchecked") // The object is implied to be of type`T`.
+    @SuppressWarnings("unchecked") // See doc.
     default R applyTo(Object object) {
         checkNotNull(object);
         T value = (T) object;
@@ -43,14 +46,6 @@ public interface PersistenceStrategy<T, R> extends Function<T, R> {
     }
 
     static <T> PersistenceStrategy<T, T> identity() {
-        return new Identity<>();
-    }
-
-    final class Identity<T> implements PersistenceStrategy<T, T> {
-
-        @Override
-        public T apply(T t) {
-            return t;
-        }
+        return t -> t;
     }
 }
