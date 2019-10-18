@@ -33,12 +33,9 @@ import java.util.function.Function;
 
 import static io.spine.code.proto.ColumnOption.columnsOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 import static java.util.function.Function.identity;
 
 final class Introspector {
-
-    private static final String GET_PREFIX = "get";
 
     private final EntityClass<?> entityClass;
 
@@ -108,7 +105,7 @@ final class Introspector {
     }
 
     private Method getterOf(FieldDeclaration field, Class<?> clazz) {
-        String getterName = getterName(field);
+        String getterName = field.getterName();
         try {
             Method result = clazz.getMethod(getterName);
             return result;
@@ -125,12 +122,6 @@ final class Introspector {
                 "Expected to find a getter with name %s in entity class %s according to the " +
                         "declaration of column %s.",
                 getterName, entityClass.typeName(), field.name());
-    }
-
-    private static String getterName(FieldDeclaration field) {
-        String fieldNameCamelCase = field.name()
-                                         .toCamelCase();
-        return format("%s%s", GET_PREFIX, fieldNameCamelCase);
     }
 
     private static Object setAccessibleAndInvoke(Method method, Object target)
