@@ -26,7 +26,7 @@ package io.spine.server.entity.storage;
  */
 public interface TypeRegistry<R> {
 
-    PersistenceStrategy<?, ? extends R> persistenceStrategyOf(Class<?> aClass);
+    PersistenceStrategy<?, ? extends R> persistenceStrategyOf(Class<?> type);
 
     PersistenceStrategyOfNull<? extends R> persistenceStrategyOfNull();
 }

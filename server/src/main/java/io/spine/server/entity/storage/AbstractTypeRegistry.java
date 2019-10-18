@@ -41,13 +41,13 @@ public abstract class AbstractTypeRegistry<R> implements TypeRegistry<R> {
 
 
     @Override
-    public PersistenceStrategy<?, ? extends R> persistenceStrategyOf(Class<?> aClass) {
-        Optional<PersistenceStrategy<?, ? extends R>> strategy = customStrategyOf(aClass);
+    public PersistenceStrategy<?, ? extends R> persistenceStrategyOf(Class<?> type) {
+        Optional<PersistenceStrategy<?, ? extends R>> strategy = customStrategyOf(type);
         if (strategy.isPresent()) {
             return strategy.get();
         }
-        strategy = standardStrategyOf(aClass);
-        return strategy.orElseThrow(() -> unsupportedType(aClass));
+        strategy = standardStrategyOf(type);
+        return strategy.orElseThrow(() -> unsupportedType(type));
     }
 
     private ImmutableMap<Class<?>, Supplier<PersistenceStrategy<?, ? extends R>>>
