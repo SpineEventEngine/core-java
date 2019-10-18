@@ -42,11 +42,11 @@ public abstract class AbstractTypeRegistry<R> implements TypeRegistry<R> {
 
     @Override
     public PersistenceStrategy<?, ? extends R> persistenceStrategyOf(Class<?> type) {
-        Optional<PersistenceStrategy<?, ? extends R>> strategy = customStrategyOf(type);
+        Optional<PersistenceStrategy<?, ? extends R>> strategy = searchCustom(type);
         if (strategy.isPresent()) {
             return strategy.get();
         }
-        strategy = standardStrategyOf(type);
+        strategy = searchStandard(type);
         return strategy.orElseThrow(() -> unsupportedType(type));
     }
 
@@ -104,18 +104,18 @@ public abstract class AbstractTypeRegistry<R> implements TypeRegistry<R> {
 
     protected abstract PersistenceStrategy<Message, ? extends R> messagePersistenceStrategy();
 
-    protected static IllegalArgumentException unsupportedType(Class<?> aClass) {
+    protected IllegalArgumentException unsupportedType(Class<?> aClass) {
         throw newIllegalArgumentException("The class %s is not supported by the type registry.",
                                           aClass.getCanonicalName());
     }
 
-    private Optional<PersistenceStrategy<?, ? extends R>> customStrategyOf(Class<?> aClass) {
+    private Optional<PersistenceStrategy<?, ? extends R>> searchCustom(Class<?> aClass) {
         Optional<PersistenceStrategy<?, ? extends R>> result =
                 strategyOf(aClass, customStrategies());
         return result;
     }
 
-    private Optional<PersistenceStrategy<?, ? extends R>> standardStrategyOf(Class<?> aClass) {
+    private Optional<PersistenceStrategy<?, ? extends R>> searchStandard(Class<?> aClass) {
         Optional<PersistenceStrategy<?, ? extends R>> result =
                 strategyOf(aClass, standardStrategies);
         return result;
