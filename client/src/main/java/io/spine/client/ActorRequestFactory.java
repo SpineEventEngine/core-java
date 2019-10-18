@@ -22,6 +22,7 @@ package io.spine.client;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
+import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
@@ -31,6 +32,8 @@ import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -103,7 +106,10 @@ public class ActorRequestFactory {
      * @param tenant
      *         the ID of the tenant in a multi-tenant application, {@code null} for single-tenant
      * @return new instance of the factory
+     * @deprecated please always use factories on behalf of the current user,
+     *         or with a guest user ID, if the user is not logged in
      */
+    @Deprecated
     public static
     ActorRequestFactory forSystemRequests(Class<?> cls, @Nullable TenantId tenant) {
         checkNotNull(cls);
@@ -122,7 +128,10 @@ public class ActorRequestFactory {
      * @param tenant
      *         the ID of the tenant in a multi-tenant application, {@code null} for single-tenant
      * @return new instance of the factory
+     * @deprecated please always use factories on behalf of the current user,
+     *         or with a guest user ID, if the user is not logged in
      */
+    @Deprecated
     public static
     ActorRequestFactory forSystemRequests(UserId systemUser, @Nullable TenantId tenant) {
         checkNotNull(systemUser);
@@ -360,12 +369,17 @@ public class ActorRequestFactory {
         public ActorRequestFactory build() {
             checkNotNull(actor, "`actor` must be defined");
 
+            java.time.ZoneId currentZone = Time.currentTimeZone();
+
             if (zoneOffset == null) {
-                setZoneOffset(ZoneOffsets.getDefault());
+                ZoneOffset currentOffset = ZoneOffsets.of(
+                        currentZone.getRules().getOffset(Instant.now())
+                );
+                setZoneOffset(currentOffset);
             }
 
             if (zoneId == null) {
-                setZoneId(ZoneIds.systemDefault());
+                setZoneId(ZoneIds.of(currentZone));
             }
 
             return new ActorRequestFactory(this);
