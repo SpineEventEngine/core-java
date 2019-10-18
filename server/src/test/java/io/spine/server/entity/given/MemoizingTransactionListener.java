@@ -26,6 +26,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
 import io.spine.server.entity.Phase;
 import io.spine.server.entity.TransactionListener;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.validate.NonValidated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -48,6 +49,9 @@ public final class MemoizingTransactionListener<I> implements TransactionListene
     private Error lastError;
     private EntityRecord lastErroredRecord;
 
+    private RejectionEnvelope lastRejection;
+    private EntityRecord lastRejectedRecord;
+
     @Override
     public void onBeforePhase(Phase<I> phase) {
         phasesOnBefore.add(phase);
@@ -67,6 +71,13 @@ public final class MemoizingTransactionListener<I> implements TransactionListene
     public void onTransactionFailed(Error cause, @NonValidated EntityRecord entityRecord) {
         lastError = cause;
         lastErroredRecord = entityRecord;
+    }
+
+    @Override
+    public void onTransactionFailed(RejectionEnvelope cause,
+                                    @NonValidated EntityRecord entityRecord) {
+        lastRejection = cause;
+        lastRejectedRecord = entityRecord;
     }
 
     @Override
@@ -96,5 +107,13 @@ public final class MemoizingTransactionListener<I> implements TransactionListene
 
     public EntityRecord lastErroredRecord() {
         return lastErroredRecord;
+    }
+
+    public RejectionEnvelope getLastRejection() {
+        return lastRejection;
+    }
+
+    public EntityRecord getLastRejectedRecord() {
+        return lastRejectedRecord;
     }
 }

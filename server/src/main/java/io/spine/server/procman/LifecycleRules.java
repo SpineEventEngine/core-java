@@ -41,6 +41,8 @@ import static java.util.Arrays.asList;
  * {@linkplain LifecycleFlags#getArchived()} archive} or {@linkplain LifecycleFlags#getDeleted()}
  * delete} entities when certain events or rejections occur.
  */
+@Deprecated
+//TODO:2019-10-18:ysergiichuk: add deprecation notes and check current usages.
 final class LifecycleRules {
 
     /**

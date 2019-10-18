@@ -32,6 +32,7 @@ import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.quiz.PmQuizId;
@@ -77,10 +78,11 @@ public class GivenMessages {
     }
 
     public static PmIterationPlanned iterationPlanned(boolean budgetAllocated) {
-        return PmIterationPlanned.newBuilder()
-                                 .setProjectId(ID)
-                                 .setBudgetAllocated(budgetAllocated)
-                                 .build();
+        return PmIterationPlanned
+                .newBuilder()
+                .setProjectId(ID)
+                .setBudgetAllocated(budgetAllocated)
+                .build();
     }
 
     public static RejectionEnvelope
@@ -106,6 +108,13 @@ public class GivenMessages {
         return PmQuizStarted
                 .newBuilder()
                 .setQuizId(messageOfType(PmQuizId.class))
+                .build();
+    }
+
+    public static PmThrowEntityAlreadyArchived throwEntityAlreadyArchived() {
+        return PmThrowEntityAlreadyArchived
+                .newBuilder()
+                .setProjectId(ID)
                 .build();
     }
 }

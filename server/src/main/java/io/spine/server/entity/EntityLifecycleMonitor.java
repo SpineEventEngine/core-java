@@ -27,6 +27,7 @@ import io.spine.base.Error;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.logging.Logging;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -142,6 +143,12 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
                                        error,
                                        entityRecord.getVersion());
         }
+    }
+
+    @Override
+    public void onTransactionFailed(RejectionEnvelope cause,
+                                    @NonValidated EntityRecord entityRecord) {
+        // NOP.
     }
 
     /**

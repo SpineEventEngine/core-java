@@ -31,10 +31,13 @@ import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcomeHandler;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -187,7 +190,7 @@ public abstract class Transaction<I,
     B toBuilder(E entity) {
         S currentState = entity.state();
         @SuppressWarnings("unchecked") // ensured by argument of <E>.
-        B result = (B) currentState.toBuilder();
+                B result = (B) currentState.toBuilder();
 
         if (currentState.equals(entity.defaultState())) {
             IdField idField = IdField.of(entity.modelClass());
@@ -294,16 +297,18 @@ public abstract class Transaction<I,
      */
     private DispatchOutcome propagateFailsafe(Phase<I> phase) {
         try {
-            DispatchOutcome result = phase.propagate();
-            if (result.hasError()) {
-                rollback(result.getError());
-            }
-            return result;
+            //TODO:2019-10-18:ysergiichuk: add explicit test for the new behavior
+            return DispatchOutcomeHandler
+                    .from(phase.propagate())
+                    .onError(this::rollback)
+                    .onRejection(this::rollback)
+                    .process();
         } catch (Throwable t) {
             rollback(causeOf(t));
             return DispatchOutcome
                     .newBuilder()
-                    .setPropagatedSignal(phase.signal().messageId())
+                    .setPropagatedSignal(phase.signal()
+                                              .messageId())
                     .setError(causeOf(t))
                     .vBuild();
         }
@@ -368,6 +373,7 @@ public abstract class Transaction<I,
     private boolean withPhases() {
         return !phases.isEmpty();
     }
+
     /**
      * Commits this transaction and sets the new state to the entity.
      *
@@ -449,7 +455,22 @@ public abstract class Transaction<I,
      */
     @VisibleForTesting
     final void rollback(Error cause) {
-        TransactionListener<I> listener = listener();
+        doRollback(record -> listener().onTransactionFailed(cause, record));
+    }
+
+    /**
+     * Cancels the changes made within this transaction and removes the injected transaction object
+     * from the enclosed entity.
+     *
+     * @param cause
+     *         the reason of the rollback
+     */
+    @VisibleForTesting
+    final void rollback(RejectionEnvelope cause) {
+        doRollback(record -> listener().onTransactionFailed(cause, record));
+    }
+
+    private void doRollback(Consumer<EntityRecord> recordConsumer) {
         @NonValidated EntityRecord record = EntityRecord
                 .newBuilder()
                 .setEntityId(Identifier.pack(entity.id()))
@@ -457,7 +478,7 @@ public abstract class Transaction<I,
                 .setVersion(version)
                 .setLifecycleFlags(lifecycleFlags())
                 .buildPartial();
-        listener.onTransactionFailed(cause, record);
+        recordConsumer.accept(record);
         deactivate();
         entity.releaseTransaction();
     }

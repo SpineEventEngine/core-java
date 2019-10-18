@@ -21,6 +21,8 @@
 package io.spine.server.procman.given.pm;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
+import io.spine.base.Identifier;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
@@ -38,6 +40,7 @@ import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartIteration;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmIterationCompleted;
 import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmIterationStarted;
@@ -49,6 +52,7 @@ import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 
+import java.util.List;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
@@ -67,7 +71,7 @@ public class TestProcessManager
         super(id);
     }
 
-    /** Updates the state with putting incoming message.*/
+    /** Updates the state with putting incoming message. */
     private void remember(Message incoming) {
         builder().setAny(pack(incoming));
     }
@@ -127,6 +131,16 @@ public class TestProcessManager
         return PmIterationStarted
                 .newBuilder()
                 .setProjectId(command.getProjectId())
+                .build();
+    }
+
+    @Assign
+    List<EventMessage> handle(PmThrowEntityAlreadyArchived command)
+            throws io.spine.server.entity.rejection.EntityAlreadyArchived {
+        remember(command);
+        throw io.spine.server.entity.rejection.EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(Identifier.pack(command.getProjectId()))
                 .build();
     }
 

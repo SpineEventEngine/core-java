@@ -47,4 +47,11 @@ interface DispatchOutcomeMixin extends DispatchOutcomeOrBuilder, FieldAwareMessa
                 return getField(field);
         }
     }
+
+    /**
+     * Determines whether the outcome is a rejection outcome.
+     */
+    default boolean hasRejection() {
+        return hasSuccess() && getSuccess().hasRejection();
+    }
 }

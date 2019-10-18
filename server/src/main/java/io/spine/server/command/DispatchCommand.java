@@ -24,6 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandEnvelope;
 
@@ -79,7 +80,7 @@ public final class DispatchCommand<I> {
     public DispatchOutcome perform() {
         DispatchOutcome outcome = entity.dispatchCommand(command);
         if (outcome.hasSuccess()) {
-            onCommandResult(command.command(), outcome);
+            onCommandResult(command.command(), outcome.getSuccess());
         }
         return outcome;
     }
@@ -92,10 +93,9 @@ public final class DispatchCommand<I> {
         return command;
     }
 
-    private void onCommandResult(Command command, DispatchOutcome produced) {
-        if (produced.hasSuccess() && produced.getSuccess().hasRejection()) {
-            Event rejectionEvent = produced.getSuccess()
-                                           .getRejection();
+    private void onCommandResult(Command command, Success success) {
+        if (success.hasRejection()) {
+            Event rejectionEvent = success.getRejection();
             lifecycle.onCommandRejected(command.id(), rejectionEvent);
         } else {
             lifecycle.onCommandHandled(command);
