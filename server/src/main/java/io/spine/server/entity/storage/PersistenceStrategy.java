@@ -27,8 +27,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A persistence strategy of an entity {@linkplain Column column}.
  *
- * <p>The {@link #apply(Object)} method generally does not accept {@code null}s and must not return
- * {@code null}, the only exception is {@link PersistenceStrategyOfNull}.
+ * <p>The interface methods do not accept {@code null}s and must not return
+ * {@code null} with the exception of exception {@link PersistenceStrategyOfNull}.
  */
 public interface PersistenceStrategy<T, R> extends Function<T, R> {
 

@@ -22,7 +22,7 @@ package io.spine.server.entity.storage;
 
 /**
  * @param <R>
- *         store all values as
+ *         a type/supertype of all stored values
  */
 public interface TypeRegistry<R> {
 
