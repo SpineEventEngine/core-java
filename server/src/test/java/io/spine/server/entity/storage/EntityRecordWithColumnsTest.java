@@ -24,10 +24,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.TestEntity;
-import io.spine.server.entity.TestEntity.TestEntityBuilder;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
+import io.spine.test.storage.TaskId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,7 +35,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static java.util.Collections.singletonMap;
@@ -70,14 +67,8 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                   .withVersion(1)
-                                                   .build();
-        EntityClass<? extends TestEntity> entityClass = asEntityClass(entity.getClass());
-        Columns columns = Columns.of(entityClass);
         ColumnName columnName = ColumnName.of(archived.name());
         Object value = false;
-        EntityRecordWithColumns noFieldsEnvelope = newEmptyRecord();
         EntityRecordWithColumns emptyFieldsEnvelope = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(),
                 Collections.emptyMap()
@@ -88,7 +79,7 @@ class EntityRecordWithColumnsTest {
                         singletonMap(columnName, value)
                 );
         new EqualsTester()
-                .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
+                .addEqualityGroup(emptyFieldsEnvelope, notEmptyFieldsEnvelope)
                 .addEqualityGroup(newRecord())
                 .addEqualityGroup(newRecord()) // Each one has different EntityRecord
                 .testEquals();
@@ -131,13 +122,7 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("column values")
         void columnValues() {
-            TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                       .withVersion(1)
-                                                       .build();
-            EntityClass<? extends TestEntity> entityClass = asEntityClass(entity.getClass());
-            Columns columns = Columns.of(entityClass);
             ColumnName columnName = ColumnName.of(archived.name());
-            Column column = columns.get(columnName);
             Object value = false;
             Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
             EntityRecordWithColumns record = EntityRecordWithColumns.of(
@@ -169,13 +154,15 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("not have only lifecycle columns if the entity does not define custom")
+    @DisplayName("have default system columns even if the entity does not define custom ones")
     void supportEmptyColumns() {
-        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns("ID");
-        EntityClass<? extends EntityWithoutCustomColumns> entityClass =
-                asEntityClass(entity.getClass());
+        TaskId taskId = TaskId
+                .newBuilder()
+                .setId(42)
+                .build();
+        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(taskId);
 
-        Columns columns = Columns.of(entityClass);
+        Columns columns = Columns.of(entity.getClass());
         Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
 
         EntityRecordWithColumns record = EntityRecordWithColumns.of(

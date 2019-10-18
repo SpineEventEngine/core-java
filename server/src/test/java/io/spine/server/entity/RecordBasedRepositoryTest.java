@@ -264,7 +264,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             repository().store(entity1);
             repository().store(entity2);
 
-            String fieldPath = "idString";
+            String fieldPath = "id_string";
             StringValue fieldValue = StringValue.newBuilder()
                                                 .setValue(id1.toString())
                                                 .build();

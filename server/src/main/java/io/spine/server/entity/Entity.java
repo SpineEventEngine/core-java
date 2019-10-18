@@ -70,19 +70,8 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
 
     /**
      * Obtains the version of the entity.
-     *
-     * @apiNote This method has the {@code get} prefix for conforming to Java Beans
-     *         convention which is used for the column methods.
-     * @see #version()
      */
-    Version getVersion();
-
-    /**
-     * Obtains the version of the entity.
-     */
-    default Version version() {
-        return getVersion();
-    }
+    Version version();
 
     /**
      * Enumeration of generic type parameters of this interface.

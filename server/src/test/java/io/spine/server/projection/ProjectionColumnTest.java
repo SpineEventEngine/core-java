@@ -20,15 +20,21 @@
 
 package io.spine.server.projection;
 
-import io.spine.core.Version;
+import com.google.common.truth.Truth8;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.projection.given.SavingProjection;
 import io.spine.server.storage.StorageField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.server.storage.VersionField.version;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @Nested
 @DisplayName("Projection should have columns")
@@ -37,17 +43,21 @@ class ProjectionColumnTest {
     @Test
     @DisplayName("`version`")
     void version() {
-        assertHasColumn(SavingProjection.class, version, Version.class);
+        assertHasColumn(SavingProjection.class, version);
     }
 
     @Test
     @DisplayName("`archived` and `deleted`")
     void lifecycleColumns() {
+        assertHasColumn(SavingProjection.class, archived);
+        assertHasColumn(SavingProjection.class, deleted);
     }
 
     private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
-                                        StorageField columnName,
-                                        Class<?> columnType) {
-        fail("Not implemented.");
+                                        StorageField storageField) {
+        Columns columns = Columns.of(projectionType);
+        ColumnName columnName = ColumnName.of(storageField);
+        Optional<Column> result = columns.find(columnName);
+        Truth8.assertThat(result).isPresent();
     }
 }

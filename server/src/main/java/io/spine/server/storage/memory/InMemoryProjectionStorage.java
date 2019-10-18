@@ -26,7 +26,6 @@ import io.spine.client.ResponseFormat;
 import io.spine.core.TenantId;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -52,8 +51,7 @@ public final class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
 
     InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
-        super((ProjectionClass<?>) recordStorage.entityClass(),
-              recordStorage.isMultitenant());
+        super(recordStorage.entityClass(), recordStorage.isMultitenant());
         this.recordStorage = recordStorage;
     }
 

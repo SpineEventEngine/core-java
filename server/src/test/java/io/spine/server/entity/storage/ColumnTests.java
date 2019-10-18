@@ -21,23 +21,22 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.storage.LifecycleFlagField;
 
-import java.util.stream.Stream;
-
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.storage.VersionField.version;
 
 /**
  * Utilities for testing columns.
  */
 final class ColumnTests {
 
-    private static final ImmutableSet<ColumnName> lifecycleColumns =
-            Stream.of(LifecycleFlagField.values())
-                  .map(ColumnName::of)
-                  .collect(toImmutableSet());
-
-    static final ImmutableSet<ColumnName> defaultColumns = lifecycleColumns;
+    static final ImmutableSet<ColumnName> defaultColumns =
+            ImmutableSet.of(
+                    ColumnName.of(archived),
+                    ColumnName.of(deleted),
+                    ColumnName.of(version)
+            );
 
     /** Prevent instantiation of this utility class. */
     private ColumnTests() {

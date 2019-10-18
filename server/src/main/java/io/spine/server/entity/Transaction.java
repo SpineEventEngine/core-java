@@ -240,7 +240,7 @@ public abstract class Transaction<I,
                 .newBuilder()
                 .setId(Identifier.pack(entity.id()))
                 .setTypeUrl(typeUrl.value())
-                .setVersion(entity.getVersion())
+                .setVersion(entity.version())
                 .vBuild();
     }
 

@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -173,7 +174,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         I id = newId();
         EntityRecord record = newStorageRecord(id);
         EntityRecordWithColumns recordWithStorageFields =
-                EntityRecordWithColumns.create(record, storage());
+                EntityRecordWithColumns.of(record, Collections.emptyMap());
         assertFalse(recordWithStorageFields.hasColumns());
         RecordStorage<I> storage = storage();
 

@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
@@ -33,8 +32,6 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectWithColumns;
 import io.spine.testdata.Sample;
-
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
  * The test environment for {@link io.spine.server.storage.memory.EntityQueryMatcher} tests.
@@ -80,8 +77,7 @@ public final class EntityQueryMatcherTestEnv {
     }
 
     private static Column column(String name) {
-        EntityClass<ProjectView> entityClass = asEntityClass(ProjectView.class);
-        Columns columns = Columns.of(entityClass);
+        Columns columns = Columns.of(ProjectView.class);
         ColumnName columnName = ColumnName.of(name);
         Column column = columns.get(columnName);
         return column;
@@ -90,6 +86,11 @@ public final class EntityQueryMatcherTestEnv {
     private static class ProjectView
             extends Projection<ProjectId, Project, Project.Builder>
             implements ProjectWithColumns {
+
+        @Override
+        public String getIdString() {
+            return idAsString();
+        }
 
         @Override
         public boolean getDoable() {

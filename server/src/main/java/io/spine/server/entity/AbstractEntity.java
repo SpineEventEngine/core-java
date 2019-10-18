@@ -472,11 +472,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         updateState(newState, incrementedVersion());
     }
 
-    @Override
-    public final Version getVersion() {
-        return version;
-    }
-
     private void setVersion(Version version) {
         this.version = version;
     }
@@ -493,7 +488,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     @Override
     public Version version() {
-        return getVersion();
+        return version;
     }
 
     /**

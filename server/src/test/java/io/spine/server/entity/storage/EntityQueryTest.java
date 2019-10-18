@@ -31,7 +31,6 @@ import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
@@ -49,7 +48,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filter.Operator.EQUAL;
 import static io.spine.protobuf.TypeConverter.toAny;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.entity.storage.given.SimpleColumn.column;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -106,8 +104,7 @@ class EntityQueryTest {
     @Test
     @DisplayName("fail to append lifecycle columns if they are already present")
     void notDuplicateLifecycleColumns() {
-        EntityClass<TestEntity> entityClass = asEntityClass(TestEntity.class);
-        Columns columns = Columns.of(entityClass);
+        Columns columns = Columns.of(TestEntity.class);
         Column deletedColumn = columns.get(ColumnName.of(deleted));
         CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(deletedColumn, Filter.getDefaultInstance()), ALL

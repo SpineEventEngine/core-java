@@ -129,7 +129,7 @@ public final class EntityQueries {
     private static Column findMatchingColumn(Filter filter, Columns columns) {
         FieldPath fieldPath = filter.getFieldPath();
         checkArgument(fieldPath.getFieldNameCount() == 1,
-                      "Incorrect Entity Column name in Entity Filter: %s",
+                      "Incorrect Column name in Entity Filter: %s",
                       join(".", fieldPath.getFieldNameList()));
         String column = fieldPath.getFieldName(0);
         ColumnName columnName = ColumnName.of(column);
@@ -142,7 +142,7 @@ public final class EntityQueries {
         Object filterValue = toObject(filterConvent, expectedType);
         Class<?> actualType = filterValue.getClass();
         checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
-                      "EntityColumn type mismatch. EntityColumn %s cannot have value %s.",
+                      "Column type mismatch. Column %s cannot have value %s.",
                       column,
                       filterValue);
     }

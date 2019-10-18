@@ -118,8 +118,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setNumber(0)
                 .build();
 
-        Filter status = eq("projectStatusValue", wrappedValue);
-        Filter version = eq("counterVersion", versionValue);
+        Filter status = eq("project_status_value", wrappedValue);
+        Filter version = eq("counter_version", versionValue);
         CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL)
@@ -386,7 +386,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setValue(initialStatus.getNumber())
                 .build();
-        Filter status = eq("projectStatusValue", initialStatusValue);
+        Filter status = eq("project_status_value", initialStatusValue);
         CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL)
@@ -453,7 +453,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         write(noMatchIdEntity);
         write(deletedEntity);
 
-        CompositeFilter filter = all(eq("projectStatusValue", CANCELLED.getNumber()));
+        CompositeFilter filter = all(eq("project_status_value", CANCELLED.getNumber()));
         TargetFilters filters =
                 Targets.acceptingOnly(targetId)
                        .toBuilder()

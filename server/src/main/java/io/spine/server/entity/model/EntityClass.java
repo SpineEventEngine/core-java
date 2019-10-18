@@ -164,7 +164,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     public final MessageType stateType() {
-        Descriptor descriptor = defaultState.getDescriptorForType();
+        Descriptor descriptor = defaultState().getDescriptorForType();
         MessageType result = new MessageType(descriptor);
         return result;
     }

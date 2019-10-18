@@ -32,13 +32,12 @@ import io.spine.server.entity.storage.SystemColumn;
 public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to add the {@link SystemColumn} annotation.
+     * Obtains the version of the entity.
      *
      * <p>Corresponds to the {@link io.spine.server.storage.VersionField#version}.
      */
-    @Override
     @SystemColumn
-    Version getVersion();
+    default Version getVersion() {
+        return version();
+    }
 }

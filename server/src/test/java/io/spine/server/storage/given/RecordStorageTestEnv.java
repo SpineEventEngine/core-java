@@ -27,6 +27,7 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
@@ -141,12 +142,17 @@ public class RecordStorageTestEnv {
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity
             extends TransactionalEntity<ProjectId, Project, Project.Builder>
-            implements ProjectWithColumns {
+            implements ProjectWithColumns, HasLifecycleColumns<ProjectId, Project> {
 
         private int counter = 0;
 
         private TestCounterEntity(ProjectId id) {
             super(id);
+        }
+
+        @Override
+        public String getIdString() {
+            return idAsString();
         }
 
         @Override

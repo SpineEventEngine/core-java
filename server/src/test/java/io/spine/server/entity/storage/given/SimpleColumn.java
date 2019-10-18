@@ -21,7 +21,6 @@
 package io.spine.server.entity.storage.given;
 
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
@@ -30,7 +29,6 @@ import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
 import io.spine.test.entity.TaskViewWithColumns;
 
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.test.entity.TaskView.Status.CREATED;
 
 public final class SimpleColumn {
@@ -51,17 +49,12 @@ public final class SimpleColumn {
         return column("estimate_in_days");
     }
 
-    public static Column enumColumn() {
-        return column("status");
-    }
-
     public static Column timestampColumn() {
         return column("due_date");
     }
 
     private static Column column(String name) {
-        EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-        Columns columns = Columns.of(entityClass);
+        Columns columns = Columns.of(TaskViewProjection.class);
         ColumnName columnName = ColumnName.of(name);
         Column column = columns.get(columnName);
         return column;

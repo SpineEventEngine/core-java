@@ -25,10 +25,10 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,7 +48,7 @@ import java.util.Optional;
 @SPI
 public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
-    protected ProjectionStorage(ProjectionClass<?> projectionClass,
+    protected ProjectionStorage(EntityClass<?> projectionClass,
                                 boolean multitenant) {
         super(projectionClass, multitenant);
     }

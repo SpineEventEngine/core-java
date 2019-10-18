@@ -18,32 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.storage.given;
 
-/**
- * Fields used to store {@linkplain io.spine.server.entity.Entity#version() version}
- * information of an entity.
- *
- * @see StorageField
- */
-public enum VersionField implements StorageField {
+import io.spine.server.storage.StorageField;
 
-    /**
-     * Number part of the version.
-     */
-    version,
+public final class AStorageField implements StorageField {
 
-    /**
-     * A field representing a timestamp in seconds.
-     *
-     * @see com.google.protobuf.Timestamp#getSeconds()
-     */
-    timestamp,
+    public static final String NAME = "a_storage_field";
 
-    /**
-     * A field for storing the part of a timestamp representing the amount of nanoseconds.
-     *
-     * @see com.google.protobuf.Timestamp#getNanos()
-     */
-    timestamp_nanos
+    @Override
+    public String name() {
+        return NAME;
+    }
 }

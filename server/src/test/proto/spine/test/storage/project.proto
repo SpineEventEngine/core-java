@@ -50,10 +50,15 @@ message Project {
     }
     Status status = 4;
 
-    bool doable = 5 [(column) = true];
-    google.protobuf.Any wrapped_state = 6 [(column) = true];
-    int32 project_status_value = 7 [(column) = true];
-    spine.core.Version counter_version = 8 [(column) = true];
+    string id_string = 5 [(column) = true];
+
+    bool doable = 6 [(column) = true];
+
+    google.protobuf.Any wrapped_state = 7 [(column) = true];
+
+    int32 project_status_value = 8 [(column) = true];
+
+    spine.core.Version counter_version = 9 [(column) = true];
 }
 
 message TaskId {
@@ -61,6 +66,7 @@ message TaskId {
 }
 
 message Task {
+    option (entity).kind = PROJECTION;
     TaskId task_id = 1;
     string title = 2;
     string description = 3;

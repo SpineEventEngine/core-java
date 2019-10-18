@@ -31,7 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 @Internal
 public final class Columns {
@@ -53,6 +54,10 @@ public final class Columns {
         columns.putAll(introspector.systemColumns());
         columns.putAll(introspector.protoColumns());
         return new Columns(columns.build(), entityClass);
+    }
+
+    public static Columns of(Class<? extends Entity<?, ?>> entityClass) {
+        return of(asEntityClass(entityClass));
     }
 
     public Column get(ColumnName columnName) {
@@ -92,7 +97,7 @@ public final class Columns {
     }
 
     private IllegalStateException columnNotFound(ColumnName columnName) {
-        throw newIllegalStateException(
+        throw newIllegalArgumentException(
                 "A column with name '%s' not found in entity state class `%s`.",
                 columnName, entityClass.stateClass()
                                        .getCanonicalName());

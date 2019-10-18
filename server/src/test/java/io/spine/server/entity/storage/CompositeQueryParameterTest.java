@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
 import io.spine.client.Filter;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.CCF_CO_UNDEFINED;
 import static io.spine.client.Filters.eq;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -61,14 +59,13 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with other instances")
     void mergeWithOtherInstances() {
-        EntityClass<TestEntity> entityClass = asEntityClass(TestEntity.class);
-        Columns columns = Columns.of(entityClass);
+        Columns columns = Columns.of(TestEntity.class);
 
         ColumnName archivedColumnName = ColumnName.of(archived);
         ColumnName deletedColumnName = ColumnName.of(deleted);
 
         Column archivedColumn = columns.get(archivedColumnName);
-        Column deletedColumn = columns.get(archivedColumnName);
+        Column deletedColumn = columns.get(deletedColumnName);
 
         Filter archived = eq(archivedColumnName.value(), true);
         Filter deleted = eq(deletedColumnName.value(), false);
@@ -91,14 +88,13 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with single filter")
     void mergeWithSingleFilter() {
-        EntityClass<TestEntity> entityClass = asEntityClass(TestEntity.class);
-        Columns columns = Columns.of(entityClass);
+        Columns columns = Columns.of(TestEntity.class);
 
         ColumnName archivedColumnName = ColumnName.of(archived);
         ColumnName deletedColumnName = ColumnName.of(deleted);
 
         Column archivedColumn = columns.get(archivedColumnName);
-        Column deletedColumn = columns.get(archivedColumnName);
+        Column deletedColumn = columns.get(deletedColumnName);
 
         Filter archived = eq(archivedColumnName.value(), false);
         Filter deleted = eq(deletedColumnName.value(), false);

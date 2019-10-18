@@ -33,6 +33,7 @@ public final class DefaultTypeRegistry extends AbstractTypeRegistry<Object> {
      * Prevents external construction so the class is accessed only through {@link #INSTANCE}.
      */
     private DefaultTypeRegistry() {
+        super();
     }
 
     @Override
