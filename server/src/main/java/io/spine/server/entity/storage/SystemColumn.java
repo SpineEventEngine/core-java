@@ -31,12 +31,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * ...
  *
- * <p>A number of columns internally used by Spine are shared between different entities or can't
- * be stored to Protobuf for some other reasons. These columns are marked with this annotation and
- * are processed by the column introspector separately.
+ * <p>A number of columns internally used by Spine are applied to multiple entities or can't be
+ * expressed as a Protobuf field option for some other reasons. These columns are marked with this
+ * annotation and are processed by the column introspector separately.
  *
- * <p>The methods annotated with this annotation should conform to the same {@code get...()} syntax
- * as the Protobuf-based columns.
+ * <p>The methods annotated with {@code SystemColumn} should conform to the same {@code get...()}
+ * syntax as the Protobuf-based columns.
  */
 @Target(METHOD)
 @Retention(RUNTIME)
