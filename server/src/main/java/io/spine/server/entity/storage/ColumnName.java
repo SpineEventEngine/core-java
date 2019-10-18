@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import io.spine.code.java.MethodName;
+import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.storage.StorageField;
 import io.spine.value.StringTypeValue;
 
@@ -49,6 +50,12 @@ public final class ColumnName extends StringTypeValue {
     public static ColumnName of(StorageField storageField) {
         checkNotNull(storageField);
         return of(storageField.name());
+    }
+
+    public static ColumnName of(FieldDeclaration field) {
+        checkNotNull(field);
+        return of(field.name()
+                       .value());
     }
 
     public static ColumnName from(Method method) {

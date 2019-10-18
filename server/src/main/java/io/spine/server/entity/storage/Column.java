@@ -24,8 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -36,32 +34,10 @@ public final class Column {
     private final Class<?> type;
     private final Getter getter;
 
-    private Column(ColumnName name, Class<?> type, Getter getter) {
+    Column(ColumnName name, Class<?> type, Getter getter) {
         this.name = name;
         this.type = type;
         this.getter = getter;
-    }
-
-    static Column create(Method getter, boolean ofState) {
-        ColumnName name = ColumnName.from(getter);
-        Class<?> type = getter.getReturnType();
-        Getter columnGetter = entity -> setAccessibleAndInvoke(getter, entity, ofState);
-        Column column = new Column(name, type, columnGetter);
-        return column;
-    }
-
-    private static Object
-    setAccessibleAndInvoke(Method getter, Entity<?, ? extends Message> entity, boolean ofState)
-            throws IllegalAccessException, InvocationTargetException {
-        getter.setAccessible(true);
-        Object result;
-        if (ofState) {
-            result = getter.invoke(entity.state());
-        } else {
-            result = getter.invoke(entity);
-        }
-        getter.setAccessible(false);
-        return result;
     }
 
     public ColumnName name() {
@@ -76,7 +52,7 @@ public final class Column {
         return getter.apply(entity);
     }
 
-    private interface Getter extends Function<Entity<?, ? extends Message>, Object> {
+    interface Getter extends Function<Entity<?, ? extends Message>, Object> {
 
         Object invoke(Entity<?, ? extends Message> entity) throws Exception;
 

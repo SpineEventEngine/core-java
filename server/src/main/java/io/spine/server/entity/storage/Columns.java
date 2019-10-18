@@ -49,7 +49,7 @@ public final class Columns {
     }
 
     public static Columns of(EntityClass<?> entityClass) {
-        ColumnIntrospector introspector = new ColumnIntrospector(entityClass);
+        Introspector introspector = new Introspector(entityClass);
         ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
         columns.putAll(introspector.systemColumns());
         columns.putAll(introspector.protoColumns());
