@@ -226,7 +226,7 @@ public final class EventBus
         return Optional.ofNullable(enricher);
     }
 
-    protected EventEnvelope enrich(EventEnvelope event) {
+    private EventEnvelope enrich(EventEnvelope event) {
         if (enricher == null) {
             return event;
         }
