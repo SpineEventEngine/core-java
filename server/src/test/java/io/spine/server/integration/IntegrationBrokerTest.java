@@ -42,7 +42,6 @@ import io.spine.server.integration.given.ProjectDetails;
 import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
-import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
@@ -66,7 +65,6 @@ import static io.spine.server.integration.given.IntegrationBrokerTestEnv.project
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("IntegrationBroker should")
@@ -297,7 +295,7 @@ class IntegrationBrokerTest {
         assertNull(ProjectCountAggregate.externalEvent());
 
         Event projectCreated = projectCreated();
-        assertThrows(SignalOriginMismatchError.class, () -> eventBus.post(projectCreated));
+        eventBus.post(projectCreated);
 
         assertNull(ProjectEventsSubscriber.externalEvent());
         assertNull(ProjectDetails.externalEvent());

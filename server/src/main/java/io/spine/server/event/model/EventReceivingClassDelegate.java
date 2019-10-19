@@ -53,6 +53,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     private static final long serialVersionUID = 0L;
     private final HandlerMap<EventClass, P, M> handlers;
     private final ImmutableSet<EventClass> events;
+    private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
     private final ImmutableSet<StateClass> domesticStates;
     private final ImmutableSet<StateClass> externalStates;
@@ -65,6 +66,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         super(delegatingClass);
         this.handlers = HandlerMap.create(delegatingClass, signature);
         this.events = handlers.messageClasses();
+        this.domesticEvents = handlers.messageClasses((h) -> !h.isExternal());
         this.externalEvents = handlers.messageClasses(HandlerMethod::isExternal);
         this.domesticStates = extractStates(false);
         this.externalStates = extractStates(true);
@@ -75,10 +77,17 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     }
 
     /**
-     * Obtains domestic event classes handled by the delegating class.
+     * Obtains all event classes handled by the delegating class.
      */
     public ImmutableSet<EventClass> events() {
         return events;
+    }
+
+    /**
+     * Obtains domestic event classes handled by the delegating class.
+     */
+    public ImmutableSet<EventClass> domesticEvents() {
+        return domesticEvents;
     }
 
     /**

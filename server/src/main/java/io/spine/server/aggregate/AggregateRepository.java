@@ -201,7 +201,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private void checkNotVoid() {
         boolean handlesCommands = dispatchesCommands();
-        boolean reactsOnEvents = dispatchesEvents() || dispatchesExternalEvents();
+        boolean reactsOnEvents = dispatchesEvents();
 
         if (!handlesCommands && !reactsOnEvents) {
             throw newIllegalStateException(
@@ -349,6 +349,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<EventClass> events() {
         return aggregateClass().events();
+    }
+
+    @Override
+    public Set<EventClass> domesticEvents() {
+        return aggregateClass().domesticEvents();
     }
 
     @Override

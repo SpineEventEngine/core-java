@@ -65,6 +65,11 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
     }
 
     @Override
+    public Set<EventClass> domesticEventClasses() {
+        return delegate.domesticEvents();
+    }
+
+    @Override
     public Set<EventClass> externalEventClasses() {
         return delegate.externalEvents();
     }

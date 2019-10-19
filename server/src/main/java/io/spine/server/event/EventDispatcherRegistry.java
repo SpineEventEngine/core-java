@@ -25,6 +25,7 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -74,6 +75,31 @@ final class EventDispatcherRegistry
     @Override
     protected Set<EventClass> registeredMessageClasses() {
         return super.registeredMessageClasses();
+    }
+
+    /**
+     * Tells whether the passed envelope can be dispatched to the passed dispatcher according
+     * to the envelope attributes.
+     *
+     * <p>In case the packed event is external, it may be dispatched only to the dispatcher,
+     * which declares the event class as external.
+     *
+     * <p>If the passed event is domestic, it may only be dispatched to the dispatcher, which
+     * declares the corresponding event class as domestic.
+     *
+     * @return the predicate filtering out the pairs of {@linkplain EventEnvelope envelopes}
+     *         and {@linkplain EventDispatcher dispatchers} in which the dispatching is not allowed
+     */
+    @Override
+    protected final BiPredicate<EventEnvelope, EventDispatcher> attributeFilter() {
+        return (envelope, dispatcher) -> {
+            boolean external = envelope.context()
+                                       .getExternal();
+            EventClass eventClass = envelope.messageClass();
+            return external
+                   ? dispatcher.externalEventClasses().contains(eventClass)
+                   : dispatcher.domesticEventClasses().contains(eventClass);
+        };
     }
 
     /**

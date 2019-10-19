@@ -84,6 +84,11 @@ public final class ForeignContextConfig {
             }
 
             @Override
+            public Set<EventClass> domesticEventClasses() {
+                return eventClasses();
+            }
+
+            @Override
             public Set<EventClass> messageClasses() {
                 return ImmutableSet.of();
             }
