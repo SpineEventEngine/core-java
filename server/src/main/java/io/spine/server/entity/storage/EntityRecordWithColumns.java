@@ -146,24 +146,24 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      *         if there is no column with the specified name
      */
     public Object columnValue(ColumnName columnName) {
-        return columnValue(columnName, DefaultTypeRegistry.INSTANCE);
+        return columnValue(columnName, DefaultColumnConversionRules.INSTANCE);
     }
 
-    public <R> R columnValue(ColumnName columnName, TypeRegistry<R> typeRegistry) {
+    public <R> R columnValue(ColumnName columnName, ColumnConversionRules<R> conversionRules) {
         checkNotNull(columnName);
-        checkNotNull(typeRegistry);
+        checkNotNull(conversionRules);
         if (!storageFields.containsKey(columnName)) {
             throw newIllegalStateException("Column with the name `%s` was not found.",
                                            columnName);
         }
         Object columnValue = storageFields.get(columnName);
         if (columnValue == null) {
-            R result = typeRegistry.persistenceStrategyOfNull()
-                                   .apply(null);
+            R result = conversionRules.ofNull()
+                                      .apply(null);
             return result;
         }
-        R result = typeRegistry.persistenceStrategyOf(columnValue.getClass())
-                               .applyTo(columnValue);
+        R result = conversionRules.of(columnValue.getClass())
+                                  .applyTo(columnValue);
         return result;
     }
 

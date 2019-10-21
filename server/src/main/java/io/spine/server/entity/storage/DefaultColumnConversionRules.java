@@ -22,67 +22,69 @@ package io.spine.server.entity.storage;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static io.spine.server.entity.storage.PersistenceStrategy.identity;
+import static io.spine.server.entity.storage.ConversionRule.identity;
 
-public final class DefaultTypeRegistry extends AbstractTypeRegistry<Object> {
+public final class DefaultColumnConversionRules extends AbstractColumnConversionRules<Object> {
 
-    public static final DefaultTypeRegistry INSTANCE = new DefaultTypeRegistry();
+    public static final DefaultColumnConversionRules INSTANCE = new DefaultColumnConversionRules();
 
     /**
      * Prevents external construction so the class is accessed only through {@link #INSTANCE}.
      */
-    private DefaultTypeRegistry() {
+    private DefaultColumnConversionRules() {
         super();
     }
 
     @Override
-    protected PersistenceStrategy<String, String> stringPersistenceStrategy() {
+    protected ConversionRule<String, String> ofString() {
         return identity();
     }
 
     @Override
-    protected PersistenceStrategy<Integer, Integer> integerPersistenceStrategy() {
+    protected ConversionRule<Integer, Integer> ofInteger() {
         return identity();
     }
 
     @Override
-    protected PersistenceStrategy<Long, Long> longPersistenceStrategy() {
+    protected ConversionRule<Long, Long> ofLong() {
         return identity();
     }
 
     @Override
-    protected PersistenceStrategy<Float, Float> floatPersistenceStrategy() {
+    protected ConversionRule<Float, Float> ofFloat() {
         return identity();
     }
 
     @Override
-    protected PersistenceStrategy<Double, Double> doublePersistenceStrategy() {
+    protected ConversionRule<Double, Double> ofDouble() {
         return identity();
     }
 
     @Override
-    protected PersistenceStrategy<Boolean, Boolean> booleanPersistenceStrategy() {
+    protected ConversionRule<Boolean, Boolean> ofBoolean() {
         return identity();
     }
 
     @Override
-    protected PersistenceStrategy<ByteString, ByteString> byteStringPersistenceStrategy() {
+    protected ConversionRule<ByteString, ByteString> ofByteString() {
         return identity();
     }
 
     @Override
-    protected PersistenceStrategy<Enum<?>, Enum<?>> enumPersistenceStrategy() {
+    protected ConversionRule<Enum<?>, Enum<?>> ofEnum() {
         return identity();
     }
 
     @Override
-    protected PersistenceStrategy<Message, Message> messagePersistenceStrategy() {
+    protected ConversionRule<Message, Message> ofMessage() {
         return identity();
     }
 
+    @SuppressWarnings("ReturnOfNull")
     @Override
-    public PersistenceStrategyOfNull<?> persistenceStrategyOfNull() {
-        return () -> null;
+    public ConversionRule<@Nullable ?, @Nullable ?> ofNull() {
+        return o -> null;
     }
 }

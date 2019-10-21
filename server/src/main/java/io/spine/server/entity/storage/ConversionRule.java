@@ -20,23 +20,32 @@
 
 package io.spine.server.entity.storage;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface PersistenceStrategyOfNull<R> extends PersistenceStrategy<Object, R> {
+/**
+ * A persistence strategy of an entity {@linkplain Column column}.
+ *
+ * <p>The interface methods do not accept {@code null}s and must not return
+ * {@code null} with the exception of exception {@link ColumnConversionRules#ofNull()}.
+ */
+public interface ConversionRule<T, R> extends Function<T, R> {
 
-    @Nullable R nullValue();
-
-    @Override
-    default @Nullable R applyTo(@Nullable Object object) {
-        return apply(object);
+    /**
+     * A convenience shortcut for {@link #apply(T)}.
+     *
+     * <p>Can be used when the object is known of being of type {@code T} but can't be cast to it
+     * explicitly (e.g. in case of wildcard arguments).
+     */
+    @SuppressWarnings("unchecked") // See doc.
+    default R applyTo(Object object) {
+        checkNotNull(object);
+        T value = (T) object;
+        return apply(value);
     }
 
-    @Override
-    default @Nullable R apply(@Nullable Object value) {
-        checkArgument(value == null,
-                      "The `PersistenceStrategyOfNull` can't be applied to a non-`null` value.");
-        return nullValue();
+    static <T> ConversionRule<T, T> identity() {
+        return t -> t;
     }
 }

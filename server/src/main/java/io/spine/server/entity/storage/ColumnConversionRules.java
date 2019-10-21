@@ -20,32 +20,15 @@
 
 package io.spine.server.entity.storage;
 
-import java.util.function.Function;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * A persistence strategy of an entity {@linkplain Column column}.
- *
- * <p>The interface methods do not accept {@code null}s and must not return
- * {@code null} with the exception of exception {@link PersistenceStrategyOfNull}.
+ * @param <R>
+ *         a type/supertype of all stored values
  */
-public interface PersistenceStrategy<T, R> extends Function<T, R> {
+public interface ColumnConversionRules<R> {
 
-    /**
-     * A convenience shortcut for {@link #apply(T)}.
-     *
-     * <p>Can be used when the object is known of being of type {@code T} but can't be cast to it
-     * explicitly (e.g. in case of wildcard arguments).
-     */
-    @SuppressWarnings("unchecked") // See doc.
-    default R applyTo(Object object) {
-        checkNotNull(object);
-        T value = (T) object;
-        return apply(value);
-    }
+    ConversionRule<?, ? extends R> of(Class<?> type);
 
-    static <T> PersistenceStrategy<T, T> identity() {
-        return t -> t;
-    }
+    ConversionRule<@Nullable ?, @Nullable ? extends R> ofNull();
 }
