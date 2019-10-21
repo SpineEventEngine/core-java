@@ -190,7 +190,7 @@ public abstract class Transaction<I,
     B toBuilder(E entity) {
         S currentState = entity.state();
         @SuppressWarnings("unchecked") // ensured by argument of <E>.
-                B result = (B) currentState.toBuilder();
+        B result = (B) currentState.toBuilder();
 
         if (currentState.equals(entity.defaultState())) {
             IdField idField = IdField.of(entity.modelClass());
