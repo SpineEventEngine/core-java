@@ -21,33 +21,30 @@
 package io.spine.server.delivery;
 
 /**
- * How ended the delivery of all messages read from the {@code Inbox} according to a certain
- * {@code ShardIndex}.
+ * The statistics on {@linkplain Delivery#deliverMessagesFrom(ShardIndex) delivering the messages}
+ * from a certain shard.
  */
-class RunResult {
+public final class DeliveryStats {
 
-    private final int deliveredMsgCount;
-    private final boolean stoppedByMonitor;
+    private final ShardIndex index;
+    private final int deliveredCount;
 
-    RunResult(int count, boolean stoppedByMonitor) {
-        deliveredMsgCount = count;
-        this.stoppedByMonitor = stoppedByMonitor;
+    DeliveryStats(ShardIndex index, int deliveredCount) {
+        this.index = index;
+        this.deliveredCount = deliveredCount;
     }
 
     /**
-     * Tells if another run is required.
-     *
-     * <p>The run is not required either if there were no messages delivered or if
-     * the {@code DeliveryMonitor} stopped the execution.
+     * Returns the index of the shard for which this statistics is calculated.
      */
-    boolean shouldRunAgain() {
-        return !stoppedByMonitor && deliveredMsgCount > 0;
+    public ShardIndex shardIndex() {
+        return index;
     }
 
     /**
-     * Returns the number of delivered messages.
+     * Returns the total number of messages delivered.
      */
-    int deliveredCount() {
-        return this.deliveredMsgCount;
+    public int deliveredCount() {
+        return deliveredCount;
     }
 }

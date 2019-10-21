@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
+import com.google.common.truth.Truth8;
 import com.google.protobuf.util.Durations;
 import io.spine.core.TenantId;
 import io.spine.server.ServerEnvironment;
@@ -35,11 +36,14 @@ import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.SignalMemoizer;
 import io.spine.server.delivery.given.FixedShardStrategy;
 import io.spine.server.delivery.given.MemoizingDeliveryMonitor;
+import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberImported;
 import io.spine.test.delivery.NumberReacted;
 import io.spine.testing.SlowTest;
+import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -47,10 +51,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -64,8 +70,10 @@ import static com.google.common.collect.Streams.concat;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
+import static io.spine.server.delivery.given.DeliveryTestEnv.newShardIndex;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
+import static java.util.Collections.synchronizedList;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
@@ -165,7 +173,6 @@ class DeliveryTest {
     @DisplayName("multiple shards to multiple targets " +
             "in a multi-threaded env with the custom strategy")
     void withCustomStrategy() {
-
         FixedShardStrategy strategy = new FixedShardStrategy(13);
         Delivery newDelivery = Delivery.localWithStrategyAndWindow(strategy, Durations.ZERO);
         ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
@@ -181,6 +188,74 @@ class DeliveryTest {
         assertThat(shards.iterator()
                          .next())
                 .isEqualTo(strategy.nonEmptyShard());
+    }
+
+    @Test
+    @DisplayName("multiple shards to multiple targets in a single-threaded env " +
+            "and calculate the statistics properly")
+    void calculateStats() {
+        Delivery delivery = Delivery.newBuilder()
+                                    .setStrategy(UniformAcrossAllShards.forNumber(7))
+                                    .build();
+        ServerEnvironment.instance()
+                         .configureDelivery(delivery);
+        List<DeliveryStats> deliveryStats = synchronizedList(new ArrayList<>());
+        delivery.subscribe(msg -> {
+            Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(msg.getShardIndex());
+            stats.ifPresent(deliveryStats::add);
+        });
+
+        RawMessageMemoizer rawMessageMemoizer = new RawMessageMemoizer();
+        delivery.subscribe(rawMessageMemoizer);
+
+        ImmutableSet<String> targets = manyTargets(7);
+        new ThreadSimulator(1).runWith(targets);
+        int totalMsgsInStats = deliveryStats.stream()
+                               .mapToInt(DeliveryStats::deliveredCount)
+                               .sum();
+        assertThat(totalMsgsInStats).isEqualTo(rawMessageMemoizer.messages().size());
+    }
+
+    @Test
+    @DisplayName("single shard and return stats when picked up the shard " +
+            "and `Optional.empty()` if shard was already picked")
+    void returnOptionalEmptyIfPicked() {
+        int shardCount = 11;
+
+        ShardedWorkRegistry workRegistry = new InMemoryShardedWorkRegistry();
+        Delivery delivery = Delivery.newBuilder()
+                                    .setStrategy(new FixedShardStrategy(shardCount))
+                                    .setWorkRegistry(workRegistry)
+                                    .build();
+        ServerEnvironment serverEnvironment = ServerEnvironment.instance();
+        serverEnvironment.configureDelivery(delivery);
+
+        ShardIndex index = newShardIndex(0, shardCount);
+        TenantId tenantId = GivenTenantId.generate();
+        TenantAwareRunner.with(tenantId)
+                         .run(() -> checkPresentStats(delivery, index));
+
+        Optional<ShardProcessingSession> session =
+                workRegistry.pickUp(index,serverEnvironment.nodeId());
+        Truth8.assertThat(session)
+              .isPresent();
+
+        TenantAwareRunner.with(tenantId)
+                         .run(() -> checkStatsEmpty(delivery, index));
+    }
+
+    private static void checkStatsEmpty(Delivery delivery, ShardIndex index) {
+        Optional<DeliveryStats> emptyStats = delivery.deliverMessagesFrom(index);
+        Truth8.assertThat(emptyStats)
+              .isEmpty();
+    }
+
+    private static void checkPresentStats(Delivery delivery, ShardIndex index) {
+        Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
+        Truth8.assertThat(stats)
+              .isPresent();
+        assertThat(stats.get()
+                        .shardIndex()).isEqualTo(index);
     }
 
     @Test
