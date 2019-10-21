@@ -301,7 +301,7 @@ public abstract class Transaction<I,
                     .from(phase.propagate())
                     .onError(this::rollback)
                     .onRejection(this::rollback)
-                    .process();
+                    .handle();
         } catch (Throwable t) {
             rollback(causeOf(t));
             return DispatchOutcome

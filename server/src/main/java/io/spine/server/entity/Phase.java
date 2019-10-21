@@ -66,7 +66,7 @@ public abstract class Phase<I> {
         return DispatchOutcomeHandler
                 .from(performDispatch())
                 .onSuccess(success -> transaction.incrementStateAndVersion(versionIncrement))
-                .process();
+                .handle();
     }
 
     /**

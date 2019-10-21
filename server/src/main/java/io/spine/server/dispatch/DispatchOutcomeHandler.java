@@ -120,10 +120,10 @@ public final class DispatchOutcomeHandler {
     }
 
     /**
-     * Processes the {@code outcome} with the configured handlers and returns the {@code outcome}
+     * Handles the {@code outcome} with the configured handlers and returns the {@code outcome}
      * to the caller.
      */
-    public DispatchOutcome process() {
+    public DispatchOutcome handle() {
         switch (outcome.getResultCase()) {
             case SUCCESS:
                 Success success = outcome.getSuccess();

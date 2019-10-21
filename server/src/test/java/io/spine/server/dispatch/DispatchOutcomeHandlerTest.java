@@ -47,7 +47,7 @@ public final class DispatchOutcomeHandlerTest {
     void allowDefaultHandlers() {
         DispatchOutcome outcome = DispatchOutcome.getDefaultInstance();
         DispatchOutcomeHandler handler = DispatchOutcomeHandler.from(outcome);
-        assertThat(handler.process()).isEqualTo(outcome);
+        assertThat(handler.handle()).isEqualTo(outcome);
     }
 
     @Test
@@ -77,7 +77,7 @@ public final class DispatchOutcomeHandlerTest {
             DispatchOutcome result = DispatchOutcomeHandler
                     .from(outcome)
                     .onError(errors::add)
-                    .process();
+                    .handle();
             assertThat(result).isEqualTo(outcome);
             assertThat(errors).containsExactly(error);
         }
@@ -96,7 +96,7 @@ public final class DispatchOutcomeHandlerTest {
             DispatchOutcome result = DispatchOutcomeHandler
                     .from(outcome)
                     .onSuccess(successes::add)
-                    .process();
+                    .handle();
             assertThat(result).isEqualTo(outcome);
             assertThat(successes).containsExactly(success);
         }
@@ -120,7 +120,7 @@ public final class DispatchOutcomeHandlerTest {
             DispatchOutcome result = DispatchOutcomeHandler
                     .from(outcome)
                     .onEvents(events::addAll)
-                    .process();
+                    .handle();
             assertThat(result).isEqualTo(outcome);
             assertThat(events).containsExactly(event);
         }
@@ -144,7 +144,7 @@ public final class DispatchOutcomeHandlerTest {
             DispatchOutcome result = DispatchOutcomeHandler
                     .from(outcome)
                     .onCommands(commands::addAll)
-                    .process();
+                    .handle();
             assertThat(result).isEqualTo(outcome);
             assertThat(commands).containsExactly(command);
         }
@@ -165,7 +165,7 @@ public final class DispatchOutcomeHandlerTest {
             DispatchOutcome result = DispatchOutcomeHandler
                     .from(outcome)
                     .onRejection(rejections::add)
-                    .process();
+                    .handle();
             assertThat(result).isEqualTo(outcome);
             Truth.assertThat(rejections)
                  .containsExactly(rejection);
@@ -190,7 +190,7 @@ public final class DispatchOutcomeHandlerTest {
             DispatchOutcome result = DispatchOutcomeHandler
                     .from(outcome)
                     .onInterruption(interruptions::add)
-                    .process();
+                    .handle();
             assertThat(result).isEqualTo(outcome);
             assertThat(interruptions).containsExactly(interruption);
         }
@@ -210,7 +210,7 @@ public final class DispatchOutcomeHandlerTest {
             DispatchOutcome result = DispatchOutcomeHandler
                     .from(outcome)
                     .onIgnored(ignored::add)
-                    .process();
+                    .handle();
             assertThat(result).isEqualTo(outcome);
             assertThat(ignored).containsExactly(ignore);
         }
