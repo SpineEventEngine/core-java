@@ -41,6 +41,7 @@ import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartIteration;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
+import io.spine.test.procman.command.PmThrowRuntimeException;
 import io.spine.test.procman.event.PmIterationCompleted;
 import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmIterationStarted;
@@ -142,6 +143,12 @@ public class TestProcessManager
                 .newBuilder()
                 .setEntityId(Identifier.pack(command.getProjectId()))
                 .build();
+    }
+
+    @Assign
+    List<EventMessage> handle(PmThrowRuntimeException command) {
+        remember(command);
+        throw new RuntimeException("that triggers transaction rollback");
     }
 
     /*

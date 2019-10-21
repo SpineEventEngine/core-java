@@ -97,6 +97,7 @@ import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
 import static io.spine.server.procman.given.pm.GivenMessages.quizStarted;
 import static io.spine.server.procman.given.pm.GivenMessages.startProject;
 import static io.spine.server.procman.given.pm.GivenMessages.throwEntityAlreadyArchived;
+import static io.spine.server.procman.given.pm.GivenMessages.throwRuntimeException;
 import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
 import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
@@ -306,6 +307,45 @@ class ProcessManagerTest {
     }
 
     @Nested
+    @DisplayName("rollback state on")
+    class RollbackOn {
+
+        private SingleTenantBlackBoxContext boundedContext;
+
+        @BeforeEach
+        void setUp() {
+            boundedContext = BlackBoxBoundedContext.singleTenant()
+                                                   .with(new TestProcessManagerRepo());
+        }
+
+        @AfterEach
+        void tearDown() {
+            boundedContext.close();
+        }
+
+        @Test
+        @DisplayName("rejection")
+        void rejection() {
+            SingleTenantBlackBoxContext context =
+                    boundedContext.receivesCommand(throwEntityAlreadyArchived());
+            context.assertEvents()
+                   .withType(StandardRejections.EntityAlreadyArchived.class)
+                   .hasSize(1);
+            context.assertEntity(TestProcessManager.class, TestProcessManager.ID)
+                   .doesNotExist();
+        }
+
+        @Test
+        @DisplayName("exception")
+        void exception() {
+            SingleTenantBlackBoxContext context =
+                    boundedContext.receivesCommand(throwRuntimeException());
+            context.assertEntity(TestProcessManager.class, TestProcessManager.ID)
+                   .doesNotExist();
+        }
+    }
+
+    @Nested
     @DisplayName("create command(s)")
     class CommandCreation {
 
@@ -361,19 +401,6 @@ class ProcessManagerTest {
                               .assertCommands()
                               .withType(PmCreateProject.class)
                               .hasSize(1);
-            }
-
-            @Test
-            @DisplayName("discard state updates on a rejection")
-            void discardStateUpdatesOnRejection() {
-                //TODO:2019-10-18:ysergiichuk: move this test to its own sub-class
-                SingleTenantBlackBoxContext context =
-                        boundedContext.receivesCommand(throwEntityAlreadyArchived());
-                context.assertEvents()
-                       .withType(StandardRejections.EntityAlreadyArchived.class)
-                       .hasSize(1);
-                context.assertEntity(TestProcessManager.class, TestProcessManager.ID)
-                       .actual();
             }
         }
 

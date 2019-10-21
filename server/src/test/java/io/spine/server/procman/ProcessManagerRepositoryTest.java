@@ -79,6 +79,7 @@ import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -625,6 +626,8 @@ class ProcessManagerRepositoryTest
             assertTrue(processManager(id).isDeleted());
         }
 
+        //TODO:2019-10-21:ysergiichuk: remove this test as it relies on lifecycle rules
+        @Disabled
         @Test
         @DisplayName("and delete the entity after rejection is thrown")
         void andDeleteAfterRejection() {

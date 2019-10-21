@@ -28,6 +28,7 @@ import io.spine.server.type.EventEnvelope;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.dispatch.DispatchOutcomeHandler.OutcomeHandler.doNothing;
 
 //TODO:2019-10-18:ysergiichuk: add tests.
 
@@ -41,11 +42,11 @@ public final class DispatchOutcomeHandler {
 
     private final DispatchOutcome outcome;
 
-    private Consumer<Error> errorConsumer = DispatchOutcomeHandler::doNothing;
-    private Consumer<RejectionEnvelope> rejectionConsumer = DispatchOutcomeHandler::doNothing;
-    private Consumer<Success> successConsumer = DispatchOutcomeHandler::doNothing;
-    private Consumer<Interruption> interruptionConsumer = DispatchOutcomeHandler::doNothing;
-    private Consumer<Ignore> ignoreConsumer = DispatchOutcomeHandler::doNothing;
+    private OutcomeHandler<Error> errorHandler = doNothing();
+    private OutcomeHandler<RejectionEnvelope> rejectionHandler = doNothing();
+    private OutcomeHandler<Success> successHandler = doNothing();
+    private OutcomeHandler<Interruption> interruptionHandler = doNothing();
+    private OutcomeHandler<Ignore> ignoreHandler = doNothing();
 
     private DispatchOutcomeHandler(DispatchOutcome outcome) {
         this.outcome = outcome;
@@ -60,72 +61,68 @@ public final class DispatchOutcomeHandler {
     }
 
     /**
-     * Accepts {@code Error} case consumer.
+     * Accepts {@code Error} case handler.
      */
-    public DispatchOutcomeHandler onError(Consumer<Error> errorConsumer) {
-        this.errorConsumer = checkNotNull(errorConsumer);
+    public DispatchOutcomeHandler onError(OutcomeHandler<Error> handler) {
+        this.errorHandler = checkNotNull(handler);
         return this;
     }
 
     /**
-     * Accepts {@code rejection} {@code success} case consumer.
-     *
-     * <p>The consumer is called just before the {@code successConsumer}.
+     * Accepts {@code rejection} {@code handler} case consumer.
      */
-    public DispatchOutcomeHandler onRejection(Consumer<RejectionEnvelope> rejectionConsumer) {
-        this.rejectionConsumer = checkNotNull(rejectionConsumer);
+    public DispatchOutcomeHandler onRejection(OutcomeHandler<RejectionEnvelope> handler) {
+        this.rejectionHandler = checkNotNull(handler);
         return this;
     }
 
     /**
-     * Accepts {@code Success} case consumer.
+     * Accepts {@code Success} case handler.
      */
-    public DispatchOutcomeHandler onSuccess(Consumer<Success> successConsumer) {
-        this.successConsumer = checkNotNull(successConsumer);
+    public DispatchOutcomeHandler onSuccess(OutcomeHandler<Success> handler) {
+        this.successHandler = checkNotNull(handler);
         return this;
     }
 
     /**
-     * Accepts {@code Interruption} case consumer.
+     * Accepts {@code Interruption} case handler.
      */
-    public DispatchOutcomeHandler onInterruption(Consumer<Interruption> interruptionConsumer) {
-        this.interruptionConsumer = checkNotNull(interruptionConsumer);
+    public DispatchOutcomeHandler onInterruption(OutcomeHandler<Interruption> handler) {
+        this.interruptionHandler = checkNotNull(handler);
         return this;
     }
 
     /**
      * Accepts {@code Ignored} case consumer.
      */
-    public DispatchOutcomeHandler onIgnored(Consumer<Ignore> ignoreConsumer) {
-        this.ignoreConsumer = checkNotNull(ignoreConsumer);
+    public DispatchOutcomeHandler onIgnored(OutcomeHandler<Ignore> handler) {
+        this.ignoreHandler = checkNotNull(handler);
         return this;
     }
 
     /**
-     * Processes the {@code outcome} with the configured consumers and returns the {@code outcome}
+     * Processes the {@code outcome} with the configured handlers and returns the {@code outcome}
      * to the caller.
-     *
-     * <p>The {@code rejection} outcome is processed along the {@code Success} outcome and both
-     * consumers could be invoked during the same processing.
      */
     public DispatchOutcome process() {
         switch (outcome.getResultCase()) {
             case SUCCESS:
+                Success success = outcome.getSuccess();
                 if (outcome.hasRejection()) {
-                    Event rejection = outcome.getSuccess()
-                                             .getRejection();
-                    rejectionConsumer.accept(RejectionEnvelope.from(EventEnvelope.of(rejection)));
+                    Event rejection = success.getRejection();
+                    rejectionHandler.accept(RejectionEnvelope.from(EventEnvelope.of(rejection)));
+                } else {
+                    successHandler.accept(success);
                 }
-                successConsumer.accept(outcome.getSuccess());
                 break;
             case ERROR:
-                errorConsumer.accept(outcome.getError());
+                errorHandler.accept(outcome.getError());
                 break;
             case INTERRUPTED:
-                interruptionConsumer.accept(outcome.getInterrupted());
+                interruptionHandler.accept(outcome.getInterrupted());
                 break;
             case IGNORED:
-                ignoreConsumer.accept(outcome.getIgnored());
+                ignoreHandler.accept(outcome.getIgnored());
                 break;
             case RESULT_NOT_SET:
             default:
@@ -134,7 +131,21 @@ public final class DispatchOutcomeHandler {
         return outcome;
     }
 
-    private static <T> void doNothing(T t) {
-        // do nothing
+    /**
+     * A {@code DispatchOutcome} handler.
+     */
+    @FunctionalInterface
+    public interface OutcomeHandler<T> extends Consumer<T> {
+
+        OutcomeHandler DO_NOTHING = o -> {
+        };
+
+        /**
+         * Creates a new no-op handler.
+         */
+        @SuppressWarnings("unchecked")
+        static <T> OutcomeHandler<T> doNothing() {
+            return (OutcomeHandler<T>) DO_NOTHING;
+        }
     }
 }

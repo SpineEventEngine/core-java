@@ -24,7 +24,7 @@ package spine.test.procman.command;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.procman.command";
+option java_package = "io.spine.test.procman.command";
 option java_outer_classname = "ProcmanCommandsProto";
 option java_multiple_files = true;
 
@@ -54,6 +54,11 @@ message PmDoNothing {
 
 // A command, which always causes StandardRejections.EntityAlreadyArchived to be thrown.
 message PmThrowEntityAlreadyArchived {
+    ProjectId project_id = 1;
+}
+
+// A command, which always causes a RuntimeException to be thrown.
+message PmThrowRuntimeException {
     ProjectId project_id = 1;
 }
 
