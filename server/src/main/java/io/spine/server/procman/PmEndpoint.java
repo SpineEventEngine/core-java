@@ -61,19 +61,14 @@ abstract class PmEndpoint<I,
 
     /**
      * {@inheritDoc}
-     *
-     * @implNote This method works differently to its analogues as it saves the entity
-     *          state even if a rejection is thrown. It is done so because the process manager
-     *          {@linkplain ProcessManagerRepository#lifecycle() lifecycle rules} may demand that
-     *          entity becomes archived/deleted upon emitting certain rejection types.
      */
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
     public void dispatchTo(I id) {
         P manager = repository().findOrCreate(id);
         DispatchOutcome outcome = runTransactionFor(manager);
-        store(manager);
         if (outcome.hasSuccess()) {
+            store(manager);
             postMessages(outcome.getSuccess());
             afterDispatched(id);
         } else if (outcome.hasError()) {

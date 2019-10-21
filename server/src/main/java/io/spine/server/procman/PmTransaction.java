@@ -20,15 +20,12 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.Success;
 import io.spine.server.entity.CommandDispatchingPhase;
 import io.spine.server.entity.EventDispatchingPhase;
 import io.spine.server.entity.Phase;
@@ -37,8 +34,6 @@ import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.List;
 
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.
@@ -56,32 +51,14 @@ public class PmTransaction<I,
                            B extends ValidatingBuilder<S>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
-    /**
-     * The lifecycle rules which will be applied to the process manager instance.
-     */
-    private final LifecycleRules lifecycleRules;
-
-    private PmTransaction(ProcessManager<I, S, B> processManager, LifecycleRules lifecycleRules) {
-        super(processManager);
-        this.lifecycleRules = lifecycleRules;
-    }
-
-    private PmTransaction(ProcessManager<I, S, B> processManager,
-                          S state,
-                          Version version,
-                          LifecycleRules lifecycleRules) {
-        super(processManager, state, version);
-        this.lifecycleRules = lifecycleRules;
-    }
-
     @VisibleForTesting
     protected PmTransaction(ProcessManager<I, S, B> processManager) {
-        this(processManager, new LifecycleRules());
+        super(processManager);
     }
 
     @VisibleForTesting
     protected PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
-        this(processManager, state, version, new LifecycleRules());
+        super(processManager, state, version);
     }
 
     /**
@@ -95,7 +72,7 @@ public class PmTransaction<I,
     final DispatchOutcome perform(DispatchCommand<I> dispatch) {
         VersionIncrement vi = createVersionIncrement();
         Phase<I> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
-        return doPropagate(phase);
+        return propagate(phase);
     }
 
     /**
@@ -112,8 +89,7 @@ public class PmTransaction<I,
                 createDispatch(event),
                 createVersionIncrement()
         );
-        DispatchOutcome outcome = doPropagate(phase);
-        return outcome;
+        return propagate(phase);
     }
 
     private EventDispatch<I, ProcessManager<I, S, B>>
@@ -130,49 +106,15 @@ public class PmTransaction<I,
     }
 
     /**
-     * Propagates the phase and updates the process lifecycle after success.
-     */
-    private DispatchOutcome doPropagate(Phase<I> phase) {
-        DispatchOutcome outcome = propagate(phase);
-        Success success = outcome.getSuccess();
-        List<Event> events = success.getProducedEvents()
-                                    .getEventList();
-        if (!events.isEmpty()) {
-            updateLifecycle(events);
-        } else if (success.hasRejection()) {
-            updateLifecycle(success.getRejection());
-        }
-        return outcome;
-    }
-
-    /**
      * Creates a new transaction for a given {@code ProcessManager}.
      *
      * @param pm
      *         the {@code ProcessManager} instance to start the transaction for
-     * @param rules
-     *         the lifecycle rules to apply to the entity
      * @return the new transaction instance
      */
     static <I, S extends Message, B extends ValidatingBuilder<S>>
-    PmTransaction<I, S, B> start(ProcessManager<I, S, B> pm, LifecycleRules rules) {
-        PmTransaction<I, S, B> tx = new PmTransaction<>(pm, rules);
+    PmTransaction<I, S, B> start(ProcessManager<I, S, B> pm) {
+        PmTransaction<I, S, B> tx = new PmTransaction<>(pm);
         return tx;
-    }
-
-    /**
-     * Updates the process lifecycle based on a successful phase propagation result.
-     */
-    private void updateLifecycle(Iterable<Event> events) {
-        if (lifecycleRules.shouldArchiveOn(events)) {
-            setArchived(true);
-        }
-        if (lifecycleRules.shouldDeleteOn(events)) {
-            setDeleted(true);
-        }
-    }
-
-    private void updateLifecycle(Event event) {
-        updateLifecycle(ImmutableList.of(event));
     }
 }

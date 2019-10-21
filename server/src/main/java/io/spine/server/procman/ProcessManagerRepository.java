@@ -97,17 +97,6 @@ public abstract class ProcessManagerRepository<I,
 
     private @MonotonicNonNull RepositoryCache<I, P> cache;
 
-    /**
-     * The configurable lifecycle rules of the repository.
-     *
-     * <p>The rules allow to automatically mark entities as archived/deleted upon certain event and
-     * rejection types emitted.
-     *
-     * @see LifecycleRules#archiveOn(Class[])
-     * @see LifecycleRules#deleteOn(Class[])
-     */
-    private final LifecycleRules lifecycleRules = new LifecycleRules();
-
     protected ProcessManagerRepository() {
         super();
         this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
@@ -284,24 +273,6 @@ public abstract class ProcessManagerRepository<I,
         return commandRouting.get();
     }
 
-    /**
-     * Obtains configurable lifecycle rules of this repository.
-     *
-     * <p>The rules allow to automatically archive/delete entities upon certain event and rejection
-     * types produced.
-     *
-     * <p>The rules can be set as follows:
-     * <pre>{@code
-     *   repository.lifecycle()
-     *             .archiveOn(Event1.class, Rejection1.class)
-     *             .deleteOn(Rejection2.class)
-     * }</pre>
-     */
-    @Deprecated
-    public final LifecycleRules lifecycle() {
-        return lifecycleRules;
-    }
-
     @Override
     public ImmutableSet<EventClass> outgoingEvents() {
         Set<EventClass> eventClasses = processManagerClass().outgoingEvents();
@@ -359,8 +330,7 @@ public abstract class ProcessManagerRepository<I,
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
     @VisibleForTesting
     protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        PmTransaction<I, S, ?> tx =
-                PmTransaction.start((ProcessManager<I, S, ?>) manager, lifecycle());
+        PmTransaction<I, S, ?> tx = new PmTransaction<>((ProcessManager<I, S, ?>) manager);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(this, manager.id());
         tx.setListener(listener);
         return tx;

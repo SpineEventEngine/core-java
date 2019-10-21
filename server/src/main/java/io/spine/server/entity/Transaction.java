@@ -297,7 +297,6 @@ public abstract class Transaction<I,
      */
     private DispatchOutcome propagateFailsafe(Phase<I> phase) {
         try {
-            //TODO:2019-10-18:ysergiichuk: add explicit test for the new behavior
             return DispatchOutcomeHandler
                     .from(phase.propagate())
                     .onError(this::rollback)
