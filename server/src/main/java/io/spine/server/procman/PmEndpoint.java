@@ -39,8 +39,8 @@ import io.spine.server.type.SignalEnvelope;
  *         the type of message envelopes processed by the endpoint
  */
 abstract class PmEndpoint<I,
-        P extends ProcessManager<I, ?, ?>,
-        M extends SignalEnvelope<?, ?, ?>>
+                          P extends ProcessManager<I, ?, ?>,
+                          M extends SignalEnvelope<?, ?, ?>>
         extends EntityMessageEndpoint<I, P, M> {
 
     PmEndpoint(ProcessManagerRepository<I, P, ?> repository, M envelope) {

@@ -39,39 +39,19 @@ import static io.spine.protobuf.TypeConverter.toAny;
 
 public final class Given {
 
-    public static final Id ID = Id.newBuilder()
-                                  .setId(TestValues.randomString())
-                                  .build();
+    private static final Id ID = Id.newBuilder()
+                                   .setId(TestValues.randomString())
+                                   .build();
 
-    public static final TestEventFactory eventFactory =
+    private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(toAny(Given.class.getSimpleName()),
                                          DispatchOutcomeHandlerTest.class);
 
-    public static final CommandFactory commandFactory =
+    private static final CommandFactory commandFactory =
             new TestActorRequestFactory(DispatchOutcomeHandlerTest.class).command();
 
+    /** Prevent instantiation of this utility class. */
     private Given() {
-    }
-
-    public static RejectionMessage cannotCreateDispatch() {
-        return DispatchRejections.CannotCreateDispatch
-                .newBuilder()
-                .setId(ID)
-                .build();
-    }
-
-    public static EventMessage dispatchCreated() {
-        return DispatchCreated
-                .newBuilder()
-                .setId(ID)
-                .build();
-    }
-
-    public static CommandMessage createDispatch() {
-        return CreateDispatch
-                .newBuilder()
-                .setId(ID)
-                .build();
     }
 
     public static Event rejectionEvent() {
@@ -88,5 +68,26 @@ public final class Given {
 
     public static Command command() {
         return commandFactory.create(createDispatch());
+    }
+
+    private static RejectionMessage cannotCreateDispatch() {
+        return DispatchRejections.CannotCreateDispatch
+                .newBuilder()
+                .setId(ID)
+                .build();
+    }
+
+    private static EventMessage dispatchCreated() {
+        return DispatchCreated
+                .newBuilder()
+                .setId(ID)
+                .build();
+    }
+
+    private static CommandMessage createDispatch() {
+        return CreateDispatch
+                .newBuilder()
+                .setId(ID)
+                .build();
     }
 }

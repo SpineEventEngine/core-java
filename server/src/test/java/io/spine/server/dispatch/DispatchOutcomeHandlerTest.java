@@ -215,5 +215,4 @@ public final class DispatchOutcomeHandlerTest {
             assertThat(ignored).containsExactly(ignore);
         }
     }
-
 }
