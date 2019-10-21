@@ -70,7 +70,6 @@ import static com.google.common.collect.Streams.concat;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
-import static io.spine.server.delivery.given.DeliveryTestEnv.newShardIndex;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.util.Collections.synchronizedList;
@@ -221,16 +220,16 @@ class DeliveryTest {
             "and `Optional.empty()` if shard was already picked")
     void returnOptionalEmptyIfPicked() {
         int shardCount = 11;
-
         ShardedWorkRegistry workRegistry = new InMemoryShardedWorkRegistry();
+        FixedShardStrategy strategy = new FixedShardStrategy(shardCount);
         Delivery delivery = Delivery.newBuilder()
-                                    .setStrategy(new FixedShardStrategy(shardCount))
+                                    .setStrategy(strategy)
                                     .setWorkRegistry(workRegistry)
                                     .build();
         ServerEnvironment serverEnvironment = ServerEnvironment.instance();
         serverEnvironment.configureDelivery(delivery);
 
-        ShardIndex index = newShardIndex(0, shardCount);
+        ShardIndex index = strategy.nonEmptyShard();
         TenantId tenantId = GivenTenantId.generate();
         TenantAwareRunner.with(tenantId)
                          .run(() -> checkPresentStats(delivery, index));
@@ -242,6 +241,40 @@ class DeliveryTest {
 
         TenantAwareRunner.with(tenantId)
                          .run(() -> checkStatsEmpty(delivery, index));
+    }
+
+    @Test
+    @DisplayName("single shard and notify the monitor once the delivery is completed")
+    void notifyDeliveryMonitorOfDeliveryCompletion() {
+        MonitorUnderTest monitor = new MonitorUnderTest();
+        int shardCount = 1;
+        FixedShardStrategy strategy = new FixedShardStrategy(shardCount);
+        ShardIndex theOnlyIndex = strategy.nonEmptyShard();
+        Delivery delivery = Delivery.newBuilder()
+                                    .setStrategy(strategy)
+                                    .setMonitor(monitor)
+                                    .build();
+        RawMessageMemoizer rawMessageMemoizer = new RawMessageMemoizer();
+        delivery.subscribe(rawMessageMemoizer);
+        delivery.subscribe(new LocalDispatchingObserver());
+        ServerEnvironment.instance()
+                         .configureDelivery(delivery);
+
+        ImmutableSet<String> aTarget = singleTarget();
+        assertThat(monitor.stats()).isEmpty();
+        new ThreadSimulator(1).runWith(aTarget);
+
+        for (DeliveryStats singleRunStats : monitor.stats()) {
+            assertThat(singleRunStats.shardIndex()).isEqualTo(theOnlyIndex);
+        }
+        int totalFromStats = monitor.stats()
+                                    .stream()
+                                    .mapToInt(DeliveryStats::deliveredCount)
+                                    .sum();
+
+        int observedMsgCount = rawMessageMemoizer.messages()
+                                                 .size();
+        assertThat(totalFromStats).isEqualTo(observedMsgCount);
     }
 
     private static void checkStatsEmpty(Delivery delivery, ShardIndex index) {
@@ -595,5 +628,19 @@ class DeliveryTest {
         Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
         ServerEnvironment.instance()
                          .configureDelivery(newDelivery);
+    }
+
+    private static final class MonitorUnderTest extends DeliveryMonitor {
+
+        private final List<DeliveryStats> allStats = new ArrayList<>();
+
+        @Override
+        public void onDeliveryCompleted(DeliveryStats stats) {
+            allStats.add(stats);
+        }
+
+        ImmutableList<DeliveryStats> stats() {
+            return ImmutableList.copyOf(allStats);
+        }
     }
 }

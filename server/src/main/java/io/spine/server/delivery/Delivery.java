@@ -266,6 +266,7 @@ public final class Delivery {
             session.complete();
         }
         DeliveryStats stats = new DeliveryStats(index, totalDelivered);
+        monitor.onDeliveryCompleted(stats);
         return Optional.of(stats);
     }
 
