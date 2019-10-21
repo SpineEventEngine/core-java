@@ -26,6 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.RejectionEventContext;
 import io.spine.server.dispatch.DispatchOutcomeHandlerTest;
 import io.spine.server.dispatch.given.event.DispatchCreated;
+import io.spine.server.dispatch.given.rejection.DispatchRejections;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.TestEventFactory;
 
