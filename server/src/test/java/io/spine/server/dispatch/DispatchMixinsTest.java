@@ -20,7 +20,7 @@
 
 package io.spine.server.dispatch;
 
-import io.spine.core.Event;
+import io.spine.server.dispatch.given.Given;
 import io.spine.validate.FieldAwareMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +54,7 @@ class DispatchMixinsTest {
         assertThat(noRejectionOutcome.hasRejection()).isFalse();
         Success rejectionSuccessOutcome = Success
                 .newBuilder()
-                .setRejection(Event.getDefaultInstance())
+                .setRejection(Given.rejectionEvent())
                 .build();
         DispatchOutcome rejectionOutcome = DispatchOutcome
                 .newBuilder()
