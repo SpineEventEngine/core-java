@@ -22,21 +22,25 @@ package io.spine.server.procman;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.Error;
+import io.spine.core.Event;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.Success;
+import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.type.SignalEnvelope;
 
 /**
  * Common base message for endpoints of Process Managers.
  *
- * @param <I> the type of process manager IDs
- * @param <P> the type of process managers
- * @param <M> the type of message envelopes processed by the endpoint
+ * @param <I>
+ *         the type of process manager IDs
+ * @param <P>
+ *         the type of process managers
+ * @param <M>
+ *         the type of message envelopes processed by the endpoint
  */
 abstract class PmEndpoint<I,
-                          P extends ProcessManager<I, ?, ?>,
-                          M extends SignalEnvelope<?, ?, ?>>
+        P extends ProcessManager<I, ?, ?>,
+        M extends SignalEnvelope<?, ?, ?>>
         extends EntityMessageEndpoint<I, P, M> {
 
     PmEndpoint(ProcessManagerRepository<I, P, ?> repository, M envelope) {
@@ -66,36 +70,24 @@ abstract class PmEndpoint<I,
     @Override
     public void dispatchTo(I id) {
         P manager = repository().findOrCreate(id);
-        DispatchOutcome outcome = runTransactionFor(manager);
-        if (outcome.hasSuccess()) {
-            store(manager);
-            postMessages(outcome.getSuccess());
-            afterDispatched(id);
-        } else if (outcome.hasError()) {
-            Error error = outcome.getError();
-            repository().lifecycleOf(id)
-                        .onDispatchingFailed(envelope().messageId(), error);
-        }
+        DispatchOutcomeHandler
+                .from(runTransactionFor(manager))
+                .onSuccess(success -> store(manager))
+                .onCommands(repository()::postCommands)
+                .onEvents(repository()::postEvents)
+                .onRejection(this::postRejection)
+                .afterSuccess(success -> afterDispatched(id))
+                .onError(error -> dispatchingFailed(id, error))
+                .handle();
     }
 
-    private void postMessages(Success successfulOutcome) {
-        Success.ExhaustCase type = successfulOutcome.getExhaustCase();
-        switch (type) {
-            case PRODUCED_EVENTS:
-                repository().postEvents(successfulOutcome.getProducedEvents()
-                                                         .getEventList());
-                break;
-            case REJECTION:
-                repository().postEvents(ImmutableList.of(successfulOutcome.getRejection()));
-                break;
-            case PRODUCED_COMMANDS:
-                repository().postCommands(successfulOutcome.getProducedCommands()
-                                                           .getCommandList());
-                break;
-            case EXHAUST_NOT_SET:
-            default:
+    private void dispatchingFailed(I id, Error error) {
+        repository().lifecycleOf(id)
+                    .onDispatchingFailed(envelope().messageId(), error);
+    }
 
-        }
+    private void postRejection(Event rejectionEvent) {
+        repository().postEvents(ImmutableList.of(rejectionEvent));
     }
 
     protected DispatchOutcome runTransactionFor(P processManager) {

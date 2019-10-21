@@ -21,9 +21,8 @@
 package io.spine.server.command;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.dispatch.Success;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandEnvelope;
@@ -78,11 +77,17 @@ public final class DispatchCommand<I> {
      * @return the produced events including the rejections thrown by the command handler
      */
     public DispatchOutcome perform() {
-        DispatchOutcome outcome = entity.dispatchCommand(command);
-        if (outcome.hasSuccess()) {
-            onCommandResult(command.command(), outcome.getSuccess());
+        return DispatchOutcomeHandler
+                .from(entity.dispatchCommand(command))
+                .onRejection(rejection -> lifecycle.onCommandRejected(command.id(), rejection))
+                .onSuccess(this::onCommandHandler)
+                .handle();
+    }
+
+    private void onCommandHandler(Success success) {
+        if (!success.hasRejection()) {
+            lifecycle.onCommandHandled(command.command());
         }
-        return outcome;
     }
 
     public CommandHandlingEntity<I, ?, ?> entity() {
@@ -91,14 +96,5 @@ public final class DispatchCommand<I> {
 
     public CommandEnvelope command() {
         return command;
-    }
-
-    private void onCommandResult(Command command, Success success) {
-        if (success.hasRejection()) {
-            Event rejectionEvent = success.getRejection();
-            lifecycle.onCommandRejected(command.id(), rejectionEvent);
-        } else {
-            lifecycle.onCommandHandled(command);
-        }
     }
 }

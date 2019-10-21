@@ -20,6 +20,7 @@
 
 package io.spine.server.dispatch;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -42,6 +43,7 @@ public final class DispatchOutcomeHandler {
 
     private OutcomeHandler<Error> errorHandler = doNothing();
     private OutcomeHandler<Success> successHandler = doNothing();
+    private OutcomeHandler<Success> afterSuccessHandler = doNothing();
     private OutcomeHandler<List<Command>> producedCommandsHandler = doNothing();
     private OutcomeHandler<List<Event>> producedEventsHandler = doNothing();
     private OutcomeHandler<Event> rejectionHandler = doNothing();
@@ -69,25 +71,6 @@ public final class DispatchOutcomeHandler {
     }
 
     /**
-     * Accepts {@code rejection} {@code handler} case handler.
-     */
-    public DispatchOutcomeHandler onRejection(OutcomeHandler<Event> handler) {
-        this.rejectionHandler = checkNotNull(handler);
-        return this;
-    }
-
-    /**
-     * Accepts {@code Success} case handler.
-     *
-     * <p>The {@code rejection} success case is handled using a separate
-     * {@link #onRejection(OutcomeHandler)} handler.
-     */
-    public DispatchOutcomeHandler onSuccess(OutcomeHandler<Success> handler) {
-        this.successHandler = checkNotNull(handler);
-        return this;
-    }
-
-    /**
      * Accepts {@code Interruption} case handler.
      */
     public DispatchOutcomeHandler onInterruption(OutcomeHandler<Interruption> handler) {
@@ -100,6 +83,40 @@ public final class DispatchOutcomeHandler {
      */
     public DispatchOutcomeHandler onIgnored(OutcomeHandler<Ignore> handler) {
         this.ignoreHandler = checkNotNull(handler);
+        return this;
+    }
+
+    /**
+     * Accepts {@code Success} case handler.
+     *
+     * <p>The success case handle is invoked before the specific handlers like {@code onRejection},
+     * {@code onCommands} or {@code onEvents}.
+     *
+     * @see #afterSuccess(OutcomeHandler)
+     */
+    public DispatchOutcomeHandler onSuccess(OutcomeHandler<Success> handler) {
+        this.successHandler = checkNotNull(handler);
+        return this;
+    }
+
+    /**
+     * Accepts {@code Success} case handler.
+     *
+     * <p>The handler is invoked after the specific handlers like {@code onRejection},
+     * {@code onCommands} or {@code onEvents}.
+     *
+     * @see #onSuccess(OutcomeHandler)
+     */
+    public DispatchOutcomeHandler afterSuccess(OutcomeHandler<Success> handler) {
+        this.afterSuccessHandler = checkNotNull(handler);
+        return this;
+    }
+
+    /**
+     * Accepts {@code rejection} {@code handler} case handler.
+     */
+    public DispatchOutcomeHandler onRejection(OutcomeHandler<Event> handler) {
+        this.rejectionHandler = checkNotNull(handler);
         return this;
     }
 
@@ -123,15 +140,11 @@ public final class DispatchOutcomeHandler {
      * Handles the {@code outcome} with the configured handlers and returns the {@code outcome}
      * to the caller.
      */
+    @CanIgnoreReturnValue
     public DispatchOutcome handle() {
         switch (outcome.getResultCase()) {
             case SUCCESS:
-                Success success = outcome.getSuccess();
-                if (outcome.hasRejection()) {
-                    rejectionHandler.accept(success.getRejection());
-                } else {
-                    handleSuccess(success);
-                }
+                handleSuccess(outcome.getSuccess());
                 break;
             case ERROR:
                 errorHandler.accept(outcome.getError());
@@ -150,6 +163,7 @@ public final class DispatchOutcomeHandler {
     }
 
     private void handleSuccess(Success success) {
+        successHandler.accept(success);
         switch (success.getExhaustCase()) {
             case PRODUCED_EVENTS:
                 producedEventsHandler.accept(success.getProducedEvents()
@@ -160,11 +174,13 @@ public final class DispatchOutcomeHandler {
                                                       .getCommandList());
                 break;
             case REJECTION:
+                rejectionHandler.accept(success.getRejection());
+                break;
             case EXHAUST_NOT_SET:
             default:
                 break;
         }
-        successHandler.accept(success);
+        afterSuccessHandler.accept(success);
     }
 
     /**

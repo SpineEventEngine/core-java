@@ -25,6 +25,7 @@ import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
+import io.spine.server.dispatch.Success;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -65,8 +66,14 @@ public abstract class Phase<I> {
     final DispatchOutcome propagate() {
         return DispatchOutcomeHandler
                 .from(performDispatch())
-                .onSuccess(success -> transaction.incrementStateAndVersion(versionIncrement))
+                .onSuccess(this::incrementTransaction)
                 .handle();
+    }
+
+    private void incrementTransaction(Success success) {
+        if (!success.hasRejection()) {
+            transaction.incrementStateAndVersion(versionIncrement);
+        }
     }
 
     /**
