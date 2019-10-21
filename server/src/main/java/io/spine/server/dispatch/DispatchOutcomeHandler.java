@@ -30,8 +30,6 @@ import java.util.function.Consumer;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.dispatch.DispatchOutcomeHandler.OutcomeHandler.doNothing;
 
-//TODO:2019-10-18:ysergiichuk: add tests.
-
 /**
  * The holder of an {@code DispatchOutcome} which provides convenient configurable handling for
  * different outcome cases.
