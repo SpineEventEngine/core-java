@@ -20,11 +20,17 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
+import io.spine.server.entity.storage.given.TaskViewProjection;
+import io.spine.server.entity.storage.given.TestConversionRules;
 import io.spine.test.storage.TaskId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
@@ -32,9 +38,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static java.util.Collections.singletonMap;
@@ -44,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EntityRecordWithColumns should")
+@DisplayName("`EntityRecordWithColumns` should")
 class EntityRecordWithColumnsTest {
 
     private static EntityRecordWithColumns newRecord() {
@@ -58,12 +66,13 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("not accept nulls in constructor")
+    @DisplayName("not accept `null`s in constructor")
     void rejectNullInCtor() {
         new NullPointerTester()
                 .setDefault(EntityRecord.class, EntityRecord.getDefaultInstance())
                 .testAllPublicConstructors(EntityRecordWithColumns.class);
     }
+
     @Test
     @DisplayName("support equality")
     void supportEquality() {
@@ -146,7 +155,7 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("throw ISE on attempt to get value by non-existent name")
+    @DisplayName("throw `ISE` on attempt to get value by non-existent name")
     void throwOnNonExistentColumn() {
         EntityRecordWithColumns record = newEmptyRecord();
         ColumnName nonExistentName = ColumnName.of("non-existent-column");
@@ -170,5 +179,75 @@ class EntityRecordWithColumnsTest {
                 storageFields
         );
         assertThat(record.columnNames()).containsExactlyElementsIn(defaultColumns);
+    }
+
+    @Test
+    @DisplayName("update system columns when writing an entity record")
+    void updateSystemColumns() {
+        Columns columns = Columns.of(TaskViewProjection.class);
+        int versionNumber = 42;
+        Version version = Versions.newVersion(versionNumber, currentTime());
+        boolean archived = true;
+        boolean deleted = false;
+        LifecycleFlags flags = LifecycleFlags
+                .newBuilder()
+                .setArchived(archived)
+                .setDeleted(deleted)
+                .build();
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setVersion(version)
+                .setLifecycleFlags(flags)
+                .build();
+        EntityRecordWithColumns recordWithColumns =
+                EntityRecordWithColumns.create(record, columns);
+
+        Object archivedValue = recordWithColumns.columnValue(ColumnName.of("archived"));
+        assertThat(archivedValue).isEqualTo(archived);
+
+        Object deletedValue = recordWithColumns.columnValue(ColumnName.of("deleted"));
+        assertThat(deletedValue).isEqualTo(deleted);
+        Object versionValue = recordWithColumns.columnValue(ColumnName.of("version"));
+        assertThat(versionValue).isEqualTo(version);
+    }
+
+    @Test
+    @DisplayName("return column value by column name")
+    void returnColumnValue() {
+        ColumnName columnName = ColumnName.of("some-boolean-column");
+        boolean columnValue = false;
+        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
+        EntityRecordWithColumns record =
+                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        Object value = record.columnValue(columnName);
+
+        assertThat(value).isEqualTo(columnValue);
+    }
+
+    @Test
+    @DisplayName("return column value by column name with specified conversion rules")
+    void returnValueWithConversionRules() {
+        ColumnName columnName = ColumnName.of("some-int-column");
+        int columnValue = 42;
+
+        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
+        EntityRecordWithColumns record =
+                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        String value = record.columnValue(columnName, new TestConversionRules());
+
+        assertThat(value).isEqualTo(String.valueOf(columnValue));
+    }
+
+    @Test
+    @DisplayName("return `null` column value")
+    void returnNullValue() {
+        ColumnName columnName = ColumnName.of("the-null-column");
+        Map<ColumnName, Object> storageFields = new HashMap<>();
+        storageFields.put(columnName, null);
+        EntityRecordWithColumns record =
+                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        Object value = record.columnValue(columnName);
+
+        assertThat(value).isNull();
     }
 }

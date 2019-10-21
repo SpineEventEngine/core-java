@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -49,6 +50,7 @@ public final class Columns {
     }
 
     public static Columns of(EntityClass<?> entityClass) {
+        checkNotNull(entityClass);
         Introspector introspector = new Introspector(entityClass);
         ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
         columns.putAll(introspector.systemColumns());
@@ -61,11 +63,13 @@ public final class Columns {
     }
 
     public Column get(ColumnName columnName) {
+        checkNotNull(columnName);
         Column result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
         return result;
     }
 
     public Optional<Column> find(ColumnName columnName) {
+        checkNotNull(columnName);
         Column column = columns.get(columnName);
         Optional<Column> result = Optional.ofNullable(column);
         return result;
@@ -76,6 +80,7 @@ public final class Columns {
     }
 
     public Map<ColumnName, Object> valuesIn(Entity<?, ?> source) {
+        checkNotNull(source);
         Map<ColumnName, Object> result = new HashMap<>();
         for (Column column : columns.values()) {
             result.put(column.name(), column.valueIn(source));

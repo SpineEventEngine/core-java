@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface ConversionRule<T, R> extends Function<T, R> {
 
     /**
-     * A convenience shortcut for {@link #apply(T)}.
+     * A convenience shortcut for {@code #apply(T)}.
      *
      * <p>Can be used when the object is known of being of type {@code T} but can't be cast to it
      * explicitly (e.g. in case of wildcard arguments).

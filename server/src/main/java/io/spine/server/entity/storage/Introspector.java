@@ -38,9 +38,12 @@ import static java.util.function.Function.identity;
 final class Introspector {
 
     private final EntityClass<?> entityClass;
+    private final boolean implementsEntityWithColumns;
 
     Introspector(EntityClass<?> entityClass) {
         this.entityClass = entityClass;
+        this.implementsEntityWithColumns =
+                EntityWithColumns.class.isAssignableFrom(entityClass.value());
     }
 
     ImmutableMap<ColumnName, Column> systemColumns() {
@@ -72,10 +75,6 @@ final class Introspector {
 
     private void
     addColumn(FieldDeclaration field, ImmutableMap.Builder<ColumnName, Column> columns) {
-
-        @SuppressWarnings("LocalVariableNamingConvention")
-        boolean implementsEntityWithColumns =
-                EntityWithColumns.class.isAssignableFrom(entityClass.value());
         ColumnName columnName = ColumnName.of(field);
         if (implementsEntityWithColumns) {
             columns.put(columnName, columnOfEntity(field));
@@ -92,15 +91,14 @@ final class Introspector {
         return createColumn(field, entityClass.stateClass(), Entity::state);
     }
 
-    @SuppressWarnings("MethodParameterNamingConvention")
     private Column createColumn(FieldDeclaration field,
                                 Class<?> classWithGetter,
-                                Function<Entity<?, ?>, ?> getterTargetFromEntity) {
+                                Function<Entity<?, ?>, ?> entityToGetterTarget) {
         ColumnName columnName = ColumnName.of(field);
         Method getter = getterOf(field, classWithGetter);
         Class<?> columnType = getter.getReturnType();
         Column.Getter columnGetter =
-                entity -> setAccessibleAndInvoke(getter, getterTargetFromEntity.apply(entity));
+                entity -> setAccessibleAndInvoke(getter, entityToGetterTarget.apply(entity));
         return new Column(columnName, columnType, columnGetter);
     }
 

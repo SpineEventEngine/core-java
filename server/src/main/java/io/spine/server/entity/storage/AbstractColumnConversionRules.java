@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 public abstract class AbstractColumnConversionRules<R> implements ColumnConversionRules<R> {
@@ -41,6 +42,7 @@ public abstract class AbstractColumnConversionRules<R> implements ColumnConversi
 
     @Override
     public ConversionRule<?, ? extends R> of(Class<?> type) {
+        checkNotNull(type);
         Optional<ConversionRule<?, ? extends R>> rule = customRuleFor(type);
         if (rule.isPresent()) {
             return rule.get();

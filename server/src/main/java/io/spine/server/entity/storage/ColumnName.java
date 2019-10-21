@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 public final class ColumnName extends StringTypeValue {
@@ -58,9 +58,9 @@ public final class ColumnName extends StringTypeValue {
                        .value());
     }
 
-    public static ColumnName from(Method method) {
-        checkNotNull(method);
-        MethodName methodName = MethodName.of(method);
+    public static ColumnName from(Method getter) {
+        checkNotNull(getter);
+        MethodName methodName = MethodName.of(getter);
         checkIsGetter(methodName);
         String name = underscoredNameWithoutPrefix(methodName);
         return of(name);
@@ -76,9 +76,9 @@ public final class ColumnName extends StringTypeValue {
     }
 
     private static void checkIsGetter(MethodName methodName) {
-        checkState(methodName.isGetter(),
-                   "A column name can only be extracted from getter method, " +
-                           "the name of the method `%s` is unsuitable for column extraction.",
-                   methodName.fullyQualifiedName());
+        checkArgument(methodName.isGetter(),
+                      "A column name can only be extracted from getter method, " +
+                              "the name of the method `%s` is unsuitable for column extraction.",
+                      methodName.fullyQualifiedName());
     }
 }

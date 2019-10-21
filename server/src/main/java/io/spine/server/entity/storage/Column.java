@@ -26,6 +26,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 public final class Column {
@@ -49,6 +50,7 @@ public final class Column {
     }
 
     public @Nullable Object valueIn(Entity<?, ? extends Message> entity) {
+        checkNotNull(entity);
         return getter.apply(entity);
     }
 

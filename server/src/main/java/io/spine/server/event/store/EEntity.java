@@ -21,7 +21,6 @@
 package io.spine.server.event.store;
 
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.Transaction;
@@ -36,7 +35,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * <p>An underlying event doesn't contain {@linkplain Event#clearEnrichments() enrichments}.
  */
-@Internal
 final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
 
     /** Cached value of the event message type name. */

@@ -18,28 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given;
 
-import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
-import io.spine.core.Version;
-import io.spine.server.entity.storage.SystemColumn;
+import io.spine.server.projection.Projection;
+import io.spine.test.entity.TaskListView;
+import io.spine.test.entity.TaskListViewId;
 
-/**
- * Applies the {@link SystemColumn} annotation to {@code getVersion} method.
- *
- * <p>The interface is implemented by {@link Entity entities} that have a stored version.
- */
-@Internal
-public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
-
-    /**
-     * Obtains the version of the entity.
-     *
-     * <p>Corresponds to the {@link io.spine.server.storage.VersionField#version}.
-     */
-    @SystemColumn
-    default Version getVersion() {
-        return version();
-    }
+public final class TaskListViewProjection
+        extends Projection<TaskListViewId, TaskListView, TaskListView.Builder> {
 }

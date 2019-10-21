@@ -20,17 +20,11 @@
 
 package io.spine.server.entity.storage.given;
 
-import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
-import io.spine.server.projection.Projection;
-import io.spine.test.entity.TaskView;
-import io.spine.test.entity.TaskViewId;
-import io.spine.test.entity.TaskViewWithColumns;
 
-import static io.spine.test.entity.TaskView.Status.CREATED;
-
+@SuppressWarnings("DuplicateStringLiteralInspection")
 public final class SimpleColumn {
 
     /** Prevents instantiation of this test env class. */
@@ -45,7 +39,7 @@ public final class SimpleColumn {
         return column("name");
     }
 
-    public static Column floatColumn() {
+    public static Column intColumn() {
         return column("estimate_in_days");
     }
 
@@ -58,30 +52,5 @@ public final class SimpleColumn {
         ColumnName columnName = ColumnName.of(name);
         Column column = columns.get(columnName);
         return column;
-    }
-
-    private static class TaskViewProjection
-            extends Projection<TaskViewId, TaskView, TaskView.Builder>
-            implements TaskViewWithColumns {
-
-        @Override
-        public String getName() {
-            return "some-name";
-        }
-
-        @Override
-        public float getEstimateInDays() {
-            return 42.0F;
-        }
-
-        @Override
-        public TaskView.Status getStatus() {
-            return CREATED;
-        }
-
-        @Override
-        public Timestamp getDueDate() {
-            return Timestamp.getDefaultInstance();
-        }
     }
 }

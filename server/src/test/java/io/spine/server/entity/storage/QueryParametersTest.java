@@ -52,7 +52,7 @@ import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.gt;
 import static io.spine.client.Filters.le;
 import static io.spine.server.entity.storage.given.SimpleColumn.column;
-import static io.spine.server.entity.storage.given.SimpleColumn.floatColumn;
+import static io.spine.server.entity.storage.given.SimpleColumn.intColumn;
 import static io.spine.server.entity.storage.given.SimpleColumn.stringColumn;
 import static io.spine.server.entity.storage.given.SimpleColumn.timestampColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -144,7 +144,7 @@ class QueryParametersTest {
                 eq("$1st", "entityColumnValue"),
                 eq("$2nd", 42.0),
                 gt("$3d", currentTime())};
-        Column[] columns = {stringColumn(), floatColumn(), timestampColumn()};
+        Column[] columns = {stringColumn(), intColumn(), timestampColumn()};
         Multimap<Column, Filter> filterMap =
                 ImmutableMultimap.of(columns[0], filters[0],
                                      columns[1], filters[1],

@@ -21,8 +21,10 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.storage.SystemColumn;
 
+@Internal
 public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> {
 
     /**
@@ -34,7 +36,7 @@ public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> 
     }
 
     /**
-     * Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#archived}.
+     * Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#deleted}.
      */
     @SystemColumn
     default boolean getDeleted() {

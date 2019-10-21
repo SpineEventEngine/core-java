@@ -75,16 +75,20 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      * {@link EntityRecord}.
      */
     public static EntityRecordWithColumns create(EntityRecord record, RecordStorage<?> storage) {
+        return create(record, storage.columns());
+    }
+
+    @VisibleForTesting
+    static EntityRecordWithColumns create(EntityRecord record, Columns columns) {
         Map<ColumnName, Object> storageFields = new HashMap<>();
-        storeLifecycle(storageFields, record, storage);
-        storeVersion(storageFields, record, storage);
+        storeLifecycle(storageFields, record, columns);
+        storeVersion(storageFields, record, columns);
         return new EntityRecordWithColumns(record, storageFields);
     }
 
     private static void storeLifecycle(Map<ColumnName, Object> storageFields,
                                        EntityRecord record,
-                                       RecordStorage<?> storage) {
-        Columns columns = storage.columns();
+                                       Columns columns) {
         ColumnName archivedColumn = ColumnName.of(archived);
         boolean archivedPresent = columns.find(archivedColumn)
                                          .isPresent();
@@ -104,10 +108,9 @@ public final class EntityRecordWithColumns implements WithLifecycle {
 
     private static void storeVersion(Map<ColumnName, Object> storageFields,
                                      EntityRecord record,
-                                     RecordStorage<?> storage) {
+                                     Columns columns) {
         ColumnName versionColumn = ColumnName.of(version);
-        boolean versionPresent = storage.columns()
-                                        .find(versionColumn)
+        boolean versionPresent = columns.find(versionColumn)
                                         .isPresent();
         if (versionPresent) {
             storageFields.put(versionColumn, record.getVersion());

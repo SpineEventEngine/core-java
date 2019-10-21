@@ -36,7 +36,7 @@ message TaskView {
 
     string name = 2 [(column) = true];
 
-    float estimate_in_days = 3 [(column) = true];
+    int32 estimate_in_days = 3 [(column) = true];
 
     Status status = 4 [(column) = true];
 
@@ -52,6 +52,21 @@ message TaskView {
 }
 
 message TaskViewId {
+    option (is).java_type = "io.spine.server.entity.storage.given.IntIdentifier";
     int32 id = 1;
 }
 
+message TaskListView {
+    option (.entity).kind = PROJECTION;
+
+    TaskListViewId id = 1;
+
+    repeated TaskViewId task_views = 2;
+
+    string description = 3 [(column) = true];
+}
+
+message TaskListViewId {
+    option (is).java_type = "io.spine.server.entity.storage.given.IntIdentifier";
+    int32 id = 1;
+}

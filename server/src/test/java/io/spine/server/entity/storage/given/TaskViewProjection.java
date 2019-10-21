@@ -18,28 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given;
 
-import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
-import io.spine.core.Version;
-import io.spine.server.entity.storage.SystemColumn;
+import com.google.protobuf.Timestamp;
+import io.spine.server.projection.Projection;
+import io.spine.test.entity.TaskView;
+import io.spine.test.entity.TaskViewId;
+import io.spine.test.entity.TaskViewWithColumns;
 
-/**
- * Applies the {@link SystemColumn} annotation to {@code getVersion} method.
- *
- * <p>The interface is implemented by {@link Entity entities} that have a stored version.
- */
-@Internal
-public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
+import static io.spine.test.entity.TaskView.Status.CREATED;
 
-    /**
-     * Obtains the version of the entity.
-     *
-     * <p>Corresponds to the {@link io.spine.server.storage.VersionField#version}.
-     */
-    @SystemColumn
-    default Version getVersion() {
-        return version();
+public final class TaskViewProjection
+        extends Projection<TaskViewId, TaskView, TaskView.Builder>
+        implements TaskViewWithColumns {
+
+    @Override
+    public String getName() {
+        return "some-name";
+    }
+
+    @Override
+    public int getEstimateInDays() {
+        return 42;
+    }
+
+    @Override
+    public TaskView.Status getStatus() {
+        return CREATED;
+    }
+
+    @Override
+    public Timestamp getDueDate() {
+        return Timestamp.getDefaultInstance();
     }
 }
