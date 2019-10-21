@@ -425,10 +425,12 @@ public final class Delivery {
      *
      * @param entityId
      *         the ID of the entity, to which the message is heading
+     * @param entityStateType
+     *         the state type of the entity, to which the message is heading
      * @return the index of the shard for the message
      */
-    ShardIndex whichShardFor(Object entityId) {
-        return strategy.indexFor(entityId);
+    ShardIndex whichShardFor(Object entityId, TypeUrl entityStateType) {
+        return strategy.indexFor(entityId, entityStateType);
     }
 
     /**

@@ -20,6 +20,8 @@
 
 package io.spine.server.delivery;
 
+import io.spine.type.TypeUrl;
+
 /**
  * Determines the {@linkplain ShardIndex index of a shard} for the given identifier of an entity.
  *
@@ -35,9 +37,11 @@ public interface DeliveryStrategy {
      *
      * @param entityId
      *         the identifier of the entity, to which the messages are dispatched
+     * @param entityStateType
+     *         the type URL of the entity, to which the messages are dispatched
      * @return the shard index
      */
-    ShardIndex indexFor(Object entityId);
+    ShardIndex indexFor(Object entityId, TypeUrl entityStateType);
 
     /**
      * Tells how many shards there are according to this strategy.
