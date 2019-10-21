@@ -104,17 +104,4 @@ public class PmTransaction<I,
     private VersionIncrement createVersionIncrement() {
         return VersionIncrement.sequentially(this);
     }
-
-    /**
-     * Creates a new transaction for a given {@code ProcessManager}.
-     *
-     * @param pm
-     *         the {@code ProcessManager} instance to start the transaction for
-     * @return the new transaction instance
-     */
-    static <I, S extends Message, B extends ValidatingBuilder<S>>
-    PmTransaction<I, S, B> start(ProcessManager<I, S, B> pm) {
-        PmTransaction<I, S, B> tx = new PmTransaction<>(pm);
-        return tx;
-    }
 }
