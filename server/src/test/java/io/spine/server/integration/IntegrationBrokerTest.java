@@ -36,12 +36,12 @@ import io.spine.server.integration.given.MemoizingProjectDetails1Repository;
 import io.spine.server.integration.given.MemoizingProjectDetails2Repository;
 import io.spine.server.integration.given.MemoizingProjection;
 import io.spine.server.integration.given.PhotosProcMan;
+import io.spine.server.integration.given.ProjectCommander;
 import io.spine.server.integration.given.ProjectCountAggregate;
 import io.spine.server.integration.given.ProjectDetails;
 import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
-import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
@@ -64,9 +64,7 @@ import static io.spine.server.integration.given.IntegrationBrokerTestEnv.project
 import static io.spine.server.integration.given.IntegrationBrokerTestEnv.projectStarted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("IntegrationBroker should")
@@ -125,12 +123,15 @@ class IntegrationBrokerTest {
             contextWithExternalSubscribers();
 
             assertNull(ProjectEventsSubscriber.externalEvent());
+            assertNull(ProjectCommander.externalEvent());
 
             Event event = projectCreated();
+            Message expectedMsg = unpack(event.getMessage());
+
             sourceContext.eventBus()
                          .post(event);
-            assertEquals(unpack(event.getMessage()),
-                         ProjectEventsSubscriber.externalEvent());
+            assertThat(ProjectEventsSubscriber.externalEvent()).isEqualTo(expectedMsg);
+            assertThat(ProjectCommander.externalEvent()).isEqualTo(expectedMsg);
 
             sourceContext.close();
         }
@@ -183,11 +184,11 @@ class IntegrationBrokerTest {
     }
 
     @Nested
-    @DisplayName("avoid dispatching events from one BC")
+    @DisplayName("avoid dispatching events from a BC")
     class AvoidDispatching {
 
         @Test
-        @DisplayName("to domestic entity subscribers of another BC")
+        @DisplayName("to domestic entities subscribers of another BC")
         void toDomesticEntitySubscribers() throws Exception {
             BoundedContext sourceContext = newContext();
             BoundedContext destContext = contextWithExtEntitySubscribers();
@@ -214,21 +215,42 @@ class IntegrationBrokerTest {
             BoundedContext destContext = contextWithExternalSubscribers();
 
             assertNull(ProjectEventsSubscriber.domesticEvent());
+            assertNull(ProjectCommander.domesticEvent());
 
-            Event event = projectStarted();
+            Event projectStarted = projectStarted();
             sourceContext.eventBus()
-                         .post(event);
+                         .post(projectStarted);
 
-            assertNotEquals(unpack(event.getMessage()),
-                            ProjectEventsSubscriber.domesticEvent());
-            assertNull(ProjectEventsSubscriber.domesticEvent());
+            Message expectedEventMsg = unpack(projectStarted.getMessage());
+
+            assertThat(ProjectEventsSubscriber.domesticEvent()).isNull();
+            assertThat(ProjectCommander.domesticEvent()).isNull();
 
             destContext.eventBus()
-                       .post(event);
-            assertEquals(unpack(event.getMessage()),
-                         ProjectEventsSubscriber.domesticEvent());
+                       .post(projectStarted);
+
+            assertThat(ProjectEventsSubscriber.domesticEvent()).isEqualTo(expectedEventMsg);
+            assertThat(ProjectCommander.domesticEvent()).isEqualTo(expectedEventMsg);
 
             sourceContext.close();
+            destContext.close();
+        }
+
+        @Test
+        @DisplayName("to own standalone subscribers if they expect external events")
+        void toOwnExternalStandaloneSubscribers() throws Exception {
+            BoundedContext destContext = contextWithExternalSubscribers();
+
+            assertThat(ProjectEventsSubscriber.externalEvent()).isNull();
+            assertThat(ProjectCommander.externalEvent()).isNull();
+
+            Event projectCreated = projectCreated();
+            destContext.eventBus()
+                       .post(projectCreated);
+
+            assertThat(ProjectEventsSubscriber.externalEvent()).isNull();
+            assertThat(ProjectCommander.externalEvent()).isNull();
+
             destContext.close();
         }
     }
@@ -273,7 +295,7 @@ class IntegrationBrokerTest {
         assertNull(ProjectCountAggregate.externalEvent());
 
         Event projectCreated = projectCreated();
-        assertThrows(SignalOriginMismatchError.class, () -> eventBus.post(projectCreated));
+        eventBus.post(projectCreated);
 
         assertNull(ProjectEventsSubscriber.externalEvent());
         assertNull(ProjectDetails.externalEvent());

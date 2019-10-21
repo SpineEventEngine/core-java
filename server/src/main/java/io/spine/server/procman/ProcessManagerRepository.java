@@ -224,9 +224,7 @@ public abstract class ProcessManagerRepository<I,
      * Ensures the process manager class handles at least one type of messages.
      */
     private void checkNotDeaf() {
-        boolean dispatchesEvents = dispatchesEvents() || dispatchesExternalEvents();
-
-        if (!dispatchesCommands() && !dispatchesEvents) {
+        if (!dispatchesCommands() && !dispatchesEvents()) {
             throw newIllegalStateException(
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react to any events.", this);
@@ -242,6 +240,18 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public final Set<EventClass> messageClasses() {
         return processManagerClass().events();
+    }
+
+    /**
+     * Obtains classes of domestic events to which the process managers managed by this repository
+     * react.
+     *
+     * @return a set of event classes or an empty set if process managers do not react to
+     *         domestic events
+     */
+    @Override
+    public final Set<EventClass> domesticEventClasses() {
+        return processManagerClass().domesticEvents();
     }
 
     /**

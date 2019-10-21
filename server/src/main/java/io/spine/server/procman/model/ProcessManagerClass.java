@@ -85,10 +85,16 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
+    public ImmutableSet<EventClass> domesticEvents() {
+        SetView<EventClass> result =
+                union(reactorDelegate.domesticEvents(), commanderDelegate.domesticEvents());
+        return result.immutableCopy();
+    }
+
+    @Override
     public ImmutableSet<EventClass> externalEvents() {
         SetView<EventClass> result =
-                union(reactorDelegate.externalEvents(),
-                      commanderDelegate.externalEvents());
+                union(reactorDelegate.externalEvents(), commanderDelegate.externalEvents());
         return result.immutableCopy();
     }
 

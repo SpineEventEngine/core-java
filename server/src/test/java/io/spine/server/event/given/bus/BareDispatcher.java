@@ -42,6 +42,11 @@ public class BareDispatcher implements EventDispatcher {
     }
 
     @Override
+    public Set<EventClass> domesticEventClasses() {
+        return eventClasses();
+    }
+
+    @Override
     public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }

@@ -28,6 +28,8 @@ import io.spine.test.event.EvTeamCreated;
 
 import java.util.Set;
 
+import static com.google.common.collect.Sets.union;
+
 public class DelegatingEventDispatcherTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -39,6 +41,11 @@ public class DelegatingEventDispatcherTestEnv {
 
         @Override
         public Set<EventClass> events() {
+            return union(domesticEvents(), externalEvents());
+        }
+
+        @Override
+        public Set<EventClass> domesticEvents() {
             return ImmutableSet.of();
         }
 
@@ -60,6 +67,11 @@ public class DelegatingEventDispatcherTestEnv {
         @Override
         public Set<EventClass> events() {
             return EventClass.setOf(EvTeamCreated.class);
+        }
+
+        @Override
+        public Set<EventClass> domesticEvents() {
+            return events();
         }
 
         @Override

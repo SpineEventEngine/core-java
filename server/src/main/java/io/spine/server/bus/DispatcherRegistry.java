@@ -30,6 +30,7 @@ import io.spine.type.MessageClass;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -102,8 +103,17 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
                 .get(messageClass)
                 .stream()
                 .filter(dispatcher -> dispatcher.canDispatch(envelope))
+                .filter(dispatcher -> attributeFilter().test(envelope, dispatcher))
                 .collect(toImmutableSet());
         return dispatchers;
+    }
+
+    /**
+     * Returns a filter allowing to tell whether the attributes of the envelope match
+     * the dispatcher requirements.
+     */
+    protected BiPredicate<E, D> attributeFilter() {
+        return (e, d) -> true;
     }
 
     /**

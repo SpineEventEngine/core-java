@@ -299,6 +299,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * {@inheritDoc}
      *
+     * <p>The {@code BlackBoxBoundedContext} only consumes domestic events.
+     */
+    @Override
+    public Set<EventClass> domesticEventClasses() {
+        return eventClasses();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * <p>The {@code BlackBoxBoundedContext} does not consume external events.
      */
     @Override
