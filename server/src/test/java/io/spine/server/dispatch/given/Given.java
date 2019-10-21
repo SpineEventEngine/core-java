@@ -20,14 +20,19 @@
 
 package io.spine.server.dispatch.given;
 
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
+import io.spine.client.CommandFactory;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.RejectionEventContext;
 import io.spine.server.dispatch.DispatchOutcomeHandlerTest;
+import io.spine.server.dispatch.given.command.CreateDispatch;
 import io.spine.server.dispatch.given.event.DispatchCreated;
 import io.spine.server.dispatch.given.rejection.DispatchRejections;
 import io.spine.testing.TestValues;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.protobuf.TypeConverter.toAny;
@@ -41,6 +46,9 @@ public final class Given {
     public static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(toAny(Given.class.getSimpleName()),
                                          DispatchOutcomeHandlerTest.class);
+
+    public static final CommandFactory commandFactory =
+            new TestActorRequestFactory(DispatchOutcomeHandlerTest.class).command();
 
     private Given() {
     }
@@ -59,6 +67,13 @@ public final class Given {
                 .build();
     }
 
+    public static CommandMessage createDispatch() {
+        return CreateDispatch
+                .newBuilder()
+                .setId(ID)
+                .build();
+    }
+
     public static Event rejectionEvent() {
         RejectionEventContext rejectionContext = RejectionEventContext
                 .newBuilder()
@@ -69,5 +84,9 @@ public final class Given {
 
     public static Event event() {
         return eventFactory.createEvent(dispatchCreated());
+    }
+
+    public static Command command() {
+        return commandFactory.create(createDispatch());
     }
 }

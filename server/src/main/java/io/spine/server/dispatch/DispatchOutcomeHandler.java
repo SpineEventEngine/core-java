@@ -21,10 +21,10 @@
 package io.spine.server.dispatch;
 
 import io.spine.base.Error;
+import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.type.EventEnvelope;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -41,8 +41,10 @@ public final class DispatchOutcomeHandler {
     private final DispatchOutcome outcome;
 
     private OutcomeHandler<Error> errorHandler = doNothing();
-    private OutcomeHandler<RejectionEnvelope> rejectionHandler = doNothing();
     private OutcomeHandler<Success> successHandler = doNothing();
+    private OutcomeHandler<List<Command>> producedCommandsHandler = doNothing();
+    private OutcomeHandler<List<Event>> producedEventsHandler = doNothing();
+    private OutcomeHandler<Event> rejectionHandler = doNothing();
     private OutcomeHandler<Interruption> interruptionHandler = doNothing();
     private OutcomeHandler<Ignore> ignoreHandler = doNothing();
 
@@ -67,15 +69,18 @@ public final class DispatchOutcomeHandler {
     }
 
     /**
-     * Accepts {@code rejection} {@code handler} case consumer.
+     * Accepts {@code rejection} {@code handler} case handler.
      */
-    public DispatchOutcomeHandler onRejection(OutcomeHandler<RejectionEnvelope> handler) {
+    public DispatchOutcomeHandler onRejection(OutcomeHandler<Event> handler) {
         this.rejectionHandler = checkNotNull(handler);
         return this;
     }
 
     /**
      * Accepts {@code Success} case handler.
+     *
+     * <p>The {@code rejection} success case is handled using a separate
+     * {@link #onRejection(OutcomeHandler)} handler.
      */
     public DispatchOutcomeHandler onSuccess(OutcomeHandler<Success> handler) {
         this.successHandler = checkNotNull(handler);
@@ -91,10 +96,26 @@ public final class DispatchOutcomeHandler {
     }
 
     /**
-     * Accepts {@code Ignored} case consumer.
+     * Accepts {@code Ignored} case handler.
      */
     public DispatchOutcomeHandler onIgnored(OutcomeHandler<Ignore> handler) {
         this.ignoreHandler = checkNotNull(handler);
+        return this;
+    }
+
+    /**
+     * Accepts {@code ProducedCommands} success case handler.
+     */
+    public DispatchOutcomeHandler onCommands(OutcomeHandler<List<Command>> handler) {
+        this.producedCommandsHandler = checkNotNull(handler);
+        return this;
+    }
+
+    /**
+     * Accepts {@code ProducedEvents} success case handler.
+     */
+    public DispatchOutcomeHandler onEvents(OutcomeHandler<List<Event>> handler) {
+        this.producedEventsHandler = checkNotNull(handler);
         return this;
     }
 
@@ -107,10 +128,9 @@ public final class DispatchOutcomeHandler {
             case SUCCESS:
                 Success success = outcome.getSuccess();
                 if (outcome.hasRejection()) {
-                    Event rejection = success.getRejection();
-                    rejectionHandler.accept(RejectionEnvelope.from(EventEnvelope.of(rejection)));
+                    rejectionHandler.accept(success.getRejection());
                 } else {
-                    successHandler.accept(success);
+                    handleSuccess(success);
                 }
                 break;
             case ERROR:
@@ -127,6 +147,24 @@ public final class DispatchOutcomeHandler {
                 break;
         }
         return outcome;
+    }
+
+    private void handleSuccess(Success success) {
+        switch (success.getExhaustCase()) {
+            case PRODUCED_EVENTS:
+                producedEventsHandler.accept(success.getProducedEvents()
+                                                    .getEventList());
+                break;
+            case PRODUCED_COMMANDS:
+                producedCommandsHandler.accept(success.getProducedCommands()
+                                                      .getCommandList());
+                break;
+            case REJECTION:
+            case EXHAUST_NOT_SET:
+            default:
+                break;
+        }
+        successHandler.accept(success);
     }
 
     /**

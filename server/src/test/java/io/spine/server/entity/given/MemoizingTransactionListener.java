@@ -22,11 +22,11 @@ package io.spine.server.entity.given;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.Error;
+import io.spine.core.Event;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
 import io.spine.server.entity.Phase;
 import io.spine.server.entity.TransactionListener;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.validate.NonValidated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -49,7 +49,7 @@ public final class MemoizingTransactionListener<I> implements TransactionListene
     private Error lastError;
     private EntityRecord lastErroredRecord;
 
-    private RejectionEnvelope lastRejection;
+    private Event lastRejection;
     private EntityRecord lastRejectedRecord;
 
     @Override
@@ -74,8 +74,7 @@ public final class MemoizingTransactionListener<I> implements TransactionListene
     }
 
     @Override
-    public void onTransactionFailed(RejectionEnvelope cause,
-                                    @NonValidated EntityRecord entityRecord) {
+    public void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord) {
         lastRejection = cause;
         lastRejectedRecord = entityRecord;
     }
@@ -109,7 +108,7 @@ public final class MemoizingTransactionListener<I> implements TransactionListene
         return lastErroredRecord;
     }
 
-    public RejectionEnvelope getLastRejection() {
+    public Event getLastRejection() {
         return lastRejection;
     }
 

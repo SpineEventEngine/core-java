@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import io.spine.base.Error;
-import io.spine.server.event.RejectionEnvelope;
+import io.spine.core.Event;
 import io.spine.validate.NonValidated;
 
 /**
@@ -51,8 +51,7 @@ final class SilentWitness<I> implements TransactionListener<I> {
     }
 
     @Override
-    public void onTransactionFailed(RejectionEnvelope cause,
-                                    @NonValidated EntityRecord entityRecord) {
+    public void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord) {
         // Do nothing.
     }
 

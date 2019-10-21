@@ -27,12 +27,12 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
@@ -190,7 +190,7 @@ public abstract class Transaction<I,
     B toBuilder(E entity) {
         S currentState = entity.state();
         @SuppressWarnings("unchecked") // ensured by argument of <E>.
-        B result = (B) currentState.toBuilder();
+                B result = (B) currentState.toBuilder();
 
         if (currentState.equals(entity.defaultState())) {
             IdField idField = IdField.of(entity.modelClass());
@@ -465,7 +465,7 @@ public abstract class Transaction<I,
      *         the reason of the rollback
      */
     @VisibleForTesting
-    final void rollback(RejectionEnvelope cause) {
+    final void rollback(Event cause) {
         doRollback(record -> listener().onTransactionFailed(cause, record));
     }
 

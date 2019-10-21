@@ -21,7 +21,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.server.event.RejectionEnvelope;
+import io.spine.core.Event;
 import io.spine.validate.NonValidated;
 
 /**
@@ -79,7 +79,7 @@ public interface TransactionListener<I> {
      * @param entityRecord
      *         the uncommitted entity state
      */
-    void onTransactionFailed(RejectionEnvelope cause, @NonValidated EntityRecord entityRecord);
+    void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord);
 
     /**
      * A callback invoked after a successful commit.

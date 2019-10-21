@@ -24,11 +24,10 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Truth;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.server.dispatch.given.Given;
-import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.type.EventEnvelope;
 import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -103,11 +102,57 @@ public final class DispatchOutcomeHandlerTest {
         }
 
         @Test
+        @DisplayName("produced events outcome")
+        void events() {
+            Event event = Given.event();
+            Success success = Success
+                    .newBuilder()
+                    .setProducedEvents(ProducedEvents
+                                               .newBuilder()
+                                               .addEvent(event)
+                                               .build())
+                    .build();
+            DispatchOutcome outcome = DispatchOutcome
+                    .newBuilder()
+                    .setSuccess(success)
+                    .build();
+            List<Event> events = new ArrayList<>();
+            DispatchOutcome result = DispatchOutcomeHandler
+                    .from(outcome)
+                    .onEvents(events::addAll)
+                    .process();
+            assertThat(result).isEqualTo(outcome);
+            assertThat(events).containsExactly(event);
+        }
+
+        @Test
+        @DisplayName("produced commands outcome")
+        void commands() {
+            Command command = Given.command();
+            Success success = Success
+                    .newBuilder()
+                    .setProducedCommands(ProducedCommands
+                                                 .newBuilder()
+                                                 .addCommand(command)
+                                                 .build())
+                    .build();
+            DispatchOutcome outcome = DispatchOutcome
+                    .newBuilder()
+                    .setSuccess(success)
+                    .build();
+            List<Command> commands = new ArrayList<>();
+            DispatchOutcome result = DispatchOutcomeHandler
+                    .from(outcome)
+                    .onCommands(commands::addAll)
+                    .process();
+            assertThat(result).isEqualTo(outcome);
+            assertThat(commands).containsExactly(command);
+        }
+
+        @Test
         @DisplayName("rejection outcome")
         void rejection() {
             Event rejection = Given.rejectionEvent();
-            RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(
-                    EventEnvelope.of(rejection));
             Success error = Success
                     .newBuilder()
                     .setRejection(rejection)
@@ -116,14 +161,14 @@ public final class DispatchOutcomeHandlerTest {
                     .newBuilder()
                     .setSuccess(error)
                     .build();
-            List<RejectionEnvelope> rejections = new ArrayList<>();
+            List<Event> rejections = new ArrayList<>();
             DispatchOutcome result = DispatchOutcomeHandler
                     .from(outcome)
                     .onRejection(rejections::add)
                     .process();
             assertThat(result).isEqualTo(outcome);
             Truth.assertThat(rejections)
-                 .containsExactly(rejectionEnvelope);
+                 .containsExactly(rejection);
         }
 
         @Test

@@ -24,10 +24,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
+import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.logging.Logging;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -146,8 +146,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     }
 
     @Override
-    public void onTransactionFailed(RejectionEnvelope cause,
-                                    @NonValidated EntityRecord entityRecord) {
+    public void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord) {
         // NOP.
     }
 
