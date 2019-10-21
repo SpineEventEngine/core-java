@@ -95,6 +95,11 @@ public abstract class AbstractCommander
     }
 
     @Override
+    public Set<EventClass> domesticEvents() {
+        return thisClass.domesticEvents();
+    }
+
+    @Override
     public void dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getCommander(event.messageClass());
         DispatchOutcome outcome = method.invoke(this, event);

@@ -65,6 +65,11 @@ public final class EventImportDispatcher<I> implements EventDispatcher, Logging 
         return repository.importableEvents();
     }
 
+    @Override
+    public Set<EventClass> domesticEventClasses() {
+        return eventClasses();
+    }
+
     /**
      * Always returns empty set because external events cannot be imported.
      */

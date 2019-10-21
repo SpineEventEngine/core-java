@@ -77,6 +77,11 @@ public final class CommanderClass<C extends Commander>
     }
 
     @Override
+    public ImmutableSet<EventClass> domesticEvents() {
+        return delegate.domesticEvents();
+    }
+
+    @Override
     public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
     }

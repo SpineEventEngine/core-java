@@ -32,9 +32,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
 
+    @SuppressWarnings({"PublicField", "StaticNonFinalField"}) // making it available for inspection.
+    public static EBTaskAdded taskAddedEvent = null;
 
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
     @Subscribe(external = true)
     void on(EBTaskAdded message, EventContext context) {
+        taskAddedEvent = message;
         if (!context.getExternal()) {
             fail(format(
                     "Domestic event `%s` was delivered to an external subscriber.",

@@ -36,6 +36,8 @@ import io.spine.test.bc.event.BcTaskAdded;
 
 import java.util.Set;
 
+import static com.google.common.collect.Sets.union;
+
 public class Given {
 
     private Given() {
@@ -91,8 +93,13 @@ public class Given {
         }
 
         @Override
-        public Set<EventClass> messageClasses() {
+        public Set<EventClass> domesticEventClasses() {
             return ImmutableSet.of();
+        }
+
+        @Override
+        public Set<EventClass> messageClasses() {
+            return union(externalEventClasses(), domesticEventClasses());
         }
 
         @CanIgnoreReturnValue

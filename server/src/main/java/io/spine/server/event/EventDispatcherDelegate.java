@@ -42,9 +42,14 @@ import java.util.Set;
 public interface EventDispatcherDelegate {
 
     /**
-     * Obtains event classes dispatched by this delegate.
+     * Obtains all event classes dispatched by this delegate.
      */
     Set<EventClass> events();
+
+    /**
+     * Obtains domestic event classes dispatched by this delegate.
+     */
+    Set<EventClass> domesticEvents();
 
     /**
      * Obtains external event classes dispatched by this delegate.
@@ -70,7 +75,7 @@ public interface EventDispatcherDelegate {
     }
 
     /**
-     * Verifies if this instance dispatches at least one domestic event.
+     * Verifies if this instance dispatches at least one event.
      */
     default boolean dispatchesEvents() {
         return !events().isEmpty();

@@ -38,9 +38,16 @@ public interface EventReceiverClass {
      *
      * <p>The returned set contains both domestic and external event classes.
      *
+     * <p>For only the domestic events, please see {@link #domesticEvents()}.
+     *
      * <p>For only the external events, please see {@link #externalEvents()}.
      */
     ImmutableSet<EventClass> events();
+
+    /**
+     * Obtains a set of domestic events which this class receives.
+     */
+    ImmutableSet<EventClass> domesticEvents();
 
     /**
      * Obtains a set of external events which this class receives.

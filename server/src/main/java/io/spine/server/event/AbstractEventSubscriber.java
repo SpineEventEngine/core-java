@@ -151,4 +151,9 @@ public abstract class AbstractEventSubscriber
     public Set<EventClass> externalEventClasses() {
         return thisClass.externalEvents();
     }
+
+    @Override
+    public Set<EventClass> domesticEventClasses() {
+        return thisClass.domesticEvents();
+    }
 }

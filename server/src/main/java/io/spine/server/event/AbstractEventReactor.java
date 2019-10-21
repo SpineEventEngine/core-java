@@ -140,4 +140,9 @@ public abstract class AbstractEventReactor
     public Set<EventClass> externalEventClasses() {
         return thisClass.externalEvents();
     }
+
+    @Override
+    public Set<EventClass> domesticEventClasses() {
+        return thisClass.domesticEvents();
+    }
 }

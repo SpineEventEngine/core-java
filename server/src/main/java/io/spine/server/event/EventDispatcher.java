@@ -33,7 +33,7 @@ public interface EventDispatcher
         extends MulticastDispatcher<EventClass, EventEnvelope> {
 
     /**
-     * Obtains classes of domestic events processed by this dispatcher.
+     * Obtains classes of all events processed by this dispatcher.
      */
     default Set<EventClass> eventClasses() {
         return messageClasses();
@@ -45,7 +45,12 @@ public interface EventDispatcher
     Set<EventClass> externalEventClasses();
 
     /**
-     * Verifies if this instance dispatches at least one domestic event.
+     * Obtains classes of domestic events processed by this dispatcher.
+     */
+    Set<EventClass> domesticEventClasses();
+
+    /**
+     * Verifies if this instance dispatches at least one event.
      */
     default boolean dispatchesEvents() {
         return !eventClasses().isEmpty();
