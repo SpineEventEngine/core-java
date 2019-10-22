@@ -26,10 +26,9 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.dispatch.DispatchOutcomeHandler.OutcomeHandler.doNothing;
+import static io.spine.server.dispatch.OutcomeHandler.doNothing;
 
 /**
  * A holder of a {@code DispatchOutcome}.
@@ -183,21 +182,4 @@ public final class DispatchOutcomeHandler {
         afterSuccessHandler.accept(success);
     }
 
-    /**
-     * A {@code DispatchOutcome} handler.
-     */
-    @FunctionalInterface
-    public interface OutcomeHandler<T> extends Consumer<T> {
-
-        OutcomeHandler DO_NOTHING = o -> {
-        };
-
-        /**
-         * Creates a new no-op handler.
-         */
-        @SuppressWarnings("unchecked")
-        static <T> OutcomeHandler<T> doNothing() {
-            return (OutcomeHandler<T>) DO_NOTHING;
-        }
-    }
 }
