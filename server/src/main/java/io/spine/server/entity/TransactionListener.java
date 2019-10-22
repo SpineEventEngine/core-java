@@ -59,7 +59,7 @@ public interface TransactionListener<I> {
      * @param entityRecord
      *         the entity modified within the transaction
      * @apiNote The {@code entityRecord} is {@code @NonValidated} because the changes
-     *         are not yet committed and the it's not possible to guarantee that the record
+     *         are not yet committed and it's not possible to guarantee that the record
      *         will be valid.
      */
     void onBeforeCommit(@NonValidated EntityRecord entityRecord);
