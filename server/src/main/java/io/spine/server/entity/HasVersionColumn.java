@@ -38,7 +38,7 @@ public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
      *
      * <p>Corresponds to the {@link io.spine.server.storage.VersionField#version}.
      */
-    @SystemColumn
+    @SystemColumn(name = "version")
     default Version getVersion() {
         return version();
     }

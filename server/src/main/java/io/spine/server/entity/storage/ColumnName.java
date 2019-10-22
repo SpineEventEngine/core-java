@@ -20,17 +20,10 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.code.java.MethodName;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.storage.StorageField;
 import io.spine.value.StringTypeValue;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
@@ -56,29 +49,5 @@ public final class ColumnName extends StringTypeValue {
         checkNotNull(field);
         return of(field.name()
                        .value());
-    }
-
-    public static ColumnName from(Method getter) {
-        checkNotNull(getter);
-        MethodName methodName = MethodName.of(getter);
-        checkIsGetter(methodName);
-        String name = underscoredNameWithoutPrefix(methodName);
-        return of(name);
-    }
-
-    private static String underscoredNameWithoutPrefix(MethodName methodName) {
-        List<String> words = new ArrayList<>(methodName.words());
-        words.remove(0);
-        String result = words.stream()
-                             .map(String::toLowerCase)
-                             .collect(Collectors.joining("_"));
-        return result;
-    }
-
-    private static void checkIsGetter(MethodName methodName) {
-        checkArgument(methodName.isGetter(),
-                      "A column name can only be extracted from getter method, " +
-                              "the name of the method `%s` is unsuitable for column extraction.",
-                      methodName.fullyQualifiedName());
     }
 }

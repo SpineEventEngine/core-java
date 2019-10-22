@@ -42,4 +42,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Internal
 public @interface SystemColumn {
+
+    String name();
 }

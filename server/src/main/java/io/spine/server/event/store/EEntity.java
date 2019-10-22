@@ -61,7 +61,7 @@ final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
      * @return the time when the underlying event was fired
      * @see ColumnName#created
      */
-    @SystemColumn
+    @SystemColumn(name = "created")
     public Timestamp getCreated() {
         return state().context()
                       .getTimestamp();
@@ -75,7 +75,7 @@ final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
      * @return the {@link TypeName} value of the event represented by this entity
      * @see ColumnName#type
      */
-    @SystemColumn
+    @SystemColumn(name = "type")
     public String getType() {
         if (typeName == null) {
             typeName = EventEnvelope.of(state())

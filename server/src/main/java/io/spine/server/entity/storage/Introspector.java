@@ -53,7 +53,8 @@ final class Introspector {
         for (Method method : methods) {
             boolean isSystemColumn = method.isAnnotationPresent(SystemColumn.class);
             if (isSystemColumn) {
-                ColumnName columnName = ColumnName.from(method);
+                SystemColumn annotation = method.getAnnotation(SystemColumn.class);
+                ColumnName columnName = ColumnName.of(annotation.name());
                 Class<?> columnType = method.getReturnType();
                 Column.Getter columnGetter = entity -> setAccessibleAndInvoke(method, entity);
                 Column column = new Column(columnName, columnType, columnGetter);

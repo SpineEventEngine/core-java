@@ -28,13 +28,10 @@ import io.spine.test.entity.TaskView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
-
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("`ColumnName` should")
 class ColumnNameTest {
 
@@ -81,22 +78,5 @@ class ColumnNameTest {
         ColumnName columnName = ColumnName.of(fieldDeclaration);
 
         assertThat(columnName.value()).isEqualTo(field.getName());
-    }
-
-    @Test
-    @DisplayName("be extracted from getter name")
-    void initFromGetter() throws NoSuchMethodException {
-        Method getter = TaskView.class.getMethod("getEstimateInDays");
-        ColumnName columnName = ColumnName.from(getter);
-        assertThat(columnName.value()).isEqualTo("estimate_in_days");
-    }
-
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Called to throw exception.
-    @Test
-    @DisplayName("throw `IAE` when the given method is not a getter")
-    void notInitFromNonGetter() throws NoSuchMethodException {
-        Method method = TaskView.class.getMethod("hasId");
-        assertThrows(IllegalArgumentException.class, () -> ColumnName.from(method));
     }
 }

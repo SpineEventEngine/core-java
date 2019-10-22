@@ -31,6 +31,8 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.server.entity.storage.given.TestConversionRules;
+import io.spine.server.storage.LifecycleFlagField;
+import io.spine.server.storage.VersionField;
 import io.spine.test.storage.TaskId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
@@ -202,12 +204,14 @@ class EntityRecordWithColumnsTest {
         EntityRecordWithColumns recordWithColumns =
                 EntityRecordWithColumns.create(record, columns);
 
-        Object archivedValue = recordWithColumns.columnValue(ColumnName.of("archived"));
+        Object archivedValue =
+                recordWithColumns.columnValue(ColumnName.of(LifecycleFlagField.archived));
         assertThat(archivedValue).isEqualTo(archived);
 
-        Object deletedValue = recordWithColumns.columnValue(ColumnName.of("deleted"));
+        Object deletedValue =
+                recordWithColumns.columnValue(ColumnName.of(LifecycleFlagField.deleted));
         assertThat(deletedValue).isEqualTo(deleted);
-        Object versionValue = recordWithColumns.columnValue(ColumnName.of("version"));
+        Object versionValue = recordWithColumns.columnValue(ColumnName.of(VersionField.version));
         assertThat(versionValue).isEqualTo(version);
     }
 

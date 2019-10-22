@@ -483,7 +483,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     class MarkRecords {
 
         @Test
-        @DisplayName("archived")
+        @DisplayName("as archived")
         void archived() {
             E entity = createEntity(821);
             I id = entity.id();
@@ -499,7 +499,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         }
 
         @Test
-        @DisplayName("deleted")
+        @DisplayName("as deleted")
         void deleted() {
             E entity = createEntity(822);
             I id = entity.id();

@@ -30,7 +30,7 @@ public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> 
     /**
      * Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#archived}.
      */
-    @SystemColumn
+    @SystemColumn(name = "archived")
     default boolean getArchived() {
         return isArchived();
     }
@@ -38,7 +38,7 @@ public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> 
     /**
      * Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#deleted}.
      */
-    @SystemColumn
+    @SystemColumn(name = "deleted")
     default boolean getDeleted() {
         return isDeleted();
     }
