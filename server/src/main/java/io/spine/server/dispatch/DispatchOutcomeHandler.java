@@ -32,10 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.dispatch.DispatchOutcomeHandler.OutcomeHandler.doNothing;
 
 /**
- * The holder of an {@code DispatchOutcome} which provides convenient configurable handling for
- * different outcome cases.
- *
- * <p>By default all the handling are configured to {@code do nothing}.
+ * A holder of a {@code DispatchOutcome}.
  */
 public final class DispatchOutcomeHandler {
 
@@ -139,6 +136,9 @@ public final class DispatchOutcomeHandler {
     /**
      * Handles the {@code outcome} with the configured handlers and returns the {@code outcome}
      * to the caller.
+     *
+     * <p>If no handlers were configured or the outcome does not match the configured handlers,
+     * just returns the outcome.
      */
     @CanIgnoreReturnValue
     public DispatchOutcome handle() {
