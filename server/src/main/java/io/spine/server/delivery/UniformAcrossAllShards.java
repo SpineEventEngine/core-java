@@ -24,6 +24,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -80,7 +81,7 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
     }
 
     @Override
-    public ShardIndex indexFor(Object entityId) {
+    public ShardIndex indexFor(Object entityId, TypeUrl entityStateType) {
         if (1 == numberOfShards) {
             return newIndex(0);
         }
