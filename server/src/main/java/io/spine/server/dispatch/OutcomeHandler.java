@@ -23,14 +23,20 @@ package io.spine.server.dispatch;
 /**
  * A {@link DispatchOutcome} handler.
  *
+ * <p>The handler receives one of the {@code DispatchOutcome} result options, such as
+ * {@code Success}, {@code Error}, {@code Interruption} or {@code Ignore}.
+ *
+ * <p>It may also receive the {@code exhaust} of the {@code Success} result — list of produced
+ * {@code Event}s or {@code Command}s or a {@code rejection} event.
+ *
  * @param <T>
- *         {@code DispatchOutcome} result
+ *         Protobuf {@code Message} or {@code List} of messages
  */
 @FunctionalInterface
 public interface OutcomeHandler<T> {
 
     /**
-     * Handles a particular {@code DispatchOutcome}.
+     * Handles {@code DispatchOutcome} result option.
      */
-    void handle(T outcome);
+    void handle(T outcomeResult);
 }

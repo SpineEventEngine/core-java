@@ -111,7 +111,7 @@ public final class DispatchOutcomeHandler {
     }
 
     /**
-     * Accepts {@code rejection} {@code handler} case handler.
+     * Accepts {@code rejection} success case handler.
      */
     public DispatchOutcomeHandler onRejection(OutcomeHandler<Event> handler) {
         this.rejectionHandler = checkNotNull(handler);
