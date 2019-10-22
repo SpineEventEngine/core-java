@@ -43,4 +43,11 @@ class RunResult {
     boolean shouldRunAgain() {
         return !stoppedByMonitor && deliveredMsgCount > 0;
     }
+
+    /**
+     * Returns the number of delivered messages.
+     */
+    int deliveredCount() {
+        return this.deliveredMsgCount;
+    }
 }

@@ -227,7 +227,8 @@ public final class Delivery {
      * a particular shard. Therefore, in scope of this delivery, an approach based on pessimistic
      * locking per-{@code ShardIndex} is applied.
      *
-     * <p>In case the given shard is already processed by some node, this method does nothing.
+     * <p>In case the given shard is already processed by some node, this method does nothing and
+     * returns {@code Optional.empty()}.
      *
      * <p>The content of the shard is read and delivered on page-by-page basis. The runtime
      * exceptions occurring while a page is being delivered are accumulated and then the first
@@ -242,24 +243,31 @@ public final class Delivery {
      *
      * @param index
      *         the shard index to deliver the messages from.
+     * @return the statistics on the performed delivery, or {@code Optional.empty()} if there
+     *         were no delivery performed
      */
-    public void deliverMessagesFrom(ShardIndex index) {
+    public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
         Optional<ShardProcessingSession> picked = workRegistry.pickUp(index, currentNode);
         if (!picked.isPresent()) {
-            return;
+            return Optional.empty();
         }
         ShardProcessingSession session = picked.get();
 
+        RunResult runResult;
+        int totalDelivered = 0;
         try {
-            RunResult runResult;
             do {
                 runResult = doDeliver(session);
+                totalDelivered += runResult.deliveredCount();
             } while (runResult.shouldRunAgain());
         } finally {
             session.complete();
         }
+        DeliveryStats stats = new DeliveryStats(index, totalDelivered);
+        monitor.onDeliveryCompleted(stats);
+        return Optional.of(stats);
     }
 
     /**
@@ -425,10 +433,12 @@ public final class Delivery {
      *
      * @param entityId
      *         the ID of the entity, to which the message is heading
+     * @param entityStateType
+     *         the state type of the entity, to which the message is heading
      * @return the index of the shard for the message
      */
-    ShardIndex whichShardFor(Object entityId) {
-        return strategy.indexFor(entityId);
+    ShardIndex whichShardFor(Object entityId, TypeUrl entityStateType) {
+        return strategy.indexFor(entityId, entityStateType);
     }
 
     /**

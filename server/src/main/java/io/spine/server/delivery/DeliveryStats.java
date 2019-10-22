@@ -20,33 +20,31 @@
 
 package io.spine.server.delivery;
 
-import io.spine.type.TypeUrl;
-
 /**
- * Determines the {@linkplain ShardIndex index of a shard} for the given identifier of an entity.
- *
- * <p>The idea is to avoid the concurrent modification of the same {@code Entity} instance
- * on several app nodes. Therefore an entity is put into a shard, which in turn is designed to
- * process all the shard-incoming messages on a single application node at a time.
+ * The statistics on {@linkplain Delivery#deliverMessagesFrom(ShardIndex) delivering the messages}
+ * from a certain shard.
  */
-public interface DeliveryStrategy {
+public final class DeliveryStats {
+
+    private final ShardIndex index;
+    private final int deliveredCount;
+
+    DeliveryStats(ShardIndex index, int deliveredCount) {
+        this.index = index;
+        this.deliveredCount = deliveredCount;
+    }
 
     /**
-     * Determines the shard index for the messages heading to the entity with the specified target
-     * identifier.
-     *
-     * @param entityId
-     *         the identifier of the entity, to which the messages are dispatched
-     * @param entityStateType
-     *         the type URL of the entity, to which the messages are dispatched
-     * @return the shard index
+     * Returns the index of the shard for which this statistics is calculated.
      */
-    ShardIndex indexFor(Object entityId, TypeUrl entityStateType);
+    public ShardIndex shardIndex() {
+        return index;
+    }
 
     /**
-     * Tells how many shards there are according to this strategy.
-     *
-     * @return total count of shards
+     * Returns the total number of messages delivered.
      */
-    int shardCount();
+    public int deliveredCount() {
+        return deliveredCount;
+    }
 }
