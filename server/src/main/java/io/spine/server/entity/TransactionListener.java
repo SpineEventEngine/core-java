@@ -58,6 +58,9 @@ public interface TransactionListener<I> {
      *
      * @param entityRecord
      *         the entity modified within the transaction
+     * @apiNote The {@code entityRecord} is {@code @NonValidated} because the changes
+     *         are not yet committed and the it's not possible to guarantee that the record
+     *         will be valid.
      */
     void onBeforeCommit(@NonValidated EntityRecord entityRecord);
 
@@ -68,6 +71,8 @@ public interface TransactionListener<I> {
      *         the error which caused the commit failure
      * @param entityRecord
      *         the uncommitted entity state
+     * @apiNote The {@code entityRecord} is {@code @NonValidated} because the transaction
+     *         failed and it's not possible to guarantee that the record is valid.
      */
     void onTransactionFailed(Error cause, @NonValidated EntityRecord entityRecord);
 
@@ -78,6 +83,8 @@ public interface TransactionListener<I> {
      *         the rejection which caused the commit failure
      * @param entityRecord
      *         the uncommitted entity state
+     * @apiNote The {@code entityRecord} is {@code @NonValidated} because the transaction
+     *         failed and it's not possible to guarantee that the record is valid.
      */
     void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord);
 
