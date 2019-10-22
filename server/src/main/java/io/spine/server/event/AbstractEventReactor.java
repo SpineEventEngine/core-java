@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
@@ -109,16 +110,18 @@ public abstract class AbstractEventReactor
         DispatchOutcomeHandler
                 .from(method.invoke(this, event))
                 .onEvents(eventBus::post)
-                .onError(error -> {
-                    HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
-                            .newBuilder()
-                            .setEntity(eventAnchor)
-                            .setHandledSignal(event.messageId())
-                            .setError(error)
-                            .vBuild();
-                    system.postEvent(systemEvent, event.asMessageOrigin());
-                })
+                .onError(error -> postFailure(error, event))
                 .handle();
+    }
+
+    private void postFailure(Error error, EventEnvelope event) {
+        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                .newBuilder()
+                .setEntity(eventAnchor)
+                .setHandledSignal(event.messageId())
+                .setError(error)
+                .vBuild();
+        system.postEvent(systemEvent, event.asMessageOrigin());
     }
 
     /** Obtains the name of this reactor, {@linkplain TypeConverter#toAny(Object) packed to Any}. */
