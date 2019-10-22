@@ -28,8 +28,6 @@ import io.spine.server.entity.storage.ConversionRule;
 import io.spine.test.entity.TaskView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.Supplier;
-
 public final class TestConversionRules extends AbstractColumnConversionRules<String> {
 
     public static final String CONVERTED_STRING = "123";
@@ -37,10 +35,10 @@ public final class TestConversionRules extends AbstractColumnConversionRules<Str
     public static final String NULL_VALUE = "the-null";
 
     @Override
-    protected void setupCustomRules(
-            ImmutableMap.Builder<Class<?>, Supplier<ConversionRule<?, ? extends String>>> builder) {
-        builder.put(TaskView.class, TestConversionRules::ofTaskView);
-        builder.put(IntIdentifier.class, TestConversionRules::ofIntIdentifier);
+    protected void
+    setupCustomRules(ImmutableMap.Builder<Class<?>, ConversionRule<?, ? extends String>> builder) {
+        builder.put(TaskView.class, ofTaskView());
+        builder.put(IntIdentifier.class, ofIntIdentifier());
     }
 
     @Override

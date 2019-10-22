@@ -38,7 +38,7 @@ public abstract class AbstractColumnConversionRules<R> implements ColumnConversi
             = standardRules();
 
     private @MonotonicNonNull
-    ImmutableMap<Class<?>, Supplier<ConversionRule<?, ? extends R>>> customRules;
+    ImmutableMap<Class<?>, ConversionRule<?, ? extends R>> customRules;
 
     @Override
     public ConversionRule<?, ? extends R> of(Class<?> type) {
@@ -69,10 +69,10 @@ public abstract class AbstractColumnConversionRules<R> implements ColumnConversi
         return builder.build();
     }
 
-    private ImmutableMap<Class<?>, Supplier<ConversionRule<?, ? extends R>>>
+    private ImmutableMap<Class<?>, ConversionRule<?, ? extends R>>
     customRules() {
         if (customRules == null) {
-            ImmutableMap.Builder<Class<?>, Supplier<ConversionRule<?, ? extends R>>> builder =
+            ImmutableMap.Builder<Class<?>, ConversionRule<?, ? extends R>> builder =
                     ImmutableMap.builder();
 
             setupCustomRules(builder);
@@ -83,8 +83,8 @@ public abstract class AbstractColumnConversionRules<R> implements ColumnConversi
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Do not enforce implementation in descendants.
-    protected void setupCustomRules(
-            ImmutableMap.Builder<Class<?>, Supplier<ConversionRule<?, ? extends R>>> builder) {
+    protected void
+    setupCustomRules(ImmutableMap.Builder<Class<?>, ConversionRule<?, ? extends R>> builder) {
         // NO-OP by default.
     }
 
@@ -114,26 +114,23 @@ public abstract class AbstractColumnConversionRules<R> implements ColumnConversi
 
     private Optional<ConversionRule<?, ? extends R>> customRuleFor(Class<?> aClass) {
         Optional<ConversionRule<?, ? extends R>> result =
-                ruleFor(aClass, customRules());
+                customRules().keySet()
+                             .stream()
+                             .filter(cls -> cls.isAssignableFrom(aClass))
+                             .map(customRules()::get)
+                             .findFirst()
+                             .map(rule -> (ConversionRule<?, ? extends R>) rule);
         return result;
     }
 
     private Optional<ConversionRule<?, ? extends R>> standardRuleFor(Class<?> aClass) {
         Optional<ConversionRule<?, ? extends R>> result =
-                ruleFor(aClass, standardRules);
-        return result;
-    }
-
-    private Optional<ConversionRule<?, ? extends R>>
-    ruleFor(Class<?> aClass,
-            ImmutableMap<Class<?>, Supplier<ConversionRule<?, ? extends R>>> strategies) {
-        Optional<ConversionRule<?, ? extends R>> result =
-                strategies.keySet()
-                          .stream()
-                          .filter(cls -> cls.isAssignableFrom(aClass))
-                          .map(strategies::get)
-                          .findFirst()
-                          .map(Supplier::get);
+                standardRules.keySet()
+                             .stream()
+                             .filter(cls -> cls.isAssignableFrom(aClass))
+                             .map(standardRules::get)
+                             .findFirst()
+                             .map(Supplier::get);
         return result;
     }
 }
