@@ -19,33 +19,15 @@
  */
 syntax = "proto3";
 
-package spine.test.rejection.command;
+package spine.test.dispatch;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.rejection.command";
-option java_outer_classname = "RejectionCommandsProto";
-option java_multiple_files = true;
+option java_package = "io.spine.server.dispatch.given.rejection";
 
-import "spine/change/change.proto";
-import "spine/test/rejection/project.proto";
+import "spine/test/dispatch/dispatch_entities.proto";
 
-message RjStartProject {
-
-    ProjectId id = 1;
-}
-
-message RjUpdateProjectName {
-
-    ProjectId id = 1;
-
-    spine.change.StringChange name_update = 2;
-}
-
-message RjRemoveOwner {
-
-    ProjectId id = 1;
-
-    string owner_user_id = 2;
+message CannotCreateDispatch {
+    Id id = 1;
 }

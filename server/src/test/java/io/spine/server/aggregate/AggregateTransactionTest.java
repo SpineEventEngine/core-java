@@ -112,5 +112,4 @@ class AggregateTransactionTest
     void eventFromVersion() {
         advanceVersionFromEvent();
     }
-
 }

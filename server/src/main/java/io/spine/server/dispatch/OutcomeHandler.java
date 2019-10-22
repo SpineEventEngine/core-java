@@ -17,18 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.rejection;
+package io.spine.server.dispatch;
 
-import "spine/options.proto";
+/**
+ * A {@link DispatchOutcome} handler.
+ *
+ * <p>The handler receives one of the {@code DispatchOutcome} result options, such as
+ * {@code Success}, {@code Error}, {@code Interruption} or {@code Ignore}.
+ *
+ * <p>It may also receive the {@code exhaust} of the {@code Success} result — list of produced
+ * {@code Event}s or {@code Command}s or a {@code rejection} event.
+ *
+ * @param <T>
+ *         Protobuf {@code Message} or {@code List} of messages
+ */
+@FunctionalInterface
+public interface OutcomeHandler<T> {
 
-option (type_url_prefix) = "type.spine.io";
-option (SPI_all) = true;
-option java_package = "io.spine.test.rejection";
-
-// An enrichment used in rejection tests.
-//
-message ProjectInfo {
-    string project_name = 1;
+    /**
+     * Handles {@code DispatchOutcome} result option.
+     */
+    void handle(T outcomeResult);
 }

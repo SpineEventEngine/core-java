@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
@@ -31,8 +32,7 @@ import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
-import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.ProducedEvents;
+import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.tenant.TenantAwareRunner;
@@ -106,22 +106,22 @@ public abstract class AbstractEventReactor
     }
 
     private void reactAndPost(EventEnvelope event) {
-        EventReactorMethod method = thisClass.reactorOf(event.messageClass(),
-                                                        event.originClass());
-        DispatchOutcome outcome = method.invoke(this, event);
-        if (outcome.hasSuccess()) {
-            ProducedEvents events = outcome.getSuccess()
-                                           .getProducedEvents();
-            eventBus.post(events.getEventList());
-        } else if (outcome.hasError()) {
-            HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
-                    .newBuilder()
-                    .setEntity(eventAnchor)
-                    .setHandledSignal(event.messageId())
-                    .setError(outcome.getError())
-                    .vBuild();
-            system.postEvent(systemEvent, event.asMessageOrigin());
-        }
+        EventReactorMethod method = thisClass.reactorOf(event.messageClass(), event.originClass());
+        DispatchOutcomeHandler
+                .from(method.invoke(this, event))
+                .onEvents(eventBus::post)
+                .onError(error -> postFailure(error, event))
+                .handle();
+    }
+
+    private void postFailure(Error error, EventEnvelope event) {
+        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                .newBuilder()
+                .setEntity(eventAnchor)
+                .setHandledSignal(event.messageId())
+                .setError(error)
+                .vBuild();
+        system.postEvent(systemEvent, event.asMessageOrigin());
     }
 
     /** Obtains the name of this reactor, {@linkplain TypeConverter#toAny(Object) packed to Any}. */

@@ -24,7 +24,7 @@ import io.spine.core.Version;
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -69,19 +69,19 @@ public abstract class AbstractCommandHandler
      * Dispatches the command to the handler method and
      * posts resulting events to the {@link EventBus}.
      *
-     * @param envelope the command to dispatch
+     * @param envelope
+     *         the command to dispatch
      * @throws IllegalStateException
      *         if an exception occurred during command dispatching with this exception as the cause
      */
     @Override
     public void dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.handlerOf(envelope.messageClass());
-        DispatchOutcome result = method.invoke(this, envelope);
-        if (result.hasSuccess()) {
-            postEvents(result.getSuccess().getProducedEvents().getEventList());
-        } else if (result.hasError()){
-            onError(envelope,result.getError());
-        }
+        DispatchOutcomeHandler
+                .from(method.invoke(this, envelope))
+                .onEvents(this::postEvents)
+                .onError(error -> onError(envelope, error))
+                .handle();
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.

@@ -17,21 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.rejection;
+/**
+ * Test environment for the {@link io.spine.base} package.
+ */
 
-import "spine/options.proto";
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.dispatch.given;
 
-option (type_url_prefix) = "type.spine.io";
-option (SPI_all) = true;
-option java_package = "io.spine.test.rejection";
-// Keep all the rejections under the same outer class called `OperationRejections`.
+import com.google.errorprone.annotations.CheckReturnValue;
 
-
-// To be used in `RejectionEnvelopesShould`.
-message CannotPerformBusinessOperation {
-
-    // The ID of the operation.
-    string operation_id = 1;
-}
+import javax.annotation.ParametersAreNonnullByDefault;
