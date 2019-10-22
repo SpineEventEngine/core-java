@@ -20,22 +20,17 @@
 
 package io.spine.server.dispatch;
 
-import java.util.function.Consumer;
-
 /**
  * A {@link DispatchOutcome} handler.
+ *
+ * @param <T>
+ *         {@code DispatchOutcome} result
  */
 @FunctionalInterface
-public interface OutcomeHandler<T> extends Consumer<T> {
-
-    OutcomeHandler DO_NOTHING = o -> {
-    };
+public interface OutcomeHandler<T> {
 
     /**
-     * Creates a new no-op handler.
+     * Handles a particular {@code DispatchOutcome}.
      */
-    @SuppressWarnings("unchecked")
-    static <T> OutcomeHandler<T> doNothing() {
-        return (OutcomeHandler<T>) DO_NOTHING;
-    }
+    void handle(T outcome);
 }

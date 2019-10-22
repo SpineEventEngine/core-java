@@ -28,12 +28,14 @@ import io.spine.core.Event;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.dispatch.OutcomeHandler.doNothing;
 
 /**
  * A holder of a {@code DispatchOutcome}.
  */
 public final class DispatchOutcomeHandler {
+
+    private static final OutcomeHandler DO_NOTHING = o -> {
+    };
 
     private final DispatchOutcome outcome;
 
@@ -146,13 +148,13 @@ public final class DispatchOutcomeHandler {
                 handleSuccess(outcome.getSuccess());
                 break;
             case ERROR:
-                errorHandler.accept(outcome.getError());
+                errorHandler.handle(outcome.getError());
                 break;
             case INTERRUPTED:
-                interruptionHandler.accept(outcome.getInterrupted());
+                interruptionHandler.handle(outcome.getInterrupted());
                 break;
             case IGNORED:
-                ignoreHandler.accept(outcome.getIgnored());
+                ignoreHandler.handle(outcome.getIgnored());
                 break;
             case RESULT_NOT_SET:
             default:
@@ -162,24 +164,31 @@ public final class DispatchOutcomeHandler {
     }
 
     private void handleSuccess(Success success) {
-        successHandler.accept(success);
+        successHandler.handle(success);
         switch (success.getExhaustCase()) {
             case PRODUCED_EVENTS:
-                producedEventsHandler.accept(success.getProducedEvents()
+                producedEventsHandler.handle(success.getProducedEvents()
                                                     .getEventList());
                 break;
             case PRODUCED_COMMANDS:
-                producedCommandsHandler.accept(success.getProducedCommands()
+                producedCommandsHandler.handle(success.getProducedCommands()
                                                       .getCommandList());
                 break;
             case REJECTION:
-                rejectionHandler.accept(success.getRejection());
+                rejectionHandler.handle(success.getRejection());
                 break;
             case EXHAUST_NOT_SET:
             default:
                 break;
         }
-        afterSuccessHandler.accept(success);
+        afterSuccessHandler.handle(success);
     }
 
+    /**
+     * Creates a new no-op handler.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> OutcomeHandler<T> doNothing() {
+        return (OutcomeHandler<T>) DO_NOTHING;
+    }
 }
