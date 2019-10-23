@@ -29,7 +29,6 @@ import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.protobuf.Messages;
 import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.server.transport.GrpcContainer;
 import io.spine.test.commandservice.CmdServDontHandle;
@@ -46,6 +45,7 @@ import java.util.Set;
 
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.Messages.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -141,7 +141,7 @@ class CommandServiceTest {
         assertTrue(responseObserver.isCompleted());
         Ack result = responseObserver.firstResponse();
         assertNotNull(result);
-        assertTrue(Messages.isNotDefault(result));
+        assertTrue(isNotDefault(result));
         Status status = result.getStatus();
         assertEquals(ERROR, status.getStatusCase());
         Error error = status.getError();
