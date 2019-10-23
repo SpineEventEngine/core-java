@@ -41,8 +41,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.util.Exceptions.unsupported;
-import static io.spine.validate.Validate.isDefault;
 
 /**
  * The events for for a tenant.
@@ -243,19 +243,15 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
         }
 
         private static int versionNumberOf(AggregateEventRecord record) {
-            int versionNumber;
-
             Event event = record.getEvent();
             if (isDefault(event)) {
-                versionNumber = record.getSnapshot()
-                                      .getVersion()
-                                      .getNumber();
-            } else {
-                versionNumber = event.context()
-                                     .getVersion()
-                                     .getNumber();
+                return record.getSnapshot()
+                             .getVersion()
+                             .getNumber();
             }
-            return versionNumber;
+            return event.context()
+                        .getVersion()
+                        .getNumber();
         }
     }
 }

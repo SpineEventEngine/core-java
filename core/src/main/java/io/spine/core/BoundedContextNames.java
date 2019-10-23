@@ -23,9 +23,8 @@ package io.spine.core;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
  * Utility class for working with Bounded Context names.
@@ -54,8 +53,7 @@ public final class BoundedContextNames {
      * @return a newly created name
      */
     public static BoundedContextName newName(String name) {
-        checkNotNull(name);
-        checkArgument(!name.isEmpty(), "Empty context name is not allowed.");
+        checkNotEmptyOrBlank(name, "Empty context name is not allowed.");
         BoundedContextName result = BoundedContextName
                 .newBuilder()
                 .setValue(name)
@@ -85,7 +83,6 @@ public final class BoundedContextNames {
      */
     @Internal
     public static void checkValid(String boundedContextName) throws IllegalArgumentException {
-        checkNotNull(boundedContextName);
         checkNotEmptyOrBlank(
                 boundedContextName,
                 "A Bounded Context name cannot be empty or blank."

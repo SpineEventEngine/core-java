@@ -26,7 +26,7 @@ import io.spine.core.TenantId;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.isDefault;
+import static io.spine.protobuf.Messages.isDefault;
 
 /**
  * An abstract base for operations performed in a tenant context.

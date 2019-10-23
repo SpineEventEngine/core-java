@@ -67,6 +67,9 @@ final class SystemRequestFactory {
     }
 
     private static ActorRequestFactory newFactoryFor(@Nullable TenantId tenantId) {
-        return ActorRequestFactory.forSystemRequests(SYSTEM_USER, tenantId);
+        return ActorRequestFactory.newBuilder()
+                                  .setActor(SYSTEM_USER)
+                                  .setTenantId(tenantId)
+                                  .build();
     }
 }

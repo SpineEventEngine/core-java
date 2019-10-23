@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.InvalidEventException.onConstraintViolations;
 
 /**
- * Checks if a message of the event to import is {@linkplain MessageValidator#validate() valid}.
+ * Checks if a message of the event to import is valid.
  */
 final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
 
@@ -42,13 +42,11 @@ final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
     public Optional<MessageInvalid> validate(EventEnvelope event) {
         checkNotNull(event);
         EventMessage eventMessage = event.message();
-        MessageValidator validator = MessageValidator.newInstance(eventMessage);
-        List<ConstraintViolation> violations = validator.validate();
+        List<ConstraintViolation> violations = MessageValidator.validate(eventMessage);
         if (violations.isEmpty()) {
             return Optional.empty();
-        } else {
-            MessageInvalid result = onConstraintViolations(eventMessage, violations);
-            return Optional.of(result);
         }
+        MessageInvalid result = onConstraintViolations(eventMessage, violations);
+        return Optional.of(result);
     }
 }

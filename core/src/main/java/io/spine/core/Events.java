@@ -33,7 +33,7 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -93,10 +93,11 @@ public final class Events {
      *         an ID to check
      * @throws IllegalArgumentException
      *         if the ID string value is empty or blank
+     * @deprecated please use {@link io.spine.util.Preconditions2#checkNotDefaultArg(Message)}
      */
+    @Deprecated
     public static EventId checkValid(EventId id) {
-        checkNotNull(id);
-        checkNotEmptyOrBlank(id.getValue(), "event ID");
+        checkNotDefaultArg(id);
         return id;
     }
 

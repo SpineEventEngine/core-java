@@ -47,8 +47,8 @@ import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.validate.Validate.isDefault;
 import static java.util.stream.Collectors.toList;
 
 /**

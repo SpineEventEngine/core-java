@@ -40,7 +40,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
 import static io.spine.io.Files2.ensureFile;
 import static io.spine.io.Files2.existsNonEmpty;
-import static io.spine.validate.Validate.isDefault;
+import static io.spine.protobuf.Messages.isDefault;
 
 /**
  * An annotation processor for the {@link Assign @Assign} annotation.

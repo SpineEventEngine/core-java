@@ -30,10 +30,9 @@ import io.spine.core.Responses;
 import io.spine.core.Status;
 import io.spine.server.event.RejectionEnvelope;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * A utility for working with {@link Bus buses} and related data types.
@@ -59,15 +58,15 @@ public final class Buses {
     /**
      * Creates {@code Ack} response for the given message ID with the error status.
      *
-     * @param id    the ID of the message to provide with the status
-     * @param cause the cause of the message rejection
+     * @param id
+     *         the ID of the message to provide with the status
+     * @param cause
+     *         the cause of the message rejection
      * @return the {@code Ack} response with the given message ID
      */
     public static Ack reject(Message id, Error cause) {
-        checkNotNull(id);
-        checkNotNull(cause);
-
-        checkArgument(isNotDefault(cause));
+        checkNotDefaultArg(id);
+        checkNotDefaultArg(cause);
         Status status = Status
                 .newBuilder()
                 .setError(cause)
@@ -85,9 +84,8 @@ public final class Buses {
     public static Ack reject(Message id, RejectionEnvelope cause) {
         checkNotNull(id);
         checkNotNull(cause);
-
         Event event = cause.outerObject();
-        checkArgument(isNotDefault(event));
+        checkNotDefaultArg(event);
         Status status = Status
                 .newBuilder()
                 .setRejection(event)

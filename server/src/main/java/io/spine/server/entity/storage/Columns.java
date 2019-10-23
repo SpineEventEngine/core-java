@@ -29,8 +29,8 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.storage.ColumnValueExtractor.create;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
-import static java.lang.String.format;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
  * A utility class for working with {@linkplain EntityColumn entity columns}.
@@ -114,17 +114,17 @@ final class Columns {
     }
 
     static void checkColumnName(String columnName) {
-        checkNotEmptyOrBlank(columnName, "entity column name");
+        checkNotEmptyOrBlank(columnName);
     }
 
-    static IllegalArgumentException couldNotFindColumn(Class<? extends Entity> entityClass,
-                                                       String columnName) {
+    static IllegalArgumentException
+    couldNotFindColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
         checkNotNull(columnName);
-        throw new IllegalArgumentException(
-                format("Could not find an `EntityColumn` description for `%s.%s`.",
-                        entityClass.getCanonicalName(),
-                        columnName));
+        throw newIllegalArgumentException(
+                "Could not find an `EntityColumn` description for `%s.%s`.",
+                entityClass.getCanonicalName(), columnName
+        );
     }
 
     /**
@@ -145,7 +145,7 @@ final class Columns {
      *         {@linkplain EntityColumn entity columns} which values should be extracted
      * @param  <E>           
      *         the type of the {@link Entity}
-     * @return a {@code Map} of the column {@linkplain EntityColumn#storedName()
+     * @return a {@code Map} of the column {@linkplain EntityColumn#name()
      *         names for storing} to their {@linkplain MemoizedValue memoized values}
      * @see MemoizedValue
      */

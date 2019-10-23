@@ -23,7 +23,7 @@ package io.spine.testing.core.given;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
  * Collection of factory methods for creating identifiers for tests.
@@ -52,9 +52,8 @@ public final class GivenTenantId {
      * @param value must be non-null, not empty, and not-blank
      * @return new {@code TenantId}
      */
-    @SuppressWarnings("DuplicateStringLiteralInspection")
     public static TenantId of(String value) {
-        checkNotEmptyOrBlank(value, "value");
+        checkNotEmptyOrBlank(value);
         return TenantId.newBuilder()
                        .setValue(value)
                        .build();

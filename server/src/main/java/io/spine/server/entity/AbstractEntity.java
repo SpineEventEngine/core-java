@@ -254,8 +254,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     protected final List<ConstraintViolation> checkEntityState(S newState) {
         checkNotNull(newState);
-        return MessageValidator.newInstance(newState)
-                               .validate();
+        return MessageValidator.validate(newState);
     }
 
     /**

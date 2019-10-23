@@ -36,10 +36,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static java.util.Collections.singleton;
 
 /**
@@ -105,10 +104,8 @@ public abstract class Bus<T extends Message,
      * @see #post(Iterable, StreamObserver) for posing multiple messages at once
      */
     public final void post(T message, StreamObserver<Ack> observer) {
-        checkNotNull(message);
+        checkNotDefaultArg(message);
         checkNotNull(observer);
-        checkArgument(isNotDefault(message));
-
         post(singleton(message), observer);
     }
 

@@ -52,7 +52,7 @@ import static com.google.protobuf.util.Timestamps.checkValid;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.eq;
 import static io.spine.system.server.MirrorProjection.TYPE_COLUMN_NAME;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
  * An event-sourced storage of aggregate part events and snapshots.
@@ -219,7 +219,7 @@ public abstract class AggregateStorage<I>
         EventContext context = event.context();
 
         String eventIdStr = Identifier.toString(event.getId());
-        checkNotEmptyOrBlank(eventIdStr, "Event ID");
+        checkNotEmptyOrBlank(eventIdStr, "Event ID cannot be empty or blank.");
 
         checkArgument(event.hasMessage(), "Event message must be set.");
 
