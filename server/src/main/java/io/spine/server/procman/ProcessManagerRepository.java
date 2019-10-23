@@ -97,17 +97,6 @@ public abstract class ProcessManagerRepository<I,
 
     private @MonotonicNonNull RepositoryCache<I, P> cache;
 
-    /**
-     * The configurable lifecycle rules of the repository.
-     *
-     * <p>The rules allow to automatically mark entities as archived/deleted upon certain event and
-     * rejection types emitted.
-     *
-     * @see LifecycleRules#archiveOn(Class[])
-     * @see LifecycleRules#deleteOn(Class[])
-     */
-    private final LifecycleRules lifecycleRules = new LifecycleRules();
-
     protected ProcessManagerRepository() {
         super();
         this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
@@ -134,7 +123,8 @@ public abstract class ProcessManagerRepository<I,
      * <p>Registers with the {@code CommandBus} for dispatching commands
      * (via {@linkplain DelegatingCommandDispatcher delegating dispatcher}).
      *
-     * <p>Registers with the {@code IntegrationBroker} for dispatching external events and rejections.
+     * <p>Registers with the {@code IntegrationBroker} for dispatching external events and
+     * rejections.
      *
      * <p>Ensures there is at least one handler method declared by the class of the managed
      * process manager:
@@ -234,9 +224,7 @@ public abstract class ProcessManagerRepository<I,
      * Ensures the process manager class handles at least one type of messages.
      */
     private void checkNotDeaf() {
-        boolean dispatchesEvents = dispatchesEvents() || dispatchesExternalEvents();
-
-        if (!dispatchesCommands() && !dispatchesEvents) {
+        if (!dispatchesCommands() && !dispatchesEvents()) {
             throw newIllegalStateException(
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react to any events.", this);
@@ -252,6 +240,18 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public final Set<EventClass> messageClasses() {
         return processManagerClass().events();
+    }
+
+    /**
+     * Obtains classes of domestic events to which the process managers managed by this repository
+     * react.
+     *
+     * @return a set of event classes or an empty set if process managers do not react to
+     *         domestic events
+     */
+    @Override
+    public final Set<EventClass> domesticEventClasses() {
+        return processManagerClass().domesticEvents();
     }
 
     /**
@@ -281,23 +281,6 @@ public abstract class ProcessManagerRepository<I,
      */
     private CommandRouting<I> commandRouting() {
         return commandRouting.get();
-    }
-
-    /**
-     * Obtains configurable lifecycle rules of this repository.
-     *
-     * <p>The rules allow to automatically archive/delete entities upon certain event and rejection
-     * types produced.
-     *
-     * <p>The rules can be set as follows:
-     * <pre>{@code
-     *   repository.lifecycle()
-     *             .archiveOn(Event1.class, Rejection1.class)
-     *             .deleteOn(Rejection2.class)
-     * }</pre>
-     */
-    public final LifecycleRules lifecycle() {
-        return lifecycleRules;
     }
 
     @Override
@@ -357,8 +340,7 @@ public abstract class ProcessManagerRepository<I,
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
     @VisibleForTesting
     protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        PmTransaction<I, S, ?> tx =
-                PmTransaction.start((ProcessManager<I, S, ?>) manager, lifecycle());
+        PmTransaction<I, S, ?> tx = new PmTransaction<>((ProcessManager<I, S, ?>) manager);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(this, manager.id());
         tx.setListener(listener);
         return tx;

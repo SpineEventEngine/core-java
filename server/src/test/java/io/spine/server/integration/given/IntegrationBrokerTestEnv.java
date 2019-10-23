@@ -58,6 +58,7 @@ public class IntegrationBrokerTestEnv {
         boundedContext.registerEventDispatcher(new ProjectEventsSubscriber());
         boundedContext.register(DefaultRepository.of(ProjectCountAggregate.class));
         boundedContext.register(DefaultRepository.of(ProjectWizard.class));
+        boundedContext.registerCommandDispatcher(new ProjectCommander());
         return boundedContext;
     }
 
@@ -85,10 +86,13 @@ public class IntegrationBrokerTestEnv {
     }
 
     public static Event projectCreated() {
-        ProjectId projectId = ProjectId.newBuilder()
-                                       .setId(Throwables.getStackTraceAsString(new RuntimeException()))
-                                       .build();
-        TestEventFactory eventFactory = newInstance(pack(projectId), IntegrationBrokerTestEnv.class);
+        ProjectId projectId =
+                ProjectId.newBuilder()
+                         .setId(Throwables.getStackTraceAsString(
+                                 new RuntimeException("Project ID")))
+                         .build();
+        TestEventFactory eventFactory = newInstance(pack(projectId),
+                                                    IntegrationBrokerTestEnv.class);
         return eventFactory.createEvent(
                 ItgProjectCreated.newBuilder()
                                  .setProjectId(projectId)

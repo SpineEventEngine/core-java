@@ -17,41 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.dispatch;
+package spine.test.dispatch;
 
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.annotation.GeneratedMixin;
-import io.spine.validate.FieldAwareMessage;
+import "spine/options.proto";
 
-/**
- * A mixin interface for the {@link DispatchOutcome} message type.
- */
-@GeneratedMixin
-interface DispatchOutcomeMixin extends DispatchOutcomeOrBuilder, FieldAwareMessage {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.dispatch.given.command";
+option java_multiple_files = true;
 
-    @Override
-    default Object readValue(FieldDescriptor field) {
-        switch (field.getIndex()) {
-            case 0:
-                return getPropagatedSignal();
-            case 1:
-                return getSuccess();
-            case 2:
-                return getError();
-            case 3:
-                return getInterrupted();
-            case 4:
-                return getIgnored();
-            default:
-                return getField(field);
-        }
-    }
+import "spine/test/dispatch/dispatch_entities.proto";
 
-    /**
-     * Determines whether the outcome is a rejection outcome.
-     */
-    default boolean hasRejection() {
-        return hasSuccess() && getSuccess().hasRejection();
-    }
+message CreateDispatch {
+    Id id = 1;
 }

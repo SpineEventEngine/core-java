@@ -68,6 +68,22 @@ public class DeliveryMonitor {
     }
 
     /**
+     * Called once some delivery process has completed and the corresponding shard
+     * has been released.
+     *
+     * <p>The descendants may override this method to understand when it is safe to pick up
+     * the corresponding shard again. Another usage scenario is calculation of the message delivery
+     * throughput.
+     *
+     * @param stats
+     *         the statistics of the performed delivery
+     */
+    @SuppressWarnings("unused")  // This SPI method is designed for descendants.
+    public void onDeliveryCompleted(DeliveryStats stats) {
+        // do nothing.
+    }
+
+    /**
      * Returns an instance of {@code DeliveryMonitor} which always tells to continue.
      */
     static DeliveryMonitor alwaysContinue() {

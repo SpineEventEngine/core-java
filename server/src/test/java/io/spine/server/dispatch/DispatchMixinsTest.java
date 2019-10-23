@@ -20,6 +20,7 @@
 
 package io.spine.server.dispatch;
 
+import io.spine.server.dispatch.given.Given;
 import io.spine.validate.FieldAwareMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,22 @@ class DispatchMixinsTest {
     @DisplayName("`DispatchOutcomeMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
     void dispatchOutcomeMixin() {
         checkReachable(DispatchOutcome.getDefaultInstance());
+    }
+
+    @Test
+    @DisplayName("`DispatchOutcomeMixin` should provide a `hasRejection` shortcut")
+    void dispatchOutcomeMixinHasRejectionShortcut() {
+        DispatchOutcome noRejectionOutcome = DispatchOutcome.getDefaultInstance();
+        assertThat(noRejectionOutcome.hasRejection()).isFalse();
+        Success rejectionSuccessOutcome = Success
+                .newBuilder()
+                .setRejection(Given.rejectionEvent())
+                .build();
+        DispatchOutcome rejectionOutcome = DispatchOutcome
+                .newBuilder()
+                .setSuccess(rejectionSuccessOutcome)
+                .build();
+        assertThat(rejectionOutcome.hasRejection()).isTrue();
     }
 
     @Test

@@ -17,23 +17,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.rejection;
+package io.spine.server.delivery;
 
-import "spine/options.proto";
+/**
+ * The statistics on {@linkplain Delivery#deliverMessagesFrom(ShardIndex) delivering the messages}
+ * from a certain shard.
+ */
+public final class DeliveryStats {
 
-option (type_url_prefix) = "type.spine.io";
-option (SPI_all) = true;
-option java_package = "io.spine.test.rejection";
-// Keep all the rejections under the same outer class called `ProjectRejections`.
+    private final ShardIndex index;
+    private final int deliveredCount;
 
-import "spine/test/rejection/project.proto";
+    DeliveryStats(ShardIndex index, int deliveredCount) {
+        this.index = index;
+        this.deliveredCount = deliveredCount;
+    }
 
-message InvalidProjectName {
-    ProjectId project_id = 1;
-}
+    /**
+     * Returns the index of the shard for which this statistics is calculated.
+     */
+    public ShardIndex shardIndex() {
+        return index;
+    }
 
-message MissingOwner {
-    ProjectId project_id = 1;
+    /**
+     * Returns the total number of messages delivered.
+     */
+    public int deliveredCount() {
+        return deliveredCount;
+    }
 }

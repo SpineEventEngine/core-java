@@ -64,6 +64,11 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
+    public ImmutableSet<EventClass> domesticEvents() {
+        return delegate.domesticEvents();
+    }
+
+    @Override
     public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
     }

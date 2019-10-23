@@ -222,6 +222,16 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         return ImmutableSet.of();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Stand only consumes the domestic events.
+     */
+    @Override
+    public Set<EventClass> domesticEventClasses() {
+        return eventClasses();
+    }
+
     @Internal
     @VisibleForTesting
     public boolean isMultitenant() {

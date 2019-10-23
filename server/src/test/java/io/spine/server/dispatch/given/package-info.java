@@ -17,35 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.rejection.command;
+/**
+ * Test environment for the {@link io.spine.base} package.
+ */
 
-import "spine/options.proto";
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.dispatch.given;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.rejection.command";
-option java_outer_classname = "RejectionCommandsProto";
-option java_multiple_files = true;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-import "spine/change/change.proto";
-import "spine/test/rejection/project.proto";
-
-message RjStartProject {
-
-    ProjectId id = 1;
-}
-
-message RjUpdateProjectName {
-
-    ProjectId id = 1;
-
-    spine.change.StringChange name_update = 2;
-}
-
-message RjRemoveOwner {
-
-    ProjectId id = 1;
-
-    string owner_user_id = 2;
-}
+import javax.annotation.ParametersAreNonnullByDefault;

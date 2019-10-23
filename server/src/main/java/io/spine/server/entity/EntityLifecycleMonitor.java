@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
+import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.logging.Logging;
@@ -142,6 +143,11 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
                                        error,
                                        entityRecord.getVersion());
         }
+    }
+
+    @Override
+    public void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord) {
+        // NOP.
     }
 
     /**

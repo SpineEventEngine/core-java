@@ -149,12 +149,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     private void ensureDispatchesEvents() {
         boolean noEventSubscriptions = !dispatchesEvents();
         if (noEventSubscriptions) {
-            boolean noExternalSubscriptions = !dispatchesExternalEvents();
-            if (noExternalSubscriptions) {
-                throw newIllegalStateException(
-                        "Projections of the repository `%s` have neither domestic nor external" +
-                                " event subscriptions.", this);
-            }
+            throw newIllegalStateException(
+                    "Projections of the repository `%s` have neither domestic nor external" +
+                            " event subscriptions.", this);
         }
     }
 
@@ -322,6 +319,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public final Set<EventClass> messageClasses() {
         return projectionClass().events();
+    }
+
+    @Override
+    public final Set<EventClass> domesticEventClasses() {
+        return projectionClass().domesticEvents();
     }
 
     @Override

@@ -31,6 +31,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
@@ -95,6 +96,8 @@ import static io.spine.server.procman.given.pm.GivenMessages.iterationPlanned;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
 import static io.spine.server.procman.given.pm.GivenMessages.quizStarted;
 import static io.spine.server.procman.given.pm.GivenMessages.startProject;
+import static io.spine.server.procman.given.pm.GivenMessages.throwEntityAlreadyArchived;
+import static io.spine.server.procman.given.pm.GivenMessages.throwRuntimeException;
 import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
 import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
@@ -304,6 +307,45 @@ class ProcessManagerTest {
     }
 
     @Nested
+    @DisplayName("rollback state on")
+    class RollbackOn {
+
+        private SingleTenantBlackBoxContext boundedContext;
+
+        @BeforeEach
+        void setUp() {
+            boundedContext = BlackBoxBoundedContext.singleTenant()
+                                                   .with(new TestProcessManagerRepo());
+        }
+
+        @AfterEach
+        void tearDown() {
+            boundedContext.close();
+        }
+
+        @Test
+        @DisplayName("rejection")
+        void rejection() {
+            SingleTenantBlackBoxContext context =
+                    boundedContext.receivesCommand(throwEntityAlreadyArchived());
+            context.assertEvents()
+                   .withType(StandardRejections.EntityAlreadyArchived.class)
+                   .hasSize(1);
+            context.assertEntity(TestProcessManager.class, TestProcessManager.ID)
+                   .doesNotExist();
+        }
+
+        @Test
+        @DisplayName("exception")
+        void exception() {
+            SingleTenantBlackBoxContext context =
+                    boundedContext.receivesCommand(throwRuntimeException());
+            context.assertEntity(TestProcessManager.class, TestProcessManager.ID)
+                   .doesNotExist();
+        }
+    }
+
+    @Nested
     @DisplayName("create command(s)")
     class CommandCreation {
 
@@ -326,6 +368,7 @@ class ProcessManagerTest {
 
             /**
              * Tests transformation of a command into another command.
+             *
              * @see TestProcessManager#transform(PmStartProject)
              */
             @Test
@@ -339,6 +382,7 @@ class ProcessManagerTest {
 
             /**
              * Tests generation of a command in response to incoming event.
+             *
              * @see TestProcessManager#on(PmOwnerChanged)
              */
             @Test
@@ -366,6 +410,7 @@ class ProcessManagerTest {
 
             /**
              * Tests splitting incoming command into two.
+             *
              * @see TestProcessManager#split(PmCancelIteration)
              */
             @Test
@@ -373,8 +418,10 @@ class ProcessManagerTest {
             void splitCommand() {
                 CommandSubject assertCommands = boundedContext.receivesCommand(cancelIteration())
                                                               .assertCommands();
-                assertCommands.withType(PmScheduleRetrospective.class).hasSize(1);
-                assertCommands.withType(PmPlanIteration.class).hasSize(1);
+                assertCommands.withType(PmScheduleRetrospective.class)
+                              .hasSize(1);
+                assertCommands.withType(PmPlanIteration.class)
+                              .hasSize(1);
             }
         }
 
@@ -465,8 +512,10 @@ class ProcessManagerTest {
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertEvents();
             assertEvents.hasSize(2);
-            assertEvents.withType(PmQuizStarted.class).hasSize(1);
-            assertEvents.withType(PmQuestionAnswered.class).hasSize(1);
+            assertEvents.withType(PmQuizStarted.class)
+                        .hasSize(1);
+            assertEvents.withType(PmQuestionAnswered.class)
+                        .hasSize(1);
             context.close();
         }
     }

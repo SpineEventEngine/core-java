@@ -72,6 +72,11 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
+        public Set<EventClass> domesticEventClasses() {
+            return eventClasses();
+        }
+
+        @Override
         public Set<EventClass> externalEventClasses() {
             return ImmutableSet.of();
         }
