@@ -28,6 +28,7 @@ import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.system.server.EntityTypeName;
@@ -67,6 +68,9 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** The default state of entities of this class. */
     @LazyInit
     private transient volatile @MonotonicNonNull Message defaultState;
+
+    @LazyInit
+    private transient volatile @MonotonicNonNull Columns columns;
 
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
@@ -136,6 +140,20 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
                     Class<? extends Message> stateClass = stateClass();
                     defaultState = defaultInstance(stateClass);
                     result = defaultState;
+                }
+            }
+        }
+        return result;
+    }
+
+    public final Columns columns() {
+        Columns result = columns;
+        if (result == null) {
+            synchronized (this) {
+                result = columns;
+                if (result == null) {
+                    columns = Columns.of(this);
+                    result = columns;
                 }
             }
         }

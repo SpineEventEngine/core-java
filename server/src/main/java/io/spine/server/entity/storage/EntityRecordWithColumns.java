@@ -64,7 +64,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
                                                  Entity<?, ?> entity,
                                                  RecordStorage<?> storage) {
         Columns columns = storage.columns();
-        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
+        Map<ColumnName, Object> storageFields = columns.valuesIn(entity, Column::name);
         return of(record, storageFields);
     }
 
@@ -149,24 +149,24 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      *         if there is no column with the specified name
      */
     public Object columnValue(ColumnName columnName) {
-        return columnValue(columnName, DefaultColumnConversionRules.INSTANCE);
+        return columnValue(columnName, DefaultStorageRules.INSTANCE);
     }
 
-    public <R> R columnValue(ColumnName columnName, ColumnConversionRules<R> conversionRules) {
+    public <R> R columnValue(ColumnName columnName, ColumnStorageRules<R> storageRules) {
         checkNotNull(columnName);
-        checkNotNull(conversionRules);
+        checkNotNull(storageRules);
         if (!storageFields.containsKey(columnName)) {
             throw newIllegalStateException("Column with the name `%s` was not found.",
                                            columnName);
         }
         Object columnValue = storageFields.get(columnName);
         if (columnValue == null) {
-            R result = conversionRules.ofNull()
-                                      .apply(null);
+            R result = storageRules.ofNull()
+                                   .apply(null);
             return result;
         }
-        R result = conversionRules.of(columnValue.getClass())
-                                  .applyTo(columnValue);
+        R result = storageRules.of(columnValue.getClass())
+                               .applyTo(columnValue);
         return result;
     }
 

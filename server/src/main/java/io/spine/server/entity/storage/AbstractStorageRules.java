@@ -31,19 +31,19 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
-public abstract class AbstractColumnConversionRules<R> implements ColumnConversionRules<R> {
+public abstract class AbstractStorageRules<R> implements ColumnStorageRules<R> {
 
     private final
-    ImmutableMap<Class<?>, Supplier<ConversionRule<?, ? extends R>>> standardRules
+    ImmutableMap<Class<?>, Supplier<ColumnStorageRule<?, ? extends R>>> standardRules
             = standardRules();
 
     private @MonotonicNonNull
-    ImmutableMap<Class<?>, ConversionRule<?, ? extends R>> customRules;
+    ImmutableMap<Class<?>, ColumnStorageRule<?, ? extends R>> customRules;
 
     @Override
-    public ConversionRule<?, ? extends R> of(Class<?> type) {
+    public ColumnStorageRule<?, ? extends R> of(Class<?> type) {
         checkNotNull(type);
-        Optional<ConversionRule<?, ? extends R>> rule = customRuleFor(type);
+        Optional<ColumnStorageRule<?, ? extends R>> rule = customRuleFor(type);
         if (rule.isPresent()) {
             return rule.get();
         }
@@ -51,9 +51,9 @@ public abstract class AbstractColumnConversionRules<R> implements ColumnConversi
         return rule.orElseThrow(() -> unsupportedType(type));
     }
 
-    private ImmutableMap<Class<?>, Supplier<ConversionRule<?, ? extends R>>>
+    private ImmutableMap<Class<?>, Supplier<ColumnStorageRule<?, ? extends R>>>
     standardRules() {
-        ImmutableMap.Builder<Class<?>, Supplier<ConversionRule<?, ? extends R>>> builder =
+        ImmutableMap.Builder<Class<?>, Supplier<ColumnStorageRule<?, ? extends R>>> builder =
                 ImmutableMap.builder();
 
         builder.put(String.class, this::ofString);
@@ -69,10 +69,10 @@ public abstract class AbstractColumnConversionRules<R> implements ColumnConversi
         return builder.build();
     }
 
-    private ImmutableMap<Class<?>, ConversionRule<?, ? extends R>>
+    private ImmutableMap<Class<?>, ColumnStorageRule<?, ? extends R>>
     customRules() {
         if (customRules == null) {
-            ImmutableMap.Builder<Class<?>, ConversionRule<?, ? extends R>> builder =
+            ImmutableMap.Builder<Class<?>, ColumnStorageRule<?, ? extends R>> builder =
                     ImmutableMap.builder();
 
             setupCustomRules(builder);
@@ -84,47 +84,47 @@ public abstract class AbstractColumnConversionRules<R> implements ColumnConversi
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Do not enforce implementation in descendants.
     protected void
-    setupCustomRules(ImmutableMap.Builder<Class<?>, ConversionRule<?, ? extends R>> builder) {
+    setupCustomRules(ImmutableMap.Builder<Class<?>, ColumnStorageRule<?, ? extends R>> builder) {
         // NO-OP by default.
     }
 
-    protected abstract ConversionRule<String, ? extends R> ofString();
+    protected abstract ColumnStorageRule<String, ? extends R> ofString();
 
-    protected abstract ConversionRule<Integer, ? extends R> ofInteger();
+    protected abstract ColumnStorageRule<Integer, ? extends R> ofInteger();
 
-    protected abstract ConversionRule<Long, ? extends R> ofLong();
+    protected abstract ColumnStorageRule<Long, ? extends R> ofLong();
 
-    protected abstract ConversionRule<Float, ? extends R> ofFloat();
+    protected abstract ColumnStorageRule<Float, ? extends R> ofFloat();
 
-    protected abstract ConversionRule<Double, ? extends R> ofDouble();
+    protected abstract ColumnStorageRule<Double, ? extends R> ofDouble();
 
-    protected abstract ConversionRule<Boolean, ? extends R> ofBoolean();
+    protected abstract ColumnStorageRule<Boolean, ? extends R> ofBoolean();
 
-    protected abstract ConversionRule<ByteString, ? extends R> ofByteString();
+    protected abstract ColumnStorageRule<ByteString, ? extends R> ofByteString();
 
-    protected abstract ConversionRule<Enum<?>, ? extends R> ofEnum();
+    protected abstract ColumnStorageRule<Enum<?>, ? extends R> ofEnum();
 
-    protected abstract ConversionRule<Message, ? extends R> ofMessage();
+    protected abstract ColumnStorageRule<Message, ? extends R> ofMessage();
 
     protected IllegalArgumentException unsupportedType(Class<?> aClass) {
         throw newIllegalArgumentException(
-                "The class %s is not supported by the column conversion rules.",
+                "The columns of class `%s` are not supported by the storage rules.",
                 aClass.getCanonicalName());
     }
 
-    private Optional<ConversionRule<?, ? extends R>> customRuleFor(Class<?> aClass) {
-        Optional<ConversionRule<?, ? extends R>> result =
+    private Optional<ColumnStorageRule<?, ? extends R>> customRuleFor(Class<?> aClass) {
+        Optional<ColumnStorageRule<?, ? extends R>> result =
                 customRules().keySet()
                              .stream()
                              .filter(cls -> cls.isAssignableFrom(aClass))
                              .map(customRules()::get)
                              .findFirst()
-                             .map(rule -> (ConversionRule<?, ? extends R>) rule);
+                             .map(rule -> (ColumnStorageRule<?, ? extends R>) rule);
         return result;
     }
 
-    private Optional<ConversionRule<?, ? extends R>> standardRuleFor(Class<?> aClass) {
-        Optional<ConversionRule<?, ? extends R>> result =
+    private Optional<ColumnStorageRule<?, ? extends R>> standardRuleFor(Class<?> aClass) {
+        Optional<ColumnStorageRule<?, ? extends R>> result =
                 standardRules.keySet()
                              .stream()
                              .filter(cls -> cls.isAssignableFrom(aClass))

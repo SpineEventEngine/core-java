@@ -35,7 +35,9 @@ import static com.google.common.collect.Lists.newLinkedList;
 /**
  * Test environment projection for {@link io.spine.server.projection.ProjectionTransactionTest}.
  */
-public class TxProjection extends Projection<Id, ProjectionState, ProjectionState.Builder> {
+public class TxProjection
+        extends Projection<Id, ProjectionState, ProjectionState.Builder>
+        implements ProjectionStateWithColumns{
 
     private final List<Message> receivedEvents = newLinkedList();
 
@@ -70,5 +72,11 @@ public class TxProjection extends Projection<Id, ProjectionState, ProjectionStat
 
     public List<Message> receivedEvents() {
         return ImmutableList.copyOf(receivedEvents);
+    }
+
+    @Override
+    public int getNameLength() {
+        return state().getName()
+                      .length();
     }
 }

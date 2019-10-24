@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.WithLifecycle;
 import io.spine.server.entity.storage.given.TaskViewProjection;
@@ -62,6 +63,35 @@ class ColumnTest {
     }
 
     @Test
+    @DisplayName("obtain the proto field corresponding to the column")
+    void obtainProtoField() {
+        String columnName = "estimate_in_days";
+        ColumnName name = ColumnName.of(columnName);
+        Column column = Columns.of(TaskViewProjection.class)
+                               .get(name);
+        FieldDeclaration field = column.protoField();
+
+        assertThat(field).isNotNull();
+        assertThat(field.name()
+                        .value()).isEqualTo(columnName);
+    }
+
+    @Test
+    @DisplayName("obtain `null` proto field in case the column is a system column")
+    void obtainNullProtoField() {
+        FieldDeclaration field = column.protoField();
+        assertThat(field).isNull();
+    }
+
+    @Test
+    @DisplayName("tell if a column is a proto column")
+    void checkIsProtoColumn() {
+        Column column = Columns.of(TaskViewProjection.class)
+                               .get(ColumnName.of("name"));
+        assertThat(column.isProtoColumn()).isTrue();
+    }
+
+    @Test
     @DisplayName("extract column value from the entity")
     void extractValueFromEntity() {
         TaskViewProjection projection = new TaskViewProjection();
@@ -84,6 +114,28 @@ class ColumnTest {
         Entity<TaskViewId, TaskView> entity = new TaskViewProjection();
 
         assertThrows(IllegalStateException.class, () -> column.valueIn(entity));
+    }
+
+    @Test
+    @DisplayName("extract the interface-based column value")
+    void extractInterfaceBasedValue() {
+        Column column = Columns.of(TaskViewProjection.class)
+                               .get(ColumnName.of("estimate_in_days"));
+        TaskViewProjection projection = new TaskViewProjection();
+        Object value = column.valueFromInterface(projection);
+
+        assertThat(value).isEqualTo(projection.getEstimateInDays());
+        assertThat(value).isNotEqualTo(projection.state()
+                                                 .getEstimateInDays());
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Called to throw exception.
+    @Test
+    @DisplayName("throw `ISE` when trying to extract an interface-based value from non-interface-based column")
+    void throwOnWrongColumnType() {
+        Entity<TaskViewId, TaskView> projection = new TaskViewProjection();
+        assertThrows(IllegalStateException.class, () -> column.valueFromInterface(projection));
     }
 
     private static Column column() {

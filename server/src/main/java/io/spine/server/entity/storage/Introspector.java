@@ -23,26 +23,25 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMap;
 import io.spine.base.EntityWithColumns;
 import io.spine.code.proto.FieldDeclaration;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.MessageType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.function.Function;
+import java.util.Arrays;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.code.proto.ColumnOption.columnsOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.util.function.Function.identity;
 
 final class Introspector {
 
     private final EntityClass<?> entityClass;
-    private final boolean implementsEntityWithColumns;
+    private final boolean columnsInterfaceBased;
 
     Introspector(EntityClass<?> entityClass) {
         this.entityClass = entityClass;
-        this.implementsEntityWithColumns =
+        this.columnsInterfaceBased =
                 EntityWithColumns.class.isAssignableFrom(entityClass.value());
     }
 
@@ -50,77 +49,70 @@ final class Introspector {
         ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
         Class<?> entityClazz = entityClass.value();
         Method[] methods = entityClazz.getMethods();
-        for (Method method : methods) {
-            boolean isSystemColumn = method.isAnnotationPresent(SystemColumn.class);
-            if (isSystemColumn) {
-                SystemColumn annotation = method.getAnnotation(SystemColumn.class);
-                ColumnName columnName = ColumnName.of(annotation.name());
-                Class<?> columnType = method.getReturnType();
-                Column.Getter columnGetter = entity -> setAccessibleAndInvoke(method, entity);
-                Column column = new Column(columnName, columnType, columnGetter);
-                columns.put(column.name(), column);
-            }
-        }
-        ImmutableMap<ColumnName, Column> result = columns.build();
-        return result;
+        Arrays.stream(methods)
+              .filter(method -> method.isAnnotationPresent(SystemColumn.class))
+              .forEach(method -> addSystemColumn(method, columns));
+        return columns.build();
+    }
+
+    private static void addSystemColumn(Method method,
+                                        ImmutableMap.Builder<ColumnName, Column> columns) {
+        ColumnData data = ColumnData.of(method);
+        Column column = new Column(data.name, data.type, data.getter);
+        columns.put(column.name(), column);
     }
 
     ImmutableMap<ColumnName, Column> protoColumns() {
         ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
         MessageType stateType = entityClass.stateType();
         columnsOf(stateType)
-                .forEach(field -> addColumn(field, columns));
+                .forEach(field -> addProtoColumn(field, columns));
         ImmutableMap<ColumnName, Column> result = columns.build();
         return result;
     }
 
     private void
-    addColumn(FieldDeclaration field, ImmutableMap.Builder<ColumnName, Column> columns) {
+    addProtoColumn(FieldDeclaration field, ImmutableMap.Builder<ColumnName, Column> columns) {
         ColumnName columnName = ColumnName.of(field);
-        if (implementsEntityWithColumns) {
-            columns.put(columnName, columnOfEntity(field));
+        if (columnsInterfaceBased) {
+            columns.put(columnName, interfaceBasedColumn(field));
         } else {
-            columns.put(columnName, columnOfEntityState(field));
+            columns.put(columnName, column(field));
         }
     }
 
-    private Column columnOfEntity(FieldDeclaration field) {
-        return createColumn(field, entityClass.value(), identity());
+    private Column interfaceBasedColumn(FieldDeclaration field) {
+        ColumnData data = ColumnData.of(field, entityClass);
+        Method getterFromInterface = getterOf(field, entityClass.value());
+        Column.Getter columnGetterFromInterface =
+                entity -> setAccessibleAndInvoke(getterFromInterface, entity);
+        return new Column(data.name, data.type, data.getter, columnGetterFromInterface, field);
     }
 
-    private Column columnOfEntityState(FieldDeclaration field) {
-        return createColumn(field, entityClass.stateClass(), Entity::state);
+    private Column column(FieldDeclaration field) {
+        ColumnData data = ColumnData.of(field, entityClass);
+        return new Column(data.name, data.type, data.getter, field);
     }
 
-    private Column createColumn(FieldDeclaration field,
-                                Class<?> classWithGetter,
-                                Function<Entity<?, ?>, ?> entityToGetterTarget) {
-        ColumnName columnName = ColumnName.of(field);
-        Method getter = getterOf(field, classWithGetter);
-        Class<?> columnType = getter.getReturnType();
-        Column.Getter columnGetter =
-                entity -> setAccessibleAndInvoke(getter, entityToGetterTarget.apply(entity));
-        return new Column(columnName, columnType, columnGetter);
-    }
-
-    private Method getterOf(FieldDeclaration field, Class<?> clazz) {
+    private static Method getterOf(FieldDeclaration field, Class<?> clazz) {
         String getterName = field.getterName();
         try {
             Method result = clazz.getMethod(getterName);
             return result;
         } catch (NoSuchMethodException e) {
-            throw getterNotFound(field, getterName, e);
+            throw getterNotFound(field, getterName, clazz, e);
         }
     }
 
-    private IllegalStateException getterNotFound(FieldDeclaration field,
-                                                 String getterName,
-                                                 NoSuchMethodException e) {
+    private static IllegalStateException getterNotFound(FieldDeclaration field,
+                                                        String getterName,
+                                                        Class<?> clazz,
+                                                        NoSuchMethodException e) {
         throw newIllegalStateException(
                 e,
-                "Expected to find a getter with name %s in entity class %s according to the " +
-                        "declaration of column %s.",
-                getterName, entityClass.typeName(), field.name());
+                "Expected to find a getter with name `%s` in class `%s` according to the " +
+                        "declaration of column `%s`.",
+                getterName, clazz.getCanonicalName(), field.name());
     }
 
     private static Object setAccessibleAndInvoke(Method method, Object target)
@@ -129,5 +121,34 @@ final class Introspector {
         Object result = method.invoke(target);
         method.setAccessible(false);
         return result;
+    }
+
+    private static class ColumnData {
+        private final ColumnName name;
+        private final Class<?> type;
+        private final Column.Getter getter;
+
+        private ColumnData(ColumnName name, Class<?> type, Column.Getter getter) {
+            this.name = name;
+            this.type = type;
+            this.getter = getter;
+        }
+
+        private static ColumnData of(FieldDeclaration protoColumn, EntityClass<?> entityClass) {
+            ColumnName columnName = ColumnName.of(protoColumn);
+            Method getter = getterOf(protoColumn, entityClass.stateClass());
+            Class<?> columnType = getter.getReturnType();
+            Column.Getter columnGetter =
+                    entity -> setAccessibleAndInvoke(getter, entity.state());
+            return new ColumnData(columnName, columnType, columnGetter);
+        }
+
+        private static ColumnData of(Method systemColumn) {
+            SystemColumn annotation = checkNotNull(systemColumn.getAnnotation(SystemColumn.class));
+            ColumnName name = ColumnName.of(annotation.name());
+            Class<?> type = systemColumn.getReturnType();
+            Column.Getter getter = entity -> setAccessibleAndInvoke(systemColumn, entity);
+            return new ColumnData(name, type, getter);
+        }
     }
 }

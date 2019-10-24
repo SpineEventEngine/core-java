@@ -59,6 +59,7 @@ import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
 import static io.spine.server.storage.given.RecordStorageTestEnv.assertSingleRecord;
 import static io.spine.server.storage.given.RecordStorageTestEnv.buildStorageRecord;
@@ -116,10 +117,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         Version versionValue = Version
                 .newBuilder()
                 .setNumber(0)
+                .setTimestamp(PROJECT_VERSION_TIMESTAMP)
                 .build();
 
         Filter status = eq("project_status_value", wrappedValue);
-        Filter version = eq("counter_version", versionValue);
+        Filter version = eq("project_version", versionValue);
         CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL)

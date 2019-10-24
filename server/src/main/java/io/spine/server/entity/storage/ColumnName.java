@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.storage.StorageField;
 import io.spine.value.StringTypeValue;
@@ -27,6 +28,7 @@ import io.spine.value.StringTypeValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
+@Immutable
 public final class ColumnName extends StringTypeValue {
 
     private static final long serialVersionUID = 0L;

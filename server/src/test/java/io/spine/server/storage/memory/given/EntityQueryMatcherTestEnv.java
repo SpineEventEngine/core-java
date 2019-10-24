@@ -21,6 +21,7 @@
 package io.spine.server.storage.memory.given;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
@@ -65,7 +66,7 @@ public final class EntityQueryMatcherTestEnv {
      * A {@code Column} which holds a {@code boolean} value.
      */
     public static Column booleanColumn() {
-        return column("doable");
+        return column("internal");
     }
 
     /**
@@ -93,7 +94,7 @@ public final class EntityQueryMatcherTestEnv {
         }
 
         @Override
-        public boolean getDoable() {
+        public boolean getInternal() {
             return booleanValue();
         }
 
@@ -108,8 +109,16 @@ public final class EntityQueryMatcherTestEnv {
         }
 
         @Override
-        public Version getCounterVersion() {
+        public Version getProjectVersion() {
             return Versions.zero();
+        }
+
+        @Override
+        public Timestamp getDueDate() {
+            return Timestamp.newBuilder()
+                            .setSeconds(4250)
+                            .setNanos(212)
+                            .build();
         }
     }
 }

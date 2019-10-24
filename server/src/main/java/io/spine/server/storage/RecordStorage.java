@@ -36,7 +36,6 @@ import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -62,8 +61,6 @@ public abstract class RecordStorage<I>
      * The class of entities stored in this {@code RecordStorage}.
      */
     private final EntityClass<?> entityClass;
-
-    private @MonotonicNonNull Columns columns;
 
     /**
      * Creates an instance of {@code RecordStorage}.
@@ -278,10 +275,7 @@ public abstract class RecordStorage<I>
      */
     @Internal
     public Columns columns() {
-        if (columns == null) {
-            columns = Columns.of(entityClass);
-        }
-        return columns;
+        return entityClass().columns();
     }
 
     /**

@@ -22,30 +22,29 @@ package io.spine.server.entity.storage;
 
 import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * A persistence strategy of an entity {@linkplain Column column}.
  *
- * <p>The interface methods do not accept {@code null}s and must not return
- * {@code null} with the exception of exception {@link ColumnConversionRules#ofNull()}.
+ * @param <T>
+ *         the column type
+ * @param <R>
+ *         the "persist as" type
  */
-public interface ConversionRule<T, R> extends Function<T, R> {
+public interface ColumnStorageRule<T, R> extends Function<T, R> {
 
     /**
-     * A convenience shortcut for {@code #apply(T)}.
+     * A convenience alias for {@code #apply(T)}.
      *
      * <p>Can be used when the object is known of being of type {@code T} but can't be cast to it
      * explicitly (e.g. in case of wildcard arguments).
      */
     @SuppressWarnings("unchecked") // See doc.
     default R applyTo(Object object) {
-        checkNotNull(object);
         T value = (T) object;
         return apply(value);
     }
 
-    static <T> ConversionRule<T, T> identity() {
+    static <T> ColumnStorageRule<T, T> identity() {
         return t -> t;
     }
 }

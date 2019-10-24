@@ -30,7 +30,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.server.entity.storage.given.TaskViewProjection;
-import io.spine.server.entity.storage.given.TestConversionRules;
+import io.spine.server.entity.storage.given.TestStorageRules;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.VersionField;
 import io.spine.test.storage.TaskId;
@@ -174,7 +174,7 @@ class EntityRecordWithColumnsTest {
         EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(taskId);
 
         Columns columns = Columns.of(entity.getClass());
-        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
+        Map<ColumnName, Object> storageFields = columns.valuesIn(entity, Column::name);
 
         EntityRecordWithColumns record = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(),
@@ -229,15 +229,15 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("return column value by column name with specified conversion rules")
-    void returnValueWithConversionRules() {
+    @DisplayName("return a column value for storage")
+    void returnValueWithStorageRules() {
         ColumnName columnName = ColumnName.of("some-int-column");
         int columnValue = 42;
 
         ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
         EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
-        String value = record.columnValue(columnName, new TestConversionRules());
+        String value = record.columnValue(columnName, new TestStorageRules());
 
         assertThat(value).isEqualTo(String.valueOf(columnValue));
     }

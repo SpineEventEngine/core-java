@@ -20,8 +20,10 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
@@ -30,11 +32,14 @@ import io.spine.server.storage.LifecycleFlagField;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.util.function.Function.identity;
 
+@Immutable
 @Internal
 public final class Columns {
 
@@ -44,8 +49,9 @@ public final class Columns {
     private final ImmutableMap<ColumnName, Column> columns;
     private final EntityClass<?> entityClass;
 
-    private Columns(ImmutableMap<ColumnName, Column> columns, EntityClass<?> entityClass) {
-        this.columns = columns;
+    @VisibleForTesting
+    Columns(Map<ColumnName, Column> columns, EntityClass<?> entityClass) {
+        this.columns = ImmutableMap.copyOf(columns);
         this.entityClass = entityClass;
     }
 
@@ -79,13 +85,54 @@ public final class Columns {
         return columns.values();
     }
 
-    public Map<ColumnName, Object> valuesIn(Entity<?, ?> source) {
+    public boolean basedOnInterface() {
+        boolean result = columnList()
+                .stream()
+                .allMatch(Column::isInterfaceBased);
+        return result;
+    }
+
+    public boolean empty() {
+        boolean result = columns.isEmpty();
+        return result;
+    }
+
+    public Map<Column, Object> valuesIn(Entity<?, ?> source) {
+        return valuesIn(source, identity());
+    }
+
+    /**
+     * A convenience method that returns column values by {@code C}.
+     */
+    public <C> Map<C, Object> valuesIn(Entity<?, ?> source, Function<Column, C> columnMapper) {
         checkNotNull(source);
-        Map<ColumnName, Object> result = new HashMap<>();
+        Map<C, Object> result = new HashMap<>();
         for (Column column : columns.values()) {
-            result.put(column.name(), column.valueIn(source));
+            result.put(columnMapper.apply(column), column.valueIn(source));
         }
         return result;
+    }
+
+    public Map<Column, Object> valuesFromInterface(Entity<?, ?> source) {
+        return valuesFromInterface(source, identity());
+    }
+
+    public <C> Map<C, Object> valuesFromInterface(Entity<?, ?> source,
+                                                  Function<Column, C> columnMapper) {
+        Map<C, Object> result = new HashMap<>();
+        for (Column column : columns.values()) {
+            result.put(columnMapper.apply(column), column.valueFromInterface(source));
+        }
+        return result;
+    }
+
+    public Columns protoColumns() {
+        ImmutableMap.Builder<ColumnName, Column> protoColumns = ImmutableMap.builder();
+        columns.values()
+               .stream()
+               .filter(Column::isProtoColumn)
+               .forEach(column -> protoColumns.put(column.name(), column));
+        return new Columns(protoColumns.build(), entityClass);
     }
 
     /**

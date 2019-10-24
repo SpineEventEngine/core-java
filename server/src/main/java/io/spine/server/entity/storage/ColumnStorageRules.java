@@ -26,9 +26,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <R>
  *         a type/supertype of all stored values
  */
-public interface ColumnConversionRules<R> {
+public interface ColumnStorageRules<R> {
 
-    ConversionRule<?, ? extends R> of(Class<?> type);
+    ColumnStorageRule<?, ? extends R> of(Class<?> type);
 
-    ConversionRule<@Nullable ?, @Nullable ? extends R> ofNull();
+    ColumnStorageRule<@Nullable ?, @Nullable ? extends R> ofNull();
 }

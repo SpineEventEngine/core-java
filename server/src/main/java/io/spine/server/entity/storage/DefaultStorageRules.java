@@ -24,67 +24,67 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static io.spine.server.entity.storage.ConversionRule.identity;
+import static io.spine.server.entity.storage.ColumnStorageRule.identity;
 
-public final class DefaultColumnConversionRules extends AbstractColumnConversionRules<Object> {
+public final class DefaultStorageRules extends AbstractStorageRules<Object> {
 
-    public static final DefaultColumnConversionRules INSTANCE = new DefaultColumnConversionRules();
+    public static final DefaultStorageRules INSTANCE = new DefaultStorageRules();
 
     /**
      * Prevents external construction so the class is accessed only through {@link #INSTANCE}.
      */
-    private DefaultColumnConversionRules() {
+    private DefaultStorageRules() {
         super();
     }
 
     @Override
-    protected ConversionRule<String, String> ofString() {
+    protected ColumnStorageRule<String, String> ofString() {
         return identity();
     }
 
     @Override
-    protected ConversionRule<Integer, Integer> ofInteger() {
+    protected ColumnStorageRule<Integer, Integer> ofInteger() {
         return identity();
     }
 
     @Override
-    protected ConversionRule<Long, Long> ofLong() {
+    protected ColumnStorageRule<Long, Long> ofLong() {
         return identity();
     }
 
     @Override
-    protected ConversionRule<Float, Float> ofFloat() {
+    protected ColumnStorageRule<Float, Float> ofFloat() {
         return identity();
     }
 
     @Override
-    protected ConversionRule<Double, Double> ofDouble() {
+    protected ColumnStorageRule<Double, Double> ofDouble() {
         return identity();
     }
 
     @Override
-    protected ConversionRule<Boolean, Boolean> ofBoolean() {
+    protected ColumnStorageRule<Boolean, Boolean> ofBoolean() {
         return identity();
     }
 
     @Override
-    protected ConversionRule<ByteString, ByteString> ofByteString() {
+    protected ColumnStorageRule<ByteString, ByteString> ofByteString() {
         return identity();
     }
 
     @Override
-    protected ConversionRule<Enum<?>, Enum<?>> ofEnum() {
+    protected ColumnStorageRule<Enum<?>, Enum<?>> ofEnum() {
         return identity();
     }
 
     @Override
-    protected ConversionRule<Message, Message> ofMessage() {
+    protected ColumnStorageRule<Message, Message> ofMessage() {
         return identity();
     }
 
     @SuppressWarnings("ReturnOfNull")
     @Override
-    public ConversionRule<@Nullable ?, @Nullable ?> ofNull() {
+    public ColumnStorageRule<@Nullable ?, @Nullable ?> ofNull() {
         return o -> null;
     }
 }

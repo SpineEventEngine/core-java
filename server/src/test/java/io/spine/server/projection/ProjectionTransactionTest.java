@@ -31,15 +31,16 @@ import io.spine.server.entity.VersionIncrement;
 import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.ProjectionState;
 import io.spine.server.entity.given.tx.TxProjection;
+import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -92,12 +93,15 @@ class ProjectionTransactionTest
 
     @Override
     protected ProjectionState newState() {
+        String nameString = "The new name for the projection state in this tx";
         return ProjectionState
                 .newBuilder()
                 .setId(id())
-                .setName("The new name for the projection state in this tx")
+                .setName(nameString)
+                .setNameLength(nameString.length())
                 .build();
     }
+
 
     @Override
     protected void checkEventReceived(
@@ -132,8 +136,13 @@ class ProjectionTransactionTest
     void incrementVersionOnEvent() {
         Projection<Id, ProjectionState, ProjectionState.Builder> entity = createEntity();
         Version oldVersion = entity.version();
-        Event event = GivenEvent.withMessage(createEventMessage());
-        Projection.playOn(entity, Collections.singleton(event));
+        Version eventVersion = Version
+                .newBuilder()
+                .setNumber(42)
+                .setTimestamp(currentTime())
+                .build();
+        Event event = GivenEvent.withMessageAndVersion(createEventMessage(), eventVersion);
+        Projection.playOn(entity, singleton(event));
         Version expected = Versions.increment(oldVersion);
 
         assertThat(entity.version()
@@ -142,5 +151,23 @@ class ProjectionTransactionTest
         assertThat(entity.version())
                 .isNotEqualTo(event.context()
                                    .getVersion());
+    }
+
+    @Test
+    @DisplayName("propagate column values to the entity state on commit")
+    void propagateColumnValues() {
+        Projection<Id, ProjectionState, ProjectionState.Builder> entity = createEntity();
+        String name = "some-projection-name";
+        TxCreated txCreated = TxCreated
+                .newBuilder()
+                .setId(id())
+                .setName(name)
+                .build();
+        Event event = GivenEvent.withMessage(txCreated);
+        Projection.playOn(entity, singleton(event));
+
+        int nameLength = entity.state()
+                               .getNameLength();
+        assertThat(nameLength).isEqualTo(name.length());
     }
 }

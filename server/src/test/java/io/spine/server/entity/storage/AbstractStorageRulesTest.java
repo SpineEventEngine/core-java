@@ -23,7 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.server.entity.storage.given.TestConversionRules;
+import io.spine.server.entity.storage.given.TestStorageRules;
 import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,45 +31,45 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.storage.given.TestConversionRules.CONVERTED_MESSAGE;
-import static io.spine.server.entity.storage.given.TestConversionRules.CONVERTED_STRING;
-import static io.spine.server.entity.storage.given.TestConversionRules.NULL_VALUE;
+import static io.spine.server.entity.storage.given.TestStorageRules.CONVERTED_MESSAGE;
+import static io.spine.server.entity.storage.given.TestStorageRules.CONVERTED_STRING;
+import static io.spine.server.entity.storage.given.TestStorageRules.NULL_VALUE;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`AbstractColumnConversionRules` should")
-class AbstractColumnConversionRulesTest {
+@DisplayName("`AbstractStorageRules` should")
+class AbstractStorageRulesTest {
 
-    private final ColumnConversionRules<String> conversionRules = new TestConversionRules();
+    private final ColumnStorageRules<String> rules = new TestStorageRules();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .testAllPublicInstanceMethods(conversionRules);
+                .testAllPublicInstanceMethods(rules);
     }
 
     @Test
-    @DisplayName("obtain a conversion rule for the given proto type")
+    @DisplayName("obtain a storage rule for the given proto type")
     void obtainForType() {
-        ConversionRule<?, ? extends String> rule = conversionRules.of(String.class);
+        ColumnStorageRule<?, ? extends String> rule = rules.of(String.class);
         String result = rule.applyTo("some-string");
         assertThat(result).isEqualTo(CONVERTED_STRING);
     }
 
     @Test
-    @DisplayName("obtain a conversion rule of a supertype if the given proto type is not present")
+    @DisplayName("obtain a storage rule of a supertype if the given proto type is not present")
     void obtainForSupertype() {
         Timestamp timestamp = Time.currentTime();
-        ConversionRule<?, ? extends String> rule = conversionRules.of(Timestamp.class);
+        ColumnStorageRule<?, ? extends String> rule = rules.of(Timestamp.class);
         String result = rule.applyTo(timestamp);
         assertThat(result).isEqualTo(CONVERTED_MESSAGE);
     }
 
     @Test
-    @DisplayName("obtain a conversion rule for `null`")
+    @DisplayName("obtain a storage rule for `null`")
     void obtainForNull() {
-        ConversionRule<@Nullable ?, ? extends String> rule = conversionRules.ofNull();
+        ColumnStorageRule<@Nullable ?, ? extends String> rule = rules.ofNull();
         String result = rule.apply(null);
         assertThat(result).isEqualTo(NULL_VALUE);
     }
@@ -80,14 +80,14 @@ class AbstractColumnConversionRulesTest {
     @DisplayName("throw an `IAE` when the rule is not found for the specified type")
     void throwOnUnknownType() {
         assertThrows(IllegalArgumentException.class,
-                     () -> conversionRules.of(AbstractColumnConversionRulesTest.class));
+                     () -> rules.of(AbstractStorageRulesTest.class));
     }
 
     @Test
     @DisplayName("allow to setup custom rules in the derived classes")
     void allowToSetupCustomRules() {
         TaskView taskView = taskView();
-        ConversionRule<?, ? extends String> rule = conversionRules.of(TaskView.class);
+        ColumnStorageRule<?, ? extends String> rule = rules.of(TaskView.class);
         String result = rule.applyTo(taskView);
         assertThat(result).isEqualTo(taskView.getName());
     }
@@ -96,7 +96,7 @@ class AbstractColumnConversionRulesTest {
     @DisplayName("consider supertypes when obtaining custom rules")
     void obtainCustomForSupertype() {
         TaskViewId id = taskViewId();
-        ConversionRule<?, ? extends String> rule = conversionRules.of(TaskViewId.class);
+        ColumnStorageRule<?, ? extends String> rule = rules.of(TaskViewId.class);
         String result = rule.applyTo(id);
         assertThat(result).isEqualTo(String.valueOf(id.getId()));
     }

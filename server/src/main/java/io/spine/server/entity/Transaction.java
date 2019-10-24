@@ -27,14 +27,18 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.code.proto.FieldDeclaration;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.Columns;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -384,6 +388,7 @@ public abstract class Transaction<I,
             beforeCommit(newState, pendingVersion);
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
+            updateColumns();
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
         } catch (RuntimeException e) {
@@ -391,6 +396,23 @@ public abstract class Transaction<I,
         } finally {
             releaseTx();
         }
+    }
+
+    @SuppressWarnings("unchecked") // Logically correct.
+    private void updateColumns() {
+        Columns columns = entity.thisClass()
+                                .columns()
+                                .protoColumns();
+        if (columns.empty() || !columns.basedOnInterface()) {
+            // Columns are not present/already propagated to the entity state.
+            return;
+        }
+        Map<FieldDeclaration, Object> values =
+                columns.valuesFromInterface(entity, Column::protoField);
+        Message.Builder newStateWithColumns = entity.state()
+                                                    .toBuilder();
+        values.forEach((field, value) -> newStateWithColumns.setField(field.descriptor(), value));
+        entity.updateState((S) newStateWithColumns.build());
     }
 
     /**

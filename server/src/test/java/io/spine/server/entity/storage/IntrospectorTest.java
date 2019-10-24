@@ -68,31 +68,10 @@ class IntrospectorTest {
             Introspector introspector = new Introspector(entityClass);
             ImmutableMap<ColumnName, Column> columns = introspector.protoColumns();
 
-            TaskViewProjection projection = new TaskViewProjection();
-
-            ColumnName name = ColumnName.of("name");
-            assertThat(columns).containsKey(name);
-            Column nameColumn = columns.get(name);
-            assertThat(nameColumn.valueIn(projection))
-                    .isEqualTo(projection.getName());
-
-            ColumnName estimateInDays = ColumnName.of("estimate_in_days");
-            assertThat(columns).containsKey(estimateInDays);
-            Column estimateInDaysColumn = columns.get(estimateInDays);
-            assertThat(estimateInDaysColumn.valueIn(projection))
-                    .isEqualTo(projection.getEstimateInDays());
-
-            ColumnName status = ColumnName.of("status");
-            assertThat(columns).containsKey(status);
-            Column statusColumn = columns.get(status);
-            assertThat(statusColumn.valueIn(projection))
-                    .isEqualTo(projection.getStatus());
-
-            ColumnName dueDate = ColumnName.of("due_date");
-            assertThat(columns).containsKey(dueDate);
-            Column dueDateColumn = columns.get(dueDate);
-            assertThat(dueDateColumn.valueIn(projection))
-                    .isEqualTo(projection.getDueDate());
+            assertThat(columns).containsKey(ColumnName.of("name"));
+            assertThat(columns).containsKey(ColumnName.of("estimate_in_days"));
+            assertThat(columns).containsKey(ColumnName.of("status"));
+            assertThat(columns).containsKey(ColumnName.of("due_date"));
         }
 
         @Test
@@ -104,34 +83,8 @@ class IntrospectorTest {
 
             ImmutableMap<ColumnName, Column> columns = introspector.protoColumns();
 
-            Entity<TaskListViewId, TaskListView> projection = new TaskListViewProjection();
-            String descriptionFromState = projection.state()
-                                                    .getDescription();
-            ColumnName description = ColumnName.of("description");
-            assertThat(columns).containsKey(description);
-            Column descriptionColumn = columns.get(description);
-
-            assertThat(descriptionColumn.valueIn(projection)).isEqualTo(descriptionFromState);
+            assertThat(columns).containsKey(ColumnName.of("description"));
         }
-    }
-
-    @Test
-    @DisplayName("always choose custom getter implementation over the modified entity state")
-    void preferGettersFromInterface() {
-        EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-        Introspector introspector = new Introspector(entityClass);
-        ImmutableMap<ColumnName, Column> columns = introspector.protoColumns();
-
-        Column column = columns.get(ColumnName.of("name"));
-
-        TaskViewProjection projection = new TaskViewProjection();
-        String nameFromInterface = projection.getName();
-        String nameFromState = projection.state()
-                                     .getName();
-
-        assertThat(column.valueIn(projection)).isEqualTo(nameFromInterface);
-
-        assertThat(column.valueIn(projection)).isNotEqualTo(nameFromState);
     }
 
     @Test
@@ -147,7 +100,7 @@ class IntrospectorTest {
 
         Entity<TaskListViewId, TaskListView> projection = new PrivateProjection();
 
-        assertThat(column.valueIn(projection)).isEqualTo(PrivateProjection.DESCRIPTION);
+        assertThat(column.valueFromInterface(projection)).isEqualTo(PrivateProjection.DESCRIPTION);
     }
 
     @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})

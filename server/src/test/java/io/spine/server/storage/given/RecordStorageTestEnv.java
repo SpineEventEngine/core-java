@@ -23,6 +23,7 @@ package io.spine.server.storage.given;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -144,9 +145,14 @@ public class RecordStorageTestEnv {
             extends TransactionalEntity<ProjectId, Project, Project.Builder>
             implements ProjectWithColumns, HasLifecycleColumns<ProjectId, Project> {
 
+        public static final Timestamp PROJECT_VERSION_TIMESTAMP = Timestamp.newBuilder()
+                                                                           .setSeconds(124565)
+                                                                           .setNanos(2434535)
+                                                                           .build();
+
         private int counter = 0;
 
-        private TestCounterEntity(ProjectId id) {
+        public TestCounterEntity(ProjectId id) {
             super(id);
         }
 
@@ -156,7 +162,7 @@ public class RecordStorageTestEnv {
         }
 
         @Override
-        public boolean getDoable() {
+        public boolean getInternal() {
             return false;
         }
 
@@ -171,10 +177,19 @@ public class RecordStorageTestEnv {
         }
 
         @Override
-        public Version getCounterVersion() {
+        public Version getProjectVersion() {
             return Version.newBuilder()
                           .setNumber(counter)
+                          .setTimestamp(PROJECT_VERSION_TIMESTAMP)
                           .build();
+        }
+
+        @Override
+        public Timestamp getDueDate() {
+            return Timestamp.newBuilder()
+                            .setSeconds(42800)
+                            .setNanos(140000)
+                            .build();
         }
 
         public void assignStatus(Project.Status status) {
@@ -182,11 +197,17 @@ public class RecordStorageTestEnv {
                     .newBuilder(state())
                     .setStatus(status)
                     .build();
-            injectState(this, newState, getCounterVersion());
+            injectState(this, newState, getProjectVersion());
         }
 
         public void assignCounter(int counter) {
             this.counter = counter;
+            // Manually inject state so the `project_version` storage field is populated.
+            Project newState = Project
+                    .newBuilder(state())
+                    .setProjectVersion(getProjectVersion())
+                    .build();
+            injectState(this, newState, getProjectVersion());
         }
     }
 }

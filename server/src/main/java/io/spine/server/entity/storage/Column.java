@@ -20,25 +20,56 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
+@Immutable
 public final class Column {
 
     private final ColumnName name;
     private final Class<?> type;
     private final Getter getter;
 
+    private final @Nullable Getter getterFromInterface;
+
+    /**
+     * The corresponding proto field.
+     *
+     * <p>Is null for {@linkplain SystemColumn system columns}.
+     */
+    private final @Nullable FieldDeclaration protoField;
+
     Column(ColumnName name, Class<?> type, Getter getter) {
+        this(name, type, getter, null, null);
+    }
+
+    Column(ColumnName name, Class<?> type, Getter getter, FieldDeclaration protoField) {
+        this(name, type, getter, null, protoField);
+    }
+
+    Column(ColumnName name, Class<?> type, Getter getter, @Nullable Getter getterFromInterface) {
+        this(name, type, getter, getterFromInterface, null);
+    }
+
+    Column(ColumnName name,
+           Class<?> type,
+           Getter getter,
+           @Nullable Getter getterFromInterface,
+           @Nullable FieldDeclaration protoField) {
         this.name = name;
         this.type = type;
         this.getter = getter;
+        this.getterFromInterface = getterFromInterface;
+        this.protoField = protoField;
     }
 
     public ColumnName name() {
@@ -49,11 +80,30 @@ public final class Column {
         return type;
     }
 
+    public @Nullable FieldDeclaration protoField() {
+        return protoField;
+    }
+
     public @Nullable Object valueIn(Entity<?, ? extends Message> entity) {
         checkNotNull(entity);
         return getter.apply(entity);
     }
 
+    public @Nullable Object valueFromInterface(Entity<?, ? extends Message> entity) {
+        checkNotNull(entity);
+        checkState(isInterfaceBased());
+        return getterFromInterface.apply(entity);
+    }
+
+    public boolean isInterfaceBased() {
+        return getterFromInterface != null;
+    }
+
+    public boolean isProtoColumn() {
+        return protoField != null;
+    }
+
+    @Immutable
     interface Getter extends Function<Entity<?, ? extends Message>, Object> {
 
         Object invoke(Entity<?, ? extends Message> entity) throws Exception;
