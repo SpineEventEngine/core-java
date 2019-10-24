@@ -57,9 +57,9 @@ class StorageSpecTest {
 
         StorageSpec<Long> spec = StorageSpec.of(bcName, stateUrl, idClass);
 
-        assertEquals(bcName, spec.getBoundedContextName());
-        assertEquals(stateUrl, spec.getEntityStateUrl());
-        assertEquals(idClass, spec.getIdClass());
+        assertEquals(bcName, spec.context());
+        assertEquals(stateUrl, spec.entityStateUrl());
+        assertEquals(idClass, spec.idClass());
     }
 
     @Test

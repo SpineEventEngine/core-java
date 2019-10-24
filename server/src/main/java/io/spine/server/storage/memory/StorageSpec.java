@@ -28,7 +28,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.checkNotDefault;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * Attributes for accessing in-memory storage over in-process gRPC.
@@ -39,46 +39,79 @@ public final class StorageSpec<I> implements Serializable {
 
     private static final long serialVersionUID = 0L;
     
-    private static final String FLD_BOUNDED_CONTEXT_NAME = "boundedContextName";
+    private static final String FLD_BOUNDED_CONTEXT_NAME = "context";
     private static final String FLD_ENTITY_STATE_URL = "entityStateUrl";
     private static final String FLD_ID_CLASS = "idClass";
 
-    private final BoundedContextName boundedContextName;
+    private final BoundedContextName context;
     private final TypeUrl entityStateUrl;
     private final Class<I> idClass;
 
-    public static <I> StorageSpec<I> of(BoundedContextName boundedContextName,
-                                     TypeUrl entityStateUrl,
-                                     Class<I> idClass) {
-        checkNotNull(boundedContextName);
+    public static <I>
+    StorageSpec<I> of(BoundedContextName context, TypeUrl entityStateUrl, Class<I> idClass) {
+        checkNotDefaultArg(context);
         checkNotNull(entityStateUrl);
         checkNotNull(idClass);
-        checkNotDefault(boundedContextName);
-        return new StorageSpec<>(boundedContextName, entityStateUrl, idClass);
+        return new StorageSpec<>(context, entityStateUrl, idClass);
     }
 
-    private StorageSpec(BoundedContextName boundedContextName, TypeUrl entityStateUrl,
-                        Class<I> idClass) {
-        this.boundedContextName = boundedContextName;
+    private StorageSpec(BoundedContextName context, TypeUrl entityStateUrl, Class<I> idClass) {
+        this.context = context;
         this.entityStateUrl = entityStateUrl;
         this.idClass = idClass;
     }
 
+    /**
+     * Obtains the name of the context.
+     * @deprecated please use {@link #context()}
+     */
+    @Deprecated
     public BoundedContextName getBoundedContextName() {
-        return boundedContextName;
+        return context();
     }
 
+    /**
+     * Obtains the name of the context served by the storage.
+     */
+    public BoundedContextName context() {
+        return context;
+    }
+
+    /**
+     * Obtains the URL of the entity state type.
+     * @deprecated please use {@link #entityStateUrl()}
+     */
+    @Deprecated
     public TypeUrl getEntityStateUrl() {
+        return entityStateUrl();
+    }
+
+    /**
+     * Obtains the URL of the entity state type.
+     */
+    public TypeUrl entityStateUrl() {
         return entityStateUrl;
     }
 
+    /**
+     * Obtains the class of identifiers used by the storage.
+     * @deprecated please use {@link #idClass()}
+     */
+    @Deprecated
     public Class<I> getIdClass() {
+        return idClass();
+    }
+
+    /**
+     * Obtains the class of identifiers used by the storage.
+     */
+    public Class<I> idClass() {
         return idClass;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(boundedContextName, entityStateUrl);
+        return Objects.hash(context, entityStateUrl);
     }
 
     @Override
@@ -90,14 +123,14 @@ public final class StorageSpec<I> implements Serializable {
             return false;
         }
         StorageSpec other = (StorageSpec) obj;
-        return Objects.equals(this.boundedContextName, other.boundedContextName)
+        return Objects.equals(this.context, other.context)
                 && Objects.equals(this.entityStateUrl, other.entityStateUrl);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add(FLD_BOUNDED_CONTEXT_NAME, boundedContextName)
+                          .add(FLD_BOUNDED_CONTEXT_NAME, context)
                           .add(FLD_ENTITY_STATE_URL, entityStateUrl.value())
                           .add(FLD_ID_CLASS, idClass.getName())
                           .toString();

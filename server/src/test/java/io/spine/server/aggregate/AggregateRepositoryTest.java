@@ -87,6 +87,7 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.boundedContext;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
@@ -99,7 +100,6 @@ import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.re
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.testing.core.given.GivenTenantId.generate;
-import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;

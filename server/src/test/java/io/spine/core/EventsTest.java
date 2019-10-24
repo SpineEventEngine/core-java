@@ -35,10 +35,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.nothing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -102,19 +100,5 @@ public class EventsTest extends UtilityClassTest<Events> {
         for (Object ignored : nothing()) {
             fail("Something found in nothing().");
         }
-    }
-
-    @Test
-    @DisplayName("reject empty event ID")
-    void rejectEmptyEventId() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> checkValid(EventId.getDefaultInstance()));
-    }
-
-    @Test
-    @DisplayName("accept generated event ID")
-    void acceptGeneratedEventId() {
-        EventId eventId = event.getId();
-        assertEquals(eventId, checkValid(eventId));
     }
 }

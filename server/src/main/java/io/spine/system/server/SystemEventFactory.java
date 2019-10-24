@@ -35,7 +35,7 @@ import io.spine.server.route.EventRoute;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.protobuf.Messages.isNotDefault;
 
 /**
  * Creates events that will be imported into system aggregates.

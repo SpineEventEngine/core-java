@@ -45,7 +45,6 @@ import io.spine.server.integration.given.ProjectWizard;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.validate.Validate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +54,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithExtEntitySubscribers;
 import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithExternalSubscribers;
 import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithProjectCreatedNeeds;
@@ -317,7 +317,7 @@ class IntegrationBrokerTest {
         Error error = observer.firstResponse()
                               .getStatus()
                               .getError();
-        assertFalse(Validate.isDefault(error));
+        assertFalse(isDefault(error));
         assertEquals(EventValidationError.getDescriptor().getFullName(),
                      error.getType());
         assertEquals(UNSUPPORTED_EVENT_VALUE, error.getCode());

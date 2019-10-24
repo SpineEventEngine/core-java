@@ -26,13 +26,13 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
+import io.spine.protobuf.Messages;
 import io.spine.validate.FieldAwareMessage;
-import io.spine.validate.Validate;
 
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.protobuf.Messages.isNotDefault;
 
 /**
  * Mixin interface for command objects.
@@ -74,7 +74,7 @@ interface CommandMixin
     default Optional<Origin> origin() {
         Origin parent = context().getOrigin();
         return Optional.of(parent)
-                       .filter(Validate::isNotDefault);
+                       .filter(Messages::isNotDefault);
     }
 
     /**
