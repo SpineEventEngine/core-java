@@ -48,8 +48,8 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
