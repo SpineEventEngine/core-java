@@ -113,8 +113,14 @@ final class Columns {
         throw couldNotFindColumn(entityClass, columnName);
     }
 
+    /**
+     * Ensures that the column name is not empty or a blank string.
+     *
+     * @throws IllegalArgumentException
+     *  if the passed string is empty or blank
+     */
     static void checkColumnName(String columnName) {
-        checkNotEmptyOrBlank(columnName);
+        checkNotEmptyOrBlank(columnName, "Entity column name must not be empty or blank.");
     }
 
     static IllegalArgumentException

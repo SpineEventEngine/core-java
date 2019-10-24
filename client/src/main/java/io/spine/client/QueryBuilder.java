@@ -104,6 +104,12 @@ public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
         return self();
     }
 
+    /**
+     * Ensures that the passed value is positive.
+     *
+     * @throws IllegalArgumentException
+     *         if the value is zero or negative
+     */
     static void checkLimit(long count) {
         checkArgument(count > 0, "A query limit must be a positive value.");
     }

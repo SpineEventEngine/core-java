@@ -53,7 +53,7 @@ public final class GivenTenantId {
      * @return new {@code TenantId}
      */
     public static TenantId of(String value) {
-        checkNotEmptyOrBlank(value);
+        checkNotEmptyOrBlank(value, "A tenant ID cannot be empty or blank.");
         return TenantId.newBuilder()
                        .setValue(value)
                        .build();

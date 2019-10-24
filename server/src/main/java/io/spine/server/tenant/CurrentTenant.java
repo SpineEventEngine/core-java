@@ -63,7 +63,7 @@ final class CurrentTenant {
         Optional<TenantId> currentTenant = get();
         if (!currentTenant.isPresent()) {
             throw new IllegalStateException(
-                    "No current TenantId set in multi-tenant execution context.");
+                    "No current `TenantId` set in multi-tenant execution context.");
         }
         return currentTenant.get();
     }
@@ -74,7 +74,7 @@ final class CurrentTenant {
      * @param tenantId a non-null and non-default instance of {@code TenantId}
      */
     static void set(TenantId tenantId) {
-        checkNotDefaultArg(tenantId);
+        checkNotDefaultArg(tenantId, "A tenant ID must not be a default value.");
         threadLocal.set(tenantId);
     }
 
