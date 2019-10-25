@@ -19,19 +19,14 @@
  */
 syntax = "proto3";
 
-package spine.test.rejection;
+package spine.test.dispatch;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option (SPI_all) = true;
-option java_package = "io.spine.test.rejection";
-// Keep all the rejections under the same outer class called `OperationRejections`.
+option java_package = "io.spine.server.dispatch.given";
+option java_multiple_files = true;
 
-
-// To be used in `RejectionEnvelopesShould`.
-message CannotPerformBusinessOperation {
-
-    // The ID of the operation.
-    string operation_id = 1;
+message Id {
+    string id = 1;
 }

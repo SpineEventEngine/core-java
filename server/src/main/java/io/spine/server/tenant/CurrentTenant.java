@@ -24,9 +24,7 @@ import io.spine.core.TenantId;
 
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * This class allows to obtain a ID of the current tenant when handling
@@ -65,7 +63,7 @@ final class CurrentTenant {
         Optional<TenantId> currentTenant = get();
         if (!currentTenant.isPresent()) {
             throw new IllegalStateException(
-                    "No current TenantId set in multi-tenant execution context.");
+                    "No current `TenantId` set in multi-tenant execution context.");
         }
         return currentTenant.get();
     }
@@ -76,8 +74,7 @@ final class CurrentTenant {
      * @param tenantId a non-null and non-default instance of {@code TenantId}
      */
     static void set(TenantId tenantId) {
-        checkNotNull(tenantId);
-        checkArgument(isNotDefault(tenantId));
+        checkNotDefaultArg(tenantId, "A tenant ID must not be a default value.");
         threadLocal.set(tenantId);
     }
 

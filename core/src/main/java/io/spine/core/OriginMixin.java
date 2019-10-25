@@ -25,7 +25,7 @@ import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 import io.spine.validate.FieldAwareMessage;
 
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.protobuf.Messages.isNotDefault;
 
 /**
  * A mixin interface for the {@link Origin} message type.

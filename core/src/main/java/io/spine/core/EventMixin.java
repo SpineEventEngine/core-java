@@ -25,13 +25,13 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
+import io.spine.protobuf.Messages;
 import io.spine.validate.FieldAwareMessage;
-import io.spine.validate.Validate;
 
 import java.util.Optional;
 
 import static io.spine.core.EventContext.OriginCase.PAST_MESSAGE;
-import static io.spine.validate.Validate.isDefault;
+import static io.spine.protobuf.Messages.isDefault;
 
 /**
  * Mixin interface for event objects.
@@ -64,7 +64,7 @@ interface EventMixin extends Signal<EventId, EventMessage, EventContext>, FieldA
     default Optional<Origin> origin() {
         Origin parent = context().getPastMessage();
         return Optional.of(parent)
-                       .filter(Validate::isNotDefault);
+                       .filter(Messages::isNotDefault);
     }
 
     /**

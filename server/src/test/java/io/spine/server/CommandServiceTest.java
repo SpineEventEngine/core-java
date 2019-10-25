@@ -45,7 +45,7 @@ import java.util.Set;
 
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.protobuf.Messages.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

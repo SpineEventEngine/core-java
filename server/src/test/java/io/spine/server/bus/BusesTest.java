@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Command;
+import io.spine.core.MessageId;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.TestValues.newUuidValue;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
 @DisplayName("Buses utility should")
@@ -68,6 +70,10 @@ class BusesTest {
                                               .setCode(1)
                                               .build())
                 .setDefault(RejectionEnvelope.class, defaultRejection)
+                .setDefault(Message.class, newUuidValue())
+                .setDefault(MessageId.class, MessageId.newBuilder()
+                                                      .setTypeUrl("test.example.org")
+                                                      .build())
                 .testAllPublicStaticMethods(Buses.class);
     }
 }

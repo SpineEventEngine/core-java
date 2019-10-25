@@ -19,14 +19,15 @@
  */
 syntax = "proto3";
 
-package spine.test.rejection;
+package spine.test.dispatch;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.rejection";
-option java_multiple_files = true;
+option java_package = "io.spine.server.dispatch.given.rejection";
 
-message ProjectId {
-    string id = 1;
+import "spine/test/dispatch/dispatch_entities.proto";
+
+message CannotCreateDispatch {
+    Id id = 1;
 }

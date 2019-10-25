@@ -137,6 +137,7 @@ public class TestProcessManager
 
     private void checkNotArchived(PmStartProject command) throws PmCannotStartArchivedProject {
         if (isArchived()) {
+            setDeleted(true);
             PmCannotStartArchivedProject rejection = PmCannotStartArchivedProject
                     .newBuilder()
                     .setProjectId(command.getProjectId())
@@ -148,6 +149,7 @@ public class TestProcessManager
     @Assign
     PmProjectArchived handle(PmArchiveProject command) {
         keep(command);
+        setArchived(true);
         PmProjectArchived event = PmProjectArchived
                 .newBuilder()
                 .setProjectId(command.getProjectId())
@@ -158,6 +160,7 @@ public class TestProcessManager
     @Assign
     PmProjectDeleted handle(PmDeleteProject command) {
         keep(command);
+        setDeleted(true);
         PmProjectDeleted event = PmProjectDeleted
                 .newBuilder()
                 .setProjectId(command.getProjectId())

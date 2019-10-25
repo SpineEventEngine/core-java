@@ -85,6 +85,14 @@ public class AggregateClass<A extends Aggregate>
     }
 
     /**
+     * Obtains the set of <em>domestic</em> event classes on which this aggregate class reacts.
+     */
+    @Override
+    public final ImmutableSet<EventClass> domesticEvents() {
+        return delegate.domesticEvents();
+    }
+
+    /**
      * Obtains event types produced by this aggregate class.
      */
     public ImmutableSet<EventClass> outgoingEvents() {

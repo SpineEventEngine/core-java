@@ -75,10 +75,10 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
 import static io.spine.protobuf.Durations2.seconds;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.aggregate.given.StorageRecords.sequenceFor;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.testing.server.TestEventFactory.newInstance;
-import static io.spine.validate.Validate.isDefault;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.toList;
@@ -93,7 +93,6 @@ public abstract class AggregateStorageTest
                                     AggregateReadRequest<ProjectId>,
                                     AggregateStorage<ProjectId>> {
 
-    @SuppressWarnings("ReturnOfNull") // As declared by the field type.
     private static final Function<AggregateEventRecord, @Nullable Event> TO_EVENT =
             record -> record != null ? record.getEvent() : null;
 

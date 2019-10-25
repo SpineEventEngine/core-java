@@ -32,8 +32,7 @@ import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.Success;
+import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -78,10 +77,11 @@ public abstract class AbstractCommander
     @Override
     public void dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
-        DispatchOutcome outcome = method.invoke(this, command);
-        Success success = outcome.getSuccess();
-        postCommands(success);
-        postRejection(success);
+        DispatchOutcomeHandler
+                .from(method.invoke(this, command))
+                .onCommands(this::postCommands)
+                .onRejection(this::postRejection)
+                .handle();
     }
 
     @Override
@@ -95,10 +95,17 @@ public abstract class AbstractCommander
     }
 
     @Override
+    public Set<EventClass> domesticEvents() {
+        return thisClass.domesticEvents();
+    }
+
+    @Override
     public void dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getCommander(event.messageClass());
-        DispatchOutcome outcome = method.invoke(this, event);
-        postCommands(outcome.getSuccess());
+        DispatchOutcomeHandler
+                .from(method.invoke(this, event))
+                .onCommands(this::postCommands)
+                .handle();
     }
 
     /**
@@ -111,18 +118,12 @@ public abstract class AbstractCommander
         return Versions.zero();
     }
 
-    private void postCommands(Success successfulOutcome) {
-        if (successfulOutcome.hasProducedCommands()) {
-            List<Command> commands = successfulOutcome.getProducedCommands()
-                                                      .getCommandList();
-            commandBus().post(commands, noOpObserver());
-        }
+    private void postCommands(List<Command> commands) {
+        commandBus().post(commands, noOpObserver());
     }
 
-    private void postRejection(Success successfulOutcome) {
-        if (successfulOutcome.hasRejection()) {
-            ImmutableList<Event> events = ImmutableList.of(successfulOutcome.getRejection());
-            postEvents(events);
-        }
+    private void postRejection(Event rejectionEvent) {
+        ImmutableList<Event> events = ImmutableList.of(rejectionEvent);
+        postEvents(events);
     }
 }

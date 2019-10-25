@@ -78,7 +78,7 @@ import static java.util.Collections.singleton;
  * @param <B>
  *         a type of the builder implementations
  */
-abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTargetBuilder> {
+public abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
 
     private final Class<? extends Message> targetType;
 
@@ -92,7 +92,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
     private @Nullable Set<CompositeFilter> filters;
     private @Nullable Set<String> fieldMask;
 
-    AbstractTargetBuilder(Class<? extends Message> targetType) {
+    TargetBuilder(Class<? extends Message> targetType) {
         this.targetType = checkNotNull(targetType);
     }
 
@@ -116,7 +116,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
     }
 
     /**
-     * Sets the ID predicate to the {@link io.spine.client.Query}.
+     * Sets the ID predicate to the targets of the request.
      *
      * <p>Though it's not prohibited at compile-time, please make sure to pass instances of the
      * same type to the argument of this method. Moreover, the instances must be of the type of
@@ -337,7 +337,7 @@ abstract class AbstractTargetBuilder<T extends Message, B extends AbstractTarget
         String valueSeparator = "; ";
         StringBuilder sb = new StringBuilder();
 
-        Class<? extends AbstractTargetBuilder> builderCls = self().getClass();
+        Class<? extends TargetBuilder> builderCls = self().getClass();
         sb.append(builderCls.getSimpleName())
           .append('(')
           .append("SELECT ")

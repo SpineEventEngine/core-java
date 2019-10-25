@@ -70,13 +70,18 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public final ImmutableSet<StateClass> domesticStates() {
-        return delegate.domesticStates();
+    public final ImmutableSet<EventClass> domesticEvents() {
+        return delegate.domesticEvents();
     }
 
     @Override
     public final ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
+    }
+
+    @Override
+    public final ImmutableSet<StateClass> domesticStates() {
+        return delegate.domesticStates();
     }
 
     @Override

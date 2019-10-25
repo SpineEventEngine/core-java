@@ -67,6 +67,11 @@ public abstract class AbstractEventAccumulator implements EventDispatcher {
     }
 
     @Override
+    public final Set<EventClass> domesticEventClasses() {
+        return eventClasses();
+    }
+
+    @Override
     public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }

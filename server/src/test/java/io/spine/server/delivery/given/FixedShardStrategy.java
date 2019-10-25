@@ -22,6 +22,7 @@ package io.spine.server.delivery.given;
 
 import io.spine.server.delivery.DeliveryStrategy;
 import io.spine.server.delivery.ShardIndex;
+import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
 
@@ -51,7 +52,7 @@ public class FixedShardStrategy implements DeliveryStrategy, Serializable {
     }
 
     @Override
-    public ShardIndex indexFor(Object entityId) {
+    public ShardIndex indexFor(Object entityId, TypeUrl entityStateType) {
         return nonEmptyShard;
     }
 

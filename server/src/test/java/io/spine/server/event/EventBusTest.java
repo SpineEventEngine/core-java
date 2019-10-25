@@ -39,7 +39,6 @@ import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectAggregate;
 import io.spine.server.event.given.bus.RememberingSubscriber;
 import io.spine.server.event.given.bus.TaskCreatedFilter;
-import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EBTaskAdded;
@@ -440,8 +439,8 @@ public class EventBusTest {
                 .setTask(task)
                 .build();
         Event event = eventFactory.createEvent(eventMessage);
-        assertThrows(SignalOriginMismatchError.class,
-                     () -> eventBus.post(event, StreamObservers.noOpObserver()));
+        eventBus.post(event, StreamObservers.noOpObserver());
+        assertThat(EBExternalTaskAddedSubscriber.taskAddedEvent).isNull();
     }
 
     /**
