@@ -195,6 +195,7 @@ public class RecordStorageTestEnv {
         public void assignStatus(Project.Status status) {
             Project newState = Project
                     .newBuilder(state())
+                    .setId(id())
                     .setStatus(status)
                     .build();
             injectState(this, newState, getProjectVersion());
@@ -205,6 +206,7 @@ public class RecordStorageTestEnv {
             // Manually inject state so the `project_version` storage field is populated.
             Project newState = Project
                     .newBuilder(state())
+                    .setId(id())
                     .setProjectVersion(getProjectVersion())
                     .build();
             injectState(this, newState, getProjectVersion());

@@ -57,13 +57,26 @@ public abstract class AbstractStorageRules<R> implements ColumnStorageRules<R> {
                 ImmutableMap.builder();
 
         builder.put(String.class, this::ofString);
+
+        builder.put(int.class, this::ofInteger);
         builder.put(Integer.class, this::ofInteger);
+
+        builder.put(long.class, this::ofLong);
         builder.put(Long.class, this::ofLong);
+
+        builder.put(float.class, this::ofFloat);
         builder.put(Float.class, this::ofFloat);
+
+        builder.put(double.class, this::ofDouble);
         builder.put(Double.class, this::ofDouble);
+
+        builder.put(boolean.class, this::ofBoolean);
         builder.put(Boolean.class, this::ofBoolean);
+
         builder.put(ByteString.class, this::ofByteString);
+
         builder.put(Enum.class, this::ofEnum);
+
         builder.put(Message.class, this::ofMessage);
 
         return builder.build();
