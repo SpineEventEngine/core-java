@@ -95,7 +95,7 @@ final class Introspector {
     }
 
     private static Method getterOf(FieldDeclaration field, Class<?> clazz) {
-        String getterName = field.getterName();
+        String getterName = field.javaGetterName();
         try {
             Method result = clazz.getMethod(getterName);
             return result;
