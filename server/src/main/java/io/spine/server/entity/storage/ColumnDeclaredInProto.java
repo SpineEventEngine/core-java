@@ -21,11 +21,14 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
+import io.spine.code.proto.FieldDeclaration;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Immutable
-public interface Column {
+interface ColumnDeclaredInProto extends Column {
 
-    ColumnName name();
+    @Nullable Object valueIn(Message entityState);
 
-    Class<?> type();
+    FieldDeclaration protoField();
 }

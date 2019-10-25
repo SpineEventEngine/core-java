@@ -24,6 +24,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
@@ -31,7 +32,6 @@ import io.spine.client.Filter;
 import io.spine.server.storage.RecordStorage;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.eq;
@@ -87,19 +87,19 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
      *         lifecycle flags} filters
      */
     public static QueryParameters activeEntityQueryParams(RecordStorage<?> storage) {
-        Columns lifecycleColumns = storage.lifecycleColumns();
+        ImmutableMap<ColumnName, SpineColumn> lifecycleColumns = storage.lifecycleColumns();
         ColumnName archivedColumnName = ColumnName.of(archived);
         ColumnName deletedColumnName = ColumnName.of(deleted);
 
-        Optional<Column> archivedColumn = lifecycleColumns.find(archivedColumnName);
-        Optional<Column> deletedColumn = lifecycleColumns.find(deletedColumnName);
-        boolean entityHasLifecycle = archivedColumn.isPresent() && deletedColumn.isPresent();
+        SpineColumn archivedColumn = lifecycleColumns.get(archivedColumnName);
+        SpineColumn deletedColumn = lifecycleColumns.get(deletedColumnName);
+        boolean entityHasLifecycle = archivedColumn != null && deletedColumn != null;
         if (!entityHasLifecycle) {
             return newBuilder().build();
         }
         CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(archivedColumn.get(), eq(archivedColumnName.value(), false),
-                                     deletedColumn.get(), eq(deletedColumnName.value(), false)),
+                ImmutableMultimap.of(archivedColumn, eq(archivedColumnName.value(), false),
+                                     deletedColumn, eq(deletedColumnName.value(), false)),
                 ALL
         );
         return newBuilder().add(lifecycleParameter).build();

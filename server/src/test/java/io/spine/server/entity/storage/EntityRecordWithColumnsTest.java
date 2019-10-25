@@ -167,7 +167,7 @@ class EntityRecordWithColumnsTest {
         EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(taskId);
 
         Columns columns = Columns.of(entity.getClass());
-        Map<ColumnName, Object> storageFields = columns.valuesIn(entity, Column::name);
+        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
 
         EntityRecordWithColumns record = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(),

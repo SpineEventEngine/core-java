@@ -31,7 +31,6 @@ import io.spine.test.entity.TaskListView;
 import io.spine.test.entity.TaskListViewId;
 import io.spine.test.entity.TaskListViewWithColumns;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -49,42 +48,36 @@ class IntrospectorTest {
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
         Introspector introspector = new Introspector(entityClass);
-        ImmutableMap<ColumnName, Column> systemColumns = introspector.systemColumns();
+        ImmutableMap<ColumnName, SpineColumn> systemColumns = introspector.systemColumns();
 
         assertThat(systemColumns).containsKey(ColumnName.of(archived));
         assertThat(systemColumns).containsKey(ColumnName.of(deleted));
         assertThat(systemColumns).containsKey(ColumnName.of(version));
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    @Nested
-    @DisplayName("extract columns defined in Protobuf")
-    class ExtractProtoColumns {
+    @Test
+    @DisplayName("extract columns implemented via `EntityWithColumns` descendant")
+    void extractImplementedColumns() {
+        EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
+        Introspector introspector = new Introspector(entityClass);
+        ImmutableMap<ColumnName, ImplementedColumn> columns = introspector.implementedColumns();
 
-        @Test
-        @DisplayName("from the entity which implements an `EntityWithColumns` interface")
-        void fromImplementedInterface() {
-            EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-            Introspector introspector = new Introspector(entityClass);
-            ImmutableMap<ColumnName, Column> columns = introspector.protoColumns();
+        assertThat(columns).containsKey(ColumnName.of("name"));
+        assertThat(columns).containsKey(ColumnName.of("estimate_in_days"));
+        assertThat(columns).containsKey(ColumnName.of("status"));
+        assertThat(columns).containsKey(ColumnName.of("due_date"));
+    }
 
-            assertThat(columns).containsKey(ColumnName.of("name"));
-            assertThat(columns).containsKey(ColumnName.of("estimate_in_days"));
-            assertThat(columns).containsKey(ColumnName.of("status"));
-            assertThat(columns).containsKey(ColumnName.of("due_date"));
-        }
+    @Test
+    @DisplayName("extract simple Protobuf field based columns")
+    void extractSimpleColumns() {
+        EntityClass<TaskListViewProjection> entityClass =
+                asEntityClass(TaskListViewProjection.class);
+        Introspector introspector = new Introspector(entityClass);
 
-        @Test
-        @DisplayName("from the entity which updates column values by modifying own state")
-        void fromEntityState() {
-            EntityClass<TaskListViewProjection> entityClass =
-                    asEntityClass(TaskListViewProjection.class);
-            Introspector introspector = new Introspector(entityClass);
+        ImmutableMap<ColumnName, SimpleColumn> columns = introspector.simpleColumns();
 
-            ImmutableMap<ColumnName, Column> columns = introspector.protoColumns();
-
-            assertThat(columns).containsKey(ColumnName.of("description"));
-        }
+        assertThat(columns).containsKey(ColumnName.of("description"));
     }
 
     @Test
@@ -93,14 +86,14 @@ class IntrospectorTest {
         EntityClass<PrivateProjection> entityClass = asEntityClass(PrivateProjection.class);
         Introspector introspector = new Introspector(entityClass);
 
-        ImmutableMap<ColumnName, Column> columns = introspector.protoColumns();
+        ImmutableMap<ColumnName, ImplementedColumn> columns = introspector.implementedColumns();
 
         ColumnName description = ColumnName.of("description");
-        Column column = columns.get(description);
+        ImplementedColumn column = columns.get(description);
 
         Entity<TaskListViewId, TaskListView> projection = new PrivateProjection();
 
-        assertThat(column.valueFromInterface(projection)).isEqualTo(PrivateProjection.DESCRIPTION);
+        assertThat(column.valueIn(projection)).isEqualTo(PrivateProjection.DESCRIPTION);
     }
 
     @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
@@ -112,7 +105,7 @@ class IntrospectorTest {
                 asEntityClass(InvalidEntityWithColumns.class);
         Introspector introspector = new Introspector(entityClass);
 
-        assertThrows(IllegalStateException.class, introspector::protoColumns);
+        assertThrows(IllegalStateException.class, introspector::implementedColumns);
     }
 
     /**

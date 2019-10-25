@@ -21,6 +21,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -28,20 +29,18 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
-import io.spine.code.proto.FieldDeclaration;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
-import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.Columns;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.ImplementedColumn;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -405,18 +404,19 @@ public abstract class Transaction<I,
 
     @SuppressWarnings("unchecked") // Logically correct.
     private void updateColumns() {
-        Columns columns = entity.thisClass()
-                                .columns()
-                                .protoColumns();
-        if (columns.empty() || !columns.basedOnInterface()) {
-            // Columns are not present/already propagated to the entity state.
+        ImmutableMap<ColumnName, ImplementedColumn> columns = entity.thisClass()
+                                                                    .columns()
+                                                                    .implementedColumns();
+        if (columns.isEmpty()) {
             return;
         }
-        Map<FieldDeclaration, Object> values =
-                columns.valuesFromInterface(entity, Column::protoField);
         Message.Builder newStateWithColumns = entity.state()
                                                     .toBuilder();
-        values.forEach((field, value) -> newStateWithColumns.setField(field.descriptor(), value));
+        columns.values()
+               .forEach(column -> {
+                   Object value = column.valueIn(entity);
+                   newStateWithColumns.setField(column.protoField().descriptor(), value);
+               });
         entity.updateState((S) newStateWithColumns.build());
     }
 

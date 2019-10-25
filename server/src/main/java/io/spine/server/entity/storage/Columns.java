@@ -20,8 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
@@ -32,36 +30,39 @@ import io.spine.server.storage.LifecycleFlagField;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static java.util.function.Function.identity;
 
 @Immutable
 @Internal
 public final class Columns {
 
-    /**
-     * A map of entity columns by their name.
-     */
-    private final ImmutableMap<ColumnName, Column> columns;
+    private final ImmutableMap<ColumnName, SpineColumn> systemColumns;
+    private final ImmutableMap<ColumnName, SimpleColumn> simpleColumns;
+    private final ImmutableMap<ColumnName, ImplementedColumn> implementedColumns;
+
     private final EntityClass<?> entityClass;
 
-    @VisibleForTesting
-    Columns(Map<ColumnName, Column> columns, EntityClass<?> entityClass) {
-        this.columns = ImmutableMap.copyOf(columns);
+    private Columns(
+            ImmutableMap<ColumnName, SpineColumn> systemColumns,
+            ImmutableMap<ColumnName, SimpleColumn> simpleColumns,
+            ImmutableMap<ColumnName, ImplementedColumn> implementedColumns,
+            EntityClass<?> entityClass) {
+        this.systemColumns = systemColumns;
+        this.simpleColumns = simpleColumns;
+        this.implementedColumns = implementedColumns;
         this.entityClass = entityClass;
     }
 
     public static Columns of(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
         Introspector introspector = new Introspector(entityClass);
-        ImmutableMap.Builder<ColumnName, Column> columns = ImmutableMap.builder();
-        columns.putAll(introspector.systemColumns());
-        columns.putAll(introspector.protoColumns());
-        return new Columns(columns.build(), entityClass);
+        return new Columns(introspector.systemColumns(),
+                           introspector.simpleColumns(),
+                           introspector.implementedColumns(),
+                           entityClass);
     }
 
     public static Columns of(Class<? extends Entity<?, ?>> entityClass) {
@@ -76,76 +77,55 @@ public final class Columns {
 
     public Optional<Column> find(ColumnName columnName) {
         checkNotNull(columnName);
-        Column column = columns.get(columnName);
-        Optional<Column> result = Optional.ofNullable(column);
-        return result;
-    }
-
-    public ImmutableCollection<Column> columnList() {
-        return columns.values();
-    }
-
-    public boolean basedOnInterface() {
-        boolean result = columnList()
-                .stream()
-                .allMatch(Column::isInterfaceBased);
-        return result;
-    }
-
-    public boolean empty() {
-        boolean result = columns.isEmpty();
-        return result;
-    }
-
-    public Map<Column, Object> valuesIn(Entity<?, ?> source) {
-        return valuesIn(source, identity());
-    }
-
-    /**
-     * A convenience method that returns column values by {@code C}.
-     */
-    public <C> Map<C, Object> valuesIn(Entity<?, ?> source, Function<Column, C> columnMapper) {
-        checkNotNull(source);
-        Map<C, Object> result = new HashMap<>();
-        for (Column column : columns.values()) {
-            result.put(columnMapper.apply(column), column.valueIn(source));
+        Column column = systemColumns.get(columnName);
+        if (column == null) {
+            column = simpleColumns.get(columnName);
         }
-        return result;
-    }
-
-    public Map<Column, Object> valuesFromInterface(Entity<?, ?> source) {
-        return valuesFromInterface(source, identity());
-    }
-
-    public <C> Map<C, Object> valuesFromInterface(Entity<?, ?> source,
-                                                  Function<Column, C> columnMapper) {
-        Map<C, Object> result = new HashMap<>();
-        for (Column column : columns.values()) {
-            result.put(columnMapper.apply(column), column.valueFromInterface(source));
+        if (column == null) {
+            column = implementedColumns.get(columnName);
         }
+        return Optional.ofNullable(column);
+    }
+
+    public Map<ColumnName, Object> valuesIn(Entity<?, ?> source) {
+        Map<ColumnName, Object> result = new HashMap<>();
+        systemColumns.forEach(
+                (name, column) -> result.put(name, column.valueIn(source))
+        );
+        simpleColumns.forEach(
+                (name, column) -> result.put(name, column.valueIn(source.state()))
+        );
+        implementedColumns.forEach(
+                (name, column) -> result.put(name, column.valueIn(source.state()))
+        );
         return result;
     }
 
-    public Columns protoColumns() {
-        ImmutableMap.Builder<ColumnName, Column> protoColumns = ImmutableMap.builder();
-        columns.values()
-               .stream()
-               .filter(Column::isProtoColumn)
-               .forEach(column -> protoColumns.put(column.name(), column));
-        return new Columns(protoColumns.build(), entityClass);
+    public ImmutableMap<ColumnName, Column> allColumns() {
+        ImmutableMap.Builder<ColumnName, Column> builder = ImmutableMap.builder();
+        builder.putAll(systemColumns);
+        builder.putAll(simpleColumns);
+        builder.putAll(implementedColumns);
+        return builder.build();
     }
 
     /**
      * Returns a subset of columns corresponding to the lifecycle of the entity.
      */
-    public Columns lifecycleColumns() {
-        ImmutableMap.Builder<ColumnName, Column> lifecycleColumns = ImmutableMap.builder();
+    public ImmutableMap<ColumnName, SpineColumn> lifecycleColumns() {
+        ImmutableMap.Builder<ColumnName, SpineColumn> result = ImmutableMap.builder();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
             ColumnName name = ColumnName.of(field.name());
-            Optional<Column> column = find(name);
-            column.ifPresent(col -> lifecycleColumns.put(name, col));
+            SpineColumn column = systemColumns.get(name);
+            if (column != null) {
+                result.put(name, column);
+            }
         }
-        return new Columns(lifecycleColumns.build(), entityClass);
+        return result.build();
+    }
+
+    public ImmutableMap<ColumnName, ImplementedColumn> implementedColumns() {
+        return implementedColumns;
     }
 
     private IllegalStateException columnNotFound(ColumnName columnName) {

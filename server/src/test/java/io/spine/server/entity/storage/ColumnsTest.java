@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
@@ -27,12 +28,10 @@ import io.spine.server.storage.LifecycleFlagField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -104,7 +103,7 @@ class ColumnsTest {
         int systemColumnCount = ColumnTests.defaultColumns.size();
         int protoColumnCount = 4;
 
-        assertThat(columns.columnList())
+        assertThat(columns.allColumns())
                 .hasSize(systemColumnCount + protoColumnCount);
 
     }
@@ -113,69 +112,48 @@ class ColumnsTest {
     @DisplayName("extract values from entity")
     void extractColumnValues() {
         TaskViewProjection projection = new TaskViewProjection();
-        Map<Column, Object> values = columns.valuesIn(projection);
+        Map<ColumnName, Object> values = columns.valuesIn(projection);
 
         assertThat(values).containsExactly(
-                column("archived"), projection.isArchived(),
-                column("deleted"), projection.isDeleted(),
-                column("version"), projection.version(),
-                column("name"), projection.state().getName(),
-                column("estimate_in_days"), projection.state().getEstimateInDays(),
-                column("status"), projection.state().getStatus(),
-                column("due_date"), projection.state().getDueDate()
+                ColumnName.of("archived"), projection.isArchived(),
+                ColumnName.of("deleted"), projection.isDeleted(),
+                ColumnName.of("version"), projection.version(),
+                ColumnName.of("name"), projection.state()
+                                                 .getName(),
+                ColumnName.of("estimate_in_days"), projection.state()
+                                                             .getEstimateInDays(),
+                ColumnName.of("status"), projection.state()
+                                                   .getStatus(),
+                ColumnName.of("due_date"), projection.state()
+                                                     .getDueDate()
         );
     }
 
     @Test
-    @DisplayName("extract interface-based column values from the entity")
+    @DisplayName("return a map of interface-based columns")
     void extractInterfaceBasedValues() {
         TaskViewProjection projection = new TaskViewProjection();
-        Map<Column, Object> values = columns.protoColumns()
-                                            .valuesFromInterface(projection);
+        ImmutableMap<ColumnName, ImplementedColumn> values = columns.implementedColumns();
 
-        assertThat(values).containsExactly(
-                column("name"), projection.getName(),
-                column("estimate_in_days"), projection.getEstimateInDays(),
-                column("status"), projection.getStatus(),
-                column("due_date"), projection.getDueDate()
-        );
+        assertThat(values).containsKey(ColumnName.of("name"));
+        assertThat(values).containsKey(ColumnName.of("estimate_in_days"));
+        assertThat(values).containsKey(ColumnName.of("status"));
+        assertThat(values).containsKey(ColumnName.of("due_date"));
     }
 
     @Test
-    @DisplayName("tell if column map is empty")
-    void checkEmpty() {
-        Columns columns =
-                new Columns(Collections.emptyMap(), asEntityClass(TaskViewProjection.class));
-        assertThat(columns.empty()).isTrue();
-    }
-
-    @Test
-    @DisplayName("return a subset of columns that are declared as proto fields")
-    void returnProtoColumns() {
-        Columns columns = this.columns.protoColumns();
-
-        assertThat(columns.columnList()).hasSize(4);
-    }
-
-    @Test
-    @DisplayName("return lifecycle columns of the entity if they are present")
+    @DisplayName("return a map of lifecycle columns of the entity")
     void returnLifecycleColumns() {
-        Columns columns = this.columns.lifecycleColumns();
+        ImmutableMap<ColumnName, SpineColumn> columns = this.columns.lifecycleColumns();
 
-        assertThat(columns.columnList()).hasSize(2);
+        assertThat(columns).hasSize(2);
 
         ColumnName archived = ColumnName.of(LifecycleFlagField.archived);
-        Optional<Column> archivedColumn = columns.find(archived);
-        assertThat(archivedColumn.isPresent()).isTrue();
+        SpineColumn archivedColumn = columns.get(archived);
+        assertThat(archivedColumn).isNotNull();
 
         ColumnName deleted = ColumnName.of(LifecycleFlagField.deleted);
-        Optional<Column> deletedColumn = columns.find(deleted);
-        assertThat(deletedColumn.isPresent()).isTrue();
-    }
-
-    private Column column(String name) {
-        ColumnName columnName = ColumnName.of(name);
-        Column result = columns.get(columnName);
-        return result;
+        SpineColumn deletedColumn = columns.get(deleted);
+        assertThat(deletedColumn).isNotNull();
     }
 }

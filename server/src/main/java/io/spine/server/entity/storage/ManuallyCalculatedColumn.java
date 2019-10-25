@@ -21,11 +21,11 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.server.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Immutable
-public interface Column {
+interface ManuallyCalculatedColumn extends Column {
 
-    ColumnName name();
-
-    Class<?> type();
+    @Nullable Object valueIn(Entity<?, ?> source);
 }

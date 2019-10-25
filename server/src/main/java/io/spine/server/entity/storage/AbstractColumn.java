@@ -23,9 +23,25 @@ package io.spine.server.entity.storage;
 import com.google.errorprone.annotations.Immutable;
 
 @Immutable
-public interface Column {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
+// Prevent instantiation in favor of concrete column types.
+abstract class AbstractColumn implements Column {
 
-    ColumnName name();
+    private final ColumnName name;
+    private final Class<?> type;
 
-    Class<?> type();
+    protected AbstractColumn(ColumnName name, Class<?> type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    @Override
+    public ColumnName name() {
+        return name;
+    }
+
+    @Override
+    public Class<?> type() {
+        return type;
+    }
 }

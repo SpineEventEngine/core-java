@@ -31,6 +31,7 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Subscribe;
 import io.spine.core.Version;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
@@ -212,7 +213,7 @@ public final class MirrorProjection
     /**
      * Obtains the type of the mirrored aggregate state.
      *
-     * <p>This method defined is an entity {@link io.spine.server.entity.storage.Column column}
+     * <p>This method defined is an entity {@link Column column}
      * required for effective querying.
      *
      * <p>The framework never queries for several types of mirrors in a single call.

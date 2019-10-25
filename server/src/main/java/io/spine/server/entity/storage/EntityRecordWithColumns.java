@@ -63,7 +63,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
                                                  Entity<?, ?> entity,
                                                  EntityClass<?> entityClass) {
         Columns columns = entityClass.columns();
-        Map<ColumnName, Object> storageFields = columns.valuesIn(entity, Column::name);
+        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
         return of(record, storageFields);
     }
 

@@ -21,11 +21,26 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.server.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Immutable
-public interface Column {
+import java.util.function.Function;
 
-    ColumnName name();
+public final class SpineColumn extends AbstractColumn implements ManuallyCalculatedColumn {
 
-    Class<?> type();
+    private final Getter getter;
+
+    SpineColumn(ColumnName name, Class<?> type, Getter getter) {
+        super(name, type);
+        this.getter = getter;
+    }
+
+    @Override
+    public @Nullable Object valueIn(Entity<?, ?> entity) {
+        return getter.apply(entity);
+    }
+
+    @Immutable
+    interface Getter extends Function<Entity<?, ?>, Object> {
+    }
 }

@@ -21,11 +21,36 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
+import io.spine.code.proto.FieldDeclaration;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Immutable
-public interface Column {
+import java.util.function.Function;
 
-    ColumnName name();
+public final class SimpleColumn
+        extends AbstractColumn
+        implements ColumnDeclaredInProto {
 
-    Class<?> type();
+    private final Getter getter;
+    private final FieldDeclaration field;
+
+    SimpleColumn(ColumnName name, Class<?> type, Getter getter, FieldDeclaration field) {
+        super(name, type);
+        this.getter = getter;
+        this.field = field;
+    }
+
+    @Override
+    public @Nullable Object valueIn(Message entityState) {
+        return getter.apply(entityState);
+    }
+
+    @Override
+    public FieldDeclaration protoField() {
+        return field;
+    }
+
+    @Immutable
+    interface Getter extends Function<Message, Object> {
+    }
 }

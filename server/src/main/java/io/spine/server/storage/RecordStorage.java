@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -32,10 +33,11 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.SpineColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -118,7 +120,8 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Writes a record and its {@linkplain Column columns} into the storage.
+     * Writes a record and its {@linkplain io.spine.server.entity.storage.Column columns} into the
+     * storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
@@ -270,7 +273,7 @@ public abstract class RecordStorage<I>
     /**
      * Returns the columns of the managed {@link Entity}.
      *
-     * @see Column
+     * @see io.spine.server.entity.storage.Column
      * @see io.spine.code.proto.ColumnOption
      */
     @Internal
@@ -279,9 +282,9 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Returns a {@code Map} of {@linkplain Column columns} corresponded to the
-     * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed
-     * by this storage.
+     * Returns a {@code Map} of {@linkplain io.spine.server.entity.storage.Column columns}
+     * corresponded to the {@link LifecycleFlagField lifecycle storage fields} of the
+     * {@link Entity} class managed by this storage.
      *
      * @return a {@code Map} of managed {@link Entity} lifecycle columns
      * @throws IllegalArgumentException
@@ -290,7 +293,7 @@ public abstract class RecordStorage<I>
      * @see LifecycleFlagField
      */
     @Internal
-    public Columns lifecycleColumns() {
+    public ImmutableMap<ColumnName, SpineColumn> lifecycleColumns() {
         return columns().lifecycleColumns();
     }
 
@@ -348,7 +351,8 @@ public abstract class RecordStorage<I>
     readAllRecords(EntityQuery<I> query, ResponseFormat format);
 
     /**
-     * Writes a record and the associated {@link Column} values into the storage.
+     * Writes a record and the associated {@link io.spine.server.entity.storage.Column} values into
+     * the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *

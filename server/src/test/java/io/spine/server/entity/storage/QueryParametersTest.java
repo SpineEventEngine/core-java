@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.UnmodifiableIterator;
@@ -215,7 +216,7 @@ class QueryParametersTest {
         assertEquals(ALL, lifecycleParameter.operator());
         ImmutableMultimap<Column, Filter> filters = lifecycleParameter.filters();
 
-        Columns lifecycleColumns = storage.lifecycleColumns();
+        ImmutableMap<ColumnName, SpineColumn> lifecycleColumns = storage.lifecycleColumns();
         ColumnName archivedName = ColumnName.of(archived);
         Column archivedColumn = lifecycleColumns.get(archivedName);
         ColumnName deletedName = ColumnName.of(deleted);
