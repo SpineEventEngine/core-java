@@ -254,7 +254,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         for (int i = 0; i < bulkSize; i++) {
             I id = newId();
             EntityRecord record = newStorageRecord(id);
-            initial.put(id, EntityRecordWithColumns.create(record, storage));
+            initial.put(id, EntityRecordWithColumns.of(record));
         }
         storage.write(initial);
 
@@ -335,7 +335,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         I id = newId();
         EntityRecord record = newStorageRecord(id);
         RecordStorage<I> storage = storage();
-        storage.write(id, EntityRecordWithColumns.create(record, storage));
+        storage.write(id, EntityRecordWithColumns.of(record));
 
         storage.writeLifecycleFlags(id, archived());
 

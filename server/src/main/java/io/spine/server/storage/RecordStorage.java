@@ -142,7 +142,7 @@ public abstract class RecordStorage<I>
     @Override
     public void write(I id, EntityRecord record) {
         EntityRecordWithColumns recordWithStorageFields =
-                EntityRecordWithColumns.create(record, this);
+                EntityRecordWithColumns.of(record);
         write(id, recordWithStorageFields);
     }
 

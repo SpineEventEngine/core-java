@@ -26,15 +26,13 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.entity.model.EntityClass;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -59,62 +57,18 @@ public final class EntityRecordWithColumns implements WithLifecycle {
     }
 
     /**
+     * ...
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
-                                                 RecordStorage<?> storage) {
-        Columns columns = storage.columns();
+                                                 EntityClass<?> entityClass) {
+        Columns columns = entityClass.columns();
         Map<ColumnName, Object> storageFields = columns.valuesIn(entity, Column::name);
         return of(record, storageFields);
     }
 
-    /**
-     * ...
-     *
-     * <p>Manually updates the entity lifecycle and version storage fields based on the passed
-     * {@link EntityRecord}.
-     */
-    public static EntityRecordWithColumns create(EntityRecord record, RecordStorage<?> storage) {
-        return create(record, storage.columns());
-    }
-
-    @VisibleForTesting
-    static EntityRecordWithColumns create(EntityRecord record, Columns columns) {
-        Map<ColumnName, Object> storageFields = new HashMap<>();
-        storeLifecycle(storageFields, record, columns);
-        storeVersion(storageFields, record, columns);
-        return new EntityRecordWithColumns(record, storageFields);
-    }
-
-    private static void storeLifecycle(Map<ColumnName, Object> storageFields,
-                                       EntityRecord record,
-                                       Columns columns) {
-        ColumnName archivedColumn = ColumnName.of(archived);
-        boolean archivedPresent = columns.find(archivedColumn)
-                                         .isPresent();
-        ColumnName deletedColumn = ColumnName.of(deleted);
-        boolean deletedPresent = columns.find(deletedColumn)
-                                        .isPresent();
-        if (archivedPresent && deletedPresent) {
-            boolean archived = record.getLifecycleFlags()
-                                     .getArchived();
-            storageFields.put(archivedColumn, archived);
-
-            boolean deleted = record.getLifecycleFlags()
-                                    .getDeleted();
-            storageFields.put(deletedColumn, deleted);
-        }
-    }
-
-    private static void storeVersion(Map<ColumnName, Object> storageFields,
-                                     EntityRecord record,
-                                     Columns columns) {
-        ColumnName versionColumn = ColumnName.of(version);
-        boolean versionPresent = columns.find(versionColumn)
-                                        .isPresent();
-        if (versionPresent) {
-            storageFields.put(versionColumn, record.getVersion());
-        }
+    public static EntityRecordWithColumns of(EntityRecord record) {
+        return new EntityRecordWithColumns(record, Collections.emptyMap());
     }
 
     /**
@@ -176,7 +130,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      * <p>If returns {@code false}, the columns are not considered by the storage.
      *
      * @return {@code true} if the object was constructed using
-     *  {@link #create(EntityRecord, Entity, RecordStorage)} and the entity has columns;
+     *  {@link #create(EntityRecord, Entity, EntityClass)} and the entity has columns;
      *  {@code false} otherwise
      */
     public boolean hasColumns() {

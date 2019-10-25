@@ -24,15 +24,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import io.spine.core.Version;
-import io.spine.core.Versions;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
-import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.server.entity.storage.given.TestStorageRules;
-import io.spine.server.storage.LifecycleFlagField;
-import io.spine.server.storage.VersionField;
 import io.spine.test.storage.TaskId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Time.currentTime;
 import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static java.util.Collections.singletonMap;
@@ -181,38 +174,6 @@ class EntityRecordWithColumnsTest {
                 storageFields
         );
         assertThat(record.columnNames()).containsExactlyElementsIn(defaultColumns);
-    }
-
-    @Test
-    @DisplayName("update system columns when writing an entity record")
-    void updateSystemColumns() {
-        Columns columns = Columns.of(TaskViewProjection.class);
-        int versionNumber = 42;
-        Version version = Versions.newVersion(versionNumber, currentTime());
-        boolean archived = true;
-        boolean deleted = false;
-        LifecycleFlags flags = LifecycleFlags
-                .newBuilder()
-                .setArchived(archived)
-                .setDeleted(deleted)
-                .build();
-        EntityRecord record = EntityRecord
-                .newBuilder()
-                .setVersion(version)
-                .setLifecycleFlags(flags)
-                .build();
-        EntityRecordWithColumns recordWithColumns =
-                EntityRecordWithColumns.create(record, columns);
-
-        Object archivedValue =
-                recordWithColumns.columnValue(ColumnName.of(LifecycleFlagField.archived));
-        assertThat(archivedValue).isEqualTo(archived);
-
-        Object deletedValue =
-                recordWithColumns.columnValue(ColumnName.of(LifecycleFlagField.deleted));
-        assertThat(deletedValue).isEqualTo(deleted);
-        Object versionValue = recordWithColumns.columnValue(ColumnName.of(VersionField.version));
-        assertThat(versionValue).isEqualTo(version);
     }
 
     @Test
