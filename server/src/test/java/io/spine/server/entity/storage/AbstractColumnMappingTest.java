@@ -23,7 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.server.entity.storage.given.TestStorageRules;
+import io.spine.server.entity.storage.given.TestColumnMapping;
 import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,45 +31,45 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.storage.given.TestStorageRules.CONVERTED_MESSAGE;
-import static io.spine.server.entity.storage.given.TestStorageRules.CONVERTED_STRING;
-import static io.spine.server.entity.storage.given.TestStorageRules.NULL_VALUE;
+import static io.spine.server.entity.storage.given.TestColumnMapping.CONVERTED_MESSAGE;
+import static io.spine.server.entity.storage.given.TestColumnMapping.CONVERTED_STRING;
+import static io.spine.server.entity.storage.given.TestColumnMapping.NULL_VALUE;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`AbstractStorageRules` should")
-class AbstractStorageRulesTest {
+@DisplayName("`AbstractColumnMapping` should")
+class AbstractColumnMappingTest {
 
-    private final ColumnStorageRules<String> rules = new TestStorageRules();
+    private final ColumnMapping<String> mapping = new TestColumnMapping();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .testAllPublicInstanceMethods(rules);
+                .testAllPublicInstanceMethods(mapping);
     }
 
     @Test
-    @DisplayName("obtain a storage rule for the given proto type")
+    @DisplayName("obtain a column type mapping for the given proto type")
     void obtainForType() {
-        ColumnStorageRule<?, ? extends String> rule = rules.of(String.class);
+        ColumnTypeMapping<?, ? extends String> rule = mapping.of(String.class);
         String result = rule.applyTo("some-string");
         assertThat(result).isEqualTo(CONVERTED_STRING);
     }
 
     @Test
-    @DisplayName("obtain a storage rule of a supertype if the given proto type is not present")
+    @DisplayName("obtain a column type mapping of a supertype")
     void obtainForSupertype() {
         Timestamp timestamp = Time.currentTime();
-        ColumnStorageRule<?, ? extends String> rule = rules.of(Timestamp.class);
+        ColumnTypeMapping<?, ? extends String> rule = mapping.of(Timestamp.class);
         String result = rule.applyTo(timestamp);
         assertThat(result).isEqualTo(CONVERTED_MESSAGE);
     }
 
     @Test
-    @DisplayName("obtain a storage rule for `null`")
+    @DisplayName("obtain a mapping for `null`")
     void obtainForNull() {
-        ColumnStorageRule<@Nullable ?, ? extends String> rule = rules.ofNull();
+        ColumnTypeMapping<@Nullable ?, ? extends String> rule = mapping.ofNull();
         String result = rule.apply(null);
         assertThat(result).isEqualTo(NULL_VALUE);
     }
@@ -77,26 +77,26 @@ class AbstractStorageRulesTest {
     @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
     // Called to throw exception.
     @Test
-    @DisplayName("throw an `IAE` when the rule is not found for the specified type")
+    @DisplayName("throw an `IAE` when the type is not found")
     void throwOnUnknownType() {
         assertThrows(IllegalArgumentException.class,
-                     () -> rules.of(AbstractStorageRulesTest.class));
+                     () -> mapping.of(AbstractColumnMappingTest.class));
     }
 
     @Test
-    @DisplayName("allow to setup custom rules in the derived classes")
-    void allowToSetupCustomRules() {
+    @DisplayName("allow to setup custom mapping in the derived classes")
+    void allowToSetupCustomMapping() {
         TaskView taskView = taskView();
-        ColumnStorageRule<?, ? extends String> rule = rules.of(TaskView.class);
+        ColumnTypeMapping<?, ? extends String> rule = mapping.of(TaskView.class);
         String result = rule.applyTo(taskView);
         assertThat(result).isEqualTo(taskView.getName());
     }
 
     @Test
-    @DisplayName("consider supertypes when obtaining custom rules")
+    @DisplayName("consider supertypes when obtaining custom mapping")
     void obtainCustomForSupertype() {
         TaskViewId id = taskViewId();
-        ColumnStorageRule<?, ? extends String> rule = rules.of(TaskViewId.class);
+        ColumnTypeMapping<?, ? extends String> rule = mapping.of(TaskViewId.class);
         String result = rule.applyTo(id);
         assertThat(result).isEqualTo(String.valueOf(id.getId()));
     }

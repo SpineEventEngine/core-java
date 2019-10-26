@@ -23,12 +23,12 @@ package io.spine.server.entity.storage.given;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.spine.server.entity.storage.AbstractStorageRules;
-import io.spine.server.entity.storage.ColumnStorageRule;
+import io.spine.server.entity.storage.AbstractColumnMapping;
+import io.spine.server.entity.storage.ColumnTypeMapping;
 import io.spine.test.entity.TaskView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class TestStorageRules extends AbstractStorageRules<String> {
+public final class TestColumnMapping extends AbstractColumnMapping<String> {
 
     public static final String CONVERTED_STRING = "123";
     public static final String CONVERTED_MESSAGE = "converted-message";
@@ -36,66 +36,66 @@ public final class TestStorageRules extends AbstractStorageRules<String> {
 
     @Override
     protected void
-    setupCustomRules(ImmutableMap.Builder<Class<?>, ColumnStorageRule<?, ? extends String>> builder) {
+    setupCustomMapping(ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends String>> builder) {
         builder.put(TaskView.class, ofTaskView());
         builder.put(IntIdentifier.class, ofIntIdentifier());
     }
 
     @Override
-    protected ColumnStorageRule<String, String> ofString() {
+    protected ColumnTypeMapping<String, String> ofString() {
         return str -> CONVERTED_STRING;
     }
 
     @Override
-    protected ColumnStorageRule<Integer, ? extends String> ofInteger() {
+    protected ColumnTypeMapping<Integer, ? extends String> ofInteger() {
         return String::valueOf;
     }
 
     @Override
-    protected ColumnStorageRule<Long, ? extends String> ofLong() {
+    protected ColumnTypeMapping<Long, ? extends String> ofLong() {
         throw unsupportedType(Long.class);
     }
 
     @Override
-    protected ColumnStorageRule<Float, ? extends String> ofFloat() {
+    protected ColumnTypeMapping<Float, ? extends String> ofFloat() {
         throw unsupportedType(Float.class);
     }
 
     @Override
-    protected ColumnStorageRule<Double, ? extends String> ofDouble() {
+    protected ColumnTypeMapping<Double, ? extends String> ofDouble() {
         throw unsupportedType(Double.class);
     }
 
     @Override
-    protected ColumnStorageRule<Boolean, ? extends String> ofBoolean() {
+    protected ColumnTypeMapping<Boolean, ? extends String> ofBoolean() {
         throw unsupportedType(Boolean.class);
     }
 
     @Override
-    protected ColumnStorageRule<ByteString, ? extends String> ofByteString() {
+    protected ColumnTypeMapping<ByteString, ? extends String> ofByteString() {
         throw unsupportedType(ByteString.class);
     }
 
     @Override
-    protected ColumnStorageRule<Enum<?>, ? extends String> ofEnum() {
+    protected ColumnTypeMapping<Enum<?>, ? extends String> ofEnum() {
         throw unsupportedType(Enum.class);
     }
 
     @Override
-    protected ColumnStorageRule<Message, String> ofMessage() {
+    protected ColumnTypeMapping<Message, String> ofMessage() {
         return msg -> CONVERTED_MESSAGE;
     }
 
     @Override
-    public ColumnStorageRule<@Nullable ?, ? extends String> ofNull() {
+    public ColumnTypeMapping<@Nullable ?, ? extends String> ofNull() {
         return o -> NULL_VALUE;
     }
 
-    private static ColumnStorageRule<TaskView, String> ofTaskView() {
+    private static ColumnTypeMapping<TaskView, String> ofTaskView() {
         return TaskView::getName;
     }
 
-    private static ColumnStorageRule<IntIdentifier, String> ofIntIdentifier() {
+    private static ColumnTypeMapping<IntIdentifier, String> ofIntIdentifier() {
         return id -> String.valueOf(id.getId());
     }
 }

@@ -31,29 +31,29 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
-public abstract class AbstractStorageRules<R> implements ColumnStorageRules<R> {
+public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
 
     private final
-    ImmutableMap<Class<?>, Supplier<ColumnStorageRule<?, ? extends R>>> standardRules
-            = standardRules();
+    ImmutableMap<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>> standardMapping
+            = standardMapping();
 
     private @MonotonicNonNull
-    ImmutableMap<Class<?>, ColumnStorageRule<?, ? extends R>> customRules;
+    ImmutableMap<Class<?>, ColumnTypeMapping<?, ? extends R>> customMapping;
 
     @Override
-    public ColumnStorageRule<?, ? extends R> of(Class<?> type) {
+    public ColumnTypeMapping<?, ? extends R> of(Class<?> type) {
         checkNotNull(type);
-        Optional<ColumnStorageRule<?, ? extends R>> rule = customRuleFor(type);
+        Optional<ColumnTypeMapping<?, ? extends R>> rule = customMappingFor(type);
         if (rule.isPresent()) {
             return rule.get();
         }
-        rule = standardRuleFor(type);
+        rule = standardMappingFor(type);
         return rule.orElseThrow(() -> unsupportedType(type));
     }
 
-    private ImmutableMap<Class<?>, Supplier<ColumnStorageRule<?, ? extends R>>>
-    standardRules() {
-        ImmutableMap.Builder<Class<?>, Supplier<ColumnStorageRule<?, ? extends R>>> builder =
+    private ImmutableMap<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>>
+    standardMapping() {
+        ImmutableMap.Builder<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>> builder =
                 ImmutableMap.builder();
 
         builder.put(String.class, this::ofString);
@@ -82,68 +82,68 @@ public abstract class AbstractStorageRules<R> implements ColumnStorageRules<R> {
         return builder.build();
     }
 
-    private ImmutableMap<Class<?>, ColumnStorageRule<?, ? extends R>>
-    customRules() {
-        if (customRules == null) {
-            ImmutableMap.Builder<Class<?>, ColumnStorageRule<?, ? extends R>> builder =
+    private ImmutableMap<Class<?>, ColumnTypeMapping<?, ? extends R>>
+    customMapping() {
+        if (customMapping == null) {
+            ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends R>> builder =
                     ImmutableMap.builder();
 
-            setupCustomRules(builder);
+            setupCustomMapping(builder);
 
-            customRules = builder.build();
+            customMapping = builder.build();
         }
-        return customRules;
+        return customMapping;
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Do not enforce implementation in descendants.
     protected void
-    setupCustomRules(ImmutableMap.Builder<Class<?>, ColumnStorageRule<?, ? extends R>> builder) {
+    setupCustomMapping(ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends R>> builder) {
         // NO-OP by default.
     }
 
-    protected abstract ColumnStorageRule<String, ? extends R> ofString();
+    protected abstract ColumnTypeMapping<String, ? extends R> ofString();
 
-    protected abstract ColumnStorageRule<Integer, ? extends R> ofInteger();
+    protected abstract ColumnTypeMapping<Integer, ? extends R> ofInteger();
 
-    protected abstract ColumnStorageRule<Long, ? extends R> ofLong();
+    protected abstract ColumnTypeMapping<Long, ? extends R> ofLong();
 
-    protected abstract ColumnStorageRule<Float, ? extends R> ofFloat();
+    protected abstract ColumnTypeMapping<Float, ? extends R> ofFloat();
 
-    protected abstract ColumnStorageRule<Double, ? extends R> ofDouble();
+    protected abstract ColumnTypeMapping<Double, ? extends R> ofDouble();
 
-    protected abstract ColumnStorageRule<Boolean, ? extends R> ofBoolean();
+    protected abstract ColumnTypeMapping<Boolean, ? extends R> ofBoolean();
 
-    protected abstract ColumnStorageRule<ByteString, ? extends R> ofByteString();
+    protected abstract ColumnTypeMapping<ByteString, ? extends R> ofByteString();
 
-    protected abstract ColumnStorageRule<Enum<?>, ? extends R> ofEnum();
+    protected abstract ColumnTypeMapping<Enum<?>, ? extends R> ofEnum();
 
-    protected abstract ColumnStorageRule<Message, ? extends R> ofMessage();
+    protected abstract ColumnTypeMapping<Message, ? extends R> ofMessage();
 
     protected IllegalArgumentException unsupportedType(Class<?> aClass) {
         throw newIllegalArgumentException(
-                "The columns of class `%s` are not supported by the storage rules.",
+                "The columns of class `%s` are not supported by the column mapping.",
                 aClass.getCanonicalName());
     }
 
-    private Optional<ColumnStorageRule<?, ? extends R>> customRuleFor(Class<?> aClass) {
-        Optional<ColumnStorageRule<?, ? extends R>> result =
-                customRules().keySet()
-                             .stream()
-                             .filter(cls -> cls.isAssignableFrom(aClass))
-                             .map(customRules()::get)
-                             .findFirst()
-                             .map(rule -> (ColumnStorageRule<?, ? extends R>) rule);
+    private Optional<ColumnTypeMapping<?, ? extends R>> customMappingFor(Class<?> aClass) {
+        Optional<ColumnTypeMapping<?, ? extends R>> result =
+                customMapping().keySet()
+                               .stream()
+                               .filter(cls -> cls.isAssignableFrom(aClass))
+                               .map(customMapping()::get)
+                               .findFirst()
+                               .map(rule -> (ColumnTypeMapping<?, ? extends R>) rule);
         return result;
     }
 
-    private Optional<ColumnStorageRule<?, ? extends R>> standardRuleFor(Class<?> aClass) {
-        Optional<ColumnStorageRule<?, ? extends R>> result =
-                standardRules.keySet()
-                             .stream()
-                             .filter(cls -> cls.isAssignableFrom(aClass))
-                             .map(standardRules::get)
-                             .findFirst()
-                             .map(Supplier::get);
+    private Optional<ColumnTypeMapping<?, ? extends R>> standardMappingFor(Class<?> aClass) {
+        Optional<ColumnTypeMapping<?, ? extends R>> result =
+                standardMapping.keySet()
+                               .stream()
+                               .filter(cls -> cls.isAssignableFrom(aClass))
+                               .map(standardMapping::get)
+                               .findFirst()
+                               .map(Supplier::get);
         return result;
     }
 }

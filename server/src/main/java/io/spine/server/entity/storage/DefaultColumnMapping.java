@@ -24,67 +24,67 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static io.spine.server.entity.storage.ColumnStorageRule.identity;
+import static io.spine.server.entity.storage.ColumnTypeMapping.identity;
 
-public final class DefaultStorageRules extends AbstractStorageRules<Object> {
+public final class DefaultColumnMapping extends AbstractColumnMapping<Object> {
 
-    public static final DefaultStorageRules INSTANCE = new DefaultStorageRules();
+    public static final DefaultColumnMapping INSTANCE = new DefaultColumnMapping();
 
     /**
      * Prevents external construction so the class is accessed only through {@link #INSTANCE}.
      */
-    private DefaultStorageRules() {
+    private DefaultColumnMapping() {
         super();
     }
 
     @Override
-    protected ColumnStorageRule<String, String> ofString() {
+    protected ColumnTypeMapping<String, String> ofString() {
         return identity();
     }
 
     @Override
-    protected ColumnStorageRule<Integer, Integer> ofInteger() {
+    protected ColumnTypeMapping<Integer, Integer> ofInteger() {
         return identity();
     }
 
     @Override
-    protected ColumnStorageRule<Long, Long> ofLong() {
+    protected ColumnTypeMapping<Long, Long> ofLong() {
         return identity();
     }
 
     @Override
-    protected ColumnStorageRule<Float, Float> ofFloat() {
+    protected ColumnTypeMapping<Float, Float> ofFloat() {
         return identity();
     }
 
     @Override
-    protected ColumnStorageRule<Double, Double> ofDouble() {
+    protected ColumnTypeMapping<Double, Double> ofDouble() {
         return identity();
     }
 
     @Override
-    protected ColumnStorageRule<Boolean, Boolean> ofBoolean() {
+    protected ColumnTypeMapping<Boolean, Boolean> ofBoolean() {
         return identity();
     }
 
     @Override
-    protected ColumnStorageRule<ByteString, ByteString> ofByteString() {
+    protected ColumnTypeMapping<ByteString, ByteString> ofByteString() {
         return identity();
     }
 
     @Override
-    protected ColumnStorageRule<Enum<?>, Enum<?>> ofEnum() {
+    protected ColumnTypeMapping<Enum<?>, Enum<?>> ofEnum() {
         return identity();
     }
 
     @Override
-    protected ColumnStorageRule<Message, Message> ofMessage() {
+    protected ColumnTypeMapping<Message, Message> ofMessage() {
         return identity();
     }
 
     @SuppressWarnings("ReturnOfNull")
     @Override
-    public ColumnStorageRule<@Nullable ?, @Nullable ?> ofNull() {
+    public ColumnTypeMapping<@Nullable ?, @Nullable ?> ofNull() {
         return o -> null;
     }
 }

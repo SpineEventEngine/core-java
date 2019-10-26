@@ -30,7 +30,7 @@ import java.util.function.Function;
  * @param <R>
  *         the "persist as" type
  */
-public interface ColumnStorageRule<T, R> extends Function<T, R> {
+public interface ColumnTypeMapping<T, R> extends Function<T, R> {
 
     /**
      * A convenience alias for {@code #apply(T)}.
@@ -44,7 +44,7 @@ public interface ColumnStorageRule<T, R> extends Function<T, R> {
         return apply(value);
     }
 
-    static <T> ColumnStorageRule<T, T> identity() {
+    static <T> ColumnTypeMapping<T, T> identity() {
         return t -> t;
     }
 }

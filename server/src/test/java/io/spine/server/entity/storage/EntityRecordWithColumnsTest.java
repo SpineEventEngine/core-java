@@ -26,7 +26,7 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
-import io.spine.server.entity.storage.given.TestStorageRules;
+import io.spine.server.entity.storage.given.TestColumnMapping;
 import io.spine.test.storage.TaskId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
@@ -190,15 +190,15 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("return a column value for storage")
-    void returnValueWithStorageRules() {
+    @DisplayName("return a column value with the column mapping applied")
+    void returnValueWithColumnMapping() {
         ColumnName columnName = ColumnName.of("some-int-column");
         int columnValue = 42;
 
         ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
         EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
-        String value = record.columnValue(columnName, new TestStorageRules());
+        String value = record.columnValue(columnName, new TestColumnMapping());
 
         assertThat(value).isEqualTo(String.valueOf(columnValue));
     }
