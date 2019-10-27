@@ -24,11 +24,19 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.storage.SystemColumn;
 
+/**
+ * Marks an {@link Entity} that declares columns for lifecycle flags.
+ *
+ * @see SystemColumn
+ */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literal in annotation.
 @Internal
 public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> {
 
     /**
-     * Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#archived}.
+     * Obtains a value of the {@code archived} flag.
+     *
+     * <p>Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#archived}.
      */
     @SystemColumn(name = "archived")
     default boolean getArchived() {
@@ -36,7 +44,9 @@ public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> 
     }
 
     /**
-     * Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#deleted}.
+     * Obtains a value of the {@code deleted} flag.
+     *
+     * <p>Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#deleted}.
      */
     @SystemColumn(name = "deleted")
     default boolean getDeleted() {

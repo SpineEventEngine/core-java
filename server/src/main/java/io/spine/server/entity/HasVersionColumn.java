@@ -26,17 +26,14 @@ import io.spine.core.Version;
 import io.spine.server.entity.storage.SystemColumn;
 
 /**
- * Applies the {@link SystemColumn} annotation to {@code getVersion} method.
- *
- * <p>The interface is implemented by {@link Entity entities} that have a stored version.
+ * Marks an {@link Entity} that declares a {@link Version} column.
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literal in annotation.
 @Internal
 public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Obtains the version of the entity.
-     *
-     * <p>Corresponds to the {@link io.spine.server.storage.VersionField#version}.
      */
     @SystemColumn(name = "version")
     default Version getVersion() {
