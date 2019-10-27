@@ -143,16 +143,16 @@ class ColumnsTest {
     @Test
     @DisplayName("return a map of lifecycle columns of the entity")
     void returnLifecycleColumns() {
-        ImmutableMap<ColumnName, SpineColumn> columns = this.columns.lifecycleColumns();
+        ImmutableMap<ColumnName, Column> columns = this.columns.lifecycleColumns();
 
         assertThat(columns).hasSize(2);
 
         ColumnName archived = ColumnName.of(LifecycleFlagField.archived);
-        SpineColumn archivedColumn = columns.get(archived);
+        Column archivedColumn = columns.get(archived);
         assertThat(archivedColumn).isNotNull();
 
         ColumnName deleted = ColumnName.of(LifecycleFlagField.deleted);
-        SpineColumn deletedColumn = columns.get(deleted);
+        Column deletedColumn = columns.get(deleted);
         assertThat(deletedColumn).isNotNull();
     }
 }

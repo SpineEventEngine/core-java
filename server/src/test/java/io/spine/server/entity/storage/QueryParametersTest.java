@@ -216,7 +216,7 @@ class QueryParametersTest {
         assertEquals(ALL, lifecycleParameter.operator());
         ImmutableMultimap<Column, Filter> filters = lifecycleParameter.filters();
 
-        ImmutableMap<ColumnName, SpineColumn> lifecycleColumns = storage.lifecycleColumns();
+        ImmutableMap<ColumnName, Column> lifecycleColumns = storage.lifecycleColumns();
         ColumnName archivedName = ColumnName.of(archived);
         Column archivedColumn = lifecycleColumns.get(archivedName);
         ColumnName deletedName = ColumnName.of(deleted);

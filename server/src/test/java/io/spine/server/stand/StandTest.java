@@ -418,7 +418,7 @@ class StandTest extends TenantAwareTest {
 
             // Check the callback is called with the correct value.
             Any packedState = AnyPacker.pack(project);
-            assertEquals(packedState, callback.newEntityState());
+            assertThat(packedState).isEqualTo(callback.newEntityState());
         }
 
         @SuppressWarnings("OverlyCoupledMethod") // Huge end-to-end test.

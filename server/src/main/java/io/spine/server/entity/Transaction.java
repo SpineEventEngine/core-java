@@ -366,7 +366,7 @@ public abstract class Transaction<I,
                      ? entity.state()
                      : builder.buildPartial();
         if (initialState.equals(newState)) {
-            S withColumns = stateWithColumns();
+            S withColumns = stateWithColumns(initialState);
             if (initialState.equals(withColumns)) {
                 commitUnchangedState();
             } else {
@@ -400,7 +400,7 @@ public abstract class Transaction<I,
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
             if (updateColumns) {
-                updateColumns();
+                updateColumns(newState);
             }
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
@@ -414,8 +414,8 @@ public abstract class Transaction<I,
     /**
      * Propagates the entity column values to the entity state.
      */
-    private void updateColumns() {
-        S stateWithColumns = stateWithColumns();
+    private void updateColumns(S initialState) {
+        S stateWithColumns = stateWithColumns(initialState);
         entity.updateState(stateWithColumns);
     }
 
@@ -426,10 +426,10 @@ public abstract class Transaction<I,
      * declared in the entity class. The values of such columns need to be propagated to the entity
      * state during transaction commit.
      *
-     * <p>This method returns the updated entity state with all column values up-to-date.
+     * <p>This method returns the entity state with all column values up-to-date.
      */
     @SuppressWarnings("unchecked") // Logically correct.
-    private S stateWithColumns() {
+    private S stateWithColumns(S initialState) {
         ImmutableMap<ColumnName, InterfaceBasedColumn> columns = entity.thisClass()
                                                                        .columns()
                                                                        .interfaceBasedColumns();
@@ -437,7 +437,7 @@ public abstract class Transaction<I,
             return initialState;
         }
         Message.Builder stateWithColumns = entity.state()
-                                                    .toBuilder();
+                                                 .toBuilder();
         columns.values()
                .forEach(column -> {
                    Object value = column.valueIn(entity);
