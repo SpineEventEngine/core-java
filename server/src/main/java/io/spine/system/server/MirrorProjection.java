@@ -213,8 +213,7 @@ public final class MirrorProjection
     /**
      * Obtains the type of the mirrored aggregate state.
      *
-     * <p>This method defined is an entity {@link Column column}
-     * required for effective querying.
+     * <p>This method defines an entity {@link Column column} required for effective querying.
      *
      * <p>The framework never queries for several types of mirrors in a single call.
      * {@link io.spine.annotation.SPI SPI} users may exploit this fact when optimising databases for

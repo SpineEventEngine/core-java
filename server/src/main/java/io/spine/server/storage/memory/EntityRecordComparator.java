@@ -29,13 +29,11 @@ import java.util.Comparator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.validate.Validate.checkNotDefault;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * A comparator for sorting the contents of {@link TenantRecords}
  * in a provided {@link OrderBy order}.
- *
- * ...
  *
  * @implNote While more sophisticated storage implementations can order records by
  *         non-{@link Comparable} fields like {@link com.google.protobuf.Message message}-type
@@ -64,8 +62,9 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
      *         if the provided {@code OrderBy} is a default instance
      */
     static Comparator<EntityRecordWithColumns> orderedBy(OrderBy orderBy) {
-        checkNotDefault(orderBy,
-                        "An empty OrderBy instance cannot be mapped to an EntityRecordComparator.");
+        checkNotDefaultArg(
+                orderBy,
+                "An empty OrderBy instance cannot be mapped to an EntityRecordComparator.");
         Direction direction = orderBy.getDirection();
         String columnName = orderBy.getColumn();
         if (direction == Direction.ASCENDING) {
@@ -100,6 +99,6 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
                     int result = ((Comparable) aValue).compareTo(bValue);
             return result;
         }
-        throw newIllegalStateException("The entity record value is not a Comparable");
+        throw newIllegalStateException("The entity record value is not a Comparable.");
     }
 }

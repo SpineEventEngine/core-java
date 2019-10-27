@@ -142,7 +142,7 @@ public final class EntityQueries {
         Object filterValue = toObject(filterConvent, expectedType);
         Class<?> actualType = filterValue.getClass();
         checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
-                      "Column type mismatch. Column %s cannot have value %s.",
+                      "Column type mismatch. Column `%s` cannot have value `%s`.",
                       column,
                       filterValue);
     }

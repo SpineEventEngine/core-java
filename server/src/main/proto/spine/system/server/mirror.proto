@@ -37,6 +37,7 @@ message Mirror {
     // The version of the aggregate.
     core.Version version = 5;
 
+    // The aggregate type URL.
     string aggregate_type = 6 [(column) = true];
 }
 

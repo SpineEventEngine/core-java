@@ -29,19 +29,20 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * ...
+ * Marks an entity column declared by the Spine Framework.
  *
- * <p>A number of columns internally used by Spine are applied to multiple entities or can't be
- * expressed as a Protobuf field for some other reasons. These columns are marked with
- * {@code SystemColumn} annotation and are processed by the entity introspector separately.
+ * <p>Such columns may be shared across entities and are used internally by the Spine routines.
  *
- * <p>The methods annotated with {@code SystemColumn} should conform to the same {@code get...()}
- * syntax as the Protobuf-based columns.
+ * <p>This annotation should not be used in the client code. The users should rely on the
+ * {@code (column)} option to declare entity columns instead.
  */
 @Target(METHOD)
 @Retention(RUNTIME)
 @Internal
 public @interface SystemColumn {
 
+    /**
+     * The column name for storage.
+     */
     String name();
 }

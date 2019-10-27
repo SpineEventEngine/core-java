@@ -28,6 +28,9 @@ import io.spine.server.entity.storage.ColumnTypeMapping;
 import io.spine.test.entity.TaskView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Defines a mapping where all types a mapped to a {@code String}.
+ */
 public final class TestColumnMapping extends AbstractColumnMapping<String> {
 
     public static final String CONVERTED_STRING = "123";

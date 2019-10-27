@@ -32,5 +32,8 @@ package io.spine.server.storage;
  */
 public interface StorageField {
 
+    /**
+     * The field name.
+     */
     String name();
 }

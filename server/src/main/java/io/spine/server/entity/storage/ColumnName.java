@@ -28,6 +28,9 @@ import io.spine.value.StringTypeValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
+/**
+ * A name of the column in the storage.
+ */
 @Immutable
 public final class ColumnName extends StringTypeValue {
 

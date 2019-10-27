@@ -33,11 +33,11 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.SpineColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -293,7 +293,7 @@ public abstract class RecordStorage<I>
      * @see LifecycleFlagField
      */
     @Internal
-    public ImmutableMap<ColumnName, SpineColumn> lifecycleColumns() {
+    public ImmutableMap<ColumnName, Column> lifecycleColumns() {
         return columns().lifecycleColumns();
     }
 

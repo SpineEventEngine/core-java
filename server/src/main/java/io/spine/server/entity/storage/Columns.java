@@ -35,6 +35,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
+/**
+ * The collection of declared columns of the {@link Entity}.
+ */
 @Immutable
 @Internal
 public final class Columns {
@@ -56,6 +59,9 @@ public final class Columns {
         this.entityClass = entityClass;
     }
 
+    /**
+     * Gathers columns of the entity class.
+     */
     public static Columns of(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
         Introspector introspector = new Introspector(entityClass);
@@ -65,16 +71,28 @@ public final class Columns {
                            entityClass);
     }
 
+    /**
+     * Gathers columns of the entity class.
+     */
     public static Columns of(Class<? extends Entity<?, ?>> entityClass) {
         return of(asEntityClass(entityClass));
     }
 
+    /**
+     * Obtains a column by name.
+     *
+     * @throws IllegalArgumentException
+     *         if the column with the specified name is not found
+     */
     public Column get(ColumnName columnName) {
         checkNotNull(columnName);
         Column result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
         return result;
     }
 
+    /**
+     * Searches for a column with a given name.
+     */
     public Optional<Column> find(ColumnName columnName) {
         checkNotNull(columnName);
         Column column = systemColumns.get(columnName);
@@ -87,6 +105,13 @@ public final class Columns {
         return Optional.ofNullable(column);
     }
 
+    /**
+     * Extracts column values from the entity.
+     *
+     * <p>The {@linkplain ColumnDeclaredInProto proto-based} columns are extracted from the entity
+     * state while the system columns are obtained from the entity itself via the corresponding
+     * getters.
+     */
     public Map<ColumnName, Object> valuesIn(Entity<?, ?> source) {
         Map<ColumnName, Object> result = new HashMap<>();
         systemColumns.forEach(
@@ -101,6 +126,9 @@ public final class Columns {
         return result;
     }
 
+    /**
+     * Returns all columns of the entity.
+     */
     public ImmutableMap<ColumnName, Column> allColumns() {
         ImmutableMap.Builder<ColumnName, Column> builder = ImmutableMap.builder();
         builder.putAll(systemColumns);
@@ -112,8 +140,8 @@ public final class Columns {
     /**
      * Returns a subset of columns corresponding to the lifecycle of the entity.
      */
-    public ImmutableMap<ColumnName, SpineColumn> lifecycleColumns() {
-        ImmutableMap.Builder<ColumnName, SpineColumn> result = ImmutableMap.builder();
+    public ImmutableMap<ColumnName, Column> lifecycleColumns() {
+        ImmutableMap.Builder<ColumnName, Column> result = ImmutableMap.builder();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
             ColumnName name = ColumnName.of(field.name());
             SpineColumn column = systemColumns.get(name);
@@ -124,11 +152,14 @@ public final class Columns {
         return result.build();
     }
 
+    /**
+     * Obtains {@linkplain InterfaceBasedColumn interface-based} columns of the entity.
+     */
     public ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
         return interfaceBasedColumns;
     }
 
-    private IllegalStateException columnNotFound(ColumnName columnName) {
+    private IllegalArgumentException columnNotFound(ColumnName columnName) {
         throw newIllegalArgumentException(
                 "A column with name '%s' not found in entity state class `%s`.",
                 columnName, entityClass.stateClass()

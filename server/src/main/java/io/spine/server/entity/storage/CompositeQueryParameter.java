@@ -103,7 +103,6 @@ public final class CompositeQueryParameter {
     /**
      * Returns the joined entity column {@linkplain Filter filters}.
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public ImmutableMultimap<Column, Filter> filters() {
         return filters;
     }

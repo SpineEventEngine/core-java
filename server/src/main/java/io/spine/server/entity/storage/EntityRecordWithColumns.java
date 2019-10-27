@@ -42,22 +42,16 @@ public final class EntityRecordWithColumns implements WithLifecycle {
 
     private final EntityRecord record;
     private final Map<ColumnName, Object> storageFields;
+    private final boolean hasStorageFields;
 
-    /**
-     * Creates a new instance with storage fields.
-     *
-     * @param record
-     *         the record to pack
-     * @param storageFields
-     *         the storage fields to pack
-     */
     private EntityRecordWithColumns(EntityRecord record, Map<ColumnName, Object> storageFields) {
         this.record = checkNotNull(record);
         this.storageFields = new HashMap<>(storageFields);
+        this.hasStorageFields = !storageFields.isEmpty();
     }
 
     /**
-     * ...
+     * Creates a new record extracting the column values from the passed entity.
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
@@ -67,12 +61,17 @@ public final class EntityRecordWithColumns implements WithLifecycle {
         return of(record, storageFields);
     }
 
+    /**
+     * Wraps a passed entity record.
+     *
+     * <p>Such instance of {@code EntityRecordWithColumns} will contain no storage fields.
+     */
     public static EntityRecordWithColumns of(EntityRecord record) {
         return new EntityRecordWithColumns(record, Collections.emptyMap());
     }
 
     /**
-     * Creates a new instance.
+     * Creates a new instance from the passed record and storage fields.
      */
     @VisibleForTesting
     public static EntityRecordWithColumns
@@ -80,6 +79,9 @@ public final class EntityRecordWithColumns implements WithLifecycle {
         return new EntityRecordWithColumns(record, storageFields);
     }
 
+    /**
+     * Returns the enclosed entity record.
+     */
     public EntityRecord record() {
         return record;
     }
@@ -96,6 +98,13 @@ public final class EntityRecordWithColumns implements WithLifecycle {
     /**
      * Obtains the value of the storage field by the specified column name.
      *
+     * <p>The {@linkplain DefaultColumnMapping default column mapping} will be used. It is suitable
+     * for storages that store values "as-is" or that are willing to do the manual column value
+     * conversion.
+     *
+     * <p>In other cases consider implementing a custom {@link ColumnMapping} and using the
+     * {@link #columnValue(ColumnName, ColumnMapping)} alternative.
+     *
      * @param columnName
      *         the column name
      * @return the storage field value
@@ -106,6 +115,11 @@ public final class EntityRecordWithColumns implements WithLifecycle {
         return columnValue(columnName, DefaultColumnMapping.INSTANCE);
     }
 
+    /**
+     * Obtains the value of the storage field by the specified column name.
+     *
+     * <p>The specified column mapping will be used to do the column value conversion.
+     */
     public <R> R columnValue(ColumnName columnName, ColumnMapping<R> columnMapping) {
         checkNotNull(columnName);
         checkNotNull(columnMapping);
@@ -134,9 +148,12 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      *  {@code false} otherwise
      */
     public boolean hasColumns() {
-        return !storageFields.isEmpty();
+        return hasStorageFields;
     }
 
+    /**
+     * Determines if there is a column with the specified name among the storage fields.
+     */
     public boolean hasColumn(ColumnName name) {
         boolean result = storageFields.containsKey(name);
         return result;

@@ -35,9 +35,23 @@ import static io.spine.code.proto.ColumnOption.columnsOf;
 import static io.spine.reflect.Methods.setAccessibleAndInvoke;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
+/**
+ * An extractor of entity columns.
+ */
 final class Introspector {
 
+    /**
+     * The target entity class.
+     */
     private final EntityClass<?> entityClass;
+
+    /**
+     * Is {@code true} when user-defined columns of the entity are {@linkplain InterfaceBasedColumn
+     * interface-based}.
+     *
+     * <p>With the current implementation all columns except {@linkplain SystemColumn system} ones
+     * will either be interface-based or {@linkplain SimpleColumn entity-state-based}.
+     */
     private final boolean columnsInterfaceBased;
 
     Introspector(EntityClass<?> entityClass) {
@@ -46,6 +60,9 @@ final class Introspector {
                 EntityWithColumns.class.isAssignableFrom(entityClass.value());
     }
 
+    /**
+     * Obtains the {@linkplain SystemColumn system} columns of the class.
+     */
     ImmutableMap<ColumnName, SpineColumn> systemColumns() {
         ImmutableMap.Builder<ColumnName, SpineColumn> columns = ImmutableMap.builder();
         Class<?> entityClazz = entityClass.value();
@@ -64,6 +81,9 @@ final class Introspector {
         columns.put(column.name(), column);
     }
 
+    /**
+     * Obtains the {@linkplain SimpleColumn entity-state-based} columns of the class.
+     */
     ImmutableMap<ColumnName, SimpleColumn> simpleColumns() {
         if (columnsInterfaceBased) {
             return ImmutableMap.of();
@@ -82,6 +102,9 @@ final class Introspector {
         columns.put(column.name(), column);
     }
 
+    /**
+     * Obtains the {@linkplain InterfaceBasedColumn interface-based} columns of the class.
+     */
     ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
         if (!columnsInterfaceBased) {
             return ImmutableMap.of();
