@@ -366,9 +366,14 @@ public abstract class Transaction<I,
                      ? entity.state()
                      : builder.buildPartial();
         if (initialState.equals(newState)) {
-            commitUnchangedState();
+            S withColumns = stateWithColumns();
+            if (initialState.equals(withColumns)) {
+                commitUnchangedState();
+            } else {
+                commitChangedState(withColumns, false);
+            }
         } else {
-            commitChangedState(newState);
+            commitChangedState(newState, true);
         }
     }
 
@@ -384,15 +389,19 @@ public abstract class Transaction<I,
      *
      * @param newState
      *         the new state of the entity
+     * @param updateColumns
+     *         if {@code true}, the entity column values will be propagated to the entity state
      */
-    private void commitChangedState(@NonValidated S newState) {
+    private void commitChangedState(@NonValidated S newState, boolean updateColumns) {
         try {
             markStateChanged();
             Version pendingVersion = version();
             beforeCommit(newState, pendingVersion);
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
-            updateColumns();
+            if (updateColumns) {
+                updateColumns();
+            }
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
         } catch (RuntimeException e) {
@@ -402,22 +411,40 @@ public abstract class Transaction<I,
         }
     }
 
-    @SuppressWarnings("unchecked") // Logically correct.
+    /**
+     * Propagates the entity column values to the entity state.
+     */
     private void updateColumns() {
+        S stateWithColumns = stateWithColumns();
+        entity.updateState(stateWithColumns);
+    }
+
+    /**
+     * Returns an entity state with updated entity columns.
+     *
+     * <p>Some of the columns may be {@linkplain ImplementedColumn implemented} with custom getters
+     * declared in the entity class. The values of such columns need to be propagated to the entity
+     * state during transaction commit.
+     *
+     * <p>This method returns the updated entity state with all column values up-to-date.
+     */
+    @SuppressWarnings("unchecked") // Logically correct.
+    private S stateWithColumns() {
         ImmutableMap<ColumnName, ImplementedColumn> columns = entity.thisClass()
                                                                     .columns()
                                                                     .implementedColumns();
         if (columns.isEmpty()) {
-            return;
+            return initialState;
         }
-        Message.Builder newStateWithColumns = entity.state()
+        Message.Builder stateWithColumns = entity.state()
                                                     .toBuilder();
         columns.values()
                .forEach(column -> {
                    Object value = column.valueIn(entity);
-                   newStateWithColumns.setField(column.protoField().descriptor(), value);
+                   stateWithColumns.setField(column.protoField().descriptor(), value);
                });
-        entity.updateState((S) newStateWithColumns.build());
+        S result = (S) stateWithColumns.build();
+        return result;
     }
 
     /**
