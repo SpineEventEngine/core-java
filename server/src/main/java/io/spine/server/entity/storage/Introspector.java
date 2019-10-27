@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.base.EntityWithColumns;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.ImplementedColumn.GetterFromEntity;
-import io.spine.server.entity.storage.ImplementedColumn.GetterFromState;
+import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromEntity;
+import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromState;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -82,29 +82,29 @@ final class Introspector {
         columns.put(column.name(), column);
     }
 
-    ImmutableMap<ColumnName, ImplementedColumn> implementedColumns() {
+    ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
         if (!columnsInterfaceBased) {
             return ImmutableMap.of();
         }
-        ImmutableMap.Builder<ColumnName, ImplementedColumn> columns = ImmutableMap.builder();
+        ImmutableMap.Builder<ColumnName, InterfaceBasedColumn> columns = ImmutableMap.builder();
         columnsOf(entityClass.stateType())
                 .forEach(field -> addImplementedColumn(field, columns));
         return columns.build();
     }
 
     private void addImplementedColumn(FieldDeclaration field,
-                                      ImmutableMap.Builder<ColumnName, ImplementedColumn> columns) {
+                                      ImmutableMap.Builder<ColumnName, InterfaceBasedColumn> columns) {
         ColumnData data = ColumnData.of(field, entityClass);
         Method getter = getterOf(field, entityClass.value());
         GetterFromState getterFromState =
                 state -> setAccessibleAndInvoke(data.getter, state);
         GetterFromEntity getterFromEntity =
                 entity -> setAccessibleAndInvoke(getter, entity);
-        ImplementedColumn column = new ImplementedColumn(data.name,
-                                                         data.type,
-                                                         getterFromState,
-                                                         getterFromEntity,
-                                                         field);
+        InterfaceBasedColumn column = new InterfaceBasedColumn(data.name,
+                                                               data.type,
+                                                               getterFromState,
+                                                               getterFromEntity,
+                                                               field);
         columns.put(column.name(), column);
     }
 

@@ -21,11 +21,32 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.SPI;
 
+/**
+ * A column of the {@linkplain io.spine.server.entity.Entity entity}.
+ *
+ * <p>Columns are the entity state fields which are stored separately from the entity record and
+ * can be used as criteria for target {@linkplain io.spine.client.Filter filters} during the entity
+ * querying.
+ *
+ * <p>The {@linkplain #name() name} of the column represents the value which needs to be specified
+ * to the filter during querying. The {@linkplain #type() type} is an expected type of the value.
+ */
+@SPI
 @Immutable
 public interface Column {
 
+    /**
+     * The name of the column in the storage.
+     */
     ColumnName name();
 
+    /**
+     * The type of the column.
+     *
+     * <p>As user-defined columns are proto-based, there is a fixed set of possible column types.
+     * See {@link ColumnMapping}.
+     */
     Class<?> type();
 }

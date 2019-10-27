@@ -20,16 +20,22 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
+
 import java.util.function.Function;
 
 /**
  * A persistence strategy of an entity {@linkplain Column column}.
+ *
+ * <p>Maps a column value to a stored value of type {@code R}.
  *
  * @param <T>
  *         the column type
  * @param <R>
  *         the "persist as" type
  */
+@SPI
 public interface ColumnTypeMapping<T, R> extends Function<T, R> {
 
     /**
@@ -39,6 +45,7 @@ public interface ColumnTypeMapping<T, R> extends Function<T, R> {
      * explicitly (e.g. in case of wildcard arguments).
      */
     @SuppressWarnings("unchecked") // See doc.
+    @Internal
     default R applyTo(Object object) {
         T value = (T) object;
         return apply(value);

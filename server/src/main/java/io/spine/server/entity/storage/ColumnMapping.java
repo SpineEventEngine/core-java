@@ -20,15 +20,32 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.annotation.SPI;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
+ * The value mapping rules of entity {@linkplain Column columns}.
+ *
+ * <p>A {@link ColumnTypeMapping} allows to map column values of certain type to their value
+ * in the storage.
+ *
+ * <p>Since there is a limited set of possible column types, in most non-testing scenarios it will
+ * be more convenient to extend {@link AbstractColumnMapping} than to implement this interface
+ * directly.
+ *
  * @param <R>
- *         a type/supertype of all stored values
+ *         a supertype of all stored values
  */
+@SPI
 public interface ColumnMapping<R> {
 
-    ColumnTypeMapping<?, ? extends R> of(Class<?> type);
+    /**
+     * Obtains the mapping rules for the given type.
+     */
+    <T> ColumnTypeMapping<T, ? extends R> of(Class<T> type);
 
+    /**
+     * Obtains the mapping rules of {@code null}.
+     */
     ColumnTypeMapping<@Nullable ?, @Nullable ? extends R> ofNull();
 }

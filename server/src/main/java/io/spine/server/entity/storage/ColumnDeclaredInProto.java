@@ -25,10 +25,20 @@ import com.google.protobuf.Message;
 import io.spine.code.proto.FieldDeclaration;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Marks a column which is declared in proto and is a part of
+ * {@linkplain io.spine.server.entity.Entity entity} state.
+ */
 @Immutable
 interface ColumnDeclaredInProto extends Column {
 
+    /**
+     * Extracts the column value currently stored in the entity state.
+     */
     @Nullable Object valueIn(Message entityState);
 
+    /**
+     * Obtains the corresponding proto field declaration.
+     */
     FieldDeclaration protoField();
 }

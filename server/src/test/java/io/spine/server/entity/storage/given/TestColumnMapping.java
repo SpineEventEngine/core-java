@@ -35,8 +35,8 @@ public final class TestColumnMapping extends AbstractColumnMapping<String> {
     public static final String NULL_VALUE = "the-null";
 
     @Override
-    protected void
-    setupCustomMapping(ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends String>> builder) {
+    protected void setupCustomMapping(
+            ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends String>> builder) {
         builder.put(TaskView.class, ofTaskView());
         builder.put(IntIdentifier.class, ofIntIdentifier());
     }

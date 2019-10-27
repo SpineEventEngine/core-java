@@ -60,7 +60,8 @@ class IntrospectorTest {
     void extractImplementedColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
         Introspector introspector = new Introspector(entityClass);
-        ImmutableMap<ColumnName, ImplementedColumn> columns = introspector.implementedColumns();
+        ImmutableMap<ColumnName, InterfaceBasedColumn> columns =
+                introspector.interfaceBasedColumns();
 
         assertThat(columns).containsKey(ColumnName.of("name"));
         assertThat(columns).containsKey(ColumnName.of("estimate_in_days"));
@@ -86,10 +87,10 @@ class IntrospectorTest {
         EntityClass<PrivateProjection> entityClass = asEntityClass(PrivateProjection.class);
         Introspector introspector = new Introspector(entityClass);
 
-        ImmutableMap<ColumnName, ImplementedColumn> columns = introspector.implementedColumns();
+        ImmutableMap<ColumnName, InterfaceBasedColumn> columns = introspector.interfaceBasedColumns();
 
         ColumnName description = ColumnName.of("description");
-        ImplementedColumn column = columns.get(description);
+        InterfaceBasedColumn column = columns.get(description);
 
         Entity<TaskListViewId, TaskListView> projection = new PrivateProjection();
 
@@ -105,7 +106,7 @@ class IntrospectorTest {
                 asEntityClass(InvalidEntityWithColumns.class);
         Introspector introspector = new Introspector(entityClass);
 
-        assertThrows(IllegalStateException.class, introspector::implementedColumns);
+        assertThrows(IllegalStateException.class, introspector::interfaceBasedColumns);
     }
 
     /**

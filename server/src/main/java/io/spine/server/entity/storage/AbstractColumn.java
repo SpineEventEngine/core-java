@@ -22,6 +22,9 @@ package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
 
+/**
+ * An abstract base for different column types.
+ */
 @Immutable
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
 // Prevent instantiation in favor of concrete column types.

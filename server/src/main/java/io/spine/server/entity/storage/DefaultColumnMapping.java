@@ -22,10 +22,18 @@ package io.spine.server.entity.storage;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import io.spine.annotation.SPI;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.server.entity.storage.ColumnTypeMapping.identity;
 
+/**
+ * A default column mapping which stores all values "as-is".
+ *
+ * <p>May be sufficient for in-memory storage implementations and storages that do manual
+ * conversion of column values.
+ */
+@SPI
 public final class DefaultColumnMapping extends AbstractColumnMapping<Object> {
 
     public static final DefaultColumnMapping INSTANCE = new DefaultColumnMapping();

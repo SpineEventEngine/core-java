@@ -26,8 +26,20 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
-public final class SpineColumn extends AbstractColumn implements ManuallyCalculatedColumn {
+/**
+ * A system column.
+ *
+ * <p>A system column is:
+ *    <ol>
+ *        <li>Declared by Spine framework with {@link SystemColumn} annotation.
+ *        <li>Extracted from the entity via the getter marked with annotation.
+ *    </ol>
+ */
+final class SpineColumn extends AbstractColumn implements ColumnWithCustomGetter {
 
+    /**
+     * A getter of the column from the entity.
+     */
     private final Getter getter;
 
     SpineColumn(ColumnName name, Class<?> type, Getter getter) {

@@ -41,18 +41,18 @@ public final class Columns {
 
     private final ImmutableMap<ColumnName, SpineColumn> systemColumns;
     private final ImmutableMap<ColumnName, SimpleColumn> simpleColumns;
-    private final ImmutableMap<ColumnName, ImplementedColumn> implementedColumns;
+    private final ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns;
 
     private final EntityClass<?> entityClass;
 
     private Columns(
             ImmutableMap<ColumnName, SpineColumn> systemColumns,
             ImmutableMap<ColumnName, SimpleColumn> simpleColumns,
-            ImmutableMap<ColumnName, ImplementedColumn> implementedColumns,
+            ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns,
             EntityClass<?> entityClass) {
         this.systemColumns = systemColumns;
         this.simpleColumns = simpleColumns;
-        this.implementedColumns = implementedColumns;
+        this.interfaceBasedColumns = interfaceBasedColumns;
         this.entityClass = entityClass;
     }
 
@@ -61,7 +61,7 @@ public final class Columns {
         Introspector introspector = new Introspector(entityClass);
         return new Columns(introspector.systemColumns(),
                            introspector.simpleColumns(),
-                           introspector.implementedColumns(),
+                           introspector.interfaceBasedColumns(),
                            entityClass);
     }
 
@@ -82,7 +82,7 @@ public final class Columns {
             column = simpleColumns.get(columnName);
         }
         if (column == null) {
-            column = implementedColumns.get(columnName);
+            column = interfaceBasedColumns.get(columnName);
         }
         return Optional.ofNullable(column);
     }
@@ -95,7 +95,7 @@ public final class Columns {
         simpleColumns.forEach(
                 (name, column) -> result.put(name, column.valueIn(source.state()))
         );
-        implementedColumns.forEach(
+        interfaceBasedColumns.forEach(
                 (name, column) -> result.put(name, column.valueIn(source.state()))
         );
         return result;
@@ -105,7 +105,7 @@ public final class Columns {
         ImmutableMap.Builder<ColumnName, Column> builder = ImmutableMap.builder();
         builder.putAll(systemColumns);
         builder.putAll(simpleColumns);
-        builder.putAll(implementedColumns);
+        builder.putAll(interfaceBasedColumns);
         return builder.build();
     }
 
@@ -124,8 +124,8 @@ public final class Columns {
         return result.build();
     }
 
-    public ImmutableMap<ColumnName, ImplementedColumn> implementedColumns() {
-        return implementedColumns;
+    public ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
+        return interfaceBasedColumns;
     }
 
     private IllegalStateException columnNotFound(ColumnName columnName) {

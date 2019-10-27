@@ -29,20 +29,58 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
+/**
+ * A column declared with the help of {@link io.spine.base.EntityWithColumns}-derived interface.
+ *
+ * <p>An interface-based column is:
+ * <ol>
+ *     <li>Declared in the Protobuf with {@code (column)} option.
+ *     <li>Implemented using custom Spine-generated interface. For example:
+ *         <pre>
+ *         interface UserProfileWithColumns extends EntityWithColumns {
+ *             int getYearOfRegistration();
+ *         }
+ *
+ *         // ...
+ *         class UserProfileProjection
+ *             extends Projection<UserId, UserProfile, UserProfile.Builder>
+ *             implements UserProfileWithColumns {
+ *
+ *            {@literal @}Override
+ *             public int getYearOfRegistration() {
+ *                 return yearOfRegistration();
+ *             }
+ *         }
+ *         </pre>
+ *     <li>Extracted from the entity and propagated to the entity state at the moment of
+ *         transaction commit.
+ * </ol>
+ */
 @Internal
-public final class ImplementedColumn
+public final class InterfaceBasedColumn
         extends AbstractColumn
-        implements ColumnDeclaredInProto, ManuallyCalculatedColumn {
+        implements ColumnDeclaredInProto, ColumnWithCustomGetter {
 
+    /**
+     * A getter which obtains the column value present in the entity state.
+     */
     private final GetterFromState getterFromState;
+
+    /**
+     * A getter which obtains the actual column value from the entity.
+     */
     private final GetterFromEntity getterFromEntity;
+
+    /**
+     * A corresponding proto field declaration.
+     */
     private final FieldDeclaration field;
 
-    ImplementedColumn(ColumnName name,
-                      Class<?> type,
-                      GetterFromState getterFromState,
-                      GetterFromEntity getterFromEntity,
-                      FieldDeclaration field) {
+    InterfaceBasedColumn(ColumnName name,
+                         Class<?> type,
+                         GetterFromState getterFromState,
+                         GetterFromEntity getterFromEntity,
+                         FieldDeclaration field) {
         super(name, type);
         this.getterFromState = getterFromState;
         this.getterFromEntity = getterFromEntity;

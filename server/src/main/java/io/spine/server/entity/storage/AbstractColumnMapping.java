@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import io.spine.annotation.SPI;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -31,24 +32,113 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
+/**
+ * The basic implementation of mapping rules for entity {@linkplain Column columns}.
+ *
+ * <p>Since entity columns are proto-based an have a limited amount of possible types, this class
+ * allows descendants to override concrete type mapping rules in a convenient way.
+ */
+@SPI
 public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
 
+    /**
+     * The mapping rules of standard proto types.
+     */
     private final
     ImmutableMap<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>> standardMapping
             = standardMapping();
 
+    /**
+     * The mapping rules for custom types.
+     *
+     * @see #setupCustomMapping(ImmutableMap.Builder)
+     */
     private @MonotonicNonNull
     ImmutableMap<Class<?>, ColumnTypeMapping<?, ? extends R>> customMapping;
 
+    @SuppressWarnings("unchecked") // Ensured by mapping declaration.
     @Override
-    public ColumnTypeMapping<?, ? extends R> of(Class<?> type) {
+    public <T> ColumnTypeMapping<T, ? extends R> of(Class<T> type) {
         checkNotNull(type);
+        ColumnTypeMapping<?, ? extends R> result;
         Optional<ColumnTypeMapping<?, ? extends R>> rule = customMappingFor(type);
         if (rule.isPresent()) {
-            return rule.get();
+            result = rule.get();
+        } else {
+            rule = standardMappingFor(type);
+            result = rule.orElseThrow(() -> unsupportedType(type));
         }
-        rule = standardMappingFor(type);
-        return rule.orElseThrow(() -> unsupportedType(type));
+        return (ColumnTypeMapping<T, ? extends R>) result;
+    }
+
+    /**
+     * Allows to specify custom mapping rules.
+     *
+     * <p>If some message types are special-case and need to be stored differently to the generic
+     * {@linkplain Message messages}, the rules for their storage can be specified using this
+     * method.
+     *
+     * <p>The custom mapping can also be specified for marker interfaces of messages like
+     * {@link io.spine.base.EventMessage}.
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // Do not enforce implementation in descendants.
+    protected void
+    setupCustomMapping(ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends R>> builder) {
+        // NO-OP by default.
+    }
+
+    /**
+     * Returns the mapping rules of {@link String} columns.
+     */
+    protected abstract ColumnTypeMapping<String, ? extends R> ofString();
+
+    /**
+     * Returns the mapping rules of {@link Integer} columns.
+     */
+    protected abstract ColumnTypeMapping<Integer, ? extends R> ofInteger();
+
+    /**
+     * Returns the mapping rules of {@link Long} columns.
+     */
+    protected abstract ColumnTypeMapping<Long, ? extends R> ofLong();
+
+    /**
+     * Returns the mapping rules of {@link Float} columns.
+     */
+    protected abstract ColumnTypeMapping<Float, ? extends R> ofFloat();
+
+    /**
+     * Returns the mapping rules of {@link Double} columns.
+     */
+    protected abstract ColumnTypeMapping<Double, ? extends R> ofDouble();
+
+    /**
+     * Returns the mapping rules of {@link Boolean} columns.
+     */
+    protected abstract ColumnTypeMapping<Boolean, ? extends R> ofBoolean();
+
+    /**
+     * Returns the mapping rules of {@link ByteString} columns.
+     */
+    protected abstract ColumnTypeMapping<ByteString, ? extends R> ofByteString();
+
+    /**
+     * Returns the mapping rules of {@link Enum} columns.
+     */
+    protected abstract ColumnTypeMapping<Enum<?>, ? extends R> ofEnum();
+
+    /**
+     * Returns the mapping rules of {@link Message} columns.
+     */
+    protected abstract ColumnTypeMapping<Message, ? extends R> ofMessage();
+
+    /**
+     * Throws an exception about an unsupported column type.
+     */
+    protected IllegalArgumentException unsupportedType(Class<?> aClass) {
+        throw newIllegalArgumentException(
+                "The columns of type `%s` are not supported by the column mapping.",
+                aClass.getCanonicalName());
     }
 
     private ImmutableMap<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>>
@@ -93,36 +183,6 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
             customMapping = builder.build();
         }
         return customMapping;
-    }
-
-    @SuppressWarnings("NoopMethodInAbstractClass") // Do not enforce implementation in descendants.
-    protected void
-    setupCustomMapping(ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends R>> builder) {
-        // NO-OP by default.
-    }
-
-    protected abstract ColumnTypeMapping<String, ? extends R> ofString();
-
-    protected abstract ColumnTypeMapping<Integer, ? extends R> ofInteger();
-
-    protected abstract ColumnTypeMapping<Long, ? extends R> ofLong();
-
-    protected abstract ColumnTypeMapping<Float, ? extends R> ofFloat();
-
-    protected abstract ColumnTypeMapping<Double, ? extends R> ofDouble();
-
-    protected abstract ColumnTypeMapping<Boolean, ? extends R> ofBoolean();
-
-    protected abstract ColumnTypeMapping<ByteString, ? extends R> ofByteString();
-
-    protected abstract ColumnTypeMapping<Enum<?>, ? extends R> ofEnum();
-
-    protected abstract ColumnTypeMapping<Message, ? extends R> ofMessage();
-
-    protected IllegalArgumentException unsupportedType(Class<?> aClass) {
-        throw newIllegalArgumentException(
-                "The columns of class `%s` are not supported by the column mapping.",
-                aClass.getCanonicalName());
     }
 
     private Optional<ColumnTypeMapping<?, ? extends R>> customMappingFor(Class<?> aClass) {

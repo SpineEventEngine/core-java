@@ -69,6 +69,9 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     @LazyInit
     private transient volatile @MonotonicNonNull Message defaultState;
 
+    /**
+     * The entity columns of this class.
+     */
     @LazyInit
     private transient volatile @MonotonicNonNull Columns columns;
 
@@ -146,6 +149,9 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         return result;
     }
 
+    /**
+     * Obtains the entity columns of this class.
+     */
     public final Columns columns() {
         Columns result = columns;
         if (result == null) {
@@ -181,6 +187,9 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         return stateClass;
     }
 
+    /**
+     * Obtains the entity state type.
+     */
     public final MessageType stateType() {
         Descriptor descriptor = defaultState().getDescriptorForType();
         MessageType result = new MessageType(descriptor);

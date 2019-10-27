@@ -24,8 +24,15 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Marks a column whose actual value should be extracted from the {@link Entity} with a custom
+ * getter.
+ */
 @Immutable
-interface ManuallyCalculatedColumn extends Column {
+interface ColumnWithCustomGetter extends Column {
 
+    /**
+     * Extracts the actual column value from the source.
+     */
     @Nullable Object valueIn(Entity<?, ?> source);
 }

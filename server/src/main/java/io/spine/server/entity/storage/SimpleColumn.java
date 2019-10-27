@@ -27,11 +27,27 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
-public final class SimpleColumn
+/**
+ * A simple proto-based entity column.
+ *
+ * <p>A proto-based entity column is:
+ *    <ol>
+ *         <li>Declared in Protobuf with {@code (column)} option.
+ *         <li>Updated in handler methods of the entity along with other entity state fields.
+ *    </ol>
+ */
+final class SimpleColumn
         extends AbstractColumn
         implements ColumnDeclaredInProto {
 
+    /**
+     * A getter of the column from the entity state.
+     */
     private final Getter getter;
+
+    /**
+     * The corresponding proto field declaration.
+     */
     private final FieldDeclaration field;
 
     SimpleColumn(ColumnName name, Class<?> type, Getter getter, FieldDeclaration field) {

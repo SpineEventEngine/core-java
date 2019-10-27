@@ -20,7 +20,9 @@
 
 package io.spine.server.entity.storage.given;
 
-public interface IntIdentifier {
+import com.google.protobuf.Message;
+
+public interface IntIdentifier extends Message {
 
     int getId();
 }

@@ -35,7 +35,7 @@ import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.ImplementedColumn;
+import io.spine.server.entity.storage.InterfaceBasedColumn;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
@@ -422,7 +422,7 @@ public abstract class Transaction<I,
     /**
      * Returns an entity state with updated entity columns.
      *
-     * <p>Some of the columns may be {@linkplain ImplementedColumn implemented} with custom getters
+     * <p>Some of the columns may be {@linkplain InterfaceBasedColumn implemented} with custom getters
      * declared in the entity class. The values of such columns need to be propagated to the entity
      * state during transaction commit.
      *
@@ -430,9 +430,9 @@ public abstract class Transaction<I,
      */
     @SuppressWarnings("unchecked") // Logically correct.
     private S stateWithColumns() {
-        ImmutableMap<ColumnName, ImplementedColumn> columns = entity.thisClass()
-                                                                    .columns()
-                                                                    .implementedColumns();
+        ImmutableMap<ColumnName, InterfaceBasedColumn> columns = entity.thisClass()
+                                                                       .columns()
+                                                                       .interfaceBasedColumns();
         if (columns.isEmpty()) {
             return initialState;
         }

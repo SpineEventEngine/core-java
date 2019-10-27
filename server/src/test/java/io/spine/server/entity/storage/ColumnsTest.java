@@ -132,8 +132,7 @@ class ColumnsTest {
     @Test
     @DisplayName("return a map of interface-based columns")
     void extractInterfaceBasedValues() {
-        TaskViewProjection projection = new TaskViewProjection();
-        ImmutableMap<ColumnName, ImplementedColumn> values = columns.implementedColumns();
+        ImmutableMap<ColumnName, InterfaceBasedColumn> values = columns.interfaceBasedColumns();
 
         assertThat(values).containsKey(ColumnName.of("name"));
         assertThat(values).containsKey(ColumnName.of("estimate_in_days"));
