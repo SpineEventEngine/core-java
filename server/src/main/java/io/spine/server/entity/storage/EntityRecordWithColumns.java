@@ -41,7 +41,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public final class EntityRecordWithColumns implements WithLifecycle {
 
     private final EntityRecord record;
+
+    /**
+     * A map of column names to the corresponding column values.
+     *
+     * <p>May contain {@code null} column values.
+     */
     private final Map<ColumnName, Object> storageFields;
+
     private final boolean hasStorageFields;
 
     private EntityRecordWithColumns(EntityRecord record, Map<ColumnName, Object> storageFields) {
