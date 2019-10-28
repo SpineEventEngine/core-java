@@ -41,6 +41,9 @@ public interface ColumnMapping<R> {
 
     /**
      * Obtains the mapping rules for the given type.
+     *
+     * @throws IllegalArgumentException
+     *         if the mapping for the specified type cannot be found
      */
     <T> ColumnTypeMapping<T, ? extends R> of(Class<T> type);
 

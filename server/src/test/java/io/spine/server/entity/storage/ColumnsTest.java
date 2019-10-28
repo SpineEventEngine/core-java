@@ -103,8 +103,8 @@ class ColumnsTest {
         int systemColumnCount = ColumnTests.defaultColumns.size();
         int protoColumnCount = 4;
 
-        assertThat(columns.allColumns())
-                .hasSize(systemColumnCount + protoColumnCount);
+        int expectedSize = systemColumnCount + protoColumnCount;
+        assertThat(columns.columnList()).hasSize(expectedSize);
 
     }
 

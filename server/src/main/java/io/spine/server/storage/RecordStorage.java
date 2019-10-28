@@ -20,11 +20,13 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.protobuf.AnyPacker;
@@ -46,6 +48,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -67,9 +70,9 @@ public abstract class RecordStorage<I>
     /**
      * Creates an instance of {@code RecordStorage}.
      */
-    protected RecordStorage(EntityClass<?> entityClass, boolean multitenant) {
+    protected RecordStorage(Class<? extends Entity<?, ?>> entityClass, boolean multitenant) {
         super(multitenant);
-        this.entityClass = entityClass;
+        this.entityClass = asEntityClass(entityClass);
     }
 
     /**
@@ -268,6 +271,14 @@ public abstract class RecordStorage<I>
      */
     public Iterator<EntityRecord> readAll(EntityQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
+    }
+
+    /**
+     * Obtains a list of columns of the managed {@link Entity}.
+     */
+    @SPI
+    protected final ImmutableList<Column> columnList() {
+        return columns().columnList();
     }
 
     /**

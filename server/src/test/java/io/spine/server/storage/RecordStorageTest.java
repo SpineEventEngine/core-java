@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -36,6 +37,7 @@ import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
@@ -480,6 +482,19 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord readRecord = readRecords.get(0);
         assertEquals(targetEntity.state(), unpack(readRecord.getState()));
         assertEquals(targetId, Identifier.unpack(readRecord.getEntityId()));
+    }
+
+    @Test
+    @DisplayName("return a list of entity columns")
+    void returnColumnList() {
+        S storage = storage();
+        ImmutableList<Column> columns = storage.columnList();
+
+        int systemColumnCount = LifecycleFlagField.values().length;
+        int protoColumnCount = 6;
+
+        int expectedSize = systemColumnCount + protoColumnCount;
+        assertThat(columns).hasSize(expectedSize);
     }
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and

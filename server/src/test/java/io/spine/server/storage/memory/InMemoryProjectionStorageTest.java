@@ -21,6 +21,7 @@
 package io.spine.server.storage.memory;
 
 import io.spine.server.entity.Entity;
+import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.ProjectionStorageTest;
 import io.spine.test.storage.ProjectId;
@@ -28,11 +29,11 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 @DisplayName("InMemoryProjectionStorage should")
 class InMemoryProjectionStorageTest extends ProjectionStorageTest {
 
+    @SuppressWarnings("unchecked") // Logically correct.
     @Override
     protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         StorageSpec<ProjectId> spec =
@@ -41,7 +42,8 @@ class InMemoryProjectionStorageTest extends ProjectionStorageTest {
                                ProjectId.class);
         InMemoryProjectionStorage<ProjectId> storage =
                 new InMemoryProjectionStorage<>(
-                        new InMemoryRecordStorage<>(spec, asEntityClass(cls), false)
+                        (Class<? extends Projection<?,?,?>>) cls,
+                        new InMemoryRecordStorage<>(spec, cls, false)
                 );
         return storage;
     }

@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
@@ -129,11 +130,11 @@ public final class Columns {
     /**
      * Returns all columns of the entity.
      */
-    public ImmutableMap<ColumnName, Column> allColumns() {
-        ImmutableMap.Builder<ColumnName, Column> builder = ImmutableMap.builder();
-        builder.putAll(systemColumns);
-        builder.putAll(simpleColumns);
-        builder.putAll(interfaceBasedColumns);
+    public ImmutableList<Column> columnList() {
+        ImmutableList.Builder<Column> builder = ImmutableList.builder();
+        builder.addAll(systemColumns.values());
+        builder.addAll(simpleColumns.values());
+        builder.addAll(interfaceBasedColumns.values());
         return builder.build();
     }
 

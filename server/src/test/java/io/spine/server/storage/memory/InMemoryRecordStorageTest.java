@@ -31,7 +31,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +45,7 @@ public class InMemoryRecordStorageTest
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(Project.class),
                                ProjectId.class);
-        return new InMemoryRecordStorage<>(spec, asEntityClass(cls), false);
+        return new InMemoryRecordStorage<>(spec, cls, false);
     }
 
     @Override
