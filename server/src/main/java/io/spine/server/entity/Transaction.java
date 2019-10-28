@@ -366,12 +366,7 @@ public abstract class Transaction<I,
                      ? entity.state()
                      : builder.buildPartial();
         if (initialState.equals(newState)) {
-            S withColumns = stateWithColumns(initialState);
-            if (initialState.equals(withColumns)) {
-                commitUnchangedState();
-            } else {
-                commitChangedState(withColumns, false);
-            }
+            updateColumnsAndCommit();
         } else {
             commitChangedState(newState, true);
         }
@@ -379,6 +374,18 @@ public abstract class Transaction<I,
 
     private boolean withPhases() {
         return !phases.isEmpty();
+    }
+
+    /**
+     * Propagates entity column values to the entity state and commits a transaction.
+     */
+    private void updateColumnsAndCommit() {
+        S stateWithColumns = stateWithColumns();
+        if (initialState.equals(stateWithColumns)) {
+            commitUnchangedState();
+        } else {
+            commitChangedState(stateWithColumns, false);
+        }
     }
 
     /**
@@ -390,7 +397,8 @@ public abstract class Transaction<I,
      * @param newState
      *         the new state of the entity
      * @param updateColumns
-     *         if {@code true}, the entity column values will be propagated to the entity state
+     *         if {@code true}, the entity column values will be propagated to the entity state,
+     *         {@code false} value implies the columns have already been updated previously
      */
     private void commitChangedState(@NonValidated S newState, boolean updateColumns) {
         try {
@@ -400,7 +408,7 @@ public abstract class Transaction<I,
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
             if (updateColumns) {
-                updateColumns(newState);
+                updateColumns();
             }
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
@@ -414,27 +422,28 @@ public abstract class Transaction<I,
     /**
      * Propagates the entity column values to the entity state.
      */
-    private void updateColumns(S initialState) {
-        S stateWithColumns = stateWithColumns(initialState);
+    private void updateColumns() {
+        S stateWithColumns = stateWithColumns();
         entity.updateState(stateWithColumns);
     }
 
     /**
      * Returns an entity state with updated entity columns.
      *
-     * <p>Some of the columns may be {@linkplain InterfaceBasedColumn implemented} with custom getters
-     * declared in the entity class. The values of such columns need to be propagated to the entity
-     * state during transaction commit.
+     * <p>Some of the columns may be {@linkplain InterfaceBasedColumn implemented} with custom
+     * getters declared in the entity class. The values of such columns need to be propagated to
+     * the entity state during transaction commit.
      *
-     * <p>This method returns the entity state with all column values up-to-date.
+     * @implNote This method relies on all other entity state changes being already propagated to
+     *         the entity, so the column getters that rely on entity state are evaluated correctly.
      */
     @SuppressWarnings("unchecked") // Logically correct.
-    private S stateWithColumns(S initialState) {
+    private S stateWithColumns() {
         ImmutableMap<ColumnName, InterfaceBasedColumn> columns = entity.thisClass()
                                                                        .columns()
                                                                        .interfaceBasedColumns();
         if (columns.isEmpty()) {
-            return initialState;
+            return entity.state();
         }
         Message.Builder stateWithColumns = entity.state()
                                                  .toBuilder();
