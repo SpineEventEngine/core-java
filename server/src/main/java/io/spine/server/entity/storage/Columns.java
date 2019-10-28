@@ -27,6 +27,7 @@ import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.LifecycleFlagField;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -124,8 +125,8 @@ public final class Columns {
      * state while the system columns are obtained from the entity itself via the corresponding
      * getters.
      */
-    public Map<ColumnName, Object> valuesIn(Entity<?, ?> source) {
-        Map<ColumnName, Object> result = new HashMap<>();
+    public Map<ColumnName, @Nullable Object> valuesIn(Entity<?, ?> source) {
+        Map<ColumnName, @Nullable Object> result = new HashMap<>();
         systemColumns.forEach(
                 (name, column) -> result.put(name, column.valueIn(source))
         );

@@ -35,7 +35,6 @@ import io.spine.server.entity.storage.QueryParameters;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -116,11 +115,11 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
                                     EntityRecordWithColumns record) {
         for (Map.Entry<Column, Filter> filter : filters.entries()) {
             Column column = filter.getKey();
-            Optional<Object> columnValue = columnValue(record, column);
-            if (!columnValue.isPresent()) {
+            if (!record.hasColumn(column.name())) {
                 return false;
             }
-            boolean matches = checkSingleParameter(filter.getValue(), columnValue.get(), column);
+            @Nullable Object columnValue = columnValue(record, column);
+            boolean matches = checkSingleParameter(filter.getValue(), columnValue, column);
             if (!matches) {
                 return false;
             }
@@ -132,13 +131,14 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
                                        EntityRecordWithColumns record) {
         for (Map.Entry<Column, Filter> filter : filters.entries()) {
             Column column = filter.getKey();
-            Optional<Object> columnValue = columnValue(record, column);
-            if (columnValue.isPresent()) {
-                boolean matches =
-                        checkSingleParameter(filter.getValue(), columnValue.get(), column);
-                if (matches) {
-                    return true;
-                }
+            if (!record.hasColumn(column.name())) {
+                continue;
+            }
+            @Nullable Object columnValue = columnValue(record, column);
+            boolean matches =
+                    checkSingleParameter(filter.getValue(), columnValue, column);
+            if (matches) {
+                return true;
             }
         }
         return filters.isEmpty();
@@ -162,14 +162,10 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return result;
     }
 
-    private static Optional<Object> columnValue(EntityRecordWithColumns record,
+    private static @Nullable Object columnValue(EntityRecordWithColumns record,
                                                 Column column) {
         ColumnName columnName = column.name();
-        if (!record.hasColumn(columnName)) {
-            return Optional.empty();
-        }
-
         Object value = record.columnValue(columnName);
-        return Optional.of(value);
+        return value;
     }
 }

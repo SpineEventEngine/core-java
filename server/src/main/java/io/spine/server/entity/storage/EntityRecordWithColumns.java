@@ -27,6 +27,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.RecordStorage;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,10 +45,8 @@ public final class EntityRecordWithColumns implements WithLifecycle {
 
     /**
      * A map of column names to the corresponding column values.
-     *
-     * <p>May contain {@code null} column values.
      */
-    private final Map<ColumnName, Object> storageFields;
+    private final Map<ColumnName, @Nullable Object> storageFields;
 
     private final boolean hasStorageFields;
 
@@ -64,7 +63,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
                                                  Entity<?, ?> entity,
                                                  RecordStorage<?> recordStorage) {
         Columns columns = recordStorage.columns();
-        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
+        Map<ColumnName, @Nullable Object> storageFields = columns.valuesIn(entity);
         return of(record, storageFields);
     }
 
@@ -119,7 +118,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      * @throws IllegalStateException
      *         if there is no column with the specified name
      */
-    public Object columnValue(ColumnName columnName) {
+    public @Nullable Object columnValue(ColumnName columnName) {
         return columnValue(columnName, DefaultColumnMapping.INSTANCE);
     }
 
@@ -162,6 +161,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
     /**
      * Determines if there is a column with the specified name among the storage fields.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean hasColumn(ColumnName name) {
         boolean result = storageFields.containsKey(name);
         return result;
