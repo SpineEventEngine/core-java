@@ -32,13 +32,14 @@ import java.util.function.Function;
  * <p>A system column is:
  *    <ol>
  *        <li>Declared by Spine framework with {@link SystemColumn} annotation.
- *        <li>Extracted from the entity via the getter marked with annotation.
+ *        <li>Extracted from the entity with the getter to which the {@link SystemColumn} is
+ *            applied.
  *    </ol>
  */
 final class SpineColumn extends AbstractColumn implements ColumnWithCustomGetter {
 
     /**
-     * A getter of the column from the entity.
+     * The getter of the column.
      */
     private final Getter getter;
 

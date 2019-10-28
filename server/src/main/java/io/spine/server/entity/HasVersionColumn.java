@@ -28,7 +28,7 @@ import io.spine.server.entity.storage.SystemColumn;
 /**
  * Marks an {@link Entity} that declares a {@link Version} column.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literal in annotation.
+@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literals in annotation.
 @Internal
 public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
 

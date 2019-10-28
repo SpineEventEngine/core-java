@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@DisplayName("StorageField should")
+@DisplayName("`StorageField` should")
 class StorageFieldTest {
 
     @Test

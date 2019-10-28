@@ -28,12 +28,21 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.function.Function;
 
 /**
- * A simple proto-based entity column.
+ * A simple entity-state-based column.
  *
- * <p>A proto-based entity column is:
+ * <p>An entity-state-based column is:
  *    <ol>
- *         <li>Declared in Protobuf with {@code (column)} option.
- *         <li>Updated in handler methods of the entity along with other entity state fields.
+ *         <li>Declared in Protobuf with {@code (column)} option:
+ *             <pre>
+ *             string task_description = 3 [(column) = true];
+ *             </pre>
+ *         <li>Updated in handler methods of the entity along with other entity state fields:
+ *             <pre>
+ *            {@literal @Subscribe}
+ *             void on(TaskDescriptionUpdated event) {
+ *                 builder().setTaskDescription(event.getNewTaskDescription())
+ *             }
+ *             </pre>
  *    </ol>
  */
 final class SimpleColumn

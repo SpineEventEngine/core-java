@@ -37,7 +37,7 @@ import static com.google.common.collect.Lists.newLinkedList;
  */
 public class TxProjection
         extends Projection<Id, ProjectionState, ProjectionState.Builder>
-        implements ProjectionStateWithColumns{
+        implements ProjectionStateWithColumns {
 
     private final List<Message> receivedEvents = newLinkedList();
 

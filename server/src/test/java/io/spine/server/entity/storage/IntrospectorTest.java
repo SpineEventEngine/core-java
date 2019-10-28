@@ -87,7 +87,8 @@ class IntrospectorTest {
         EntityClass<PrivateProjection> entityClass = asEntityClass(PrivateProjection.class);
         Introspector introspector = new Introspector(entityClass);
 
-        ImmutableMap<ColumnName, InterfaceBasedColumn> columns = introspector.interfaceBasedColumns();
+        ImmutableMap<ColumnName, InterfaceBasedColumn> columns =
+                introspector.interfaceBasedColumns();
 
         ColumnName description = ColumnName.of("description");
         InterfaceBasedColumn column = columns.get(description);
@@ -118,7 +119,7 @@ class IntrospectorTest {
             extends Projection<TaskListViewId, TaskListView, TaskListView.Builder>
             implements TaskListViewWithColumns {
 
-        private static final String DESCRIPTION = "some-list-description";
+        private static final String DESCRIPTION = "some-description";
 
         @Override
         public String getDescription() {

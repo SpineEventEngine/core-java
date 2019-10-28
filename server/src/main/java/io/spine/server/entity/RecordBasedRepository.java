@@ -334,7 +334,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         EntityRecord entityRecord = storageConverter().convert(entity);
         checkNotNull(entityRecord);
         EntityRecordWithColumns result =
-                EntityRecordWithColumns.create(entityRecord, entity, entityModelClass());
+                EntityRecordWithColumns.create(entityRecord, entity, recordStorage());
         return result;
     }
 

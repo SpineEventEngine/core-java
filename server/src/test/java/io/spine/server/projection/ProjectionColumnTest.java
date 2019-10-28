@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.common.truth.Truth8;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.server.storage.VersionField.version;
@@ -58,6 +58,6 @@ class ProjectionColumnTest {
         Columns columns = Columns.of(projectionType);
         ColumnName columnName = ColumnName.of(storageField);
         Optional<Column> result = columns.find(columnName);
-        Truth8.assertThat(result).isPresent();
+        assertThat(result).isPresent();
     }
 }

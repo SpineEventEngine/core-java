@@ -29,14 +29,12 @@ import io.spine.server.entity.storage.SystemColumn;
  *
  * @see SystemColumn
  */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literal in annotation.
+@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literals in annotation.
 @Internal
 public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> {
 
     /**
-     * Obtains a value of the {@code archived} flag.
-     *
-     * <p>Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#archived}.
+     * Obtains the value of {@code archived} flag.
      */
     @SystemColumn(name = "archived")
     default boolean getArchived() {
@@ -44,9 +42,7 @@ public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> 
     }
 
     /**
-     * Obtains a value of the {@code deleted} flag.
-     *
-     * <p>Corresponds to the {@link io.spine.server.storage.LifecycleFlagField#deleted}.
+     * Obtains the value of {@code deleted} flag.
      */
     @SystemColumn(name = "deleted")
     default boolean getDeleted() {

@@ -46,11 +46,12 @@ final class Introspector {
     private final EntityClass<?> entityClass;
 
     /**
-     * Is {@code true} when user-defined columns of the entity are {@linkplain InterfaceBasedColumn
+     * Is {@code true} when proto-based columns of the entity are {@linkplain InterfaceBasedColumn
      * interface-based}.
      *
-     * <p>With the current implementation all columns except {@linkplain SystemColumn system} ones
-     * will either be interface-based or {@linkplain SimpleColumn entity-state-based}.
+     * <p>With the current implementation all proto-based columns are either interface-based or
+     * {@linkplain SimpleColumn entity-state-based} and two column implementation methods cannot be
+     * mixed.
      */
     private final boolean columnsInterfaceBased;
 
@@ -83,6 +84,9 @@ final class Introspector {
 
     /**
      * Obtains the {@linkplain SimpleColumn entity-state-based} columns of the class.
+     *
+     * <p>Currently is mutually exclusive with {@link #interfaceBasedColumns()}, i.e. one of the
+     * methods will hold an empty map for any given entity.
      */
     ImmutableMap<ColumnName, SimpleColumn> simpleColumns() {
         if (columnsInterfaceBased) {
@@ -104,6 +108,9 @@ final class Introspector {
 
     /**
      * Obtains the {@linkplain InterfaceBasedColumn interface-based} columns of the class.
+     *
+     * <p>Currently is mutually exclusive with {@link #simpleColumns()}, i.e. one of the
+     * methods will hold an empty map for any given entity.
      */
     ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
         if (!columnsInterfaceBased) {
@@ -125,8 +132,8 @@ final class Introspector {
                 entity -> setAccessibleAndInvoke(getter, entity);
         InterfaceBasedColumn column = new InterfaceBasedColumn(data.name,
                                                                data.type,
-                                                               getterFromState,
                                                                getterFromEntity,
+                                                               getterFromState,
                                                                field);
         columns.put(column.name(), column);
     }

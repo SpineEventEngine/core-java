@@ -26,7 +26,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
-import io.spine.server.entity.model.EntityClass;
+import io.spine.server.storage.RecordStorage;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,8 +55,8 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
-                                                 EntityClass<?> entityClass) {
-        Columns columns = entityClass.columns();
+                                                 RecordStorage<?> recordStorage) {
+        Columns columns = recordStorage.columns();
         Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
         return of(record, storageFields);
     }
@@ -103,7 +103,8 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      * conversion.
      *
      * <p>In other cases consider implementing a custom {@link ColumnMapping} and using the
-     * {@link #columnValue(ColumnName, ColumnMapping)} alternative.
+     * {@link #columnValue(ColumnName, ColumnMapping)} overload for convenient column value
+     * conversion.
      *
      * @param columnName
      *         the column name
@@ -144,7 +145,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
      * <p>If returns {@code false}, the columns are not considered by the storage.
      *
      * @return {@code true} if the object was constructed using
-     *  {@link #create(EntityRecord, Entity, EntityClass)} and the entity has columns;
+     *  {@link #create(EntityRecord, Entity, RecordStorage)} and the entity has columns;
      *  {@code false} otherwise
      */
     public boolean hasColumns() {

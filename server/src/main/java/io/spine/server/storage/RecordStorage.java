@@ -275,6 +275,9 @@ public abstract class RecordStorage<I>
 
     /**
      * Obtains a list of columns of the managed {@link Entity}.
+     *
+     * @see io.spine.server.entity.storage.Column
+     * @see io.spine.code.proto.ColumnOption
      */
     @SPI
     protected final ImmutableList<Column> columnList() {
@@ -289,7 +292,7 @@ public abstract class RecordStorage<I>
      */
     @Internal
     public Columns columns() {
-        return entityClass().columns();
+        return entityClass.columns();
     }
 
     /**
@@ -306,10 +309,6 @@ public abstract class RecordStorage<I>
     @Internal
     public ImmutableMap<ColumnName, Column> lifecycleColumns() {
         return columns().lifecycleColumns();
-    }
-
-    public EntityClass<?> entityClass() {
-        return entityClass;
     }
 
     /*
@@ -362,8 +361,8 @@ public abstract class RecordStorage<I>
     readAllRecords(EntityQuery<I> query, ResponseFormat format);
 
     /**
-     * Writes a record and the associated {@link io.spine.server.entity.storage.Column} values into
-     * the storage.
+     * Writes a record and the associated {@linkplain io.spine.server.entity.storage.Column column}
+     * values into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *

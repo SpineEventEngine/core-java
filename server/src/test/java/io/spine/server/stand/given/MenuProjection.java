@@ -35,7 +35,7 @@ public final class MenuProjection
         extends Projection<MenuId, Menu, Menu.Builder>
         implements MenuWithColumns {
 
-    public static final String UUID = "uuid";
+    public static final String UUID_COLUMN = "uuid";
 
     @Subscribe
     void on(DishAdded event) {

@@ -74,9 +74,12 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
     /**
      * Allows to specify custom mapping rules.
      *
-     * <p>If some message types are special-case and need to be stored differently to the generic
+     * <p>If some message types are needed to be stored differently to the generic
      * {@linkplain Message messages}, the rules for their storage can be specified using this
      * method.
+     *
+     * <p>The common examples of such messages are {@link com.google.protobuf.Timestamp Timestamp}
+     * and {@link io.spine.core.Version Version}.
      *
      * <p>The custom mapping can also be specified for marker interfaces of messages like
      * {@link io.spine.base.EventMessage}.
@@ -88,47 +91,47 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
     }
 
     /**
-     * Returns the mapping rules of {@link String} columns.
+     * Returns the mapping rules of {@code String} columns.
      */
     protected abstract ColumnTypeMapping<String, ? extends R> ofString();
 
     /**
-     * Returns the mapping rules of {@link Integer} columns.
+     * Returns the mapping rules of {@code Integer} columns.
      */
     protected abstract ColumnTypeMapping<Integer, ? extends R> ofInteger();
 
     /**
-     * Returns the mapping rules of {@link Long} columns.
+     * Returns the mapping rules of {@code Long} columns.
      */
     protected abstract ColumnTypeMapping<Long, ? extends R> ofLong();
 
     /**
-     * Returns the mapping rules of {@link Float} columns.
+     * Returns the mapping rules of {@code Float} columns.
      */
     protected abstract ColumnTypeMapping<Float, ? extends R> ofFloat();
 
     /**
-     * Returns the mapping rules of {@link Double} columns.
+     * Returns the mapping rules of {@code Double} columns.
      */
     protected abstract ColumnTypeMapping<Double, ? extends R> ofDouble();
 
     /**
-     * Returns the mapping rules of {@link Boolean} columns.
+     * Returns the mapping rules of {@code Boolean} columns.
      */
     protected abstract ColumnTypeMapping<Boolean, ? extends R> ofBoolean();
 
     /**
-     * Returns the mapping rules of {@link ByteString} columns.
+     * Returns the mapping rules of {@code ByteString} columns.
      */
     protected abstract ColumnTypeMapping<ByteString, ? extends R> ofByteString();
 
     /**
-     * Returns the mapping rules of {@link Enum} columns.
+     * Returns the mapping rules of {@code Enum} columns.
      */
     protected abstract ColumnTypeMapping<Enum<?>, ? extends R> ofEnum();
 
     /**
-     * Returns the mapping rules of {@link Message} columns.
+     * Returns the mapping rules of {@code Message} columns.
      */
     protected abstract ColumnTypeMapping<Message, ? extends R> ofMessage();
 

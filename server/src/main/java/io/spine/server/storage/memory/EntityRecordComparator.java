@@ -37,9 +37,7 @@ import static io.spine.util.Preconditions2.checkNotDefaultArg;
  *
  * @implNote While more sophisticated storage implementations can order records by
  *         non-{@link Comparable} fields like {@link com.google.protobuf.Message message}-type
- *         fields, the in-memory implementation stores all entity records "as-is" which means
- *         trying to {@linkplain OrderBy order by} non-comparable fields will lead to an exception
- *         being thrown.
+ *         fields, the in-memory implementation does not support this functionality.
  */
 @SuppressWarnings("ComparatorNotSerializable")
 final class EntityRecordComparator implements Comparator<EntityRecordWithColumns> {
@@ -64,7 +62,7 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
     static Comparator<EntityRecordWithColumns> orderedBy(OrderBy orderBy) {
         checkNotDefaultArg(
                 orderBy,
-                "An empty OrderBy instance cannot be mapped to an EntityRecordComparator.");
+                "An empty `OrderBy` instance cannot be mapped to an `EntityRecordComparator`.");
         Direction direction = orderBy.getDirection();
         String columnName = orderBy.getColumn();
         if (direction == Direction.ASCENDING) {

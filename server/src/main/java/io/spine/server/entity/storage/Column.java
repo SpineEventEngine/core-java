@@ -31,7 +31,7 @@ import io.spine.annotation.SPI;
  * querying.
  *
  * <p>The {@linkplain #name() name} of the column represents the value which needs to be specified
- * to the filter during querying. The {@linkplain #type() type} is an expected type of the value.
+ * to the filter. The {@linkplain #type() type} is an expected type of the filter value.
  */
 @SPI
 @Immutable

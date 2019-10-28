@@ -48,7 +48,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filter.Operator.EQUAL;
 import static io.spine.protobuf.TypeConverter.toAny;
-import static io.spine.server.entity.storage.given.SimpleColumn.column;
+import static io.spine.server.entity.storage.given.AColumn.column;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.Collections.emptyList;

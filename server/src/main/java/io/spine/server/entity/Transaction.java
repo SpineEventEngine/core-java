@@ -398,7 +398,7 @@ public abstract class Transaction<I,
      *         the new state of the entity
      * @param updateColumns
      *         if {@code true}, the entity column values will be propagated to the entity state,
-     *         {@code false} value implies the columns have already been updated previously
+     *         {@code false} implies the columns have already been updated
      */
     private void commitChangedState(@NonValidated S newState, boolean updateColumns) {
         try {

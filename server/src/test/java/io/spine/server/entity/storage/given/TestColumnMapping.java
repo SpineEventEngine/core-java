@@ -29,7 +29,7 @@ import io.spine.test.entity.TaskView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Defines a mapping where all types a mapped to a {@code String}.
+ * Defines a mapping where all types are mapped to a {@code String}.
  */
 public final class TestColumnMapping extends AbstractColumnMapping<String> {
 

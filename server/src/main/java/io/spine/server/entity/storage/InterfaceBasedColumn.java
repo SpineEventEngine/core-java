@@ -34,8 +34,11 @@ import java.util.function.Function;
  *
  * <p>An interface-based column is:
  * <ol>
- *     <li>Declared in the Protobuf with {@code (column)} option.
- *     <li>Implemented using custom Spine-generated interface. For example:
+ *     <li>Declared in Protobuf with {@code (column)} option:
+ *         <pre>
+ *         int32 year_of_registration = 8 [(column) = true];
+ *         </pre>
+ *     <li>Implemented using custom Spine-generated interface:
  *         <pre>
  *         interface UserProfileWithColumns extends EntityWithColumns {
  *             int getYearOfRegistration();
@@ -48,12 +51,12 @@ import java.util.function.Function;
  *
  *            {@literal @}Override
  *             public int getYearOfRegistration() {
- *                 return yearOfRegistration();
+ *                 return yearOfRegistration;
  *             }
  *         }
  *         </pre>
  *     <li>Extracted from the entity and propagated to the entity state at the moment of
- *         transaction commit.
+ *         transaction commit. The column value is finalized by this moment.
  * </ol>
  */
 @Internal
@@ -62,14 +65,14 @@ public final class InterfaceBasedColumn
         implements ColumnDeclaredInProto, ColumnWithCustomGetter {
 
     /**
-     * A getter which obtains the column value present in the entity state.
-     */
-    private final GetterFromState getterFromState;
-
-    /**
      * A getter which obtains the actual column value from the entity.
      */
     private final GetterFromEntity getterFromEntity;
+
+    /**
+     * A getter which obtains the column value present in the entity state.
+     */
+    private final GetterFromState getterFromState;
 
     /**
      * A corresponding proto field declaration.
@@ -78,12 +81,12 @@ public final class InterfaceBasedColumn
 
     InterfaceBasedColumn(ColumnName name,
                          Class<?> type,
-                         GetterFromState getterFromState,
                          GetterFromEntity getterFromEntity,
+                         GetterFromState getterFromState,
                          FieldDeclaration field) {
         super(name, type);
-        this.getterFromState = getterFromState;
         this.getterFromEntity = getterFromEntity;
+        this.getterFromState = getterFromState;
         this.field = field;
     }
 
@@ -103,10 +106,10 @@ public final class InterfaceBasedColumn
     }
 
     @Immutable
-    interface GetterFromState extends Function<Message, Object> {
+    interface GetterFromEntity extends Function<Entity<?, ?>, Object> {
     }
 
     @Immutable
-    interface GetterFromEntity extends Function<Entity<?, ?>, Object> {
+    interface GetterFromState extends Function<Message, Object> {
     }
 }

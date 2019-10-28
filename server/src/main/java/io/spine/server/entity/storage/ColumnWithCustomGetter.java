@@ -25,8 +25,8 @@ import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Marks a column whose actual value should be extracted from the {@link Entity} with a custom
- * getter.
+ * Marks a column whose actual value should be extracted from the {@link Entity} and not the entity
+ * {@linkplain Entity#state() state}.
  */
 @Immutable
 interface ColumnWithCustomGetter extends Column {

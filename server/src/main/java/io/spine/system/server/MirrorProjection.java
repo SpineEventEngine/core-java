@@ -64,7 +64,7 @@ import static java.util.stream.Collectors.toList;
 @Internal
 public final class MirrorProjection
         extends Projection<MirrorId, Mirror, Mirror.Builder>
-        implements MirrorWithColumns{
+        implements MirrorWithColumns {
 
     public static final String TYPE_COLUMN_NAME = "aggregate_type";
 

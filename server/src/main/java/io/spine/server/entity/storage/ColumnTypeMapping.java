@@ -44,8 +44,8 @@ public interface ColumnTypeMapping<T, R> extends Function<T, R> {
      * <p>Can be used when the object is known of being of type {@code T} but can't be cast to it
      * explicitly (e.g. in case of wildcard arguments).
      */
-    @SuppressWarnings("unchecked") // See doc.
     @Internal
+    @SuppressWarnings("unchecked") // See doc.
     default R applyTo(Object object) {
         T value = (T) object;
         return apply(value);

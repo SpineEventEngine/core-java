@@ -43,8 +43,19 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 @Internal
 public final class Columns {
 
+    /**
+     * The {@linkplain SystemColumn system columns} of the entity.
+     */
     private final ImmutableMap<ColumnName, SpineColumn> systemColumns;
+
+    /**
+     * The entity-state-based columns of the entity.
+     */
     private final ImmutableMap<ColumnName, SimpleColumn> simpleColumns;
+
+    /**
+     * The interface-based columns of the entity.
+     */
     private final ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns;
 
     private final EntityClass<?> entityClass;

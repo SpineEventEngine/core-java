@@ -25,10 +25,10 @@ import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
 
 @SuppressWarnings("DuplicateStringLiteralInspection")
-public final class SimpleColumn {
+public final class AColumn {
 
     /** Prevents instantiation of this test env class. */
-    private SimpleColumn() {
+    private AColumn() {
     }
 
     public static Column column() {

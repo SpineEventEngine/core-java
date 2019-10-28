@@ -39,7 +39,7 @@ public final class DefaultColumnMapping extends AbstractColumnMapping<Object> {
     public static final DefaultColumnMapping INSTANCE = new DefaultColumnMapping();
 
     /**
-     * Prevents external construction so the class is accessed only through {@link #INSTANCE}.
+     * Prevents external construction so the class is accessed only through the {@link #INSTANCE}.
      */
     private DefaultColumnMapping() {
         super();
