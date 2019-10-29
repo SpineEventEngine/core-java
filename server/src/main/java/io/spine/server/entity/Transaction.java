@@ -365,11 +365,7 @@ public abstract class Transaction<I,
         S newState = withPhases()
                      ? entity.state()
                      : builder.buildPartial();
-        if (initialState.equals(newState)) {
-            updateColumnsAndCommit();
-        } else {
-            commitChangedState(newState, true);
-        }
+        commitEntityState(newState);
     }
 
     private boolean withPhases() {
@@ -377,39 +373,27 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Propagates entity column values to the entity state and commits a transaction.
-     */
-    private void updateColumnsAndCommit() {
-        S stateWithColumns = stateWithColumns();
-        if (initialState.equals(stateWithColumns)) {
-            commitUnchangedState();
-        } else {
-            commitChangedState(stateWithColumns, false);
-        }
-    }
-
-    /**
      * Commits this transaction and sets the new state to the entity.
      *
-     * <p>In case if the commit is failed, the transaction is rolled back and the entity keeps
-     * the current state.
+     * <p>In case there are no entity state changes, still checks the entity columns and meta
+     * attributes for the updates, as these values may change independently of entity state.
      *
-     * @param newState
-     *         the new state of the entity
-     * @param updateColumns
-     *         if {@code true}, the entity column values will be propagated to the entity state,
-     *         {@code false} implies the columns have already been updated
+     * <p>In case something goes wrong during the commit, the transaction is rolled back and the
+     * entity keeps its current state.
      */
-    private void commitChangedState(@NonValidated S newState, boolean updateColumns) {
+    private void commitEntityState(@NonValidated S newState) {
         try {
-            markStateChanged();
             Version pendingVersion = version();
             beforeCommit(newState, pendingVersion);
-            entity.updateState(newState, pendingVersion);
-            commitAttributeChanges();
-            if (updateColumns) {
-                updateColumns();
+            boolean stateChanged = !initialState.equals(newState);
+            if (stateChanged || !pendingVersion.equals(entity.version())) {
+                entity.updateState(newState, pendingVersion);
             }
+            updateColumns();
+            if (!entity.state().equals(initialState)) {
+                markStateChanged();
+            }
+            commitAttributeChanges();
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
         } catch (RuntimeException e) {
@@ -421,10 +405,15 @@ public abstract class Transaction<I,
 
     /**
      * Propagates the entity column values to the entity state.
+     *
+     * @implNote This method relies on all other entity state changes being already applied to
+     *         the entity, so the column getters that rely on entity state are evaluated correctly.
      */
     private void updateColumns() {
         S stateWithColumns = stateWithColumns();
-        entity.updateState(stateWithColumns);
+        if (!stateWithColumns.equals(entity.state())) {
+            entity.updateState(stateWithColumns);
+        }
     }
 
     /**
@@ -433,9 +422,6 @@ public abstract class Transaction<I,
      * <p>Some of the columns may be {@linkplain InterfaceBasedColumn implemented} with custom
      * getters declared in the entity class. The values of such columns need to be propagated to
      * the entity state during transaction commit.
-     *
-     * @implNote This method relies on all other entity state changes being already propagated to
-     *         the entity, so the column getters that rely on entity state are evaluated correctly.
      */
     @SuppressWarnings("unchecked") // Logically correct.
     private S stateWithColumns() {
@@ -462,24 +448,6 @@ public abstract class Transaction<I,
     @VisibleForTesting
     final void deactivate() {
         this.active = false;
-    }
-
-    /**
-     * Commits this transaction skipping the entity state update.
-     *
-     * <p>This method is called when none of the transaction phases has changed the entity state.
-     */
-    private void commitUnchangedState() {
-        S unchanged = entity().state();
-        Version pendingVersion = version();
-        beforeCommit(unchanged, pendingVersion);
-        if (!pendingVersion.equals(entity.version())) {
-            entity.updateState(unchanged, pendingVersion);
-        }
-        commitAttributeChanges();
-        releaseTx();
-        EntityRecord newRecord = entityRecord();
-        afterCommit(newRecord);
     }
 
     private void beforeCommit(S newState, Version newVersion) {
@@ -536,8 +504,19 @@ public abstract class Transaction<I,
                 .setLifecycleFlags(lifecycleFlags())
                 .buildPartial();
         recordConsumer.accept(record);
+        rollbackState();
         deactivate();
         entity.releaseTransaction();
+    }
+
+    /**
+     * Does the state rollback in case some of the changes have already been propagated to the
+     * entity.
+     */
+    private void rollbackState() {
+        if (!initialState.equals(entity.state())) {
+            entity.updateState(initialState);
+        }
     }
 
     /**
