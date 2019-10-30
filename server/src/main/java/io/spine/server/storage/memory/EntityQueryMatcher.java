@@ -113,35 +113,44 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
 
     private static boolean checkAll(Multimap<Column, Filter> filters,
                                     EntityRecordWithColumns record) {
-        for (Map.Entry<Column, Filter> filter : filters.entries()) {
-            Column column = filter.getKey();
-            if (!record.hasColumn(column.name())) {
-                return false;
-            }
-            @Nullable Object columnValue = columnValue(record, column);
-            boolean matches = checkSingleParameter(filter.getValue(), columnValue, column);
-            if (!matches) {
-                return false;
-            }
+        if (filters.isEmpty()) {
+            return true;
         }
-        return true;
+        boolean result =
+                filters.entries()
+                       .stream()
+                       .allMatch(filter -> matches(record, filter));
+        return result;
     }
 
     private static boolean checkEither(Multimap<Column, Filter> filters,
                                        EntityRecordWithColumns record) {
-        for (Map.Entry<Column, Filter> filter : filters.entries()) {
-            Column column = filter.getKey();
-            if (!record.hasColumn(column.name())) {
-                continue;
-            }
-            @Nullable Object columnValue = columnValue(record, column);
-            boolean matches =
-                    checkSingleParameter(filter.getValue(), columnValue, column);
-            if (matches) {
-                return true;
-            }
+        if (filters.isEmpty()) {
+            return true;
         }
-        return filters.isEmpty();
+        boolean result =
+                filters.entries()
+                       .stream()
+                       .anyMatch(filter -> matches(record, filter));
+        return result;
+    }
+
+    private static boolean matches(EntityRecordWithColumns record,
+                                   Map.Entry<Column, Filter> filter) {
+        if (!hasColumn(record, filter)) {
+            return false;
+        }
+        Column column = filter.getKey();
+        @Nullable Object columnValue = columnValue(record, column);
+        boolean result = checkSingleParameter(filter.getValue(), columnValue, column);
+        return result;
+    }
+
+    private static boolean hasColumn(EntityRecordWithColumns record,
+                                     Map.Entry<Column, Filter> filter) {
+        boolean result = record.hasColumn(filter.getKey()
+                                                .name());
+        return result;
     }
 
     private static boolean checkSingleParameter(Filter filter,
