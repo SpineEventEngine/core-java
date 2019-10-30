@@ -438,7 +438,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return result;
     }
 
-    private void updateVersion(Version newVersion) {
+    final void updateVersion(Version newVersion) {
         checkNotNull(newVersion);
         checkValid(newVersion);
         if (version.equals(newVersion)) {
@@ -471,7 +471,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         updateState(newState, incrementedVersion());
     }
 
-    private void setVersion(Version version) {
+    void setVersion(Version version) {
         this.version = version;
     }
 

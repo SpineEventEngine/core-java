@@ -94,6 +94,11 @@ public abstract class Transaction<I,
     private final S initialState;
 
     /**
+     * The version of the entity before the beginning of the transaction.
+     */
+    private final Version initialVersion;
+
+    /**
      * The builder for the entity state at the current phase of the transaction.
      *
      * <p>All the state changes made within the transaction go to this {@code Builder},
@@ -169,6 +174,7 @@ public abstract class Transaction<I,
     protected Transaction(E entity) {
         this.entity = checkNotNull(entity);
         this.initialState = entity.state();
+        this.initialVersion = entity.version();
         this.builder = toBuilder(entity);
         this.version = entity.version();
         this.lifecycleFlags = entity.lifecycleFlags();
@@ -365,7 +371,7 @@ public abstract class Transaction<I,
         S newState = withPhases()
                      ? entity.state()
                      : builder.buildPartial();
-        commitEntityState(newState);
+        doCommit(newState);
     }
 
     private boolean withPhases() {
@@ -375,24 +381,20 @@ public abstract class Transaction<I,
     /**
      * Commits this transaction and sets the new state to the entity.
      *
-     * <p>In case there are no entity state changes, still checks the entity columns and meta
-     * attributes for the updates, as these values may change independently of entity state.
+     * <p>In case there are no entity state changes, still checks the entity column values and meta
+     * attributes for updates, as these values may change independently of entity state.
      *
      * <p>In case something goes wrong during the commit, the transaction is rolled back and the
      * entity keeps its current state.
      */
-    private void commitEntityState(@NonValidated S newState) {
+    private void doCommit(@NonValidated S newState) {
         try {
             Version pendingVersion = version();
             beforeCommit(newState, pendingVersion);
-            boolean stateChanged = !initialState.equals(newState);
-            if (stateChanged || !pendingVersion.equals(entity.version())) {
-                entity.updateState(newState, pendingVersion);
-            }
+            updateState(newState);
             updateColumns();
-            if (!entity.state().equals(initialState)) {
-                markStateChanged();
-            }
+            updateVersion();
+            updateStateChanged();
             commitAttributeChanges();
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
@@ -404,15 +406,45 @@ public abstract class Transaction<I,
     }
 
     /**
+     * Propagates the state update to the entity.
+     */
+    private void updateState(@NonValidated S newState) {
+        if (!initialState.equals(newState)) {
+            entity.updateState(newState);
+        }
+    }
+
+    /**
      * Propagates the entity column values to the entity state.
      *
-     * @implNote This method relies on all other entity state changes being already applied to
-     *         the entity, so the column getters that rely on entity state are evaluated correctly.
+     * <p>This method should only be invoked after all entity state changes are already applied to
+     * the entity, so the column getters that rely on entity state are evaluated correctly.
      */
     private void updateColumns() {
         S stateWithColumns = stateWithColumns();
         if (!stateWithColumns.equals(entity.state())) {
             entity.updateState(stateWithColumns);
+        }
+    }
+
+    /**
+     * Propagates the version update to the entity.
+     */
+    private void updateVersion() {
+        Version pending = version();
+        if (!pending.equals(entity.version())) {
+            entity.updateVersion(pending);
+        }
+    }
+
+    /**
+     * Marks entity state as changed if there are any changes.
+     *
+     * <p>This triggers the storage mechanism.
+     */
+    private void updateStateChanged() {
+        if (!entity.state().equals(initialState)) {
+            markStateChanged();
         }
     }
 
@@ -504,18 +536,20 @@ public abstract class Transaction<I,
                 .setLifecycleFlags(lifecycleFlags())
                 .buildPartial();
         recordConsumer.accept(record);
-        rollbackState();
+        rollbackStateAndVersion();
         deactivate();
         entity.releaseTransaction();
     }
 
     /**
-     * Does the state rollback in case some of the changes have already been propagated to the
-     * entity.
+     * Does the entity state and version rollback.
      */
-    private void rollbackState() {
+    private void rollbackStateAndVersion() {
         if (!initialState.equals(entity.state())) {
-            entity.updateState(initialState);
+            entity.setState(initialState);
+        }
+        if (!initialVersion.equals(entity.version())) {
+            entity.setVersion(initialVersion);
         }
     }
 

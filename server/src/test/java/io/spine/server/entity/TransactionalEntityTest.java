@@ -20,7 +20,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.given.TeEntity;
 import io.spine.server.test.shared.EmptyEntity;
@@ -216,11 +216,11 @@ class TransactionalEntityTest {
             assertThat(newState)
                     .isNotEqualTo(originalState);
 
-            TestTransaction.injectState(entity, newState, Version.getDefaultInstance());
+            TestTransaction.injectState(entity, newState, Versions.zero());
             Message modifiedState = toBuilder(entity)
                     .build();
 
-            assertEquals(newState, modifiedState);
+            assertThat(newState).isEqualTo(modifiedState);
         }
     }
 
