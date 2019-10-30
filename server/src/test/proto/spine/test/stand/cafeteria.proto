@@ -20,7 +20,6 @@ message Menu {
 
     MenuId id = 1;
     repeated Dish dish = 2;
-
     string uuid = 3 [(column) = true];
 }
 
