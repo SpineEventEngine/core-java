@@ -159,10 +159,28 @@ final class Scanner {
                 getterName, clazz.getCanonicalName(), field.name());
     }
 
+    /**
+     * The basic column data needed to create an entity {@link Column} instance.
+     */
     private static class ColumnData {
 
+        /**
+         * The name of the column.
+         */
         private final ColumnName name;
+
+        /**
+         * The Java type of the column.
+         */
         private final Class<?> type;
+
+        /**
+         * The method with which the column is extracted from the entity.
+         *
+         * <p>The {@linkplain ColumnDeclaredInProto entity-state-based} columns are extracted from
+         * the entity state while the {@linkplain SystemColumn system} columns are obtained from
+         * the entity itself.
+         */
         private final Method getter;
 
         private ColumnData(ColumnName name, Class<?> type, Method getter) {
@@ -171,6 +189,12 @@ final class Scanner {
             this.getter = getter;
         }
 
+        /**
+         * Extracts the column data from the proto field declaration.
+         *
+         * <p>The resulting data can be used for constructing a {@link ColumnDeclaredInProto}
+         * instance.
+         */
         private static ColumnData of(FieldDeclaration protoColumn, EntityClass<?> entityClass) {
             ColumnName columnName = ColumnName.of(protoColumn);
             Method getter = getterOf(protoColumn, entityClass.stateClass());
@@ -178,6 +202,9 @@ final class Scanner {
             return new ColumnData(columnName, columnType, getter);
         }
 
+        /**
+         * Extracts the column data from the method annotated with {@link SystemColumn}.
+         */
         private static ColumnData of(Method systemColumn) {
             SystemColumn annotation = checkNotNull(systemColumn.getAnnotation(SystemColumn.class));
             ColumnName name = ColumnName.of(annotation.name());
