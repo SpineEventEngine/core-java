@@ -40,15 +40,15 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.server.storage.VersionField.version;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`Introspector` should")
-class IntrospectorTest {
+@DisplayName("`Scanner` should")
+class ScannerTest {
 
     @Test
     @DisplayName("extract system columns from the entity class")
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-        Introspector introspector = new Introspector(entityClass);
-        ImmutableMap<ColumnName, SysColumn> systemColumns = introspector.systemColumns();
+        Scanner scanner = new Scanner(entityClass);
+        ImmutableMap<ColumnName, SysColumn> systemColumns = scanner.systemColumns();
 
         assertThat(systemColumns).containsKey(ColumnName.of(archived));
         assertThat(systemColumns).containsKey(ColumnName.of(deleted));
@@ -59,9 +59,9 @@ class IntrospectorTest {
     @DisplayName("extract columns implemented via `EntityWithColumns` descendant")
     void extractImplementedColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-        Introspector introspector = new Introspector(entityClass);
+        Scanner scanner = new Scanner(entityClass);
         ImmutableMap<ColumnName, InterfaceBasedColumn> columns =
-                introspector.interfaceBasedColumns();
+                scanner.interfaceBasedColumns();
 
         assertThat(columns).containsKey(ColumnName.of("name"));
         assertThat(columns).containsKey(ColumnName.of("estimate_in_days"));
@@ -74,9 +74,9 @@ class IntrospectorTest {
     void extractSimpleColumns() {
         EntityClass<TaskListViewProjection> entityClass =
                 asEntityClass(TaskListViewProjection.class);
-        Introspector introspector = new Introspector(entityClass);
+        Scanner scanner = new Scanner(entityClass);
 
-        ImmutableMap<ColumnName, SimpleColumn> columns = introspector.simpleColumns();
+        ImmutableMap<ColumnName, SimpleColumn> columns = scanner.simpleColumns();
 
         assertThat(columns).containsKey(ColumnName.of("description"));
     }
@@ -85,10 +85,10 @@ class IntrospectorTest {
     @DisplayName("extract columns from the non-`public` entity class")
     void extractFromNonPublic() {
         EntityClass<PrivateProjection> entityClass = asEntityClass(PrivateProjection.class);
-        Introspector introspector = new Introspector(entityClass);
+        Scanner scanner = new Scanner(entityClass);
 
         ImmutableMap<ColumnName, InterfaceBasedColumn> columns =
-                introspector.interfaceBasedColumns();
+                scanner.interfaceBasedColumns();
 
         ColumnName description = ColumnName.of("description");
         InterfaceBasedColumn column = columns.get(description);
@@ -105,9 +105,9 @@ class IntrospectorTest {
     void throwOnGetterNotFound() {
         EntityClass<InvalidEntityWithColumns> entityClass =
                 asEntityClass(InvalidEntityWithColumns.class);
-        Introspector introspector = new Introspector(entityClass);
+        Scanner scanner = new Scanner(entityClass);
 
-        assertThrows(IllegalStateException.class, introspector::interfaceBasedColumns);
+        assertThrows(IllegalStateException.class, scanner::interfaceBasedColumns);
     }
 
     /**

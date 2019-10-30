@@ -38,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * An extractor of entity columns.
  */
-final class Introspector {
+final class Scanner {
 
     /**
      * The target entity class.
@@ -55,7 +55,7 @@ final class Introspector {
      */
     private final boolean columnsInterfaceBased;
 
-    Introspector(EntityClass<?> entityClass) {
+    Scanner(EntityClass<?> entityClass) {
         this.entityClass = entityClass;
         this.columnsInterfaceBased =
                 EntityWithColumns.class.isAssignableFrom(entityClass.value());

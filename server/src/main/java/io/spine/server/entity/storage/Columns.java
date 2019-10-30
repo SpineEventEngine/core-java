@@ -77,10 +77,10 @@ public final class Columns {
      */
     public static Columns of(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
-        Introspector introspector = new Introspector(entityClass);
-        return new Columns(introspector.systemColumns(),
-                           introspector.simpleColumns(),
-                           introspector.interfaceBasedColumns(),
+        Scanner scanner = new Scanner(entityClass);
+        return new Columns(scanner.systemColumns(),
+                           scanner.simpleColumns(),
+                           scanner.interfaceBasedColumns(),
                            entityClass);
     }
 
