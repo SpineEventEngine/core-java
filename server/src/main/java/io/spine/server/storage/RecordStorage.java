@@ -305,7 +305,7 @@ public abstract class RecordStorage<I>
      * @see LifecycleFlagField
      */
     @Internal
-    public ImmutableMap<ColumnName, Column> lifecycleColumns() {
+    public final ImmutableMap<ColumnName, Column> lifecycleColumns() {
         return columns().lifecycleColumns();
     }
 
