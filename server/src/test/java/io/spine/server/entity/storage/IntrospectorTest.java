@@ -48,7 +48,7 @@ class IntrospectorTest {
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
         Introspector introspector = new Introspector(entityClass);
-        ImmutableMap<ColumnName, SpineColumn> systemColumns = introspector.systemColumns();
+        ImmutableMap<ColumnName, SysColumn> systemColumns = introspector.systemColumns();
 
         assertThat(systemColumns).containsKey(ColumnName.of(archived));
         assertThat(systemColumns).containsKey(ColumnName.of(deleted));

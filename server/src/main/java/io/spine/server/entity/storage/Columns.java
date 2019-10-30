@@ -47,7 +47,7 @@ public final class Columns {
     /**
      * The {@linkplain SystemColumn system columns} of the entity.
      */
-    private final ImmutableMap<ColumnName, SpineColumn> systemColumns;
+    private final ImmutableMap<ColumnName, SysColumn> systemColumns;
 
     /**
      * The entity-state-based columns of the entity.
@@ -62,7 +62,7 @@ public final class Columns {
     private final EntityClass<?> entityClass;
 
     private Columns(
-            ImmutableMap<ColumnName, SpineColumn> systemColumns,
+            ImmutableMap<ColumnName, SysColumn> systemColumns,
             ImmutableMap<ColumnName, SimpleColumn> simpleColumns,
             ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns,
             EntityClass<?> entityClass) {
@@ -157,7 +157,7 @@ public final class Columns {
         ImmutableMap.Builder<ColumnName, Column> result = ImmutableMap.builder();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
             ColumnName name = ColumnName.of(field.name());
-            SpineColumn column = systemColumns.get(name);
+            SysColumn column = systemColumns.get(name);
             if (column != null) {
                 result.put(name, column);
             }

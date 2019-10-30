@@ -36,14 +36,14 @@ import java.util.function.Function;
  *            applied.
  *    </ol>
  */
-final class SpineColumn extends AbstractColumn implements ColumnWithCustomGetter {
+final class SysColumn extends AbstractColumn implements ColumnWithCustomGetter {
 
     /**
      * The getter of the column.
      */
     private final Getter getter;
 
-    SpineColumn(ColumnName name, Class<?> type, Getter getter) {
+    SysColumn(ColumnName name, Class<?> type, Getter getter) {
         super(name, type);
         this.getter = getter;
     }

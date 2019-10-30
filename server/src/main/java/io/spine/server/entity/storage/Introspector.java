@@ -64,8 +64,8 @@ final class Introspector {
     /**
      * Obtains the {@linkplain SystemColumn system} columns of the class.
      */
-    ImmutableMap<ColumnName, SpineColumn> systemColumns() {
-        ImmutableMap.Builder<ColumnName, SpineColumn> columns = ImmutableMap.builder();
+    ImmutableMap<ColumnName, SysColumn> systemColumns() {
+        ImmutableMap.Builder<ColumnName, SysColumn> columns = ImmutableMap.builder();
         Class<?> entityClazz = entityClass.value();
         Method[] methods = entityClazz.getMethods();
         Arrays.stream(methods)
@@ -75,10 +75,10 @@ final class Introspector {
     }
 
     private static void addSystemColumn(Method method,
-                                        ImmutableMap.Builder<ColumnName, SpineColumn> columns) {
+                                        ImmutableMap.Builder<ColumnName, SysColumn> columns) {
         ColumnData data = ColumnData.of(method);
-        SpineColumn.Getter getter = entity -> setAccessibleAndInvoke(data.getter, entity);
-        SpineColumn column = new SpineColumn(data.name, data.type, getter);
+        SysColumn.Getter getter = entity -> setAccessibleAndInvoke(data.getter, entity);
+        SysColumn column = new SysColumn(data.name, data.type, getter);
         columns.put(column.name(), column);
     }
 
