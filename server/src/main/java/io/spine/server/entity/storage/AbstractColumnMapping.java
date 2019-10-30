@@ -186,22 +186,36 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
         return customMapping;
     }
 
-    private Optional<ColumnTypeMapping<?, ? extends R>> customMappingFor(Class<?> aClass) {
+    /**
+     * Searches for column type mapping among the custom user-defined types mapping.
+     *
+     * <p>It's a common case when a particular message type like
+     * {@link com.google.protobuf.Timestamp} requires a type mapping different to other messages.
+     *
+     * <p>If such mapping for the passed type exists, it will be retrieved by this method.
+     */
+    private Optional<ColumnTypeMapping<?, ? extends R>> customMappingFor(Class<?> columnType) {
         Optional<ColumnTypeMapping<?, ? extends R>> result =
                 customMapping().keySet()
                                .stream()
-                               .filter(cls -> cls.isAssignableFrom(aClass))
+                               .filter(cls -> cls.isAssignableFrom(columnType))
                                .map(customMapping()::get)
                                .findFirst()
                                .map(rule -> (ColumnTypeMapping<?, ? extends R>) rule);
         return result;
     }
 
-    private Optional<ColumnTypeMapping<?, ? extends R>> standardMappingFor(Class<?> aClass) {
+    /**
+     * Searches for the column type mapping among standard proto type mappings.
+     *
+     * <p>Inherited types are taken into account too, so if the passed type extends {@link Enum},
+     * the {@linkplain #ofEnum() enum type mapping} will be used.
+     */
+    private Optional<ColumnTypeMapping<?, ? extends R>> standardMappingFor(Class<?> columnType) {
         Optional<ColumnTypeMapping<?, ? extends R>> result =
                 standardTypesMapping.keySet()
                                     .stream()
-                                    .filter(cls -> cls.isAssignableFrom(aClass))
+                                    .filter(cls -> cls.isAssignableFrom(columnType))
                                     .map(standardTypesMapping::get)
                                     .findFirst()
                                     .map(Supplier::get);
