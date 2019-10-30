@@ -21,7 +21,6 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.SPI;
 
 /**
  * A column of the {@linkplain io.spine.server.entity.Entity entity}.
@@ -33,7 +32,6 @@ import io.spine.annotation.SPI;
  * <p>The {@linkplain #name() name} of the column represents the value which needs to be specified
  * to the filter. The {@linkplain #type() type} is an expected type of the filter value.
  */
-@SPI
 @Immutable
 public interface Column {
 
