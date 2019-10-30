@@ -42,6 +42,8 @@ public interface ColumnMapping<R> {
     /**
      * Obtains the mapping rules for the given type.
      *
+     * @param <T>
+     *         the column type
      * @throws IllegalArgumentException
      *         if the mapping for the specified type cannot be found
      */
