@@ -21,4 +21,8 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Run tests with Gradle
-      run: gradlew.bat build
+      run: |
+        echo Current directory is:
+        cd
+        gradlew.bat build
+
