@@ -40,14 +40,14 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
 
     /**
-     * The mapping rules of standard proto types.
+     * The mapping rules of built-in proto types.
      */
     private final
-    ImmutableMap<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>> standardMapping
-            = standardMapping();
+    ImmutableMap<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>> standardTypesMapping
+            = standardTypesMapping();
 
     /**
-     * The mapping rules for custom types.
+     * The mapping rules for custom user-defined types.
      *
      * @see #setupCustomMapping(ImmutableMap.Builder)
      */
@@ -143,7 +143,7 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
     }
 
     private ImmutableMap<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>>
-    standardMapping() {
+    standardTypesMapping() {
         ImmutableMap.Builder<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>> builder =
                 ImmutableMap.builder();
 
@@ -199,12 +199,12 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
 
     private Optional<ColumnTypeMapping<?, ? extends R>> standardMappingFor(Class<?> aClass) {
         Optional<ColumnTypeMapping<?, ? extends R>> result =
-                standardMapping.keySet()
-                               .stream()
-                               .filter(cls -> cls.isAssignableFrom(aClass))
-                               .map(standardMapping::get)
-                               .findFirst()
-                               .map(Supplier::get);
+                standardTypesMapping.keySet()
+                                    .stream()
+                                    .filter(cls -> cls.isAssignableFrom(aClass))
+                                    .map(standardTypesMapping::get)
+                                    .findFirst()
+                                    .map(Supplier::get);
         return result;
     }
 }
