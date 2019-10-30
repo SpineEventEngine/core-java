@@ -35,9 +35,12 @@ import static io.spine.util.Preconditions2.checkNotDefaultArg;
  * A comparator for sorting the contents of {@link TenantRecords}
  * in a provided {@link OrderBy order}.
  *
- * @implNote While more sophisticated storage implementations can order records by
+ * @implNote More sophisticated storage implementations can order records by
  *         non-{@link Comparable} fields like {@link com.google.protobuf.Message message}-type
- *         fields, the in-memory implementation does not support this functionality.
+ *         fields, depending on their storage method (e.g. comparing the string content of
+ *         messages).The in-memory implementation stores all column values "as-is" and cannot do
+ *         that. Trying to {@linkplain OrderBy order by} column of non-comparable type will lead to
+ *         an exception being thrown.
  */
 @SuppressWarnings("ComparatorNotSerializable")
 final class EntityRecordComparator implements Comparator<EntityRecordWithColumns> {
