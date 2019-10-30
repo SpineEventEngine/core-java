@@ -34,7 +34,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * The basic implementation of mapping rules for entity {@linkplain Column columns}.
  *
- * <p>Since entity columns are proto-based an have a limited amount of possible types, this class
+ * <p>Since entity columns are proto-based and have a limited amount of possible types, this class
  * allows descendants to override concrete type mapping rules in a convenient way.
  */
 public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
