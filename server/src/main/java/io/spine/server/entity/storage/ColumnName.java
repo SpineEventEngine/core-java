@@ -21,7 +21,6 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.SPI;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.storage.StorageField;
 import io.spine.value.StringTypeValue;
@@ -32,7 +31,6 @@ import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 /**
  * A name of the column in the storage.
  */
-@SPI
 @Immutable
 public final class ColumnName extends StringTypeValue {
 

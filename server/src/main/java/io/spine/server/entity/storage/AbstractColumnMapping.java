@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.spine.annotation.SPI;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -38,7 +37,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>Since entity columns are proto-based an have a limited amount of possible types, this class
  * allows descendants to override concrete type mapping rules in a convenient way.
  */
-@SPI
 public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
 
     /**

@@ -26,7 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.protobuf.AnyPacker;
@@ -279,7 +278,6 @@ public abstract class RecordStorage<I>
      * @see io.spine.server.entity.storage.Column
      * @see io.spine.code.proto.ColumnOption
      */
-    @SPI
     protected final ImmutableList<Column> columnList() {
         return columns().columnList();
     }
