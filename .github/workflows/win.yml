@@ -25,4 +25,4 @@ jobs:
         echo Current directory is:
         cd
         gradlew.bat build
-
+      shell: cmd
