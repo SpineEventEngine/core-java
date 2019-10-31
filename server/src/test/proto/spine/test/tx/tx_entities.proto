@@ -47,4 +47,5 @@ message ProjectionState {
     option (entity) = { kind: PROJECTION visibility: FULL };
     Id id = 1;
     string name = 2 [(required) = true];
+    int32 name_length = 3 [(column) = true];
 }

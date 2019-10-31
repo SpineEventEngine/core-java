@@ -76,13 +76,14 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
               .setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
               .setDefault(RecordStorage.class, storage)
+              .setDefault(Columns.class, Columns.of(TestEntity.class))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
     private static EntityQuery<?> createEntityQuery(TargetFilters filters,
                                                     Class<? extends Entity<?, ?>> entityClass) {
-        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return EntityQueries.from(filters, entityColumns);
+        Columns columns = Columns.of(entityClass);
+        return EntityQueries.from(filters, columns);
     }
 
     @Test
@@ -169,9 +170,9 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         assertThat(values).hasSize(1);
 
         CompositeQueryParameter singleParam = values.get(0);
-        Collection<Filter> columnFilters = singleParam.getFilters()
+        Collection<Filter> columnFilters = singleParam.filters()
                                                       .values();
-        assertEquals(EITHER, singleParam.getOperator());
+        assertEquals(EITHER, singleParam.operator());
         IterableSubject assertColumnFilters = assertThat(columnFilters);
         assertColumnFilters.contains(archivedFilter);
     }

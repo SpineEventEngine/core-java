@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
-import io.spine.server.entity.storage.Column;
 import io.spine.string.Stringifiers;
 
 /**
@@ -65,43 +64,14 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
     S state();
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to add the {@code Column} annotation.
-     */
-    @Column
-    @Override
-    boolean isArchived();
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to add {@code Column} annotation.
-     */
-    @Column
-    @Override
-    boolean isDeleted();
-
-    /**
      * Tells whether lifecycle flags of the entity changed since its initialization.
      */
     boolean lifecycleFlagsChanged();
 
     /**
      * Obtains the version of the entity.
-     *
-     * @apiNote This method has the {@code get} prefix for conforming to Java Beans
-     *         convention which is used for the column methods.
-     * @see #version()
      */
-    Version getVersion();
-
-    /**
-     * Obtains the version of the entity.
-     */
-    default Version version() {
-        return getVersion();
-    }
+    Version version();
 
     /**
      * Enumeration of generic type parameters of this interface.

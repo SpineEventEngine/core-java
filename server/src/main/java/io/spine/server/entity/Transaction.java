@@ -21,6 +21,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -33,6 +34,8 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.InterfaceBasedColumn;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
@@ -89,6 +92,11 @@ public abstract class Transaction<I,
      * The state of the entity before the beginning of the transaction.
      */
     private final S initialState;
+
+    /**
+     * The version of the entity before the beginning of the transaction.
+     */
+    private final Version initialVersion;
 
     /**
      * The builder for the entity state at the current phase of the transaction.
@@ -166,6 +174,7 @@ public abstract class Transaction<I,
     protected Transaction(E entity) {
         this.entity = checkNotNull(entity);
         this.initialState = entity.state();
+        this.initialVersion = entity.version();
         this.builder = toBuilder(entity);
         this.version = entity.version();
         this.lifecycleFlags = entity.lifecycleFlags();
@@ -243,7 +252,7 @@ public abstract class Transaction<I,
                 .newBuilder()
                 .setId(Identifier.pack(entity.id()))
                 .setTypeUrl(typeUrl.value())
-                .setVersion(entity.getVersion())
+                .setVersion(entity.version())
                 .vBuild();
     }
 
@@ -362,11 +371,7 @@ public abstract class Transaction<I,
         S newState = withPhases()
                      ? entity.state()
                      : builder.buildPartial();
-        if (initialState.equals(newState)) {
-            commitUnchangedState();
-        } else {
-            commitChangedState(newState);
-        }
+        doCommit(newState);
     }
 
     private boolean withPhases() {
@@ -376,18 +381,20 @@ public abstract class Transaction<I,
     /**
      * Commits this transaction and sets the new state to the entity.
      *
-     * <p>In case if the commit is failed, the transaction is rolled back and the entity keeps
-     * the current state.
+     * <p>In case there are no entity state changes, still checks the entity column values and meta
+     * attributes for updates, as these values may change independently of entity state.
      *
-     * @param newState
-     *         the new state of the entity
+     * <p>In case something goes wrong during the commit, the transaction is rolled back and the
+     * entity keeps its current state.
      */
-    private void commitChangedState(@NonValidated S newState) {
+    private void doCommit(@NonValidated S newState) {
         try {
-            markStateChanged();
             Version pendingVersion = version();
             beforeCommit(newState, pendingVersion);
-            entity.updateState(newState, pendingVersion);
+            updateState(newState);
+            updateColumns();
+            updateVersion();
+            updateStateChanged();
             commitAttributeChanges();
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
@@ -399,29 +406,80 @@ public abstract class Transaction<I,
     }
 
     /**
+     * Propagates the state update to the entity.
+     */
+    private void updateState(@NonValidated S newState) {
+        if (!initialState.equals(newState)) {
+            entity.updateState(newState);
+        }
+    }
+
+    /**
+     * Propagates the entity column values to the entity state.
+     *
+     * <p>This method should only be invoked after all entity state changes are already applied to
+     * the entity, so the column getters that rely on entity state are evaluated correctly.
+     */
+    private void updateColumns() {
+        S stateWithColumns = stateWithColumns();
+        if (!stateWithColumns.equals(entity.state())) {
+            entity.updateState(stateWithColumns);
+        }
+    }
+
+    /**
+     * Propagates the version update to the entity.
+     */
+    private void updateVersion() {
+        Version pending = version();
+        if (!pending.equals(entity.version())) {
+            entity.updateVersion(pending);
+        }
+    }
+
+    /**
+     * Marks entity state as changed if there are any changes.
+     *
+     * <p>This triggers the storage mechanism.
+     */
+    private void updateStateChanged() {
+        if (!entity.state().equals(initialState)) {
+            markStateChanged();
+        }
+    }
+
+    /**
+     * Returns an entity state with updated entity columns.
+     *
+     * <p>Some of the columns may be {@linkplain InterfaceBasedColumn implemented} with custom
+     * getters declared in the entity class. The values of such columns need to be propagated to
+     * the entity state during transaction commit.
+     */
+    @SuppressWarnings("unchecked") // Logically correct.
+    private S stateWithColumns() {
+        ImmutableMap<ColumnName, InterfaceBasedColumn> columns = entity.thisClass()
+                                                                       .columns()
+                                                                       .interfaceBasedColumns();
+        if (columns.isEmpty()) {
+            return entity.state();
+        }
+        Message.Builder stateWithColumns = entity.state()
+                                                 .toBuilder();
+        columns.values()
+               .forEach(column -> {
+                   Object value = column.valueIn(entity);
+                   stateWithColumns.setField(column.protoField().descriptor(), value);
+               });
+        S result = (S) stateWithColumns.build();
+        return result;
+    }
+
+    /**
      * Turns the transaction into inactive state.
      */
     @VisibleForTesting
     final void deactivate() {
         this.active = false;
-    }
-
-    /**
-     * Commits this transaction skipping the entity state update.
-     *
-     * <p>This method is called when none of the transaction phases has changed the entity state.
-     */
-    private void commitUnchangedState() {
-        S unchanged = entity().state();
-        Version pendingVersion = version();
-        beforeCommit(unchanged, pendingVersion);
-        if (!pendingVersion.equals(entity.version())) {
-            entity.updateState(unchanged, pendingVersion);
-        }
-        commitAttributeChanges();
-        releaseTx();
-        EntityRecord newRecord = entityRecord();
-        afterCommit(newRecord);
     }
 
     private void beforeCommit(S newState, Version newVersion) {
@@ -478,8 +536,21 @@ public abstract class Transaction<I,
                 .setLifecycleFlags(lifecycleFlags())
                 .buildPartial();
         recordConsumer.accept(record);
+        rollbackStateAndVersion();
         deactivate();
         entity.releaseTransaction();
+    }
+
+    /**
+     * Does the entity state and version rollback.
+     */
+    private void rollbackStateAndVersion() {
+        if (!initialState.equals(entity.state())) {
+            entity.setState(initialState);
+        }
+        if (!initialVersion.equals(entity.version())) {
+            entity.setVersion(initialVersion);
+        }
     }
 
     /**

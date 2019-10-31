@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -36,6 +37,7 @@ import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
@@ -59,6 +61,7 @@ import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
 import static io.spine.server.storage.given.RecordStorageTestEnv.assertSingleRecord;
 import static io.spine.server.storage.given.RecordStorageTestEnv.buildStorageRecord;
@@ -96,7 +99,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord record = newStorageRecord(id);
         Entity<ProjectId, ?> testEntity = newEntity(id);
         RecordStorage<ProjectId> storage = storage();
-        EntityRecordWithColumns recordWithColumns = create(record, testEntity, storage);
+        EntityRecordWithColumns recordWithColumns =
+                create(record, testEntity, storage);
         storage.write(id, recordWithColumns);
 
         RecordReadRequest<ProjectId> readRequest = newReadRequest(id);
@@ -116,10 +120,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         Version versionValue = Version
                 .newBuilder()
                 .setNumber(0)
+                .setTimestamp(PROJECT_VERSION_TIMESTAMP)
                 .build();
 
-        Filter status = eq("projectStatusValue", wrappedValue);
-        Filter version = eq("counterVersion", versionValue);
+        Filter status = eq("project_status_value", wrappedValue);
+        Filter version = eq("project_version", versionValue);
         CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL)
@@ -157,9 +162,12 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
         EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
-        EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
-        EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1, storage);
-        EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2, storage);
+        EntityRecordWithColumns recordRight =
+                create(fineRecord, matchingEntity, storage);
+        EntityRecordWithColumns recordWrong1 =
+                create(notFineRecord1, wrongEntity1, storage);
+        EntityRecordWithColumns recordWrong2 =
+                create(notFineRecord2, wrongEntity2, storage);
 
         storage.write(idMatching, recordRight);
         storage.write(idWrong1, recordWrong1);
@@ -167,20 +175,6 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         Iterator<EntityRecord> readRecords = storage.readAll(query);
         assertSingleRecord(fineRecord, readRecords);
-    }
-
-    @Test
-    @DisplayName("filter records by ordinal enum columns")
-    protected void filterByOrdinalEnumColumns() {
-        String columnPath = "projectStatusOrdinal";
-        checkEnumFilter(columnPath);
-    }
-
-    @Test
-    @DisplayName("filter records by string enum columns")
-    protected void filterByStringEnumColumns() {
-        String columnPath = "projectStatusString";
-        checkEnumFilter(columnPath);
     }
 
     @Test
@@ -201,9 +195,12 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = storage();
 
-        EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
-        EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1, storage);
-        EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2, storage);
+        EntityRecordWithColumns recordRight =
+                create(fineRecord, matchingEntity, storage);
+        EntityRecordWithColumns recordWrong1 =
+                create(notFineRecord1, wrongEntity1, storage);
+        EntityRecordWithColumns recordWrong2 =
+                create(notFineRecord2, wrongEntity2, storage);
 
         // Fill the storage
         storage.write(idWrong1, recordWrong1);
@@ -237,8 +234,10 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         archive(archivedEntity);
 
         RecordStorage<ProjectId> storage = storage();
-        storage.write(activeRecordId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedRecordId, create(archivedRecord, archivedEntity, storage));
+        storage.write(activeRecordId,
+                      create(activeRecord, activeEntity, storage));
+        storage.write(archivedRecordId,
+                      create(archivedRecord, archivedEntity, storage));
 
         TargetFilters filters = TargetFilters
                 .newBuilder()
@@ -400,7 +399,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .newBuilder()
                 .setValue(initialStatus.getNumber())
                 .build();
-        Filter status = eq("projectStatusValue", initialStatusValue);
+        Filter status = eq("project_status_value", initialStatusValue);
         CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL)
@@ -437,7 +436,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         // Update the entity columns of the record.
         entity.assignStatus(statusAfterUpdate);
 
-        EntityRecordWithColumns updatedRecordWithColumns = create(record, entity, storage);
+        EntityRecordWithColumns updatedRecordWithColumns =
+                create(record, entity, storage);
         storage.write(id, updatedRecordWithColumns);
 
         Iterator<EntityRecord> recordsAfter = storage.readAll(query, format);
@@ -467,7 +467,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         write(noMatchIdEntity);
         write(deletedEntity);
 
-        CompositeFilter filter = all(eq("projectStatusValue", CANCELLED.getNumber()));
+        CompositeFilter filter = all(eq("project_status_value", CANCELLED.getNumber()));
         TargetFilters filters =
                 Targets.acceptingOnly(targetId)
                        .toBuilder()
@@ -484,6 +484,19 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         assertEquals(targetId, Identifier.unpack(readRecord.getEntityId()));
     }
 
+    @Test
+    @DisplayName("return a list of entity columns")
+    void returnColumnList() {
+        S storage = storage();
+        ImmutableList<Column> columns = storage.columnList();
+
+        int systemColumnCount = LifecycleFlagField.values().length;
+        int protoColumnCount = 6;
+
+        int expectedSize = systemColumnCount + protoColumnCount;
+        assertThat(columns).hasSize(expectedSize);
+    }
+
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
                                                                checking via #contains(Object). */)
     @Test
@@ -498,49 +511,6 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 fail("RecordStorageTest.newState() should return unique messages.");
             }
         }
-    }
-
-    /**
-     * A complex test case to check the correct {@link TestCounterEntity} filtering by the
-     * enumerated column returning {@link Project.Status}.
-     */
-    private void checkEnumFilter(String columnPath) {
-        Project.Status requiredValue = DONE;
-        Project.Status value = Enum.valueOf(Project.Status.class, requiredValue.name());
-        Filter status = eq(columnPath, value);
-        CompositeFilter aggregatingFilter = CompositeFilter
-                .newBuilder()
-                .setOperator(ALL)
-                .addFilter(status)
-                .build();
-        TargetFilters filters = TargetFilters
-                .newBuilder()
-                .addFilter(aggregatingFilter)
-                .build();
-
-        RecordStorage<ProjectId> storage = storage();
-
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
-        ProjectId idMatching = newId();
-        ProjectId idWrong = newId();
-
-        TestCounterEntity matchingEntity = newEntity(idMatching);
-        TestCounterEntity wrongEntity = newEntity(idWrong);
-
-        matchingEntity.assignStatus(requiredValue);
-        wrongEntity.assignStatus(CANCELLED);
-
-        EntityRecord fineRecord = buildStorageRecord(idMatching, newState(idMatching));
-        EntityRecord notFineRecord = buildStorageRecord(idWrong, newState(idWrong));
-
-        EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
-        EntityRecordWithColumns recordWrong = create(notFineRecord, wrongEntity, storage);
-
-        storage.write(idMatching, recordRight);
-        storage.write(idWrong, recordWrong);
-
-        Iterator<EntityRecord> readRecords = storage.readAll(query);
-        assertSingleRecord(fineRecord, readRecords);
     }
 
     private void write(Entity<ProjectId, ?> entity) {

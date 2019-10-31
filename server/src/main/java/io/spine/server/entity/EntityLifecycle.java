@@ -137,7 +137,7 @@ public class EntityLifecycle {
 
     private EntityLifecycle(Builder builder) {
         this(builder.entityId,
-             builder.entityType.stateType(),
+             builder.entityType.stateTypeUrl(),
              builder.writeSide,
              builder.eventFilter,
              builder.entityType.typeName());

@@ -58,7 +58,7 @@ public abstract class DefaultRecordBasedRepository<I,
     protected final StorageConverter<I, E, S> storageConverter() {
         if (storageConverter == null) {
             EntityClass<E> entityClass = entityModelClass();
-            TypeUrl stateType = entityClass.stateType();
+            TypeUrl stateType = entityClass.stateTypeUrl();
             storageConverter = DefaultConverter.forAllFields(stateType, entityFactory());
         }
         return storageConverter;

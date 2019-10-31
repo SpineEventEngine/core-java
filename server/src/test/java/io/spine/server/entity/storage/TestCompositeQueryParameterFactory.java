@@ -31,7 +31,7 @@ public final class TestCompositeQueryParameterFactory {
     private TestCompositeQueryParameterFactory() {
     }
 
-    public static CompositeQueryParameter createParams(Multimap<EntityColumn, Filter> filters,
+    public static CompositeQueryParameter createParams(Multimap<Column, Filter> filters,
                                                        CompositeOperator operator) {
         return CompositeQueryParameter.from(filters, operator);
     }

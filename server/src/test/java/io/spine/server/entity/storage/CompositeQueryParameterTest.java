@@ -23,9 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.testing.SerializableTester;
 import io.spine.client.Filter;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.given.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +33,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.CCF_CO_UNDEFINED;
 import static io.spine.client.Filters.eq;
-import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -53,14 +50,6 @@ class CompositeQueryParameterTest {
     }
 
     @Test
-    @DisplayName("be serializable")
-    void beSerializable() {
-        ImmutableMultimap<EntityColumn, Filter> filters = ImmutableMultimap.of();
-        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
-        SerializableTester.reserializeAndAssert(parameter);
-    }
-
-    @Test
     @DisplayName("fail to construct for invalid operator")
     void rejectInvalidOperator() {
         assertThrows(IllegalArgumentException.class,
@@ -70,16 +59,16 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with other instances")
     void mergeWithOtherInstances() {
-        Class<? extends Entity<?, ?>> cls = TestEntity.class;
+        Columns columns = Columns.of(TestEntity.class);
 
-        String archivedColumnName = archived.name();
-        String deletedColumnName = deleted.name();
+        ColumnName archivedColumnName = ColumnName.of(archived);
+        ColumnName deletedColumnName = ColumnName.of(deleted);
 
-        EntityColumn archivedColumn = findColumn(cls, archivedColumnName);
-        EntityColumn deletedColumn = findColumn(cls, deletedColumnName);
+        Column archivedColumn = columns.get(archivedColumnName);
+        Column deletedColumn = columns.get(deletedColumnName);
 
-        Filter archived = eq(archivedColumnName, true);
-        Filter deleted = eq(archivedColumnName, false);
+        Filter archived = eq(archivedColumnName.value(), true);
+        Filter deleted = eq(deletedColumnName.value(), false);
 
         CompositeQueryParameter lifecycle =
                 CompositeQueryParameter.from(
@@ -88,9 +77,9 @@ class CompositeQueryParameterTest {
                 );
 
         // Check
-        assertEquals(lifecycle.getOperator(), ALL);
+        assertEquals(lifecycle.operator(), ALL);
 
-        Multimap<EntityColumn, Filter> asMultimap = lifecycle.getFilters();
+        Multimap<Column, Filter> asMultimap = lifecycle.filters();
 
         assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
         assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);
@@ -99,16 +88,16 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with single filter")
     void mergeWithSingleFilter() {
-        Class<? extends Entity<?, ?>> cls = TestEntity.class;
+        Columns columns = Columns.of(TestEntity.class);
 
-        String archivedColumnName = archived.name();
-        String deletedColumnName = deleted.name();
+        ColumnName archivedColumnName = ColumnName.of(archived);
+        ColumnName deletedColumnName = ColumnName.of(deleted);
 
-        EntityColumn archivedColumn = findColumn(cls, archivedColumnName);
-        EntityColumn deletedColumn = findColumn(cls, deletedColumnName);
+        Column archivedColumn = columns.get(archivedColumnName);
+        Column deletedColumn = columns.get(deletedColumnName);
 
-        Filter archived = eq(archivedColumnName, false);
-        Filter deleted = eq(archivedColumnName, false);
+        Filter archived = eq(archivedColumnName.value(), false);
+        Filter deleted = eq(deletedColumnName.value(), false);
 
         CompositeQueryParameter lifecycle =
                 CompositeQueryParameter.from(
@@ -117,9 +106,9 @@ class CompositeQueryParameterTest {
                 );
 
         // Check
-        assertEquals(lifecycle.getOperator(), ALL);
+        assertEquals(lifecycle.operator(), ALL);
 
-        Multimap<EntityColumn, Filter> asMultimap = lifecycle.getFilters();
+        Multimap<Column, Filter> asMultimap = lifecycle.filters();
 
         assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
         assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);

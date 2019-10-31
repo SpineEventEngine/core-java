@@ -20,22 +20,21 @@
 
 package io.spine.server.storage;
 
+import io.spine.server.storage.given.AStorageField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
+import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-@DisplayName("StorageField should")
+@DisplayName("`StorageField` should")
 class StorageFieldTest {
 
     @Test
-    @DisplayName("declare no methods")
-    void declareNoMethods() {
-        Class<?> clazz = StorageField.class;
-        Method[] methods = clazz.getDeclaredMethods();
+    @DisplayName("return own name")
+    void returnName() {
+        StorageField storageField = new AStorageField();
+        String name = storageField.name();
 
-        assertEquals(0, methods.length);
+        assertThat(name).isEqualTo(AStorageField.NAME);
     }
 }

@@ -654,7 +654,7 @@ public class AggregateTest {
                     .newBuilder()
                     .setId(Identifier.pack(faultyAggregate.id()))
                     .setTypeUrl(faultyAggregate.modelClass()
-                                               .stateType()
+                                               .stateTypeUrl()
                                                .value())
                     .buildPartial();
             assertThat(batchDispatchOutcome.getTargetEntity())

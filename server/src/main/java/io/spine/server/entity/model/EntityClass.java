@@ -21,15 +21,18 @@
 package io.spine.server.entity.model;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.system.server.EntityTypeName;
+import io.spine.type.MessageType;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -65,6 +68,12 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** The default state of entities of this class. */
     @LazyInit
     private transient volatile @MonotonicNonNull Message defaultState;
+
+    /**
+     * The entity columns of this class.
+     */
+    @LazyInit
+    private transient volatile @MonotonicNonNull Columns columns;
 
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
@@ -141,6 +150,23 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     /**
+     * Obtains the entity columns of this class.
+     */
+    public final Columns columns() {
+        Columns result = columns;
+        if (result == null) {
+            synchronized (this) {
+                result = columns;
+                if (result == null) {
+                    columns = Columns.of(this);
+                    result = columns;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * Obtains constructor for the entities of this class.
      */
     public final Constructor<E> constructor() {
@@ -159,6 +185,15 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public final Class<? extends Message> stateClass() {
         return stateClass;
+    }
+
+    /**
+     * Obtains the entity state type.
+     */
+    public final MessageType stateType() {
+        Descriptor descriptor = defaultState().getDescriptorForType();
+        MessageType result = new MessageType(descriptor);
+        return result;
     }
 
     /**
@@ -190,7 +225,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains type URL of the state of entities of this class.
      */
-    public final TypeUrl stateType() {
+    public final TypeUrl stateTypeUrl() {
         return entityStateType;
     }
 
