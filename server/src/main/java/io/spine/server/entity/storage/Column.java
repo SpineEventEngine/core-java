@@ -26,8 +26,7 @@ import com.google.errorprone.annotations.Immutable;
  * A column of the {@linkplain io.spine.server.entity.Entity entity}.
  *
  * <p>Columns are the entity state fields which are stored separately from the entity record and
- * can be used as criteria for target {@linkplain io.spine.client.Filter filters} during the entity
- * querying.
+ * can be used as criteria for query {@linkplain io.spine.client.Filter filters}.
  *
  * <p>The {@linkplain #name() name} of the column represents the value which needs to be specified
  * to the filter. The {@linkplain #type() type} is an expected type of the filter value.
