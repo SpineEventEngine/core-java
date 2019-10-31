@@ -20,16 +20,47 @@
 
 package io.spine.client;
 
+import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Truth8;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.spine.core.TenantId;
+import io.spine.core.UserId;
+import io.spine.testing.TestValues;
+import io.spine.testing.core.given.GivenTenantId;
+import io.spine.testing.core.given.GivenUserId;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.Client.connectTo;
+import static io.spine.client.Client.usingChannel;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`ClientBuilder` should")
 class ClientBuilderTest {
+
+    private static final String host = "localhost";
+    private int port;
+    private Client.Builder builder;
+
+    @BeforeEach
+    void createBuilder() {
+        port = TestValues.random(100, 500);
+        builder = connectTo(host, port);
+    }
+
+    @Test
+    @DisplayName("reject nulls in factory methods of `Client`")
+    void nullCheck() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Client.class);
+    }
 
     @Nested
     @DisplayName("be created with host/port combination")
@@ -38,9 +69,6 @@ class ClientBuilderTest {
         @Test
         @DisplayName("creating a `ManagedChannel` by these values ")
         void creating() {
-            String host = "localhost";
-            int port = 100;
-            Client.Builder builder = connectTo(host, port);
             assertThat(builder.host())
                     .isEqualTo(host);
             assertThat(builder.port())
@@ -64,6 +92,132 @@ class ClientBuilderTest {
         private void assertRejects(String illegalHostName) {
             assertThrows(IllegalArgumentException.class,
                          () -> connectTo(illegalHostName, 404));
+        }
+    }
+
+    @Nested
+    @DisplayName("be created using `ManagedChannel")
+    class Channel {
+
+        private ManagedChannel channel;
+
+        @BeforeEach
+        void createChannel() {
+            channel = ManagedChannelBuilder
+                    .forAddress(host, 1010)
+                    .build();
+        }
+
+        @AfterEach
+        void shutdownChannel() throws InterruptedException {
+            channel.shutdownNow();
+            channel.awaitTermination(200, TimeUnit.MILLISECONDS);
+        }
+
+        @Test
+        @DisplayName("passing it to the created `Client`")
+        void value() {
+            Client.Builder builder = usingChannel(channel);
+
+            assertThat(builder.host())
+                    .isNull();
+            assertThat(builder.port())
+                    .isEqualTo(0);
+            assertThat(builder.channel())
+                    .isEqualTo(channel);
+
+            Client client = builder.build();
+            assertThat(client.channel())
+                    .isEqualTo(channel);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure shutdown timeout")
+    class ShutdownTimeout {
+
+        @Test
+        @DisplayName("via value and unit")
+        void valueAndUnit() {
+            int value = 100;
+            TimeUnit unit = TimeUnit.MILLISECONDS;
+            builder.shutdownTimout(value, unit);
+
+            Client client = builder.build();
+            assertThat(client.shutdownTimeout())
+                    .isEqualTo(Timeout.of(value, unit));
+        }
+
+        @Test
+        @DisplayName("supply default value if not specified")
+        void defaultValue() {
+            Client client = builder.build();
+
+            assertThat(client.shutdownTimeout())
+                    .isEqualTo(Client.DEFAULT_SHUTDOWN_TIMEOUT);
+        }
+    }
+
+    @Nested
+    @DisplayName("allow setting tenant")
+    class Tenant {
+
+        @Test
+        @DisplayName("assuming single-tenant context if not set")
+        void singleTenant() {
+            Client client = builder.build();
+            Truth8.assertThat(client.tenant())
+                  .isEmpty();
+        }
+
+        @Test
+        @DisplayName("which is non-null and not default")
+        void correctValue() {
+            TenantId expected = GivenTenantId.generate();
+            Client client = builder.forTenant(expected)
+                                   .build();
+            Truth8.assertThat(client.tenant())
+                  .hasValue(expected);
+        }
+
+        @Test
+        @DisplayName("rejecting `null` value")
+        void nullValue() {
+            assertThrows(NullPointerException.class,
+                         () -> builder.forTenant(null));
+        }
+
+        @Test
+        @DisplayName("rejecting default value")
+        void defaultValue() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> builder.forTenant(TenantId.getDefaultInstance()));
+        }
+    }
+
+    @Nested
+    @DisplayName("allow setting guest user ID")
+    class Guest {
+
+        @Test
+        @DisplayName("which is non-null and not default")
+        void correctValue() {
+            UserId expected = GivenUserId.generated();
+            Client client = builder.withGuestId(expected)
+                                   .build();
+
+            assertThat(client.asGuest()
+                             .user()).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("use default value if not set directly")
+        void defaultValue() {
+            Client client = builder.build();
+
+            assertThat(client.asGuest()
+                             .user())
+                    .isEqualTo(Client.DEFAULT_GUEST_ID);
         }
     }
 }

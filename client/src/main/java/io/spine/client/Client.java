@@ -41,10 +41,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
@@ -52,15 +51,19 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 
 /**
- * The gRPC-based gateway for backend services such as {@code CommandService} or
- * {@code QueryService}.
+ * The gRPC-based gateway for backend services such as {@code CommandService},
+ * {@code QueryService}, or {@code SubscriptionService}.
  */
 public class Client implements AutoCloseable {
 
     /** The number of seconds to wait when {@linkplain #close() closing} the client. */
-    private static final int TIMEOUT = 10;
+    public static final Timeout DEFAULT_SHUTDOWN_TIMEOUT = Timeout.of(5, SECONDS);
+
+    /** Default ID for a guest user. */
+    public static final UserId DEFAULT_GUEST_ID = UserId.newBuilder().setValue("guest").build();
 
     private final ManagedChannel channel;
+    private final Timeout shutdownTimeout;
     private final @Nullable TenantId tenant;
     private final QueryServiceBlockingStub queryService;
     private final CommandServiceBlockingStub commandService;
@@ -102,6 +105,7 @@ public class Client implements AutoCloseable {
      */
     private Client(Builder builder) {
         this.channel = checkNotNull(builder.channel);
+        this.shutdownTimeout = checkNotNull(builder.shutdownTimeout);
         this.tenant = builder.tenant;
         this.commandService = CommandServiceGrpc.newBlockingStub(channel);
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
@@ -113,6 +117,11 @@ public class Client implements AutoCloseable {
     @VisibleForTesting
     ManagedChannel channel() {
         return channel;
+    }
+
+    @VisibleForTesting
+    Timeout shutdownTimeout() {
+        return shutdownTimeout;
     }
 
     /**
@@ -138,10 +147,17 @@ public class Client implements AutoCloseable {
     public void close() {
         try {
             channel.shutdown()
-                   .awaitTermination(TIMEOUT, SECONDS);
+                   .awaitTermination(shutdownTimeout.value(), shutdownTimeout.unit());
         } catch (InterruptedException e) {
             throw illegalStateWithCauseOf(e);
         }
+    }
+
+    /**
+     * Same as {@link #close()}.
+     */
+    public void shutdown() {
+        close();
     }
 
     /**
@@ -244,6 +260,7 @@ public class Client implements AutoCloseable {
          */
         private @MonotonicNonNull String host;
         private int port;
+        private @MonotonicNonNull Timeout shutdownTimeout;
 
         /**
          * The ID of the tenant in a multi-tenant application.
@@ -253,10 +270,7 @@ public class Client implements AutoCloseable {
         private @Nullable TenantId tenant;
 
         /** The ID of the user for performing requests on behalf of a non-logged in user. */
-        private UserId guestUser = UserId
-                .newBuilder()
-                .setValue("guest")
-                .build();
+        private UserId guestUser = DEFAULT_GUEST_ID;
 
         private Builder(ManagedChannel channel) {
             this.channel = checkNotNull(channel);
@@ -295,23 +309,37 @@ public class Client implements AutoCloseable {
          * <p>This method should be called only in multi-tenant applications.
          *
          * @param tenant
-         *          a non-null ID of the tenant
+         *          a non-null and non-default ID of the tenant
          */
         public Builder forTenant(TenantId tenant) {
-            this.tenant = checkNotNull(tenant);
+            this.tenant = checkNotDefaultArg(tenant);
             return this;
         }
 
         /**
          * Assigns the ID of the user for performing requests on behalf of non-logged in user.
          *
-         * <p>If the not set directly, the {@code UserId} withe value {@code "guest"} will be used.
+         * <p>If the not set directly, the value {@code "guest"} will be used.
+         *
+         * @param guestUser
+         *         non-null and non-default value
          */
         public Builder withGuestId(UserId guestUser) {
            checkNotNull(guestUser);
-           checkArgument(!isDefault(guestUser), "Guest user ID cannot be a default value.");
-           this.guestUser = guestUser;
+           this.guestUser = checkNotDefaultArg(
+                    guestUser, "Guest user ID cannot be a default value.");
            return this;
+        }
+
+        /**
+         * Sets the timeout for the {@linkplain Client#close() shutdown operation} of the client.
+         *
+         * <p>If not specified directly, {@link Client#DEFAULT_SHUTDOWN_TIMEOUT} will be used.
+         */
+        public Builder shutdownTimout(long timeout, TimeUnit timeUnit) {
+            checkNotNull(timeUnit);
+            this.shutdownTimeout = Timeout.of(timeout, timeUnit);
+            return this;
         }
 
         /**
@@ -321,6 +349,9 @@ public class Client implements AutoCloseable {
             if (channel == null) {
                 checkNotNull(host, "Either channel or host must be specified.");
                 channel = createChannel(host, port);
+            }
+            if (shutdownTimeout == null) {
+                shutdownTimeout = DEFAULT_SHUTDOWN_TIMEOUT;
             }
             return new Client(this);
         }
