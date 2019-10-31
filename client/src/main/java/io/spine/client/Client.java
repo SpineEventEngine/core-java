@@ -20,6 +20,7 @@
 
 package io.spine.client;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -107,6 +108,11 @@ public class Client implements AutoCloseable {
         this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
         this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
         this.guestUser = builder.guestUser;
+    }
+
+    @VisibleForTesting
+    ManagedChannel channel() {
+        return channel;
     }
 
     /**
@@ -266,6 +272,21 @@ public class Client implements AutoCloseable {
                     .forAddress(host, port)
                     .build();
             return result;
+        }
+
+        @VisibleForTesting
+        @Nullable String host() {
+            return host;
+        }
+
+        @VisibleForTesting
+        int port() {
+            return port;
+        }
+
+        @VisibleForTesting
+        @Nullable ManagedChannel channel() {
+            return channel;
         }
 
         /**
