@@ -29,7 +29,7 @@ option java_multiple_files = true;
 option java_outer_classname = "EmptyContextProto";
 
 // An empty context is used in combination with message types that do not have a context
-// co conform APIs that require both message and its context.
+// to conform APIs that require both message and its context.
 //
 // Handlers of command and message may accept both command and event message and their context.
 // Updated entity states when propagated to subscribers do not have a context.
