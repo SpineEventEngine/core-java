@@ -60,7 +60,7 @@ public class Client implements AutoCloseable {
     public static final Timeout DEFAULT_SHUTDOWN_TIMEOUT = Timeout.of(5, SECONDS);
 
     /** Default ID for a guest user. */
-    public static final UserId DEFAULT_GUEST_ID = UserId.newBuilder().setValue("guest").build();
+    public static final UserId DEFAULT_GUEST_ID = user("guest");
 
     private final ManagedChannel channel;
     private final Timeout shutdownTimeout;
@@ -235,6 +235,12 @@ public class Client implements AutoCloseable {
         return result;
     }
 
+    private static UserId user(String value) {
+        checkNotEmptyOrBlank(value);
+        return UserId.newBuilder()
+                     .setValue(value)
+                     .build();
+    }
     /**
      * The builder for the client.
      */
@@ -326,6 +332,19 @@ public class Client implements AutoCloseable {
            this.guestUser = checkNotDefaultArg(
                     guestUser, "Guest user ID cannot be a default value.");
            return this;
+        }
+
+        /**
+         * Assigns the ID of the user for performing requests on behalf of non-logged in user.
+         *
+         * <p>If the not set directly, the value {@code "guest"} will be used.
+         *
+         * @param guestUser
+         *         non-null and not empty or a blank value
+         */
+        public Builder withGuestId(String guestUser) {
+            checkNotEmptyOrBlank(guestUser, "Guest user ID cannot be empty or blank.");
+            return withGuestId(user(guestUser));
         }
 
         /**

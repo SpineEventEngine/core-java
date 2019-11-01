@@ -211,6 +211,18 @@ class ClientBuilderTest {
         }
 
         @Test
+        @DisplayName("which is not empty or a blank string")
+        void correctStringValue() {
+            UserId expected = GivenUserId.generated();
+
+            Client client = builder.withGuestId(expected.getValue())
+                                   .build();
+
+            assertThat(client.asGuest()
+                             .user()).isEqualTo(expected);
+        }
+
+        @Test
         @DisplayName("use default value if not set directly")
         void defaultValue() {
             Client client = builder.build();
@@ -218,6 +230,22 @@ class ClientBuilderTest {
             assertThat(client.asGuest()
                              .user())
                     .isEqualTo(Client.DEFAULT_GUEST_ID);
+        }
+
+        @Test
+        @DisplayName("rejecting illegal arguments")
+        void illegalArguments() {
+            assertThrows(NullPointerException.class,
+                         () -> builder.withGuestId((UserId) null));
+            assertThrows(IllegalArgumentException.class,
+                         () -> builder.withGuestId(UserId.getDefaultInstance()));
+
+            assertThrows(NullPointerException.class,
+                         () -> builder.withGuestId((String) null));
+            assertThrows(IllegalArgumentException.class,
+                         () -> builder.withGuestId(""));
+            assertThrows(IllegalArgumentException.class,
+                         () -> builder.withGuestId(" "));
         }
     }
 }
