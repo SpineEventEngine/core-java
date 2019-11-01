@@ -35,10 +35,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
-import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * A factory for various requests fired from the client-side by an actor.
@@ -95,54 +93,6 @@ public class ActorRequestFactory {
                 .setZoneOffset(actorContext.getZoneOffset())
                 .setZoneId(actorContext.getZoneId());
         return builder.build();
-    }
-
-    /**
-     * Creates an instance for sending system requests on behalf of the passed class.
-     *
-     * @param cls
-     *         the class full name of which will be used in the value of {@code UserId} when
-     *         sending requests
-     * @param tenant
-     *         the ID of the tenant in a multi-tenant application, {@code null} for single-tenant
-     * @return new instance of the factory
-     * @deprecated please always use factories on behalf of the current user,
-     *         or with a guest user ID, if the user is not logged in
-     */
-    @Deprecated
-    public static
-    ActorRequestFactory forSystemRequests(Class<?> cls, @Nullable TenantId tenant) {
-        checkNotNull(cls);
-        UserId thisClassName = UserId
-                .newBuilder()
-                .setValue(cls.getName())
-                .build();
-        return forSystemRequests(thisClassName, tenant);
-    }
-
-    /**
-     * Creates an instance for sending system requests on behalf of the passed class.
-     *
-     * @param systemUser
-     *         the ID of the user which will be used for sending the requests
-     * @param tenant
-     *         the ID of the tenant in a multi-tenant application, {@code null} for single-tenant
-     * @return new instance of the factory
-     * @deprecated please always use factories on behalf of the current user,
-     *         or with a guest user ID, if the user is not logged in
-     */
-    @Deprecated
-    public static
-    ActorRequestFactory forSystemRequests(UserId systemUser, @Nullable TenantId tenant) {
-        checkNotNull(systemUser);
-        if (tenant != null) {
-            checkArgument(isNotDefault(tenant),
-                          "Tenant ID cannot be empty in multi-tenant context.");
-        }
-        return newBuilder()
-                .setTenantId(tenant)
-                .setActor(systemUser)
-                .build();
     }
 
     /**
