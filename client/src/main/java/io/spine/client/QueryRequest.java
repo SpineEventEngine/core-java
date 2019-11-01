@@ -20,10 +20,12 @@
 
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 
-import java.util.List;
 import java.util.function.Function;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
  * Allows to create a post a query for messages of the given type.
@@ -87,9 +89,14 @@ public final class QueryRequest<M extends Message>
     /**
      * Obtains the results of the query.
      */
-    public List<M> query() {
+    @SuppressWarnings("unchecked") // The type is ensured when building the query.
+    public ImmutableList<M> query() {
         Query query = builder().build();
-        List<M> result = client().query(query);
+        ImmutableList<M> result =
+                client().read(query)
+                        .stream()
+                        .map(m -> (M) m)
+                        .collect(toImmutableList());
         return result;
     }
 

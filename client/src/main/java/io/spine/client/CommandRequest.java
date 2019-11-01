@@ -117,7 +117,7 @@ public final class CommandRequest extends ClientRequest {
                       .create(this.commandMessage);
         Subscription result =
                 EventsAfterCommand.subscribe(client, command, consumers, streamingErrorHandler);
-        client().postCommand(command);
+        client().post(command);
         return result;
     }
 }

@@ -21,6 +21,7 @@
 package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -39,16 +40,15 @@ import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.stream.Collectors.toList;
 
 /**
  * The gRPC-based gateway for backend services such as {@code CommandService},
@@ -217,24 +217,21 @@ public class Client implements AutoCloseable {
     /**
      * Posts the command to the {@code CommandService}.
      */
-    void postCommand(Command c) {
+    void post(Command c) {
         commandService.post(c);
     }
 
     /**
      * Queries the read-side with the specified query.
      */
-    <M extends Message> List<M> query(Query query) {
-        @SuppressWarnings("unchecked")
-        // The caller is responsible for matching the type with the query.
-        List<M> result = queryService
+    ImmutableList<Message> read(Query query) {
+        ImmutableList<Message> result = queryService
                 .read(query)
                 .getMessageList()
                 .stream()
                 .map(EntityStateWithVersion::getState)
                 .map(AnyPacker::unpack)
-                .map(message -> (M) message)
-                .collect(toList());
+                .collect(toImmutableList());
         return result;
     }
 
