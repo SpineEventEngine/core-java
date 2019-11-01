@@ -344,7 +344,7 @@ public class Client implements AutoCloseable {
          */
         public Client build() {
             if (channel == null) {
-                checkNotNull(host, "Either channel or host must be specified.");
+                checkNotNull(host, "Either channel or host/port must be specified.");
                 channel = createChannel(host, port);
             }
             if (shutdownTimeout == null) {
