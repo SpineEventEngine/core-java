@@ -114,34 +114,20 @@ public class Client implements AutoCloseable {
         this.guestUser = builder.guestUser;
     }
 
-    @VisibleForTesting
-    ManagedChannel channel() {
-        return channel;
-    }
-
-    @VisibleForTesting
-    Timeout shutdownTimeout() {
-        return shutdownTimeout;
-    }
-
     /**
      * Obtains the tenant of this client connection in a multitenant application,
      * and empty {@code Optional} in a single-tenant one.
+     *
+     * @see Builder#forTenant(TenantId)
      */
     public Optional<TenantId> tenant() {
         return Optional.ofNullable(tenant);
     }
 
     /**
-     * Obtains the ID of the user for performing requests on behalf of the user
-     * who is not logged in yet.
-     */
-    private UserId guestUser() {
-        return guestUser;
-    }
-
-    /**
      * Closes the client by shutting down the gRPC connection.
+     *
+     * @see #isOpen()
      */
     @Override
     public void close() {
@@ -161,18 +147,18 @@ public class Client implements AutoCloseable {
     }
 
     /**
-     * Creates a new request factory for the requests to be sent on behalf of the passed user.
+     * Verifies if the client connection is open.
+     *
+     * @see #close()
      */
-    ActorRequestFactory requestOf(UserId user) {
-        return ActorRequestFactory
-                .newBuilder()
-                .setTenantId(tenant)
-                .setActor(user)
-                .build();
+    public boolean isOpen() {
+        return !channel.isTerminated();
     }
 
     /**
      * Creates a builder for requests on behalf of the passed user.
+     *
+     * @see #asGuest()
      */
     public ClientRequest onBehalfOf(UserId user) {
         checkNotDefaultArg(user);
@@ -181,37 +167,42 @@ public class Client implements AutoCloseable {
 
     /**
      * Creates a builder for posting guest requests.
+     *
+     * @see #onBehalfOf(UserId)
      */
     public ClientRequest asGuest() {
-        return onBehalfOf(guestUser());
-    }
-
-    /**
-     * Subscribes the given {@link StreamObserver} to the given topic and activates
-     * the subscription.
-     *
-     * @param topic
-     *         the topic to subscribe to
-     * @param observer
-     *         the observer to subscribe
-     * @param <M>
-     *         the type of the result messages
-     * @return the activated subscription
-     * @see #cancel(Subscription)
-     */
-    <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
-        Subscription subscription = blockingSubscriptionService.subscribe(topic);
-        subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
-        return subscription;
+        return onBehalfOf(guestUser);
     }
 
     /**
      * Requests cancellation of the passed subscription.
      *
-     * @see #subscribeTo(Topic, StreamObserver)
+     * @see ClientRequest#subscribeTo(Class)
+     * @see ClientRequest#subscribeToEvent(Class)
      */
     public void cancel(Subscription s) {
         blockingSubscriptionService.cancel(s);
+    }
+
+    @VisibleForTesting
+    ManagedChannel channel() {
+        return channel;
+    }
+
+    @VisibleForTesting
+    Timeout shutdownTimeout() {
+        return shutdownTimeout;
+    }
+
+    /**
+     * Creates a new request factory for the requests to be sent on behalf of the passed user.
+     */
+    ActorRequestFactory requestOf(UserId user) {
+        return ActorRequestFactory
+                .newBuilder()
+                .setTenantId(tenant)
+                .setActor(user)
+                .build();
     }
 
     /**
@@ -235,12 +226,32 @@ public class Client implements AutoCloseable {
         return result;
     }
 
+    /**
+     * Subscribes the given {@link StreamObserver} to the given topic and activates
+     * the subscription.
+     *
+     * @param topic
+     *         the topic to subscribe to
+     * @param observer
+     *         the observer to subscribe
+     * @param <M>
+     *         the type of the result messages
+     * @return the activated subscription
+     * @see #cancel(Subscription)
+     */
+    <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
+        Subscription subscription = blockingSubscriptionService.subscribe(topic);
+        subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
+        return subscription;
+    }
+
     private static UserId user(String value) {
         checkNotEmptyOrBlank(value);
         return UserId.newBuilder()
                      .setValue(value)
                      .build();
     }
+
     /**
      * The builder for the client.
      */
@@ -249,8 +260,8 @@ public class Client implements AutoCloseable {
         /**
          * The channel to be used in the client.
          *
-         * <p>If not set directly, the channel will be created using the assigned host and port
-         * values.
+         * <p>If not set directly, the channel will be created using the assigned
+         * host and port values.
          */
         private ManagedChannel channel;
 
@@ -291,25 +302,10 @@ public class Client implements AutoCloseable {
             return result;
         }
 
-        @VisibleForTesting
-        @Nullable String host() {
-            return host;
-        }
-
-        @VisibleForTesting
-        int port() {
-            return port;
-        }
-
-        @VisibleForTesting
-        @Nullable ManagedChannel channel() {
-            return channel;
-        }
-
         /**
          * Assigns the tenant for the client connection to be built.
          *
-         * <p>This method should be called only in multi-tenant applications.
+         * <p>This method should be called only in multitenant applications.
          *
          * @param tenant
          *          a non-null and non-default ID of the tenant
@@ -370,6 +366,21 @@ public class Client implements AutoCloseable {
                 shutdownTimeout = DEFAULT_SHUTDOWN_TIMEOUT;
             }
             return new Client(this);
+        }
+
+        @VisibleForTesting
+        @Nullable String host() {
+            return host;
+        }
+
+        @VisibleForTesting
+        int port() {
+            return port;
+        }
+
+        @VisibleForTesting
+        @Nullable ManagedChannel channel() {
+            return channel;
         }
     }
 }
