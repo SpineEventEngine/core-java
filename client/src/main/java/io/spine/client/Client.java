@@ -89,14 +89,14 @@ public class Client implements AutoCloseable {
     /** Default ID for a guest user. */
     public static final UserId DEFAULT_GUEST_ID = user("guest");
 
+    private final @Nullable TenantId tenant;
+    private final UserId guestUser;
     private final ManagedChannel channel;
     private final Timeout shutdownTimeout;
-    private final @Nullable TenantId tenant;
     private final QueryServiceBlockingStub queryService;
     private final CommandServiceBlockingStub commandService;
     private final SubscriptionServiceStub subscriptionService;
     private final SubscriptionServiceBlockingStub blockingSubscriptionService;
-    private final UserId guestUser;
 
     /**
      * Creates a builder for a client connected to the specified address.
@@ -131,14 +131,14 @@ public class Client implements AutoCloseable {
      * with the backend services.
      */
     private Client(Builder builder) {
+        this.tenant = builder.tenant;
+        this.guestUser = builder.guestUser;
         this.channel = checkNotNull(builder.channel);
         this.shutdownTimeout = checkNotNull(builder.shutdownTimeout);
-        this.tenant = builder.tenant;
         this.commandService = CommandServiceGrpc.newBlockingStub(channel);
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
         this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
         this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
-        this.guestUser = builder.guestUser;
     }
 
     /**
@@ -158,6 +158,7 @@ public class Client implements AutoCloseable {
      */
     @Override
     public void close() {
+        //TODO:2019-11-02:alexander.yevsyukov: Cancel orphan subscriptions here.
         try {
             channel.shutdown()
                    .awaitTermination(shutdownTimeout.value(), shutdownTimeout.unit());
