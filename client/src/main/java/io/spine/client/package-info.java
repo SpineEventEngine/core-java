@@ -19,7 +19,25 @@
  */
 
 /**
- * This package provides utility classes for client-side code.
+ * This package provides classes and interfaces for performing client requests like
+ * posting commands, running queries, or creating subscriptions.
+ *
+ * <p>The term <em>actor</em> used in this API means the user on behalf of whom requests
+ * are created and executed. The package provides two levels of API.
+ *
+ * <dl>
+ *   <dt><strong>High-level API</strong></dt>
+ *   <dd>is meant for client-side Java applications that would communicate with backend
+ *   services via a gRPC connection. An instance of the {@link io.spine.client.Client} class
+ *   establishes this connection and serves as a gateway for creating and posting requests.
+ *   </dd>
+ *
+ *   <dt><strong>Low-level API</strong></dt>
+ *   <dd>is meant for server-side code which needs to speak to backend services without involving
+ *   gRPC connection. This API is also by the High-level API implementation.
+ *   The entry point for creating client requests at this level is
+ *   {@link io.spine.client.ActorRequestFactory}.</dd>
+ * </dl>
  */
 
 @CheckReturnValue

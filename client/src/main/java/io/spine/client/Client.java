@@ -53,8 +53,35 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * The gRPC-based gateway for backend services such as {@code CommandService},
  * {@code QueryService}, or {@code SubscriptionService}.
+ *
+ * <p>A connection can be established via {@linkplain #connectTo(String, int) host/port}
+ * combination, or via already available {@link #usingChannel(ManagedChannel) ManagedChannel}.
+ *
+ * <p>Multitenant applications need to specify {@link Builder#forTenant(TenantId) TenantId}
+ * for a new client connection. Single-tenant applications do nothing about it.
+ *
+ * <p>Client requests can be created on behalf of a {@linkplain #asGuest() guest user},
+ * if the user is not yet authenticated, and on behalf of the
+ * {@linkplain #onBehalfOf(UserId) current user} after the user is authenticated.
+ *
+ * <p>Please note that Spine client-side library does not define the authentication process.
+ * The {@code Client} class simply relies on the fact that {@link UserId} passed to the method
+ * {@link #onBehalfOf(UserId)} represents a valid logged-in user, ID of whom the client application
+ * got (presumably as field of a {@code UserLoggedIn} event) following due authentication process.
+ * The server-side code also needs to make sure that the {@link UserId} matches security
+ * constraints of the backend services. Security arrangements is not a part of the Spine client-side
+ * library either.
+ *
+ * <p>Subscriptions to {@linkplain SubscriptionRequest entity states} or
+ * {@linkplain EventSubscriptionRequest events} must be {@linkplain #cancel(Subscription)
+ * cancelled} when no longer needed to preserve both client-side and backend resources.
+ *
+ * <p>The client connection must be {@link #close() closed} when the application finishes its work.
  */
 public class Client implements AutoCloseable {
+
+    //TODO:2019-11-02:alexander.yevsyukov: Remember subscriptions and cancel them if not
+    // cancelled explicitly when closing.
 
     /** The number of seconds to wait when {@linkplain #close() closing} the client. */
     public static final Timeout DEFAULT_SHUTDOWN_TIMEOUT = Timeout.of(5, SECONDS);
