@@ -28,7 +28,6 @@ import io.spine.base.MessageContext;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -87,9 +86,11 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
                 ));
     }
 
-    private static <H> H ifNullUse(@Nullable H errorHandler, Supplier<? extends H> defaultHandler) {
-        return Optional.ofNullable(errorHandler)
-                       .orElseGet(defaultHandler);
+    private static <H>
+    H ifNullUse(@Nullable H errorHandler, Supplier<? extends H> defaultHandler) {
+        return errorHandler == null
+               ? defaultHandler.get()
+               : errorHandler;
     }
 
     /**
@@ -168,9 +169,9 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
      *         the type of this builder for return type covariance
      */
     abstract static class Builder<M extends Message,
-                                  C extends MessageContext,
-                                  W extends Message,
-                                  B extends Builder> {
+                                   C extends MessageContext,
+                                   W extends Message,
+                                   B extends Builder> {
 
         private final ImmutableSet.Builder<MessageConsumer<M, C>> consumers =
                 ImmutableSet.builder();
