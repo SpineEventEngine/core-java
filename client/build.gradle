@@ -22,12 +22,17 @@ dependencies {
 
     api deps.grpc.grpcStub
 
-    implementation deps.grpc.grpcOkHttp
-    implementation deps.grpc.grpcProtobuf
+    implementation (
+            deps.grpc.grpcOkHttp,
+            deps.grpc.grpcProtobuf
+    )
 
-    testImplementation project(path: ":testutil-client")
-    testImplementation project(path: ":core", configuration: 'testArtifacts')
-    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
+    testImplementation(
+            "io.spine:spine-testlib:$spineBaseVersion",
+            project(path: ":testutil-client"),
+            project(path: ":core", configuration: 'testArtifacts'),
+            project(path: ":server"), // for testing io.spine.client
+    )
 }
 
 apply from: deps.scripts.testArtifacts
