@@ -76,14 +76,14 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
         this.streamingErrorHandler = ifNullUse(
                 builder.streamingErrorHandler,
                 () -> ErrorHandler.logError(
-                        this.logger(), "Error receiving a message of the type `%s`."
-                ));
+                        this.logger(), "Error receiving a message of the type `%s`.")
+        );
         this.consumingErrorHandler = ifNullUse(
                 builder.consumingErrorHandler,
                 () -> ConsumerErrorHandler.logError(
                         this.logger(),
-                        "The consumer `%s` could not handle the message of the type `%s`."
-                ));
+                        "The consumer `%s` could not handle the message of the type `%s`.")
+        );
     }
 
     private static <H>
