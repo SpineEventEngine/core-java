@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package spine.test.client;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.client.event";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
+
+import "spine/core/user_id.proto";
+import "spine/test/client/user_account.proto";
+
+message UserLoggedIn {
+    core.UserId user = 1;
+    UserAccount account = 2;
+}
+
+message UserLoggedOut {
+    core.UserId user = 1;
+}

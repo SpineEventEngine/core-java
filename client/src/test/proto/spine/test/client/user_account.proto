@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package spine.test.client;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.client";
+option java_outer_classname = "UserAccountProto";
+option java_multiple_files = true;
+
+import "spine/core/user_id.proto";
+import "spine/people/person_name.proto";
+
+message UserAccount {
+    core.UserId user = 1;
+    people.PersonName name = 2;
+}
+
