@@ -21,25 +21,57 @@
 package io.spine.client;
 
 import io.spine.core.UserId;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.Server;
+import io.spine.test.client.UserAccount;
+import io.spine.test.client.event.UserLoggedIn;
+import io.spine.test.client.event.UserLoggedOut;
 import io.spine.testing.TestValues;
 import io.spine.testing.core.given.GivenUserId;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.List;
+
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.client.Filters.eq;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`Client` should")
 class ClientTest {
 
+    @SuppressWarnings("StaticVariableMayNotBeInitialized")
+    private static Server server;
+    @SuppressWarnings("StaticVariableMayNotBeInitialized")
+    private static int port;
+
+    @BeforeAll
+    static void createServer() throws IOException {
+        port = TestValues.random(64000, 65000);
+        server = Server.newBuilder()
+                       .setPort(port)
+                       .add(BoundedContextBuilder.assumingTests())
+                       .build();
+        server.start();
+    }
+
+    @AfterAll
+    @SuppressWarnings("StaticVariableUsedBeforeInitialization") // see createServer().
+    static void shutdownServer() {
+        server.shutdown();
+    }
+
     private Client client;
 
     @BeforeEach
     void createClient() {
-        int port = TestValues.random(64000, 65000);
         client = Client.connectTo("localhost", port)
                        .build();
     }
@@ -84,5 +116,54 @@ class ClientTest {
         ClientRequest request = client.asGuest();
         assertThat(request.user())
                 .isEqualTo(Client.DEFAULT_GUEST_ID);
+    }
+
+    @Nested
+    @DisplayName("manage subscriptions")
+    class Subscriptions {
+
+        private List<Subscription> subscriptions;
+
+        @BeforeEach
+        void createSubscriptions() {
+            UserId currentUser = GivenUserId.generated();
+            String userField = "user";
+            Subscription userLoggedIn =
+                    client.onBehalfOf(currentUser)
+                          .subscribeToEvent(UserLoggedIn.class)
+                          .where(eq(userField, currentUser))
+                          .observe((e) -> {})
+                          .post();
+            Subscription userLoggedOut =
+                    client.onBehalfOf(currentUser)
+                          .subscribeToEvent(UserLoggedOut.class)
+                          .where(eq(userField, currentUser))
+                          .observe((e) -> {})
+                          .post();
+            Subscription userProfile =
+                    client.onBehalfOf(currentUser)
+                    .subscribeTo(UserAccount.class)
+                    .where(eq(userField, currentUser))
+                    .post();
+
+            subscriptions.add(userLoggedIn);
+            subscriptions.add(userLoggedOut);
+            subscriptions.add(userProfile);
+        }
+
+        @Test
+        @DisplayName("remembering them until cancelled")
+        void remembering() {
+            ActiveSubscriptions remembered = client.subscriptions();
+            subscriptions.forEach(
+                    (s) -> assertTrue(remembered.contains(s))
+            );
+            subscriptions.forEach(
+                    (s) -> {
+                        client.cancel(s);
+                        assertFalse(remembered.contains(s));
+                    }
+            );
+        }
     }
 }
