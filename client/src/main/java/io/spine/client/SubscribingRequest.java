@@ -96,7 +96,7 @@ SubscribingRequest<M extends Message,
     /**
      * Creates and posts the subscription request to the server.
      */
-    public Subscription subscribe() {
+    public Subscription post() {
         Topic topic = builder().build();
         StreamObserver<W> observer = createObserver();
         return subscribe(topic, observer);
