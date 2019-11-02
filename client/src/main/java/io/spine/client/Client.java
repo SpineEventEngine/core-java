@@ -227,6 +227,11 @@ public class Client implements AutoCloseable {
         return shutdownTimeout;
     }
 
+    @VisibleForTesting
+    ActiveSubscriptions subscriptions() {
+        return subscriptions;
+    }
+
     /**
      * Creates a new request factory for the requests to be sent on behalf of the passed user.
      */

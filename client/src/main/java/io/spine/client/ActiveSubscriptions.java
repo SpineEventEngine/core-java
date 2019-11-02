@@ -20,6 +20,8 @@
 
 package io.spine.client;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,5 +45,10 @@ final class ActiveSubscriptions {
 
     synchronized void cancelAll(Client client) {
         subscriptions.forEach(client::cancel);
+    }
+
+    @VisibleForTesting
+    synchronized boolean contains(Subscription s) {
+        return subscriptions.contains(s);
     }
 }
