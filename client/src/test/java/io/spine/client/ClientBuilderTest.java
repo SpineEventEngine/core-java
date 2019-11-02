@@ -29,6 +29,7 @@ import io.spine.core.UserId;
 import io.spine.testing.TestValues;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.core.given.GivenUserId;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,11 +49,19 @@ class ClientBuilderTest {
     private static final String host = "localhost";
     private int port;
     private Client.Builder builder;
+    private @Nullable Client client;
 
     @BeforeEach
     void createBuilder() {
-        port = TestValues.random(100, 500);
+        port = TestValues.random(64000, 65000);
         builder = connectTo(host, port);
+    }
+
+    @AfterEach
+    void shutdownClient() {
+        if (client != null) {
+            client.shutdown();
+        }
     }
 
     @Test
@@ -76,7 +85,7 @@ class ClientBuilderTest {
             assertThat(builder.channel())
                     .isNull();
 
-            Client client = builder.build();
+            client = builder.build();
             assertThat(client.channel())
                     .isNotNull();
         }
@@ -104,7 +113,7 @@ class ClientBuilderTest {
         @BeforeEach
         void createChannel() {
             channel = ManagedChannelBuilder
-                    .forAddress(host, 1010)
+                    .forAddress(host, 64000)
                     .build();
         }
 
@@ -126,7 +135,7 @@ class ClientBuilderTest {
             assertThat(builder.channel())
                     .isEqualTo(channel);
 
-            Client client = builder.build();
+            client = builder.build();
             assertThat(client.channel())
                     .isEqualTo(channel);
         }
@@ -143,7 +152,7 @@ class ClientBuilderTest {
             TimeUnit unit = TimeUnit.MILLISECONDS;
             builder.shutdownTimout(value, unit);
 
-            Client client = builder.build();
+            client = builder.build();
             assertThat(client.shutdownTimeout())
                     .isEqualTo(Timeout.of(value, unit));
         }
@@ -151,7 +160,7 @@ class ClientBuilderTest {
         @Test
         @DisplayName("supply default value if not specified")
         void defaultValue() {
-            Client client = builder.build();
+            client = builder.build();
 
             assertThat(client.shutdownTimeout())
                     .isEqualTo(Client.DEFAULT_SHUTDOWN_TIMEOUT);
@@ -165,7 +174,7 @@ class ClientBuilderTest {
         @Test
         @DisplayName("assuming single-tenant context if not set")
         void singleTenant() {
-            Client client = builder.build();
+            client = builder.build();
             Truth8.assertThat(client.tenant())
                   .isEmpty();
         }
@@ -174,8 +183,8 @@ class ClientBuilderTest {
         @DisplayName("which is non-null and not default")
         void correctValue() {
             TenantId expected = GivenTenantId.generate();
-            Client client = builder.forTenant(expected)
-                                   .build();
+            client = builder.forTenant(expected)
+                            .build();
             Truth8.assertThat(client.tenant())
                   .hasValue(expected);
         }
@@ -203,8 +212,8 @@ class ClientBuilderTest {
         @DisplayName("which is non-null and not default")
         void correctValue() {
             UserId expected = GivenUserId.generated();
-            Client client = builder.withGuestId(expected)
-                                   .build();
+            client = builder.withGuestId(expected)
+                            .build();
 
             assertThat(client.asGuest()
                              .user()).isEqualTo(expected);
@@ -215,8 +224,8 @@ class ClientBuilderTest {
         void correctStringValue() {
             UserId expected = GivenUserId.generated();
 
-            Client client = builder.withGuestId(expected.getValue())
-                                   .build();
+            client = builder.withGuestId(expected.getValue())
+                            .build();
 
             assertThat(client.asGuest()
                              .user()).isEqualTo(expected);
@@ -225,7 +234,7 @@ class ClientBuilderTest {
         @Test
         @DisplayName("use default value if not set directly")
         void defaultValue() {
-            Client client = builder.build();
+            client = builder.build();
 
             assertThat(client.asGuest()
                              .user())
