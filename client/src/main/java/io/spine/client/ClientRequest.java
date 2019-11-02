@@ -67,7 +67,7 @@ public class ClientRequest {
     /**
      * Creates a builder for customizing subscription for the passed entity state type.
      */
-    public <M extends Message> SubscriptionRequest subscribeTo(Class<M> type) {
+    public <M extends Message> SubscriptionRequest<M> subscribeTo(Class<M> type) {
         checkNotNull(type);
         return new SubscriptionRequest<>(this, type);
     }
