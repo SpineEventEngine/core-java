@@ -80,9 +80,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class Client implements AutoCloseable {
 
-    //TODO:2019-11-02:alexander.yevsyukov: Remember subscriptions and cancel them if not
-    // cancelled explicitly when closing.
-
     /** The number of seconds to wait when {@linkplain #close() closing} the client. */
     public static final Timeout DEFAULT_SHUTDOWN_TIMEOUT = Timeout.of(5, SECONDS);
 
@@ -97,6 +94,9 @@ public class Client implements AutoCloseable {
     private final CommandServiceBlockingStub commandService;
     private final SubscriptionServiceStub subscriptionService;
     private final SubscriptionServiceBlockingStub blockingSubscriptionService;
+
+    /** Subscriptions created by the client which are not cancelled yet. */
+    private final ActiveSubscriptions subscriptions;
 
     /**
      * Creates a builder for a client connected to the specified address.
@@ -139,6 +139,7 @@ public class Client implements AutoCloseable {
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
         this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
         this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
+        this.subscriptions = new ActiveSubscriptions();
     }
 
     /**
@@ -154,11 +155,14 @@ public class Client implements AutoCloseable {
     /**
      * Closes the client by shutting down the gRPC connection.
      *
+     * <p>Subscriptions created by this client which were not cancelled
+     * {@linkplain #cancel(Subscription) directly} will be cancelled.
+     *
      * @see #isOpen()
      */
     @Override
     public void close() {
-        //TODO:2019-11-02:alexander.yevsyukov: Cancel orphan subscriptions here.
+        subscriptions.cancelAll(this);
         try {
             channel.shutdown()
                    .awaitTermination(shutdownTimeout.value(), shutdownTimeout.unit());
@@ -209,6 +213,7 @@ public class Client implements AutoCloseable {
      * @see ClientRequest#subscribeToEvent(Class)
      */
     public void cancel(Subscription s) {
+        subscriptions.forget(s);
         blockingSubscriptionService.cancel(s);
     }
 
@@ -270,6 +275,7 @@ public class Client implements AutoCloseable {
     <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
         Subscription subscription = blockingSubscriptionService.subscribe(topic);
         subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
+        subscriptions.remember(subscription);
         return subscription;
     }
 
