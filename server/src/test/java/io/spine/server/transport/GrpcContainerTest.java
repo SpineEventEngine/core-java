@@ -65,7 +65,7 @@ class GrpcContainerTest {
                 .setPort(8080)
                 .setPort(port);
 
-        assertEquals(port, builder.getPort());
+        assertEquals(port, builder.port());
 
         int count = 3;
         for (int i = 0; i < count; i++) {
@@ -74,12 +74,12 @@ class GrpcContainerTest {
             builder.addService(service);
         }
 
-        ImmutableSet<ServerServiceDefinition> services = builder.getServices();
+        ImmutableSet<ServerServiceDefinition> services = builder.services();
 
         // Perform removal and check that the return value is builder itself.
         assertEquals(builder, builder.removeService(services.iterator().next()));
 
-        Set<ServerServiceDefinition> serviceSet = builder.getServices();
+        Set<ServerServiceDefinition> serviceSet = builder.services();
         assertThat(serviceSet).hasSize(count - 1);
 
         GrpcContainer container = builder.build();
@@ -137,7 +137,7 @@ class GrpcContainerTest {
         container.addShutdownHook();
 
         container.start();
-        container.getOnShutdownCallback()
+        container.shutdownCallback()
                  .run();
         assertThat(container.isShutdown())
                 .isTrue();

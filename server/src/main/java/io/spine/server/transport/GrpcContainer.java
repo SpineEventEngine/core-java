@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 
 /**
  * Wrapping container for gRPC server.
@@ -60,8 +61,8 @@ public final class GrpcContainer {
     }
 
     private GrpcContainer(Builder builder) {
-        this.port = builder.getPort();
-        this.services = builder.getServices();
+        this.port = builder.port();
+        this.services = builder.services();
     }
 
     /**
@@ -174,7 +175,7 @@ public final class GrpcContainer {
      */
     public void addShutdownHook() {
         Runtime.getRuntime()
-               .addShutdownHook(new Thread(getOnShutdownCallback()));
+               .addShutdownHook(new Thread(shutdownCallback()));
     }
 
     private Server createGrpcServer() {
@@ -189,30 +190,6 @@ public final class GrpcContainer {
         return builder.build();
     }
 
-    // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-    @SuppressWarnings({"UseOfSystemOutOrSystemErr", "CatchAndPrintStackTrace"})
-    @VisibleForTesting
-    Runnable getOnShutdownCallback() {
-        return () -> {
-            String serverClass = getClass().getName();
-            try {
-                if (!isShutdown()) {
-                    System.err.println("Shutting down " +
-                                       serverClass + " since JVM is shutting down...");
-                    shutdown();
-                    System.err.println(serverClass + " shut down.");
-                }
-            } catch (RuntimeException e) {
-                e.printStackTrace(System.err);
-            }
-        };
-    }
-
-    @VisibleForTesting
-    @Nullable Server grpcServer() {
-        return grpcServer;
-    }
-
     /**
      * Injects a server to this container.
      *
@@ -225,34 +202,108 @@ public final class GrpcContainer {
         this.injectedServer = server;
     }
 
+    @VisibleForTesting
+    Runnable shutdownCallback() {
+        return new ShutdownCallback();
+    }
+
+    @VisibleForTesting
+    @Nullable Server grpcServer() {
+        return grpcServer;
+    }
+
+    /**
+     * Shuts down the container printing the status to {@code System.err}.
+     *
+     * <p>Stderr is used since the logger may have been reset already by its JVM shutdown hook.
+     */
+
+    @SuppressWarnings({"UseOfSystemOutOrSystemErr", "CatchAndPrintStackTrace"}) // see Javadoc
+    final class ShutdownCallback implements Runnable {
+
+        private final String containerClass = GrpcContainer.class.getName();
+
+        @Override
+        public void run() {
+            try {
+                if (!isShutdown()) {
+                    println("Shutting down `%s` since JVM is shutting down...", containerClass);
+                    shutdown();
+                    println("`%s` shut down.", containerClass);
+                }
+            } catch (RuntimeException e) {
+                e.printStackTrace(System.err);
+            }
+        }
+        private void println(String msgFormat, Object... arg) {
+            String msg = format(msgFormat, arg);
+            System.err.println(msg);
+        }
+    }
+
+    /**
+     * The builder for {@code GrpcContainer} allows to defind a port and services exposed
+     * by the container.
+     */
     public static class Builder {
 
         private int port = ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
-        private final Set<ServerServiceDefinition> serviceDefinitions = Sets.newHashSet();
+        private final Set<ServerServiceDefinition> services = Sets.newHashSet();
 
+        /**
+         * Assigns the port to by used by the container.
+         *
+         * <p>If not set explicitly, {@link ConnectionConstants#DEFAULT_CLIENT_SERVICE_PORT}
+         * will be used.
+         */
         public Builder setPort(int port) {
             this.port = port;
             return this;
         }
 
+        /**
+         * Obtains the port to be used by the container.
+         *
+         * @deprecated please use {@link #port()}.
+         */
+        @Deprecated
         public int getPort() {
-            return this.port;
+            return port();
+        }
+
+        /**
+         * Obtains the port to be used by the container.
+         */
+        public int port() {
+            return port;
         }
 
         @CanIgnoreReturnValue
         public Builder addService(BindableService service) {
-            serviceDefinitions.add(service.bindService());
+            services.add(service.bindService());
             return this;
         }
 
         @CanIgnoreReturnValue
         public Builder removeService(ServerServiceDefinition service) {
-            serviceDefinitions.remove(service);
+            services.remove(service);
             return this;
         }
 
+        /**
+         * Obtains the services already added to the builder.
+         * @deprecated please use {@link #services()}.
+         */
+        @Deprecated
         public ImmutableSet<ServerServiceDefinition> getServices() {
-            return ImmutableSet.copyOf(serviceDefinitions);
+            return services();
+        }
+
+        /**
+         * Obtains the services already added to the builder.
+         */
+        public ImmutableSet<ServerServiceDefinition> services() {
+            return ImmutableSet.copyOf(services);
         }
 
         public GrpcContainer build() {
