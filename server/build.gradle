@@ -21,16 +21,21 @@
 dependencies {
     compile project(path: ':client')
 
-    implementation deps.grpc.grpcProtobuf
+    implementation(
+            deps.grpc.grpcProtobuf,
+            deps.grpc.grpcCore
+    )
 
     testAnnotationProcessor deps.build.autoService.processor
     testCompileOnly deps.build.autoService.annotations
 
-    testImplementation deps.grpc.grpcNetty
-    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
-    testImplementation project(path: ":core", configuration: 'testArtifacts')
-    testImplementation project(path: ":client", configuration: 'testArtifacts')
-    testImplementation project(path: ":testutil-server")
+    testImplementation (
+            deps.grpc.grpcNetty,
+            "io.spine:spine-testlib:$spineBaseVersion",
+            project(path: ":core", configuration: 'testArtifacts'),
+            project(path: ":client", configuration: 'testArtifacts'),
+            project(path: ":testutil-server")
+    )
 }
 
 apply from: deps.scripts.testArtifacts
