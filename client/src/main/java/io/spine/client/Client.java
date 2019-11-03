@@ -179,6 +179,9 @@ public class Client implements AutoCloseable {
      */
     @Override
     public void close() {
+        if (!isOpen()) {
+            return;
+        }
         subscriptions.cancelAll(this);
         try {
             channel.shutdown()
@@ -230,8 +233,8 @@ public class Client implements AutoCloseable {
      * @see ClientRequest#subscribeToEvent(Class)
      */
     public void cancel(Subscription s) {
-        subscriptions.forget(s);
         blockingSubscriptionService.cancel(s);
+        subscriptions.forget(s);
     }
 
     @VisibleForTesting
