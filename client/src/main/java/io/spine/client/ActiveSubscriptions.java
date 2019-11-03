@@ -35,20 +35,33 @@ final class ActiveSubscriptions {
 
     private final List<Subscription> subscriptions = new ArrayList<>();
 
+    /** Remembers the passed subscription for future use. */
     synchronized void remember(Subscription s) {
         subscriptions.add(checkNotNull(s));
     }
 
+    /** Forgets the passed subscription. */
     synchronized void forget(Subscription s) {
         subscriptions.remove(checkNotNull(s));
     }
 
+    /** Cancels all the remembered subscription. */
     synchronized void cancelAll(Client client) {
-        subscriptions.forEach(client::cancel);
+        // Use the loop approach to avoid concurrent modification because the `Client` modifies
+        // active subscriptions when canceling.
+        while (!subscriptions.isEmpty()) {
+            Subscription subscription = subscriptions.get(0);
+            client.cancel(subscription);
+        }
     }
 
     @VisibleForTesting
     synchronized boolean contains(Subscription s) {
         return subscriptions.contains(s);
+    }
+
+    @VisibleForTesting
+    synchronized boolean isEmpty() {
+        return subscriptions.isEmpty();
     }
 }
