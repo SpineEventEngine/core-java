@@ -20,6 +20,7 @@
 package io.spine.server.transport;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.Truth8;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerServiceDefinition;
@@ -61,11 +62,10 @@ class GrpcContainerTest {
     void setParamsInBuilder() {
         int port = 60;
         GrpcContainer.Builder builder = GrpcContainer
-                .newBuilder()
-                .setPort(8080)
-                .setPort(port);
+                .atPort(port);
 
-        assertEquals(port, builder.port());
+        Truth8.assertThat(builder.port())
+              .hasValue(port);
 
         int count = 3;
         for (int i = 0; i < count; i++) {
@@ -131,8 +131,7 @@ class GrpcContainerTest {
         Runtime runtimeSpy = (Runtime) currentRuntimeValue.get(null);
         currentRuntimeValue.set(null, runtimeSpy);
 
-        GrpcContainer container = GrpcContainer.newBuilder()
-                                               .setPort(8080)
+        GrpcContainer container = GrpcContainer.atPort(8080)
                                                .build();
         container.addShutdownHook();
 

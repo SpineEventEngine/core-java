@@ -27,12 +27,16 @@ import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
+import io.grpc.inprocess.InProcessServerBuilder;
 import io.spine.client.ConnectionConstants;
+import io.spine.server.ConnectionBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
@@ -48,7 +52,13 @@ public final class GrpcContainer {
     private static final String SERVER_NOT_STARTED_MSG =
             "gRPC server was not started or is shut down already.";
 
-    private final int port;
+    /**
+     * The port at which the container is exposed.
+     *
+     * <p>Is {@code null} if the container is exposed in the in-process mode with a server name.
+     */
+    private final @Nullable Integer port;
+    private final @Nullable String serverName;
     private final ImmutableSet<ServerServiceDefinition> services;
 
     private @Nullable Server grpcServer;
@@ -56,13 +66,56 @@ public final class GrpcContainer {
     @VisibleForTesting
     private @Nullable Server injectedServer;
 
+    /**
+     * Creates a new builder for the container.
+     *
+     * @deprecated please use {@link #atPort(int)} or {@link #forTesting(String)}
+     */
+    @Deprecated
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT, null);
+    }
+
+    /**
+     * Initiates creating a container exposed at the given port.
+     */
+    public static Builder atPort(int port) {
+        return new Builder(port, null);
+    }
+
+    /**
+     * Initiates creating an in-process container exposed with the given server name.
+     *
+     * <p>The container in fully-featured, high performance, and is useful in testing.
+     */
+    public static Builder forTesting(String serverName) {
+        return new Builder(null, serverName);
     }
 
     private GrpcContainer(Builder builder) {
-        this.port = builder.port();
+        this.port = builder.port().orElse(null);
+        this.serverName = builder.serverName().orElse(null);
         this.services = builder.services();
+    }
+
+    /**
+     * Obtains the port at which the container is exposed, or empty {@code Optional} if this
+     * is an in-process container.
+     *
+     * @see #serverName()
+     */
+    public Optional<Integer> port() {
+        return Optional.ofNullable(port);
+    }
+
+    /**
+     * Obtains the name of the in-process server, or empty {@code Optinal} if the container is
+     * exposed at a port.
+     *
+     * @see #port()
+     */
+    public Optional<String> serverName() {
+        return Optional.ofNullable(serverName);
     }
 
     /**
@@ -182,12 +235,20 @@ public final class GrpcContainer {
         if (injectedServer != null) {
             return injectedServer;
         }
-        ServerBuilder builder = ServerBuilder.forPort(port);
+        ServerBuilder builder = createServerBuilder();
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
         }
-
         return builder.build();
+    }
+
+    private ServerBuilder createServerBuilder() {
+        ServerBuilder result =
+                serverName == null
+                ? ServerBuilder.forPort(checkNotNull(port))
+                : InProcessServerBuilder.forName(serverName)
+                                        .directExecutor();
+        return result;
     }
 
     /**
@@ -245,19 +306,21 @@ public final class GrpcContainer {
      * The builder for {@code GrpcContainer} allows to defind a port and services exposed
      * by the container.
      */
-    public static class Builder {
+    public static final class Builder extends ConnectionBuilder {
 
-        private int port = ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
         private final Set<ServerServiceDefinition> services = Sets.newHashSet();
 
+        private Builder(@Nullable Integer port, @Nullable String serverName) {
+            super(port, serverName);
+        }
+
         /**
-         * Assigns the port to by used by the container.
+         * Does nothing.
          *
-         * <p>If not set explicitly, {@link ConnectionConstants#DEFAULT_CLIENT_SERVICE_PORT}
-         * will be used.
+         * @deprecated please use {@link GrpcContainer#atPort(int)}.
          */
-        public Builder setPort(int port) {
-            this.port = port;
+        @Deprecated
+        public Builder setPort(@SuppressWarnings("unused") int ignored) {
             return this;
         }
 
@@ -268,14 +331,7 @@ public final class GrpcContainer {
          */
         @Deprecated
         public int getPort() {
-            return port();
-        }
-
-        /**
-         * Obtains the port to be used by the container.
-         */
-        public int port() {
-            return port;
+            return port().orElse(0);
         }
 
         @CanIgnoreReturnValue

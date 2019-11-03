@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.core.Responses.statusOk;
 import static io.spine.testing.client.grpc.TableSide.LEFT;
 import static io.spine.testing.client.grpc.TableSide.RIGHT;
@@ -62,8 +63,9 @@ class TestClientTest {
         BoundedContextBuilder context = BoundedContext
                 .singleTenant("Tennis")
                 .add(new GameRepository());
+        int port = DEFAULT_CLIENT_SERVICE_PORT;
         server = Server
-                .newBuilder()
+                .atPort(port)
                 .add(context)
                 .build();
         server.start();
@@ -71,7 +73,7 @@ class TestClientTest {
                 .newBuilder()
                 .setValue(TestClientTest.class.getSimpleName())
                 .build();
-        client = new TestClient(userId, "localhost", server.port());
+        client = new TestClient(userId, "localhost", port);
     }
 
     @AfterEach

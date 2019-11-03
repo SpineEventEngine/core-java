@@ -20,13 +20,13 @@
 
 package io.spine.client;
 
+import io.grpc.inprocess.InProcessServerBuilder;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Server;
 import io.spine.test.client.UserAccount;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.event.UserLoggedOut;
-import io.spine.testing.TestValues;
 import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -48,15 +48,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ClientTest {
 
     @SuppressWarnings("StaticVariableMayNotBeInitialized")
-    private static Server server;
+    private static String serverName;
     @SuppressWarnings("StaticVariableMayNotBeInitialized")
-    private static int port;
+    private static Server server;
 
     @BeforeAll
     static void createServer() throws IOException {
-        port = TestValues.random(64000, 65000);
-        server = Server.newBuilder()
-                       .setPort(port)
+        serverName = InProcessServerBuilder.generateName();
+        server = Server.forTesting(serverName)
                        .add(BoundedContextBuilder.assumingTests())
                        .build();
         server.start();
@@ -72,7 +71,7 @@ class ClientTest {
 
     @BeforeEach
     void createClient() {
-        client = Client.connectTo("localhost", port)
+        client = Client.forTesting(serverName)
                        .build();
     }
 

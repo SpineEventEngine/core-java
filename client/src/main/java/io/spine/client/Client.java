@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
@@ -105,6 +106,7 @@ public class Client implements AutoCloseable {
      * For a channel with custom configuration please use {@link #usingChannel(ManagedChannel)}.
      *
      * @see #usingChannel(ManagedChannel)
+     * @see #forTesting(String)
      */
     public static Builder connectTo(String host, int port) {
         checkNotEmptyOrBlank(host);
@@ -119,11 +121,26 @@ public class Client implements AutoCloseable {
      * application.
      *
      * @see #connectTo(String, int)
+     * @see #forTesting(String)
      * @see ManagedChannel
      */
     public static Builder usingChannel(ManagedChannel channel) {
         checkNotNull(channel);
         return new Builder(channel);
+    }
+
+    /**
+     * Creates a client which will be connected to the in-process server with the passed name.
+     *
+     * <p>The client is fully-featured, high performance, and is useful in testing.
+     *
+     * @see #connectTo(String, int)
+     * @see #usingChannel(ManagedChannel)
+     */
+    @VisibleForTesting
+    public static Builder forTesting(String serverName) {
+        checkNotEmptyOrBlank(serverName);
+        return new Builder(serverName);
     }
 
     /**
@@ -332,6 +349,18 @@ public class Client implements AutoCloseable {
         private Builder(String host, int port) {
             this.host = host;
             this.port = port;
+        }
+
+        private Builder(String processServerName) {
+            this(channelForTesting(processServerName));
+        }
+
+        private static ManagedChannel channelForTesting(String serverName) {
+            ManagedChannel result = InProcessChannelBuilder
+                    .forName(serverName)
+                    .directExecutor()
+                    .build();
+            return result;
         }
 
         private static ManagedChannel createChannel(String host, int port) {
