@@ -22,9 +22,9 @@ package io.spine.client;
 
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.spine.core.UserId;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Server;
-import io.spine.test.client.UserAccount;
+import io.spine.test.client.ClientTestContext;
+import io.spine.test.client.LoginStatus;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.event.UserLoggedOut;
 import io.spine.testing.core.given.GivenUserId;
@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -56,7 +57,7 @@ class ClientTest {
     static void createServer() throws IOException {
         serverName = InProcessServerBuilder.generateName();
         server = Server.forTesting(serverName)
-                       .add(BoundedContextBuilder.assumingTests())
+                       .add(ClientTestContext.builder())
                        .build();
         server.start();
     }
@@ -125,6 +126,7 @@ class ClientTest {
 
         @BeforeEach
         void createSubscriptions() {
+            subscriptions = new ArrayList<>();
             UserId currentUser = GivenUserId.generated();
             String userField = "user";
             Subscription userLoggedIn =
@@ -139,15 +141,16 @@ class ClientTest {
                           .where(eq(userField, currentUser))
                           .observe((e) -> {})
                           .post();
-            Subscription userProfile =
+            Subscription loginStatus =
                     client.onBehalfOf(currentUser)
-                    .subscribeTo(UserAccount.class)
+                    .subscribeTo(LoginStatus.class)
                     .where(eq(userField, currentUser))
+                    .observe((s) -> {})
                     .post();
 
             subscriptions.add(userLoggedIn);
             subscriptions.add(userLoggedOut);
-            subscriptions.add(userProfile);
+            subscriptions.add(loginStatus);
         }
 
         @Test
@@ -163,6 +166,20 @@ class ClientTest {
                         assertFalse(remembered.contains(s));
                     }
             );
+        }
+
+        @Test
+        @DisplayName("clear subscriptions when closing")
+        void clearing() {
+            ActiveSubscriptions subscriptions = client.subscriptions();
+            this.subscriptions.forEach(
+                    (s) -> assertTrue(subscriptions.contains(s))
+            );
+
+            client.close();
+
+            assertThat(subscriptions.isEmpty())
+                    .isTrue();
         }
     }
 }

@@ -10,7 +10,17 @@ option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
+import "spine/test/client/user_account.proto";
 
 message LogInUser {
     core.UserId user = 1;
+}
+
+message LogOutUser {
+    core.UserId user = 1;
+}
+
+message CreateUserAccount {
+    core.UserId user = 1;
+    UserAccount account = 2 [(validate) = true, (required) = true];
 }

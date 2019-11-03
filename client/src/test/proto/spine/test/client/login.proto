@@ -6,15 +6,13 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.test.client";
-option java_outer_classname = "UserAccountProto";
+option java_outer_classname = "LoginProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
-import "spine/people/person_name.proto";
 
-message UserAccount {
-    option (entity) = { kind: AGGREGATE visibility: SUBSCRIBE };
+message LoginStatus {
+    option (entity) = { kind: PROCESS_MANAGER visibility: SUBSCRIBE };
     core.UserId user = 1;
-    people.PersonName name = 2;
+    bool logged_in = 2;
 }
-
