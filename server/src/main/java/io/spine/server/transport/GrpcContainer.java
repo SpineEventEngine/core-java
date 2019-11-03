@@ -209,7 +209,7 @@ public final class GrpcContainer {
     }
 
     @VisibleForTesting
-    Server grpcServer() {
+    @Nullable Server grpcServer() {
         return grpcServer;
     }
 
