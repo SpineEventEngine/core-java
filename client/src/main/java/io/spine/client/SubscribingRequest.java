@@ -42,7 +42,6 @@ import java.util.function.Consumer;
  * @param <B>
  *         the type of this requests for return type covariance
  */
-
 public abstract class
 SubscribingRequest<M extends Message,
                    C extends MessageContext,
