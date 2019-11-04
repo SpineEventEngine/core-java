@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.transport;
+package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
@@ -29,7 +29,6 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.spine.client.ConnectionConstants;
-import io.spine.server.ConnectionBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
@@ -69,7 +68,7 @@ public final class GrpcContainer {
     /**
      * Creates a new builder for the container.
      *
-     * @deprecated please use {@link #atPort(int)} or {@link #forTesting(String)}
+     * @deprecated please use {@link #atPort(int)} or {@link #inProcess(String)}
      */
     @Deprecated
     public static Builder newBuilder() {
@@ -88,7 +87,7 @@ public final class GrpcContainer {
      *
      * <p>The container in fully-featured, high performance, and is useful in testing.
      */
-    public static Builder forTesting(String serverName) {
+    public static Builder inProcess(String serverName) {
         return new Builder(null, serverName);
     }
 
@@ -278,7 +277,6 @@ public final class GrpcContainer {
      *
      * <p>Stderr is used since the logger may have been reset already by its JVM shutdown hook.
      */
-
     @SuppressWarnings({"UseOfSystemOutOrSystemErr", "CatchAndPrintStackTrace"}) // see Javadoc
     final class ShutdownCallback implements Runnable {
 
@@ -303,7 +301,7 @@ public final class GrpcContainer {
     }
 
     /**
-     * The builder for {@code GrpcContainer} allows to defind a port and services exposed
+     * The builder for {@code GrpcContainer} allows to define a port and services exposed
      * by the container.
      */
     public static final class Builder extends ConnectionBuilder {

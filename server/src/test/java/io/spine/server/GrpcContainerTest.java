@@ -17,14 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.transport;
+package io.spine.server;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth8;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerServiceDefinition;
-import io.spine.server.CommandService;
 import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,10 +32,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -51,7 +50,7 @@ class GrpcContainerTest {
 
     @BeforeEach
     void setUp() {
-        grpcContainer = GrpcContainer.newBuilder()
+        grpcContainer = GrpcContainer.inProcess(randomString())
                                      .build();
         grpcContainer.injectServer(new TestGrpcServer());
     }
@@ -121,17 +120,8 @@ class GrpcContainerTest {
     @Test
     @MuteLogging
     @DisplayName("stop properly upon application shutdown")
-    void stopUponAppShutdown()
-            throws NoSuchFieldException, IllegalAccessException, IOException {
-        Class<Runtime> runtimeClass = Runtime.class;
-        // Field signature: private static Runtime currentRuntime
-        // Origin class: {@code java.lang.Runtime}.
-        Field currentRuntimeValue = runtimeClass.getDeclaredField("currentRuntime");
-        currentRuntimeValue.setAccessible(true);
-        Runtime runtimeSpy = (Runtime) currentRuntimeValue.get(null);
-        currentRuntimeValue.set(null, runtimeSpy);
-
-        GrpcContainer container = GrpcContainer.atPort(8080)
+    void stopUponAppShutdown() throws IOException {
+        GrpcContainer container = GrpcContainer.inProcess(randomString())
                                                .build();
         container.addShutdownHook();
 

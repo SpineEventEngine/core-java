@@ -30,7 +30,6 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.given.transport.TestGrpcServer;
-import io.spine.server.transport.GrpcContainer;
 import io.spine.test.commandservice.CmdServDontHandle;
 import io.spine.testing.TestValues;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -152,7 +151,7 @@ class CommandServiceTest {
     @Test
     @DisplayName("deploy to gRPC container")
     void deployToGrpcContainer() throws IOException {
-        GrpcContainer grpcContainer = GrpcContainer.forTesting(TestValues.randomString())
+        GrpcContainer grpcContainer = GrpcContainer.inProcess(TestValues.randomString())
                                                    .addService(service)
                                                    .build();
         grpcContainer.injectServer(new TestGrpcServer());
