@@ -30,12 +30,12 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 /**
  * Allows to create a post a query for messages of the given type.
  *
- * <p>None of the parameters set by the builder methods are required. Call {@link #query()} to
+ * <p>None of the parameters set by the builder methods are required. Call {@link #run()} to
  * retrieve the results of the query.
  *
  * <p>Usage example:
  * <pre>{@code
- * Query query = client.onBehalfOf(currentUser)
+ * ImmutableList<Customer> customers = client.onBehalfOf(currentUser)
  *          .select(Customer.class)
  *          .byId(westCoastCustomerIds())
  *          .withMask("name", "address", "email")
@@ -44,7 +44,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
  *                 eq("companySize", Company.Size.SMALL))
  *          .orderBy("name", ASCENDING)
  *          .limit(20)
- *          .build();
+ *          .run();
  * }</pre>
  *
  * <p>Filtering by field values (via {@link #where(Filter...)} and
@@ -87,10 +87,10 @@ public final class QueryRequest<M extends Message>
     }
 
     /**
-     * Obtains the results of the query.
+     * Obtains results of the query.
      */
     @SuppressWarnings("unchecked") // The type is ensured when building the query.
-    public ImmutableList<M> query() {
+    public ImmutableList<M> run() {
         Query query = builder().build();
         ImmutableList<M> result =
                 client().read(query)
