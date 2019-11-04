@@ -21,6 +21,7 @@
 package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.grpc.stub.StreamObserver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,24 +30,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Maintains the list of subscriptions created by the {@link Client} which are
- * not cancelled yet. Cancels remaining subscriptions upon request.
+ * not cancelled yet.
+ *
+ * <p>The {@link Client} updates this collection when a new subscription is
+ * {@linkplain Client#subscribeTo(Topic, StreamObserver) created} and
+ * {@linkplain Client#cancel(Subscription) canceled}.
+ *
+ * <p>Remaining subscriptions are cancelled by the {@code Client} upon
+ * {@linkplain #cancelAll(Client) request}.
  */
 final class ActiveSubscriptions {
 
     private final List<Subscription> subscriptions = new ArrayList<>();
 
     /** Remembers the passed subscription for future use. */
-    synchronized void remember(Subscription s) {
+    void remember(Subscription s) {
         subscriptions.add(checkNotNull(s));
     }
 
     /** Forgets the passed subscription. */
-    synchronized void forget(Subscription s) {
+    void forget(Subscription s) {
         subscriptions.remove(checkNotNull(s));
     }
 
     /** Cancels all the remembered subscription. */
-    synchronized void cancelAll(Client client) {
+    void cancelAll(Client client) {
         // Use the loop approach to avoid concurrent modification because the `Client` modifies
         // active subscriptions when canceling.
         while (!subscriptions.isEmpty()) {
@@ -56,12 +64,12 @@ final class ActiveSubscriptions {
     }
 
     @VisibleForTesting
-    synchronized boolean contains(Subscription s) {
+    boolean contains(Subscription s) {
         return subscriptions.contains(s);
     }
 
     @VisibleForTesting
-    synchronized boolean isEmpty() {
+    boolean isEmpty() {
         return subscriptions.isEmpty();
     }
 }
