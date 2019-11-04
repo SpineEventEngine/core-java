@@ -23,8 +23,8 @@ dependencies {
     api deps.grpc.grpcStub
 
     implementation (
-            deps.grpc.grpcOkHttp,
-            deps.grpc.grpcProtobuf
+            deps.grpc.grpcProtobuf,
+            deps.grpc.grpcCore
     )
 
     testImplementation(
@@ -32,6 +32,7 @@ dependencies {
             project(path: ":testutil-client"),
             project(path: ":core", configuration: 'testArtifacts'),
             project(path: ":server"), // for testing io.spine.client
+            deps.grpc.grpcNettyShaded
     )
 }
 
