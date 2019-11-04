@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A timout value with unit.
+ * A timout value with a unit.
  *
  * @implNote This class is created instead of reusing {@code okio.Timeout} to avoid
  *         dependency on the library which is a transitive dependency of gRPC.
