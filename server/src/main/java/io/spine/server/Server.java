@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
-import io.spine.server.transport.GrpcContainer;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -53,7 +52,7 @@ public final class Server implements Logging {
     /**
      * Creates a new builder for the server.
      *
-     * @deprecated please use {@link #atPort(int)} or {@link #forTesting(String)}
+     * @deprecated please use {@link #atPort(int)} or {@link #inProcess(String)}
      */
     @Deprecated
     public static Builder newBuilder() {
@@ -72,8 +71,7 @@ public final class Server implements Logging {
      *
      * <p>The server is full-featured, high performance, and is useful in testing.
      */
-    @VisibleForTesting
-    public static Builder forTesting(String serverName) {
+    public static Builder inProcess(String serverName) {
         checkNotEmptyOrBlank(serverName);
         return new Builder(null, serverName);
     }
@@ -223,7 +221,7 @@ public final class Server implements Logging {
         private GrpcContainer.Builder createContainerBuilder() {
             GrpcContainer.Builder result;
             if (serverName().isPresent()) {
-                result = GrpcContainer.forTesting(serverName().get());
+                result = GrpcContainer.inProcess(serverName().get());
             } else {
                 int port = port().orElseThrow(() -> newIllegalStateException(
                         "Neither `port` nor `serverName` assigned."));

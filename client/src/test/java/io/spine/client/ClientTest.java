@@ -56,7 +56,7 @@ class ClientTest {
     @BeforeAll
     static void createServer() throws IOException {
         serverName = InProcessServerBuilder.generateName();
-        server = Server.forTesting(serverName)
+        server = Server.inProcess(serverName)
                        .add(ClientTestContext.builder())
                        .build();
         server.start();
@@ -72,7 +72,7 @@ class ClientTest {
 
     @BeforeEach
     void createClient() {
-        client = Client.forTesting(serverName)
+        client = Client.inProcess(serverName)
                        .build();
     }
 

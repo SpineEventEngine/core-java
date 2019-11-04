@@ -106,7 +106,7 @@ public class Client implements AutoCloseable {
      * For a channel with custom configuration please use {@link #usingChannel(ManagedChannel)}.
      *
      * @see #usingChannel(ManagedChannel)
-     * @see #forTesting(String)
+     * @see #inProcess(String)
      */
     public static Builder connectTo(String host, int port) {
         checkNotEmptyOrBlank(host);
@@ -121,7 +121,7 @@ public class Client implements AutoCloseable {
      * application.
      *
      * @see #connectTo(String, int)
-     * @see #forTesting(String)
+     * @see #inProcess(String)
      * @see ManagedChannel
      */
     public static Builder usingChannel(ManagedChannel channel) {
@@ -137,8 +137,7 @@ public class Client implements AutoCloseable {
      * @see #connectTo(String, int)
      * @see #usingChannel(ManagedChannel)
      */
-    @VisibleForTesting
-    public static Builder forTesting(String serverName) {
+    public static Builder inProcess(String serverName) {
         checkNotEmptyOrBlank(serverName);
         return new Builder(serverName);
     }

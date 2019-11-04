@@ -41,7 +41,7 @@ public abstract class ConnectionBuilder {
     private @MonotonicNonNull Integer port;
     private @MonotonicNonNull String serverName;
 
-    protected ConnectionBuilder(@Nullable Integer port, @Nullable String serverName) {
+    ConnectionBuilder(@Nullable Integer port, @Nullable String serverName) {
         if (port != null) {
             checkArgument(serverName == null,
                           "`serverName` must be `null` if `port` is defined.");
@@ -53,11 +53,22 @@ public abstract class ConnectionBuilder {
         }
     }
 
+    /**
+     * Obtains the port of the connection, or empty {@code Optional} for in-process connection.
+     *
+     * @see #serverName()
+     */
     public final Optional<Integer> port() {
         return Optional.ofNullable(port);
     }
 
+    /**
+     * Obtains the name of the in-process connection, or empty {@code Optional} if the connection
+     * is made via a port.
+     *
+     * @see #port()
+     */
     public final Optional<String> serverName() {
-        return Optional.of(serverName);
+        return Optional.ofNullable(serverName);
     }
 }
