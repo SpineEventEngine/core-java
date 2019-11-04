@@ -20,23 +20,20 @@
 
 package io.spine.client;
 
-import io.grpc.inprocess.InProcessServerBuilder;
+import com.google.common.collect.ImmutableList;
 import io.spine.core.UserId;
-import io.spine.server.Server;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.LoginStatus;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.event.UserLoggedOut;
 import io.spine.testing.core.given.GivenUserId;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,51 +42,25 @@ import static io.spine.client.Filters.eq;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@MuteLogging
 @DisplayName("`Client` should")
-class ClientTest {
+class ClientTest extends AbstractClientTest {
 
-    @SuppressWarnings("StaticVariableMayNotBeInitialized")
-    private static String serverName;
-    @SuppressWarnings("StaticVariableMayNotBeInitialized")
-    private static Server server;
-
-    @BeforeAll
-    static void createServer() throws IOException {
-        serverName = InProcessServerBuilder.generateName();
-        server = Server.inProcess(serverName)
-                       .add(ClientTestContext.builder())
-                       .build();
-        server.start();
-    }
-
-    @AfterAll
-    @SuppressWarnings("StaticVariableUsedBeforeInitialization") // see createServer().
-    static void shutdownServer() {
-        server.shutdown();
-    }
-
-    private Client client;
-
-    @BeforeEach
-    void createClient() {
-        client = Client.inProcess(serverName)
-                       .build();
-    }
-
-    @AfterEach
-    void closeClient() {
-        client.close();
+    @Override
+    protected ImmutableList<BoundedContextBuilder> contexts() {
+        return ImmutableList.of(ClientTestContext.builder());
     }
 
     @Test
     @DisplayName("be opened upon creation")
     void opened() {
-        assertTrue(client.isOpen());
+        assertTrue(client().isOpen());
     }
 
     @Test
     @DisplayName("close upon request")
     void closing() {
+        Client client = client();
         client.close();
         assertFalse(client.isOpen());
     }
@@ -97,6 +68,7 @@ class ClientTest {
     @Test
     @DisplayName("have `shutdown()` alias method")
     void shutdown() {
+        Client client = client();
         client.shutdown();
         assertFalse(client.isOpen());
     }
@@ -105,7 +77,7 @@ class ClientTest {
     @DisplayName("create requests on behalf of a user")
     void onBehalf() {
         UserId expected = GivenUserId.generated();
-        ClientRequest request = client.onBehalfOf(expected);
+        ClientRequest request = client().onBehalfOf(expected);
         assertThat(request.user())
                 .isEqualTo(expected);
     }
@@ -113,7 +85,7 @@ class ClientTest {
     @Test
     @DisplayName("create requests for a guest user")
     void guestRequest() {
-        ClientRequest request = client.asGuest();
+        ClientRequest request = client().asGuest();
         assertThat(request.user())
                 .isEqualTo(Client.DEFAULT_GUEST_ID);
     }
@@ -129,6 +101,7 @@ class ClientTest {
             subscriptions = new ArrayList<>();
             UserId currentUser = GivenUserId.generated();
             String userField = "user";
+            Client client = client();
             Subscription userLoggedIn =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedIn.class)
@@ -154,8 +127,9 @@ class ClientTest {
         }
 
         @Test
-        @DisplayName("remembering them until cancelled")
+        @DisplayName("remembering them until canceled")
         void remembering() {
+            Client client = client();
             ActiveSubscriptions remembered = client.subscriptions();
             subscriptions.forEach(
                     (s) -> assertTrue(remembered.contains(s))
@@ -171,6 +145,7 @@ class ClientTest {
         @Test
         @DisplayName("clear subscriptions when closing")
         void clearing() {
+            Client client = client();
             ActiveSubscriptions subscriptions = client.subscriptions();
             this.subscriptions.forEach(
                     (s) -> assertTrue(subscriptions.contains(s))
