@@ -110,7 +110,8 @@ public final class Server implements Logging {
      * Initiates an orderly shutdown in which existing calls continue but new calls are rejected.
      */
     public void shutdown() {
-        _info().log("Shutting down the server...");
+        FluentLogger.Api info = _info();
+        info.log("Shutting down the server...");
         grpcContainer.shutdown();
         contexts.forEach(context -> {
             try {
@@ -122,6 +123,7 @@ public final class Server implements Logging {
                         .log("Unable to close the `%s` Context.", contextName);
             }
         });
+        info.log("Server shut down.");
     }
 
     /**
