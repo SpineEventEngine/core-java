@@ -20,6 +20,7 @@
 
 package io.spine.client;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -33,16 +34,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Allows to post a command optionally subscribing to events that are immediate results
  * of handling this command.
+ *
+ * <p>Usage example:
+ * <pre>{@code
+ * Subscription loginSubscription =
+ *     client.asGuest()
+ *           .command(logInUser)
+ *           .observe(UserLoggedIn.class, (event, context) -> { ... })
+ *           .observe(UserAlreadyLoggedIn.class, (rejection, context) -> { ... })
+ *           .onStreamingError((throwable) -> {})
+ *           .post();
+ * }</pre>
+ *
+ * <p>The subscription obtained from the {@link #post()} should must be cancelled to preserve
+ * both client-side and server-side resources. The moment of cancelling the subscriptions
+ * depends on the nature of the posted command and the outcome expected by the client application.
  */
 public final class CommandRequest extends ClientRequest {
 
-    private final CommandMessage commandMessage;
+    private final CommandMessage message;
     private final MultiEventConsumers.Builder builder;
     private @Nullable ErrorHandler streamingErrorHandler;
 
     CommandRequest(ClientRequest parent, CommandMessage c) {
         super(parent);
-        this.commandMessage = c;
+        this.message = c;
         this.builder = MultiEventConsumers.newBuilder();
     }
 
@@ -84,6 +100,9 @@ public final class CommandRequest extends ClientRequest {
 
     /**
      * Assigns a handler for errors occurred when delivering events.
+     *
+     * <p>If such an error occur, no more events resulting from the posted command will be
+     * delivered to the consumers.
      */
     @CanIgnoreReturnValue
     public CommandRequest onStreamingError(ErrorHandler handler) {
@@ -93,11 +112,11 @@ public final class CommandRequest extends ClientRequest {
 
     /**
      * Subscribes the consumers to events to receive events resulting from the command as
-     * the happen, then sends the command to the server.
+     * they happen, then sends the command to the server.
      *
      * <p>The returned {@code Subscription} instance should be
-     * {@linkplain Client#cancel(Subscription) canceled} after the requesting code receives all
-     * the expected events, or after a reasonable timeout.
+     * {@linkplain Client#cancel(Subscription) canceled} after the requesting code receives
+     * expected events, or after a reasonable timeout.
      *
      * @return the subscription to all the events
      * @implNote Subscriptions should be cancelled to free up client and server resources required
@@ -114,10 +133,15 @@ public final class CommandRequest extends ClientRequest {
         Command command =
                 client.requestOf(user())
                       .command()
-                      .create(this.commandMessage);
+                      .create(message);
         Subscription result =
                 EventsAfterCommand.subscribe(client, command, consumers, streamingErrorHandler);
         client().post(command);
         return result;
+    }
+
+    @VisibleForTesting
+    CommandMessage message() {
+        return message;
     }
 }
