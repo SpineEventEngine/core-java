@@ -26,16 +26,15 @@ import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -81,7 +80,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
 
     private boolean idMatches(EntityRecordWithColumns record) {
         if (!acceptedIds.isEmpty()) {
-            Any packedId = record.getRecord()
+            Any packedId = record.record()
                                  .getEntityId();
             boolean idMatches = acceptedIds.contains(packedId);
             return idMatches;
@@ -93,13 +92,13 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         boolean match;
         for (CompositeQueryParameter filter : queryParams) {
-            CompositeOperator operator = filter.getOperator();
+            CompositeOperator operator = filter.operator();
             switch (operator) {
                 case ALL:
-                    match = checkAll(filter.getFilters(), record);
+                    match = checkAll(filter.filters(), record);
                     break;
                 case EITHER:
-                    match = checkEither(filter.getFilters(), record);
+                    match = checkEither(filter.filters(), record);
                     break;
                 default:
                     throw newIllegalArgumentException("Composite operator %s is invalid.",
@@ -112,63 +111,70 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return true;
     }
 
-    private static boolean checkAll(Multimap<EntityColumn, Filter> filters,
+    private static boolean checkAll(Multimap<Column, Filter> filters,
                                     EntityRecordWithColumns record) {
-        for (Map.Entry<EntityColumn, Filter> filter : filters.entries()) {
-            Optional<MemoizedValue> columnValue = columnValue(record, filter.getKey());
-            if (!columnValue.isPresent()) {
-                return false;
-            }
-            boolean matches = checkSingleParameter(filter.getValue(), columnValue.get());
-            if (!matches) {
-                return false;
-            }
+        if (filters.isEmpty()) {
+            return true;
         }
-        return true;
+        boolean result =
+                filters.entries()
+                       .stream()
+                       .allMatch(filter -> matches(record, filter));
+        return result;
     }
 
-    private static boolean checkEither(Multimap<EntityColumn, Filter> filters,
+    private static boolean checkEither(Multimap<Column, Filter> filters,
                                        EntityRecordWithColumns record) {
-        for (Map.Entry<EntityColumn, Filter> filter : filters.entries()) {
-            Optional<MemoizedValue> columnValue = columnValue(record, filter.getKey());
-            if (columnValue.isPresent()) {
-                boolean matches = checkSingleParameter(filter.getValue(), columnValue.get());
-                if (matches) {
-                    return true;
-                }
-            }
+        if (filters.isEmpty()) {
+            return true;
         }
-        return filters.isEmpty();
+        boolean result =
+                filters.entries()
+                       .stream()
+                       .anyMatch(filter -> matches(record, filter));
+        return result;
+    }
+
+    private static boolean matches(EntityRecordWithColumns record,
+                                   Map.Entry<Column, Filter> filter) {
+        if (!hasColumn(record, filter)) {
+            return false;
+        }
+        Column column = filter.getKey();
+        @Nullable Object columnValue = columnValue(record, column);
+        boolean result = checkSingleParameter(filter.getValue(), columnValue, column);
+        return result;
+    }
+
+    private static boolean hasColumn(EntityRecordWithColumns record,
+                                     Map.Entry<Column, Filter> filter) {
+        boolean result = record.hasColumn(filter.getKey()
+                                                .name());
+        return result;
     }
 
     private static boolean checkSingleParameter(Filter filter,
-                                                @Nullable MemoizedValue actualValue) {
+                                                @Nullable Object actualValue,
+                                                Column column) {
         if (actualValue == null) {
             return false;
         }
         Object filterValue;
         Any wrappedValue = filter.getValue();
-        EntityColumn sourceColumn = actualValue.sourceColumn();
-        Class<?> sourceClass = sourceColumn.type();
+        Class<?> sourceClass = column.type();
         if (sourceClass != Any.class) {
             filterValue = toObject(wrappedValue, sourceClass);
         } else {
             filterValue = wrappedValue;
         }
-        Object columnValue = sourceColumn.toPersistedValue(filterValue);
-        boolean result = eval(actualValue.value(), filter.getOperator(), columnValue);
+        boolean result = eval(actualValue, filter.getOperator(), filterValue);
         return result;
     }
 
-    private static Optional<MemoizedValue> columnValue(EntityRecordWithColumns record,
-                                                       EntityColumn column) {
-        String storedName = column.name();
-        if (!record.getColumnNames()
-                   .contains(storedName)) {
-            return Optional.empty();
-        }
-
-        MemoizedValue value = record.getColumnValue(storedName);
-        return Optional.of(value);
+    private static @Nullable Object columnValue(EntityRecordWithColumns record,
+                                                Column column) {
+        ColumnName columnName = column.name();
+        Object value = record.columnValue(columnName);
+        return value;
     }
 }

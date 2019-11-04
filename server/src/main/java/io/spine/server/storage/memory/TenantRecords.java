@@ -135,7 +135,7 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
         if (recordWithColumns == null) {
             return null;
         }
-        EntityRecord record = recordWithColumns.getRecord();
+        EntityRecord record = recordWithColumns.record();
         Any recordState = record.getState();
         Any maskedState = new FieldMaskApplier(fieldMask).maskAny(recordState);
         EntityRecord maskedRecord = record.toBuilder()

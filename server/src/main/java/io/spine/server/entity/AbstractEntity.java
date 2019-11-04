@@ -245,7 +245,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Verifies the new entity state and returns {@link ConstraintViolation}s, if any.
      *
-     * <p>Default implementation uses the {@linkplain MessageValidator#validate() message
+     * <p>Default implementation uses the {@linkplain MessageValidator#validate(Message) message
      * validation}.
      *
      * @param newState
@@ -438,7 +438,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return result;
     }
 
-    private void updateVersion(Version newVersion) {
+    final void updateVersion(Version newVersion) {
         checkNotNull(newVersion);
         checkValid(newVersion);
         if (version.equals(newVersion)) {
@@ -471,12 +471,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         updateState(newState, incrementedVersion());
     }
 
-    @Override
-    public final Version getVersion() {
-        return version;
-    }
-
-    private void setVersion(Version version) {
+    void setVersion(Version version) {
         this.version = version;
     }
 
@@ -492,7 +487,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     @Override
     public Version version() {
-        return getVersion();
+        return version;
     }
 
     /**

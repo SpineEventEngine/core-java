@@ -20,6 +20,8 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -31,24 +33,21 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.EntityColumnCache;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.stand.AggregateStateId;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -63,36 +62,16 @@ public abstract class RecordStorage<I>
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
     /**
-     * The cache for entity columns.
-     *
-     * <p>Is {@code null} for instances that do not support entity columns.
-     *
-     * @see RecordStorage(boolean)
+     * The class of entities stored in this {@code RecordStorage}.
      */
-    private final @MonotonicNonNull EntityColumnCache entityColumnCache;
+    private final EntityClass<?> entityClass;
 
     /**
-     * Creates an instance of {@code RecordStorage} which does not support
-     * the {@link EntityColumnCache}.
-     *
-     * <p>This creation method should only be used for the {@code RecordStorage} descendants,
-     * that are containers for another {@code RecordStorage} instance, which actually supports
-     * {@link EntityColumnCache}, for example, a {@link ProjectionStorage}.
-     *
-     * <p>Instances created by this constructor should override
-     * {@link RecordStorage#entityColumnCache()} method.
+     * Creates an instance of {@code RecordStorage}.
      */
-    protected RecordStorage(boolean multitenant) {
+    protected RecordStorage(Class<? extends Entity<?, ?>> entityClass, boolean multitenant) {
         super(multitenant);
-        this.entityColumnCache = null;
-    }
-
-    /**
-     * Creates an instance of {@code RecordStorage} which supports the {@link EntityColumnCache}.
-     */
-    protected RecordStorage(boolean multitenant, Class<? extends Entity<?, ?>> entityClass) {
-        super(multitenant);
-        this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);
+        this.entityClass = asEntityClass(entityClass);
     }
 
     /**
@@ -143,7 +122,8 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Writes a record and its {@linkplain EntityColumn entity columns} into the storage.
+     * Writes a record and its {@linkplain io.spine.server.entity.storage.Column columns} into the
+     * storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
@@ -157,7 +137,7 @@ public abstract class RecordStorage<I>
      */
     public void write(I id, EntityRecordWithColumns record) {
         checkNotNull(id);
-        checkArgument(record.getRecord()
+        checkArgument(record.record()
                             .hasState(), "Record does not have state field.");
         checkNotClosed();
 
@@ -166,7 +146,8 @@ public abstract class RecordStorage<I>
 
     @Override
     public void write(I id, EntityRecord record) {
-        EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
+        EntityRecordWithColumns recordWithStorageFields =
+                EntityRecordWithColumns.of(record);
         write(id, recordWithStorageFields);
     }
 
@@ -205,10 +186,7 @@ public abstract class RecordStorage<I>
                                          .build();
             write(id, updated);
         } else {
-            // The AggregateStateId is a special case which is not handled by the Identifier class.
-            String idStr = id instanceof AggregateStateId
-                           ? id.toString()
-                           : Identifier.toString(id);
+            String idStr = Identifier.toString(id);
             throw newIllegalStateException("Unable to load record for entity with ID: %s", idStr);
         }
     }
@@ -295,56 +273,40 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Returns a {@code Collection} of {@linkplain Column columns} of the {@link Entity} managed
-     * by this storage.
+     * Obtains a list of columns of the managed {@link Entity}.
      *
-     * @return a {@code Collection} of managed {@link Entity} columns
-     * @see EntityColumn
+     * @see io.spine.server.entity.storage.Column
+     * @see io.spine.code.proto.ColumnOption
      */
-    @Internal
-    public Collection<EntityColumn> entityColumns() {
-        return entityColumnCache().getColumns();
+    protected final ImmutableList<Column> columnList() {
+        return columns().columnList();
     }
 
     /**
-     * Returns a {@code Map} of {@linkplain EntityColumn columns} corresponded to the
-     * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed
-     * by this storage.
+     * Returns the columns of the managed {@link Entity}.
+     *
+     * @see io.spine.server.entity.storage.Column
+     * @see io.spine.code.proto.ColumnOption
+     */
+    @Internal
+    public Columns columns() {
+        return entityClass.columns();
+    }
+
+    /**
+     * Returns a {@code Map} of {@linkplain io.spine.server.entity.storage.Column columns}
+     * corresponded to the {@link LifecycleFlagField lifecycle storage fields} of the
+     * {@link Entity} class managed by this storage.
      *
      * @return a {@code Map} of managed {@link Entity} lifecycle columns
      * @throws IllegalArgumentException
      *         if a lifecycle field is not present
      *         in the managed {@link Entity} class
-     * @see EntityColumn
      * @see LifecycleFlagField
      */
     @Internal
-    public Map<String, EntityColumn> entityLifecycleColumns() {
-        Map<String, EntityColumn> lifecycleColumns = new HashMap<>();
-        for (LifecycleFlagField field : LifecycleFlagField.values()) {
-            String name = field.name();
-            EntityColumn column = entityColumnCache().findColumn(name);
-            lifecycleColumns.put(name, column);
-        }
-        return lifecycleColumns;
-    }
-
-    /**
-     * Obtains the entity column cache.
-     *
-     * @throws IllegalStateException
-     *         if the storage {@linkplain RecordStorage#RecordStorage(boolean) does not support}
-     *         the cache
-     */
-    @Internal
-    public EntityColumnCache entityColumnCache() {
-        if (entityColumnCache == null) {
-            throw newIllegalStateException(
-                    "Entity column cache is not initialized for the storage %s.",
-                    this
-            );
-        }
-        return entityColumnCache;
+    public final ImmutableMap<ColumnName, Column> lifecycleColumns() {
+        return columns().lifecycleColumns();
     }
 
     /*
@@ -397,7 +359,8 @@ public abstract class RecordStorage<I>
     readAllRecords(EntityQuery<I> query, ResponseFormat format);
 
     /**
-     * Writes a record and the associated {@link EntityColumn} values into the storage.
+     * Writes a record and the associated {@linkplain io.spine.server.entity.storage.Column column}
+     * values into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *

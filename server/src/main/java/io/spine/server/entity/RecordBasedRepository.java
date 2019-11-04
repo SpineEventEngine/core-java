@@ -31,9 +31,6 @@ import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
-import io.spine.server.BoundedContext;
-import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -100,21 +97,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         RecordStorage<I> storage = (RecordStorage<I>) storage();
         return storage;
-    }
-
-    /**
-     * Initializes the repository by caching {@link Column} definitions of
-     * the {@link Entity} class managed by this repository.
-     *
-     * @param context
-     *         the Bounded Context of this repository
-     */
-    @Override
-    @OverridingMethodsMustInvokeSuper
-    public void registerWith(BoundedContext context) {
-        checkNotNull(context);
-        super.registerWith(context);
-        cacheEntityColumns();
     }
 
     @OverridingMethodsMustInvokeSuper
@@ -365,34 +347,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                                      .convert(record);
         checkNotNull(result);
         return result;
-    }
-
-    /**
-     * Retrieves the {@link EntityColumnCache} used by this repository's
-     * {@linkplain RecordStorage storage}.
-     *
-     * @return the entity column cache from the storage
-     * @throws IllegalStateException
-     *         if the {@link EntityColumnCache} is not supported by this repository's storage
-     */
-    private EntityColumnCache columnCache() {
-        return recordStorage().entityColumnCache();
-    }
-
-    /**
-     * Caches {@link Column} definitions of the {@link Entity} class managed by this repository.
-     *
-     * <p>The process of caching columns also acts as a check of {@link Column} definitions,
-     * because {@linkplain Column columns} with incorrect definitions cannot be retrieved and
-     * stored.
-     *
-     * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
-     *
-     * @throws IllegalStateException
-     *         if the entity column definitions are incorrect
-     */
-    private void cacheEntityColumns() {
-        columnCache().ensureColumnsCached();
     }
 
     /**

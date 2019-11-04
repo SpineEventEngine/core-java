@@ -20,12 +20,14 @@
 
 package io.spine.server.entity.storage.given;
 
-import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractEntity;
+import io.spine.server.projection.Projection;
+import io.spine.test.storage.Task;
+import io.spine.test.storage.TaskId;
 
-public class EntityWithoutCustomColumns extends AbstractEntity<String, Any> {
+public final class EntityWithoutCustomColumns
+        extends Projection<TaskId, Task, Task.Builder> {
 
-    public EntityWithoutCustomColumns(String id) {
+    public EntityWithoutCustomColumns(TaskId id) {
         super(id);
     }
 }

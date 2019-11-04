@@ -21,7 +21,10 @@
 package io.spine.server.entity.storage.given;
 
 import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.test.storage.Project;
 
-public class TestEntity extends AbstractEntity<String, Project> {
+public class TestEntity
+        extends AbstractEntity<String, Project>
+        implements HasLifecycleColumns<String, Project> {
 }

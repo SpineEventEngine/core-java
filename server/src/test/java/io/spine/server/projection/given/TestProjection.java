@@ -26,12 +26,11 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.server.entity.TestEntityWithStringColumn;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
+import io.spine.test.projection.ProjectWithColumns;
 import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
@@ -43,7 +42,7 @@ import java.util.Set;
 /** The projection stub used in tests. */
 public class TestProjection
         extends Projection<ProjectId, Project, Project.Builder>
-        implements TestEntityWithStringColumn<ProjectId, Project> {
+        implements ProjectWithColumns {
 
     /** The event message history we store for inspecting in delivery tests. */
     private static final Multimap<ProjectId, Message> eventMessagesDelivered =
@@ -131,7 +130,7 @@ public class TestProjection
         setDeleted(true);
     }
 
-    @Column
+    @Override
     public String getName() {
         return state().getName();
     }

@@ -31,4 +31,9 @@ package io.spine.server.storage;
  * to get a valid field name.
  */
 public interface StorageField {
+
+    /**
+     * The field name.
+     */
+    String name();
 }

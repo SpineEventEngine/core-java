@@ -28,6 +28,7 @@ import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
@@ -57,7 +58,8 @@ public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M>>
         extends TransactionalEntity<I, M, B>
-        implements EventPlayer, EventSubscriber, HasVersionColumn<I, M> {
+        implements EventPlayer, EventSubscriber,
+                   HasVersionColumn<I, M>, HasLifecycleColumns<I, M> {
 
     /**
      * Creates a new instance.

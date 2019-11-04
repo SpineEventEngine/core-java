@@ -21,62 +21,24 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.storage.LifecycleFlagField;
 
-import java.util.Collection;
-import java.util.stream.Stream;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.storage.VersionField.version;
 
 /**
  * Utilities for testing columns.
  */
 final class ColumnTests {
 
-    private static final ImmutableSet<String> lifecycleColumns =
-            Stream.of(LifecycleFlagField.values())
-                  .map(Enum::name)
-                  .collect(toImmutableSet());
-
-    static final ImmutableSet<String> defaultColumns = lifecycleColumns;
+    static final ImmutableSet<ColumnName> defaultColumns =
+            ImmutableSet.of(
+                    ColumnName.of(archived),
+                    ColumnName.of(deleted),
+                    ColumnName.of(version)
+            );
 
     /** Prevent instantiation of this utility class. */
     private ColumnTests() {
-    }
-
-    /**
-     * Verifies that a column collection contains the specified columns.
-     */
-    static void assertContainsColumns(Collection<EntityColumn> actual, String... columnNames) {
-        assertTrue(containsColumns(actual, columnNames));
-    }
-
-    /**
-     * Verifies that a column collection does not contain the specified columns.
-     */
-    static void assertNotContainsColumns(Collection<EntityColumn> actual, String... columnNames) {
-        assertFalse(containsColumns(actual, columnNames));
-    }
-
-    /**
-     * Checks whether a given column collection contains the specified columns.
-     *
-     * <p>The collection can be safely stored in {@link ImmutableSet} as it will never contain
-     * repeated column names.
-     */
-    private static boolean containsColumns(Collection<EntityColumn> actual, String... columnNames) {
-        checkNotNull(actual);
-        checkNotNull(columnNames);
-
-        ImmutableSet<String> expectedColumns = ImmutableSet.copyOf(columnNames);
-        ImmutableSet<String> actualColumns = actual
-                .stream()
-                .map(EntityColumn::name)
-                .collect(toImmutableSet());
-        boolean result = expectedColumns.equals(actualColumns);
-        return result;
     }
 }

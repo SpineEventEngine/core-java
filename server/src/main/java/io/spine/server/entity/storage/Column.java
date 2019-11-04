@@ -20,40 +20,30 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Experimental;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import com.google.errorprone.annotations.Immutable;
 
 /**
- * An annotation which is used to mark getters for {@linkplain EntityColumn entity columns}.
+ * A column of the {@linkplain io.spine.server.entity.Entity entity}.
  *
- * <p>The properties of the annotation affect how the column is seen by the storage and clients.
+ * <p>Columns are the entity state fields which are stored separately from the entity record and
+ * can be used as criteria for query {@linkplain io.spine.client.Filter filters}.
  *
- * <p>The annotation will have effect only if it's applied to a {@code public} instance getter,
- * meaning a method without parameters and with {@code get-} prefix. The {@code is-} prefix is
- * supported for primitive {@code boolean} or boxed {@code Boolean} columns.
- *
- * <p>A {@link #name()} allows to specify a custom column name to be persisted in a {@code Storage}.
- *
- * <p>If there are repeated column names within an {@code Entity},
- * the exception will be raised when a repository serving the entity is added to
- * its {@code BoundedContext}.
- *
- * <p>Please note this feature is experimental.
+ * <p>The {@linkplain #name() name} of the column represents the value which needs to be specified
+ * to the filter. The {@linkplain #type() type} is an expected type of the filter value.
  */
-@Target(METHOD)
-@Retention(RUNTIME)
-@Experimental
-public @interface Column {
+@Immutable
+public interface Column {
 
     /**
-     * The custom {@linkplain EntityColumn#name() name} of the column.
-     *
-     * <p>Defaults to the name extracted from the getter which is used for querying.
+     * The name of the column in the storage.
      */
-    String name() default "";
+    ColumnName name();
+
+    /**
+     * The type of the column.
+     *
+     * <p>As user-defined columns are proto-based, there is a fixed set of possible column types.
+     * See {@link ColumnMapping}.
+     */
+    Class<?> type();
 }

@@ -25,7 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityColumnCache;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordReadRequest;
@@ -47,14 +47,15 @@ import java.util.Optional;
 @SPI
 public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
-    protected ProjectionStorage(boolean multitenant) {
-        super(multitenant);
+    protected ProjectionStorage(Class<? extends Projection<?, ?, ?>> projectionClass,
+                                boolean multitenant) {
+        super(projectionClass, multitenant);
     }
 
     @Internal
     @Override
-    public final EntityColumnCache entityColumnCache() {
-        return recordStorage().entityColumnCache();
+    public Columns columns() {
+        return recordStorage().columns();
     }
 
     @Override

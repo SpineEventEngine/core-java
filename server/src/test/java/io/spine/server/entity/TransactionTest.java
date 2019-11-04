@@ -252,14 +252,14 @@ public abstract class TransactionTest<I,
     @DisplayName("not propagate changes to entity on rollback")
     void notPropagateChangesOnRollback() {
         E entity = createEntity();
+        S stateBeforeRollback = entity.state();
+        Version versionBeforeRollback = entity.version();
 
         Transaction<I, E, S, B> tx = createTx(entity);
 
         Event event = withMessage(createEventMessage());
         DispatchOutcome outcome = applyEvent(tx, event);
         assertTrue(outcome.hasSuccess());
-        S stateBeforeRollback = entity.state();
-        Version versionBeforeRollback = entity.version();
         RuntimeException exception = new RuntimeException("that triggers rollback");
         tx.rollback(fromThrowable(exception));
 

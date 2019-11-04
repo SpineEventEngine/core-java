@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -172,7 +173,8 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     void acceptRecordsWithEmptyColumns() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
-        EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
+        EntityRecordWithColumns recordWithStorageFields =
+                EntityRecordWithColumns.of(record, Collections.emptyMap());
         assertFalse(recordWithStorageFields.hasColumns());
         RecordStorage<I> storage = storage();
 
@@ -264,7 +266,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 initial.values()
                        .stream()
                        .map(recordWithColumns -> recordWithColumns != null
-                                                 ? recordWithColumns.getRecord()
+                                                 ? recordWithColumns.record()
                                                  : null)
                        .collect(toList());
         assertThat(actual).containsExactlyElementsIn(expected);
