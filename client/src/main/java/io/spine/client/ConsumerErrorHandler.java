@@ -33,6 +33,7 @@ import static io.spine.client.DelegatingConsumer.toRealConsumer;
  *
  * @param <M>
  *         the type of messages delivered to consumers
+ * @see SubscribingRequest#onConsumingError(ConsumerErrorHandler)
  */
 @FunctionalInterface
 public interface ConsumerErrorHandler<M extends Message>

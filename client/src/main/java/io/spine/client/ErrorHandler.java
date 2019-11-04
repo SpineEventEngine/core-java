@@ -28,6 +28,8 @@ import java.util.function.Consumer;
 
 /**
  * Functional interface for error handlers.
+ *
+ * @see SubscribingRequest#onStreamingError(ErrorHandler)
  */
 @FunctionalInterface
 public interface ErrorHandler extends Consumer<Throwable> {
