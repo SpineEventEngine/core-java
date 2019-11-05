@@ -30,7 +30,7 @@ dependencies {
     testCompileOnly deps.build.autoService.annotations
 
     testImplementation (
-            deps.grpc.grpcNetty,
+            deps.grpc.grpcNettyShaded,
             "io.spine:spine-testlib:$spineBaseVersion",
             project(path: ":core", configuration: 'testArtifacts'),
             project(path: ":client", configuration: 'testArtifacts'),
