@@ -28,6 +28,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract base for Client API tests.
@@ -66,6 +67,9 @@ abstract class AbstractClientTest {
         server.start();
 
         client = Client.inProcess(serverName)
+                       // When shutting down, terminate the client immediately since all
+                       // the requests made in tests are going to be complete by that time.
+                       .shutdownTimout(0, TimeUnit.SECONDS)
                        .build();
     }
 
