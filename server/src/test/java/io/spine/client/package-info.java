@@ -17,22 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    compile project(':core')
 
-    api deps.grpc.grpcStub
+/**
+ * This package contains of high-level {@link io.spine.client.Client} API. For the tests of
+ * low-level client API based on {@link io.spine.client.ActorRequestFactory} please see the same
+ * package in the {@link ":client"} module.
+ *
+ * <p>High-level Client API tests are placed under the {@code ":server"} module because they
+ * are based on client-server communications that in turn require backend classes
+ * like {@link io.spine.server.Server} or {@link io.spine.server.BoundedContextBuilder}.
+ * The {@code ":server"} module itself also depends on {@code ":client"}. Placing these client
+ * tests here avoids dependency from {@code "testImplementation"} of {@code ":client"}
+ * to {@code ":server"}, which is not circular but in some cases is not handled by Gradle.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.client;
 
-    implementation (
-            deps.grpc.grpcProtobuf,
-            deps.grpc.grpcCore
-    )
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    testImplementation(
-            "io.spine:spine-testlib:$spineBaseVersion",
-            project(':testutil-client'),
-            project(path: ':core', configuration: 'testArtifacts'),
-    )
-}
-
-apply from: deps.scripts.testArtifacts
-apply from: deps.scripts.publishProto
+import javax.annotation.ParametersAreNonnullByDefault;
