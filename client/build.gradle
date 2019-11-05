@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 dependencies {
-    compile project(path: ':core')
+    compile project(':core')
 
     api deps.grpc.grpcStub
 
@@ -29,9 +29,9 @@ dependencies {
 
     testImplementation(
             "io.spine:spine-testlib:$spineBaseVersion",
-            project(path: ":testutil-client"),
-            project(path: ":core", configuration: 'testArtifacts'),
-            project(path: ":server"), // for testing io.spine.client
+            project(':testutil-client'),
+            project(path: ':core', configuration: 'testArtifacts'),
+            project(':server'), // for testing io.spine.client
             deps.grpc.grpcNettyShaded
     )
 }
