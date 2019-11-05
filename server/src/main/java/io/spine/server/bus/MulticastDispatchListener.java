@@ -18,15 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery.given;
+package io.spine.server.bus;
+
+import io.spine.annotation.Internal;
+import io.spine.core.SignalId;
 
 /**
- * A common interface for signals used in {@link Delivery} tests.
+ * A listener of dispatching operations performed in {@link MulticastBus}.
  */
-public interface CalculatorSignal {
+@Internal
+public interface MulticastDispatchListener {
 
-    @SuppressWarnings("override")   // Overrides are located in the Protobuf-generated code.
-    String getCalculatorId();
+    /**
+     * Invoked whenever a dispatching of the signal with the given ID has started.
+     *
+     * @param signal
+     *         identifier of the dispatched signal
+     */
+    void onStarted(SignalId signal);
 
-    int getValue();
+    /**
+     * Invoked when the signal with the given ID has been dispatched to all dispatchers.
+     *
+     * @param signal
+     *         identifier of the dispatched signal
+     */
+    void onCompleted(SignalId signal);
 }

@@ -91,6 +91,7 @@ import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.synchronizedSet;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -166,9 +167,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                                      String name) {
         super();
         this.commands = new CommandCollector();
-        this.postedCommands = new HashSet<>();
+        this.postedCommands = synchronizedSet(new HashSet<>());
         this.events = new EventCollector();
-        this.postedEvents = new HashSet<>();
+        this.postedEvents = synchronizedSet(new HashSet<>());
         BoundedContextBuilder builder =
                 multitenant
                 ? BoundedContext.multitenant(name)

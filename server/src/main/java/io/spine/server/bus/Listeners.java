@@ -22,7 +22,7 @@ package io.spine.server.bus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
 import java.util.function.Consumer;
 
@@ -31,9 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Manages consumption of a message posted to the bus by its listeners.
  *
- * @param <E> the type of the {@link MessageEnvelope} posted by the bus
+ * @param <E> the type of the {@link SignalEnvelope} posted by the bus
  */
-final class Listeners<E extends MessageEnvelope<?, ?, ?>> implements Consumer<E> {
+final class Listeners<E extends SignalEnvelope<?, ?, ?>> implements Consumer<E> {
 
     private final ImmutableSet<Listener<E>> listeners;
 

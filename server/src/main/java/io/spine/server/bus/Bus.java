@@ -27,8 +27,12 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
+import io.spine.core.Signal;
+import io.spine.core.SignalId;
+import io.spine.logging.Logging;
 import io.spine.server.Closeable;
 import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.LinkedHashMap;
@@ -39,6 +43,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.singleton;
 
@@ -50,15 +55,13 @@ import static java.util.Collections.singleton;
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
  */
+@SuppressWarnings("ClassWithTooManyMethods")    // It's OK.
 @Internal
-public abstract class Bus<T extends Message,
-                          E extends MessageEnvelope<?, T, ?>,
+public abstract class Bus<T extends Signal<?, ?, ?>,
+                          E extends SignalEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
                           D extends MessageDispatcher<C, E>>
-        implements Closeable {
-
-    /** A queue of envelopes to post. */
-    private final DispatchingQueue<E> queue;
+        implements Closeable, Logging {
 
     /** Dispatchers of messages by their class. */
     private final DispatcherRegistry<C, E, D> registry;
@@ -72,7 +75,6 @@ public abstract class Bus<T extends Message,
         super();
         this.listeners = new Listeners<>(builder);
         this.filterChain = memoize(() -> this.createFilterChain(builder.filters()));
-        this.queue = new DispatchingQueue<>(this::dispatch);
         this.registry = builder.newRegistry();
     }
 
@@ -311,7 +313,7 @@ public abstract class Bus<T extends Message,
      *
      * <p>This method assumes that the given message has passed the filtering.
      *
-     * @see #post(Message, StreamObserver) for the public API
+     * @see #post(Signal, StreamObserver) for the public API
      */
     protected abstract void dispatch(E envelope);
 
@@ -320,12 +322,59 @@ public abstract class Bus<T extends Message,
      *
      * @param envelopes the envelopes to post
      * @param observer  the observer to be notified of the operation result
-     * @see #dispatch(MessageEnvelope)
+     * @see #dispatch(SignalEnvelope)
      */
+    @SuppressWarnings("ProhibitedExceptionThrown") // Rethrow a caught exception.
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
-        for (E message : envelopes) {
-            queue.add(message, observer);
+        for (E envelope : envelopes) {
+            SignalId signalId = envelope.id();
+            observer.onNext(acknowledge(signalId));
+            onDispatchingStarted(signalId);
+            try {
+                dispatch(envelope);
+            } catch (Throwable t) {
+                _error().withCause(t)
+                        .log("Error when dispatching %s[ID: %s].",
+                             envelope.messageClass(),
+                             signalId);
+                throw t;
+            } finally {
+                onDispatched(signalId);
+            }
         }
+    }
+
+    /**
+     * Called before the dispatching of the signal with the passed ID is started.
+     *
+     * <p>Descendants may override this method and define their own logic on handling the
+     * dispatching lifecycle.
+     *
+     * @param signal
+     *         the ID of the signal being dispatched
+     * @see #onDispatched(SignalId)
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass")      // Sets a default behavior.
+    protected void onDispatchingStarted(SignalId signal) {
+        // Do nothing.
+    }
+
+    /**
+     * Called after the dispatching of the signal to all of the target dispatchers
+     * has been completed.
+     *
+     * <p>This method is called even if the dispatching of the message has failed.
+     *
+     * <p>Descendants may override this method and define their own logic on handling the
+     * dispatching lifecycle.
+     *
+     * @param signal
+     *         the ID of the dispatched signal
+     * @see #onDispatchingStarted(SignalId)
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass")      // Sets a default behavior.
+    protected void onDispatched(SignalId signal) {
+        // Do nothing.
     }
 
     /**

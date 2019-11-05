@@ -26,9 +26,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.Signal;
 import io.spine.server.BoundedContext;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -49,15 +50,15 @@ import static java.util.Optional.ofNullable;
 /**
  * The implementation base for the bus builders.
  *
- * @param <E> the type of {@link MessageEnvelope} posted by the bus
- * @param <T> the type of {@link Message} posted by the bus
+ * @param <E> the type of {@link SignalEnvelope} posted by the bus
+ * @param <T> the type of {@link Signal} posted by the bus
  * @param <B> the own type of the builder
  */
 @Internal
 @CanIgnoreReturnValue
 public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
-                                 T extends Message,
-                                 E extends MessageEnvelope<?, T, ?>,
+                                 T extends Signal<?, ?, ?>,
+                                 E extends SignalEnvelope<?, T, ?>,
                                  C extends MessageClass<? extends Message>,
                                  D extends MessageDispatcher<C, E>> {
 

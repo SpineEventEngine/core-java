@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static com.google.common.collect.Multimaps.synchronizedSortedSetMultimap;
 import static io.spine.util.Exceptions.unsupported;
 import static io.spine.validate.Validate.isDefault;
 
@@ -51,10 +52,11 @@ import static io.spine.validate.Validate.isDefault;
  */
 final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord> {
 
-    private final Multimap<I, AggregateEventRecord> records = TreeMultimap.create(
-            new AggregateStorageKeyComparator<>(), // key comparator
-            new AggregateStorageRecordReverseComparator() // value comparator
-    );
+    private final Multimap<I, AggregateEventRecord> records = synchronizedSortedSetMultimap(
+            TreeMultimap.create(
+                    new AggregateStorageKeyComparator<>(), // key comparator
+                    new AggregateStorageRecordReverseComparator() // value comparator
+            ));
 
     private final Map<I, LifecycleFlags> statuses = new HashMap<>();
 
@@ -82,7 +84,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      *
      * @return immutable list
      */
-    List<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
+    synchronized List<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         I id = request.recordId();
         return ImmutableList.copyOf(records.get(id));
     }
@@ -98,11 +100,11 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     }
 
     @Override
-    public void put(I id, AggregateEventRecord record) {
+    public synchronized void put(I id, AggregateEventRecord record) {
         records.put(id, record);
     }
 
-    void putStatus(I id, LifecycleFlags status) {
+    synchronized void putStatus(I id, LifecycleFlags status) {
         statuses.put(id, status);
     }
 
@@ -136,7 +138,8 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      * Drops the records that are preceding the specified snapshot and match the specified
      * {@code Predicate}.
      */
-    private void truncate(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
+    private synchronized void
+    truncate(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
         ImmutableSet.copyOf(records.keySet())
                     .forEach(id -> truncate(id, snapshotIndex, predicate));
     }

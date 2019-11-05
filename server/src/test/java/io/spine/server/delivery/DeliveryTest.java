@@ -26,7 +26,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.util.Durations;
+import io.spine.base.Identifier;
 import io.spine.core.TenantId;
+import io.spine.core.UserId;
+import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
 import io.spine.server.delivery.given.CalculatorSignal;
@@ -36,15 +39,23 @@ import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.SignalMemoizer;
 import io.spine.server.delivery.given.FixedShardStrategy;
 import io.spine.server.delivery.given.MemoizingDeliveryMonitor;
+import io.spine.server.delivery.given.TaskAggregate;
+import io.spine.server.delivery.given.TaskAssignment;
+import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
+import io.spine.test.delivery.DCreateTask;
+import io.spine.test.delivery.DTaskView;
 import io.spine.test.delivery.NumberImported;
 import io.spine.test.delivery.NumberReacted;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.entity.EntitySubject;
+import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +72,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -73,6 +83,7 @@ import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.util.Collections.synchronizedList;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
@@ -210,9 +221,10 @@ class DeliveryTest {
         ImmutableSet<String> targets = manyTargets(7);
         new ThreadSimulator(1).runWith(targets);
         int totalMsgsInStats = deliveryStats.stream()
-                               .mapToInt(DeliveryStats::deliveredCount)
-                               .sum();
-        assertThat(totalMsgsInStats).isEqualTo(rawMessageMemoizer.messages().size());
+                                            .mapToInt(DeliveryStats::deliveredCount)
+                                            .sum();
+        assertThat(totalMsgsInStats).isEqualTo(rawMessageMemoizer.messages()
+                                                                 .size());
     }
 
     @Test
@@ -235,7 +247,7 @@ class DeliveryTest {
                          .run(() -> checkPresentStats(delivery, index));
 
         Optional<ShardProcessingSession> session =
-                workRegistry.pickUp(index,serverEnvironment.nodeId());
+                workRegistry.pickUp(index, serverEnvironment.nodeId());
         Truth8.assertThat(session)
               .isPresent();
 
@@ -355,6 +367,49 @@ class DeliveryTest {
         assertThat(simulator.callsToRepoStore(theTarget)).isLessThan(signalsDispatched);
 
         assertStages(monitor, pageSize);
+    }
+
+    @Test
+    @DisplayName("via multiple shards in multiple threads in an order of message emission")
+    void deliverMessagesInOrderOfEmission() throws InterruptedException {
+        changeShardCountTo(20);
+
+        SingleTenantBlackBoxContext context =
+                BlackBoxBoundedContext.singleTenant()
+                                      .with(DefaultRepository.of(TaskAggregate.class))
+                                      .with(new TaskAssignment.Repository())
+                                      .with(new TaskView.Repository());
+        List<DCreateTask> commands = generateCommands(200);
+        ExecutorService service = newFixedThreadPool(20);
+        service.invokeAll(commands.stream()
+                                  .map(c -> (Callable<Object>) () -> context.receivesCommand(c))
+                                  .collect(toList()));
+        List<Runnable> leftovers = service.shutdownNow();
+        assertThat(leftovers).isEmpty();
+
+        for (DCreateTask command : commands) {
+            String taskId = command.getId();
+            EntitySubject subject = context.assertEntity(TaskView.class, taskId);
+            subject.exists();
+
+            TaskView actualView = (TaskView) subject.actual();
+            DTaskView state = actualView.state();
+            UserId actualAssignee = state.getAssignee();
+
+            assertThat(state.getId()).isEqualTo(taskId);
+            assertThat(Validate.isDefault(actualAssignee)).isFalse();
+        }
+    }
+
+    private static List<DCreateTask> generateCommands(int howMany) {
+        List<DCreateTask> commands = new ArrayList<>();
+        for (int taskIndex = 0; taskIndex < howMany; taskIndex++) {
+            String taskId = Identifier.newUuid();
+            commands.add(DCreateTask.newBuilder()
+                                    .setId(taskIndex + "--" + taskId)
+                                    .vBuild());
+        }
+        return commands;
     }
 
     private static void assertStages(MemoizingDeliveryMonitor monitor, int pageSize) {
@@ -576,13 +631,13 @@ class DeliveryTest {
         }
 
         private void runAsync(Collection<Callable<Object>> signals) {
-            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+            ExecutorService executorService = newFixedThreadPool(threadCount);
             try {
                 executorService.invokeAll(signals);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } finally {
-                executorService.shutdown();
+                executorService.shutdownNow();
             }
         }
 

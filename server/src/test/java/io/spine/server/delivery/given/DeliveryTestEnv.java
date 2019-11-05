@@ -156,12 +156,10 @@ public class DeliveryTestEnv {
             } else {
                 packed = update.getEvent()
                                .getMessage();
-
             }
             CalculatorSignal msg =
                     (CalculatorSignal) AnyPacker.unpack(packed);
             signals.put(msg.getCalculatorId(), msg);
-
         }
 
         public ImmutableSet<CalculatorSignal> messagesBy(String id) {

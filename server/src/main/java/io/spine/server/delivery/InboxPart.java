@@ -29,6 +29,7 @@ import io.spine.type.TypeUrl;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -101,7 +102,8 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setShardIndex(shardIndex)
                 .setLabel(label)
                 .setStatus(determineStatus(envelope))
-                .setWhenReceived(Time.currentTime());
+                .setWhenReceived(Time.currentTime())
+                .setVersion(Version.INSTANCE.getNextValue());
         setRecordPayload(envelope, builder);
         InboxMessage message = builder.vBuild();
 
@@ -180,6 +182,18 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                                       .getValue();
             boolean hasDuplicate = rawIds.contains(currentId);
             return hasDuplicate;
+        }
+    }
+
+    private enum Version {
+
+        INSTANCE;
+
+        public static final int MAX_VERSION = 10_000;
+        private final AtomicInteger counter = new AtomicInteger();
+
+        public synchronized int getNextValue() {
+            return counter.updateAndGet(n -> (n >= MAX_VERSION) ? 1 : n + 1);
         }
     }
 }

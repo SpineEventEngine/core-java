@@ -21,7 +21,6 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.server.delivery.Inbox;
@@ -30,11 +29,14 @@ import io.spine.server.delivery.InboxMessageId;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedSet;
+
+import static java.util.Collections.synchronizedMap;
 
 /**
  * The memory-based storage for {@link io.spine.server.delivery.InboxMessage InboxMessage}s
@@ -42,7 +44,7 @@ import java.util.SortedSet;
  */
 final class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMessage> {
 
-    private final Map<InboxMessageId, InboxMessage> records = Maps.newConcurrentMap();
+    private final Map<InboxMessageId, InboxMessage> records = synchronizedMap(new HashMap<>());
 
     @Override
     public Iterator<InboxMessageId> index() {
@@ -103,8 +105,11 @@ final class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMes
             if (timeComparison != 0) {
                 return timeComparison;
             }
-            int hashCodeComparison = Integer.compare(first.hashCode(), second.hashCode());
-            return hashCodeComparison;
+            int versionComparison = Integer.compare(first.getVersion(), second.getVersion());
+            if(versionComparison == 0) {
+                throw new IllegalStateException("Inbox record versions must not be equal.");
+            }
+            return versionComparison;
         }
     }
 }
