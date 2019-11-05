@@ -23,36 +23,39 @@ package io.spine.client;
 import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 
-import java.util.function.BiConsumer;
+import static io.spine.client.DelegatingConsumer.toRealConsumer;
 
 /**
- * Functional interface for handlers of errors caused by consumers of messages.
+ * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() server} level
+ * of the passed logger.
  *
  * @param <M>
- *         the type of messages delivered to consumers
- * @see SubscribingRequest#onConsumingError(ConsumerErrorHandler)
+ *         the type of the messages delivered to the consumer
  */
-@FunctionalInterface
-public interface ConsumerErrorHandler<M extends Message>
-        extends BiConsumer<MessageConsumer<M, ?>, Throwable> {
+final class LoggingConsumerErrorHandler<M extends Message>
+        extends LoggingHandler
+        implements ConsumerErrorHandler<M> {
 
     /**
-     * Obtains the handler which logs the fact of the error using
-     * the {@linkplain FluentLogger#atSevere() server} level of the passed logger.
+     * Creates new instance of the logging handler.
      *
      * @param logger
      *         the instance of the logger to use for reporting the error
      * @param messageFormat
      *         the formatting message where the first parameter is the consumer which caused
      *         the error, and the second parameter is the type of the message which caused the error
-     * @param <M>
-     *         the type of the messages delivered to the consumer
-     * @return the logging error handler
      */
-    static <M extends Message>
-    ConsumerErrorHandler<M> logError(FluentLogger logger,
-                                     String messageFormat,
-                                     Class<? extends Message> type) {
-        return new LoggingConsumerErrorHandler<>(logger, messageFormat, type);
+    LoggingConsumerErrorHandler(FluentLogger logger,
+                                String messageFormat,
+                                Class<? extends Message> type) {
+        super(logger, messageFormat, type);
+    }
+
+    @Override
+    public void accept(MessageConsumer<M, ?> consumer, Throwable throwable) {
+        Object consumerToReport = toRealConsumer(consumer);
+        logger().atSevere()
+              .withCause(throwable)
+              .log(messageFormat(), consumerToReport, type());
     }
 }

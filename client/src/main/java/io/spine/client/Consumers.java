@@ -21,6 +21,7 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -76,13 +77,15 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
         this.streamingErrorHandler = ifNullUse(
                 builder.streamingErrorHandler,
                 () -> ErrorHandler.logError(
-                        this.logger(), "Error receiving a message of the type `%s`.")
+                        this.logger(), "Error receiving a message of the type `%s`.",
+                        messageType())
         );
         this.consumingErrorHandler = ifNullUse(
                 builder.consumingErrorHandler,
                 () -> ConsumerErrorHandler.logError(
                         this.logger(),
-                        "The consumer `%s` could not handle the message of the type `%s`.")
+                        "The consumer `%s` could not handle the message of the type `%s`.",
+                        messageType())
         );
     }
 
@@ -91,6 +94,16 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
         return errorHandler == null
                ? defaultHandler.get()
                : errorHandler;
+    }
+
+    @SuppressWarnings({
+            "SerializableNonStaticInnerClassWithoutSerialVersionUID",
+            "SerializableInnerClassWithNonSerializableOuterClass" /* for TypeToken work */,
+            "unchecked" /* The returned type is a class of messages, which is protected
+                           by generic params of this class. */})
+    final Class<? extends Message> messageType() {
+        Class<? super M> result = new TypeToken<M>(){}.getRawType();
+        return (Class<? extends Message>) result;
     }
 
     /**

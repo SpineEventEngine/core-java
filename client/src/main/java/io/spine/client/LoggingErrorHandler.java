@@ -23,31 +23,25 @@ package io.spine.client;
 import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 
-import java.util.function.Consumer;
-
 /**
- * Functional interface for error handlers.
+ * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() server} level
+ * of the passed logger.
  *
- * @see SubscribingRequest#onStreamingError(ErrorHandler)
+ * @param <M>
+ *         the type of the messages delivered to the consumer
  */
-@FunctionalInterface
-public interface ErrorHandler extends Consumer<Throwable> {
+final class LoggingErrorHandler<M extends Message>
+        extends LoggingHandler
+        implements ErrorHandler {
 
-    /**
-     * Obtains the handler which logs the fact of the error using
-     * the {@linkplain FluentLogger#atSevere() server} level of the passed logger.
-     *
-     * @param logger
-     *         the instance of the logger to use for reporting the error
-     * @param messageFormat
-     *         the formatting message where the sole parameter is the type of
-     *         the message which caused the error
-     * @param type
-     *         the type of messages delivered to the consumers
-     * @return the logging error handler
-     */
-    static ErrorHandler
-    logError(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
-        return new LoggingErrorHandler<>(logger, messageFormat, type);
+    LoggingErrorHandler(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
+        super(logger, messageFormat, type);
+    }
+
+    @Override
+    public void accept(Throwable throwable) {
+        logger().atSevere()
+              .withCause(throwable)
+              .log(messageFormat(), type());
     }
 }

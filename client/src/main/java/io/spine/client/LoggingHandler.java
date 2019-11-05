@@ -23,36 +23,36 @@ package io.spine.client;
 import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 
-import java.util.function.BiConsumer;
+abstract class LoggingHandler {
 
-/**
- * Functional interface for handlers of errors caused by consumers of messages.
- *
- * @param <M>
- *         the type of messages delivered to consumers
- * @see SubscribingRequest#onConsumingError(ConsumerErrorHandler)
- */
-@FunctionalInterface
-public interface ConsumerErrorHandler<M extends Message>
-        extends BiConsumer<MessageConsumer<M, ?>, Throwable> {
+    private final FluentLogger logger;
+    private final String messageFormat;
+    private final Class<? extends Message> type;
 
     /**
-     * Obtains the handler which logs the fact of the error using
-     * the {@linkplain FluentLogger#atSevere() server} level of the passed logger.
-     *
-     * @param logger
+     * Creates new instance of the logging handler.
+     *  @param logger
      *         the instance of the logger to use for reporting the error
      * @param messageFormat
      *         the formatting message where the first parameter is the consumer which caused
-     *         the error, and the second parameter is the type of the message which caused the error
-     * @param <M>
-     *         the type of the messages delivered to the consumer
-     * @return the logging error handler
+     * @param type
+     *         the type of messages obtained by a consumer
      */
-    static <M extends Message>
-    ConsumerErrorHandler<M> logError(FluentLogger logger,
-                                     String messageFormat,
-                                     Class<? extends Message> type) {
-        return new LoggingConsumerErrorHandler<>(logger, messageFormat, type);
+    LoggingHandler(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
+        this.logger = logger;
+        this.messageFormat = messageFormat;
+        this.type = type;
+    }
+
+    final FluentLogger logger() {
+        return logger;
+    }
+
+    final String messageFormat() {
+        return messageFormat;
+    }
+
+    final Class<? extends Message> type() {
+        return type;
     }
 }
