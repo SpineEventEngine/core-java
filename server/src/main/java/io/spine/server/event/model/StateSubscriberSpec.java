@@ -22,7 +22,7 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EntityVisibility;
@@ -46,16 +46,16 @@ import static io.spine.server.model.TypeMatcher.exactly;
 @Immutable
 enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(classImplementing(Message.class)) {
+    MESSAGE(classImplementing(EntityState.class)) {
         @Override
-        protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
+        protected Object[] arrangeArguments(EntityState entityState, EventEnvelope event) {
             return new Object[]{entityState};
         }
     },
 
-    MESSAGE_AND_EVENT_CONTEXT(classImplementing(Message.class), exactly(EventContext.class)) {
+    MESSAGE_AND_EVENT_CONTEXT(classImplementing(EntityState.class), exactly(EventContext.class)) {
         @Override
-        protected Object[] arrangeArguments(Message entityState, EventEnvelope event) {
+        protected Object[] arrangeArguments(EntityState entityState, EventEnvelope event) {
             return new Object[]{entityState, event.context()};
         }
     };
@@ -72,7 +72,8 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
             return false;
         }
         @SuppressWarnings("unchecked") // Checked above.
-        Class<? extends Message> firstParameter = (Class<? extends Message>) params.type(0);
+        Class<? extends EntityState> firstParameter =
+                (Class<? extends EntityState>) params.type(0);
         Optional<EntityVisibility> visibilityOption = EntityVisibility.of(firstParameter);
         if (!visibilityOption.isPresent()) {
             return false;
@@ -91,9 +92,9 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         checkArgument(eventMessage instanceof EntityStateChanged,
                       "Must be an `%s` event.", EntityStateChanged.class.getSimpleName());
         EntityStateChanged systemEvent = (EntityStateChanged) eventMessage;
-        Message entityState = unpack(systemEvent.getNewState());
+        EntityState entityState = (EntityState) unpack(systemEvent.getNewState());
         return arrangeArguments(entityState, event);
     }
 
-    protected abstract Object[] arrangeArguments(Message entityState, EventEnvelope event);
+    protected abstract Object[] arrangeArguments(EntityState entityState, EventEnvelope event);
 }

@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeUrl;
@@ -34,7 +34,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 public abstract class DefaultRecordBasedRepository<I,
                                                    E extends AbstractEntity<I, S>,
-                                                   S extends Message>
+                                                   S extends EntityState>
                 extends RecordBasedRepository<I, E, S> {
 
     @LazyInit

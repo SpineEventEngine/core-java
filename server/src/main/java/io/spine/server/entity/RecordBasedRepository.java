@@ -27,6 +27,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
@@ -68,7 +69,7 @@ import static io.spine.validate.Validate.checkValid;
  * @param <S>
  *         the type of entity state messages
  */
-public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
+public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends EntityState>
         extends Repository<I, E> {
 
     /** Creates a new instance. */

@@ -20,7 +20,7 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.entity.Repository;
 
 import java.util.Optional;
@@ -48,7 +48,7 @@ public enum NoOpSystemClient implements SystemClient {
     }
 
     @Override
-    public Optional<Repository> systemRepositoryFor(Class<? extends Message> stateClass) {
+    public Optional<Repository> systemRepositoryFor(Class<? extends EntityState> stateClass) {
         return Optional.empty();
     }
 

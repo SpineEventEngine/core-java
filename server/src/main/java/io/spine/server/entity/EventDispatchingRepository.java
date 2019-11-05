@@ -23,7 +23,7 @@ package io.spine.server.entity;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class EventDispatchingRepository<I,
                                                  E extends AbstractEntity<I, S>,
-                                                 S extends Message>
+                                                 S extends EntityState>
         extends DefaultRecordBasedRepository<I, E, S>
         implements EventDispatcher {
 

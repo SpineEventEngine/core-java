@@ -19,7 +19,7 @@
  */
 package io.spine.server.entity.model;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.entity.Entity;
 import io.spine.server.type.EventClass;
 import io.spine.system.server.event.EntityStateChanged;
@@ -30,12 +30,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A class of an {@linkplain Entity#state() entity state}.
  */
-public final class StateClass extends MessageClass<Message> {
+public final class StateClass extends MessageClass<EntityState> {
 
     private static final long serialVersionUID = 0L;
     private static final EventClass UPDATE_EVENT = EventClass.from(EntityStateChanged.class);
 
-    private StateClass(Class<? extends Message> value) {
+    private StateClass(Class<? extends EntityState> value) {
         super(value);
     }
 
@@ -44,14 +44,14 @@ public final class StateClass extends MessageClass<Message> {
      */
     public static StateClass of(Entity entity) {
         checkNotNull(entity);
-        Message state = entity.state();
+        EntityState state = entity.state();
         return of(state);
     }
 
     /**
      * Creates an instance of {@code EntityStateClass} from the class of the given message.
      */
-    public static StateClass of(Message entityState) {
+    public static StateClass of(EntityState entityState) {
         checkNotNull(entityState);
         return from(entityState.getClass());
     }
@@ -59,7 +59,7 @@ public final class StateClass extends MessageClass<Message> {
     /**
      * Creates an instance of {@code EntityStateClass} from the given class.
      */
-    public static StateClass from(Class<? extends Message> value) {
+    public static StateClass from(Class<? extends EntityState> value) {
         checkNotNull(value);
         return new StateClass(value);
     }

@@ -21,7 +21,7 @@
 package io.spine.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.Repository;
 
@@ -61,7 +61,7 @@ final class DefaultSystemClient implements SystemClient {
     }
 
     @Override
-    public Optional<Repository> systemRepositoryFor(Class<? extends Message> stateClass) {
+    public Optional<Repository> systemRepositoryFor(Class<? extends EntityState> stateClass) {
         if (!context.hasEntitiesWithState(stateClass)) {
             return Optional.empty();
         }

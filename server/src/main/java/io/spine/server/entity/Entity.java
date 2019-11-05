@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
@@ -41,7 +41,7 @@ import io.spine.string.Stringifiers;
  * @param <S>
  *         the type of the entity state
  */
-public interface Entity<I, S extends Message> extends WithLifecycle {
+public interface Entity<I, S extends EntityState> extends WithLifecycle {
 
     /**
      * Obtains the identifier of the entity.

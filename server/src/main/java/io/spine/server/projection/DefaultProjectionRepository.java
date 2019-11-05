@@ -1,7 +1,7 @@
 package io.spine.server.projection;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.server.DefaultRepository;
 import io.spine.server.projection.model.ProjectionClass;
 
@@ -13,7 +13,7 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  * @see io.spine.server.DefaultRepository
  */
 @Internal
-public class DefaultProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
+public class DefaultProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState>
         extends ProjectionRepository<I, P, S>
         implements DefaultRepository {
 

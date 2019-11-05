@@ -20,8 +20,8 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -34,23 +34,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A transaction, within which {@linkplain Projection projection instances} are modified.
  *
- * @param <I> the type of projection IDs
- * @param <M> the type of projection state
- * @param <B> the type of a {@code ValidatingBuilder} for the projection state
+ * @param <I>
+ *         the type of projection IDs
+ * @param <S>
+ *         the type of projection state
+ * @param <B>
+ *         the type of a {@code ValidatingBuilder} for the projection state
  */
 @Internal
 public class ProjectionTransaction<I,
-                                   M extends Message,
-                                   B extends ValidatingBuilder<M>>
-        extends EventPlayingTransaction<I, Projection<I, M, B>, M, B> {
+                                   S extends EntityState,
+                                   B extends ValidatingBuilder<S>>
+        extends EventPlayingTransaction<I, Projection<I, S, B>, S, B> {
 
     @VisibleForTesting
-    ProjectionTransaction(Projection<I, M, B> projection) {
+    ProjectionTransaction(Projection<I, S, B> projection) {
         super(projection);
     }
 
     @VisibleForTesting
-    protected ProjectionTransaction(Projection<I, M, B> projection, M state, Version version) {
+    protected ProjectionTransaction(Projection<I, S, B> projection, S state, Version version) {
         super(projection, state, version);
     }
 
@@ -61,17 +64,17 @@ public class ProjectionTransaction<I,
      * @return the new transaction instance
      */
     protected static <I,
-                      M extends Message,
-                      B extends ValidatingBuilder<M>>
-    ProjectionTransaction<I, M, B> start(Projection<I, M, B> projection) {
+                      S extends EntityState,
+                      B extends ValidatingBuilder<S>>
+    ProjectionTransaction<I, S, B> start(Projection<I, S, B> projection) {
         checkNotNull(projection);
 
-        ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection);
+        ProjectionTransaction<I, S, B> tx = new ProjectionTransaction<>(projection);
         return tx;
     }
 
     @Override
-    protected DispatchOutcome dispatch(Projection<I, M, B> projection, EventEnvelope event) {
+    protected DispatchOutcome dispatch(Projection<I, S, B> projection, EventEnvelope event) {
         return projection.apply(event);
     }
 

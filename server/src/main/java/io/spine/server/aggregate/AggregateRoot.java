@@ -20,8 +20,8 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Experimental;
+import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
 
 import java.util.Optional;
@@ -64,14 +64,16 @@ public class AggregateRoot<I> {
     /**
      * Obtains a part state by its class.
      *
-     * @param partStateClass the class of the state of the part
-     * @param <S>            the type of the part state
+     * @param partStateClass
+     *         the class of the state of the part
+     * @param <S>
+     *         the type of the part state
      * @return the state of the part or a default state if the state was not found
-     * @throws IllegalStateException if a repository was not found,
-     *                               or the ID type of the part state does not match
-     *                               the ID type of this {@code AggregateRoot}
+     * @throws IllegalStateException
+     *         if a repository was not found, or the ID type of the part state does not match
+     *         the ID type of this {@code AggregateRoot}
      */
-    protected <S extends Message, A extends AggregatePart<I, S, ?, ?>>
+    protected <S extends EntityState, A extends AggregatePart<I, S, ?, ?>>
     S partState(Class<S> partStateClass) {
         AggregatePartRepository<I, A, ?> repo = repositoryOf(partStateClass);
         AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(id());
@@ -82,12 +84,12 @@ public class AggregateRoot<I> {
     /**
      * Obtains a repository for the passed state class.
      *
-     * @throws IllegalStateException if a repository was not found,
-     *                               or the repository ID type does not match
-     *                               the ID type of this {@code AggregateRoot}
+     * @throws IllegalStateException
+     *         if a repository was not found, or the repository ID type does not match the ID type
+     *         of this {@code AggregateRoot}
      */
     @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
-    private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
+    private <S extends EntityState, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> repositoryOf(Class<S> stateClass) {
         Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
         Optional<? extends AggregatePartRepository<?, ?, ?>> partRepository = boundedContext

@@ -20,8 +20,8 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.server.entity.Repository;
 
 import java.util.Optional;
@@ -45,7 +45,7 @@ public interface SystemClient {
     /**
      * Finds a system repository by the state class of entities.
      */
-    Optional<Repository> systemRepositoryFor(Class<? extends Message> stateClass);
+    Optional<Repository> systemRepositoryFor(Class<? extends EntityState> stateClass);
 
     /**
      * Closes the underlying system context.

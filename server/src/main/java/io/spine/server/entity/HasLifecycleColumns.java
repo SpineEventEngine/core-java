@@ -20,8 +20,8 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.server.entity.storage.SystemColumn;
 
 /**
@@ -31,7 +31,7 @@ import io.spine.server.entity.storage.SystemColumn;
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literals in annotation.
 @Internal
-public interface HasLifecycleColumns<I, S extends Message> extends Entity<I, S> {
+public interface HasLifecycleColumns<I, S extends EntityState> extends Entity<I, S> {
 
     /**
      * Obtains the value of {@code archived} flag.
