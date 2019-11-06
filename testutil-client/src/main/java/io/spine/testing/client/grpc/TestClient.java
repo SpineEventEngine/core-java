@@ -97,7 +97,8 @@ public class TestClient implements Logging {
     /**
      * Queries all entities of provided type.
      *
-     * @param messageType an entity type to query
+     * @param messageType
+     *         an entity type to query
      * @return query response with the state of entities obtained from the server
      */
     public QueryResponse queryAll(Class<? extends EntityState> messageType) {
@@ -120,7 +121,8 @@ public class TestClient implements Logging {
     /**
      * Shutdown the client waiting 5 seconds for preexisting calls to continue.
      *
-     * @throws InterruptedException if waiting is interrupted.
+     * @throws InterruptedException
+     *         if waiting is interrupted.
      */
     public void shutdown() throws InterruptedException {
         if (!channel.isShutdown()) {

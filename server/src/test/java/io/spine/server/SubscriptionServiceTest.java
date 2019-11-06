@@ -23,6 +23,7 @@ package io.spine.server;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityUpdates;
 import io.spine.client.Subscription;
@@ -36,7 +37,6 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.entity.Entity;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -58,7 +58,6 @@ import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -278,7 +277,7 @@ class SubscriptionServiceTest {
                .post(command, StreamObservers.noOpObserver());
     }
 
-    private static <T extends Message>
+    private static <T extends EntityState>
     T memoizedEntity(MemoizingObserver<SubscriptionUpdate> observer, Class<T> entityCls) {
         SubscriptionUpdate update = observer.firstResponse();
         EntityUpdates entityUpdates = update.getEntityUpdates();
@@ -510,15 +509,6 @@ class SubscriptionServiceTest {
                                .getMessage())
                     .isEqualTo(rejectionMessage);
         }
-    }
-
-    private static Entity newEntity(ProjectId projectId, Message projectState, int version) {
-        Entity entity = aggregateOfClass(PAggregate.class)
-                .withId(projectId)
-                .withState((Project) projectState)
-                .withVersion(version)
-                .build();
-        return entity;
     }
 
     private static BoundedContext boundedContextWith(ProjectAggregateRepository repository) {

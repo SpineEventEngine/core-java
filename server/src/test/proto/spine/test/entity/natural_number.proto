@@ -33,6 +33,7 @@ option java_multiple_files = true;
 // Zero is considered a natural number.
 //
 message NaturalNumber {
+    option (.entity).kind = ENTITY;
 
     // Natural number value.
     //

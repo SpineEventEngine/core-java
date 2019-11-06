@@ -21,7 +21,7 @@
 package io.spine.testing.server.blackbox.verify.state;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
@@ -60,7 +60,7 @@ public abstract class VerifyState {
         queryService.read(query, observer);
         assertTrue(observer.isCompleted());
         QueryResponse response = observer.firstResponse();
-        List<? extends Message> entities = response.states();
+        List<? extends EntityState> entities = response.states();
         verify(entities);
     }
 
@@ -72,13 +72,13 @@ public abstract class VerifyState {
     /**
      * Verifies actual entity states and throws an assertion error if the verification is failed.
      */
-    protected abstract void verify(Collection<? extends Message> actualEntities);
+    protected abstract void verify(Collection<? extends EntityState> actualEntities);
 
     /**
      * The shortcut of {@link #exactly(Class, Iterable)} to verify that
      * only a single entity is present in the storage and its state matches the expected.
      */
-    public static <T extends Message> VerifyState exactlyOne(T expected) {
+    public static <T extends EntityState> VerifyState exactlyOne(T expected) {
         @SuppressWarnings("unchecked" /* The cast is totally safe. */)
         Class<T> messageClass = (Class<T>) expected.getClass();
         return exactly(messageClass, singletonList(expected));
@@ -95,7 +95,7 @@ public abstract class VerifyState {
      *         the expected entity states
      * @return new instance of {@code VerifyState}
      */
-    public static <T extends Message>
+    public static <T extends EntityState>
     VerifyState exactly(Class<T> entityType, Iterable<T> expected) {
         return new AllOfTypeMatch<>(expected, entityType);
     }

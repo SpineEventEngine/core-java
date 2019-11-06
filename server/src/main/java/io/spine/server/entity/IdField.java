@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.protobuf.ValidatingBuilder;
@@ -42,8 +41,8 @@ final class IdField {
 
     private final @Nullable FieldDeclaration declaration;
 
-    static IdField of (EntityClass<?> entityClass) {
-        Message defaultState = entityClass.defaultState();
+    static IdField of(EntityClass<?> entityClass) {
+        EntityState defaultState = entityClass.defaultState();
         List<FieldDescriptor> fields =
                 defaultState.getDescriptorForType()
                             .getFields();

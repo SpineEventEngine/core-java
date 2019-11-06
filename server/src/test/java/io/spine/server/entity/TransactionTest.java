@@ -21,7 +21,7 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public abstract class TransactionTest<I,
         E extends TransactionalEntity<I, S, B>,
-        S extends Message,
+        S extends EntityState,
         B extends ValidatingBuilder<S>> {
 
     /**
@@ -69,7 +69,7 @@ public abstract class TransactionTest<I,
      */
     protected final Id id() {
         return Id.newBuilder()
-                 .setId(getClass().getSimpleName() + '-' +  Identifier.newUuid())
+                 .setId(getClass().getSimpleName() + '-' + Identifier.newUuid())
                  .build();
     }
 

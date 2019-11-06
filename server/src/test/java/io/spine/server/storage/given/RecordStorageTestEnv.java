@@ -22,8 +22,8 @@ package io.spine.server.storage.given;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EntityState;
 import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -63,7 +63,7 @@ public class RecordStorageTestEnv {
     private RecordStorageTestEnv() {
     }
 
-    public static EntityRecord buildStorageRecord(ProjectId id, Message state) {
+    public static EntityRecord buildStorageRecord(ProjectId id, EntityState state) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
                 .newBuilder()
@@ -74,7 +74,7 @@ public class RecordStorageTestEnv {
         return record;
     }
 
-    public static EntityRecord buildStorageRecord(ProjectId id, Message state,
+    public static EntityRecord buildStorageRecord(ProjectId id, EntityState state,
                                                   LifecycleFlags lifecycleFlags) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord

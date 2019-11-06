@@ -21,8 +21,8 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -96,7 +96,7 @@ public final class InterfaceBasedColumn
     }
 
     @Override
-    public @Nullable Object valueIn(Message entityState) {
+    public @Nullable Object valueIn(EntityState entityState) {
         return getterFromState.apply(entityState);
     }
 
@@ -110,6 +110,6 @@ public final class InterfaceBasedColumn
     }
 
     @Immutable
-    interface GetterFromState extends Function<Message, Object> {
+    interface GetterFromState extends Function<EntityState, Object> {
     }
 }

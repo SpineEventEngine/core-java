@@ -27,7 +27,11 @@ import io.spine.testdata.Sample;
 
 public class EntityWithMessageId extends AbstractEntity<ProjectId, Project> {
 
+    public EntityWithMessageId(ProjectId id) {
+        super(id);
+    }
+
     public EntityWithMessageId() {
-        super(Sample.messageOfType(ProjectId.class));
+        this(Sample.messageOfType(ProjectId.class));
     }
 }

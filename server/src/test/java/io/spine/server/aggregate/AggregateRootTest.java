@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.AggregateRootTestEnv;
@@ -74,10 +74,10 @@ class AggregateRootTest {
     @Test
     @DisplayName("obtain part state by its class")
     void returnPartStateByClass() {
-        Message definitionPart = aggregateRoot.partState(ProjectDefinition.class);
+        EntityState definitionPart = aggregateRoot.partState(ProjectDefinition.class);
         assertNotNull(definitionPart);
 
-        Message lifeCyclePart = aggregateRoot.partState(ProjectLifecycle.class);
+        EntityState lifeCyclePart = aggregateRoot.partState(ProjectLifecycle.class);
         assertNotNull(lifeCyclePart);
     }
 }

@@ -71,6 +71,8 @@ message BbTaskId {
 }
 
 message BbTask {
+    option (entity).kind = ENTITY;
+
     BbTaskId task_id = 1;
     string title = 2;
     string description = 3;

@@ -20,7 +20,7 @@
 
 package io.spine.server.enrich.given;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.enrich.given.event.EitProjectCreated;
 import io.spine.server.enrich.given.event.EitTaskCreated;
 import io.spine.server.enrich.given.event.EitUserAccountCreated;
@@ -51,7 +51,7 @@ public class EitEnricherSetup {
         return enricher;
     }
 
-    private static <I, R extends Repository<I, E>, E extends Entity<I, S>, S extends Message>
+    private static <I, R extends Repository<I, E>, E extends Entity<I, S>, S extends EntityState>
     S find(R repo, I id) {
         return repo.find(id)
                    .map(Entity::state)

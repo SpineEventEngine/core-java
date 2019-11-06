@@ -20,7 +20,7 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
@@ -68,8 +68,10 @@ final class InMemoryTypeRegistry implements TypeRegistry {
         TypeUrl entityType = repository.entityStateType();
 
         if (repository instanceof RecordBasedRepository) {
+            RecordBasedRepository<I, E, ? extends EntityState> recordBasedRepository
+                    = (RecordBasedRepository<I, E, ? extends EntityState>) repository;
             typeToRepositoryMap.put(entityType,
-                                    (RecordBasedRepository<I, E, ? extends Message>) repository);
+                                    recordBasedRepository);
         }
         if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);

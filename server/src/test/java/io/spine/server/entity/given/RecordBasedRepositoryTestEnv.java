@@ -21,7 +21,7 @@
 package io.spine.server.entity.given;
 
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.AbstractEntity;
@@ -38,7 +38,7 @@ public final class RecordBasedRepositoryTestEnv {
 
     public static <E extends AbstractEntity<?, ?>>
     void assertMatches(E entity, FieldMask fieldMask) {
-        Message state = entity.state();
+        EntityState state = entity.state();
         assertMatchesMask(state, fieldMask);
     }
 

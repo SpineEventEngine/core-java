@@ -20,10 +20,10 @@
 
 package io.spine.server.entity.given.entity;
 
-import com.google.protobuf.StringValue;
 import io.spine.server.entity.AbstractEntity;
+import io.spine.test.entity.Project;
 
-public class AnEntity extends AbstractEntity<Long, StringValue> {
+public class AnEntity extends AbstractEntity<Long, Project> {
     public AnEntity(Long id) {
         super(id);
     }

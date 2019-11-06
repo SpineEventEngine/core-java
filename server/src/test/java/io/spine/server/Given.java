@@ -39,7 +39,6 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.model.Nothing;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.aggregate.Project;
@@ -56,6 +55,7 @@ import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
+import io.spine.test.storage.Task;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
@@ -205,7 +205,7 @@ public class Given {
 
         static Query readUnknownType() {
             Query result = requestFactory.query()
-                                         .all(Nothing.class);
+                                         .all(Task.class);
             return result;
         }
     }
