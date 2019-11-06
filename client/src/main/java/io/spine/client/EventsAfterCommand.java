@@ -77,6 +77,7 @@ final class EventsAfterCommand implements Logging {
         Topic topic =
                 client.requestOf(user)
                       .topic()
+                      //TODO:2019-11-06:alexander.yevsyukov: Subscribe to all event message types instead.
                       .select(Event.class)
                       .where(eq(fieldName, c.asMessageOrigin()))
                       .build();
