@@ -102,7 +102,7 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
             "unchecked" /* The returned type is a class of messages, which is protected
                            by generic params of this class. */})
     final Class<? extends Message> messageType() {
-        Class<? super M> result = new TypeToken<M>(){}.getRawType();
+        Class<? super M> result = new TypeToken<M>(getClass()){}.getRawType();
         return (Class<? extends Message>) result;
     }
 
