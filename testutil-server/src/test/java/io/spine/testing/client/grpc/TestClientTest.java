@@ -41,6 +41,7 @@ import java.util.Optional;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.core.Responses.statusOk;
+import static io.spine.testing.TestValues.random;
 import static io.spine.testing.client.grpc.TableSide.LEFT;
 import static io.spine.testing.client.grpc.TableSide.RIGHT;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,7 +64,8 @@ class TestClientTest {
         BoundedContextBuilder context = BoundedContext
                 .singleTenant("Tennis")
                 .add(new GameRepository());
-        int port = DEFAULT_CLIENT_SERVICE_PORT;
+        // Select a port randomly to avoid the intermittent hanging port under Windows.
+        int port = random(DEFAULT_CLIENT_SERVICE_PORT, DEFAULT_CLIENT_SERVICE_PORT + 1000);
         server = Server
                 .atPort(port)
                 .add(context)
