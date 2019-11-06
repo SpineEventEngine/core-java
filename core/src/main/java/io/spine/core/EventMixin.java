@@ -37,8 +37,8 @@ import static io.spine.protobuf.Messages.isDefault;
 /**
  * Mixin interface for event objects.
  *
- * @apiNote Implements {@link EntityState} because events are actually a part of system-side
- *        entities (see {@code EEntity}) and can be queried directly.
+ * @apiNote Implements {@link EntityState} because events are actually a part of system entities
+ *        (see {@code EEntity}) and can be queried directly.
  */
 @Immutable
 interface EventMixin
