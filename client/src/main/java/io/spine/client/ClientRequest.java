@@ -20,8 +20,8 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.core.UserId;
 
@@ -67,7 +67,7 @@ public class ClientRequest {
     /**
      * Creates a builder for customizing subscription for the passed entity state type.
      */
-    public <M extends Message> SubscriptionRequest<M> subscribeTo(Class<M> type) {
+    public <S extends EntityState> SubscriptionRequest<S> subscribeTo(Class<S> type) {
         checkNotNull(type);
         return new SubscriptionRequest<>(this, type);
     }
@@ -83,7 +83,7 @@ public class ClientRequest {
     /**
      * Creates a builder for constructing a query for messages of the specified type.
      */
-    public <M extends Message> QueryRequest<M> select(Class<M> type) {
+    public <S extends EntityState> QueryRequest<S> select(Class<S> type) {
         return new QueryRequest<>(this, type);
     }
 
