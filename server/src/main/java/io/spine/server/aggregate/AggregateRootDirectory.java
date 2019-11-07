@@ -20,9 +20,9 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.SPI;
+import io.spine.base.EntityState;
 
 import java.util.Optional;
 
@@ -55,5 +55,6 @@ public interface AggregateRootDirectory {
      *         is not registered
      */
     Optional<? extends AggregatePartRepository<?, ?, ?>>
-    findPart(Class<? extends AggregateRoot<?>> rootClass, Class<? extends Message> partStateClass);
+    findPart(Class<? extends AggregateRoot<?>> rootClass,
+             Class<? extends EntityState> partStateClass);
 }

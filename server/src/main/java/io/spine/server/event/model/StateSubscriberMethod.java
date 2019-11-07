@@ -21,7 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.Environment;
 import io.spine.base.EventMessage;
 import io.spine.base.Field;
@@ -50,7 +50,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     private static final FieldPath ENTITY_TYPE_URL = Field.parse("entity.type_url").path();
 
     private final BoundedContextName contextOfSubscriber;
-    private final Class<? extends Message> stateType;
+    private final Class<? extends EntityState> stateType;
 
     StateSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(checkNotFiltered(method), parameterSpec);
@@ -76,7 +76,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     /**
      * Obtains the type of the entity state to which the method is subscribed.
      */
-    public Class<? extends Message> stateType() {
+    public Class<? extends EntityState> stateType() {
         return stateType;
     }
 

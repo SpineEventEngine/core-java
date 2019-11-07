@@ -21,8 +21,6 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
-import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
@@ -42,10 +40,7 @@ public abstract class EventException extends RuntimeException implements Message
     public static final String ATTR_EVENT_TYPE_NAME = "eventType";
 
     /**
-     * The event message or the message packed into {@link Any}.
-     *
-     * <p>We use {@link GeneratedMessageV3} (not {@code Message}) because
-     * it is {@link java.io.Serializable Serializable}.
+     * The event message.
      */
     private final EventMessage eventMessage;
 
@@ -57,9 +52,12 @@ public abstract class EventException extends RuntimeException implements Message
     /**
      * Creates a new instance.
      *
-     * @param messageText  the error message text
-     * @param eventMessage the related event message
-     * @param error        the error occurred
+     * @param messageText
+     *         the error message text
+     * @param eventMessage
+     *         the related event message
+     * @param error
+     *          the error occurred
      */
     protected EventException(String messageText, EventMessage eventMessage, Error error) {
         super(messageText);

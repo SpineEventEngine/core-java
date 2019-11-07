@@ -23,7 +23,7 @@ package io.spine.system.server;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
@@ -110,7 +110,7 @@ class MirrorRepositoryTest {
             @DisplayName("find all instances")
             void includeAll() {
                 Query query = queries.all(MRPhoto.class);
-                List<? extends Message> readMessages = execute(query);
+                List<? extends EntityState> readMessages = execute(query);
                 assertThat(readMessages, containsInAnyOrder(givenPhotos.values()
                                                                        .toArray()));
             }
@@ -185,7 +185,7 @@ class MirrorRepositoryTest {
             }
 
             private void checkRead(Query query, MRPhoto... expected) {
-                List<? extends Message> readMessages = execute(query);
+                List<? extends EntityState> readMessages = execute(query);
                 assertThat(readMessages, containsInAnyOrder(expected));
             }
 
@@ -215,15 +215,6 @@ class MirrorRepositoryTest {
             private void delete(MRPhoto photo) {
                 dispatchEvent(deleted(photo));
             }
-        }
-
-        @Test
-        @DisplayName("for an unknown type")
-        void unknown() {
-            Query query = queries.all(Timestamp.class);
-
-            Collection<?> result = execute(query);
-            assertTrue(result.isEmpty());
         }
 
         @Test
@@ -261,7 +252,7 @@ class MirrorRepositoryTest {
             checkNotFound(type);
         }
 
-        private void dispatchStateChanged(TypeUrl type, Message id, Message state) {
+        private void dispatchStateChanged(TypeUrl type, Message id, EntityState state) {
             MessageId historyId = MessageId
                     .newBuilder()
                     .setId(pack(id))
@@ -285,7 +276,7 @@ class MirrorRepositoryTest {
         }
     }
 
-    private void prepareAggregates(Map<MessageId, ? extends Message> aggregateStates) {
+    private void prepareAggregates(Map<MessageId, ? extends EntityState> aggregateStates) {
         aggregateStates.entrySet()
                        .stream()
                        .map(entry -> entityStateChanged(entry.getKey(), entry.getValue()))
@@ -298,12 +289,13 @@ class MirrorRepositoryTest {
         repository.dispatch(envelope);
     }
 
-    private List<? extends Message> execute(Query query) {
+    private List<? extends EntityState> execute(Query query) {
         Iterator<EntityStateWithVersion> result = repository.execute(query);
-        List<? extends Message> readMessages =
+        List<? extends EntityState> readMessages =
                 Streams.stream(result)
                        .map(EntityStateWithVersion::getState)
                        .map(unpackFunc())
+                       .map(EntityState.class::cast)
                        .collect(toList());
         return readMessages;
     }

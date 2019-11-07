@@ -22,8 +22,8 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Version;
@@ -46,7 +46,7 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
  * @param <S> the type of the entity state
  */
 @VisibleForTesting
-public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends Message>
+public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends EntityState>
         extends ReflectiveBuilder<E> {
 
     /**

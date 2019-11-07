@@ -27,6 +27,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.client.Query;
@@ -158,7 +159,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     private final UnsupportedCommandGuard unsupportedCommandGuard;
 
-    private final Map<Class<? extends Message>, Repository<?, ?>> repositories;
+    private final Map<Class<? extends EntityState>, Repository<?, ?>> repositories;
 
     @SuppressWarnings("ThisEscapedInObjectConstruction") // to inject self as event dispatcher.
     protected BlackBoxBoundedContext(boolean multitenant,
@@ -358,8 +359,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     private void remember(Repository<?, ?> repository) {
-        Class<Message> stateClass = repository.entityStateType()
-                                              .getMessageClass();
+        Class<? extends EntityState> stateClass = repository.entityModelClass()
+                                                            .stateClass();
         repositories.put(stateClass, repository);
     }
 
@@ -844,33 +845,36 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Obtains a Subject for an entity of the passed class with the given ID.
      */
-    public <I, E extends Entity<I, ? extends Message>>
+    public <I, E extends Entity<I, ? extends EntityState>>
     EntitySubject assertEntity(Class<E> entityClass, I id) {
         @Nullable Entity<I, ?> found = findEntity(entityClass, id);
         return EntitySubject.assertEntity(found);
     }
 
-    private <I> @Nullable Entity<I, ?> findEntity(Class<? extends Entity<I, ?>> entityClass, I id) {
-        Class<? extends Message> stateClass = stateClassOf(entityClass);
+    private <I> @Nullable Entity<I, ?>
+    findEntity(Class<? extends Entity<I, ?>> entityClass, I id) {
+        Class<? extends EntityState> stateClass = stateClassOf(entityClass);
         return findByState(stateClass, id);
     }
 
     /**
      * Obtains a Subject for an entity which has the state of the passed class with the given ID.
      */
-    public <I, S extends Message> EntitySubject assertEntityWithState(Class<S> stateClass, I id) {
+    public <I, S extends EntityState> EntitySubject
+    assertEntityWithState(Class<S> stateClass, I id) {
         @Nullable Entity<I, S> found = findByState(stateClass, id);
         return EntitySubject.assertEntity(found);
     }
 
-    private <I, S extends Message> @Nullable Entity<I, S> findByState(Class<S> stateClass, I id) {
+    private <I, S extends EntityState> @Nullable Entity<I, S>
+    findByState(Class<S> stateClass, I id) {
         @SuppressWarnings("unchecked")
         Repository<I, ? extends Entity<I, S>> repo =
                 (Repository<I, ? extends Entity<I, S>>) repositoryOf(stateClass);
         return readOperation(() -> (Entity<I, S>) repo.find(id).orElse(null));
     }
 
-    private Repository<?, ?> repositoryOf(Class<? extends Message> stateClass) {
+    private Repository<?, ?> repositoryOf(Class<? extends EntityState> stateClass) {
         Repository<?, ?> repository = repositories.get(stateClass);
         return repository;
     }

@@ -19,7 +19,7 @@
  */
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -47,7 +47,8 @@ public class TestTransaction {
      *
      * <p>To be used in tests only.
      */
-    public static void injectState(TransactionalEntity entity, Message state, Version version) {
+    public static void
+    injectState(TransactionalEntity entity, EntityState state, Version version) {
         TestTx tx = new TestTx(entity, state, version);
         tx.commit();
     }
@@ -99,7 +100,7 @@ public class TestTransaction {
             super(entity);
         }
 
-        private TestTx(TransactionalEntity entity, Message state, Version version) {
+        private TestTx(TransactionalEntity entity, EntityState state, Version version) {
             super(entity, state, version);
         }
 

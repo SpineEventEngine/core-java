@@ -21,7 +21,7 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
@@ -101,7 +101,7 @@ final class EntityUpdateHandler extends UpdateHandler {
     /**
      * Checks if the event message matches the subscription filters.
      */
-    private boolean isStateMatching(Message state) {
+    private boolean isStateMatching(EntityState state) {
         TargetFilters filters = target().getFilters();
         boolean result = filters
                 .getFilterList()
@@ -110,17 +110,17 @@ final class EntityUpdateHandler extends UpdateHandler {
         return result;
     }
 
-    private static Message newStateFrom(EventEnvelope event) {
+    private static EntityState newStateFrom(EventEnvelope event) {
         EntityStateChanged eventMessage = asEntityEvent(event);
         Any newState = eventMessage.getNewState();
-        Message result = AnyPacker.unpack(newState);
+        EntityState result = (EntityState) AnyPacker.unpack(newState);
         return result;
     }
 
-    private static Message oldStateFrom(EventEnvelope event) {
+    private static EntityState oldStateFrom(EventEnvelope event) {
         EntityStateChanged eventMessage = asEntityEvent(event);
         Any newState = eventMessage.getOldState();
-        Message result = AnyPacker.unpack(newState);
+        EntityState result = (EntityState) AnyPacker.unpack(newState);
         return result;
     }
 

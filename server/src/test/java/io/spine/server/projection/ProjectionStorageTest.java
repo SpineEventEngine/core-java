@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
@@ -91,7 +91,7 @@ public abstract class ProjectionStorageTest
     }
 
     @Override
-    protected Message newState(ProjectId id) {
+    protected EntityState newState(ProjectId id) {
         String uniqueName = format("Projection_name-%s-%s", id.getId(), System.nanoTime());
         Project state = givenProject(id, uniqueName);
         return state;

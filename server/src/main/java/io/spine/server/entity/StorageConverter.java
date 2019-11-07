@@ -23,7 +23,7 @@ package io.spine.server.entity;
 import com.google.common.base.Converter;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,7 +39,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * An abstract base for converters of entities into {@link EntityRecord}.
  */
-public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Message>
+public abstract class StorageConverter<I, E extends Entity<I, S>, S extends EntityState>
         extends Converter<E, EntityRecord> implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -72,7 +72,7 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Mess
 
     /**
      * Obtains the field mask used by this converter to trim the state of entities before the state
-     * is {@linkplain #injectState(Entity, Message, EntityRecord) injected} into entities.
+     * is {@linkplain #injectState(Entity, EntityState, EntityRecord) injected} into entities.
      */
     protected FieldMask fieldMask() {
         return this.fieldMask;
@@ -113,8 +113,10 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Mess
      *
      * <p>Default implementation does nothing.
      *
-     * @param builder the entity builder to update
-     * @param entity  the entity which data is passed to the {@link EntityRecord} we are building
+     * @param builder
+     *         the entity builder to update
+     * @param entity
+     *         the entity which data is passed to the {@link EntityRecord} we are building
      */
     @SuppressWarnings("NoopMethodInAbstractClass") // Avoid forcing empty implementations.
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
@@ -124,9 +126,12 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Mess
     /**
      * Derived classes must implement providing state injection into the passed entity.
      *
-     * @param entity       the entity into which inject the state
-     * @param state        the state message extracted from the record
-     * @param entityRecord the record which may contain additional properties for the entity
+     * @param entity
+     *         the entity into which inject the state
+     * @param state
+     *         the state message extracted from the record
+     * @param entityRecord
+     *         the record which may contain additional properties for the entity
      */
     protected abstract void injectState(E entity, S state, EntityRecord entityRecord);
 

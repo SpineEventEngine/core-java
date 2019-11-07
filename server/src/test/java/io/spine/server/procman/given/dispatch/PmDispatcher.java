@@ -22,7 +22,7 @@ package io.spine.server.procman.given.dispatch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
@@ -96,14 +96,14 @@ public final class PmDispatcher {
      */
     private static class TestPmCommandEndpoint<I,
                                                P extends ProcessManager<I, S, ?>,
-                                               S extends Message>
+                                               S extends EntityState>
             extends PmCommandEndpoint<I, P> {
 
         private TestPmCommandEndpoint(CommandEnvelope cmd) {
             super(new TestPmRepository<>(), cmd);
         }
 
-        private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
+        private static <I, P extends ProcessManager<I, S, ?>, S extends EntityState>
         DispatchOutcome dispatch(P manager, CommandEnvelope envelope) {
             TestPmCommandEndpoint<I, P, S> endpoint = new TestPmCommandEndpoint<>(envelope);
             return endpoint.runTransactionFor(manager);
@@ -123,14 +123,14 @@ public final class PmDispatcher {
      */
     private static class TestPmEventEndpoint<I,
                                              P extends ProcessManager<I, S, ?>,
-                                             S extends Message>
+                                             S extends EntityState>
             extends PmEventEndpoint<I, P> {
 
         private TestPmEventEndpoint(EventEnvelope event) {
             super(new TestPmRepository<>(), event);
         }
 
-        private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
+        private static <I, P extends ProcessManager<I, S, ?>, S extends EntityState>
         DispatchOutcome dispatch(P manager, EventEnvelope event) {
             TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(event);
             return endpoint.runTransactionFor(manager);
@@ -141,7 +141,9 @@ public final class PmDispatcher {
      * Test-only process manager repository which uses {@link TestPmTransaction} and
      * {@linkplain NoOpLifecycle NO-OP entity lifecycle}.
      */
-    private static class TestPmRepository<I, P extends ProcessManager<I, S, ?>, S extends Message>
+    private static class TestPmRepository<I,
+                                          P extends ProcessManager<I, S, ?>,
+                                          S extends EntityState>
             extends ProcessManagerRepository<I, P, S> {
 
         @SuppressWarnings("unchecked") // OK for this test implementation.

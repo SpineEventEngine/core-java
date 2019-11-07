@@ -23,6 +23,7 @@ package io.spine.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
@@ -74,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
 
-    private static EntityRecord newStorageRecord(Message state) {
+    private static EntityRecord newStorageRecord(EntityState state) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
                 .newBuilder()
@@ -93,7 +94,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
      *         the ID for the message
      * @return the unique {@code Message}
      */
-    protected abstract Message newState(I id);
+    protected abstract EntityState newState(I id);
 
     @Override
     protected RecordReadRequest<I> newReadRequest(I id) {
@@ -198,7 +199,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         RecordStorage<I> storage = storage();
         storage.write(id, record);
 
-        Message state = newState(id);
+        EntityState state = newState(id);
         FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
 
         RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
@@ -217,13 +218,13 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         RecordStorage<I> storage = storage();
         int count = 10;
         List<I> ids = new ArrayList<>();
-        Class<? extends Message> messageClass = null;
+        Class<? extends EntityState> stateClass = null;
 
         for (int i = 0; i < count; i++) {
             I id = newId();
-            Message state = newState(id);
-            if (messageClass == null) {
-                messageClass = state.getClass();
+            EntityState state = newState(id);
+            if (stateClass == null) {
+                stateClass = state.getClass();
             }
             EntityRecord record = newStorageRecord(state);
             storage.write(id, record);
@@ -231,7 +232,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         }
 
         int bulkCount = count / 2;
-        FieldMask fieldMask = fromFieldNumbers(messageClass, 2);
+        FieldMask fieldMask = fromFieldNumbers(stateClass, 2);
         Iterator<EntityRecord> readRecords = storage.readMultiple(
                 ids.subList(0, bulkCount),
                 fieldMask);

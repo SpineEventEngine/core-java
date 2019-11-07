@@ -21,8 +21,8 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
@@ -73,7 +73,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the process manager state
  */
 public abstract class ProcessManager<I,
-                                     S extends Message,
+                                     S extends EntityState,
                                      B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventReactor, Commander, HasVersionColumn<I, S>, HasLifecycleColumns<I, S> {

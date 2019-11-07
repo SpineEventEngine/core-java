@@ -22,7 +22,7 @@ package io.spine.system.server.given.mirror;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -105,7 +105,7 @@ public final class MirrorRepositoryTestEnv {
         return historyId;
     }
 
-    public static Event entityStateChanged(MessageId entityId, Message state) {
+    public static Event entityStateChanged(MessageId entityId, EntityState state) {
         EntityStateChanged stateChanged = EntityStateChanged
                 .newBuilder()
                 .setEntity(entityId)

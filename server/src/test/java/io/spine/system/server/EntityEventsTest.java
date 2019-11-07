@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.MessageId;
@@ -313,7 +314,7 @@ class EntityEventsTest {
         assertEquals(id, payload.getId());
     }
 
-    private void checkEntityStateChanged(Message state) {
+    private void checkEntityStateChanged(EntityState state) {
         EntityStateChanged event = eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
         assertId(event.getEntity());
         assertEquals(state, unpack(event.getNewState()));

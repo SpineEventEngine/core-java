@@ -22,11 +22,10 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
-import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
+import io.spine.base.EntityState;
 import io.spine.base.Error;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.model.StateClass;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
@@ -51,23 +50,18 @@ public final class InvalidEntityStateException extends ValidationException {
 
     /**
      * The entity state or the message packed into {@link Any}.
-     *
-     * <p>We use {@link GeneratedMessageV3} (not {@code Message}) because
-     * it is {@link java.io.Serializable Serializable}.
      */
-    private final GeneratedMessageV3 entityState;
+    private final EntityState entityState;
 
     /**
      * The error passed with the exception.
      */
     private final Error error;
 
-    private InvalidEntityStateException(Message entityState, Error error) {
+    private InvalidEntityStateException(EntityState entityState, Error error) {
         super(error.getValidationError()
                    .getConstraintViolationList());
-        this.entityState = entityState instanceof GeneratedMessageV3
-                           ? (GeneratedMessageV3) entityState
-                           : AnyPacker.pack(entityState);
+        this.entityState = entityState;
         this.error = error;
     }
 
@@ -75,11 +69,13 @@ public final class InvalidEntityStateException extends ValidationException {
      * Creates an exception instance for an entity state, which has fields that
      * violate validation constraint(s).
      *
-     * @param entityState the invalid entity state
-     * @param violations  the constraint violations for the entity state
+     * @param entityState
+     *         the invalid entity state
+     * @param violations
+     *         the constraint violations for the entity state
      */
     public static InvalidEntityStateException
-    onConstraintViolations(Message entityState, Iterable<ConstraintViolation> violations) {
+    onConstraintViolations(EntityState entityState, Iterable<ConstraintViolation> violations) {
         Factory factory = new Factory(entityState, violations);
         return factory.newException();
     }
@@ -87,12 +83,7 @@ public final class InvalidEntityStateException extends ValidationException {
     /**
      * Returns a related event message.
      */
-    Message entityState() {
-        if (entityState instanceof Any) {
-            Any any = (Any) entityState;
-            Message unpacked = AnyPacker.unpack(any);
-            return unpacked;
-        }
+    EntityState entityState() {
         return entityState;
     }
 
@@ -109,7 +100,7 @@ public final class InvalidEntityStateException extends ValidationException {
      */
     private static final class Factory
             extends ExceptionFactory<InvalidEntityStateException,
-                                     Message,
+                                     EntityState,
                                      StateClass,
                                      EntityStateValidationError> {
 
@@ -123,7 +114,7 @@ public final class InvalidEntityStateException extends ValidationException {
 
         private final StateClass stateClass;
 
-        private Factory(Message entityState,
+        private Factory(EntityState entityState,
                         Iterable<ConstraintViolation> violations) {
             super(entityState, violations);
             this.stateClass = StateClass.of(entityState);
@@ -162,7 +153,7 @@ public final class InvalidEntityStateException extends ValidationException {
 
         @Override
         protected InvalidEntityStateException
-        createException(String exceptionMsg, Message entityState, Error error) {
+        createException(String exceptionMsg, EntityState entityState, Error error) {
             List<ConstraintViolation> violations = error.getValidationError()
                                                         .getConstraintViolationList();
             checkArgument(!violations.isEmpty(), "No constraint violations provided.");

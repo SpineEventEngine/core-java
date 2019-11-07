@@ -23,6 +23,7 @@ package io.spine.server.route;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.EventContext;
 import io.spine.protobuf.Messages;
 
@@ -46,7 +47,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I>
  *         the type of the identifiers
  */
-final class DefaultStateRoute<I> implements StateUpdateRoute<I, Message> {
+final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState> {
 
     private static final long serialVersionUID = 0L;
 
@@ -73,7 +74,7 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, Message> {
         return new DefaultStateRoute<>(idClass);
     }
 
-    boolean supports(Class<? extends Message> stateType) {
+    boolean supports(Class<? extends EntityState> stateType) {
         Descriptor type = Messages.defaultInstance(stateType)
                                   .getDescriptorForType();
         Optional<FieldDescriptor> idField = findField(idClass, type);
@@ -99,10 +100,10 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, Message> {
      *          if the passed state instance does not have a field of the required ID type
      */
     @Override
-    public Set<I> apply(Message state, EventContext ignored) {
+    public Set<I> apply(EntityState state, EventContext ignored) {
         checkNotNull(state);
         checkNotNull(ignored);
-        Class<? extends Message> messageClass = state.getClass();
+        Class<? extends EntityState> messageClass = state.getClass();
         FieldDescriptor field = fields.get(messageClass);
         if (field != null) {
             return fieldToSet(field, state);
@@ -118,8 +119,8 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, Message> {
         return result;
     }
 
-    private Set<I> fieldToSet(FieldDescriptor field, Message message) {
-        Object fieldValue = message.getField(field);
+    private Set<I> fieldToSet(FieldDescriptor field, EntityState state) {
+        Object fieldValue = state.getField(field);
         I id = idClass.cast(fieldValue);
         return withId(id);
     }

@@ -23,6 +23,7 @@ package io.spine.server.command;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
@@ -40,7 +41,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 public abstract
 class CommandHandlingEntity<I,
-                            S extends Message,
+                            S extends EntityState,
                             B extends ValidatingBuilder<S>>
         extends TransactionalEntity<I, S, B>
         implements CommandHandler {

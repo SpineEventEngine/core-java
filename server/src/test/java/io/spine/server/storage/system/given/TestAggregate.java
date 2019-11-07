@@ -21,7 +21,8 @@
 package io.spine.server.storage.system.given;
 
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.model.Nothing;
+import io.spine.system.server.Company;
+import io.spine.system.server.CompanyId;
 
-public class TestAggregate extends Aggregate<String, Nothing, Nothing.Builder> {
+public class TestAggregate extends Aggregate<CompanyId, Company, Company.Builder> {
 }

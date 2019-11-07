@@ -19,8 +19,8 @@
  */
 package io.spine.client;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
@@ -79,7 +79,7 @@ public final class Queries {
         return typeUrl;
     }
 
-    static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
+    static Query.Builder queryBuilderFor(Class<? extends EntityState> entityClass,
                                          @Nullable Set<?> ids,
                                          @Nullable Set<CompositeFilter> filters) {
         checkNotNull(entityClass);

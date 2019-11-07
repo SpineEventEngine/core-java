@@ -20,8 +20,8 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.DispatchCommand;
@@ -47,7 +47,7 @@ import io.spine.server.type.EventEnvelope;
  */
 @Internal
 public class PmTransaction<I,
-                           S extends Message,
+                           S extends EntityState,
                            B extends ValidatingBuilder<S>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 

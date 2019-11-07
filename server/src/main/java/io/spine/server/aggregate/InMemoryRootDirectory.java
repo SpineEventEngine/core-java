@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
@@ -51,7 +51,8 @@ public final class InMemoryRootDirectory implements AggregateRootDirectory {
 
     @Override
     public Optional<? extends AggregatePartRepository<?, ?, ?>>
-    findPart(Class<? extends AggregateRoot<?>> rootClass, Class<? extends Message> partStateClass) {
+    findPart(Class<? extends AggregateRoot<?>> rootClass,
+             Class<? extends EntityState> partStateClass) {
         Set<AggregatePartRepository<?, ?, ?>> parts = repositories.get(rootClass);
         if (parts.isEmpty()) {
             return Optional.empty();

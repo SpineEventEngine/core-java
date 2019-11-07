@@ -23,7 +23,7 @@ package io.spine.server.tenant;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
@@ -44,7 +44,7 @@ import java.util.function.Function;
  *
  * @param <T> the type of data associated with the tenant ID
  */
-public abstract class TenantRepository<T extends Message, E extends Entity<T>>
+public abstract class TenantRepository<T extends EntityState, E extends Entity<T>>
         extends DefaultRecordBasedRepository<TenantId, E, T>
         implements TenantIndex {
 
@@ -136,7 +136,7 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
      *
      * @param <T> the type of the data associated with the tenant ID
      */
-    public static class Entity<T extends Message> extends AbstractEntity<TenantId, T> {
+    public static class Entity<T extends EntityState> extends AbstractEntity<TenantId, T> {
 
         protected Entity(TenantId id) {
             super(id);
