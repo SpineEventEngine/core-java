@@ -42,10 +42,10 @@ final class StateConsumers<S extends EntityState> extends Consumers<S, EmptyCont
 
     @Override
     StreamObserver<S> toObserver() {
-        return new StateObserver();
+        return new DeliveringStateObserver();
     }
 
-    private final class StateObserver extends DeliveringObserver {
+    private final class DeliveringStateObserver extends DeliveringObserver {
 
         @Override
         S toMessage(S outer) {
@@ -58,7 +58,7 @@ final class StateConsumers<S extends EntityState> extends Consumers<S, EmptyCont
         }
     }
 
-    public static final class Builder<S extends EntityState>
+    static final class Builder<S extends EntityState>
             extends Consumers.Builder<S, EmptyContext, S, Builder<S>> {
 
         @Override

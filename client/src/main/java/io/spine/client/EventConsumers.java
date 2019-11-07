@@ -43,13 +43,13 @@ final class EventConsumers<E extends EventMessage> extends Consumers<E, EventCon
 
     @Override
     StreamObserver<Event> toObserver() {
-        return new EventObserver();
+        return new DeliveringEventObserver();
     }
 
     /**
      * The observer to be supplied to gRPC API.
      */
-    private final class EventObserver extends DeliveringObserver {
+    private final class DeliveringEventObserver extends DeliveringObserver {
 
         @SuppressWarnings("unchecked") // The correct type is provided by subscription impl.
         @Override
