@@ -51,6 +51,12 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
+    <artifactId>grpc-core</artifactId>
+    <version>1.24.1</version>
+    <scope>compile</scope>
+  </dependency>
+  <dependency>
+    <groupId>io.grpc</groupId>
     <artifactId>grpc-okhttp</artifactId>
     <version>1.24.1</version>
     <scope>compile</scope>
@@ -118,6 +124,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty</artifactId>
+    <version>1.24.1</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>io.grpc</groupId>
+    <artifactId>grpc-netty-shaded</artifactId>
     <version>1.24.1</version>
     <scope>test</scope>
   </dependency>
