@@ -21,7 +21,7 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 
 import java.util.function.Function;
 
@@ -51,14 +51,14 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
  * {@link #where(CompositeFilter...)} methods) can be composed using the {@link Filters}
  * utility class.
  *
- * @param <M>
- *         the type of the queried messages
+ * @param <S>
+ *         the type of the queried entity states
  * @see Filters
  */
-public final class QueryRequest<M extends Message>
-        extends FilteringRequest<M, Query, QueryBuilder, QueryRequest<M>> {
+public final class QueryRequest<S extends EntityState>
+        extends FilteringRequest<S, Query, QueryBuilder, QueryRequest<S>> {
 
-    QueryRequest(ClientRequest parent, Class<M> type) {
+    QueryRequest(ClientRequest parent, Class<S> type) {
         super(parent, type);
     }
 
@@ -70,7 +70,7 @@ public final class QueryRequest<M extends Message>
      * @param direction
      *         sorting direction
      */
-    public QueryRequest<M> orderBy(String column, OrderBy.Direction direction) {
+    public QueryRequest<S> orderBy(String column, OrderBy.Direction direction) {
         builder().orderBy(column, direction);
         return this;
     }
@@ -81,7 +81,7 @@ public final class QueryRequest<M extends Message>
      * @param count
      *         the number of results to be returned
      */
-    public QueryRequest<M> limit(int count) {
+    public QueryRequest<S> limit(int count) {
         builder().limit(count);
         return this;
     }
@@ -90,12 +90,12 @@ public final class QueryRequest<M extends Message>
      * Obtains results of the query.
      */
     @SuppressWarnings("unchecked") // The type is ensured when building the query.
-    public ImmutableList<M> run() {
+    public ImmutableList<S> run() {
         Query query = builder().build();
-        ImmutableList<M> result =
+        ImmutableList<S> result =
                 client().read(query)
                         .stream()
-                        .map(m -> (M) m)
+                        .map(m -> (S) m)
                         .collect(toImmutableList());
         return result;
     }
@@ -106,7 +106,7 @@ public final class QueryRequest<M extends Message>
     }
 
     @Override
-    QueryRequest<M> self() {
+    QueryRequest<S> self() {
         return this;
     }
 }
