@@ -34,14 +34,16 @@ import "spine/base/field_path.proto";
 
 // Defines the target type and filters.
 //
-// Use Target to specify and narrow down the source for Topic and Query by the target type and
-// various criteria.
+// Use `Target` to specify and narrow down the source for `Topic` and `Query` by
+// the target type and various criteria.
+//
 message Target {
 
     // The type of the entity or event of interest.
     //
-    // Queries support only entity targets while subscriptions work with both event and entity
-    // types.
+    // Queries support only entity targets while subscriptions work with both event and
+    // entity state types.
+    //
     string type = 1 [(required) = true];
 
     // The filters which are applied to the received entity state or event message.
