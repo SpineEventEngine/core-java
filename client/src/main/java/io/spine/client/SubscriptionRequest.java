@@ -20,7 +20,7 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.EmptyContext;
 
 import java.util.function.Consumer;
@@ -32,7 +32,7 @@ import java.util.function.Function;
  * @param <S>
  *         the type of entity state to subscribe
  */
-public final class SubscriptionRequest<S extends Message>
+public final class SubscriptionRequest<S extends EntityState>
         extends SubscribingRequest<S, EmptyContext, S, SubscriptionRequest<S>> {
 
     private final StateConsumers.Builder<S> consumers;

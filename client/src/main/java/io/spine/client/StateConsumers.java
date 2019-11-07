@@ -20,8 +20,8 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.EntityState;
 import io.spine.core.EmptyContext;
 
 /**
@@ -30,9 +30,9 @@ import io.spine.core.EmptyContext;
  * @param <S>
  *         the type of entity state messages
  */
-final class StateConsumers<S extends Message> extends Consumers<S, EmptyContext, S> {
+final class StateConsumers<S extends EntityState> extends Consumers<S, EmptyContext, S> {
 
-    static <S extends Message> Builder<S> newBuilder() {
+    static <S extends EntityState> Builder<S> newBuilder() {
         return new Builder<>();
     }
 
@@ -58,7 +58,7 @@ final class StateConsumers<S extends Message> extends Consumers<S, EmptyContext,
         }
     }
 
-    public static final class Builder<S extends Message>
+    public static final class Builder<S extends EntityState>
             extends Consumers.Builder<S, EmptyContext, S, Builder<S>> {
 
         @Override
