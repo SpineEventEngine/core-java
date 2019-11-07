@@ -20,16 +20,13 @@
 
 dependencies {
     compile project(':client')
-
     implementation(
             deps.grpc.grpcProtobuf,
             deps.grpc.grpcCore
     )
-
     testAnnotationProcessor deps.build.autoService.processor
     testCompileOnly deps.build.autoService.annotations
-
-    testImplementation (
+    testImplementation(
             deps.grpc.grpcNettyShaded,
             "io.spine:spine-testlib:$spineBaseVersion",
             project(path: ':core', configuration: 'testArtifacts'),
