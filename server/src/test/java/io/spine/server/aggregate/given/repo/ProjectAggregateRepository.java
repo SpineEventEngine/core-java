@@ -22,11 +22,11 @@ package io.spine.server.aggregate.given.repo;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import io.spine.base.Identifier;
 import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
+import io.spine.server.Identity;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.EntityRecord;
@@ -36,7 +36,6 @@ import io.spine.server.route.EventRouting;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -139,12 +138,7 @@ public class ProjectAggregateRepository
                 .setPreviousValue(previousRecord)
                 .setNewValue(newRecord)
                 .build();
-        MessageId origin = MessageId
-                .newBuilder()
-                .setId(Identifier.pack("some-random-origin"))
-                .setTypeUrl(TypeUrl.of(Empty.class)
-                                   .value())
-                .vBuild();
+        MessageId origin = Identity.byString("some-random-origin");
         lifecycleOf(aggregate.id())
                 .onStateChanged(change, ImmutableSet.of(origin), Origin.getDefaultInstance());
     }

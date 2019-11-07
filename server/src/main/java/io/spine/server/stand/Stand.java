@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -40,6 +39,7 @@ import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.Identity;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
@@ -161,12 +161,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 .newBuilder()
                 .setNewValue(record)
                 .vBuild();
-        MessageId origin = MessageId
-                .newBuilder()
-                .setId(Identifier.pack("Stand-received-entity-update"))
-                .setTypeUrl(TypeUrl.of(Empty.class)
-                                   .value())
-                .vBuild();
+        MessageId origin = Identity.byString("Stand-received-entity-update");
         lifecycle.onStateChanged(change,
                                  ImmutableSet.of(origin),
                                  Origin.getDefaultInstance());

@@ -18,22 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package io.spine.server;
 
-final def spineVersion = '1.1.14'
+import io.spine.testing.UtilityClassTest;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.1.10'
+@DisplayName("`Identity` utility class should")
+class IdentityTest extends UtilityClassTest<Identity> {
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.1.10'
+    IdentityTest() {
+        super(Identity.class);
+    }
+
+    @Test
+    @DisplayName("not allow empty or blank identity")
+    void stringIdentity() {
+        assertRejects("");
+        assertRejects(" ");
+    }
+
+    void assertRejects(String value) {
+        assertThrows(IllegalArgumentException.class, () -> Identity.byString(value));
+    }
 }
