@@ -23,6 +23,7 @@ package io.spine.client;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
@@ -44,12 +45,12 @@ import static io.spine.client.DelegatingConsumer.toRealConsumer;
  * <p>A consumer of an event can accept {@linkplain EventConsumer event message and its context}
  * or {@linkplain Consumer only event message}.
  */
-public final class MultiEventConsumers implements Logging {
+final class MultiEventConsumers implements Logging {
 
     private final
     ImmutableMultimap<Class<? extends EventMessage>, EventConsumer<? extends EventMessage>> map;
 
-    public static Builder newBuilder() {
+    static Builder newBuilder() {
         return new Builder();
     }
 
@@ -58,23 +59,10 @@ public final class MultiEventConsumers implements Logging {
     }
 
     /**
-     * Verifies if there is at least one consumer for the passed event type.
+     * Obtains the set of consumed event types.
      */
-    public <E extends EventMessage> boolean contains(Class<E> eventType) {
-        boolean result = map.containsKey(eventType);
-        return result;
-    }
-
-    /**
-     * Creates an observer that would deliver events to all the consumers.
-     *
-     * <p>Errors that may occur when delivering events will be logged. In order to handle
-     * the errors, please use the method which accepts {@code Consumer<Throwable>}.
-     *
-     * @see #toObserver(ErrorHandler)
-     */
-    public StreamObserver<Event> toObserver() {
-        return new EventObserver(null);
+    ImmutableSet<Class<? extends EventMessage>> eventTypes() {
+        return map.keySet();
     }
 
     /**
@@ -84,7 +72,7 @@ public final class MultiEventConsumers implements Logging {
      *         the handler for possible errors reported by the server.
      *         If null the error will be simply logged.
      */
-    public StreamObserver<Event> toObserver(@Nullable ErrorHandler handler) {
+    StreamObserver<Event> toObserver(@Nullable ErrorHandler handler) {
         return new EventObserver(handler);
     }
 
@@ -94,7 +82,7 @@ public final class MultiEventConsumers implements Logging {
      * <p>If one of the consumers would cause an error when handling the event, the error will
      * be logged, and the event will be passed to remaining consumers.
      */
-    public void deliver(Event event) {
+    void deliver(Event event) {
         EventMessage message = event.enclosedMessage();
         EventContext context = event.getContext();
         Class<? extends EventMessage> type = message.getClass();
@@ -127,7 +115,7 @@ public final class MultiEventConsumers implements Logging {
     /**
      * The builder for {@link MultiEventConsumers}.
      */
-    public static final class Builder {
+    static final class Builder {
 
         private final
         Multimap<Class<? extends EventMessage>, EventConsumer<? extends EventMessage>>
@@ -160,7 +148,7 @@ public final class MultiEventConsumers implements Logging {
         /**
          * Creates the new instance.
          */
-        public MultiEventConsumers build() {
+        MultiEventConsumers build() {
             return new MultiEventConsumers(this);
         }
     }

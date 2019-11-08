@@ -20,7 +20,9 @@
 
 package io.spine.client;
 
+import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.EventMessage;
 import io.spine.base.Field;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -30,13 +32,14 @@ import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.client.Filters.eq;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static java.lang.String.format;
 
 /**
- * Subscribes to events which originate from the given command and delivers them to the passed
- * event consumers.
+ * Subscribes to events which originate from the given command and arranges the delivery
+  * to the passed event consumers.
  */
 final class EventsAfterCommand implements Logging {
 
@@ -44,6 +47,16 @@ final class EventsAfterCommand implements Logging {
     private final UserId user;
     private final Command command;
     private final MultiEventConsumers consumers;
+
+    static ImmutableSet<Subscription>
+    subscribe(Client client,
+              Command command,
+              MultiEventConsumers consumers,
+              @Nullable ErrorHandler errorHandler) {
+        EventsAfterCommand commandOutcome = new EventsAfterCommand(client, command, consumers);
+        ImmutableSet<Subscription> result = commandOutcome.subscribeWith(errorHandler);
+        return result;
+    }
 
     private EventsAfterCommand(Client client, Command cmd, MultiEventConsumers consumers) {
         this.client = checkNotNull(client);
@@ -54,34 +67,32 @@ final class EventsAfterCommand implements Logging {
         this.consumers = checkNotNull(consumers);
     }
 
-    static Subscription subscribe(Client client,
-                                  Command command,
-                                  MultiEventConsumers consumers,
-                                  @Nullable ErrorHandler errorHandler) {
-        EventsAfterCommand commandOutcome = new EventsAfterCommand(client, command, consumers);
-        Subscription result = commandOutcome.subscribeWith(errorHandler);
-        return result;
-    }
-
-    private Subscription subscribeWith(@Nullable ErrorHandler errorHandler) {
-        Topic topic = allEventsOf(command);
+    private ImmutableSet<Subscription> subscribeWith(@Nullable ErrorHandler errorHandler) {
+        ImmutableSet<Topic> topics = eventsOf(command);
         StreamObserver<Event> observer = consumers.toObserver(errorHandler);
-        return client.subscribeTo(topic, observer);
+        ImmutableSet<Subscription> subscriptions =
+                topics.stream()
+                      .map((topic) -> client.subscribeTo(topic, observer))
+                      .collect(toImmutableSet());
+        return subscriptions;
     }
 
     /**
-     * Creates a subscription topic for all events for which the passed command is the origin.
+     * Creates subscription topics for the subscribed events which has the passed command
+     * as the origin.
      */
-    private Topic allEventsOf(Command c) {
+    private ImmutableSet<Topic> eventsOf(Command c) {
         String fieldName = pastMessageField();
-        Topic topic =
-                client.requestOf(user)
-                      .topic()
-                      //TODO:2019-11-06:alexander.yevsyukov: Subscribe to all event message types instead.
-                      .select(Event.class)
-                      .where(eq(fieldName, c.asMessageOrigin()))
-                      .build();
-        return topic;
+        ImmutableSet<Class<? extends EventMessage>> eventTypes = consumers.eventTypes();
+        TopicFactory topic = client.requestOf(user)
+                                   .topic();
+        ImmutableSet<Topic> topics =
+                eventTypes.stream()
+                          .map((eventType) -> topic.select(eventType)
+                                                   .where(eq(fieldName, c.asMessageOrigin()))
+                                                   .build())
+                          .collect(toImmutableSet());
+        return topics;
     }
 
     /**

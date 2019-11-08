@@ -21,6 +21,7 @@
 package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -114,27 +115,28 @@ public final class CommandRequest extends ClientRequest {
      * Subscribes the consumers to events to receive events resulting from the command as
      * they happen, then sends the command to the server.
      *
-     * <p>The returned {@code Subscription} instance should be
+     * <p>The returned {@code Subscription} instances should be
      * {@linkplain Client#cancel(Subscription) canceled} after the requesting code receives
      * expected events, or after a reasonable timeout.
      *
-     * @return the subscription to all the events
-     * @implNote Subscriptions should be cancelled to free up client and server resources required
-     * for their maintenance. It is not possible to cancel the returned subscription in an automatic
-     * way because of the following. Subscriptions by nature are asynchronous and infinite requests.
-     * Even that we know expected types of the events produced by the command, only the
-     * client code “knows” how many of them it expects. Also, some events may not arrive because of
-     * communication of business logic reasons. That's why the returned subscription should be
-     * cancelled by the client code when it no longer needs it.
+     * @return subscription to the events
+     * @implNote Subscriptions should be cancelled to free up client and server resources
+     *         required for their maintenance. It is not possible to cancel the returned
+     *         subscription in an automatic way because of the following.
+     *         Subscriptions by nature are asynchronous and infinite requests.
+     *         Even that we know expected types of the events produced by the command, only the
+     *         client code "knows" how many of them it expects. Also, some events may not arrive
+     *         because of communication or business logic reasons. That's why the returned
+     *         subscriptions should be cancelled by the client code when it no longer needs it.
      */
-    public Subscription post() {
+    public ImmutableSet<Subscription> post() {
         MultiEventConsumers consumers = builder.build();
         Client client = client();
         Command command =
                 client.requestOf(user())
                       .command()
                       .create(message);
-        Subscription result =
+        ImmutableSet<Subscription> result =
                 EventsAfterCommand.subscribe(client, command, consumers, streamingErrorHandler);
         client().post(command);
         return result;
