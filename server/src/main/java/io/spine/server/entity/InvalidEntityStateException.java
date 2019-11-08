@@ -113,10 +113,10 @@ public final class InvalidEntityStateException extends ValidationException {
 
         private final StateClass stateClass;
 
-        private Factory(EntityState entityState,
+        private Factory(EntityState state,
                         Iterable<ConstraintViolation> violations) {
-            super(entityState, violations);
-            this.stateClass = StateClass.of(entityState);
+            super(state, violations);
+            this.stateClass = StateClass.of(state);
         }
 
         @Override
@@ -152,11 +152,11 @@ public final class InvalidEntityStateException extends ValidationException {
 
         @Override
         protected InvalidEntityStateException
-        createException(String exceptionMsg, EntityState entityState, Error error) {
+        createException(String exceptionMsg, EntityState state, Error error) {
             List<ConstraintViolation> violations = error.getValidationError()
                                                         .getConstraintViolationList();
             checkArgument(!violations.isEmpty(), "No constraint violations provided.");
-            return new InvalidEntityStateException(entityState, error);
+            return new InvalidEntityStateException(state, error);
         }
     }
 }
