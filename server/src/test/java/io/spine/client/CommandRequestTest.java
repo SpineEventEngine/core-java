@@ -25,7 +25,7 @@ import io.spine.base.CommandMessage;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.command.LogInUser;
-import io.spine.test.route.UserLoggedIn;
+import io.spine.test.client.event.UserLoggedIn;
 import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
