@@ -61,10 +61,8 @@ message MRLocalizedVideo {
     spine.net.Url subtitles_url = 5 [(validate) = true, (required) = false];
 }
 
-// This aggregate design is not complete and the aggregate is not production-ready, so
-// the `(entity)` option is absent.
-//
 message MRIncompleteAudio {
+    option (entity).kind = ENTITY;
 
     string id = 1;
 

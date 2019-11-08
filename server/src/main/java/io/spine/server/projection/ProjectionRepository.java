@@ -24,9 +24,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
@@ -70,7 +70,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <P> the type of projections
  * @param <S> the type of projection state messages
  */
-public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
+public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState>
         extends EventDispatchingRepository<I, P, S> {
 
     private @MonotonicNonNull Inbox<I> inbox;

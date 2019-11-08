@@ -20,9 +20,9 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.aggregate.model.AggregatePartClass;
@@ -61,7 +61,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  */
 @Experimental
 public abstract class AggregatePart<I,
-                                    S extends Message,
+                                    S extends EntityState,
                                     B extends ValidatingBuilder<S>,
                                     R extends AggregateRoot<I>>
                       extends Aggregate<I, S, B> {
@@ -102,7 +102,7 @@ public abstract class AggregatePart<I,
      *                               or the ID type of the part state does not match
      *                               the ID type of the {@code root}
      */
-    protected <P extends Message> P partState(Class<P> partStateClass) {
+    protected <P extends EntityState> P partState(Class<P> partStateClass) {
         P partState = root.partState(partStateClass);
         return partState;
     }

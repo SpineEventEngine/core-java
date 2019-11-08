@@ -20,8 +20,8 @@
 
 package io.spine.server.projection;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.protobuf.ValidatingBuilder;
@@ -55,7 +55,7 @@ import static java.lang.String.format;
  *         the type of the state objects holding projection data
  */
 public abstract class Projection<I,
-                                 M extends Message,
+                                 M extends EntityState,
                                  B extends ValidatingBuilder<M>>
         extends TransactionalEntity<I, M, B>
         implements EventPlayer, EventSubscriber,

@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -66,8 +66,8 @@ final class SimpleColumn
     }
 
     @Override
-    public @Nullable Object valueIn(Message entityState) {
-        return getter.apply(entityState);
+    public @Nullable Object valueIn(EntityState state) {
+        return getter.apply(state);
     }
 
     @Override
@@ -76,6 +76,6 @@ final class SimpleColumn
     }
 
     @Immutable
-    interface Getter extends Function<Message, Object> {
+    interface Getter extends Function<EntityState, Object> {
     }
 }

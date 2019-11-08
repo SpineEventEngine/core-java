@@ -20,8 +20,9 @@
 
 package io.spine.server.storage.system.given;
 
-import io.spine.server.model.Nothing;
 import io.spine.server.projection.Projection;
+import io.spine.test.storage.Task;
+import io.spine.test.storage.TaskId;
 
-public class TestProjection extends Projection<String, Nothing, Nothing.Builder> {
+public class TestProjection extends Projection<TaskId, Task, Task.Builder> {
 }

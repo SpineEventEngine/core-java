@@ -19,20 +19,20 @@
  */
 syntax = "proto3";
 
-package spine.test.entity.number;
+package spine.test.server.number;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.entity.number";
+option java_package = "io.spine.test.server.number";
 option java_multiple_files = true;
-
 
 // A natural number.
 //
 // Zero is considered a natural number.
 //
 message NaturalNumber {
+    option (entity).kind = ENTITY;
 
     // Natural number value.
     //

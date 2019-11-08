@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
@@ -89,7 +89,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
      */
     private static <I>
     StorageSpec<I> toStorageSpec(ContextSpec context, EntityClass<?> modelClass) {
-        Class<? extends Message> stateClass = modelClass.stateClass();
+        Class<? extends EntityState> stateClass = modelClass.stateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.idClass();
         TypeUrl stateUrl = TypeUrl.of(stateClass);

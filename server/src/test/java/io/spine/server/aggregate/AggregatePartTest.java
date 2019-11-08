@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.grpc.MemoizingObserver;
@@ -115,12 +115,13 @@ class AggregatePartTest {
         assertEquals(ASSIGNEE, task.getAssignee());
     }
 
-    private void assertEntityCount(Class<? extends Message> stateType, int expectedCount) {
-        Collection<? extends Message> messages = queryEntities(stateType);
-        assertThat(messages).hasSize(expectedCount);
+    private void assertEntityCount(Class<? extends EntityState> stateType, int expectedCount) {
+        Collection<? extends EntityState> entityStates = queryEntities(stateType);
+        assertThat(entityStates).hasSize(expectedCount);
     }
 
-    private Collection<? extends Message> queryEntities(Class<? extends Message> entityClass) {
+    private Collection<? extends EntityState>
+    queryEntities(Class<? extends EntityState> entityClass) {
         Query query = factory.query()
                              .all(entityClass);
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
@@ -129,7 +130,7 @@ class AggregatePartTest {
         return observer.firstResponse()
                        .getMessageList()
                        .stream()
-                       .map(state -> unpack(state.getState()))
+                       .map(state -> unpack(state.getState(), entityClass))
                        .collect(toList());
     }
 

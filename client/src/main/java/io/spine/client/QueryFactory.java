@@ -22,7 +22,7 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.ActorContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -74,7 +74,7 @@ public final class QueryFactory {
      *         the {@linkplain Query query} target type
      * @return new instance of {@link QueryBuilder}
      */
-    public QueryBuilder select(Class<? extends Message> targetType) {
+    public QueryBuilder select(Class<? extends EntityState> targetType) {
         checkNotNull(targetType);
         QueryBuilder queryBuilder = new QueryBuilder(targetType, this);
         return queryBuilder;
@@ -106,7 +106,7 @@ public final class QueryFactory {
      *         to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public Query byIdsWithMask(Class<? extends Message> entityClass,
+    public Query byIdsWithMask(Class<? extends EntityState> entityClass,
                                Set<?> ids,
                                String... maskPaths) {
         checkNotNull(ids);
@@ -135,7 +135,7 @@ public final class QueryFactory {
      * @throws IllegalArgumentException
      *         if any of IDs have invalid type or are {@code null}
      */
-    public Query byIds(Class<? extends Message> entityClass, Set<?> ids) {
+    public Query byIds(Class<? extends EntityState> entityClass, Set<?> ids) {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
@@ -160,7 +160,7 @@ public final class QueryFactory {
      *         the property paths for the {@code FieldMask} applied to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
+    public Query allWithMask(Class<? extends EntityState> entityClass, String... maskPaths) {
         FieldMask fieldMask = fromStringList(null, ImmutableList.copyOf(maskPaths));
         Query result = composeQuery(entityClass, null, null, fieldMask);
         return result;
@@ -176,13 +176,13 @@ public final class QueryFactory {
      *         the class of a target entity
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public Query all(Class<? extends Message> entityClass) {
+    public Query all(Class<? extends EntityState> entityClass) {
         checkNotNull(entityClass);
 
         return composeQuery(entityClass, null, null, null);
     }
 
-    Query composeQuery(Class<? extends Message> entityClass,
+    Query composeQuery(Class<? extends EntityState> entityClass,
                        @Nullable Set<?> ids,
                        @Nullable Set<CompositeFilter> filters,
                        @Nullable FieldMask fieldMask) {

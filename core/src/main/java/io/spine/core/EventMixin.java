@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.protobuf.Messages;
 import io.spine.validate.FieldAwareMessage;
@@ -35,9 +36,13 @@ import static io.spine.protobuf.Messages.isDefault;
 
 /**
  * Mixin interface for event objects.
+ *
+ * @apiNote Implements {@link EntityState} because events are actually a part of system entities
+ *        (see {@code EEntity}) and can be queried directly.
  */
 @Immutable
-interface EventMixin extends Signal<EventId, EventMessage, EventContext>, FieldAwareMessage {
+interface EventMixin
+        extends Signal<EventId, EventMessage, EventContext>, FieldAwareMessage, EntityState {
 
     /**
      * Obtains the ID of the tenant of the event.

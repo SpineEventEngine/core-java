@@ -25,7 +25,6 @@ import com.google.common.truth.LongSubject;
 import com.google.protobuf.StringValue;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.given.entity.BareBonesEntity;
 import io.spine.server.entity.given.entity.EntityWithMessageId;
 import io.spine.server.entity.given.entity.TestAggregate;
 import io.spine.server.entity.given.entity.TestEntityWithIdInteger;
@@ -73,7 +72,7 @@ class EntityTest {
     @Test
     @DisplayName("not accept null ID")
     void notAcceptNullId() {
-        assertThrows(NullPointerException.class, () -> new BareBonesEntity(Tests.<Long>nullRef()));
+        assertThrows(NullPointerException.class, () -> new EntityWithMessageId(Tests.nullRef()));
     }
 
     @Nested

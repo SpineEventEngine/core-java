@@ -26,6 +26,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
@@ -80,7 +81,7 @@ import static java.lang.String.format;
 @Internal
 public abstract class Transaction<I,
                                   E extends TransactionalEntity<I, S, B>,
-                                  S extends Message,
+                                  S extends EntityState,
                                   B extends ValidatingBuilder<S>> {
 
     /**
@@ -194,7 +195,7 @@ public abstract class Transaction<I,
     @VisibleForTesting
     static <I,
             E extends TransactionalEntity<I, S, B>,
-            S extends Message,
+            S extends EntityState,
             B extends ValidatingBuilder<S>>
     B toBuilder(E entity) {
         S currentState = entity.state();

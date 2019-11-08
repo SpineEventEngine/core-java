@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.StringValue;
+import io.spine.test.entity.AccountDetails;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class InvalidEntityStateExceptionTest {
     @Test
     @DisplayName("create exception with violations")
     void createExceptionWithViolations() {
-        StringValue entityState = StringValue.getDefaultInstance();
+        AccountDetails entityState = AccountDetails.getDefaultInstance();
 
         InvalidEntityStateException exception = onConstraintViolations(
                 entityState,

@@ -20,14 +20,14 @@
 
 package io.spine.client.given;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.OrderBy;
 import io.spine.test.client.TestEntity;
 import io.spine.type.TypeUrl;
 
 public class QueryBuilderTestEnv {
 
-    public static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
+    public static final Class<? extends EntityState> TEST_ENTITY_TYPE = TestEntity.class;
     public static final TypeUrl TEST_ENTITY_TYPE_URL = TypeUrl.of(TEST_ENTITY_TYPE);
     public static final OrderBy EMPTY_ORDER_BY = OrderBy.getDefaultInstance();
     public static final String SECOND_FIELD = "second_field";

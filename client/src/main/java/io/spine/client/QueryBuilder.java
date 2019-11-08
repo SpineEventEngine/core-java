@@ -21,7 +21,7 @@
 package io.spine.client;
 
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 
 import java.util.Optional;
 
@@ -66,7 +66,7 @@ public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
     private OrderBy.Direction direction;
     private int limit = 0;
 
-    QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
+    QueryBuilder(Class<? extends EntityState> targetType, QueryFactory queryFactory) {
         super(targetType);
         this.queryFactory = checkNotNull(queryFactory);
     }

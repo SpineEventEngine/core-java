@@ -21,11 +21,11 @@
 package io.spine.testing.client.grpc;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.CommandServiceGrpc;
@@ -97,10 +97,11 @@ public class TestClient implements Logging {
     /**
      * Queries all entities of provided type.
      *
-     * @param messageType an entity type to query
+     * @param messageType
+     *         an entity type to query
      * @return query response with the state of entities obtained from the server
      */
-    public QueryResponse queryAll(Class<? extends Message> messageType) {
+    public QueryResponse queryAll(Class<? extends EntityState> messageType) {
         Query query = requestFactory.query()
                                     .all(messageType);
         try {
@@ -120,7 +121,8 @@ public class TestClient implements Logging {
     /**
      * Shutdown the client waiting 5 seconds for preexisting calls to continue.
      *
-     * @throws InterruptedException if waiting is interrupted.
+     * @throws InterruptedException
+     *         if waiting is interrupted.
      */
     public void shutdown() throws InterruptedException {
         if (!channel.isShutdown()) {

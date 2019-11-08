@@ -20,8 +20,8 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkState;
  * to modify the state from the descendants.
  */
 public abstract class TransactionalEntity<I,
-                                          S extends Message,
+                                          S extends EntityState,
                                           B extends ValidatingBuilder<S>>
                       extends AbstractEntity<I, S> {
 

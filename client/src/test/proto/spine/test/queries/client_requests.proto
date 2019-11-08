@@ -39,6 +39,7 @@ message TestEntityId {
 
 // Test entity used as a `Target` for queries.
 message TestEntity {
+    option (entity).kind = ENTITY;
 
     // Entity ID.
     TestEntityId id = 1;

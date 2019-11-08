@@ -23,10 +23,10 @@ package io.spine.server.aggregate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.Time;
 import io.spine.core.ActorContext;
@@ -733,7 +733,7 @@ public abstract class AggregateStorageTest
 
 
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
-        Event expectedEvent = eventFactory.createEvent(event(Time.currentTime()));
+        Event expectedEvent = eventFactory.createEvent(event(Project.getDefaultInstance()));
 
         storage.writeEvent(id, expectedEvent);
 
@@ -803,10 +803,10 @@ public abstract class AggregateStorageTest
         }
     }
 
-    private static EventMessage event(Message entityState) {
+    private static EventMessage event(EntityState state) {
         return StateImported
                 .newBuilder()
-                .setState(Any.pack(entityState))
+                .setState(Any.pack(state))
                 .vBuild();
     }
 }

@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorageTest;
 import io.spine.test.storage.Project;
@@ -49,7 +49,7 @@ public class InMemoryRecordStorageTest
     }
 
     @Override
-    protected Message newState(ProjectId id) {
+    protected EntityState newState(ProjectId id) {
         String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
         Project project = Project
                 .newBuilder()

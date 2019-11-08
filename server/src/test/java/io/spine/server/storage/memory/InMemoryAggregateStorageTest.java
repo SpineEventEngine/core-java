@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
@@ -41,7 +41,7 @@ class InMemoryAggregateStorageTest extends AggregateStorageTest {
     protected <I> AggregateStorage<I> newStorage(
             Class<? extends I> idClass,
             Class<? extends Aggregate<I,
-                                      ? extends Message,
+                                      ? extends EntityState,
                                       ? extends ValidatingBuilder<?>>> aggregateClass) {
         return InMemoryAggregateStorage.newInstance();
     }

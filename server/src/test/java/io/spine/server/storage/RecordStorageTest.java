@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
@@ -504,9 +504,9 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
     void createUniqueStatesForSameId() {
         int checkCount = 10;
         ProjectId id = newId();
-        Set<Message> states = newHashSet();
+        Set<EntityState> states = newHashSet();
         for (int i = 0; i < checkCount; i++) {
-            Message newState = newState(id);
+            EntityState newState = newState(id);
             if (states.contains(newState)) {
                 fail("RecordStorageTest.newState() should return unique messages.");
             }
