@@ -70,8 +70,7 @@ final class InMemoryTypeRegistry implements TypeRegistry {
         if (repository instanceof RecordBasedRepository) {
             RecordBasedRepository<I, E, ? extends EntityState> recordBasedRepository
                     = (RecordBasedRepository<I, E, ? extends EntityState>) repository;
-            typeToRepositoryMap.put(entityType,
-                                    recordBasedRepository);
+            typeToRepositoryMap.put(entityType, recordBasedRepository);
         }
         if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);

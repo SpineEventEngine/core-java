@@ -66,8 +66,8 @@ final class SimpleColumn
     }
 
     @Override
-    public @Nullable Object valueIn(EntityState entityState) {
-        return getter.apply(entityState);
+    public @Nullable Object valueIn(EntityState state) {
+        return getter.apply(state);
     }
 
     @Override

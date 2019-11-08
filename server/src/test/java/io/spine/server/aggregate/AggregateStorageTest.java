@@ -803,10 +803,10 @@ public abstract class AggregateStorageTest
         }
     }
 
-    private static EventMessage event(EntityState entityState) {
+    private static EventMessage event(EntityState state) {
         return StateImported
                 .newBuilder()
-                .setState(Any.pack(entityState))
+                .setState(Any.pack(state))
                 .vBuild();
     }
 }

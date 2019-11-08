@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.EntityState;
@@ -49,19 +48,19 @@ public final class InvalidEntityStateException extends ValidationException {
             "Entity state does match the validation constraints";
 
     /**
-     * The entity state or the message packed into {@link Any}.
+     * The entity state which is invalid.
      */
-    private final EntityState entityState;
+    private final EntityState state;
 
     /**
      * The error passed with the exception.
      */
     private final Error error;
 
-    private InvalidEntityStateException(EntityState entityState, Error error) {
+    private InvalidEntityStateException(EntityState state, Error error) {
         super(error.getValidationError()
                    .getConstraintViolationList());
-        this.entityState = entityState;
+        this.state = state;
         this.error = error;
     }
 
@@ -69,14 +68,14 @@ public final class InvalidEntityStateException extends ValidationException {
      * Creates an exception instance for an entity state, which has fields that
      * violate validation constraint(s).
      *
-     * @param entityState
+     * @param state
      *         the invalid entity state
      * @param violations
      *         the constraint violations for the entity state
      */
     public static InvalidEntityStateException
-    onConstraintViolations(EntityState entityState, Iterable<ConstraintViolation> violations) {
-        Factory factory = new Factory(entityState, violations);
+    onConstraintViolations(EntityState state, Iterable<ConstraintViolation> violations) {
+        Factory factory = new Factory(state, violations);
         return factory.newException();
     }
 
@@ -84,7 +83,7 @@ public final class InvalidEntityStateException extends ValidationException {
      * Returns a related event message.
      */
     EntityState entityState() {
-        return entityState;
+        return state;
     }
 
     /**

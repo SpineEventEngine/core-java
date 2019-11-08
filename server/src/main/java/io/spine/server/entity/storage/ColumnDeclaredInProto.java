@@ -35,7 +35,7 @@ interface ColumnDeclaredInProto extends Column {
     /**
      * Extracts the column value currently stored in the entity state.
      */
-    @Nullable Object valueIn(EntityState entityState);
+    @Nullable Object valueIn(EntityState state);
 
     /**
      * Obtains the corresponding proto field declaration.
