@@ -19,7 +19,7 @@
  */
 syntax = "proto3";
 
-package spine.test.entity.number;
+package spine.test.natural.number;
 
 import "spine/options.proto";
 
@@ -33,7 +33,7 @@ option java_multiple_files = true;
 // Zero is considered a natural number.
 //
 message NaturalNumber {
-    option (.entity).kind = ENTITY;
+    option (entity).kind = ENTITY;
 
     // Natural number value.
     //
