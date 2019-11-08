@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.client.EntityStateUpdate;
@@ -74,6 +75,8 @@ class SubscriptionServiceTest {
     private MemoizingObserver<Subscription> observer;
     /** The observer for activating a subscription. */
     private MemoizingObserver<SubscriptionUpdate> activationObserver;
+    /** The observer for cancelling a subscription. */
+    private MemoizingObserver<Response> cancellationObserver;
 
     @BeforeEach
     void setUp() {
@@ -90,6 +93,7 @@ class SubscriptionServiceTest {
                 .build();
         observer = new MemoizingObserver<>();
         activationObserver = new MemoizingObserver<>();
+        cancellationObserver = new MemoizingObserver<>();
     }
 
     @AfterEach
@@ -270,42 +274,47 @@ class SubscriptionServiceTest {
         // Activate subscription.
         subscriptionService.activate(observer.firstResponse(), activationObserver);
 
-        // Post update to Stand directly.
-        ProjectId projectId = ProjectId
-                .newBuilder()
-                .setId("some-id")
-                .build();
-
-        createProject(context, projectId);
+        // Generate the update and get the ID of the updated entity.
+        ProjectId entityId = updateEntity();
 
         // `isCompleted` set to false since we don't expect
-        // activationObserver::onCompleted to be called.
+        // `activationObserver::onCompleted` to be called.
         verifyState(activationObserver, false);
 
-        Project actual = memoizedEntity(activationObserver, Project.class);
-        Project expected = Project.newBuilder()
-                                  .setId(projectId)
-                                  .build();
+        EntityState actual = memoizedEntity(activationObserver, Project.class);
+        EntityState expected = toExpected(entityId);
         ProtoTruth.assertThat(actual)
                   .comparingExpectedFieldsOnly()
                   .isEqualTo(expected);
     }
 
-    private void createProject(BoundedContext context, ProjectId projectId) {
+    @CanIgnoreReturnValue
+    private ProjectId updateEntity() {
+        ProjectId projectId = ProjectId
+                .newBuilder()
+                .setId("some-id")
+                .build();
         AggCreateProject cmd = Given.CommandMessage.createProject(projectId);
         Command command = requestFactory.createCommand(cmd);
         context.commandBus()
                .post(command, StreamObservers.noOpObserver());
+        return projectId;
+    }
+
+    private static EntityState toExpected(ProjectId entityId) {
+        return Project.newBuilder()
+               .setId(entityId)
+               .build();
     }
 
     private static <T extends EntityState>
-    T memoizedEntity(MemoizingObserver<SubscriptionUpdate> observer, Class<T> entityCls) {
+    T memoizedEntity(MemoizingObserver<SubscriptionUpdate> observer, Class<T> stateType) {
         SubscriptionUpdate update = observer.firstResponse();
         EntityUpdates entityUpdates = update.getEntityUpdates();
         assertThat(entityUpdates.getUpdateCount()).isEqualTo(1);
 
-        EntityStateUpdate projectUpdate = entityUpdates.getUpdate(0);
-        return unpack(projectUpdate.getState(), entityCls);
+        EntityStateUpdate stateUpdate = entityUpdates.getUpdate(0);
+        return unpack(stateUpdate.getState(), stateType);
     }
 
     private static <T> void verifyState(MemoizingObserver<T> observer, boolean completed) {
@@ -339,14 +348,10 @@ class SubscriptionServiceTest {
         subscriptionService.activate(observer.firstResponse(), activationObserver);
 
         // Cancel subscription.
-        subscriptionService.cancel(observer.firstResponse(), new MemoizingObserver<>());
+        subscriptionService.cancel(observer.firstResponse(), cancellationObserver);
 
         // Post update to Stand.
-        ProjectId projectId = ProjectId
-                .newBuilder()
-                .setId("some-other-id")
-                .build();
-        createProject(context, projectId);
+        updateEntity();
 
         // The update must not be handled by the observer.
         assertThat(activationObserver.responses()).isEmpty();
@@ -356,8 +361,6 @@ class SubscriptionServiceTest {
     @Nested
     @DisplayName("when cancelling non-existent subscription")
     class WarnOnCancelling extends LoggingTest {
-
-        private MemoizingObserver<Response> cancellationObserver;
 
         WarnOnCancelling() {
             super(SubscriptionService.class, Level.WARNING);
@@ -370,7 +373,6 @@ class SubscriptionServiceTest {
             // Hook the log here to minimize the trapped output.
             interceptLogging();
 
-            cancellationObserver = new MemoizingObserver<>();
             subscriptionService.cancel(invalidSubscription, cancellationObserver);
         }
 
