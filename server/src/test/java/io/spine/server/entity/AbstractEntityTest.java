@@ -27,7 +27,7 @@ import io.spine.server.entity.given.entity.AnEntity;
 import io.spine.server.entity.given.entity.NaturalNumberEntity;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
-import io.spine.test.entity.number.NaturalNumber;
+import io.spine.test.server.number.NaturalNumber;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
