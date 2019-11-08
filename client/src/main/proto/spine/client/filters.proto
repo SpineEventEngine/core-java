@@ -73,6 +73,7 @@ message TargetFilters {
 
 // The filter grouping a number of simple filters with a specified logical operator.
 message CompositeFilter {
+    option (is).java_type = "CompositeFilterMixin";
 
     // The list of filters.
     //
@@ -98,6 +99,7 @@ message CompositeFilter {
 
 // A filter matching some value in the event message/entity state.
 message Filter {
+    option (is).java_type = "FilterMixin";
 
     // The path to the field to be matched.
     //

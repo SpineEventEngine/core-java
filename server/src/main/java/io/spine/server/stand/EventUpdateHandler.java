@@ -46,7 +46,7 @@ final class EventUpdateHandler extends UpdateHandler {
 
     @Override
     Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
-        boolean matches = isTypeMatching(event) && (includeAll() || matchByFilters(event));
+        boolean matches = typeMatches(event) && (includeAll() || matchByFilters(event));
         if (!matches) {
             return Optional.empty();
         }
@@ -62,7 +62,7 @@ final class EventUpdateHandler extends UpdateHandler {
     }
 
     @Override
-    boolean isTypeMatching(EventEnvelope event) {
+    boolean typeMatches(EventEnvelope event) {
         String expectedTypeUrl = target().getType();
         String actualTypeUrl = TypeUrl.of(event.message())
                                       .value();
@@ -73,7 +73,9 @@ final class EventUpdateHandler extends UpdateHandler {
      * Matches an event to the subscription filters.
      */
     private boolean matchByFilters(EventEnvelope event) {
-        return isIdMatching(event) && checkEventMessageMatches(event);
+        boolean idMatches = idMatches(event);
+        boolean eventMatches = eventMatches(event);
+        return idMatches && eventMatches;
     }
 
     /**
@@ -102,13 +104,16 @@ final class EventUpdateHandler extends UpdateHandler {
     /**
      * Checks if the event message matches the subscription filters.
      */
-    private boolean checkEventMessageMatches(EventEnvelope event) {
+    private boolean eventMatches(EventEnvelope event) {
         Message message = event.message();
         TargetFilters filters = target().getFilters();
         boolean result = filters
                 .getFilterList()
                 .stream()
-                .allMatch(f -> checkPasses(message, f));
+                .allMatch(f -> {
+                    //Field field = Field.withPath(f.getFieldPath());
+                    return f.test(message);
+                });
         return result;
     }
 }

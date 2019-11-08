@@ -18,12 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.server.storage.given.OperatorEvaluatorTestEnv.FaultyComparisonType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,8 +37,8 @@ import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filter.Operator.LESS_THAN;
+import static io.spine.client.OperatorEvaluator.eval;
 import static io.spine.protobuf.Durations2.seconds;
-import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -254,13 +253,13 @@ class OperatorEvaluatorTest {
         @Test
         @DisplayName("`GREATER_THAN`")
         void gt() {
-            checkFailsToCompareBy(GREATER_THAN);;
+            checkFailsToCompareBy(GREATER_THAN);
         }
 
         @Test
         @DisplayName("`GREATER_OR_EQUAL`")
         void ge() {
-            checkFailsToCompareBy(GREATER_OR_EQUAL);;
+            checkFailsToCompareBy(GREATER_OR_EQUAL);
         }
 
         @Test
@@ -325,5 +324,15 @@ class OperatorEvaluatorTest {
 
         assertTrue(eval(obj, operator, obj));
         assertTrue(eval(obj, EQUAL, obj));
+    }
+
+    private static class FaultyComparisonType {
+
+        @SuppressWarnings("InstantiationOfUtilityClass") // Not a utility class
+        public static final FaultyComparisonType INSTANCE = new FaultyComparisonType();
+
+        private FaultyComparisonType() {
+            // Singleton type.
+        }
     }
 }
