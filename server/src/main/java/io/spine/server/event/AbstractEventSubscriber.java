@@ -21,12 +21,11 @@
 package io.spine.server.event;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import com.google.protobuf.Empty;
-import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageId;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
+import io.spine.server.Identity;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Ignore;
@@ -37,13 +36,14 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.lang.String.format;
@@ -62,11 +62,7 @@ public abstract class AbstractEventSubscriber
 
     /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
-    private final MessageId eventAnchor = MessageId
-            .newBuilder()
-            .setId(Identifier.pack(getClass().getName()))
-            .setTypeUrl(TypeUrl.of(Empty.class).value())
-            .vBuild();
+    private final Supplier<MessageId> eventAnchor = memoize(() -> Identity.ofSingleton(getClass()));
     @LazyInit
     private SystemWriteSide system = NoOpSystemWriteSide.INSTANCE;
     @LazyInit
@@ -112,12 +108,16 @@ public abstract class AbstractEventSubscriber
         if (outcome.hasError()) {
             HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
                     .newBuilder()
-                    .setEntity(eventAnchor)
+                    .setEntity(eventAnchor())
                     .setHandledSignal(event.messageId())
                     .setError(outcome.getError())
                     .vBuild();
             system.postEvent(systemEvent, event.asMessageOrigin());
         }
+    }
+
+    private MessageId eventAnchor() {
+        return eventAnchor.get();
     }
 
     private DispatchOutcome notSupported(EventEnvelope event) {

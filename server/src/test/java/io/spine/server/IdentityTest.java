@@ -17,16 +17,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    api deps.grpc.grpcStub
-    compile project(':core')
-    implementation deps.grpc.grpcProtobuf
-    testImplementation(
-            "io.spine:spine-testlib:$spineBaseVersion",
-            project(':testutil-client'),
-            project(path: ':core', configuration: 'testArtifacts')
-    )
-}
 
-apply from: deps.scripts.testArtifacts
-apply from: deps.scripts.publishProto
+package io.spine.server;
+
+import io.spine.testing.UtilityClassTest;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@DisplayName("`Identity` utility class should")
+class IdentityTest extends UtilityClassTest<Identity> {
+
+    IdentityTest() {
+        super(Identity.class);
+    }
+
+    @Test
+    @DisplayName("not allow empty or blank identity")
+    void stringIdentity() {
+        assertRejects("");
+        assertRejects(" ");
+    }
+
+    void assertRejects(String value) {
+        assertThrows(IllegalArgumentException.class, () -> Identity.byString(value));
+    }
+}
