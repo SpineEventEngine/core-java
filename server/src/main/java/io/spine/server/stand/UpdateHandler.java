@@ -41,9 +41,9 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Handles the domain and system events which correspond to the specified {@code Subscription}.
@@ -79,10 +79,12 @@ abstract class UpdateHandler implements Logging {
      *         the event which may trigger subscription updates
      */
     void handle(EventEnvelope event) {
-        checkState(isActive(),
-                   "Dispatched an event of type `%s` to the non-active subscription with ID `%s`.",
-                   TypeUrl.of(event.message()), subscription.getId()
-                                                            .getValue());
+        if (!isActive()) {
+            throw newIllegalStateException(
+                    "Dispatched an event of type `%s` to the non-active subscription with ID `%s`.",
+                    TypeUrl.of(event.message()), subscription.getId().getValue()
+            );
+        }
         detectUpdate(event).ifPresent(this::deliverUpdate);
     }
 
