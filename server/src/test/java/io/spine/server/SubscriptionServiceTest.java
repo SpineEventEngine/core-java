@@ -36,7 +36,6 @@ import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.ProjectAggregateRepository;
-import io.spine.server.aggregate.Aggregate;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -521,12 +520,5 @@ class SubscriptionServiceTest {
 
     private static Target getProjectQueryTarget() {
         return Targets.allOf(Project.class);
-    }
-
-    private static class PAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
-
-        protected PAggregate(ProjectId id) {
-            super(id);
-        }
     }
 }
