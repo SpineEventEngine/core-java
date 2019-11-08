@@ -135,8 +135,8 @@ message Filter {
 
 // Allows to add an ID filter for the read operations.
 //
-// Used to filter out all objects with identifiers not included into the filter. SQL equivalent is
-// "... where row.id IN (...)".
+// Used to filter out all objects with identifiers not included into the filter.
+// SQL equivalent is "... where row.id IN (...)".
 //
 message IdFilter {
 
