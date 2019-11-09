@@ -20,18 +20,73 @@
 package io.spine.server.type;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.base.RejectionMessage;
+import io.spine.core.Event;
+import io.spine.server.type.given.rejection.PhoneNotFound;
+import io.spine.server.type.given.rejection.TestRejections;
+import io.spine.server.type.given.rejection.UnableToLocateKeys;
+import io.spine.testing.core.given.GivenUserId;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.type.RejectionClass.from;
+import static io.spine.server.type.RejectionClass.of;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-@DisplayName("RejectionClass should")
+@DisplayName("`RejectionClass` should")
 class RejectionClassTest {
+
+    /** Test value for test data rejections. */
+    private final String user = GivenUserId.generated().getValue();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(RejectionClass.class);
+    }
+
+    @Test
+    @DisplayName("obtain the value by the `RejectionMessage` class")
+    void byClass() {
+        Class<TestRejections.PhoneNotFound> expected = TestRejections.PhoneNotFound.class;
+        assertThat(of(expected).value())
+                .isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("obtain the value by rejection message")
+    void byMessage() {
+        RejectionMessage msg =
+                PhoneNotFound.newBuilder()
+                             .setUser(user)
+                             .build()
+                             .messageThrown();
+        assertThat(of(msg).value())
+                .isEqualTo(msg.getClass());
+    }
+
+    @Test
+    @DisplayName("obtain the value by the `Event` instance")
+    void byEvent() {
+        RejectionMessage msg = UnableToLocateKeys
+                .newBuilder()
+                .setUser(user)
+                .build()
+                .messageThrown();
+        Event event = TestEventFactory.newInstance(getClass())
+                                      .createEvent(msg);
+
+        assertThat(of(event).value())
+                .isEqualTo(msg.getClass());
+    }
+
+    @Test
+    @DisplayName("obtain the value by `ThrowableMessage` class")
+    void byThrowableMessage() {
+        assertThat(from(PhoneNotFound.class).value())
+                .isEqualTo(TestRejections.PhoneNotFound.class);
     }
 }
