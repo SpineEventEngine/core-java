@@ -20,31 +20,12 @@
 
 package io.spine.client;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.annotation.GeneratedMixin;
-import io.spine.client.CompositeFilter.CompositeOperator;
 
-import java.util.List;
+import java.util.function.Predicate;
 
 /**
- * Augments {@link CompositeFilter} with useful methods.
+ * Tells whether or not a message satisfies the specified criteria.
  */
-@SuppressWarnings("override") // to handle the absence of `@Override` in the generated code.
-@GeneratedMixin
-interface CompositeFilterMixin extends Message, CompositeMessageFilter<Message> {
-
-    List<Filter> getFilterList();
-    CompositeOperator getOperator();
-
-    @Override
-    default List<MessageFilter<Message>> filters() {
-        List<Filter> list = getFilterList();
-        return ImmutableList.copyOf(list);
-    }
-
-    @Override
-    default CompositeOperator operator() {
-        return getOperator();
-    }
+interface MessageFilter<M extends Message> extends Predicate<M> {
 }

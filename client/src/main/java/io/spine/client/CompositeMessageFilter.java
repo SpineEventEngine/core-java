@@ -20,45 +20,41 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.annotation.GeneratedMixin;
-import io.spine.base.Field;
-import io.spine.base.FieldPath;
-import io.spine.protobuf.TypeConverter;
+import io.spine.client.CompositeFilter.CompositeOperator;
 
-import static io.spine.client.OperatorEvaluator.eval;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Augments {@link Filter} with useful methods.
+ * A message filter which is an {@linkplain #operator() operation} on other
+ * message {@linkplain #filters() filters}.
  */
-@GeneratedMixin
-@SuppressWarnings("override") // to handle the absence of `@Override` in the generated code.
-interface FilterMixin extends Message, MessageFilter<Message> {
+interface CompositeMessageFilter<M extends Message> extends MessageFilter<M> {
 
-    Any getValue();
-    FieldPath getFieldPath();
-    Filter.Operator getOperator();
+    List<MessageFilter<M>> filters();
+    CompositeOperator operator();
 
     /**
      * Verifies if this filter passed the message.
      */
     @Override
-    default boolean test(Message message) {
-        Field field = Field.withPath(getFieldPath());
-        Object actual = field.valueIn(message);
-        Any requiredAsAny = getValue();
-        Object required = TypeConverter.toObject(requiredAsAny, actual.getClass());
-        try {
-            return eval(actual, getOperator(), required);
-        } catch (IllegalArgumentException e) {
-            throw newIllegalArgumentException(
-                    e,
-                    "Filter value `%s` cannot be properly compared to" +
-                            " the message field `%s` of the class `%s`.",
-                    required, field, actual.getClass().getName()
-            );
+    @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // OK for Proto enum.
+    default boolean test(M message) {
+        Stream<MessageFilter<M>> filters = filters().stream();
+        CompositeFilter.CompositeOperator operator = operator();
+        Predicate<MessageFilter<M>> passesFilter = f -> f.test(message);
+        switch (operator) {
+            case ALL:
+                return filters.allMatch(passesFilter);
+            case EITHER:
+                return filters.anyMatch(passesFilter);
+            default:
+                throw newIllegalArgumentException(
+                        "Unknown composite filter operator `%s`.", operator);
         }
     }
 }
