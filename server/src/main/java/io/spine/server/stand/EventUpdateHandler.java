@@ -29,11 +29,12 @@ import io.spine.client.SubscriptionUpdate;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.Responses;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
+
+import static io.spine.core.Responses.ok;
 
 /**
  * The update handler of {@code Subscription}s for {@code Event}s.
@@ -86,7 +87,7 @@ final class EventUpdateHandler extends UpdateHandler {
         SubscriptionUpdate result = SubscriptionUpdate
                 .newBuilder()
                 .setSubscription(subscription())
-                .setResponse(Responses.ok())
+                .setResponse(ok())
                 .setEventUpdates(updates)
                 .build();
         return result;
