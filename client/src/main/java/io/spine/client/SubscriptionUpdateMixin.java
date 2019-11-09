@@ -35,7 +35,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
  * Extends {@link SubscriptionUpdate} with useful methods.
  */
 @GeneratedMixin
-public interface SubscriptionUpdateMixin {
+interface SubscriptionUpdateMixin {
 
     @SuppressWarnings("override") // for generated code
     EntityUpdates getEntityUpdates();
