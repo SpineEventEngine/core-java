@@ -80,7 +80,7 @@ public final class EventClass extends MessageClass<EventMessage> {
      * <p>Named {@code from} to avoid collision with {@link #of(Message)}.
      */
     public static EventClass from(Event event) {
-        return from(event.typeUrl());
+        return from(event.messageTypeUrl());
     }
 
     /**

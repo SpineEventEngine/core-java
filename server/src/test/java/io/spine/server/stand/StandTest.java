@@ -457,7 +457,7 @@ class StandTest extends TenantAwareTest {
                                       .messageId();
             assertThat(origin.asCommandId()).isEqualTo(cmd.id());
             assertThat(origin.getTypeUrl()).isEqualTo(cmd.command()
-                                                         .typeUrl()
+                                                         .messageTypeUrl()
                                                          .value());
             Any packedMessage = event.getMessage();
             CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
