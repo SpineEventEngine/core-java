@@ -20,6 +20,7 @@
 
 package io.spine.client;
 
+import io.spine.base.Field;
 import io.spine.core.Event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -29,8 +30,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class EventFilter implements MessageFilter<Event> {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // local semantic: field name in `Event`
-    private static final String CONTEXT_PREFIX = "context";
+    /** The name of the {@code context} field in the {@code Event} type. */
+    private static final String CONTEXT_FIELD =
+            Field.nameOf(Event.CONTEXT_FIELD_NUMBER, Event.getDescriptor());
+
     private final Filter filter;
 
     EventFilter(Filter filter) {
@@ -42,7 +45,7 @@ final class EventFilter implements MessageFilter<Event> {
         boolean byContext =
                 filter.getFieldPath()
                       .getFieldName(0)
-                      .equals(CONTEXT_PREFIX);
+                      .equals(CONTEXT_FIELD);
         if (byContext) {
             // Since we reference the context field with `context` prefix, we need to pass
             // the whole `Event` instance.
