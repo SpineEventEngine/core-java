@@ -23,8 +23,10 @@ package io.spine.test.client;
 import io.spine.core.UserId;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.tuple.Pair;
 import io.spine.test.client.command.LogInUser;
 import io.spine.test.client.command.LogOutUser;
+import io.spine.test.client.event.UserAccountCreated;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.event.UserLoggedOut;
 
@@ -34,11 +36,19 @@ import io.spine.test.client.event.UserLoggedOut;
 final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus.Builder>  {
 
     @Assign
-    UserLoggedIn on(LogInUser c) {
+    Pair<UserLoggedIn, UserAccountCreated> on(LogInUser c) {
         builder().setLoggedIn(true);
-        return UserLoggedIn.newBuilder()
-                           .setUser(c.getUser())
-                           .vBuild();
+        UserId user = c.getUser();
+        return Pair.of(
+                UserLoggedIn
+                        .newBuilder()
+                        .setUser(user)
+                        .vBuild(),
+                UserAccountCreated
+                        .newBuilder()
+                        .setUser(user)
+                        .vBuild()
+        );
     }
 
     @Assign

@@ -25,8 +25,10 @@ import io.spine.base.CommandMessage;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.command.LogInUser;
+import io.spine.test.client.event.UserAccountCreated;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.testing.core.given.GivenUserId;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,18 +38,24 @@ import static com.google.common.truth.Truth.assertThat;
 @DisplayName("`CommandRequest` should")
 class CommandRequestTest extends AbstractClientTest {
 
+    /** Registers which event consumers were called. */
+    private final ConsumerCallCounter counter = new ConsumerCallCounter();
     private CommandRequest commandRequest;
-    private boolean consumerCalled;
 
     @BeforeEach
     void createCommandRequest() {
-        consumerCalled = false;
+        counter.clear();
         CommandMessage cmd = LogInUser
                 .newBuilder()
                 .setUser(GivenUserId.generated())
                 .build();
         commandRequest = client().asGuest()
                                  .command(cmd);
+    }
+
+    @AfterEach
+    void clearCounter() {
+        counter.clear();
     }
 
     @Override
@@ -58,18 +66,21 @@ class CommandRequestTest extends AbstractClientTest {
     @Test
     @DisplayName("deliver an event to a consumer")
     void eventConsumer() {
-        commandRequest.observe(UserLoggedIn.class, (e) -> consumerCalled = true)
+        commandRequest.observe(UserLoggedIn.class, counter::add)
+                      .observe(UserAccountCreated.class, counter::add)
                       .post();
-        assertThat(consumerCalled)
+        assertThat(counter.containsAll(UserLoggedIn.class, UserAccountCreated.class))
                 .isTrue();
     }
 
     @Test
     @DisplayName("deliver an event and its context fo a consumer")
     void eventAndContextConsumer() {
-        commandRequest.observe(UserLoggedIn.class, (e, c) -> consumerCalled = true)
+        commandRequest.observe(UserLoggedIn.class, (e, c) -> counter.add(e))
+                      .observe(UserAccountCreated.class, (e, c) -> counter.add(e))
                       .post();
-        assertThat(consumerCalled)
+        assertThat(counter.containsAll(UserLoggedIn.class, UserAccountCreated.class))
                 .isTrue();
     }
+
 }
