@@ -34,7 +34,6 @@ import io.spine.server.stand.Stand;
 import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -57,9 +56,9 @@ public final class SubscriptionService
 
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
-    private SubscriptionService(Map<TypeUrl, BoundedContext> map) {
+    private SubscriptionService(ImmutableMap<TypeUrl, BoundedContext> map) {
         super();
-        this.typeToContextMap = ImmutableMap.copyOf(map);
+        this.typeToContextMap = checkNotNull(map);
     }
 
     public static Builder newBuilder() {
@@ -86,7 +85,9 @@ public final class SubscriptionService
         return newIllegalArgumentException(
                 "Unable to subscribe to the type `%s` which is not a part of" +
                         " any of Bounded Contexts handled by this `SubscriptionService`." +
-                        " Did you call `SubscriptionService.Builder.add(BoundedContext)`?",
+                        " Please check that the method" +
+                        " `SubscriptionService.Builder.add(BoundedContext)` is called for" +
+                        " the context which produces this type.",
                 target.getType());
     }
 
