@@ -51,9 +51,9 @@ public final class StateClass extends MessageClass<EntityState> {
     /**
      * Creates an instance of {@code EntityStateClass} from the class of the given message.
      */
-    public static StateClass of(EntityState entityState) {
-        checkNotNull(entityState);
-        return from(entityState.getClass());
+    public static StateClass of(EntityState state) {
+        checkNotNull(state);
+        return from(state.getClass());
     }
 
     /**

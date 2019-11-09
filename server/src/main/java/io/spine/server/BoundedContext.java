@@ -338,7 +338,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      * <p>If a repository is registered, the method returns it or {@link Optional#empty()} if
      * the requested entity is {@linkplain Visibility#NONE not visible}.
      *
-     * @param entityStateClass
+     * @param stateClass
      *         the class of the state of the entity managed by the resulting repository
      * @return the requested repository or {@link Optional#empty()} if the repository manages
      *         a {@linkplain Visibility#NONE non-visible} entity
@@ -347,13 +347,13 @@ public abstract class BoundedContext implements Closeable, Logging {
      * @see VisibilityGuard
      */
     @Internal
-    public Optional<Repository> findRepository(Class<? extends EntityState> entityStateClass) {
+    public Optional<Repository> findRepository(Class<? extends EntityState> stateClass) {
         // See if there is a repository for this state at all.
-        if (!guard.hasRepository(entityStateClass)) {
+        if (!guard.hasRepository(stateClass)) {
             throw newIllegalStateException("No repository found for the entity state class `%s`.",
-                                           entityStateClass.getName());
+                                           stateClass.getName());
         }
-        Optional<Repository> repository = guard.repositoryFor(entityStateClass);
+        Optional<Repository> repository = guard.repositoryFor(stateClass);
         return repository;
     }
 

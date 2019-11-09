@@ -96,8 +96,8 @@ public final class InterfaceBasedColumn
     }
 
     @Override
-    public @Nullable Object valueIn(EntityState entityState) {
-        return getterFromState.apply(entityState);
+    public @Nullable Object valueIn(EntityState state) {
+        return getterFromState.apply(state);
     }
 
     @Override

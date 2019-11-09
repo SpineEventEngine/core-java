@@ -116,8 +116,8 @@ class AggregatePartTest {
     }
 
     private void assertEntityCount(Class<? extends EntityState> stateType, int expectedCount) {
-        Collection<? extends EntityState> messages = queryEntities(stateType);
-        assertThat(messages).hasSize(expectedCount);
+        Collection<? extends EntityState> entityStates = queryEntities(stateType);
+        assertThat(entityStates).hasSize(expectedCount);
     }
 
     private Collection<? extends EntityState>

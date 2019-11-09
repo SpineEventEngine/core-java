@@ -48,15 +48,15 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     MESSAGE(classImplementing(EntityState.class)) {
         @Override
-        protected Object[] arrangeArguments(EntityState entityState, EventEnvelope event) {
-            return new Object[]{entityState};
+        protected Object[] arrangeArguments(EntityState state, EventEnvelope event) {
+            return new Object[]{state};
         }
     },
 
     MESSAGE_AND_EVENT_CONTEXT(classImplementing(EntityState.class), exactly(EventContext.class)) {
         @Override
-        protected Object[] arrangeArguments(EntityState entityState, EventEnvelope event) {
-            return new Object[]{entityState, event.context()};
+        protected Object[] arrangeArguments(EntityState state, EventEnvelope event) {
+            return new Object[]{state, event.context()};
         }
     };
 
@@ -92,9 +92,9 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         checkArgument(eventMessage instanceof EntityStateChanged,
                       "Must be an `%s` event.", EntityStateChanged.class.getSimpleName());
         EntityStateChanged systemEvent = (EntityStateChanged) eventMessage;
-        EntityState entityState = (EntityState) unpack(systemEvent.getNewState());
-        return arrangeArguments(entityState, event);
+        EntityState state = (EntityState) unpack(systemEvent.getNewState());
+        return arrangeArguments(state, event);
     }
 
-    protected abstract Object[] arrangeArguments(EntityState entityState, EventEnvelope event);
+    protected abstract Object[] arrangeArguments(EntityState state, EventEnvelope event);
 }
