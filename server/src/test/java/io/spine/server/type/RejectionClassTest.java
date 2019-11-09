@@ -38,6 +38,9 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 @DisplayName("`RejectionClass` should")
 class RejectionClassTest {
 
+    private static final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(RejectionClassTest.class);
+
     /** Test value for test data rejections. */
     private final String user = GivenUserId.generated().getValue();
 
@@ -76,8 +79,7 @@ class RejectionClassTest {
                 .setUser(user)
                 .build()
                 .messageThrown();
-        Event event = TestEventFactory.newInstance(getClass())
-                                      .createEvent(msg);
+        Event event = eventFactory.createEvent(msg);
 
         assertThat(of(event).value())
                 .isEqualTo(msg.getClass());
