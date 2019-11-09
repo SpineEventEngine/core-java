@@ -27,6 +27,7 @@ import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.command.LogInUser;
 import io.spine.test.client.event.UserAccountCreated;
 import io.spine.test.client.event.UserLoggedIn;
+import io.spine.test.client.rejection.Rejections.UserAlreadyLoggedIn;
 import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,7 +75,7 @@ class CommandRequestTest extends AbstractClientTest {
     }
 
     @Test
-    @DisplayName("deliver an event and its context fo a consumer")
+    @DisplayName("deliver an event and its context to a consumer")
     void eventAndContextConsumer() {
         commandRequest.observe(UserLoggedIn.class, (e, c) -> counter.add(e))
                       .observe(UserAccountCreated.class, (e, c) -> counter.add(e))
@@ -83,4 +84,16 @@ class CommandRequestTest extends AbstractClientTest {
                 .isTrue();
     }
 
+    @Test
+    @DisplayName("deliver a rejection to its consumers")
+    void rejections() {
+        // Post the command so that the user is logged in. We are not interested in events here.
+        commandRequest.post();
+        // Now post the command again, expecting the rejection.
+        commandRequest.observe(UserAlreadyLoggedIn.class, counter::add)
+                      .post();
+
+        assertThat(counter.contains(UserAlreadyLoggedIn.class))
+                .isTrue();
+    }
 }
