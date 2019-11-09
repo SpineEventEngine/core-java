@@ -47,7 +47,7 @@ SubscribingRequest<M extends Message,
                    C extends MessageContext,
                    W extends Message,
                    B extends SubscribingRequest<M, C, W, B>>
-        extends FilteringRequest<M, Topic, TopicBuilder, SubscribingRequest<M, C, W, B>> {
+        extends FilteringRequest<M, Topic, TopicBuilder, B> {
 
     SubscribingRequest(ClientRequest parent, Class<M> type) {
         super(parent, type);
@@ -58,7 +58,7 @@ SubscribingRequest<M extends Message,
     abstract MessageConsumer<M, C> toMessageConsumer(Consumer<M> consumer);
 
     @CanIgnoreReturnValue
-    public SubscribingRequest<M, C, W, B> observe(Consumer<M> consumer) {
+    public B observe(Consumer<M> consumer) {
         consumers().add(toMessageConsumer(consumer));
         return self();
     }
@@ -74,7 +74,7 @@ SubscribingRequest<M extends Message,
      * @see #onConsumingError(ConsumerErrorHandler)
      */
     @CanIgnoreReturnValue
-    public SubscribingRequest<M, C, W, B> onStreamingError(ErrorHandler handler) {
+    public B onStreamingError(ErrorHandler handler) {
         consumers().onStreamingError(handler);
         return self();
     }
@@ -87,7 +87,7 @@ SubscribingRequest<M extends Message,
      * @see #onStreamingError(ErrorHandler)
      */
     @CanIgnoreReturnValue
-    SubscribingRequest<M, C, W, B> onConsumingError(ConsumerErrorHandler<M> handler) {
+    public B onConsumingError(ConsumerErrorHandler<M> handler) {
         consumers().onConsumingError(handler);
         return self();
     }
