@@ -101,7 +101,7 @@ public abstract class AbstractCommander
 
     @Override
     public void dispatchEvent(EventEnvelope event) {
-        CommandReactionMethod method = thisClass.getCommander(event.messageClass());
+        CommandReactionMethod method = thisClass.commanderOn(event.messageClass());
         DispatchOutcomeHandler
                 .from(method.invoke(this, event))
                 .onCommands(this::postCommands)

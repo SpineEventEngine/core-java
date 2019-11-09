@@ -134,7 +134,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
      * event with the passed class.
      */
     public CommandReactionMethod commanderOf(EventClass eventClass) {
-        return commanderDelegate.getCommander(eventClass);
+        return commanderDelegate.commanderOn(eventClass);
     }
 
     /**

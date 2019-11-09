@@ -89,7 +89,7 @@ public final class CommanderClass<C extends Commander>
     /**
      * Obtains the method which reacts on the passed event class.
      */
-    public CommandReactionMethod getCommander(EventClass eventClass) {
+    public CommandReactionMethod commanderOn(EventClass eventClass) {
         return delegate.handlerOf(eventClass, EmptyClass.instance());
     }
 
