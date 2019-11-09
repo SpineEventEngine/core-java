@@ -34,7 +34,6 @@ import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -81,8 +80,7 @@ abstract class UpdateHandler implements Logging {
     void handle(EventEnvelope event) {
         checkState(isActive(),
                    "Dispatched an event of type `%s` to the non-active subscription with ID `%s`.",
-                   TypeUrl.of(event.message()), subscription.getId()
-                                                            .getValue());
+                   event.typeUrl(), subscription.getId().getValue());
         detectUpdate(event).ifPresent(this::deliverUpdate);
     }
 

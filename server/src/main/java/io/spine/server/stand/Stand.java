@@ -172,7 +172,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     @Override
     protected void handle(EventEnvelope event) {
-        TypeUrl typeUrl = TypeUrl.of(event.message());
+        TypeUrl typeUrl = event.typeUrl();
         if (subscriptionRegistry.hasType(typeUrl)) {
             subscriptionRegistry.byType(typeUrl)
                                 .stream()

@@ -97,7 +97,7 @@ public final class EventClass extends MessageClass<EventMessage> {
      */
     public static EventClass of(Message eventOrMessage) {
         EventMessage eventMessage = ensureMessage(eventOrMessage);
-        TypeUrl typeUrl = TypeUrl.of(eventMessage.getDefaultInstanceForType());
+        TypeUrl typeUrl = eventMessage.typeUrl();
         return new EventClass(eventMessage.getClass(), typeUrl);
     }
 
