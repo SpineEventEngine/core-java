@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *           .command(logInUser)
  *           .observe(UserLoggedIn.class, (event, context) -> { ... })
  *           .observe(UserAlreadyLoggedIn.class, (rejection, context) -> { ... })
- *           .onStreamingError((throwable) -> {})
+ *           .onStreamingError((throwable) -> { ... })
  *           .post();
  * }</pre>
  *
