@@ -21,9 +21,9 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.EventUpdates;
+import io.spine.client.Filters;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.TargetFilters;
@@ -105,15 +105,13 @@ final class EventUpdateHandler extends UpdateHandler {
      * Checks if the event message matches the subscription filters.
      */
     private boolean eventMatches(EventEnvelope event) {
-        Message message = event.message();
         TargetFilters filters = target().getFilters();
+        Event evt = event.outerObject();
         boolean result = filters
                 .getFilterList()
                 .stream()
-                .allMatch(f -> {
-                    //Field field = Field.withPath(f.getFieldPath());
-                    return f.test(message);
-                });
+                .map(Filters::toEventFilter)
+                .allMatch(f -> f.test(evt));
         return result;
     }
 }

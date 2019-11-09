@@ -28,7 +28,6 @@ import io.spine.test.client.command.LogInUser;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +57,6 @@ class CommandRequestTest extends AbstractClientTest {
 
     @Test
     @DisplayName("deliver an event to a consumer")
-    @Disabled("Until `EventsAfterCommand` subscribing is fixed")
     void eventConsumer() {
         commandRequest.observe(UserLoggedIn.class, (e) -> consumerCalled = true)
                       .post();
@@ -68,7 +66,6 @@ class CommandRequestTest extends AbstractClientTest {
 
     @Test
     @DisplayName("deliver an event and its context fo a consumer")
-    @Disabled("Until `EventsAfterCommand` subscribing is fixed")
     void eventAndContextConsumer() {
         commandRequest.observe(UserLoggedIn.class, (e, c) -> consumerCalled = true)
                       .post();
