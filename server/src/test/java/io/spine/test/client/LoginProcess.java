@@ -29,6 +29,7 @@ import io.spine.test.client.command.LogOutUser;
 import io.spine.test.client.event.UserAccountCreated;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.event.UserLoggedOut;
+import io.spine.test.client.rejection.UserAlreadyLoggedIn;
 
 /**
  * Performs login/logout operations and keeps the login status of the user.
@@ -36,9 +37,19 @@ import io.spine.test.client.event.UserLoggedOut;
 final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus.Builder>  {
 
     @Assign
-    Pair<UserLoggedIn, UserAccountCreated> on(LogInUser c) {
-        builder().setLoggedIn(true);
+    Pair<UserLoggedIn, UserAccountCreated> on(LogInUser c) throws UserAlreadyLoggedIn {
+
         UserId user = c.getUser();
+        LoginStatus state = state();
+        if (state.getUser().equals(user) && state.getLoggedIn()) {
+            throw UserAlreadyLoggedIn
+                    .newBuilder()
+                    .setUser(user)
+                    .build();
+        }
+        builder()
+                .setUser(user)
+                .setLoggedIn(true);
         return Pair.of(
                 UserLoggedIn
                         .newBuilder()
