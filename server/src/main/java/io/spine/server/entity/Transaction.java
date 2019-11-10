@@ -247,8 +247,7 @@ public abstract class Transaction<I,
      * Obtains the {@link MessageId} of the entity under the transaction.
      */
     MessageId entityId() {
-        TypeUrl typeUrl = TypeUrl.of(entity.state()
-                                           .getClass());
+        TypeUrl typeUrl = entity.state().typeUrl();
         return MessageId
                 .newBuilder()
                 .setId(Identifier.pack(entity.id()))
