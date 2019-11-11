@@ -31,7 +31,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.server.type.RejectionClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
@@ -66,14 +66,14 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
      * Obtains the classes of rejections thrown by this method, or empty set
      * if no rejections are thrown.
      */
-    public ImmutableSet<RejectionClass> rejections() {
+    public ImmutableSet<EventClass> rejections() {
         Class<?>[] exceptionTypes = rawMethod().getExceptionTypes();
         @SuppressWarnings("unchecked") // The cast is safe as we filter before.
-        ImmutableSet<RejectionClass> result =
+        ImmutableSet<EventClass> result =
                 Arrays.stream(exceptionTypes)
                       .filter(ThrowableMessage.class::isAssignableFrom)
                       .map(c -> (Class<ThrowableMessage>) c)
-                      .map(RejectionClass::from)
+                      .map(EventClass::fromThrowable)
                       .collect(toImmutableSet());
         return result;
     }

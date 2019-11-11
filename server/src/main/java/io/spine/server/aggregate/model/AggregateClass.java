@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
@@ -96,7 +96,8 @@ public class AggregateClass<A extends Aggregate>
      * Obtains event types produced by this aggregate class.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
-        Sets.SetView<EventClass> result = union(commandOutput(), reactionOutput());
+        SetView<EventClass> methodResults = union(commandOutput(), reactionOutput());
+        SetView<EventClass> result = union(methodResults, rejections());
         return result.immutableCopy();
     }
 

@@ -23,7 +23,7 @@ package io.spine.server.procman.model;
 import io.spine.base.RejectionMessage;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.procman.given.pm.TestProcessManager;
-import io.spine.server.type.RejectionClass;
+import io.spine.server.type.EventClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ class ProcessManagerClassTest {
     @DisplayName("expose generated rejections")
     void rejections() {
         Class<? extends RejectionMessage> cls = StandardRejections.EntityAlreadyArchived.class;
-        RejectionClass rejectionClass = RejectionClass.of(cls);
+        EventClass rejectionClass = EventClass.from(cls);
         assertThat(processManagerClass.rejections())
                 .contains(rejectionClass);
     }

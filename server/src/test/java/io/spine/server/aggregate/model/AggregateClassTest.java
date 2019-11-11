@@ -97,7 +97,9 @@ class AggregateClassTest {
         assertThat(aggregateClass.outgoingEvents())
                 .containsExactlyElementsIn(EventClass.setOf(
                         EngineStarted.class,
-                        EngineStopped.class
+                        EngineStopped.class,
+                        Rejections.EngineAlreadyStarted.class,
+                        Rejections.EngineAlreadyStopped.class
                 ));
     }
 }

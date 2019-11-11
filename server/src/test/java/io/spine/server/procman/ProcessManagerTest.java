@@ -551,7 +551,8 @@ class ProcessManagerTest {
                     PmTaskAdded.class,
                     PmNotificationSent.class,
                     PmIterationPlanned.class,
-                    PmIterationStarted.class
+                    PmIterationStarted.class,
+                    StandardRejections.EntityAlreadyArchived.class
             ));
         }
 
