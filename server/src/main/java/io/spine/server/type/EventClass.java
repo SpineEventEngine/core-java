@@ -24,15 +24,19 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.ensureMessage;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * A value object holding a class of events.
@@ -40,6 +44,12 @@ import static io.spine.core.Events.ensureMessage;
 public final class EventClass extends MessageClass<EventMessage> {
 
     private static final long serialVersionUID = 0L;
+    /**
+     * The name of the {@link ThrowableMessage#messageThrown()} method.
+     *
+     * @see #from(Class)
+     */
+    private static final String MESSAGE_THROWN_METHOD = "messageThrown";
 
     private EventClass(Class<? extends EventMessage> value) {
         super(value);
@@ -52,11 +62,28 @@ public final class EventClass extends MessageClass<EventMessage> {
     /**
      * Creates a new instance of the event class.
      *
-     * @param value a value to hold
+     * @param rawClass
+      *     a class of an event message or a rejection message
      * @return new instance
      */
-    public static EventClass from(Class<? extends EventMessage> value) {
-        return new EventClass(checkNotNull(value));
+    public static EventClass from(Class<? extends EventMessage> rawClass) {
+        return new EventClass(checkNotNull(rawClass));
+    }
+
+    /**
+     * Obtains the class of a rejection by the class of corresponding throwable message.
+     */
+    public static EventClass fromThrowable(Class<? extends ThrowableMessage> cls) {
+        Method messageThrownMethod;
+        try {
+            messageThrownMethod = cls.getMethod(MESSAGE_THROWN_METHOD);
+        } catch (NoSuchMethodException e) {
+            throw illegalStateWithCauseOf(e);
+        }
+        @SuppressWarnings("unchecked") // Safe as declared by `ThrowableMessage.messageThrown`.
+                Class<? extends RejectionMessage> returnType =
+                (Class<? extends RejectionMessage>) messageThrownMethod.getReturnType();
+        return from(returnType);
     }
 
     /**
