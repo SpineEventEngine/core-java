@@ -67,6 +67,7 @@ public final class TopicBuilder extends TargetBuilder<Topic, TopicBuilder> {
     @Override
     public Topic build() {
         Target target = buildTarget();
+        target.checkValid();
         FieldMask mask = composeMask();
         Topic topic = topicFactory.composeTopic(target, mask);
         return topic;

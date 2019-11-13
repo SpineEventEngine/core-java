@@ -274,7 +274,7 @@ class CommandLogTest {
             CommandRejected rejected = eventAccumulator.assertReceivedEvent(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Event rejectionEvent = rejected.getRejectionEvent();
-            TypeUrl rejectionType = rejectionEvent.typeUrl();
+            TypeUrl rejectionType = rejectionEvent.enclosedTypeUrl();
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }

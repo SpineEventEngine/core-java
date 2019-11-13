@@ -33,6 +33,7 @@ import io.spine.test.client.TestEntityId;
 import io.spine.test.queries.ProjectId;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -78,6 +79,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Topic builder should")
 @SuppressWarnings("DuplicateStringLiteralInspection")
+@Disabled
 class TopicBuilderTest {
 
     private static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
