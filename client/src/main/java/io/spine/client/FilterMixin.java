@@ -21,14 +21,21 @@
 package io.spine.client;
 
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import io.spine.annotation.GeneratedMixin;
 import io.spine.base.EntityState;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
+import io.spine.code.proto.ColumnOption;
+import io.spine.code.proto.FieldDeclaration;
 import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
+@GeneratedMixin
 public interface FilterMixin {
 
     @SuppressWarnings("override") // Implemented in the generated code.
@@ -53,6 +60,25 @@ public interface FilterMixin {
         }
     }
 
+    default boolean fieldIsColumnIn(Descriptor message) {
+        Optional<FieldDescriptor> fieldDescriptor = field().findDescriptor(message);
+        if (!fieldDescriptor.isPresent()) {
+            return false;
+        }
+        FieldDeclaration declaration = new FieldDeclaration(fieldDescriptor.get());
+        boolean result = ColumnOption.isColumn(declaration);
+        return result;
+    }
+
+    default void checkFieldIsColumnIn(Descriptor message) {
+        if (!fieldIsColumnIn(message)) {
+            throw newIllegalArgumentException(
+                    "The entity column `%s` is not found in entity state type `%s`. " +
+                            "Check the proto field exists and is marked with `(column)` option.",
+                    field(), message.getFullName());
+        }
+    }
+
     default boolean fieldIsTopLevel() {
         return !field().isNested();
     }
@@ -69,11 +95,13 @@ public interface FilterMixin {
 
     default void validateAgainst(TypeUrl targetType) {
         Class<Message> javaClass = targetType.getMessageClass();
-        if (EntityState.class.isAssignableFrom(javaClass)) {
-            checkFieldIsTopLevel();
-        }
         Descriptor descriptor = targetType.toTypeName()
                                           .messageDescriptor();
-        checkFieldPresentIn(descriptor);
+        if (EntityState.class.isAssignableFrom(javaClass)) {
+            checkFieldIsTopLevel();
+            checkFieldIsColumnIn(descriptor);
+        } else {
+            checkFieldPresentIn(descriptor);
+        }
     }
 }
