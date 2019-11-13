@@ -30,6 +30,9 @@ import java.util.Collection;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
+/**
+ * Extends the {@link Target} with validation routines.
+ */
 @GeneratedMixin
 @SuppressWarnings("override") // Methods are implemented in the generated code.
 public interface TargetMixin {
@@ -38,6 +41,13 @@ public interface TargetMixin {
 
     TargetFilters getFilters();
 
+    /**
+     * Verifies that the target type is a valid type for querying.
+     *
+     * @throws IllegalArgumentException
+     *         if the target type is not a valid type for querying
+     *
+     */
     default void checkTypeValid() {
         String type = getType();
         Class<Message> targetClass = TypeUrl.parse(type)
@@ -51,11 +61,17 @@ public interface TargetMixin {
         }
     }
 
+    /**
+     * Verifies that the target has valid type and filters.
+     *
+     * @throws IllegalArgumentException
+     *         if either the target type is not a valid type for querying or the filters are
+     *         invalid
+     * @see FilterMixin#validateAgainst(TypeUrl)
+     */
     default void checkValid() {
         checkTypeValid();
-
-        String type = getType();
-        TypeUrl typeUrl = TypeUrl.parse(type);
+        TypeUrl typeUrl = TypeUrl.parse(getType());
         getFilters()
                 .getFilterList()
                 .stream()

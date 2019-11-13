@@ -36,17 +36,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.code.proto.ColumnOption.isColumn;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
+/**
+ * Extends the {@link Filter} with validation routines.
+ */
 @GeneratedMixin
 public interface FilterMixin {
 
     @SuppressWarnings("override") // Implemented in the generated code.
     FieldPath getFieldPath();
 
+    /**
+     * Obtains the target field.
+     */
     default Field field() {
         FieldPath fieldPath = getFieldPath();
         return Field.withPath(fieldPath);
     }
 
+    /**
+     * Checks if the target field is present in the specified message type.
+     */
     default boolean fieldPresentIn(Descriptor message) {
         checkNotNull(message);
         Field field = field();
@@ -54,6 +63,9 @@ public interface FilterMixin {
         return result;
     }
 
+    /**
+     * Verifies that the target field is present in the passed message type.
+     */
     default void checkFieldPresentIn(Descriptor message) {
         checkNotNull(message);
         if (!fieldPresentIn(message)) {
@@ -63,6 +75,9 @@ public interface FilterMixin {
         }
     }
 
+    /**
+     * Checks if the target field is an entity column in the passed message type.
+     */
     default boolean fieldIsColumnIn(Descriptor message) {
         checkNotNull(message);
         Optional<FieldDescriptor> fieldDescriptor = field().findDescriptor(message);
@@ -74,6 +89,9 @@ public interface FilterMixin {
         return result;
     }
 
+    /**
+     * Verifies that the target field is an entity column in the passed message type.
+     */
     default void checkFieldIsColumnIn(Descriptor message) {
         checkNotNull(message);
         if (!fieldIsColumnIn(message)) {
@@ -84,10 +102,16 @@ public interface FilterMixin {
         }
     }
 
+    /**
+     * Checks that the target field is a top-level field.
+     */
     default boolean fieldIsTopLevel() {
         return !field().isNested();
     }
 
+    /**
+     * Verifies that the target field is a top-level field.
+     */
     default void checkFieldIsTopLevel() {
         if (!fieldIsTopLevel()) {
             throw newIllegalArgumentException(
@@ -98,6 +122,15 @@ public interface FilterMixin {
         }
     }
 
+    /**
+     * Validates a filter against the queried type.
+     *
+     * <p>Makes sure the target field is a valid entity column in case the {@link EntityState} is
+     * queried and is a valid message field in all other cases.
+     *
+     * @throws IllegalArgumentException
+     *         if the target field is not present in the type or doesn't satisfy the constraints
+     */
     default void validateAgainst(TypeUrl targetType) {
         checkNotNull(targetType);
 
