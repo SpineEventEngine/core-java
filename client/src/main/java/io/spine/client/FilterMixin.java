@@ -70,7 +70,7 @@ public interface FilterMixin {
         checkNotNull(message);
         if (!fieldPresentIn(message)) {
             throw newIllegalArgumentException(
-                    "The field with path `%s` is not present in message type `%s`.",
+                    "The field with path `%s` is not present in the message type `%s`.",
                     field(), message.getFullName());
         }
     }
@@ -104,7 +104,7 @@ public interface FilterMixin {
     }
 
     /**
-     * Checks that the target field is a top-level field.
+     * Checks if the target field is a top-level field.
      */
     default boolean fieldIsTopLevel() {
         return !field().isNested();
@@ -117,7 +117,7 @@ public interface FilterMixin {
         if (!fieldIsTopLevel()) {
             throw newIllegalArgumentException(
                     "The entity filter contains a nested entity column `%s`. " +
-                            "The nested entity columns are currently not supported.",
+                            "Nested entity columns are currently not supported.",
                     field()
             );
         }

@@ -55,7 +55,7 @@ message TestEntity {
 
 // A simple value holder.
 //
-// Is an `ENTITY` so it's possible to declare an entity column, which is needed by test.
+// Is an `ENTITY` so it's possible to declare an entity column, which is needed by the test.
 //
 message TestEntityName {
     option (entity).kind = ENTITY;

@@ -46,7 +46,6 @@ public interface TargetMixin {
      *
      * @throws IllegalArgumentException
      *         if the target type is not a valid type for querying
-     *
      */
     default void checkTypeValid() {
         String type = getType();
