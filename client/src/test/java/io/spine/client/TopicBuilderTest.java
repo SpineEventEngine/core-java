@@ -25,15 +25,12 @@ import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.StringValue;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
-import io.spine.test.queries.ProjectId;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,25 +39,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filter.Operator.EQUAL;
 import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
-import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.either;
 import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.ge;
-import static io.spine.client.Filters.gt;
 import static io.spine.client.Filters.le;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.TestEntities.randomId;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
@@ -75,11 +67,11 @@ import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Topic builder should")
 @SuppressWarnings("DuplicateStringLiteralInspection")
-@Disabled
 class TopicBuilderTest {
 
     private static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
@@ -176,8 +168,8 @@ class TopicBuilderTest {
         @Test
         @DisplayName("matching a predicate")
         void byFilter() {
-            String columnName = "myImaginaryColumn";
-            Object columnValue = 42;
+            String columnName = "first_field";
+            Object columnValue = "a column value";
 
             Topic topic = factory.select(TEST_ENTITY_TYPE)
                                  .where(eq(columnName, columnValue))
@@ -196,18 +188,18 @@ class TopicBuilderTest {
                  .hasSize(1);
             Any actualValue = findByName(filters, columnName).getValue();
             assertNotNull(columnValue);
-            Int32Value messageValue = unpack(actualValue, Int32Value.class);
-            int actualGenericValue = messageValue.getValue();
+            StringValue messageValue = unpack(actualValue, StringValue.class);
+            String actualGenericValue = messageValue.getValue();
             assertEquals(columnValue, actualGenericValue);
         }
 
         @Test
         @DisplayName("matching multiple predicates")
         void byMultipleFilters() {
-            String columnName1 = "myColumn";
-            Object columnValue1 = 42;
-            String columnName2 = "oneMore";
-            Object columnValue2 = randomId();
+            String columnName1 = "first_field";
+            Object columnValue1 = "the column value";
+            String columnName2 = "second_field";
+            Object columnValue2 = false;
 
             Topic topic = factory.select(TEST_ENTITY_TYPE)
                                  .where(eq(columnName1, columnValue1),
@@ -225,12 +217,12 @@ class TopicBuilderTest {
                                                            .getFilterList();
             Any actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
-            int actualGenericValue1 = toObject(actualValue1, int.class);
+            String actualGenericValue1 = toObject(actualValue1, String.class);
             assertEquals(columnValue1, actualGenericValue1);
 
             Any actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
-            Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
+            boolean actualGenericValue2 = toObject(actualValue2, boolean.class);
             assertEquals(columnValue2, actualGenericValue2);
         }
 
@@ -239,18 +231,16 @@ class TopicBuilderTest {
         @Test
         @DisplayName("with filter groupings")
         void byFilterGrouping() {
-            String establishedTimeColumn = "establishedTime";
-            String companySizeColumn = "companySize";
-            String countryColumn = "country";
+            String firstColumn = "first_field";
+            String secondColumn = "second_field";
+            String thirdColumn = "third_field";
             String countryName = "Ukraine";
 
-            Timestamp twoDaysAgo = subtract(currentTime(), fromHours(-48));
-
             Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .where(all(ge(companySizeColumn, 50),
-                                            le(companySizeColumn, 1000)),
-                                        either(gt(establishedTimeColumn, twoDaysAgo),
-                                               eq(countryColumn, countryName)))
+                                 .where(all(ge(thirdColumn, 50),
+                                            le(thirdColumn, 1000)),
+                                        either(eq(secondColumn, false),
+                                               eq(firstColumn, countryName)))
                                  .build();
             Target target = topic.getTarget();
             List<CompositeFilter> filters = target.getFilters()
@@ -277,31 +267,31 @@ class TopicBuilderTest {
             Truth.assertThat(eitherFilters)
                  .hasSize(2);
 
-            Filter companySizeLowerBound = allFilters.get(0);
-            String columnName1 = companySizeLowerBound.getFieldPath()
-                                                      .getFieldName(0);
-            assertEquals(companySizeColumn, columnName1);
-            assertEquals(50L, (long) toObject(companySizeLowerBound.getValue(), int.class));
-            assertEquals(GREATER_OR_EQUAL, companySizeLowerBound.getOperator());
+            Filter lowerBound = allFilters.get(0);
+            String columnName1 = lowerBound.getFieldPath()
+                                           .getFieldName(0);
+            assertEquals(thirdColumn, columnName1);
+            assertEquals(50L, (long) toObject(lowerBound.getValue(), int.class));
+            assertEquals(GREATER_OR_EQUAL, lowerBound.getOperator());
 
-            Filter companySizeHigherBound = allFilters.get(1);
-            String columnName2 = companySizeHigherBound.getFieldPath()
+            Filter higherBound = allFilters.get(1);
+            String columnName2 = higherBound.getFieldPath()
                                                        .getFieldName(0);
-            assertEquals(companySizeColumn, columnName2);
-            assertEquals(1000L, (long) toObject(companySizeHigherBound.getValue(), int.class));
-            assertEquals(LESS_OR_EQUAL, companySizeHigherBound.getOperator());
+            assertEquals(thirdColumn, columnName2);
+            assertEquals(1000L, (long) toObject(higherBound.getValue(), int.class));
+            assertEquals(LESS_OR_EQUAL, higherBound.getOperator());
 
             Filter establishedTimeFilter = eitherFilters.get(0);
             String columnName3 = establishedTimeFilter.getFieldPath()
                                                       .getFieldName(0);
-            assertEquals(establishedTimeColumn, columnName3);
-            assertEquals(twoDaysAgo, toObject(establishedTimeFilter.getValue(), Timestamp.class));
-            assertEquals(GREATER_THAN, establishedTimeFilter.getOperator());
+            assertEquals(secondColumn, columnName3);
+            assertEquals(false, toObject(establishedTimeFilter.getValue(), boolean.class));
+            assertEquals(EQUAL, establishedTimeFilter.getOperator());
 
             Filter countryFilter = eitherFilters.get(1);
             String columnName4 = countryFilter.getFieldPath()
                                               .getFieldName(0);
-            assertEquals(countryColumn, columnName4);
+            assertEquals(firstColumn, columnName4);
             assertEquals(countryName, toObject(countryFilter.getValue(), String.class));
             assertEquals(EQUAL, countryFilter.getOperator());
         }
@@ -313,10 +303,10 @@ class TopicBuilderTest {
         void byAllArguments() {
             int id1 = 314;
             int id2 = 271;
-            String columnName1 = "column1";
-            Object columnValue1 = 42;
-            String columnName2 = "column2";
-            Object columnValue2 = randomId();
+            String columnName1 = "first_field";
+            Object columnValue1 = "some column value";
+            String columnName2 = "second_field";
+            Object columnValue2 = true;
             String fieldName = "TestEntity.secondField";
             Topic query = factory.select(TEST_ENTITY_TYPE)
                                  .withMask(fieldName)
@@ -360,14 +350,24 @@ class TopicBuilderTest {
 
             Any actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
-            int actualGenericValue1 = toObject(actualValue1, int.class);
+            String actualGenericValue1 = toObject(actualValue1, String.class);
             assertEquals(columnValue1, actualGenericValue1);
 
             Any actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
-            Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
+            boolean actualGenericValue2 = toObject(actualValue2, boolean.class);
             assertEquals(columnValue2, actualGenericValue2);
         }
+    }
+
+    @SuppressWarnings("CheckReturnValue")
+    @Test
+    @DisplayName("fail when creating a topic with an invalid filter")
+    void failOnInvalidFilter() {
+        TopicBuilder builder = new TopicBuilder(TEST_ENTITY_TYPE, factory);
+        builder.where(eq("non_existent_column", "some value"));
+
+        assertThrows(IllegalArgumentException.class, builder::build);
     }
 
     @Nested

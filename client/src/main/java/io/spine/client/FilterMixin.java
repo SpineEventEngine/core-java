@@ -27,12 +27,13 @@ import io.spine.annotation.GeneratedMixin;
 import io.spine.base.EntityState;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.code.proto.ColumnOption;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.code.proto.ColumnOption.isColumn;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 @GeneratedMixin
@@ -47,12 +48,14 @@ public interface FilterMixin {
     }
 
     default boolean fieldPresentIn(Descriptor message) {
+        checkNotNull(message);
         Field field = field();
         boolean result = field.presentIn(message);
         return result;
     }
 
     default void checkFieldPresentIn(Descriptor message) {
+        checkNotNull(message);
         if (!fieldPresentIn(message)) {
             throw newIllegalArgumentException(
                     "The field with path `%s` is not present in message type `%s`.",
@@ -61,20 +64,22 @@ public interface FilterMixin {
     }
 
     default boolean fieldIsColumnIn(Descriptor message) {
+        checkNotNull(message);
         Optional<FieldDescriptor> fieldDescriptor = field().findDescriptor(message);
         if (!fieldDescriptor.isPresent()) {
             return false;
         }
         FieldDeclaration declaration = new FieldDeclaration(fieldDescriptor.get());
-        boolean result = ColumnOption.isColumn(declaration);
+        boolean result = isColumn(declaration);
         return result;
     }
 
     default void checkFieldIsColumnIn(Descriptor message) {
+        checkNotNull(message);
         if (!fieldIsColumnIn(message)) {
             throw newIllegalArgumentException(
                     "The entity column `%s` is not found in entity state type `%s`. " +
-                            "Check the proto field exists and is marked with `(column)` option.",
+                            "Please check the field exists and is marked with `(column)` option.",
                     field(), message.getFullName());
         }
     }
@@ -94,6 +99,8 @@ public interface FilterMixin {
     }
 
     default void validateAgainst(TypeUrl targetType) {
+        checkNotNull(targetType);
+
         Class<Message> javaClass = targetType.getMessageClass();
         Descriptor descriptor = targetType.toTypeName()
                                           .messageDescriptor();

@@ -44,7 +44,21 @@ message TestEntity {
     // Entity ID.
     TestEntityId id = 1;
 
-    string first_field = 2;
+    string first_field = 2 [(column) = true];
 
-    bool second_field = 3;
+    bool second_field = 3  [(column) = true];
+
+    int32 third_field = 4 [(column) = true];
+
+    TestEntityName name = 5;
+}
+
+// A simple value holder.
+//
+// Is an `ENTITY` so it's possible to declare an entity column, which is needed by test.
+//
+message TestEntityName {
+    option (entity).kind = ENTITY;
+
+    string value = 1 [(column) = true];
 }
