@@ -94,6 +94,7 @@ public interface FilterMixin {
      */
     default void checkFieldIsColumnIn(Descriptor message) {
         checkNotNull(message);
+        checkFieldIsTopLevel();
         if (!fieldIsColumnIn(message)) {
             throw newIllegalArgumentException(
                     "The entity column `%s` is not found in entity state type `%s`. " +
@@ -138,7 +139,6 @@ public interface FilterMixin {
         Descriptor descriptor = targetType.toTypeName()
                                           .messageDescriptor();
         if (EntityState.class.isAssignableFrom(javaClass)) {
-            checkFieldIsTopLevel();
             checkFieldIsColumnIn(descriptor);
         } else {
             checkFieldPresentIn(descriptor);
