@@ -77,3 +77,53 @@ message RoutingFailed {
     // The error which occurred during the routing.
     base.Error error = 3;
 }
+
+// An event emitted when an Aggregate cannot load its history due to an error while applying
+// historical events.
+//
+// The event is emitted upon each attempt to load the Aggregate.
+//
+// An Aggregate with a corrupted state cannot handle new signals.
+//
+// The Aggregate state accessible to read side is undefined. It may reflect the state of the
+// Aggregate after the last successful event, or may have advanced further, including changes caused
+// by the erroneous event. An `EntityStateChanged` event must be emitted after the error is resolved
+// to catch up the read-side on the valid Aggregate state.
+//
+// The error may take place some time after the erroneous event was emitted. In this case, there may
+// be newer events in the Aggregate history.
+//
+// The framework does not provide a turn-key solution for resolving this kind of data corruption.
+// Depending on the situation, there may be different approaches to the problem. Most common ones
+// are:
+//   - Change the logic in the event applier, so that a runtime error is not produced for the given
+//     event.
+//   - Manually change the event in the database. Note that the erroneous event may have been
+//     propagated to other entities. Re-writing part of the system's history might lead to
+//     inconsistent data.
+//   - Manually delete the event in the database. Just like the previous approach, this is
+//     a dangerous operation as the consequences of changing the history are unpredictable.
+//
+message AggregateHistoryCorrupted {
+
+    // The Aggregate ID.
+    core.MessageId entity = 1;
+
+    // The type of the Aggregate.
+    EntityTypeName entity_type = 2;
+
+    // The ID of the last event which could be applied successfully.
+    core.MessageId last_successful_event = 3;
+
+    // The ID of the event which caused an error.
+    core.MessageId erroneous_event = 4;
+
+    // The error which occurred while applying the `erroneous_event`.
+    base.Error error = 5;
+
+    // Count of events which come after the `erroneous_event` in the Aggregate history.
+    //
+    // The events are not applied to the Aggregate when loading, i.e. applying for these events was
+    // interrupted.
+    uint32 interrupted_events = 6;
+}

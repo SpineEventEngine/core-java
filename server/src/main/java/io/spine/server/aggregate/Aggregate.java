@@ -21,7 +21,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.annotation.Internal;
@@ -304,7 +303,6 @@ public abstract class Aggregate<I,
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
      */
-    @CanIgnoreReturnValue
     final BatchDispatchOutcome play(AggregateHistory history) {
         Snapshot snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
@@ -313,9 +311,7 @@ public abstract class Aggregate<I,
         List<Event> events = history.getEventList();
         eventCountAfterLastSnapshot = events.size();
         BatchDispatchOutcome batchDispatchOutcome = play(events);
-        if (batchDispatchOutcome.getSuccessful()) {
-            remember(events);
-        }
+        remember(events);
         return batchDispatchOutcome;
     }
 

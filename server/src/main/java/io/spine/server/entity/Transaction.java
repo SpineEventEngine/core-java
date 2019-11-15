@@ -307,18 +307,19 @@ public abstract class Transaction<I,
      */
     private DispatchOutcome propagateFailsafe(Phase<I> phase) {
         try {
+            DispatchOutcome outcome = phase.propagate();
             return DispatchOutcomeHandler
-                    .from(phase.propagate())
+                    .from(outcome)
                     .onError(this::rollback)
                     .onRejection(this::rollback)
                     .handle();
         } catch (Throwable t) {
-            rollback(causeOf(t));
+            Error rootCause = causeOf(t);
+            rollback(rootCause);
             return DispatchOutcome
                     .newBuilder()
-                    .setPropagatedSignal(phase.signal()
-                                              .messageId())
-                    .setError(causeOf(t))
+                    .setPropagatedSignal(phase.signal().messageId())
+                    .setError(rootCause)
                     .vBuild();
         }
     }
