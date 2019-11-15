@@ -62,6 +62,9 @@ public interface FilterMixin extends FilterOrBuilder {
 
     /**
      * Verifies that the target field is present in the passed message type.
+     *
+     * @throws IllegalArgumentException
+     *         if the field is not present in the passed message type
      */
     default void checkFieldPresentIn(Descriptor message) {
         checkNotNull(message);
@@ -88,6 +91,9 @@ public interface FilterMixin extends FilterOrBuilder {
 
     /**
      * Verifies that the target field is an entity column in the passed message type.
+     *
+     * @throws IllegalArgumentException
+     *         if the field is not an entity column in the passed message type
      */
     default void checkFieldIsColumnIn(Descriptor message) {
         checkNotNull(message);
@@ -109,6 +115,9 @@ public interface FilterMixin extends FilterOrBuilder {
 
     /**
      * Verifies that the target field is a top-level field.
+     *
+     * @throws IllegalArgumentException
+     *         if the field is not a top-level field
      */
     default void checkFieldIsTopLevel() {
         if (!fieldIsTopLevel()) {

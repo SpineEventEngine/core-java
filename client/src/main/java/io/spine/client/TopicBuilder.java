@@ -63,6 +63,9 @@ public final class TopicBuilder extends TargetBuilder<Topic, TopicBuilder> {
      * configuration.
      *
      * @return a new {@link io.spine.client.Topic Topic}
+     * @throws IllegalArgumentException
+     *         if the built {@link Target} instance is invalid, e.g. contains filters with
+     *         non-existent fields
      */
     @Override
     public Topic build() {
