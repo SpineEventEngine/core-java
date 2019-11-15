@@ -26,6 +26,7 @@ import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.type.TypeUrl;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -103,7 +104,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setLabel(label)
                 .setStatus(determineStatus(envelope))
                 .setWhenReceived(Time.currentTime())
-                .setVersion(Version.INSTANCE.getNextValue());
+                .setVersion(Version.instance.getNextValue());
         setRecordPayload(envelope, builder);
         InboxMessage message = builder.vBuild();
 
@@ -185,15 +186,32 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
         }
     }
 
-    private enum Version {
+    /**
+     * A counter providing the version for the incoming {@code InboxMessage}s.
+     *
+     * <p>Serves to distinguish the messages arrived at the very same millisecond, even from
+     * different threads.
+     *
+     * <p>Hard-coded to reset the value to zero every {@link #MAX_VERSION} times. This allows
+     * to avoid any number overflows, but still is sufficient for realistic use-cases.
+     */
+    @ThreadSafe
+    private static final class Version {
 
-        INSTANCE;
+        private static final int MAX_VERSION = 10_000;
+        private static final Version instance = new Version();
 
-        public static final int MAX_VERSION = 10_000;
         private final AtomicInteger counter = new AtomicInteger();
 
-        public synchronized int getNextValue() {
+        private synchronized int getNextValue() {
             return counter.updateAndGet(n -> (n >= MAX_VERSION) ? 1 : n + 1);
+        }
+
+        /**
+         * Obtains the next version value.
+         */
+        public static int next() {
+            return instance.getNextValue();
         }
     }
 }
