@@ -47,10 +47,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
@@ -365,11 +367,42 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             @SuppressWarnings("unchecked")
             M message = (M) envelope.message();
             R result = routing.apply(message, envelope.context());
+            checkMatchesIdType(result);
             return Optional.of(result);
         } catch (RuntimeException e) {
             Throwable cause = getRootCause(e);
             onRoutingFailed(envelope, cause);
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Ensures that the passed routing result corresponds to the {@linkplain #idClass() type of
+     * the identifiers} served by this repository.
+     *
+     * <p>An {@code IllegalStateException} is thrown otherwise.
+     *
+     * @param result the result of routing
+     * @param <R> the type of the result
+     */
+    private <R> void checkMatchesIdType(R result) {
+        Class routingResultType = null;
+        if(result instanceof Collection) {
+            Collection asCollection = (Collection) result;
+            Iterator iterator = asCollection.iterator();
+            if(iterator.hasNext()) {
+                Object element = iterator.next();
+                routingResultType = element.getClass();
+            }
+        } else {
+            routingResultType = result.getClass();
+        }
+        if (routingResultType != null) {
+            Class<I> idClass = idClass();
+            boolean corresponds = idClass.isAssignableFrom(routingResultType);
+            checkArgument(corresponds, "Message routing failed in `%s` due to the type mismatch. " +
+                                  "Expected ID type is `%s`, but was `%s`.",
+                          getClass().getName(), idClass.getName(), routingResultType.getName());
         }
     }
 
