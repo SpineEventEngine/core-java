@@ -23,6 +23,7 @@ package io.spine.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -47,9 +49,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.server.entity.given.GivenLifecycleFlags.archived;
-import static io.spine.validate.Validate.isDefault;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -73,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
 
-    private static EntityRecord newStorageRecord(Message state) {
+    private static EntityRecord newStorageRecord(EntityState state) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
                 .newBuilder()
@@ -92,7 +94,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
      *         the ID for the message
      * @return the unique {@code Message}
      */
-    protected abstract Message newState(I id);
+    protected abstract EntityState newState(I id);
 
     @Override
     protected RecordReadRequest<I> newReadRequest(I id) {
@@ -172,7 +174,8 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     void acceptRecordsWithEmptyColumns() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
-        EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
+        EntityRecordWithColumns recordWithStorageFields =
+                EntityRecordWithColumns.of(record, Collections.emptyMap());
         assertFalse(recordWithStorageFields.hasColumns());
         RecordStorage<I> storage = storage();
 
@@ -196,7 +199,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         RecordStorage<I> storage = storage();
         storage.write(id, record);
 
-        Message state = newState(id);
+        EntityState state = newState(id);
         FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
 
         RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
@@ -215,13 +218,13 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         RecordStorage<I> storage = storage();
         int count = 10;
         List<I> ids = new ArrayList<>();
-        Class<? extends Message> messageClass = null;
+        Class<? extends EntityState> stateClass = null;
 
         for (int i = 0; i < count; i++) {
             I id = newId();
-            Message state = newState(id);
-            if (messageClass == null) {
-                messageClass = state.getClass();
+            EntityState state = newState(id);
+            if (stateClass == null) {
+                stateClass = state.getClass();
             }
             EntityRecord record = newStorageRecord(state);
             storage.write(id, record);
@@ -229,7 +232,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         }
 
         int bulkCount = count / 2;
-        FieldMask fieldMask = fromFieldNumbers(messageClass, 2);
+        FieldMask fieldMask = fromFieldNumbers(stateClass, 2);
         Iterator<EntityRecord> readRecords = storage.readMultiple(
                 ids.subList(0, bulkCount),
                 fieldMask);
@@ -264,7 +267,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 initial.values()
                        .stream()
                        .map(recordWithColumns -> recordWithColumns != null
-                                                 ? recordWithColumns.getRecord()
+                                                 ? recordWithColumns.record()
                                                  : null)
                        .collect(toList());
         assertThat(actual).containsExactlyElementsIn(expected);

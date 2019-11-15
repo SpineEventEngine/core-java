@@ -38,7 +38,7 @@ import java.time.Instant;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.protobuf.Messages.isNotDefault;
 
 /**
  * A factory for various requests fired from the client-side by an actor.

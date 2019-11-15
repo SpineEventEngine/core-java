@@ -22,6 +22,7 @@ package io.spine.server.integration.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.projection.Projection;
 
@@ -29,7 +30,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newLinkedList;
 
-public abstract class MemoizingProjection<I, M extends Message, B extends ValidatingBuilder<M>>
+public abstract class MemoizingProjection<I, M extends EntityState, B extends ValidatingBuilder<M>>
         extends Projection<I, M, B> {
 
     private static final Collection<Message> events = newLinkedList();

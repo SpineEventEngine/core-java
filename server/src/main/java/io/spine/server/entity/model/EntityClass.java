@@ -21,15 +21,18 @@
 package io.spine.server.entity.model;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import com.google.protobuf.Message;
+import com.google.protobuf.Descriptors.Descriptor;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.system.server.EntityTypeName;
+import io.spine.type.MessageType;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -54,7 +57,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     private final Class<?> idClass;
 
     /** The class of the entity state. */
-    private final Class<? extends Message> stateClass;
+    private final Class<? extends EntityState> stateClass;
 
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
@@ -64,7 +67,13 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     /** The default state of entities of this class. */
     @LazyInit
-    private transient volatile @MonotonicNonNull Message defaultState;
+    private transient volatile @MonotonicNonNull EntityState defaultState;
+
+    /**
+     * The entity columns of this class.
+     */
+    @LazyInit
+    private transient volatile @MonotonicNonNull Columns columns;
 
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
@@ -125,15 +134,32 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the default state for this class of entities.
      */
-    public final Message defaultState() {
-        Message result = defaultState;
+    public final EntityState defaultState() {
+        EntityState result = defaultState;
         if (result == null) {
             synchronized (this) {
                 result = defaultState;
                 if (result == null) {
-                    Class<? extends Message> stateClass = stateClass();
+                    Class<? extends EntityState> stateClass = stateClass();
                     defaultState = defaultInstance(stateClass);
                     result = defaultState;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Obtains the entity columns of this class.
+     */
+    public final Columns columns() {
+        Columns result = columns;
+        if (result == null) {
+            synchronized (this) {
+                result = columns;
+                if (result == null) {
+                    columns = Columns.of(this);
+                    result = columns;
                 }
             }
         }
@@ -157,8 +183,17 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the class of the state of entities of this class.
      */
-    public final Class<? extends Message> stateClass() {
+    public final Class<? extends EntityState> stateClass() {
         return stateClass;
+    }
+
+    /**
+     * Obtains the entity state type.
+     */
+    public final MessageType stateType() {
+        Descriptor descriptor = defaultState().getDescriptorForType();
+        MessageType result = new MessageType(descriptor);
+        return result;
     }
 
     /**
@@ -190,7 +225,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains type URL of the state of entities of this class.
      */
-    public final TypeUrl stateType() {
+    public final TypeUrl stateTypeUrl() {
         return entityStateType;
     }
 
@@ -250,7 +285,8 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * public API. It is used internally by other framework routines and not designed for efficient
      * execution by Spine users.
      */
-    public static <S extends Message> Class<S> stateClassOf(Class<? extends Entity> entityClass) {
+    public static <S extends EntityState> Class<S>
+    stateClassOf(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
         return result;

@@ -22,6 +22,8 @@ package io.spine.server.route;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
+import io.spine.base.MessageContext;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.event.EntityStateChanged;
@@ -35,13 +37,13 @@ import java.util.Set;
  * When calculating targets to be notified on the updated state, {@code StateUpdateRouting} would
  * see if there is a custom route set for the type of the entity state.
  * If not found, the default route will be
- * {@linkplain StateUpdateRouting#apply(Message, Message) applied}.
+ * {@linkplain MessageRouting#apply(Message, MessageContext) applied}.
  *
  * @param <I>
  *         the type of the entity IDs to which the updates are routed
  */
 public final class StateUpdateRouting<I>
-        extends MessageRouting<Message, EventContext, Set<I>> {
+        extends MessageRouting<EntityState, EventContext, Set<I>> {
 
     private static final long serialVersionUID = 0L;
 
@@ -70,7 +72,7 @@ public final class StateUpdateRouting<I>
      * the message has a field matching the type of identifiers served by this routing.
      */
     @Override
-    public boolean supports(Class<? extends Message> stateType) {
+    public boolean supports(Class<? extends EntityState> stateType) {
         boolean customRouteSet = super.supports(stateType);
         @SuppressWarnings({"unchecked", "RedundantSuppression"}) // cast to the type used in ctor.
         DefaultStateRoute<I> defaultRoute = (DefaultStateRoute<I>) defaultRoute();
@@ -95,11 +97,12 @@ public final class StateUpdateRouting<I>
      *         if the route for this class is already set
      */
     @CanIgnoreReturnValue
-    public <S extends Message>
+    public <S extends EntityState>
     StateUpdateRouting<I> route(Class<S> stateClass, StateUpdateRoute<I, S> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // Logically valid.
-        Route<Message, EventContext, Set<I>> route = (Route<Message, EventContext, Set<I>>) via;
+        Route<EntityState, EventContext, Set<I>> route =
+                (Route<EntityState, EventContext, Set<I>>) via;
         addRoute(stateClass, route);
         return this;
     }
@@ -113,7 +116,7 @@ public final class StateUpdateRouting<I>
      */
     EventRoute<I, EntityStateChanged> eventRoute() {
         return (event, context) -> {
-            Message state = AnyPacker.unpack(event.getNewState());
+            EntityState state = (EntityState) AnyPacker.unpack(event.getNewState());
             return apply(state, context);
         };
     }

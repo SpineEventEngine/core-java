@@ -22,28 +22,32 @@ package io.spine.server.storage.memory;
 
 import io.spine.client.OrderBy;
 import io.spine.client.OrderBy.Direction;
-import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
+import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import java.util.Comparator;
-import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * A comparator for sorting the contents of {@link TenantRecords}
  * in a provided {@link OrderBy order}.
+ *
+ * @implNote More sophisticated storage implementations can order records by
+ *         non-{@link Comparable} fields like {@link com.google.protobuf.Message message}-type
+ *         fields, depending on their storage method (e.g. comparing the string content of
+ *         messages).The in-memory implementation stores all column values "as-is" and cannot do
+ *         that. Trying to {@linkplain OrderBy order by} column of non-comparable type will lead to
+ *         an exception being thrown.
  */
 @SuppressWarnings("ComparatorNotSerializable")
 final class EntityRecordComparator implements Comparator<EntityRecordWithColumns> {
 
     private final String column;
-    private final Comparator<MemoizedValue> comparator;
 
-    private EntityRecordComparator(String column, Comparator<MemoizedValue> comparator) {
-        this.comparator = comparator;
+    private EntityRecordComparator(String column) {
         this.column = column;
     }
 
@@ -58,72 +62,44 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
      * @throws IllegalArgumentException
      *         if the provided {@code OrderBy} is a default instance
      */
-    static EntityRecordComparator orderedBy(OrderBy orderBy) {
-        checkNotNull(orderBy);
-        checkArgument(!orderIsEmpty(orderBy),
-                      "An empty OrderBy instance cannot be mapped to an EntityRecordComparator.");
+    static Comparator<EntityRecordWithColumns> orderedBy(OrderBy orderBy) {
+        checkNotDefaultArg(
+                orderBy,
+                "An empty `OrderBy` instance cannot be mapped to an `EntityRecordComparator`.");
         Direction direction = orderBy.getDirection();
-        DirectedComparator orderDirection = DirectedComparator.of(direction);
-        return new EntityRecordComparator(orderBy.getColumn(), orderDirection.comparator());
+        String columnName = orderBy.getColumn();
+        if (direction == Direction.ASCENDING) {
+            return ascending(columnName);
+        }
+        return descending(columnName);
     }
 
-    private static boolean orderIsEmpty(OrderBy orderBy) {
-        return orderBy.equals(OrderBy.getDefaultInstance());
+    private static Comparator<EntityRecordWithColumns> ascending(String columnName) {
+        return new EntityRecordComparator(columnName);
+    }
+
+    private static Comparator<EntityRecordWithColumns> descending(String columnName) {
+        return ascending(columnName).reversed();
     }
 
     @Override
     public int compare(EntityRecordWithColumns a, EntityRecordWithColumns b) {
-        return comparator.compare(value(a), value(b));
-    }
-
-    private MemoizedValue value(EntityRecordWithColumns b) {
-        checkNotNull(column, "The column can only be null for when no ordering is performed.");
-        return b.getColumnValue(column);
-    }
-
-    /**
-     * An {@link #ASCENDING ASCENDING} or {@link #DESCENDING DESCENDING} comparator of
-     * {@link MemoizedValue MemoizedValue}s resolved from corresponding
-     * {@linkplain OrderBy#getDirection() order direction}.
-     */
-    private enum DirectedComparator {
-        ASCENDING {
-            @Override
-            boolean matches(Direction direction) {
-                return direction == Direction.ASCENDING;
-            }
-
-            @Override
-            Comparator<MemoizedValue> comparator() {
-                return MemoizedValue.comparator();
-            }
-        },
-        DESCENDING {
-            @Override
-            boolean matches(Direction direction) {
-                return direction == Direction.DESCENDING;
-            }
-
-            @Override
-            Comparator<MemoizedValue> comparator() {
-                return MemoizedValue.comparator()
-                                    .reversed();
-            }
-        };
-
-        abstract boolean matches(Direction direction);
-
-        abstract Comparator<MemoizedValue> comparator();
-
-        private static DirectedComparator of(Direction direction) {
-            DirectedComparator result =
-                    Stream.of(values())
-                          .filter((value) -> value.matches(direction))
-                          .findFirst()
-                          .orElseThrow(() -> newIllegalArgumentException(
-                                  "An invalid order direction provided to `TenantRecords`."));
-
+        checkNotNull(a);
+        checkNotNull(b);
+        ColumnName columnName = ColumnName.of(column);
+        Object aValue = a.columnValue(columnName);
+        Object bValue = b.columnValue(columnName);
+        if (aValue == null) {
+            return bValue == null ? 0 : -1;
+        }
+        if (bValue == null) {
+            return +1;
+        }
+        if (aValue instanceof Comparable) {
+            @SuppressWarnings({"unchecked", "rawtypes"}) // For convenience.
+                    int result = ((Comparable) aValue).compareTo(bValue);
             return result;
         }
+        throw newIllegalStateException("The entity record value is not a Comparable.");
     }
 }

@@ -21,6 +21,7 @@
 package io.spine.server.storage.memory;
 
 import io.spine.server.entity.Entity;
+import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.ProjectionStorageTest;
 import io.spine.test.storage.ProjectId;
@@ -32,6 +33,7 @@ import static io.spine.core.BoundedContextNames.newName;
 @DisplayName("InMemoryProjectionStorage should")
 class InMemoryProjectionStorageTest extends ProjectionStorageTest {
 
+    @SuppressWarnings("unchecked") // Logically correct.
     @Override
     protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         StorageSpec<ProjectId> spec =
@@ -40,7 +42,8 @@ class InMemoryProjectionStorageTest extends ProjectionStorageTest {
                                ProjectId.class);
         InMemoryProjectionStorage<ProjectId> storage =
                 new InMemoryProjectionStorage<>(
-                        new InMemoryRecordStorage<>(spec, false, cls)
+                        (Class<? extends Projection<?,?,?>>) cls,
+                        new InMemoryRecordStorage<>(spec, cls, false)
                 );
         return storage;
     }

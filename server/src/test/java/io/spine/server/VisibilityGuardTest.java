@@ -22,12 +22,12 @@ package io.spine.server;
 
 import com.google.common.collect.Lists;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Empty;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.ExposedRepository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.HiddenRepository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.SubscribableRepository;
+import io.spine.system.server.Company;
 import io.spine.test.entity.FullAccessAggregate;
 import io.spine.test.entity.HiddenAggregate;
 import io.spine.test.entity.SubscribableAggregate;
@@ -140,6 +140,6 @@ class VisibilityGuardTest {
     @Test
     @DisplayName("reject unregistered state class")
     void rejectUnregisteredStateClass() {
-        assertThrows(IllegalStateException.class, () -> guard.repositoryFor(Empty.class));
+        assertThrows(IllegalStateException.class, () -> guard.repositoryFor(Company.class));
     }
 }

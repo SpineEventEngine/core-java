@@ -47,7 +47,7 @@ class DefaultConverterTest {
         bc.register(repo);
 
         TypeUrl stateType = repo.entityModelClass()
-                                .stateType();
+                                .stateTypeUrl();
         converter = forAllFields(stateType, repo.entityFactory());
     }
 

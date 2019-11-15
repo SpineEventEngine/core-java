@@ -22,19 +22,18 @@ package io.spine.server.command;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
+import io.spine.server.Identity;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.function.Supplier;
@@ -57,11 +56,8 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
     /** Supplier for a packed version of the dispatcher ID. */
     private final Supplier<Any> producerId =
             memoize(() -> pack(TypeConverter.toMessage(id())));
-    private final Supplier<MessageId> eventAnchor = memoize(() -> MessageId
-            .newBuilder()
-            .setId(producerId())
-            .setTypeUrl(TypeUrl.of(Empty.class).value())
-            .vBuild());
+    private final Supplier<MessageId> eventAnchor =
+            memoize(() -> Identity.ofProducer(producerId()));
 
     @Override
     public void registerWith(BoundedContext context) {

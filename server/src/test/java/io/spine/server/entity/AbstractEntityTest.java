@@ -22,13 +22,12 @@ package io.spine.server.entity;
 
 import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
+import io.spine.base.EntityState;
 import io.spine.server.entity.given.entity.AnEntity;
 import io.spine.server.entity.given.entity.NaturalNumberEntity;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
-import io.spine.test.entity.number.NaturalNumber;
+import io.spine.test.server.number.NaturalNumber;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,6 +36,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,26 +51,27 @@ class AbstractEntityTest {
     class NotAllowToOverride {
 
         /**
-         * Ensures that {@link AbstractEntity#updateState(Message)} is final so that
+         * Ensures that {@link AbstractEntity#updateState(EntityState)} is final so that
          * it's not possible to override the default behaviour.
          */
         @Test
         @DisplayName("`updateState`")
         void updateState() throws NoSuchMethodException {
             Method updateState =
-                    AbstractEntity.class.getDeclaredMethod("updateState", Message.class);
+                    AbstractEntity.class.getDeclaredMethod("updateState", EntityState.class);
             int modifiers = updateState.getModifiers();
             assertTrue(Modifier.isFinal(modifiers));
         }
 
         /**
-         * Ensures that {@link AbstractEntity#validate(Message)} is final so that
+         * Ensures that {@link AbstractEntity#validate(EntityState)} is final so that
          * it's not possible to override the default behaviour.
          */
         @Test
         @DisplayName("`validate`")
         void validate() throws NoSuchMethodException {
-            Method validate = AbstractEntity.class.getDeclaredMethod("validate", Message.class);
+            Method validate =
+                    AbstractEntity.class.getDeclaredMethod("validate", EntityState.class);
             int modifiers = validate.getModifiers();
             assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
         }
@@ -109,7 +110,15 @@ class AbstractEntityTest {
     @DisplayName("allow valid state")
     void allowValidState() {
         AnEntity entity = new AnEntity(0L);
-        assertTrue(entity.checkEntityState(StringValue.getDefaultInstance())
+        ProjectId id = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        Project project = Project
+                .newBuilder()
+                .setId(id)
+                .build();
+        assertTrue(entity.checkEntityState(project)
                          .isEmpty());
     }
 

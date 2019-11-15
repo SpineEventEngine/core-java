@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorageTest;
 import io.spine.test.storage.Project;
@@ -45,11 +45,11 @@ public class InMemoryRecordStorageTest
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(Project.class),
                                ProjectId.class);
-        return new InMemoryRecordStorage<>(spec, false, cls);
+        return new InMemoryRecordStorage<>(spec, cls, false);
     }
 
     @Override
-    protected Message newState(ProjectId id) {
+    protected EntityState newState(ProjectId id) {
         String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
         Project project = Project
                 .newBuilder()
@@ -65,6 +65,6 @@ public class InMemoryRecordStorageTest
     @DisplayName("return storage spec")
     void returnStorageSpec() {
         StorageSpec spec = storage().spec();
-        assertEquals(ProjectId.class, spec.getIdClass());
+        assertEquals(ProjectId.class, spec.idClass());
     }
 }

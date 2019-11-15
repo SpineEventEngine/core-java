@@ -21,16 +21,23 @@
 package io.spine.server.tuple;
 
 import com.google.common.testing.EqualsTester;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
-import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Element should")
@@ -41,9 +48,40 @@ class ElementTest {
     void supportEquality() {
         Timestamp time = Time.currentTime();
         new EqualsTester().addEqualityGroup(new Element(time), new Element(time))
-                          .addEqualityGroup(new Element(TestValues.newUuidValue()))
+                          .addEqualityGroup(new Element(newUuidValue()))
                           .addEqualityGroup(new Element(Optional.empty()))
                           .testEquals();
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("elementArgument")
+    @DisplayName("allow argument of type")
+    void argumentType(Object arg,
+                      @SuppressWarnings("unused") // is used for the type in test display names
+                              String typeName) {
+        assertThat(new Element(arg).value()).isEqualTo(arg);
+    }
+
+    /**
+     * Provides arguments for {@link #argumentType(Object, String)}.
+     *
+     * <p>The first argument is the value used by the test. The second argument is the type name
+     * to be used in the display test name.
+     */
+    private static Stream<Object> elementArgument() {
+        return Stream.of(
+                Arguments.of(EitherOf2.withA(newUuidValue()), Either.class.getSimpleName()),
+                Arguments.of(Optional.of(Time.currentTime()), Optional.class.getSimpleName()),
+                Arguments.of(Durations.fromDays(100), Message.class.getSimpleName())
+        );
+    }
+
+    @Test
+    @DisplayName("do not allow types other than `Either`, `Optional`, or `Message`")
+    void noOtherTypes() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new Element(getClass().getName())
+        );
     }
 
     @Nested

@@ -30,7 +30,6 @@ import com.google.common.truth.StringSubject;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.test.entity.ProjectId;
@@ -44,15 +43,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 
-import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filter.Operator.EQUAL;
 import static io.spine.protobuf.TypeConverter.toAny;
-import static io.spine.server.entity.storage.Columns.findColumn;
-import static io.spine.server.entity.storage.given.SimpleColumn.column;
+import static io.spine.server.entity.storage.given.AColumn.column;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.Collections.emptyList;
@@ -75,34 +71,17 @@ class EntityQueryTest {
     }
 
     @Test
-    @DisplayName("be serializable")
-    void beSerializable() {
-        String columnName = deleted.name();
-        EntityColumn column = findColumn(TestEntity.class, columnName);
-        Filter filter = Filters.eq(columnName, false);
-        Multimap<EntityColumn, Filter> filters = ImmutableMultimap.of(column, filter);
-        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
-        QueryParameters parameters = QueryParameters
-                .newBuilder()
-                .add(parameter)
-                .build();
-        Set<String> ids = singleton("my-awesome-ID");
-        EntityQuery<String> query = EntityQuery.of(ids, parameters);
-        reserializeAndAssert(query);
-    }
-
-    @Test
     @DisplayName("support `toString`")
     void supportToString() {
         Object someId = Sample.messageOfType(ProjectId.class);
         Collection<Object> ids = singleton(someId);
-        EntityColumn someColumn = column();
+        Column someColumn = column();
         Object someValue = "something";
 
-        Map<EntityColumn, Object> params = new HashMap<>(1);
+        Map<Column, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
-        EntityQuery query = EntityQuery.of(ids, paramsFromValues(params));
+        EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
 
         StringSubject assertQuery = assertThat(query.toString());
         assertQuery.contains(query.getIds()
@@ -125,7 +104,8 @@ class EntityQueryTest {
     @Test
     @DisplayName("fail to append lifecycle columns if they are already present")
     void notDuplicateLifecycleColumns() {
-        EntityColumn deletedColumn = Columns.findColumn(TestEntity.class, deleted.name());
+        Columns columns = Columns.of(TestEntity.class);
+        Column deletedColumn = columns.get(ColumnName.of(deleted));
         CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(deletedColumn, Filter.getDefaultInstance()), ALL
         );
@@ -143,7 +123,7 @@ class EntityQueryTest {
      */
     private static void addEqualityGroupA(EqualsTester tester) {
         Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
-        Map<EntityColumn, Object> params = new IdentityHashMap<>(2);
+        Map<Column, Object> params = new IdentityHashMap<>(2);
         params.put(column(), "anything");
         params.put(column(), 5);
         EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
@@ -156,7 +136,7 @@ class EntityQueryTest {
      */
     private static void addEqualityGroupB(EqualsTester tester) {
         Collection<?> ids = emptyList();
-        Map<EntityColumn, Object> params = new HashMap<>(1);
+        Map<Column, Object> params = new HashMap<>(1);
         params.put(column(), 5);
         EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
         EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
@@ -172,9 +152,9 @@ class EntityQueryTest {
      */
     private static void addEqualityGroupC(EqualsTester tester) {
         Collection<?> ids = emptySet();
-        EntityColumn column = column();
+        Column column = column();
         Object value = 42;
-        Map<EntityColumn, Object> params = new HashMap<>(1);
+        Map<Column, Object> params = new HashMap<>(1);
         params.put(column, value);
         EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
         EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
@@ -187,17 +167,17 @@ class EntityQueryTest {
      */
     private static void addEqualityGroupD(EqualsTester tester) {
         Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
-        Map<EntityColumn, Object> columns = Collections.emptyMap();
+        Map<Column, Object> columns = Collections.emptyMap();
         EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
     }
 
-    private static QueryParameters paramsFromValues(Map<EntityColumn, Object> values) {
+    private static QueryParameters paramsFromValues(Map<Column, Object> values) {
         QueryParameters.Builder builder = QueryParameters.newBuilder();
-        Multimap<EntityColumn, Filter> filters = HashMultimap.create(values.size(), 1);
-        for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
-            EntityColumn column = param.getKey();
-            FieldPath fieldPath = Field.parse(column.name()).path();
+        Multimap<Column, Filter> filters = HashMultimap.create(values.size(), 1);
+        for (Map.Entry<Column, Object> param : values.entrySet()) {
+            Column column = param.getKey();
+            FieldPath fieldPath = Field.parse(column.name().value()).path();
             Filter filter = Filter
                     .newBuilder()
                     .setOperator(EQUAL)

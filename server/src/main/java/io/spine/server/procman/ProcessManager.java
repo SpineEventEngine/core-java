@@ -21,8 +21,8 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
@@ -30,6 +30,7 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
@@ -72,10 +73,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the process manager state
  */
 public abstract class ProcessManager<I,
-                                     S extends Message,
+                                     S extends EntityState,
                                      B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventReactor, Commander, HasVersionColumn<I, S> {
+        implements EventReactor, Commander, HasVersionColumn<I, S>, HasLifecycleColumns<I, S> {
 
     /**
      * Creates a new instance.

@@ -24,7 +24,6 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.validate.Validate;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -33,9 +32,9 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * An element of a tuple.
@@ -66,7 +65,7 @@ final class Element implements Serializable {
             this.type = Type.MESSAGE;
         } else {
             throw newIllegalArgumentException(
-                    "Tuple element of unsupported type passed: %s.", value
+                    "Tuple element of unsupported type passed: `%s`.", value
             );
         }
 
@@ -87,12 +86,11 @@ final class Element implements Serializable {
      * Ensures that the passed message is not default or is an instance of {@link Empty}.
      */
     private static void checkNotDefault(Message value) {
-        String valueClass = value.getClass()
-                                 .getName();
-        checkArgument(
-                Validate.isNotDefault(value),
-                "Tuples cannot contain default values. Default value of %s encountered.",
-                valueClass);
+        checkNotDefaultArg(
+                value,
+                "Tuples cannot contain default values. Default value of `%s` encountered.",
+                value.getClass().getName()
+        );
     }
 
     Object value() {
@@ -118,7 +116,7 @@ final class Element implements Serializable {
     }
 
     private IllegalStateException uncoveredType() {
-        throw newIllegalStateException("Unsupported element type encountered %s", this.type);
+        throw newIllegalStateException("Unsupported element type encountered: `%s`.", this.type);
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {

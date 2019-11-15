@@ -21,7 +21,7 @@
 package io.spine.client;
 
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 
 import java.util.Optional;
 
@@ -34,30 +34,31 @@ import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
 /**
  * A builder for the {@link Query} instances.
  *
- * <p>None of the parameters set by the builder methods are required. Call {@link #build()} to retrieve
- * the resulting {@link Query} instance.
+ * <p>None of the parameters set by the builder methods are required. Call {@link #build()} to
+ * retrieve the resulting {@link Query} instance.
  *
  * <p>Usage example:
- * <pre>
- *     {@code
- *     final Query query = factory().query()
- *                                  .select(Customer.class)
- *                                  .byId(getWestCoastCustomerIds())
- *                                  .withMask("name", "address", "email")
- *                                  .where(eq("type", "permanent"),
- *                                         eq("discountPercent", 10),
- *                                         eq("companySize", Company.Size.SMALL))
- *                                  .orderBy("name", DESCENDING)
- *                                  .limit(20)
- *                                  .build();
- *     }
- * </pre>
+ * <pre>{@code
+ * ActorRequestFactory factory = ... ;
+ * Query query = factory.query()
+ *          .select(Customer.class)
+ *          .byId(westCoastCustomerIds())
+ *          .withMask("name", "address", "email")
+ *          .where(eq("type", "permanent"),
+ *                 eq("discountPercent", 10),
+ *                 eq("companySize", Company.Size.SMALL))
+ *          .orderBy("name", ASCENDING)
+ *          .limit(20)
+ *          .build();
+ * }</pre>
  *
- * @see QueryFactory#select(Class) to start query building
- * @see Filters for filter creation shortcuts
- * @see AbstractTargetBuilder for more details on this builders API
+ * <p>Arguments for the {@link #where(Filter...)} method can be composed using the {@link Filters}
+ * utility class.
+ *
+ * @see Filters
+ * @see TargetBuilder
  */
-public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilder> {
+public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
 
     private final QueryFactory queryFactory;
 
@@ -65,19 +66,18 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     private OrderBy.Direction direction;
     private int limit = 0;
 
-    QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
+    QueryBuilder(Class<? extends EntityState> targetType, QueryFactory queryFactory) {
         super(targetType);
         this.queryFactory = checkNotNull(queryFactory);
     }
 
     /**
-     * Sets the sorting order for the query represented by the target column and order direction.
+     * Sets the sorting order by the target column and order direction.
      *
      * @param column
-     *         an entity column to sort by
+     *         the entity column to sort by
      * @param direction
      *         sorting direction
-     * @return this builder instance
      */
     public QueryBuilder orderBy(String column, OrderBy.Direction direction) {
         checkNotNull(column);
@@ -96,8 +96,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
      * Limits the number of results returned by the query.
      *
      * @param count
-     *         number of results to be returned
-     * @return this builder instance
+     *         the number of results to be returned
      */
     public QueryBuilder limit(int count) {
         checkLimit(count);
@@ -105,9 +104,14 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         return self();
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")  /* See https://github.com/pmd/pmd/issues/770. */
-    private static void checkLimit(Number count) {
-        checkArgument(count.longValue() > 0, "A Query limit must be more than 0.");
+    /**
+     * Ensures that the passed value is positive.
+     *
+     * @throws IllegalArgumentException
+     *         if the value is zero or negative
+     */
+    static void checkLimit(long count) {
+        checkArgument(count > 0, "A query limit must be a positive value.");
     }
 
     /**

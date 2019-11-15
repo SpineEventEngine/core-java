@@ -20,7 +20,7 @@
 package io.spine.server.projection.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -74,14 +74,16 @@ public class ProjectionEventDispatcher {
         TestProjectionEndpoint.dispatch(projection, EventEnvelope.of(event));
     }
 
-    private static class TestProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Message>
+    private static class TestProjectionEndpoint<I,
+                                                P extends Projection<I, S, ?>,
+                                                S extends EntityState>
             extends ProjectionEndpoint<I, P> {
 
         private TestProjectionEndpoint(EventEnvelope event) {
             super(new TestProjectionRepository<>(), event);
         }
 
-        private static <I, P extends Projection<I, S, ?>, S extends Message> void
+        private static <I, P extends Projection<I, S, ?>, S extends EntityState> void
         dispatch(P projection, EventEnvelope event) {
             TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(event);
             endpoint.runTransactionFor(projection);
@@ -93,7 +95,7 @@ public class ProjectionEventDispatcher {
      */
     private static class TestProjectionRepository<I,
                                                   P extends Projection<I, S, ?>,
-                                                  S extends Message>
+                                                  S extends EntityState>
             extends ProjectionRepository<I, P, S> {
 
         @Override

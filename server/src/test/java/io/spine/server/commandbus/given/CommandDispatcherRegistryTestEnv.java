@@ -29,7 +29,6 @@ import io.spine.core.Subscribe;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandClass;
@@ -57,8 +56,7 @@ public class CommandDispatcherRegistryTestEnv {
      ***************************/
 
     public static class NoCommandsProcessManager
-            extends ProcessManager<ProjectId, Project, Project.Builder>
-            implements TestEntityWithStringColumn<ProjectId, Project> {
+            extends ProcessManager<ProjectId, Project, Project.Builder> {
 
         /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
@@ -114,11 +112,6 @@ public class CommandDispatcherRegistryTestEnv {
                                       .setStatus(Project.Status.STARTED)
                                       .build();
             builder().mergeFrom(newState);
-        }
-
-        @Override
-        public String getIdString() {
-            return id().toString();
         }
     }
 

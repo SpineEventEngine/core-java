@@ -20,7 +20,7 @@
 
 package io.spine.server.entity.given;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
@@ -46,7 +46,7 @@ public class Given {
     /**
      * Creates dynamic builder for building an {@code Aggregate}.
      */
-    public static <A extends Aggregate<I, S, ?>, I, S extends Message>
+    public static <A extends Aggregate<I, S, ?>, I, S extends EntityState>
     AggregateBuilder<A, I, S> aggregateOfClass(Class<A> aggregateClass) {
         checkNotNull(aggregateClass);
         AggregateBuilder<A, I, S> result = new AggregateBuilder<>();
@@ -59,7 +59,7 @@ public class Given {
      */
     public static <A extends AggregatePart<I, S, ?, R>,
                    I,
-                   S extends Message,
+                   S extends EntityState,
                    R extends AggregateRoot<I>>
     AggregatePartBuilder<A, I, S, R> aggregatePartOfClass(Class<A> partClass) {
         checkNotNull(partClass);
@@ -73,7 +73,7 @@ public class Given {
      */
     public static <P extends Projection<I, S, B>,
                    I,
-                   S extends Message,
+                   S extends EntityState,
                    B extends ValidatingBuilder<S>>
     ProjectionBuilder<P, I, S, B> projectionOfClass(Class<P> projectionClass) {
         checkNotNull(projectionClass);
@@ -87,7 +87,7 @@ public class Given {
      */
     public static <P extends ProcessManager<I, S, B>,
                    I,
-                   S extends Message,
+                   S extends EntityState,
                    B extends ValidatingBuilder<S>>
     ProcessManagerBuilder<P, I, S, B> processManagerOfClass(Class<P> pmClass) {
         checkNotNull(pmClass);

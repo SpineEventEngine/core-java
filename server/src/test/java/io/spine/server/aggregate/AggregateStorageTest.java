@@ -23,10 +23,10 @@ package io.spine.server.aggregate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.Time;
 import io.spine.core.ActorContext;
@@ -75,10 +75,10 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
 import static io.spine.protobuf.Durations2.seconds;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.aggregate.given.StorageRecords.sequenceFor;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.testing.server.TestEventFactory.newInstance;
-import static io.spine.validate.Validate.isDefault;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.toList;
@@ -93,7 +93,6 @@ public abstract class AggregateStorageTest
                                     AggregateReadRequest<ProjectId>,
                                     AggregateStorage<ProjectId>> {
 
-    @SuppressWarnings("ReturnOfNull") // As declared by the field type.
     private static final Function<AggregateEventRecord, @Nullable Event> TO_EVENT =
             record -> record != null ? record.getEvent() : null;
 
@@ -734,7 +733,7 @@ public abstract class AggregateStorageTest
 
 
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
-        Event expectedEvent = eventFactory.createEvent(event(Time.currentTime()));
+        Event expectedEvent = eventFactory.createEvent(event(Project.getDefaultInstance()));
 
         storage.writeEvent(id, expectedEvent);
 
@@ -804,10 +803,10 @@ public abstract class AggregateStorageTest
         }
     }
 
-    private static EventMessage event(Message entityState) {
+    private static EventMessage event(EntityState state) {
         return StateImported
                 .newBuilder()
-                .setState(Any.pack(entityState))
+                .setState(Any.pack(state))
                 .vBuild();
     }
 }

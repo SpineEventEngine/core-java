@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
@@ -65,7 +65,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
     createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
         EntityClass<?> modelClass = asEntityClass(entityClass);
         StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
-        return new InMemoryRecordStorage<>(storageSpec, context.isMultitenant(), entityClass);
+        return new InMemoryRecordStorage<>(storageSpec, entityClass, context.isMultitenant());
     }
 
     @Override
@@ -75,8 +75,8 @@ public final class InMemoryStorageFactory implements StorageFactory {
         EntityClass<?> modelClass = asProjectionClass(projectionClass);
         StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
         InMemoryRecordStorage<I> recordStorage =
-                new InMemoryRecordStorage<>(storageSpec, context.isMultitenant(), projectionClass);
-        return new InMemoryProjectionStorage<>(recordStorage);
+                new InMemoryRecordStorage<>(storageSpec, projectionClass, context.isMultitenant());
+        return new InMemoryProjectionStorage<>(projectionClass, recordStorage);
     }
 
     @Override
@@ -89,7 +89,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
      */
     private static <I>
     StorageSpec<I> toStorageSpec(ContextSpec context, EntityClass<?> modelClass) {
-        Class<? extends Message> stateClass = modelClass.stateClass();
+        Class<? extends EntityState> stateClass = modelClass.stateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.idClass();
         TypeUrl stateUrl = TypeUrl.of(stateClass);

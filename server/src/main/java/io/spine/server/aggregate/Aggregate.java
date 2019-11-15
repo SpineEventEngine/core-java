@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.Version;
@@ -52,8 +52,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterators.any;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Abstract base for aggregates.
@@ -119,7 +119,7 @@ import static io.spine.validate.Validate.isNotDefault;
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for this central concept.
 public abstract class Aggregate<I,
-                                S extends Message,
+                                S extends EntityState,
                                 B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventPlayer, EventReactor {

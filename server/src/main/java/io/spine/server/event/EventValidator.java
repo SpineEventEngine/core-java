@@ -33,10 +33,9 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.InvalidEventException.onConstraintViolations;
-import static java.util.Optional.ofNullable;
 
 /**
- * Checks if the message of the passed event is {@linkplain MessageValidator#validate() valid}.
+ * Checks if the message of the passed event is valid.
  */
 final class EventValidator implements EnvelopeValidator<EventEnvelope> {
 
@@ -44,13 +43,12 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
     public Optional<MessageInvalid> validate(EventEnvelope event) {
         checkNotNull(event);
         Event outerObject = event.outerObject();
-        MessageInvalid result = null;
-        MessageValidator validator = MessageValidator.newInstance(outerObject);
-        List<ConstraintViolation> violations = validator.validate();
-        if (!violations.isEmpty()) {
-            EventMessage message = event.message();
-            result = onConstraintViolations(message, violations);
+        List<ConstraintViolation> violations = MessageValidator.validate(outerObject);
+        if (violations.isEmpty()) {
+            return Optional.empty();
         }
-        return ofNullable(result);
+        EventMessage message = event.message();
+        MessageInvalid result = onConstraintViolations(message, violations);
+        return Optional.of(result);
     }
 }

@@ -47,9 +47,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @see io.spine.client.TopicFactory#select(Class) to start topic building
  * @see Filters for filter creation shortcuts
- * @see AbstractTargetBuilder for more details on this builders API
+ * @see TargetBuilder for more details on this builders API
  */
-public final class TopicBuilder extends AbstractTargetBuilder<Topic, TopicBuilder> {
+public final class TopicBuilder extends TargetBuilder<Topic, TopicBuilder> {
 
     private final TopicFactory topicFactory;
 

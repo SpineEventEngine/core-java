@@ -27,6 +27,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -60,7 +61,7 @@ import static io.spine.validate.Validate.checkValid;
             fields. See Effective Java 2nd Ed. Item #71. */,
         "AbstractClassWithoutAbstractMethods",
         "ClassWithTooManyMethods"})
-public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
+public abstract class AbstractEntity<I, S extends EntityState> implements Entity<I, S> {
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -87,7 +88,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * The state of the entity.
      *
      * <p>Lazily initialized to the {@linkplain #defaultState() default state},
-     * if {@linkplain #state() accessed} before {@linkplain #setState(Message)}
+     * if {@linkplain #state() accessed} before {@linkplain #setState(EntityState)}
      * initialization}.
      */
     @LazyInit
@@ -229,12 +230,12 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Updates the state of the entity.
      *
-     * <p>The new state must be {@linkplain #validate(Message) valid}.
+     * <p>The new state must be {@linkplain #validate(EntityState) valid}.
      *
      * @param state
      *         the new state to set
      * @throws InvalidEntityStateException
-     *         if the passed state is not {@linkplain #validate(Message) valid}
+     *         if the passed state is not {@linkplain #validate(EntityState) valid}
      */
     final void updateState(S state) {
         checkNotNull(state);
@@ -245,7 +246,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Verifies the new entity state and returns {@link ConstraintViolation}s, if any.
      *
-     * <p>Default implementation uses the {@linkplain MessageValidator#validate() message
+     * <p>Default implementation uses the {@linkplain MessageValidator#validate(Message) message
      * validation}.
      *
      * @param newState
@@ -254,8 +255,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     protected final List<ConstraintViolation> checkEntityState(S newState) {
         checkNotNull(newState);
-        return MessageValidator.newInstance(newState)
-                               .validate();
+        return MessageValidator.validate(newState);
     }
 
     /**
@@ -265,7 +265,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *         a state object to replace the current state
      * @throws InvalidEntityStateException
      *         if the state is not valid
-     * @see #checkEntityState(Message)
+     * @see #checkEntityState(EntityState)
      */
     private void validate(S newState) throws InvalidEntityStateException {
         List<ConstraintViolation> violations = checkEntityState(newState);
@@ -439,7 +439,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return result;
     }
 
-    private void updateVersion(Version newVersion) {
+    final void updateVersion(Version newVersion) {
         checkNotNull(newVersion);
         checkValid(newVersion);
         if (version.equals(newVersion)) {
@@ -460,9 +460,9 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Updates the state incrementing the version number and recording time of the modification.
      *
      * <p>This is a test-only convenience method. Calling this method is equivalent to calling
-     * {@link #updateState(Message, Version)} with the incremented by one version.
+     * {@link #updateState(EntityState, Version)} with the incremented by one version.
      *
-     * <p>Please use {@link #updateState(Message, Version)} directly in the production code.
+     * <p>Please use {@link #updateState(EntityState, Version)} directly in the production code.
      *
      * @param newState
      *         a new state to set
@@ -472,12 +472,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         updateState(newState, incrementedVersion());
     }
 
-    @Override
-    public final Version getVersion() {
-        return version;
-    }
-
-    private void setVersion(Version version) {
+    void setVersion(Version version) {
         this.version = version;
     }
 
@@ -493,7 +488,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     @Override
     public Version version() {
-        return getVersion();
+        return version;
     }
 
     /**

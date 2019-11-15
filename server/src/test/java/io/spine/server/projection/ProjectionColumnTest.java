@@ -20,16 +20,18 @@
 
 package io.spine.server.projection;
 
-import io.spine.core.Version;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.EntityColumnCache;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.Columns;
 import io.spine.server.projection.given.SavingProjection;
 import io.spine.server.storage.StorageField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
+import java.util.Optional;
+
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.server.storage.VersionField.version;
@@ -41,22 +43,21 @@ class ProjectionColumnTest {
     @Test
     @DisplayName("`version`")
     void version() {
-        assertHasColumn(SavingProjection.class, version, Version.class);
+        assertHasColumn(SavingProjection.class, version);
     }
 
     @Test
     @DisplayName("`archived` and `deleted`")
     void lifecycleColumns() {
-        assertHasColumn(SavingProjection.class, archived, boolean.class);
-        assertHasColumn(SavingProjection.class, deleted, boolean.class);
+        assertHasColumn(SavingProjection.class, archived);
+        assertHasColumn(SavingProjection.class, deleted);
     }
 
     private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
-                                        StorageField columnName,
-                                        Class<?> columnType) {
-        EntityColumnCache cache = EntityColumnCache.initializeFor(projectionType);
-        EntityColumn column = cache.findColumn(columnName.toString());
-        assertThat(column).isNotNull();
-        assertThat(column.type()).isEqualTo(columnType);
+                                        StorageField storageField) {
+        Columns columns = Columns.of(projectionType);
+        ColumnName columnName = ColumnName.of(storageField);
+        Optional<Column> result = columns.find(columnName);
+        assertThat(result).isPresent();
     }
 }

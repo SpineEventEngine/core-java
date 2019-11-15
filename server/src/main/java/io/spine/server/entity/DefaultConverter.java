@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.type.TypeUrl;
 
 /**
@@ -31,7 +31,7 @@ import io.spine.type.TypeUrl;
  * @param <E> the type of entities
  * @param <S> the type of entity states
  */
-final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Message>
+final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends EntityState>
         extends StorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
@@ -40,7 +40,7 @@ final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Messag
         super(stateType, factory, fieldMask);
     }
 
-    static <I, E extends AbstractEntity<I, S>, S extends Message>
+    static <I, E extends AbstractEntity<I, S>, S extends EntityState>
     StorageConverter<I, E, S> forAllFields(TypeUrl stateType, EntityFactory<E> factory) {
         FieldMask allFields = FieldMask.getDefaultInstance();
         return new DefaultConverter<>(stateType, factory, allFields);

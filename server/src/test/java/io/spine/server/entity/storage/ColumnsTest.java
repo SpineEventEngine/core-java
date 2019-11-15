@@ -20,133 +20,139 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.testing.NullPointerTester.Visibility;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import io.spine.server.entity.storage.given.column.EntityWithManyGetters;
-import io.spine.server.entity.storage.given.column.EntityWithNoStorageFields;
-import io.spine.server.entity.storage.given.column.EntityWithRepeatedColumnNames;
-import io.spine.server.entity.storage.given.column.RealLifeEntity;
+import io.spine.server.entity.storage.given.TaskListViewProjection;
+import io.spine.server.entity.storage.given.TaskViewProjection;
+import io.spine.server.storage.LifecycleFlagField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
-import static io.spine.server.entity.storage.ColumnTests.assertContainsColumns;
-import static io.spine.server.entity.storage.Columns.extractColumnValues;
-import static io.spine.server.entity.storage.Columns.findColumn;
-import static io.spine.server.entity.storage.given.column.EntityWithManyGetters.CUSTOM_COLUMN_NAME;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("DuplicateStringLiteralInspection") // Lots of literals for column names.
-@DisplayName("Columns utility should")
+@SuppressWarnings("DuplicateStringLiteralInspection")
+@DisplayName("`Columns` should")
 class ColumnsTest {
 
-    private static final String STRING_ID = "some-string-id-never-used";
-
-    /**
-     * Helper method that checks all {@link EntityWithManyGetters} field values.
-     *
-     * <p>Created to avoid code duplication, as {@link EntityWithManyGetters} is
-     * the main {@link Entity} class used to test
-     * {@linkplain Columns#extractColumnValues(Entity, Collection) column extraction}
-     * functionality.
-     */
-    private
-    static void checkFields(EntityWithManyGetters entity, Map<String, MemoizedValue> fields) {
-        assertNotNull(fields);
-
-        String floatNullKey = "floatNull";
-        MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
-        assertNotNull(floatMemoizedNull);
-        assertNull(floatMemoizedNull.value());
-
-        assertEquals(entity.getIntegerFieldValue(),
-                     fields.get(CUSTOM_COLUMN_NAME)
-                           .value());
-
-        String messageKey = "someMessage";
-        assertEquals(entity.getSomeMessage(),
-                     fields.get(messageKey)
-                           .value());
-    }
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Columns.class);
-    }
+    private final Columns columns = Columns.of(TaskViewProjection.class);
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        new NullPointerTester().testStaticMethods(Columns.class, Visibility.PACKAGE);
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Columns.class);
+        new NullPointerTester()
+                .testAllPublicInstanceMethods(columns);
     }
 
     @Test
-    @DisplayName("get all valid columns for entity class")
-    void getAllColumns() {
-        Collection<EntityColumn> entityColumns =
-                Columns.getAllColumns(EntityWithManyGetters.class);
+    @DisplayName("be extracted from an entity class")
+    void beExtractedFromEntityClass() {
+        Columns columns = Columns.of(TaskListViewProjection.class);
+        ColumnName columnName = ColumnName.of("description");
+        Optional<Column> descriptionColumn = columns.find(columnName);
 
-        assertContainsColumns(
-                entityColumns,
-                archived.name(), deleted.name(),
-                "boolean", "booleanWrapper", "someMessage", "floatNull", CUSTOM_COLUMN_NAME
+        assertThat(descriptionColumn.isPresent()).isTrue();
+    }
+
+    @Test
+    @DisplayName("obtain a column by name")
+    void obtainByName() {
+        ColumnName columName = ColumnName.of("estimate_in_days");
+        Column column = columns.get(columName);
+
+        assertThat(column.type()).isEqualTo(int.class);
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Called to throw exception.
+    @Test
+    @DisplayName("throw `IAE` when the column with the specified name is not found")
+    void throwOnColumnNotFound() {
+        ColumnName nonExistent = ColumnName.of("non-existent-column");
+
+        assertThrows(IllegalArgumentException.class, () -> columns.get(nonExistent));
+    }
+
+    @Test
+    @DisplayName("search for a column by name")
+    void searchByName() {
+        ColumnName existent = ColumnName.of("name");
+        Optional<Column> column = columns.find(existent);
+
+        assertThat(column.isPresent()).isTrue();
+    }
+
+    @Test
+    @DisplayName("return empty `Optional` when searching for a non-existent column")
+    void returnEmptyOptionalForNonExistent() {
+        ColumnName nonExistent = ColumnName.of("non-existent-column");
+        Optional<Column> result = columns.find(nonExistent);
+
+        assertThat(result.isPresent()).isFalse();
+    }
+
+    @Test
+    @DisplayName("return the list of columns")
+    void returnColumns() {
+        int systemColumnCount = ColumnTests.defaultColumns.size();
+        int protoColumnCount = 4;
+
+        int expectedSize = systemColumnCount + protoColumnCount;
+        assertThat(columns.columnList()).hasSize(expectedSize);
+
+    }
+
+    @Test
+    @DisplayName("extract values from entity")
+    void extractColumnValues() {
+        TaskViewProjection projection = new TaskViewProjection();
+        Map<ColumnName, Object> values = columns.valuesIn(projection);
+
+        assertThat(values).containsExactly(
+                ColumnName.of("archived"), projection.isArchived(),
+                ColumnName.of("deleted"), projection.isDeleted(),
+                ColumnName.of("version"), projection.version(),
+                ColumnName.of("name"), projection.state()
+                                                 .getName(),
+                ColumnName.of("estimate_in_days"), projection.state()
+                                                             .getEstimateInDays(),
+                ColumnName.of("status"), projection.state()
+                                                   .getStatus(),
+                ColumnName.of("due_date"), projection.state()
+                                                     .getDueDate()
         );
     }
 
     @Test
-    @DisplayName("fail to obtain columns for invalid entity class")
-    void notGetInvalidColumns() {
-        assertThrows(IllegalStateException.class,
-                     () -> Columns.getAllColumns(EntityWithRepeatedColumnNames.class));
+    @DisplayName("return a map of interface-based columns")
+    void extractInterfaceBasedValues() {
+        ImmutableMap<ColumnName, InterfaceBasedColumn> values = columns.interfaceBasedColumns();
+
+        assertThat(values).containsKey(ColumnName.of("name"));
+        assertThat(values).containsKey(ColumnName.of("estimate_in_days"));
+        assertThat(values).containsKey(ColumnName.of("status"));
+        assertThat(values).containsKey(ColumnName.of("due_date"));
     }
 
     @Test
-    @DisplayName("get column by name")
-    void getColumnByName() {
-        Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
-        String existingColumnName = archived.name();
-        EntityColumn archivedColumn = findColumn(entityClass, existingColumnName);
-        assertNotNull(archivedColumn);
-        assertEquals(existingColumnName, archivedColumn.name());
-    }
+    @DisplayName("return a map of lifecycle columns of the entity")
+    void returnLifecycleColumns() {
+        ImmutableMap<ColumnName, Column> columns = this.columns.lifecycleColumns();
 
-    @Test
-    @DisplayName("fail to get non-existing column")
-    void notGetNonExisting() {
-        Class<? extends Entity<?, ?>> entityClass = EntityWithNoStorageFields.class;
-        String nonExistingColumnName = "foo";
+        assertThat(columns).hasSize(2);
 
-        assertThrows(IllegalArgumentException.class,
-                     () -> findColumn(entityClass, nonExistingColumnName));
-    }
+        ColumnName archived = ColumnName.of(LifecycleFlagField.archived);
+        Column archivedColumn = columns.get(archived);
+        assertThat(archivedColumn).isNotNull();
 
-    @Test
-    @DisplayName("not count method with `is` prefix and non-boolean return type as column")
-    void requireBooleanTypeForIs() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> findColumn(EntityWithManyGetters.class, "isNonBoolean"));
-    }
-
-    @Test
-    @DisplayName("extract column values with names for storing")
-    void getColumnValues() {
-        EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entity.getClass());
-        Map<String, MemoizedValue> fields = extractColumnValues(entity, entityColumns);
-
-        checkFields(entity, fields);
+        ColumnName deleted = ColumnName.of(LifecycleFlagField.deleted);
+        Column deletedColumn = columns.get(deleted);
+        assertThat(deletedColumn).isNotNull();
     }
 }

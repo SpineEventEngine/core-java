@@ -31,7 +31,7 @@ import static io.spine.base.Identifier.newUuid;
 public class TestAggregate
         extends Aggregate<String, EmptyAggregate, EmptyAggregate.Builder> {
 
-    protected TestAggregate(String id) {
+    public TestAggregate(String id) {
         super(id);
     }
 

@@ -49,6 +49,7 @@ message TuTaskId {
 
 // A state for an aggregate.
 message TuProject {
+    option (entity).kind = AGGREGATE;
 
     TuProjectId id = 1;
 
@@ -57,6 +58,7 @@ message TuProject {
 
 // A state of an aggregate part.
 message TuProjectPart {
+    option (entity).kind = AGGREGATE;
 
     TuProjectId id = 1;
 
@@ -65,6 +67,7 @@ message TuProjectPart {
 
 // A state of an aggregate part.
 message TuComments {
+    option (entity).kind = AGGREGATE;
 
     TuTaskId id = 1;
 
@@ -81,6 +84,7 @@ message TuComments {
 // Shared among several test classes for the sake of brevity.
 //
 message TuPmState {
+    option (entity).kind = PROCESS_MANAGER;
 
     TuProjectId id = 1;
 
@@ -89,6 +93,7 @@ message TuPmState {
 
 // A state of a projection.
 message TuEventLog {
+    option (entity).kind = PROJECTION;
 
     TuProjectId id = 1;
 
@@ -97,6 +102,7 @@ message TuEventLog {
 
 // A state for `TuProjection`.
 message TuString {
+    option (entity).kind = PROJECTION;
 
     uint64 id = 1;
 

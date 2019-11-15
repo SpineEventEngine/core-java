@@ -21,11 +21,12 @@
 package io.spine.testing.server.blackbox.verify.query;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.IterableOfProtosSubject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.QueryResponse;
 import io.spine.core.Status;
 import io.spine.core.Status.StatusCase;
@@ -34,25 +35,21 @@ import io.spine.testing.server.entity.EntityVersionSubject;
 import io.spine.testing.server.entity.IterableEntityVersionSubject;
 
 import java.util.Collection;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.responseStatus;
 import static io.spine.testing.server.entity.IterableEntityVersionSubject.entityVersions;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A set of assertions for a {@link io.spine.client.Query Query} execution result.
  *
- * <p>The class base methods check a set of entity states received in the {@link QueryResponse} in
- * form of {@link Message messages}. The subject can be used as follows:
+ * <p>The class base methods check a set of {@linkplain EntityState entity states} received in the
+ * {@link QueryResponse}. The subject can be used as follows:
  * <pre>
- *     {@code
- *          context.assertQueryResult(query)
- *                 .containsExactly(state1, state2);
- *      }
+ * context.assertQueryResult(query)
+ *        .containsExactly(state1, state2);
  * </pre>
  *
  * <p>There are also convenience methods for checking response {@link Status} and received entity
@@ -64,7 +61,7 @@ import static java.util.stream.Collectors.toList;
  */
 @VisibleForTesting
 public final class QueryResultSubject
-        extends IterableOfProtosSubject<Message> {
+        extends IterableOfProtosSubject<EntityState> {
 
     /**
      * A helper {@code Subject} which allows to check the {@link QueryResponse} status.
@@ -83,10 +80,10 @@ public final class QueryResultSubject
      */
     private IterableEntityVersionSubject versionsSubject;
 
-    private final Iterable<Message> actual;
+    private final Iterable<EntityState> actual;
 
     private QueryResultSubject(FailureMetadata failureMetadata,
-                               Iterable<Message> entityStates) {
+                               Iterable<EntityState> entityStates) {
         super(failureMetadata, entityStates);
         this.actual = entityStates;
     }
@@ -111,7 +108,7 @@ public final class QueryResultSubject
     QueryResultSubject assertQueryResult(QueryResponse queryResponse) {
         checkNotNull(queryResponse, "`QueryResponse` must never be `null`.");
 
-        Iterable<Message> entityStates = extractEntityStates(queryResponse);
+        Iterable<EntityState> entityStates = extractEntityStates(queryResponse);
         QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
         subject.initChildSubjects(queryResponse);
         return subject;
@@ -134,12 +131,12 @@ public final class QueryResultSubject
 
     /**
      * Verifies that the {@link QueryResponse} yields a single entity and returns a
-     * {@code ProtoSubject} for its {@link Message state}.
+     * {@code ProtoSubject} for its {@link EntityState state}.
      */
     public ProtoSubject containsSingleEntityStateThat() {
         assertContainsSingleItem();
-        Message entityState = actual.iterator().next();
-        ProtoSubject subject = check("singleEntityState()").about(protos()).that(entityState);
+        EntityState state = actual.iterator().next();
+        ProtoSubject subject = check("singleEntityState()").about(protos()).that(state);
         return subject;
     }
 
@@ -163,11 +160,8 @@ public final class QueryResultSubject
         hasSize(1);
     }
 
-    private static Iterable<Message> extractEntityStates(QueryResponse queryResponse) {
-        List<Message> result = queryResponse.states()
-                                            .stream()
-                                            .map(Message.class::cast)
-                                            .collect(toList());
+    private static Iterable<EntityState> extractEntityStates(QueryResponse queryResponse) {
+        ImmutableList<EntityState> result = ImmutableList.copyOf(queryResponse.states());
         return result;
     }
 
@@ -180,7 +174,7 @@ public final class QueryResultSubject
                             .getStatus();
     }
 
-    static Subject.Factory<QueryResultSubject, Iterable<Message>> queryResult() {
+    static Subject.Factory<QueryResultSubject, Iterable<EntityState>> queryResult() {
         return QueryResultSubject::new;
     }
 }

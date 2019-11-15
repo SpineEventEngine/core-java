@@ -64,9 +64,9 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.command.CompanyNameProcman.FAULTY_NAME;
-import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

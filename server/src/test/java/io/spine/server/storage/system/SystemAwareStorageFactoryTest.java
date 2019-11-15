@@ -38,6 +38,8 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import io.spine.server.storage.system.given.TestAggregate;
 import io.spine.server.storage.system.given.TestProjection;
+import io.spine.system.server.CompanyId;
+import io.spine.test.storage.TaskId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -93,7 +95,7 @@ class SystemAwareStorageFactoryTest {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         Class<TestAggregate> aggregateClass = TestAggregate.class;
-        AggregateStorage<String> storage =
+        AggregateStorage<CompanyId> storage =
                 systemAware.createAggregateStorage(CONTEXT, aggregateClass);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages()).containsExactly(aggregateClass);
@@ -105,7 +107,7 @@ class SystemAwareStorageFactoryTest {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         Class<TestProjection> projectionClass = TestProjection.class;
-        ProjectionStorage<String> storage =
+        ProjectionStorage<TaskId> storage =
                 systemAware.createProjectionStorage(CONTEXT, projectionClass);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages()).containsExactly(projectionClass);
@@ -117,7 +119,7 @@ class SystemAwareStorageFactoryTest {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         Class<TestProjection> projectionClass = TestProjection.class;
-        RecordStorage<String> storage = systemAware.createRecordStorage(CONTEXT, projectionClass);
+        RecordStorage<TaskId> storage = systemAware.createRecordStorage(CONTEXT, projectionClass);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages()).containsExactly(projectionClass);
     }

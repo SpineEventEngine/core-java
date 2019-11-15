@@ -105,6 +105,7 @@ import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.server.entity.given.Given.projectionOfClass;
 import static io.spine.server.stand.given.Given.StandTestProjection;
@@ -113,7 +114,6 @@ import static io.spine.test.projection.Project.Status.CANCELLED;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.test.projection.Project.Status.UNDEFINED;
 import static io.spine.testing.Tests.assertMatchesMask;
-import static io.spine.validate.Validate.isNotDefault;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -418,7 +418,7 @@ class StandTest extends TenantAwareTest {
 
             // Check the callback is called with the correct value.
             Any packedState = AnyPacker.pack(project);
-            assertEquals(packedState, callback.newEntityState());
+            assertThat(packedState).isEqualTo(callback.newEntityState());
         }
 
         @SuppressWarnings("OverlyCoupledMethod") // Huge end-to-end test.

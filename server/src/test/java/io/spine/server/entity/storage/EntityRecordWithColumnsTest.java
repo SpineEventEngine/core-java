@@ -20,28 +20,25 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.TestEntity;
-import io.spine.server.entity.TestEntity.TestEntityBuilder;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
+import io.spine.server.entity.storage.given.TestColumnMapping;
+import io.spine.test.storage.TaskId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
-import static io.spine.server.entity.storage.Columns.extractColumnValues;
-import static io.spine.server.entity.storage.Columns.findColumn;
-import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EntityRecordWithColumns should")
+@DisplayName("`EntityRecordWithColumns` should")
 class EntityRecordWithColumnsTest {
 
     private static EntityRecordWithColumns newRecord() {
@@ -59,11 +56,12 @@ class EntityRecordWithColumnsTest {
     }
 
     private static EntityRecordWithColumns newEmptyRecord() {
-        return EntityRecordWithColumns.of(EntityRecord.getDefaultInstance());
+        return EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(),
+                                          Collections.emptyMap());
     }
 
     @Test
-    @DisplayName("not accept nulls in constructor")
+    @DisplayName("not accept `null`s in constructor")
     void rejectNullInCtor() {
         new NullPointerTester()
                 .setDefault(EntityRecord.class, EntityRecord.getDefaultInstance())
@@ -71,32 +69,10 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("be serializable")
-    void beSerializable() {
-        EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                   .withVersion(1)
-                                                   .build();
-        String columnName = archived.name();
-        EntityColumn column = findColumn(entity.getClass(), columnName);
-        MemoizedValue value = column.memoizeFor(entity);
-
-        Map<String, MemoizedValue> columns = singletonMap(columnName, value);
-        EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record, columns);
-        reserializeAndAssert(recordWithColumns);
-    }
-
-    @Test
     @DisplayName("support equality")
     void supportEquality() {
-        TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                   .withVersion(1)
-                                                   .build();
-        String columnName = archived.name();
-        EntityColumn column = findColumn(entity.getClass(), columnName);
-        boolean columnValue = false;
-        MemoizedValue memoizedValue = new MemoizedValue(column, columnValue);
-        EntityRecordWithColumns noFieldsEnvelope = newEmptyRecord();
+        ColumnName columnName = ColumnName.of(archived.name());
+        Object value = false;
         EntityRecordWithColumns emptyFieldsEnvelope = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(),
                 Collections.emptyMap()
@@ -104,10 +80,10 @@ class EntityRecordWithColumnsTest {
         EntityRecordWithColumns notEmptyFieldsEnvelope =
                 EntityRecordWithColumns.of(
                         EntityRecord.getDefaultInstance(),
-                        singletonMap("key", memoizedValue)
+                        singletonMap(columnName, value)
                 );
         new EqualsTester()
-                .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
+                .addEqualityGroup(emptyFieldsEnvelope, notEmptyFieldsEnvelope)
                 .addEqualityGroup(newRecord())
                 .addEqualityGroup(newRecord()) // Each one has different EntityRecord
                 .testEquals();
@@ -143,29 +119,24 @@ class EntityRecordWithColumnsTest {
         @DisplayName("record")
         void record() {
             EntityRecordWithColumns recordWithFields = newRecord();
-            EntityRecord record = recordWithFields.getRecord();
+            EntityRecord record = recordWithFields.record();
             assertNotNull(record);
         }
 
         @Test
         @DisplayName("column values")
         void columnValues() {
-            TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                       .withVersion(1)
-                                                       .build();
-            String columnName = archived.name();
-            EntityColumn column = findColumn(entity.getClass(), columnName);
-            boolean columnValue = false;
-            MemoizedValue memoizedValue = new MemoizedValue(column, columnValue);
-            Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, memoizedValue);
+            ColumnName columnName = ColumnName.of(archived.name());
+            Object value = false;
+            Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
             EntityRecordWithColumns record = EntityRecordWithColumns.of(
                     Sample.messageOfType(EntityRecord.class),
                     columnsExpected
             );
-            Collection<String> columnNames = record.getColumnNames();
+            ImmutableSet<ColumnName> columnNames = record.columnNames();
             assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
-            assertEquals(memoizedValue, record.getColumnValue(columnName));
+            assertEquals(value, record.columnValue(columnName));
         }
     }
 
@@ -174,32 +145,74 @@ class EntityRecordWithColumnsTest {
     void returnEmptyColumns() {
         EntityRecordWithColumns record = newEmptyRecord();
         assertFalse(record.hasColumns());
-        Collection<String> names = record.getColumnNames();
+        ImmutableSet<ColumnName> names = record.columnNames();
         assertTrue(names.isEmpty());
     }
 
     @Test
-    @DisplayName("throw ISE on attempt to get value by non-existent name")
+    @DisplayName("throw `ISE` on attempt to get value by non-existent name")
     void throwOnNonExistentColumn() {
         EntityRecordWithColumns record = newEmptyRecord();
-
-        assertThrows(IllegalStateException.class, () -> record.getColumnValue(""));
+        ColumnName nonExistentName = ColumnName.of("non-existent-column");
+        assertThrows(IllegalStateException.class, () -> record.columnValue(nonExistentName));
     }
 
     @Test
-    @DisplayName("not have only lifecycle columns if the entity does not define custom")
+    @DisplayName("have default system columns even if the entity does not define custom ones")
     void supportEmptyColumns() {
-        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns("ID");
-        Class<? extends Entity<?, ?>> entityClass = entity.getClass();
-        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
+        TaskId taskId = TaskId
+                .newBuilder()
+                .setId(42)
+                .build();
+        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(taskId);
 
-        assertThat(columnValues).hasSize(defaultColumns.size());
+        Columns columns = Columns.of(entity.getClass());
+        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
 
         EntityRecordWithColumns record = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(),
-                columnValues
+                storageFields
         );
-        assertThat(record.getColumnNames()).containsExactlyElementsIn(defaultColumns);
+        assertThat(record.columnNames()).containsExactlyElementsIn(defaultColumns);
+    }
+
+    @Test
+    @DisplayName("return column value by column name")
+    void returnColumnValue() {
+        ColumnName columnName = ColumnName.of("some-boolean-column");
+        boolean columnValue = false;
+        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
+        EntityRecordWithColumns record =
+                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        Object value = record.columnValue(columnName);
+
+        assertThat(value).isEqualTo(columnValue);
+    }
+
+    @Test
+    @DisplayName("return a column value with the column mapping applied")
+    void returnValueWithColumnMapping() {
+        ColumnName columnName = ColumnName.of("some-int-column");
+        int columnValue = 42;
+
+        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
+        EntityRecordWithColumns record =
+                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        String value = record.columnValue(columnName, new TestColumnMapping());
+
+        assertThat(value).isEqualTo(String.valueOf(columnValue));
+    }
+
+    @Test
+    @DisplayName("return `null` column value")
+    void returnNullValue() {
+        ColumnName columnName = ColumnName.of("the-null-column");
+        Map<ColumnName, Object> storageFields = new HashMap<>();
+        storageFields.put(columnName, null);
+        EntityRecordWithColumns record =
+                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        Object value = record.columnValue(columnName);
+
+        assertThat(value).isNull();
     }
 }

@@ -29,15 +29,14 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
-import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.RecordStorage;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.entity.given.GivenLifecycleFlags;
 import io.spine.testing.server.model.ModelTests;
@@ -78,11 +77,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
  *
  * @param <E>
- *         the type of the {@link Entity} of this repository; the type is checked to implement
- *         {@link TestEntityWithStringColumn} at runtime
+ *         the type of the {@link Entity} of this repository
  */
 public abstract
-class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Message>
+class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends EntityState>
         extends TenantAwareTest {
 
     private RecordBasedRepository<I, E, S> repository;
@@ -267,7 +265,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             repository().store(entity1);
             repository().store(entity2);
 
-            String fieldPath = "idString";
+            String fieldPath = "id_string";
             StringValue fieldValue = StringValue.newBuilder()
                                                 .setValue(id1.toString())
                                                 .build();
@@ -388,7 +386,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
 
             for (E entity : entities) {
                 EntityRecordWithColumns record = repository.toRecord(entity);
-                assertThat(found).contains(record.getRecord());
+                assertThat(found).contains(record.record());
             }
         }
 
@@ -571,15 +569,5 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         IterableSubject assertFoundList = assertThat(foundList);
         assertFoundList.hasSize(2);
         assertFoundList.containsExactly(activeEntity, deletedEntity);
-    }
-
-    @Test
-    @DisplayName("cache entity columns on registration")
-    void cacheColumnsOnRegister() {
-        RecordStorage<I> storage = repository().recordStorage();
-        EntityColumnCache entityColumnCache = storage.entityColumnCache();
-
-        // Verify that cache contains searched column
-        assertNotNull(entityColumnCache.findColumn("idString"));
     }
 }

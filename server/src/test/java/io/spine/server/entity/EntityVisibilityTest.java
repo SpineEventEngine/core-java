@@ -22,9 +22,8 @@ package io.spine.server.entity;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Truth8;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
-import io.spine.core.Signal;
 import io.spine.option.EntityOption;
 import io.spine.test.entity.AccountDetails;
 import io.spine.test.entity.LastSeen;
@@ -62,13 +61,6 @@ class EntityVisibilityTest {
         EntityVisibility instance = value.get();
         new NullPointerTester()
                 .testAllPublicInstanceMethods(instance);
-    }
-
-    @Test
-    @DisplayName("return `Optional.empty()` if no `GeneratedMessageV3` descendant passed")
-    void returnEmptyForNonGeneratedMessageV3() {
-        Optional<EntityVisibility> value = EntityVisibility.of(Signal.class);
-        Truth8.assertThat(value).isEmpty();
     }
 
     @Test
@@ -138,13 +130,13 @@ class EntityVisibilityTest {
     }
 
     private static EntityVisibility
-    assertVisibility(Class<? extends Message> stateClass, EntityOption.Visibility expected) {
+    assertVisibility(Class<? extends EntityState> stateClass, EntityOption.Visibility expected) {
         EntityVisibility actual = visibilityOf(stateClass);
         assertTrue(actual.is(expected));
         return actual;
     }
 
-    private static EntityVisibility visibilityOf(Class<? extends Message> stateClass) {
+    private static EntityVisibility visibilityOf(Class<? extends EntityState> stateClass) {
         Optional<EntityVisibility> visibility = EntityVisibility.of(stateClass);
         Truth8.assertThat(visibility)
               .isPresent();

@@ -21,145 +21,134 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
-import io.spine.annotation.Internal;
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.RecordStorage;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.Serializable;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A value of {@link EntityRecord} associated with its {@linkplain EntityColumn columns}.
+ * A value of {@link EntityRecord} associated with the values of its {@linkplain Column columns}.
  */
-public final class EntityRecordWithColumns implements WithLifecycle, Serializable {
-
-    private static final long serialVersionUID = 0L;
+public final class EntityRecordWithColumns implements WithLifecycle {
 
     private final EntityRecord record;
-    private final ImmutableMap<String, EntityColumn.MemoizedValue> storageFields;
+
+    /**
+     * A map of column names to the corresponding column values.
+     */
+    private final Map<ColumnName, @Nullable Object> storageFields;
+
     private final boolean hasStorageFields;
 
-    /**
-     * Creates a new instance with columns.
-     *
-     * @param record the record to pack
-     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} to pack
-     */
-    private EntityRecordWithColumns(EntityRecord record,
-                                    Map<String, EntityColumn.MemoizedValue> columns) {
+    private EntityRecordWithColumns(EntityRecord record, Map<ColumnName, Object> storageFields) {
         this.record = checkNotNull(record);
-        this.storageFields = ImmutableMap.copyOf(columns);
-        this.hasStorageFields = !columns.isEmpty();
+        this.storageFields = new HashMap<>(storageFields);
+        this.hasStorageFields = !storageFields.isEmpty();
     }
 
     /**
-     * Creates an instance with no {@linkplain EntityColumn columns}.
-     *
-     * <p>An object created with this constructor will always return {@code false} on
-     * {@link #hasColumns()}.
-     *
-     * @param record {@link EntityRecord} to pack
-     * @see #hasColumns()
-     */
-    private EntityRecordWithColumns(EntityRecord record) {
-        this.record = checkNotNull(record);
-        this.storageFields = ImmutableMap.of();
-        this.hasStorageFields = false;
-    }
-
-    /**
-     * Creates a new instance of the {@code EntityRecordWithColumns} with
-     * {@link EntityColumn} values from the given {@linkplain Entity}.
-     *
-     * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
-     * and then combines it with the given {@link EntityRecord}.
-     *
-     * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction.
-     * This way the {@linkplain Columns#getAllColumns(Class) column retrieval operation} can be
-     * omitted when calling this method.
-     *
-     * @param record  the {@link EntityRecord} to create value from
-     * @param entity  the {@link Entity} to extract {@linkplain EntityColumn column} values from
-     * @param storage the {@linkplain RecordStorage storage} for which the record is created
-     * @return new instance
+     * Creates a new record extracting the column values from the passed entity.
      */
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
-                                                 RecordStorage<?> storage) {
-        Collection<EntityColumn> entityColumns = storage.entityColumns();
-        Map<String, EntityColumn.MemoizedValue> columns =
-                extractColumnValues(entity, entityColumns);
-        return of(record, columns);
+                                                 RecordStorage<?> recordStorage) {
+        Columns columns = recordStorage.columns();
+        Map<ColumnName, @Nullable Object> storageFields = columns.valuesIn(entity);
+        return of(record, storageFields);
     }
 
     /**
-     * Creates an instance with no {@linkplain EntityColumn columns}.
+     * Wraps a passed entity record.
      *
-     * <p>An object created with this factory method will always return {@code false} on
-     * {@link #hasColumns()}.
-     *
-     * @see #hasColumns()
+     * <p>Such instance of {@code EntityRecordWithColumns} will contain no storage fields.
      */
     public static EntityRecordWithColumns of(EntityRecord record) {
-        return new EntityRecordWithColumns(record);
+        return new EntityRecordWithColumns(record, Collections.emptyMap());
     }
 
     /**
-     * Creates a new instance.
+     * Creates a new instance from the passed record and storage fields.
      */
     @VisibleForTesting
-    static EntityRecordWithColumns of(EntityRecord record,
-                                      Map<String, EntityColumn.MemoizedValue> storageFields) {
+    public static EntityRecordWithColumns
+    of(EntityRecord record, Map<ColumnName, Object> storageFields) {
         return new EntityRecordWithColumns(record, storageFields);
     }
 
-    public EntityRecord getRecord() {
+    /**
+     * Returns the enclosed entity record.
+     */
+    public EntityRecord record() {
         return record;
     }
 
     /**
-     * Obtains entity column {@linkplain EntityColumn#name() names} for the record.
+     * Obtains the names of storage fields in the record.
      *
-     * @return the entity column names
+     * @return the storage field names
      */
-    public Set<String> getColumnNames() {
-        return storageFields.keySet();
+    public ImmutableSet<ColumnName> columnNames() {
+        return ImmutableSet.copyOf(storageFields.keySet());
     }
 
     /**
-     * Obtains the memorized value of the entity column
-     * by the specified {@linkplain EntityColumn#name() name}.
+     * Obtains the value of the storage field by the specified column name.
      *
-     * @param columnName the stored column name
-     * @return the memoized value of the column
-     * @throws IllegalStateException if there is no column with the specified name
-     * @see ColumnRecords for the recommended way of working with the column values
+     * <p>The {@linkplain DefaultColumnMapping default column mapping} will be used. It is suitable
+     * for storages that store values "as-is" or that are willing to do the manual column value
+     * conversion.
+     *
+     * <p>In other cases consider implementing a custom {@link ColumnMapping} and using the
+     * {@link #columnValue(ColumnName, ColumnMapping)} overload for convenient column value
+     * conversion.
+     *
+     * @param columnName
+     *         the column name
+     * @return the storage field value
+     * @throws IllegalStateException
+     *         if there is no column with the specified name
      */
-    @Internal
-    public EntityColumn.MemoizedValue getColumnValue(String columnName) {
+    public @Nullable Object columnValue(ColumnName columnName) {
+        return columnValue(columnName, DefaultColumnMapping.INSTANCE);
+    }
+
+    /**
+     * Obtains the value of the storage field by the specified column name.
+     *
+     * <p>The specified column mapping will be used to do the column value conversion.
+     */
+    public <R> R columnValue(ColumnName columnName, ColumnMapping<R> columnMapping) {
         checkNotNull(columnName);
+        checkNotNull(columnMapping);
         if (!storageFields.containsKey(columnName)) {
-            throw newIllegalStateException("Column with the stored name `%s` was not found.",
+            throw newIllegalStateException("Column with the name `%s` was not found.",
                                            columnName);
         }
-        return storageFields.get(columnName);
+        Object columnValue = storageFields.get(columnName);
+        if (columnValue == null) {
+            R result = columnMapping.ofNull()
+                                    .apply(null);
+            return result;
+        }
+        R result = columnMapping.of(columnValue.getClass())
+                                .applyTo(columnValue);
+        return result;
     }
 
     /**
-     * Determines if there are any {@linkplain EntityColumn columns} associated with this record.
+     * Determines if there are any {@linkplain Column columns} associated with this record.
      *
-     * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
-     * by the storage.
+     * <p>If returns {@code false}, the columns are not considered by the storage.
      *
      * @return {@code true} if the object was constructed using
      *  {@link #create(EntityRecord, Entity, RecordStorage)} and the entity has columns;
@@ -167,6 +156,15 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
      */
     public boolean hasColumns() {
         return hasStorageFields;
+    }
+
+    /**
+     * Determines if there is a column with the specified name among the storage fields.
+     */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean hasColumn(ColumnName name) {
+        boolean result = storageFields.containsKey(name);
+        return result;
     }
 
     @Override
@@ -200,11 +198,11 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
 
         EntityRecordWithColumns other = (EntityRecordWithColumns) o;
 
-        return getRecord().equals(other.getRecord());
+        return record().equals(other.record());
     }
 
     @Override
     public int hashCode() {
-        return getRecord().hashCode();
+        return record().hashCode();
     }
 }

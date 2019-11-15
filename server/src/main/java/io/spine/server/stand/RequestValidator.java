@@ -142,12 +142,10 @@ abstract class RequestValidator<M extends Message> {
      * @return an instance of exception or null if the request message is valid.
      */
     private @Nullable InvalidRequestException validateMessage(M request) {
-        List<ConstraintViolation> violations = MessageValidator.newInstance(request)
-                                                               .validate();
+        List<ConstraintViolation> violations = MessageValidator.validate(request);
         if (violations.isEmpty()) {
             return null;
         }
-
         ValidationError validationError = ValidationError
                 .newBuilder()
                 .addAllConstraintViolation(violations)

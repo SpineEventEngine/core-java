@@ -23,8 +23,8 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -82,7 +82,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
-                                               S extends Message>
+                                               S extends EntityState>
         extends EventDispatchingRepository<I, P, S>
         implements CommandDispatcherDelegate, EventProducingRepository {
 

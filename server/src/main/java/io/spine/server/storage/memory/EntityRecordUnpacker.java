@@ -40,6 +40,6 @@ enum EntityRecordUnpacker implements Function<EntityRecordWithColumns, EntityRec
         if (input == null) {
             return null;
         }
-        return input.getRecord();
+        return input.record();
     }
 }

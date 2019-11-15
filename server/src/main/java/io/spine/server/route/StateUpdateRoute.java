@@ -20,15 +20,17 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.core.EventContext;
 
 /**
  * Obtains a set of entity IDs for which to deliver an entity state update.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of entity states to get IDs from
+ * @param <I>
+ *         the type of entity IDs
+ * @param <M>
+ *         the type of entity states to get IDs from
  */
 @FunctionalInterface
-public interface StateUpdateRoute<I, M extends Message> extends Multicast<I, M, EventContext> {
+public interface StateUpdateRoute<I, M extends EntityState> extends Multicast<I, M, EventContext> {
 }

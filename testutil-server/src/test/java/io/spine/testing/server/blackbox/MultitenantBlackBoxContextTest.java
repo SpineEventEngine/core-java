@@ -20,7 +20,6 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.protobuf.StringValue;
 import io.spine.core.TenantId;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
@@ -106,7 +105,7 @@ class MultitenantBlackBoxContextTest
                 IllegalStateException.class,
                 () -> BlackBoxBoundedContext
                         .multiTenant()
-                        .assertEntityWithState(StringValue.class, "verify state")
+                        .assertEntityWithState(BbProject.class, "verify state")
         );
     }
 }

@@ -21,29 +21,25 @@
 package io.spine.server.storage.given;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Time;
+import io.spine.base.EntityState;
 import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
+import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.Enumerated;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.ProjectWithColumns;
 import io.spine.testing.core.given.GivenVersion;
 
 import java.util.Collection;
@@ -54,9 +50,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
-import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -67,7 +63,7 @@ public class RecordStorageTestEnv {
     private RecordStorageTestEnv() {
     }
 
-    public static EntityRecord buildStorageRecord(ProjectId id, Message state) {
+    public static EntityRecord buildStorageRecord(ProjectId id, EntityState state) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
                 .newBuilder()
@@ -78,7 +74,7 @@ public class RecordStorageTestEnv {
         return record;
     }
 
-    public static EntityRecord buildStorageRecord(ProjectId id, Message state,
+    public static EntityRecord buildStorageRecord(ProjectId id, EntityState state,
                                                   LifecycleFlags lifecycleFlags) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
@@ -110,19 +106,14 @@ public class RecordStorageTestEnv {
 
     public static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
         LifecycleFlags flags = record.getLifecycleFlags();
-        Map<String, MemoizedValue> columns = ImmutableMap.of(
-                LifecycleColumns.ARCHIVED.columnName(),
-                booleanColumn(LifecycleColumns.ARCHIVED.column(), flags.getArchived()),
-                LifecycleColumns.DELETED.columnName(),
-                booleanColumn(LifecycleColumns.DELETED.column(), flags.getDeleted())
+        Map<ColumnName, Object> columns = ImmutableMap.of(
+                ColumnName.of(archived),
+                flags.getArchived(),
+                ColumnName.of(deleted),
+                flags.getDeleted()
         );
         EntityRecordWithColumns result = createRecord(record, columns);
         return result;
-    }
-
-    private static MemoizedValue booleanColumn(EntityColumn column, boolean value) {
-        MemoizedValue memoizedValue = new MemoizedValue(column, value);
-        return memoizedValue;
     }
 
     public static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
@@ -151,117 +142,74 @@ public class RecordStorageTestEnv {
 
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity
-            extends TransactionalEntity<ProjectId, Project, Project.Builder> {
+            extends TransactionalEntity<ProjectId, Project, Project.Builder>
+            implements ProjectWithColumns, HasLifecycleColumns<ProjectId, Project> {
+
+        public static final Timestamp PROJECT_VERSION_TIMESTAMP = Timestamp.newBuilder()
+                                                                           .setSeconds(124565)
+                                                                           .setNanos(2434535)
+                                                                           .build();
 
         private int counter = 0;
 
-        private TestCounterEntity(ProjectId id) {
+        public TestCounterEntity(ProjectId id) {
             super(id);
         }
 
-        @CanIgnoreReturnValue
-        @Column
-        public int getCounter() {
-            return counter;
+        @Override
+        public String getIdString() {
+            return idAsString();
         }
 
-        @Column
-        public long getBigCounter() {
-            return getCounter();
+        @Override
+        public boolean getInternal() {
+            return false;
         }
 
-        @Column
-        public boolean isCounterEven() {
-            return counter % 2 == 0;
+        @Override
+        public Any getWrappedState() {
+            return Any.getDefaultInstance();
         }
 
-        @Column
-        public String getCounterName() {
-            return id().toString();
-        }
-
-        @Column
-        public Version getCounterVersion() {
-            return Version.newBuilder()
-                          .setNumber(counter)
-                          .build();
-        }
-
-        @Column
-        public Timestamp getNow() {
-            return Time.currentTime();
-        }
-
-        @Column
-        public Project getCounterState() {
-            return state();
-        }
-
-        @Column
+        @Override
         public int getProjectStatusValue() {
             return state().getStatusValue();
         }
 
-        @Column
-        public Project.Status getProjectStatusOrdinal() {
-            return Enum.valueOf(Project.Status.class, state().getStatus()
-                                                             .name());
+        @Override
+        public Version getProjectVersion() {
+            return Version.newBuilder()
+                          .setNumber(counter)
+                          .setTimestamp(PROJECT_VERSION_TIMESTAMP)
+                          .build();
         }
 
-        @Column
-        @Enumerated(STRING)
-        public Project.Status getProjectStatusString() {
-            return Enum.valueOf(Project.Status.class, state().getStatus()
-                                                             .name());
+        @Override
+        public Timestamp getDueDate() {
+            return Timestamp.newBuilder()
+                            .setSeconds(42800)
+                            .setNanos(140000)
+                            .build();
         }
 
         public void assignStatus(Project.Status status) {
             Project newState = Project
                     .newBuilder(state())
+                    .setId(id())
                     .setStatus(status)
                     .build();
-            injectState(this, newState, getCounterVersion());
+            injectState(this, newState, getProjectVersion());
         }
 
         public void assignCounter(int counter) {
             this.counter = counter;
-        }
-    }
-
-    /**
-     * Entity columns representing lifecycle flags, {@code archived} and {@code deleted}.
-     *
-     * <p>These columns are present in each {@linkplain Entity entity}. For the purpose of
-     * tests being as close to the real production environment as possible, these columns are stored
-     * with the entity records, even if an actual entity is missing.
-     *
-     * <p>Note that there are cases, when a {@code RecordStorage} stores entity records with no such
-     * columns, e.g. the {@linkplain EEntity event entity}. Thus, do not rely
-     * on these columns being present in all the entities by default when implementing
-     * a {@code RecordStorage}.
-     */
-    public enum LifecycleColumns {
-
-        ARCHIVED("isArchived"),
-        DELETED("isDeleted");
-
-        private final EntityColumn column;
-
-        LifecycleColumns(String getterName) {
-            try {
-
-                this.column = EntityColumn.from(Entity.class.getDeclaredMethod(getterName));
-            } catch (NoSuchMethodException e) {
-                throw illegalStateWithCauseOf(e);
-            }
-        }
-
-        public EntityColumn column() {
-            return column;
-        }
-
-        public String columnName() {
-            return column.name();
+            // Manually inject state so the `project_version` storage field is populated.
+            Project newState = Project
+                    .newBuilder(state())
+                    .setId(id())
+                    .setProjectVersion(getProjectVersion())
+                    .build();
+            injectState(this, newState, getProjectVersion());
         }
     }
 }

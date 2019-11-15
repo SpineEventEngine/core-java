@@ -20,141 +20,162 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
+import io.spine.server.entity.model.EntityClass;
+import io.spine.server.storage.LifecycleFlagField;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.ColumnValueExtractor.create;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
-import static java.lang.String.format;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A utility class for working with {@linkplain EntityColumn entity columns}.
- *
- * <p>The methods of all {@link Entity entities} that fit
- * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
- * the Java Bean</a> getter spec and annotated with {@link Column} are considered
- * {@linkplain EntityColumn columns}.
- *
- * <p>Additionally, the {@code Boolean} getters starting with {@code is-} are allowed (contrary to
- * the Java Bean spec), to enable situations like
- * <pre>
- *     {@code
- *             \@Nullable
- *             \@Column
- *             public Boolean isMale() {
- *                 return null;
- *             }
- *     }
- * </pre>
- *
- * <p>Inherited columns are taken into account too, but building entity hierarchies is strongly
- * discouraged.
- *
- * <p>Note that the returned type of an {@link EntityColumn} getter must either be primitive or
- * serializable, otherwise a runtime exception is thrown when trying to get an instance of
- * {@link EntityColumn}.
- *
- * @see EntityColumn
+ * The collection of declared columns of the {@link Entity}.
  */
-final class Columns {
+@Immutable
+@Internal
+public final class Columns {
 
     /**
-     * Prevents instantiation of this utility class.
+     * The {@linkplain SystemColumn system columns} of the entity.
      */
-    private Columns() {
+    private final ImmutableMap<ColumnName, SysColumn> systemColumns;
+
+    /**
+     * The entity-state-based columns of the entity.
+     */
+    private final ImmutableMap<ColumnName, SimpleColumn> simpleColumns;
+
+    /**
+     * The interface-based columns of the entity.
+     */
+    private final ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns;
+
+    private final EntityClass<?> entityClass;
+
+    private Columns(
+            ImmutableMap<ColumnName, SysColumn> systemColumns,
+            ImmutableMap<ColumnName, SimpleColumn> simpleColumns,
+            ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns,
+            EntityClass<?> entityClass) {
+        this.systemColumns = systemColumns;
+        this.simpleColumns = simpleColumns;
+        this.interfaceBasedColumns = interfaceBasedColumns;
+        this.entityClass = entityClass;
     }
 
     /**
-     * Retrieves {@linkplain EntityColumn columns} for the given {@link Entity} class.
-     *
-     * <p>Performs checks for the entity column definitions correctness along the way.
-     *
-     * <p>If the check for correctness fails, throws {@link IllegalStateException}.
-     *
-     * @param entityClass the class containing the {@link EntityColumn} definition
-     * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
-     * @throws IllegalStateException if entity column definitions are incorrect
+     * Gathers columns of the entity class.
      */
-    static Collection<EntityColumn> getAllColumns(Class<? extends Entity<?, ?>> entityClass) {
+    public static Columns of(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
-
-        ColumnReader columnReader = ColumnReader.forClass(entityClass);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-        return entityColumns;
+        Scanner scanner = new Scanner(entityClass);
+        return new Columns(scanner.systemColumns(),
+                           scanner.simpleColumns(),
+                           scanner.interfaceBasedColumns(),
+                           entityClass);
     }
 
     /**
-     * Retrieves an {@link EntityColumn} instance of the given name and from the given entity class.
-     *
-     * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
-     *
-     * @param entityClass the class containing the {@link EntityColumn} definition
-     * @param columnName  the entity column {@linkplain EntityColumn#name() name}
-     * @return an instance of {@link EntityColumn} with the given name
-     * @throws IllegalArgumentException if the {@link EntityColumn} is not found
+     * Gathers columns of the entity class.
      */
-    static EntityColumn findColumn(Class<? extends Entity<?, ?>> entityClass, String columnName) {
-        checkNotNull(entityClass);
-        checkColumnName(columnName);
+    public static Columns of(Class<? extends Entity<?, ?>> entityClass) {
+        return of(asEntityClass(entityClass));
+    }
 
-        ColumnReader columnReader = ColumnReader.forClass(entityClass);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-        for (EntityColumn column : entityColumns) {
-            if (columnName.equals(column.name())) {
-                return column;
+    /**
+     * Obtains a column by name.
+     *
+     * @throws IllegalArgumentException
+     *         if the column with the specified name is not found
+     */
+    public Column get(ColumnName columnName) {
+        checkNotNull(columnName);
+        Column result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
+        return result;
+    }
+
+    /**
+     * Searches for a column with a given name.
+     */
+    public Optional<Column> find(ColumnName columnName) {
+        checkNotNull(columnName);
+        Column column = systemColumns.get(columnName);
+        if (column == null) {
+            column = simpleColumns.get(columnName);
+        }
+        if (column == null) {
+            column = interfaceBasedColumns.get(columnName);
+        }
+        return Optional.ofNullable(column);
+    }
+
+    /**
+     * Extracts column values from the entity.
+     *
+     * <p>The {@linkplain ColumnDeclaredInProto proto-based} columns are extracted from the entity
+     * state while the system columns are obtained from the entity itself via the corresponding
+     * getters.
+     */
+    public Map<ColumnName, @Nullable Object> valuesIn(Entity<?, ?> source) {
+        Map<ColumnName, @Nullable Object> result = new HashMap<>();
+        systemColumns.forEach(
+                (name, column) -> result.put(name, column.valueIn(source))
+        );
+        simpleColumns.forEach(
+                (name, column) -> result.put(name, column.valueIn(source.state()))
+        );
+        interfaceBasedColumns.forEach(
+                (name, column) -> result.put(name, column.valueIn(source.state()))
+        );
+        return result;
+    }
+
+    /**
+     * Returns all columns of the entity.
+     */
+    public ImmutableList<Column> columnList() {
+        ImmutableList.Builder<Column> builder = ImmutableList.builder();
+        builder.addAll(systemColumns.values());
+        builder.addAll(simpleColumns.values());
+        builder.addAll(interfaceBasedColumns.values());
+        return builder.build();
+    }
+
+    /**
+     * Returns a subset of columns corresponding to the lifecycle of the entity.
+     */
+    public ImmutableMap<ColumnName, Column> lifecycleColumns() {
+        ImmutableMap.Builder<ColumnName, Column> result = ImmutableMap.builder();
+        for (LifecycleFlagField field : LifecycleFlagField.values()) {
+            ColumnName name = ColumnName.of(field.name());
+            SysColumn column = systemColumns.get(name);
+            if (column != null) {
+                result.put(name, column);
             }
         }
-
-        throw couldNotFindColumn(entityClass, columnName);
-    }
-
-    static void checkColumnName(String columnName) {
-        checkNotEmptyOrBlank(columnName, "entity column name");
-    }
-
-    static IllegalArgumentException couldNotFindColumn(Class<? extends Entity> entityClass,
-                                                       String columnName) {
-        checkNotNull(entityClass);
-        checkNotNull(columnName);
-        throw new IllegalArgumentException(
-                format("Could not find an `EntityColumn` description for `%s.%s`.",
-                        entityClass.getCanonicalName(),
-                        columnName));
+        return result.build();
     }
 
     /**
-     * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}, 
-     * using given {@linkplain EntityColumn entity columns}.
-     *
-     * <p>By using predefined {@linkplain EntityColumn entity columns} the process of
-     * {@linkplain ColumnReader#readColumns() obtaining columns} from the given {@link Entity} class
-     * can be skipped.
-     *
-     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for 
-     * {@link Entity} classes that are non-public or cannot be subjected to column extraction 
-     * for some other reason.
-     *
-     * @param  entity        
-     *         an {@link Entity} to get the {@linkplain EntityColumn column} values from
-     * @param  entityColumns 
-     *         {@linkplain EntityColumn entity columns} which values should be extracted
-     * @param  <E>           
-     *         the type of the {@link Entity}
-     * @return a {@code Map} of the column {@linkplain EntityColumn#storedName()
-     *         names for storing} to their {@linkplain MemoizedValue memoized values}
-     * @see MemoizedValue
+     * Obtains {@linkplain InterfaceBasedColumn interface-based} columns of the entity.
      */
-    static <E extends Entity<?, ?>> Map<String, MemoizedValue>
-    extractColumnValues(E entity, Collection<EntityColumn> entityColumns) {
-        checkNotNull(entity);
-        checkNotNull(entityColumns);
+    public ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
+        return interfaceBasedColumns;
+    }
 
-        ColumnValueExtractor columnValueExtractor = create(entity, entityColumns);
-        return columnValueExtractor.extractColumnValues();
+    private IllegalArgumentException columnNotFound(ColumnName columnName) {
+        throw newIllegalArgumentException(
+                "A column with name '%s' not found in entity state class `%s`.",
+                columnName, entityClass.stateClass()
+                                       .getCanonicalName());
     }
 }

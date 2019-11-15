@@ -18,16 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 dependencies {
-    compile project(path: ':core')
-
     api deps.grpc.grpcStub
-
-    implementation deps.grpc.grpcOkHttp
+    compile project(':core')
     implementation deps.grpc.grpcProtobuf
-
-    testImplementation project(path: ":testutil-client")
-    testImplementation project(path: ":core", configuration: 'testArtifacts')
-    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
+    testImplementation(
+            "io.spine:spine-testlib:$spineBaseVersion",
+            project(':testutil-client'),
+            project(path: ':core', configuration: 'testArtifacts')
+    )
 }
 
 apply from: deps.scripts.testArtifacts

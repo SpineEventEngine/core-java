@@ -22,7 +22,7 @@ package io.spine.testing.server.blackbox.verify.query;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.QueryResponse;
 import io.spine.testing.SubjectTest;
 import org.junit.jupiter.api.DisplayName;
@@ -48,13 +48,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * {@linkplain QueryResultSubject#assertQueryResult(QueryResponse) way} of subject creation.
  */
 @DisplayName("QueryResultSubject should")
-class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<Message>> {
+class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<EntityState>> {
 
     private static final String EXPECTED_ASSERTION_ERROR_TO_BE_THROWN =
             "Expected `AssertionError` to be thrown.";
 
     @Override
-    protected Subject.Factory<QueryResultSubject, Iterable<Message>> subjectFactory() {
+    protected Subject.Factory<QueryResultSubject, Iterable<EntityState>> subjectFactory() {
         return queryResult();
     }
 

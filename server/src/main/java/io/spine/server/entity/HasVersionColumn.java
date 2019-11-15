@@ -20,23 +20,23 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.SystemColumn;
 
 /**
- * Applies {@link Column} annotation to {@code getVersion} method.
- *
- * <p>The interface is implemented by {@link Entity entities} that have a stored version.
+ * Marks an {@link Entity} that declares a {@link Version} column.
  */
-public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literals in annotation.
+@Internal
+public interface HasVersionColumn<I, S extends EntityState> extends Entity<I, S> {
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to add the {@code Column} annotation.
+     * Obtains the version of the entity.
      */
-    @Override
-    @Column
-    Version getVersion();
+    @SystemColumn(name = "version")
+    default Version getVersion() {
+        return version();
+    }
 }

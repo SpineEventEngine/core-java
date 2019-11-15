@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Timestamp;
 import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -86,7 +85,7 @@ class TenantAwareSystemReadSideTest {
     @SuppressWarnings("CheckReturnValue")
     private void queryAndCheck(TenantId tenantId) {
         Query query = requestFactory.query()
-                                    .all(Timestamp.class);
+                                    .all(Company.class);
         SystemReadSide readSide = delegatingTo(delegate).get(tenantId);
         readSide.readDomainAggregate(query);
 

@@ -21,7 +21,7 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
@@ -41,9 +41,10 @@ import static com.google.common.collect.Streams.stream;
  */
 class EntityQueryProcessor implements QueryProcessor {
 
-    private final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository;
+    private final RecordBasedRepository<?, ? extends Entity, ? extends EntityState> repository;
 
-    EntityQueryProcessor(RecordBasedRepository<?, ? extends Entity, ? extends Message> repository) {
+    EntityQueryProcessor(
+            RecordBasedRepository<?, ? extends Entity, ? extends EntityState> repository) {
         this.repository = repository;
     }
 

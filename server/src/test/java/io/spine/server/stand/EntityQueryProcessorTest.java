@@ -53,7 +53,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.stand.given.MenuProjection.UUID;
+import static io.spine.server.stand.given.MenuProjection.UUID_COLUMN;
 import static java.util.Comparator.comparing;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -111,7 +111,7 @@ class EntityQueryProcessorTest {
     void readAllAndSort() {
         int limit = MENU_COUNT - 4;
         Query query = queries.select(Menu.class)
-                             .orderBy(UUID, DESCENDING)
+                             .orderBy(UUID_COLUMN, DESCENDING)
                              .limit(limit)
                              .build();
         ImmutableCollection<EntityStateWithVersion> records = processor.process(query);
