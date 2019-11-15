@@ -97,7 +97,7 @@ public interface FilterMixin extends FilterOrBuilder {
      */
     default void checkFieldIsColumnIn(Descriptor message) {
         checkNotNull(message);
-        checkFieldIsTopLevel();
+        checkFieldAtTopLevel();
         if (!fieldIsColumnIn(message)) {
             throw newIllegalArgumentException(
                     "The entity column `%s` is not found in entity state type `%s`. " +
@@ -109,7 +109,7 @@ public interface FilterMixin extends FilterOrBuilder {
     /**
      * Checks if the target field is a top-level field.
      */
-    default boolean fieldIsTopLevel() {
+    default boolean fieldAtTopLevel() {
         return !field().isNested();
     }
 
@@ -119,8 +119,8 @@ public interface FilterMixin extends FilterOrBuilder {
      * @throws IllegalArgumentException
      *         if the field is not a top-level field
      */
-    default void checkFieldIsTopLevel() {
-        if (!fieldIsTopLevel()) {
+    default void checkFieldAtTopLevel() {
+        if (!fieldAtTopLevel()) {
             throw newIllegalArgumentException(
                     "The entity filter contains a nested entity column `%s`. " +
                             "Nested entity columns are currently not supported.",
