@@ -83,7 +83,7 @@ message RoutingFailed {
 //
 // The event is emitted upon each attempt to load the Aggregate.
 //
-// An Aggregate with a corrupted state cannot handle new signals.
+// An Aggregate with a corrupted history cannot handle new signals.
 //
 // The Aggregate state accessible to read side is undefined. It may reflect the state of the
 // Aggregate after the last successful event, or may have advanced further, including changes caused
@@ -91,7 +91,8 @@ message RoutingFailed {
 // to catch up the read-side on the valid Aggregate state.
 //
 // The error may take place some time after the erroneous event was emitted. In this case, there may
-// be newer events in the Aggregate history.
+// be newer events in the Aggregate history. Those events cannot be applied to the Aggregate either.
+// See `interrupted_events` for the number of such events.
 //
 // The framework does not provide a turn-key solution for resolving this kind of data corruption.
 // Depending on the situation, there may be different approaches to the problem. Most common ones
