@@ -47,21 +47,21 @@ class FilterMixinTest {
     }
 
     @Test
-    @DisplayName("validate the filter against a target type")
+    @DisplayName("check the filter can be applied to the given target")
     void validateFilter() {
         Filter filter = Filters.eq("first_field", "some entity column value");
-        filter.validateAgainst(TEST_ENTITY_TYPE);
+        filter.checkCanApplyTo(testEntityTarget());
     }
 
     @Test
     @DisplayName("consider the filter targeting a nested field of an event message valid")
     void validateFilterWithNested() {
         Filter filter = Filters.eq("name.value", "a project name");
-        filter.validateAgainst(CREATE_PROJECT_TYPE);
+        filter.checkCanApplyTo(createProjectTarget());
     }
 
     @Nested
-    @DisplayName("deem filter invalid and throw `IllegalArgumentException`")
+    @DisplayName("deem the filter non-applicable to the given target")
     class CheckInvalid {
 
         @Test
@@ -69,7 +69,7 @@ class FilterMixinTest {
         void whenFieldNotPresent() {
             Filter filter = Filters.eq("non_existing_field", "some entity column value");
             assertThrows(IllegalArgumentException.class,
-                         () -> filter.validateAgainst(TEST_ENTITY_TYPE));
+                         () -> filter.checkCanApplyTo(testEntityTarget()));
         }
 
         @Nested
@@ -81,7 +81,7 @@ class FilterMixinTest {
             void whenFieldNotTopLevel() {
                 Filter filter = Filters.eq("name.value", "a test entity name");
                 assertThrows(IllegalArgumentException.class,
-                             () -> filter.validateAgainst(TEST_ENTITY_TYPE));
+                             () -> filter.checkCanApplyTo(testEntityTarget()));
             }
 
             @Test
@@ -93,8 +93,30 @@ class FilterMixinTest {
                         .build();
                 Filter filter = Filters.eq("name", name);
                 assertThrows(IllegalArgumentException.class,
-                             () -> filter.validateAgainst(TEST_ENTITY_TYPE));
+                             () -> filter.checkCanApplyTo(testEntityTarget()));
             }
         }
+    }
+
+    /**
+     * Returns a target enclosing the {@link TestEntity} type.
+     */
+    private static Target testEntityTarget() {
+        Target target = Target
+                .newBuilder()
+                .setType(TEST_ENTITY_TYPE.value())
+                .build();
+        return target;
+    }
+
+    /**
+     * Returns a target enclosing the {@link ClCreateProject} type.
+     */
+    private static Target createProjectTarget() {
+        Target target = Target
+                .newBuilder()
+                .setType(CREATE_PROJECT_TYPE.value())
+                .build();
+        return target;
     }
 }

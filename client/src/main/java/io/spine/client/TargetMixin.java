@@ -37,6 +37,14 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public interface TargetMixin extends TargetOrBuilder {
 
     /**
+     * Returns the URL of the target type.
+     */
+    default TypeUrl typeUrl() {
+        String type = getType();
+        return TypeUrl.parse(type);
+    }
+
+    /**
      * Verifies that the target type is a valid type for querying.
      *
      * @throws IllegalArgumentException
@@ -61,16 +69,17 @@ public interface TargetMixin extends TargetOrBuilder {
      * @throws IllegalArgumentException
      *         if either the target type is not a valid type for querying or the filters are
      *         invalid
-     * @see FilterMixin#validateAgainst(TypeUrl)
+     * @see FilterMixin#checkCanApplyTo(Target)
      */
+    @SuppressWarnings("ClassReferencesSubclass") // OK for a proto mixin.
     default void checkValid() {
         checkTypeValid();
-        TypeUrl typeUrl = TypeUrl.parse(getType());
+        Target thisAsTarget = (Target) this;
         getFilters()
                 .getFilterList()
                 .stream()
                 .map(CompositeFilter::getFilterList)
                 .flatMap(Collection::stream)
-                .forEach(filter -> filter.validateAgainst(typeUrl));
+                .forEach(filter -> filter.checkCanApplyTo(thisAsTarget));
     }
 }

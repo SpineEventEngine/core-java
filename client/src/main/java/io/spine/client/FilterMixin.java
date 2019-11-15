@@ -130,16 +130,18 @@ public interface FilterMixin extends FilterOrBuilder {
     }
 
     /**
-     * Validates a filter against the queried type.
+     * Verifies that the filter can be applied to the given {@code target}.
      *
-     * <p>Makes sure the target field is a valid entity column in case the {@link EntityState} is
-     * queried and is a valid message field in all other cases.
+     * <p>Makes sure the field specified in the filter is a valid entity column or a message field
+     * in the type enclosed by the {@code target}.
      *
      * @throws IllegalArgumentException
-     *         if the target field is not present in the type or doesn't satisfy the constraints
+     *         if the field is not present in the target type or doesn't satisfy the constraints
      */
-    default void validateAgainst(TypeUrl targetType) {
-        checkNotNull(targetType);
+    default void checkCanApplyTo(Target target) {
+        checkNotNull(target);
+
+        TypeUrl targetType = target.typeUrl();
 
         Class<Message> javaClass = targetType.getMessageClass();
         Descriptor descriptor = targetType.toTypeName()
