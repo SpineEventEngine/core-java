@@ -40,10 +40,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * Extends the {@link Filter} with validation routines.
  */
 @GeneratedMixin
-public interface FilterMixin {
-
-    @SuppressWarnings("override") // Implemented in the generated code.
-    FieldPath getFieldPath();
+public interface FilterMixin extends FilterOrBuilder {
 
     /**
      * Obtains the target field.

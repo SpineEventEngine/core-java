@@ -34,12 +34,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * Extends the {@link Target} with validation routines.
  */
 @GeneratedMixin
-@SuppressWarnings("override") // Methods are implemented in the generated code.
-public interface TargetMixin {
-
-    String getType();
-
-    TargetFilters getFilters();
+public interface TargetMixin extends TargetOrBuilder {
 
     /**
      * Verifies that the target type is a valid type for querying.
