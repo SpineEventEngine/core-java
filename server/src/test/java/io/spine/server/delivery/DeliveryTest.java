@@ -29,6 +29,7 @@ import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
+import io.spine.protobuf.Messages;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
@@ -55,7 +56,6 @@ import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
-import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -397,7 +397,7 @@ class DeliveryTest {
             UserId actualAssignee = state.getAssignee();
 
             assertThat(state.getId()).isEqualTo(taskId);
-            assertThat(Validate.isDefault(actualAssignee)).isFalse();
+            assertThat(Messages.isDefault(actualAssignee)).isFalse();
         }
     }
 
@@ -694,7 +694,7 @@ class DeliveryTest {
             allStats.add(stats);
         }
 
-        ImmutableList<DeliveryStats> stats() {
+        private ImmutableList<DeliveryStats> stats() {
             return ImmutableList.copyOf(allStats);
         }
     }
