@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.core.Version;
 
 import java.util.Collection;
 
@@ -63,6 +64,7 @@ import static io.spine.protobuf.TypeConverter.toAny;
  * {@link #le &lt;=}) supports only the following types:
  * <ul>
  *     <li>{@link Timestamp com.google.protobuf.Timestamp};
+ *     <li>{@link Version io.spine.core.Version};
  *     <li>Java primitive number types;
  *     <li>{@code String}.
  * </ul>
@@ -217,7 +219,7 @@ public final class Filters {
     static CompositeFilter all(Collection<Filter> filters) {
         checkNotNull(filters);
         checkArgument(!filters.isEmpty(),
-                      "Composite filter must contain at least one simple filter in it");
+                      "Composite filter must contain at least one simple filter in it.");
         return composeFilters(filters, ALL);
     }
 
@@ -247,9 +249,10 @@ public final class Filters {
         Class<?> dataType = Primitives.wrap(cls);
         boolean supported = isSupportedNumber(dataType)
                 || Timestamp.class.isAssignableFrom(dataType)
+                || Version.class.isAssignableFrom(dataType)
                 || String.class.isAssignableFrom(dataType);
         checkArgument(supported,
-                      "The type %s is not supported for the ordering comparison.",
+                      "The type `%s` is not supported for the ordering comparison.",
                       dataType.getCanonicalName());
     }
 
