@@ -37,6 +37,7 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.RecentHistory;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.type.CommandEnvelope;
@@ -411,6 +412,17 @@ public abstract class Aggregate<I,
     @Override
     protected final void clearRecentHistory() {
         super.clearRecentHistory();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Opens the method to this package for testing.
+     */
+    @VisibleForTesting
+    @Override
+    protected final RecentHistory recentHistory() {
+        return super.recentHistory();
     }
 
     /**
