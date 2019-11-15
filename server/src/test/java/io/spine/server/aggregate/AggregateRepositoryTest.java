@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
@@ -43,7 +42,6 @@ import io.spine.server.aggregate.given.repo.RejectingRepository;
 import io.spine.server.aggregate.given.repo.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.repo.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.CommandClass;
@@ -313,67 +311,6 @@ public class AggregateRepositoryTest {
                     .isEqualTo(id);
             assertThat(passedRequest.batchSize())
                     .isEqualTo(nonDefaultSnapshotTrigger + 1);
-        }
-
-        /**
-         * An {@link AggregateStorage} whose purpose is to intercept the incoming
-         * {@linkplain AggregateReadRequest read request}.
-         */
-        private final class TestAggregateStorage extends AggregateStorage<ProjectId> {
-
-            private final AggregateStorage<ProjectId> delegate;
-            private AggregateReadRequest<ProjectId> memoizedRequest;
-
-            private TestAggregateStorage(AggregateStorage<ProjectId> delegate) {
-                super(delegate.isMultitenant());
-                this.delegate = delegate;
-            }
-
-            @Override
-            public Optional<AggregateHistory> read(AggregateReadRequest<ProjectId> request) {
-                memoizedRequest = request;
-                return Optional.empty();
-            }
-
-            @Override
-            protected void writeRecord(ProjectId id, AggregateEventRecord record) {
-                delegate.writeRecord(id, record);
-            }
-
-            @Override
-            protected Iterator<AggregateEventRecord>
-            historyBackward(AggregateReadRequest<ProjectId> request) {
-                return delegate.historyBackward(request);
-            }
-
-            @Override
-            protected void truncate(int snapshotIndex) {
-                delegate.truncate(snapshotIndex);
-            }
-
-            @Override
-            protected void truncate(int snapshotIndex, Timestamp date) {
-                delegate.truncate(snapshotIndex, date);
-            }
-
-            @Override
-            protected Iterator<ProjectId> distinctAggregateIds() {
-                return delegate.distinctAggregateIds();
-            }
-
-            @Override
-            public Optional<LifecycleFlags> readLifecycleFlags(ProjectId id) {
-                return delegate.readLifecycleFlags(id);
-            }
-
-            @Override
-            public void writeLifecycleFlags(ProjectId id, LifecycleFlags flags) {
-                delegate.writeLifecycleFlags(id, flags);
-            }
-
-            private AggregateReadRequest<ProjectId> memoizedRequest() {
-                return memoizedRequest;
-            }
         }
     }
 
