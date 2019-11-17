@@ -42,9 +42,8 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.validate.Validate.isNotDefault;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static java.util.Collections.singleton;
 
 /**
