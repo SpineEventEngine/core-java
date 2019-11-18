@@ -64,8 +64,9 @@ public abstract class Phase<I> {
      * @return the result of the task execution
      */
     final DispatchOutcome propagate() {
+        DispatchOutcome outcome = performDispatch();
         return DispatchOutcomeHandler
-                .from(performDispatch())
+                .from(outcome)
                 .onSuccess(this::incrementTransaction)
                 .handle();
     }
