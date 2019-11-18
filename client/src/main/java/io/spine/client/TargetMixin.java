@@ -34,7 +34,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * Extends the {@link Target} with validation routines.
  */
 @GeneratedMixin
-public interface TargetMixin extends TargetOrBuilder {
+interface TargetMixin extends TargetOrBuilder {
 
     /**
      * Returns the URL of the target type.
