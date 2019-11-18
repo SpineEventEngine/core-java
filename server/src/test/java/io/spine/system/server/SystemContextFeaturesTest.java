@@ -123,7 +123,7 @@ class SystemContextFeaturesTest {
         systemBus.post(event);
         EventFilter filter = EventFilter
                 .newBuilder()
-                .setEventType(event.typeUrl().toTypeName().value())
+                .setEventType(event.enclosedTypeUrl().toTypeName().value())
                 .vBuild();
         EventStreamQuery query = EventStreamQuery
                 .newBuilder()

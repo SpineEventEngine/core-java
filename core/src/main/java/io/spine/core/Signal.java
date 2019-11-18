@@ -121,7 +121,7 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains the type URL of the enclosed message.
      */
-    default TypeUrl typeUrl() {
+    default TypeUrl enclosedTypeUrl() {
         return TypeUrl.ofEnclosed(getMessage());
     }
 
@@ -181,7 +181,7 @@ public interface Signal<I extends SignalId,
         return MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(typeUrl().value())
+                .setTypeUrl(enclosedTypeUrl().value())
                 .vBuild();
     }
 
@@ -194,7 +194,7 @@ public interface Signal<I extends SignalId,
         MessageId commandQualifier = MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(typeUrl().value())
+                .setTypeUrl(enclosedTypeUrl().value())
                 .buildPartial();
         Origin origin = Origin
                 .newBuilder()
