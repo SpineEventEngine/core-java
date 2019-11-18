@@ -26,6 +26,8 @@ import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.client.Filter.Operator;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -56,7 +58,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static java.lang.String.join;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Filters utility should")
@@ -176,22 +177,46 @@ class FiltersTest {
         @DisplayName("for numbers")
         void forNumbers() {
             double number = 3.14;
-            Filter filter = le("doubleField", number);
-            assertNotNull(filter);
-            assertEquals(LESS_OR_EQUAL, filter.getOperator());
+            Filter filter = le("double_field", number);
+            assertThat(filter).isNotNull();
+            assertThat(filter.getOperator()).isEqualTo(LESS_OR_EQUAL);
+
             DoubleValue value = unpack(filter.getValue(), DoubleValue.class);
-            assertEquals(number, value.getValue());
+            assertThat(value.getValue()).isWithin(0.01).of(number);
         }
 
         @Test
         @DisplayName("for strings")
         void forStrings() {
             String theString = "abc";
-            Filter filter = gt("stringField", theString);
-            assertNotNull(filter);
-            assertEquals(GREATER_THAN, filter.getOperator());
+            Filter filter = gt("string_field", theString);
+            assertThat(filter).isNotNull();
+            assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
+
             StringValue value = unpack(filter.getValue(), StringValue.class);
-            assertEquals(theString, value.getValue());
+            assertThat(value.getValue()).isEqualTo(theString);
+        }
+
+        @Test
+        @DisplayName("for timestamps")
+        void forTimestamps() {
+            Timestamp timestamp = currentTime();
+            Filter filter = gt("timestamp_field", timestamp);
+            assertThat(filter).isNotNull();
+            assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
+            Timestamp value = unpack(filter.getValue(), Timestamp.class);
+            assertThat(value).isEqualTo(timestamp);
+        }
+
+        @Test
+        @DisplayName("for versions")
+        void forVersions() {
+            Version version = Versions.zero();
+            Filter filter = ge("version_field", version);
+            assertThat(filter).isNotNull();
+            assertThat(filter.getOperator()).isEqualTo(GREATER_OR_EQUAL);
+            Version value = unpack(filter.getValue(), Version.class);
+            assertThat(value).isEqualTo(version);
         }
     }
 
