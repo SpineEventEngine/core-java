@@ -21,7 +21,7 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.test.client.ClCreateProject;
+import io.spine.test.client.ClProjectCreated;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityName;
 import io.spine.type.TypeUrl;
@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class FilterMixinTest {
 
     private static final TypeUrl TEST_ENTITY_TYPE = TypeUrl.of(TestEntity.class);
-    private static final TypeUrl CREATE_PROJECT_TYPE = TypeUrl.of(ClCreateProject.class);
+    private static final TypeUrl PROJECT_CREATED_TYPE = TypeUrl.of(ClProjectCreated.class);
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -115,7 +115,7 @@ class FilterMixinTest {
     private static Target createProjectTarget() {
         Target target = Target
                 .newBuilder()
-                .setType(CREATE_PROJECT_TYPE.value())
+                .setType(PROJECT_CREATED_TYPE.value())
                 .build();
         return target;
     }
