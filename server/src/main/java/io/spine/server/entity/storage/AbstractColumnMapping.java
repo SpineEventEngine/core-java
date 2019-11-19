@@ -36,6 +36,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * <p>Since entity columns are proto-based and have a limited amount of possible types, this class
  * allows descendants to override concrete type mapping rules in a convenient way.
+ *
+ * <p>Some of the types are expected to be mapped in a way so they support the ordering comparison
+ * operators ("greater than", "less than or equals", etc.). For details, see
+ * {@link io.spine.client.Filters}.
  */
 public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
 

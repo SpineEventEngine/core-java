@@ -38,10 +38,13 @@ import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
+import io.spine.server.dispatch.BatchDispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.AggregateHistoryCorrupted;
 import io.spine.system.server.CannotDispatchDuplicateCommand;
 import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.CommandTarget;
@@ -66,6 +69,7 @@ import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -379,6 +383,35 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setEntity(entityId)
                 .setCommand(commandId)
+                .vBuild();
+        postEvent(event);
+    }
+
+    public void onCorruptedState(BatchDispatchOutcome outcome) {
+        List<DispatchOutcome> outcomes = outcome.getOutcomeList();
+        MessageId lastSuccessful = MessageId.getDefaultInstance();
+        MessageId erroneous = null;
+        Error error = null;
+        int interruptedCount = 0;
+        for (DispatchOutcome dispatchOutcome : outcomes) {
+            if (dispatchOutcome.hasSuccess()) {
+                lastSuccessful = dispatchOutcome.getPropagatedSignal();
+            } else if (dispatchOutcome.hasError()) {
+                erroneous = dispatchOutcome.getPropagatedSignal();
+                error = dispatchOutcome.getError();
+            } else {
+                interruptedCount++;
+            }
+        }
+        checkNotNull(error);
+        AggregateHistoryCorrupted event = AggregateHistoryCorrupted
+                .newBuilder()
+                .setEntity(entityId)
+                .setEntityType(typeName)
+                .setLastSuccessfulEvent(lastSuccessful)
+                .setErroneousEvent(erroneous)
+                .setError(error)
+                .setInterruptedEvents(interruptedCount)
                 .vBuild();
         postEvent(event);
     }

@@ -37,6 +37,7 @@ import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.Repository;
@@ -621,8 +622,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected A play(I id, AggregateHistory history) {
         A result = create(id);
         AggregateTransaction tx = AggregateTransaction.start(result);
-        result.play(history);
+        BatchDispatchOutcome outcome = result.play(history);
+        boolean success = outcome.getSuccessful();
         tx.commitIfActive();
+        if (!success) {
+            lifecycleOf(id).onCorruptedState(outcome);
+            throw newIllegalStateException("Aggregate %s (ID: %s) cannot be loaded.%n%s",
+                                           aggregateClass().value().getName(),
+                                           result.idAsString(),
+                                           outcome);
+        }
         return result;
     }
 
