@@ -30,6 +30,7 @@ import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +46,7 @@ class EventRoutingIntegrationTest {
      * properly, making the corresponding field {@code false}.
      */
     @Test
+    @Disabled       // See https://github.com/SpineEventEngine/core-java/issues/925.
     @DisplayName("only occur after the event origin has already been dispatched")
     void occurAfterOriginDispatched() {
         UserId userId = GivenUserId.generated();
