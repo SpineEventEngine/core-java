@@ -184,6 +184,12 @@ public final class Delivery implements Logging {
      */
     private final int pageSize;
 
+    /**
+     * The listener of the dispatching operations inside the {@link io.spine.server.bus.MulticastBus
+     * MulticastBus}es.
+     *
+     * <p>Responsible for sending the notifications to the shard observers.
+     */
     private final DeliveryDispatchListener dispatchListener = new DeliveryDispatchListener();
 
     Delivery(DeliveryBuilder builder) {
@@ -432,6 +438,10 @@ public final class Delivery implements Logging {
         return Inbox.newBuilder(entityType, inboxWriter());
     }
 
+    /**
+     * Returns a listener of the dispatching operations occurring in the
+     * {@link io.spine.server.bus.MulticastBus MulticastBus}es.
+     */
     @Internal
     public MulticastDispatchListener dispatchListener() {
         return dispatchListener;
@@ -509,6 +519,11 @@ public final class Delivery implements Logging {
                                                  .getTypeUrl()));
     }
 
+    /**
+     * Listens to the signals dispatched via the {@code MulticastBus}es and notifies the shard
+     * observers of a new {@code InboxMessage} only when it has been dispatched to all of
+     * its multicast targets.
+     */
     private class DeliveryDispatchListener implements MulticastDispatchListener {
 
         private final Multimap<SignalId, InboxMessage> pending =
