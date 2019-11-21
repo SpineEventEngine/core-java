@@ -387,10 +387,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     private <R> void checkMatchesIdType(R result) {
         Class routingResultType = null;
-        if(result instanceof Collection) {
+        if (result instanceof Collection) {
             Collection asCollection = (Collection) result;
             Iterator iterator = asCollection.iterator();
-            if(iterator.hasNext()) {
+            if (iterator.hasNext()) {
                 Object element = iterator.next();
                 routingResultType = element.getClass();
             }
