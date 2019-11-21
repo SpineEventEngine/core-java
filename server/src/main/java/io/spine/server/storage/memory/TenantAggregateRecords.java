@@ -41,8 +41,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static io.spine.protobuf.Messages.isDefault;
 import static com.google.common.collect.Multimaps.synchronizedSortedSetMultimap;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.util.Exceptions.unsupported;
 
 /**
@@ -84,7 +84,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      *
      * @return immutable list
      */
-    synchronized List<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
+    List<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         I id = request.recordId();
         return ImmutableList.copyOf(records.get(id));
     }

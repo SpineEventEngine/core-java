@@ -61,7 +61,7 @@ public final class InMemoryInboxStorage
     }
 
     @Override
-    public synchronized Page<InboxMessage> readAll(ShardIndex index, int pageSize) {
+    public Page<InboxMessage> readAll(ShardIndex index, int pageSize) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
 
         AtomicInteger counter = new AtomicInteger();
@@ -78,7 +78,7 @@ public final class InMemoryInboxStorage
     }
 
     @Override
-    public synchronized Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index) {
+    public Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
         Optional<InboxMessage> result =
                 storage.readAll()
@@ -118,13 +118,13 @@ public final class InMemoryInboxStorage
     }
 
     @Override
-    public synchronized Iterator<InboxMessageId> index() {
+    public Iterator<InboxMessageId> index() {
         return multitenantStorage.currentSlice()
                                  .index();
     }
 
     @Override
-    public synchronized Optional<InboxMessage> read(InboxReadRequest request) {
+    public Optional<InboxMessage> read(InboxReadRequest request) {
         return multitenantStorage.currentSlice()
                                  .get(request.recordId());
     }
