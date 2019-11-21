@@ -106,7 +106,7 @@ final class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMes
                 return timeComparison;
             }
             int versionComparison = Integer.compare(first.getVersion(), second.getVersion());
-            if(versionComparison == 0) {
+            if (versionComparison == 0) {
                 throw new IllegalStateException("Inbox record versions must not be equal.");
             }
             return versionComparison;
