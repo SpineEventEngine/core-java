@@ -43,6 +43,10 @@ import static java.util.stream.Collectors.groupingBy;
 
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
+ *
+ * <p>Mutating operations are made {@code synchronized} to avoid simultaneous updates
+ * of the same records. That allows to operate in a concurrency-heavy environment notwithstanding
+ * the thread-safety of the underlying storage.
  */
 public final class InMemoryInboxStorage
         extends AbstractStorage<InboxMessageId, InboxMessage, InboxReadRequest>
