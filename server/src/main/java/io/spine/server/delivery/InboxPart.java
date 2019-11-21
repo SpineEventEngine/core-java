@@ -26,11 +26,9 @@ import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -104,7 +102,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setLabel(label)
                 .setStatus(determineStatus(envelope))
                 .setWhenReceived(Time.currentTime())
-                .setVersion(Version.instance.getNextValue());
+                .setVersion(VersionCounter.next());
         setRecordPayload(envelope, builder);
         InboxMessage message = builder.vBuild();
 
@@ -183,35 +181,6 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                                       .getValue();
             boolean hasDuplicate = rawIds.contains(currentId);
             return hasDuplicate;
-        }
-    }
-
-    /**
-     * A counter providing the version for the incoming {@code InboxMessage}s.
-     *
-     * <p>Serves to distinguish the messages arrived at the very same millisecond, even from
-     * different threads.
-     *
-     * <p>Hard-coded to reset the value to zero every {@link #MAX_VERSION} times. This allows
-     * to avoid any number overflows, but still is sufficient for realistic use-cases.
-     */
-    @ThreadSafe
-    private static final class Version {
-
-        private static final int MAX_VERSION = 10_000;
-        private static final Version instance = new Version();
-
-        private final AtomicInteger counter = new AtomicInteger();
-
-        private synchronized int getNextValue() {
-            return counter.updateAndGet(n -> (n >= MAX_VERSION) ? 1 : n + 1);
-        }
-
-        /**
-         * Obtains the next version value.
-         */
-        public static int next() {
-            return instance.getNextValue();
         }
     }
 }
