@@ -20,13 +20,24 @@
 
 package io.spine.server.delivery.given;
 
-/**
- * A common interface for signals used in {@link Delivery} tests.
- */
-public interface CalculatorSignal {
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.test.delivery.DCreateTask;
+import io.spine.test.delivery.DTask;
+import io.spine.test.delivery.DTaskCreated;
 
-    @SuppressWarnings("override")   // Overrides are located in the Protobuf-generated code.
-    String getCalculatorId();
+public class TaskAggregate extends Aggregate<String, DTask, DTask.Builder> {
 
-    int getValue();
+    @Assign
+    DTaskCreated handle(DCreateTask command) {
+        return DTaskCreated.newBuilder()
+                           .setId(command.getId())
+                           .vBuild();
+    }
+
+    @Apply
+    private void event(DTaskCreated taskCreated) {
+        builder().setId(taskCreated.getId());
+    }
 }

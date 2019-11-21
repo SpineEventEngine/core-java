@@ -20,7 +20,10 @@
 package io.spine.server.bus;
 
 import com.google.protobuf.Message;
-import io.spine.server.type.MessageEnvelope;
+import io.spine.core.Signal;
+import io.spine.core.SignalId;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -33,14 +36,19 @@ import java.util.Collection;
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
  */
-public abstract class MulticastBus<M extends Message,
-                                   E extends MessageEnvelope<?, M, ?>,
+public abstract class MulticastBus<M extends Signal<?, ?, ?>,
+                                   E extends SignalEnvelope<?, M, ?>,
                                    C extends MessageClass<? extends Message>,
                                    D extends MessageDispatcher<C, E>>
         extends Bus<M, E, C, D> {
 
+    private final MulticastDispatchListener listener;
+
     protected MulticastBus(BusBuilder<?, M, E, C, D> builder) {
         super(builder);
+        this.listener = ServerEnvironment.instance()
+                                         .delivery()
+                                         .dispatchListener();
     }
 
     /**
@@ -55,5 +63,15 @@ public abstract class MulticastBus<M extends Message,
             dispatcher.dispatch(messageEnvelope);
         }
         return dispatchers.size();
+    }
+
+    @Override
+    protected final void onDispatchingStarted(SignalId signal) {
+        listener.onStarted(signal);
+    }
+
+    @Override
+    protected final void onDispatched(SignalId signal) {
+        listener.onCompleted(signal);
     }
 }
