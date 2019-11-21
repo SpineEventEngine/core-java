@@ -32,7 +32,6 @@ import io.spine.test.delivery.DTaskAssignment;
 import io.spine.test.delivery.DTaskCreated;
 import io.spine.testing.core.given.GivenUserId;
 
-
 public class TaskAssignment
         extends ProcessManager<String, DTaskAssignment, DTaskAssignment.Builder> {
 
