@@ -83,10 +83,13 @@ public final class InMemoryInboxStorage
         Optional<InboxMessage> result =
                 storage.readAll()
                        .stream()
-                       .filter((r) -> index.equals(r.getShardIndex()) &&
-                               r.getStatus() == InboxMessageStatus.TO_DELIVER)
+                       .filter((r) -> index.equals(r.getShardIndex()) && isToDeliver(r))
                        .min(InMemoryInboxStorage::compareMessages);
         return result;
+    }
+
+    private static boolean isToDeliver(InboxMessage r) {
+        return r.getStatus() == InboxMessageStatus.TO_DELIVER;
     }
 
     private static int compareMessages(InboxMessage m1, InboxMessage m2) {
