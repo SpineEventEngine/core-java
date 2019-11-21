@@ -56,6 +56,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.collect.Iterables.getFirst;
 import static io.spine.base.Errors.fromThrowable;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -389,9 +390,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         Class routingResultType = null;
         if (result instanceof Collection) {
             Collection asCollection = (Collection) result;
-            Iterator iterator = asCollection.iterator();
-            if (iterator.hasNext()) {
-                Object element = iterator.next();
+            Object element = getFirst(asCollection, null);
+            if (element != null) {
                 routingResultType = element.getClass();
             }
         } else {
