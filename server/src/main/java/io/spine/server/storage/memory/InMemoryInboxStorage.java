@@ -82,7 +82,7 @@ public final class InMemoryInboxStorage
     }
 
     @Override
-    public Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index) {
+    public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
         Optional<InboxMessage> result =
                 storage.readAll()

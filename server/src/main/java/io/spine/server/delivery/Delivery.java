@@ -291,7 +291,7 @@ public final class Delivery implements Logging {
         }
         DeliveryStats stats = new DeliveryStats(index, totalDelivered);
         monitor.onDeliveryCompleted(stats);
-        Optional<InboxMessage> lateMessage = inboxStorage.oldestMessageToDeliver(index);
+        Optional<InboxMessage> lateMessage = inboxStorage.newestMessageToDeliver(index);
         lateMessage.ifPresent(this::onNewMessage);
 
         return Optional.of(stats);

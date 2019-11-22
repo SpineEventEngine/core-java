@@ -60,7 +60,7 @@ public interface InboxStorage
     Page<InboxMessage> readAll(ShardIndex index, int pageSize);
 
     /**
-     * Finds the oldest message {@linkplain InboxMessageStatus#TO_DELIVER to deliver}
+     * Finds the newest message {@linkplain InboxMessageStatus#TO_DELIVER to deliver}
      * in the given shard.
      *
      * @param index
@@ -68,7 +68,7 @@ public interface InboxStorage
      * @return the message found or {@code Optional.empty()} if there are no messages to deliver
      *         in the specified shard
      */
-    Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index);
+    Optional<InboxMessage> newestMessageToDeliver(ShardIndex index);
 
     /**
      * Writes a message to the storage.
