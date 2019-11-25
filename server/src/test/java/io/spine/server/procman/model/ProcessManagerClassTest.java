@@ -23,8 +23,28 @@ package io.spine.server.procman.model;
 import io.spine.base.RejectionMessage;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.procman.given.pm.TestProcessManager;
+import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
+import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmCancelIteration;
+import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmPlanIteration;
+import io.spine.test.procman.command.PmReviewBacklog;
+import io.spine.test.procman.command.PmScheduleRetrospective;
+import io.spine.test.procman.command.PmStartIteration;
+import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
+import io.spine.test.procman.command.PmThrowRuntimeException;
+import io.spine.test.procman.event.PmIterationCompleted;
+import io.spine.test.procman.event.PmIterationPlanned;
+import io.spine.test.procman.event.PmOwnerChanged;
+import io.spine.test.procman.event.PmProjectCreated;
+import io.spine.test.procman.event.PmProjectStarted;
+import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.procman.quiz.event.PmQuestionAnswered;
+import io.spine.test.procman.quiz.event.PmQuizStarted;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -34,13 +54,84 @@ class ProcessManagerClassTest {
 
     private final ProcessManagerClass<?> processManagerClass =
             ProcessManagerClass.asProcessManagerClass(TestProcessManager.class);
-    
-    @Test
-    @DisplayName("expose generated rejections")
-    void rejections() {
-        Class<? extends RejectionMessage> cls = StandardRejections.EntityAlreadyArchived.class;
-        EventClass rejectionClass = EventClass.from(cls);
-        assertThat(processManagerClass.rejections())
-                .contains(rejectionClass);
+
+    @Nested
+    @DisplayName("provide classes of")
+    class MessageClasses {
+
+        @Test
+        @DisplayName("handled and transformed commands")
+        void commands() {
+            assertThat(processManagerClass.commands())
+                    .containsExactlyElementsIn(CommandClass.setOf(
+                            // Handled commands
+                            PmCreateProject.class,
+                            PmAddTask.class,
+                            PmReviewBacklog.class,
+                            PmScheduleRetrospective.class,
+                            PmPlanIteration.class,
+                            PmStartIteration.class,
+                            PmThrowEntityAlreadyArchived.class,
+                            PmThrowRuntimeException.class,
+                            // Transformed commands
+                            PmStartProject.class,
+                            PmCancelIteration.class
+                    ));
+        }
+
+        @Test
+        @DisplayName("events (including rejections) on which the process manager reacts")
+        void reactions() {
+            assertThat(processManagerClass.events())
+                    .containsExactlyElementsIn(EventClass.setOf(
+                            PmProjectCreated.class,
+                            PmTaskAdded.class,
+                            PmProjectStarted.class,
+                            // External events
+                            PmQuizStarted.class,
+                            PmQuestionAnswered.class,
+                            // Reactions with commands
+                            PmOwnerChanged.class,
+                            PmIterationPlanned.class,
+                            PmIterationCompleted.class,
+                            // Reactions on rejections.
+                            StandardRejections.EntityAlreadyArchived.class
+                    ));
+        }
+
+        @Test
+        @DisplayName("external events on which the process manager reacts")
+        void externalEvents() {
+            assertThat(processManagerClass.externalEvents())
+                    .containsExactlyElementsIn(EventClass.setOf(
+                            PmQuizStarted.class,
+                            PmQuestionAnswered.class
+                    ));
+        }
+
+        @Test
+        @DisplayName("commands produced by the process manager")
+        void producedCommands() {
+            assertThat(processManagerClass.outgoingCommands())
+            .containsExactlyElementsIn(CommandClass.setOf(
+                    PmAddTask.class,
+                    PmReviewBacklog.class,
+                    PmScheduleRetrospective.class,
+                    PmPlanIteration.class,
+                    PmScheduleRetrospective.class,
+                    PmPlanIteration.class,
+                    PmStartIteration.class,
+                    PmCreateProject.class
+            ));
+        }
+
+        @Test
+        @DisplayName("generated rejections")
+        void rejections() {
+            Class<? extends RejectionMessage> cls = StandardRejections.EntityAlreadyArchived.class;
+            EventClass rejectionClass = EventClass.from(cls);
+            assertThat(processManagerClass.rejections())
+                    .containsExactly(rejectionClass);
+        }
     }
 }
