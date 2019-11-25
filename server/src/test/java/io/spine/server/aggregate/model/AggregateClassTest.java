@@ -33,6 +33,7 @@ import io.spine.server.aggregate.given.klasse.rejection.Rejections;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -41,65 +42,79 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 /**
  * Test obtaining dispatched message classes from {@link AggregateClass}.
  */
-@DisplayName("AggregateClass should")
+@DisplayName("`AggregateClass` should")
 class AggregateClassTest {
 
     private final AggregateClass<?> aggregateClass = asAggregateClass(EngineAggregate.class);
 
-    @Test
-    @DisplayName("provide handled command classes")
-    void commandClasses() {
-        assertThat(aggregateClass.commands())
-                .containsExactlyElementsIn(CommandClass.setOf(
-                        StartEngine.class, StopEngine.class
-                ));
-    }
+    @Nested
+    @DisplayName("provide classes of")
+    class MessageClasses {
 
-    @Test
-    @DisplayName("provide classes of events and rejection events on which the aggregate reacts")
-    void eventClasses() {
-        assertThat(aggregateClass.events())
-                .containsExactlyElementsIn(EventClass.setOf(
-                        TankEmpty.class,
-                        Rejections.EngineAlreadyStopped.class,
-                        Rejections.EngineAlreadyStarted.class,
-                        EmissionTestStarted.class,
-                        EmissionTestStopped.class,
-                        Rejections.CannotStartEmissionTest.class
-                ));
-    }
+        @Test
+        @DisplayName("commands handled by the aggregate")
+        void commandClasses() {
+            assertThat(aggregateClass.commands())
+                    .containsExactlyElementsIn(CommandClass.setOf(
+                            StartEngine.class, StopEngine.class
+                    ));
+        }
 
-    @Test
-    @DisplayName("provide classes of external events " +
-            "and rejection events on which the aggregate reacts")
-    void externalEventClasses() {
-        assertThat(aggregateClass.externalEvents())
-                .containsExactlyElementsIn(EventClass.setOf(
-                        EmissionTestStarted.class,
-                        EmissionTestStopped.class,
-                        Rejections.CannotStartEmissionTest.class
-                ));
-    }
+        @Test
+        @DisplayName("events (including rejections) on which the aggregate reacts")
+        void eventClasses() {
+            assertThat(aggregateClass.events())
+                    .containsExactlyElementsIn(EventClass.setOf(
+                            TankEmpty.class,
+                            Rejections.EngineAlreadyStopped.class,
+                            Rejections.EngineAlreadyStarted.class,
+                            EmissionTestStarted.class,
+                            EmissionTestStopped.class,
+                            Rejections.CannotStartEmissionTest.class
+                    ));
+        }
 
-    @Test
-    @DisplayName("provide classes of events that are imported by the aggregate")
-    void importedEvents() {
-        assertThat(aggregateClass.importableEvents())
-                .containsExactlyElementsIn(EventClass.setOf(
-                        EngineStopped.class,
-                        SettingsAdjusted.class
-                ));
-    }
+        @Test
+        @DisplayName("external events (including rejections) on which the aggregate reacts")
+        void externalEventClasses() {
+            assertThat(aggregateClass.externalEvents())
+                    .containsExactlyElementsIn(EventClass.setOf(
+                            EmissionTestStarted.class,
+                            EmissionTestStopped.class,
+                            Rejections.CannotStartEmissionTest.class
+                    ));
+        }
 
-    @Test
-    @DisplayName("provide classes of events produced by the aggregate")
-    void producedEvents() {
-        assertThat(aggregateClass.outgoingEvents())
+        @Test
+        @DisplayName("events imported by the aggregate")
+        void importedEvents() {
+            assertThat(aggregateClass.importableEvents())
+                    .containsExactlyElementsIn(EventClass.setOf(
+                            EngineStopped.class,
+                            SettingsAdjusted.class
+                    ));
+        }
+
+        @Test
+        @DisplayName("events produced by the aggregate")
+        void producedEvents() {
+            assertThat(aggregateClass.outgoingEvents())
+                    .containsExactlyElementsIn(EventClass.setOf(
+                            EngineStarted.class,
+                            EngineStopped.class,
+                            Rejections.EngineAlreadyStarted.class,
+                            Rejections.EngineAlreadyStopped.class
+                    ));
+        }
+
+        @Test
+        @DisplayName("rejections produced by the aggregate")
+        void producedRejections() {
+            assertThat(aggregateClass.rejections())
                 .containsExactlyElementsIn(EventClass.setOf(
-                        EngineStarted.class,
-                        EngineStopped.class,
                         Rejections.EngineAlreadyStarted.class,
                         Rejections.EngineAlreadyStopped.class
                 ));
+        }
     }
 }
