@@ -21,7 +21,6 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.annotation.Internal;
 import io.spine.server.type.EventClass;
 
 /**
@@ -30,7 +29,6 @@ import io.spine.server.type.EventClass;
  * <p>A class can declare methods to receive events from the same Bounded Context (“domestic”
  * events), or events originated in another Bounded Context (“external” events).
  */
-@Internal
 public interface EventReceiverClass {
 
     /**
