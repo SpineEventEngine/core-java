@@ -37,6 +37,7 @@ import "spine/base/field_path.proto";
 // Use Target to specify and narrow down the source for Topic and Query by the target type and
 // various criteria.
 message Target {
+    option (is).java_type = "io.spine.client.TargetMixin";
 
     // The type of the entity or event of interest.
     //
@@ -96,6 +97,7 @@ message CompositeFilter {
 
 // A filter matching some value in the event message/entity state.
 message Filter {
+    option (is).java_type = "io.spine.client.FilterMixin";
 
     // The path to the field to be matched.
     //

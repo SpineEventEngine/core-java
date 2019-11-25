@@ -22,12 +22,12 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.Events;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.klasse.EngineAggregate;
@@ -43,7 +43,7 @@ import io.spine.server.aggregate.given.repo.RejectingRepository;
 import io.spine.server.aggregate.given.repo.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.repo.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.RecentHistory;
 import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.CommandClass;
@@ -74,6 +74,7 @@ import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -86,6 +87,7 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
@@ -314,67 +316,6 @@ public class AggregateRepositoryTest {
             assertThat(passedRequest.batchSize())
                     .isEqualTo(nonDefaultSnapshotTrigger + 1);
         }
-
-        /**
-         * An {@link AggregateStorage} whose purpose is to intercept the incoming
-         * {@linkplain AggregateReadRequest read request}.
-         */
-        private final class TestAggregateStorage extends AggregateStorage<ProjectId> {
-
-            private final AggregateStorage<ProjectId> delegate;
-            private AggregateReadRequest<ProjectId> memoizedRequest;
-
-            private TestAggregateStorage(AggregateStorage<ProjectId> delegate) {
-                super(delegate.isMultitenant());
-                this.delegate = delegate;
-            }
-
-            @Override
-            public Optional<AggregateHistory> read(AggregateReadRequest<ProjectId> request) {
-                memoizedRequest = request;
-                return Optional.empty();
-            }
-
-            @Override
-            protected void writeRecord(ProjectId id, AggregateEventRecord record) {
-                delegate.writeRecord(id, record);
-            }
-
-            @Override
-            protected Iterator<AggregateEventRecord>
-            historyBackward(AggregateReadRequest<ProjectId> request) {
-                return delegate.historyBackward(request);
-            }
-
-            @Override
-            protected void truncate(int snapshotIndex) {
-                delegate.truncate(snapshotIndex);
-            }
-
-            @Override
-            protected void truncate(int snapshotIndex, Timestamp date) {
-                delegate.truncate(snapshotIndex, date);
-            }
-
-            @Override
-            protected Iterator<ProjectId> distinctAggregateIds() {
-                return delegate.distinctAggregateIds();
-            }
-
-            @Override
-            public Optional<LifecycleFlags> readLifecycleFlags(ProjectId id) {
-                return delegate.readLifecycleFlags(id);
-            }
-
-            @Override
-            public void writeLifecycleFlags(ProjectId id, LifecycleFlags flags) {
-                delegate.writeLifecycleFlags(id, flags);
-            }
-
-            private AggregateReadRequest<ProjectId> memoizedRequest() {
-                return memoizedRequest;
-            }
-        }
     }
 
     private static void loadOrCreate(AggregateRepository<ProjectId, ProjectAggregate> repository,
@@ -445,6 +386,29 @@ public class AggregateRepositoryTest {
 
         // This should iterate through all and fail.
         assertThrows(IllegalStateException.class, () -> Lists.newArrayList(iterator));
+    }
+
+    @SuppressWarnings("CheckReturnValue")
+    @Test
+    @DisplayName("throw an ISE when history is corrupted")
+    void throwWhenCorrupted() {
+        ProjectAggregate aggregate = givenStoredAggregate();
+        RecentHistory history = aggregate.recentHistory();
+        Event.Builder eventBuilder = history.stream()
+                                       .findFirst()
+                                       .orElseGet(Assertions::fail)
+                                       .toBuilder();
+        eventBuilder.setId(Events.generateId());
+        eventBuilder.getContextBuilder().setTimestamp(currentTime());
+        Event duplicateEvent = eventBuilder.build();
+        AggregateHistory corruptedHistory = AggregateHistory
+                .newBuilder()
+                .addEvent(duplicateEvent)
+                .build();
+        ProjectId id = aggregate.id();
+        repository().aggregateStorage()
+                    .write(id, corruptedHistory);
+        assertThrows(IllegalStateException.class, () -> repository().find(id));
     }
 
     @Nested

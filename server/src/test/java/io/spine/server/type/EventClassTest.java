@@ -23,18 +23,22 @@ package io.spine.server.type;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.type.given.rejection.PhoneNotFound;
 import io.spine.server.type.given.rejection.TestRejections;
+import com.google.protobuf.Any;
+import io.spine.core.Event;
+import io.spine.protobuf.AnyPacker;
 import io.spine.test.core.ProjectCreated;
 import io.spine.test.core.ProjectId;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("EventClass should")
+@DisplayName("`EventClass` should")
 class EventClassTest {
 
     @Test
@@ -44,12 +48,37 @@ class EventClassTest {
                 .testAllPublicStaticMethods(EventClass.class);
     }
 
-    @Test
-    @DisplayName("be constructed from TypeUrl instance")
-    void constructFromTypeUrl() {
-        TypeUrl typeUrl = TypeUrl.from(ProjectCreated.getDescriptor());
-        EventClass eventClass = EventClass.from(typeUrl);
-        assertEquals(ProjectCreated.class, eventClass.value());
+    @Nested
+    @DisplayName("be constructed")
+    class BeConstructed {
+
+        @Test
+        @DisplayName("from `TypeUrl` instance")
+        void fromTypeUrl() {
+            TypeUrl typeUrl = TypeUrl.from(ProjectCreated.getDescriptor());
+            EventClass eventClass = EventClass.from(typeUrl);
+            assertThat(eventClass.value()).isEqualTo(ProjectCreated.class);
+        }
+
+        @Test
+        @DisplayName("from `Event` instance")
+        void fromEvent() {
+            ProjectId id = ProjectId
+                    .newBuilder()
+                    .setId(newUuid())
+                    .build();
+            ProjectCreated projectCreated = ProjectCreated
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            Any any = AnyPacker.pack(projectCreated);
+            Event event = Event
+                    .newBuilder()
+                    .setMessage(any)
+                    .build();
+            EventClass eventClass = EventClass.from(event);
+            assertThat(eventClass.value()).isEqualTo(ProjectCreated.class);
+        }
     }
 
     @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})

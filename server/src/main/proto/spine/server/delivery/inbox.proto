@@ -130,4 +130,10 @@ message InboxMessage {
 
     // A point in time when the message was received by the `Inbox` instance.
     google.protobuf.Timestamp when_received = 9 [(required) = true];
+
+    // An `Inbox`-internal version of the message.
+    //
+    // Used to order the messages received at the very same millisecond.
+    //
+    int32 version = 10 [(min).value = "0"];
 }

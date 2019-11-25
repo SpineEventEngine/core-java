@@ -25,6 +25,7 @@ import io.spine.server.storage.Storage;
 import io.spine.validate.Validated;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
@@ -57,6 +58,17 @@ public interface InboxStorage
      * @return the first page of the results
      */
     Page<InboxMessage> readAll(ShardIndex index, int pageSize);
+
+    /**
+     * Finds the oldest message {@linkplain InboxMessageStatus#TO_DELIVER to deliver}
+     * in the given shard.
+     *
+     * @param index
+     *         the shard index to look in
+     * @return the message found or {@code Optional.empty()} if there are no messages to deliver
+     *         in the specified shard
+     */
+    Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index);
 
     /**
      * Writes a message to the storage.

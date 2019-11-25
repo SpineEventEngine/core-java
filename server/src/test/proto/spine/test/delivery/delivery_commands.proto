@@ -16,3 +16,7 @@ message AddNumber {
 
     int32 value = 2;
 }
+
+message DCreateTask {
+    string id = 1;
+}

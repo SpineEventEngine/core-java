@@ -21,7 +21,6 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.Lists;
-import com.google.common.truth.StringSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
@@ -48,6 +47,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
+import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -441,17 +441,18 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("fail when dispatching unknown event")
-    void logErrorOnUnknownEvent() {
+    @DisplayName("emit `RoutingFailed` when dispatching unknown event")
+    void emitRoutingFailedOnUnknownEvent() {
         Event event = GivenEvent.arbitrary();
         DiagnosticMonitor monitor = new DiagnosticMonitor();
         boundedContext.registerEventDispatcher(monitor);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                                                          () -> dispatchEvent(event));
-        StringSubject assertErrorMessage = assertThat(exception.getMessage());
-        assertErrorMessage.isNotNull();
-        assertErrorMessage.contains(repository().idClass().getName());
+        dispatchEvent(event);
+
+        List<RoutingFailed> failures = monitor.routingFailures();
+        assertThat(failures.size()).isEqualTo(1);
+        RoutingFailed failure = failures.get(0);
+        assertThat(failure.getError().getMessage()).contains(repository().idClass().getName());
     }
 
     @Nested
