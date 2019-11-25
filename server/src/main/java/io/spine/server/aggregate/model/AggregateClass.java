@@ -68,9 +68,6 @@ public class AggregateClass<A extends Aggregate>
         return result;
     }
 
-    /**
-     * Obtains the set of event classes on which this aggregate class reacts.
-     */
     @Override
     public final ImmutableSet<EventClass> events() {
         return delegate.events();
