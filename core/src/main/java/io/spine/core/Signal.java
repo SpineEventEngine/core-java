@@ -185,7 +185,7 @@ public interface Signal<I extends SignalId,
         return MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(enclosedMessage().typeUrl().value())
+                .setTypeUrl(enclosedTypeUrl().value())
                 .vBuild();
     }
 
@@ -198,7 +198,7 @@ public interface Signal<I extends SignalId,
         MessageId commandQualifier = MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(enclosedMessage().typeUrl().value())
+                .setTypeUrl(enclosedTypeUrl().value())
                 .buildPartial();
         Origin origin = Origin
                 .newBuilder()
