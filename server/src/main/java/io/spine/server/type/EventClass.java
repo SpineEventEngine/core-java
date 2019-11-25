@@ -81,8 +81,8 @@ public final class EventClass extends MessageClass<EventMessage> {
             throw illegalStateWithCauseOf(e);
         }
         @SuppressWarnings("unchecked") // Safe as declared by `ThrowableMessage.messageThrown`.
-                Class<? extends RejectionMessage> returnType =
-                (Class<? extends RejectionMessage>) messageThrownMethod.getReturnType();
+        Class<? extends RejectionMessage> returnType = (Class<? extends RejectionMessage>)
+                messageThrownMethod.getReturnType();
         return from(returnType);
     }
 
@@ -96,7 +96,7 @@ public final class EventClass extends MessageClass<EventMessage> {
     public static EventClass from(TypeUrl typeUrl) {
         Class<? extends Message> messageClass = typeUrl.getMessageClass();
         checkArgument(EventMessage.class.isAssignableFrom(messageClass),
-                      "Event class constructed from non-EventMessage type URL: %s",
+                      "Event class cannot be constructed from non-EventMessage type URL: `%s`.",
                       typeUrl.value());
         return new EventClass((Class<? extends EventMessage>) messageClass, typeUrl);
     }
