@@ -18,30 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.commander;
 
-import io.spine.server.command.Command;
-import io.spine.server.command.model.given.commander.InvalidCommander;
-import io.spine.server.command.model.given.commander.ValidCommander;
-import io.spine.server.model.MethodSignatureTest;
+import io.spine.model.contexts.projects.command.SigAddTaskToProject;
+import io.spine.model.contexts.projects.command.SigAssignTask;
+import io.spine.model.contexts.projects.command.SigPauseTask;
+import io.spine.model.contexts.projects.command.SigStartTask;
 
-import java.lang.reflect.Method;
-import java.util.stream.Stream;
+/**
+ * A test environment class which provides command messages.
+ */
+final class TestCommandMessage {
 
-class CommandSubstituteSignatureTest extends MethodSignatureTest<CommandSubstituteSignature> {
-
-    @Override
-    protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(Command.class, ValidCommander.class).stream();
+    /** Prevents instantiation of this test environment utility. */
+    private TestCommandMessage() {
     }
 
-    @Override
-    protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(Command.class, InvalidCommander.class).stream();
+    static SigAssignTask assignTask() {
+        return SigAssignTask.getDefaultInstance();
     }
 
-    @Override
-    protected CommandSubstituteSignature signature() {
-        return new CommandSubstituteSignature();
+    static SigAddTaskToProject addTask() {
+        return SigAddTaskToProject.getDefaultInstance();
+    }
+
+    static SigStartTask startTask() {
+        return SigStartTask.getDefaultInstance();
+    }
+
+    static SigPauseTask pauseTask() {
+        return SigPauseTask.getDefaultInstance();
     }
 }
