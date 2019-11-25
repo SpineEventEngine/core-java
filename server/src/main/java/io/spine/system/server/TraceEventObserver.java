@@ -78,7 +78,7 @@ public final class TraceEventObserver extends AbstractEventSubscriber implements
         } catch (Exception e) {
             _error().withCause(e)
                     .log("Error during trace construction on the event with type `%s`.",
-                         payload.messageTypeUrl());
+                         payload.enclosedTypeUrl());
         }
     }
 }

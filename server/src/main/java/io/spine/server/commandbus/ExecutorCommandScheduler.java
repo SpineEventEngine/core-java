@@ -79,7 +79,7 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
         } catch (Throwable t) {
             _error().withCause(t)
                     .log("Error posting command `%s` with ID `%s`: `%s`.",
-                         command.messageTypeUrl(),
+                         command.enclosedTypeUrl(),
                          command.getId()
                                 .getUuid(),
                          t.getLocalizedMessage());

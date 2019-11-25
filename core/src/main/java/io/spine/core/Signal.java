@@ -125,7 +125,7 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains the type URL of the enclosed message.
      */
-    default TypeUrl messageTypeUrl() {
+    default TypeUrl enclosedTypeUrl() {
         return enclosedMessage().typeUrl();
     }
 
