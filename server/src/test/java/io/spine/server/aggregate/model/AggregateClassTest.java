@@ -96,7 +96,7 @@ class AggregateClassTest {
         }
 
         @Test
-        @DisplayName("events produced by the aggregate")
+        @DisplayName("events (including rejections) produced by the aggregate")
         void producedEvents() {
             assertThat(aggregateClass.outgoingEvents())
                     .containsExactlyElementsIn(EventClass.setOf(
