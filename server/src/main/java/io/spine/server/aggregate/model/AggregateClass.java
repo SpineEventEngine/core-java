@@ -128,8 +128,8 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass) {
-        return delegate.reactorOf(eventClass, commandClass);
+    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+        return delegate.reactorOf(eventClass, originClass);
     }
 
     @Override

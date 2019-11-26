@@ -64,8 +64,8 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     @Override
-    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass) {
-        return reactors.handlerOf(eventClass, commandClass);
+    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+        return reactors.handlerOf(eventClass, originClass);
     }
 
     @Override
