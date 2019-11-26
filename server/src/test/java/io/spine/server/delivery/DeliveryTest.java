@@ -23,6 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterators;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
@@ -31,6 +32,7 @@ import io.spine.core.UserId;
 import io.spine.protobuf.Messages;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.given.CounterView;
 import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
 import io.spine.server.delivery.given.FixedShardStrategy;
@@ -40,8 +42,10 @@ import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.tenant.TenantAwareRunner;
+import io.spine.test.delivery.Counter;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
+import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -53,6 +57,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -344,11 +349,11 @@ public class DeliveryTest {
     public void deliverMessagesInOrderOfEmission() throws InterruptedException {
         changeShardCountTo(20);
 
-        SingleTenantBlackBoxContext context =
-                BlackBoxBoundedContext.singleTenant()
-                                      .with(DefaultRepository.of(TaskAggregate.class))
-                                      .with(new TaskAssignment.Repository())
-                                      .with(new TaskView.Repository());
+        SingleTenantBlackBoxContext context = BlackBoxBoundedContext.singleTenant()
+                                                                    .with(DefaultRepository.of(
+                                                                            TaskAggregate.class))
+                                                                    .with(new TaskAssignment.Repository())
+                                                                    .with(new TaskView.Repository());
         List<DCreateTask> commands = generateCommands(200);
         ExecutorService service = newFixedThreadPool(20);
         service.invokeAll(commands.stream()
@@ -369,6 +374,43 @@ public class DeliveryTest {
             assertThat(state.getId()).isEqualTo(taskId);
             assertThat(Messages.isDefault(actualAssignee)).isFalse();
         }
+    }
+
+    @Test
+    public void catchUp() throws InterruptedException {
+        changeShardCountTo(2);
+        CounterView.Repository repo = new CounterView.Repository();
+        SingleTenantBlackBoxContext ctx = BlackBoxBoundedContext.singleTenant()
+                                                                .with(repo);
+
+        String[] ids = {"first", "second", "third", "fourth"};
+        Iterator<String> idIterator = Iterators.cycle(ids);
+        int eventCount = 200;
+        List<NumberAdded> events = new ArrayList<>(eventCount);
+        for(int i = 0; i < eventCount; i++) {
+            events.add(NumberAdded.newBuilder()
+                                  .setCalculatorId(idIterator.next())
+                                  .setValue(0)
+                                  .vBuild());
+        }
+
+        CounterView.changeWeightTo(1);
+        dispatchInParallel(ctx, events, 20);
+
+        String firstId = ids[0];
+        Optional<CounterView> view = repo.find(firstId);
+        Truth8.assertThat(view)
+              .isPresent();
+
+        Counter actualState = view.get()
+                                  .state();
+        int totalBeforeCatchUp = actualState.getTotal();
+        assertThat(totalBeforeCatchUp).isGreaterThan(0);
+
+//        CounterView.changeWeightTo(10);
+//        Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
+//        repo.catchUp(firstId, aWhileAgo);
+//        dispatchInParallel(ctx, events, 20);
     }
 
     /*
@@ -427,6 +469,17 @@ public class DeliveryTest {
                 delivery.deliverMessagesFrom(update.getShardIndex());
             }
         });
+    }
+
+    private static void dispatchInParallel(SingleTenantBlackBoxContext ctx,
+                                           List<NumberAdded> events,
+                                           int threads) throws InterruptedException {
+        ExecutorService service = newFixedThreadPool(threads);
+        service.invokeAll(events.stream()
+                                .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
+                                .collect(toList()));
+        List<Runnable> leftovers = service.shutdownNow();
+        assertThat(leftovers).isEmpty();
     }
 
     private static final class MonitorUnderTest extends DeliveryMonitor {
