@@ -31,6 +31,8 @@ import io.spine.model.contexts.projects.command.SigStartTask;
 import io.spine.model.contexts.projects.command.SigStopTask;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.model.contexts.projects.event.SigProjectStopped;
+import io.spine.model.contexts.projects.event.SigTaskDeleted;
+import io.spine.model.contexts.projects.event.SigTaskMoved;
 import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.server.command.model.given.commander.SampleCommander;
 import io.spine.server.type.CommandClass;
@@ -64,6 +66,21 @@ class CommanderClassTest {
         }
 
         @Test
+        @DisplayName("produced commands")
+        void outgoingCommands() {
+            assertThat(commanderClass.outgoingCommands())
+                    .containsExactlyElementsIn(CommandClass.setOf(
+                            SigAddTaskToProject.class,
+                            SigStartTask.class,
+                            SigSetProjectOwner.class,
+                            SigStopTask.class,
+                            SigAssignTask.class,
+                            SigPauseTask.class,
+                            SigRemoveTaskFromProject.class
+                    ));
+        }
+
+        @Test
         @DisplayName("thrown rejections")
         void events() {
             assertThat(commanderClass.rejections())
@@ -73,31 +90,26 @@ class CommanderClassTest {
         }
 
         @Test
-        @DisplayName("events in response to which the commander produces commands")
+        @DisplayName("events (including external) in response to which the commander produces commands")
         void domesticEvents() {
             assertThat(commanderClass.events())
                     .containsExactlyElementsIn(EventClass.setOf(
                             SigProjectCreated.class,
-                            SigProjectStopped.class
+                            SigProjectStopped.class,
+                            // External events
+                            SigTaskDeleted.class,
+                            SigTaskMoved.class
                     ));
         }
 
         @Test
+        @DisplayName("external events in response to which the commander produces commands")
         void externalEvents() {
-        }
-
-        @Test
-        @DisplayName("produced commands")
-        void outgoingCommands() {
-            assertThat(commanderClass.commandOutput())
-                    .containsExactlyElementsIn(CommandClass.setOf(
-                            SigAddTaskToProject.class,
-                            SigStartTask.class,
-                            SigSetProjectOwner.class,
-                            SigStopTask.class,
-                            SigAssignTask.class,
-                            SigPauseTask.class
-                    ));
+            assertThat(commanderClass.externalEvents())
+                .containsExactlyElementsIn(EventClass.setOf(
+                        SigTaskDeleted.class,
+                        SigTaskMoved.class
+                ));
         }
     }
 }

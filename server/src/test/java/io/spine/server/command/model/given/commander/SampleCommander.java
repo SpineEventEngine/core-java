@@ -21,8 +21,6 @@
 package io.spine.server.command.model.given.commander;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.base.CommandMessage;
-import io.spine.core.CommandContext;
 import io.spine.model.contexts.projects.command.SigAddTaskToProject;
 import io.spine.model.contexts.projects.command.SigAssignTask;
 import io.spine.model.contexts.projects.command.SigCreateProject;
@@ -34,12 +32,15 @@ import io.spine.model.contexts.projects.command.SigStartTask;
 import io.spine.model.contexts.projects.command.SigStopTask;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.model.contexts.projects.event.SigProjectStopped;
+import io.spine.model.contexts.projects.event.SigTaskDeleted;
+import io.spine.model.contexts.projects.event.SigTaskMoved;
 import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.Pair;
 
+import java.util.List;
 import java.util.Optional;
 
 import static io.spine.server.command.model.given.commander.TestCommandMessage.addTask;
@@ -64,6 +65,16 @@ public final class SampleCommander extends AbstractCommander {
     }
 
     @Command
+    SigPauseTask transform(SigRemoveTaskFromProject cmd) {
+        return pauseTask();
+    }
+
+    @Command
+    List<SigStartTask> toList(SigAssignTask command) {
+        return ImmutableList.of(startTask());
+    }
+
+    @Command
     SigSetProjectOwner byEvent(SigProjectCreated event) {
         return SigSetProjectOwner.newBuilder().build();
     }
@@ -73,15 +84,13 @@ public final class SampleCommander extends AbstractCommander {
         return EitherOf2.withA(SigStopTask.getDefaultInstance());
     }
 
-    @Command
-    SigPauseTask
-    msgWithCtxEitherOf2(SigRemoveTaskFromProject cmd, CommandContext ctx) {
-        return pauseTask();
+    @Command(external = true)
+    SigRemoveTaskFromProject byExternalEvent(SigTaskDeleted event) {
+        return SigRemoveTaskFromProject.newBuilder().build();
     }
 
-    @Command
-    Iterable<CommandMessage>
-    msgWithCtxIterableResult(SigAssignTask command, CommandContext ctx) {
-        return ImmutableList.of(startTask());
+    @Command(external = true)
+    SigRemoveTaskFromProject byExternalEvent(SigTaskMoved event) {
+        return SigRemoveTaskFromProject.newBuilder().build();
     }
 }
