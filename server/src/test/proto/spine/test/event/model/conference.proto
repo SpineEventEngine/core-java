@@ -17,31 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.event.model.given.classes;
+package spine.test.event;
 
-import com.google.protobuf.Any;
-import io.spine.base.Identifier;
-import io.spine.core.Version;
-import io.spine.core.Versions;
-import io.spine.server.event.EventReactor;
+import "spine/options.proto";
 
-/**
- * A test environment {@code EventReactor} class.
- *
- * @see io.spine.server.event.model.EventReactorClassTest
- */
-public class SampleReactor implements EventReactor {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.event.model";
+option java_outer_classname = "ConferenceProto";
+option java_multiple_files = true;
 
-    private static final Any id = Identifier.pack(SampleReactor.class.getName());
+import "spine/people/person_name.proto";
 
-    @Override
-    public Any producerId() {
-        return id;
-    }
+// The name of the conference (such as `Google I/0 2019`) which serves as its identity.
+message Conference {
+    string name = 1 [(required) = true];
+}
 
-    @Override
-    public Version version() {
-        return Versions.zero();
-    }
+// A talk at the conference.
+message Talk {
+    string title = 1 [(required) = true];
+    // Description of talk.
+    string abstract = 2;
+    people.PersonName speaker = 3 [(required) = true];
 }
