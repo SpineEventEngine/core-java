@@ -66,10 +66,18 @@ public abstract class SubscriberMethod
     @Override
     public DispatchKey key() {
         DispatchKey typeBasedKey = super.key();
+        return withFilter(typeBasedKey);
+    }
+
+    /**
+     * Applies {@link #filter() filter} if a specific one is supplied. Otherwise returns the
+     * supplied {@code key}.
+     */
+    DispatchKey withFilter(DispatchKey key) {
         ArgumentFilter filter = filter();
         return filter.acceptsAll()
-               ? typeBasedKey
-               : typeBasedKey.withFilter(filter);
+               ? key
+               : key.withFilter(filter);
     }
 
     @Override
@@ -98,7 +106,8 @@ public abstract class SubscriberMethod
      * <p>It is assumed that the type of the event is correct and only the field filter should be
      * checked.
      *
-     * @param event the event to check
+     * @param event
+     *         the event to check
      * @return {@code true} if this method can handle the given event, {@code false} otherwise
      */
     final boolean canHandle(EventEnvelope event) {

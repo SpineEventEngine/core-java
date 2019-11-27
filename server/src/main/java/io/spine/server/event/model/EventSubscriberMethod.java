@@ -22,6 +22,7 @@ package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.model.ArgumentFilter;
+import io.spine.server.model.DispatchKey;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
@@ -39,6 +40,21 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     }
 
     @Override
+    protected EventAcceptingMethodParams parameterSpec() {
+        return (EventAcceptingMethodParams) super.parameterSpec();
+    }
+
+    @Override
+    public DispatchKey key() {
+        if (parameterSpec().acceptsCommand()) {
+            DispatchKey dispatchKey = RejectionDispatchKey.of(messageClass(), rawMethod());
+            return withFilter(dispatchKey);
+        } else {
+            return super.key();
+        }
+    }
+
+    @Override
     public ArgumentFilter createFilter() {
         ArgumentFilter result = ArgumentFilter.createFilter(rawMethod());
         return result;
@@ -47,6 +63,7 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     @Override
     protected void checkAttributesMatch(EventEnvelope event) throws IllegalArgumentException {
         super.checkAttributesMatch(event);
-        ensureExternalMatch(event.context().getExternal());
+        ensureExternalMatch(event.context()
+                                 .getExternal());
     }
 }
