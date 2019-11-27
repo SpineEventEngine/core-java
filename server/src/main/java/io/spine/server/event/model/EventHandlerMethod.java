@@ -20,21 +20,16 @@
 
 package io.spine.server.event.model;
 
-import com.google.protobuf.Message;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.DispatchKey;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
-import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * An abstract base for methods handling events.
@@ -50,7 +45,8 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method subscriber method
+     * @param method
+     *         subscriber method
      */
     EventHandlerMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
@@ -63,13 +59,9 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
 
     @Override
     public DispatchKey key() {
-        EventClass eventClass = messageClass();
         if (parameterSpec().acceptsCommand()) {
-            Class<?>[] parameters = rawMethod().getParameterTypes();
-            Class<? extends CommandMessage> commandMessageClass =
-                    castClass(parameters[1], CommandMessage.class);
-            CommandClass commandClass = CommandClass.from(commandMessageClass);
-            return new DispatchKey(eventClass.value(), null, commandClass.value());
+            DispatchKey dispatchKey = RejectionDispatchKey.of(messageClass(), rawMethod());
+            return dispatchKey;
         } else {
             return super.key();
         }
@@ -82,13 +74,6 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
             return result;
         }
         return super.params();
-    }
-
-    private static <T extends Message> Class<T> castClass(Class<?> raw, Class<T> targetBound) {
-        checkArgument(targetBound.isAssignableFrom(raw));
-        @SuppressWarnings("unchecked") // Checked above.
-        Class<T> result = (Class<T>) raw;
-        return result;
     }
 
     /**
@@ -111,5 +96,4 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
                                 .getExternal();
         ensureExternalMatch(external);
     }
-
 }
