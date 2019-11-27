@@ -23,7 +23,6 @@ package io.spine.server.procman.model;
 import io.spine.base.RejectionMessage;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.procman.given.pm.TestProcessManager;
-import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
@@ -48,6 +47,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.ServerAssertions.assertCommandsExactly;
+import static io.spine.server.ServerAssertions.assertExactly;
 
 @DisplayName("`ProcessManagerClass` should")
 class ProcessManagerClassTest {
@@ -62,8 +63,7 @@ class ProcessManagerClassTest {
         @Test
         @DisplayName("handled and transformed commands")
         void commands() {
-            assertThat(processManagerClass.commands())
-                    .containsExactlyElementsIn(CommandClass.setOf(
+            assertCommandsExactly(processManagerClass.commands(),
                             // Handled commands
                             PmCreateProject.class,
                             PmAddTask.class,
@@ -75,54 +75,47 @@ class ProcessManagerClassTest {
                             PmThrowRuntimeException.class,
                             // Transformed commands
                             PmStartProject.class,
-                            PmCancelIteration.class
-                    ));
+                            PmCancelIteration.class);
         }
 
         @Test
         @DisplayName("events (including rejections) on which the process manager reacts")
         void reactions() {
-            assertThat(processManagerClass.events())
-                    .containsExactlyElementsIn(EventClass.setOf(
-                            PmProjectCreated.class,
-                            PmTaskAdded.class,
-                            PmProjectStarted.class,
-                            // External events
-                            PmQuizStarted.class,
-                            PmQuestionAnswered.class,
-                            // Reactions with commands
-                            PmOwnerChanged.class,
-                            PmIterationPlanned.class,
-                            PmIterationCompleted.class,
-                            // Reactions on rejections.
-                            StandardRejections.EntityAlreadyArchived.class
-                    ));
+            assertExactly(processManagerClass.events(),
+                          PmProjectCreated.class,
+                          PmTaskAdded.class,
+                          PmProjectStarted.class,
+                          // External events
+                          PmQuizStarted.class,
+                          PmQuestionAnswered.class,
+                          // Reactions with commands
+                          PmOwnerChanged.class,
+                          PmIterationPlanned.class,
+                          PmIterationCompleted.class,
+                          // Reactions on rejections.
+                          StandardRejections.EntityAlreadyArchived.class);
         }
 
         @Test
         @DisplayName("external events on which the process manager reacts")
         void externalEvents() {
-            assertThat(processManagerClass.externalEvents())
-                    .containsExactlyElementsIn(EventClass.setOf(
-                            PmQuizStarted.class,
-                            PmQuestionAnswered.class
-                    ));
+            assertExactly(processManagerClass.externalEvents(),
+                          PmQuizStarted.class,
+                          PmQuestionAnswered.class);
         }
 
         @Test
         @DisplayName("commands produced by the process manager")
         void producedCommands() {
-            assertThat(processManagerClass.outgoingCommands())
-            .containsExactlyElementsIn(CommandClass.setOf(
-                    PmAddTask.class,
-                    PmReviewBacklog.class,
-                    PmScheduleRetrospective.class,
-                    PmPlanIteration.class,
-                    PmScheduleRetrospective.class,
-                    PmPlanIteration.class,
-                    PmStartIteration.class,
-                    PmCreateProject.class
-            ));
+            assertCommandsExactly(processManagerClass.outgoingCommands(),
+                                  PmAddTask.class,
+                                  PmReviewBacklog.class,
+                                  PmScheduleRetrospective.class,
+                                  PmPlanIteration.class,
+                                  PmScheduleRetrospective.class,
+                                  PmPlanIteration.class,
+                                  PmStartIteration.class,
+                                  PmCreateProject.class);
         }
 
         @Test

@@ -21,7 +21,6 @@
 package io.spine.server.event.model;
 
 import io.spine.server.event.model.given.classes.ConferenceSetup;
-import io.spine.server.type.EventClass;
 import io.spine.test.event.model.ConferenceAnnounced;
 import io.spine.test.event.model.SpeakerJoined;
 import io.spine.test.event.model.SpeakersInvited;
@@ -30,7 +29,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.event.model.EventReactorClass.asReactorClass;
 
 @DisplayName("`EventReactorClass` should")
@@ -45,39 +44,31 @@ class EventReactorClassTest {
         @Test
         @DisplayName("events (including external) to which instances of this class react")
         void events() {
-            assertThat(reactorClass.events())
-                    .containsExactlyElementsIn(EventClass.setOf(
+            assertExactly(reactorClass.events(),
                             ConferenceAnnounced.class,
-                            SpeakerJoined.class
-                    ));
+                            SpeakerJoined.class);
         }
 
         @Test
         @DisplayName("domestic events to which instances of this class react")
         void domesticEvents() {
-            assertThat(reactorClass.domesticEvents())
-                    .containsExactlyElementsIn(EventClass.setOf(
-                            SpeakerJoined.class
-                    ));
+            assertExactly(reactorClass.domesticEvents(),
+                          SpeakerJoined.class);
         }
 
         @Test
         @DisplayName("external events to which instances of this class react")
         void externalEvents() {
-            assertThat(reactorClass.externalEvents())
-                    .containsExactlyElementsIn(EventClass.setOf(
-                            ConferenceAnnounced.class
-                    ));
+            assertExactly(reactorClass.externalEvents(),
+                          ConferenceAnnounced.class);
         }
 
         @Test
         @DisplayName("events which instances of this class produce")
         void reactionOutput() {
-            assertThat(reactorClass.reactionOutput())
-                    .containsExactlyElementsIn(EventClass.setOf(
-                            SpeakersInvited.class,
-                            TalkSubmissionRequested.class
-                    ));
+            assertExactly(reactorClass.reactionOutput(),
+                          SpeakersInvited.class,
+                          TalkSubmissionRequested.class);
         }
     }
 

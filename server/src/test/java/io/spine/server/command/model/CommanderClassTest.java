@@ -35,13 +35,12 @@ import io.spine.model.contexts.projects.event.SigTaskDeleted;
 import io.spine.model.contexts.projects.event.SigTaskMoved;
 import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.server.command.model.given.commander.SampleCommander;
-import io.spine.server.type.CommandClass;
-import io.spine.server.type.EventClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.ServerAssertions.assertCommandsExactly;
+import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 
 @DisplayName("`CommanderClass` should")
@@ -56,60 +55,50 @@ class CommanderClassTest {
         @Test
         @DisplayName("transformed commands")
         void commands() {
-            assertThat(commanderClass.commands())
-                    .containsExactlyElementsIn(CommandClass.setOf(
-                            SigCreateTask.class,
-                            SigCreateProject.class,
-                            SigRemoveTaskFromProject.class,
-                            SigAssignTask.class
-                    ));
+            assertCommandsExactly(commanderClass.commands(),
+                                  SigCreateTask.class,
+                                  SigCreateProject.class,
+                                  SigRemoveTaskFromProject.class,
+                                  SigAssignTask.class);
         }
 
         @Test
         @DisplayName("produced commands")
         void outgoingCommands() {
-            assertThat(commanderClass.outgoingCommands())
-                    .containsExactlyElementsIn(CommandClass.setOf(
+            assertCommandsExactly(commanderClass.outgoingCommands(),
                             SigAddTaskToProject.class,
                             SigStartTask.class,
                             SigSetProjectOwner.class,
                             SigStopTask.class,
                             SigAssignTask.class,
                             SigPauseTask.class,
-                            SigRemoveTaskFromProject.class
-                    ));
+                            SigRemoveTaskFromProject.class);
         }
 
         @Test
         @DisplayName("thrown rejections")
         void events() {
-            assertThat(commanderClass.rejections())
-                    .containsExactlyElementsIn(EventClass.setOf(
-                            ProjectRejections.SigCannotCreateProject.class
-                    ));
+            assertExactly(commanderClass.rejections(),
+                          ProjectRejections.SigCannotCreateProject.class);
         }
 
         @Test
         @DisplayName("events (including external) in response to which the commander produces commands")
         void domesticEvents() {
-            assertThat(commanderClass.events())
-                    .containsExactlyElementsIn(EventClass.setOf(
-                            SigProjectCreated.class,
-                            SigProjectStopped.class,
-                            // External events
-                            SigTaskDeleted.class,
-                            SigTaskMoved.class
-                    ));
+            assertExactly(commanderClass.events(),
+                          SigProjectCreated.class,
+                          SigProjectStopped.class,
+                          // External events
+                          SigTaskDeleted.class,
+                          SigTaskMoved.class);
         }
 
         @Test
         @DisplayName("external events in response to which the commander produces commands")
         void externalEvents() {
-            assertThat(commanderClass.externalEvents())
-                .containsExactlyElementsIn(EventClass.setOf(
-                        SigTaskDeleted.class,
-                        SigTaskMoved.class
-                ));
+            assertExactly(commanderClass.externalEvents(),
+                          SigTaskDeleted.class,
+                          SigTaskMoved.class);
         }
     }
 }
