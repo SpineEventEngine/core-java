@@ -21,7 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.EventReactor;
 import io.spine.server.model.HandlerMap;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.ModelClass;
@@ -31,12 +31,12 @@ import io.spine.type.MessageClass;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides information on an {@link AbstractEventReactor} class.
+ * Provides information on an {@link EventReactor} class.
  *
  * @param <S>
  *         the type of event reactors
  */
-public final class EventReactorClass<S extends AbstractEventReactor> extends ModelClass<S>
+public final class EventReactorClass<S extends EventReactor> extends ModelClass<S>
         implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
@@ -55,7 +55,7 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     /** Creates new instance for the given raw class. */
-    public static <S extends AbstractEventReactor> EventReactorClass<S>
+    public static <S extends EventReactor> EventReactorClass<S>
     asReactorClass(Class<S> cls) {
         checkNotNull(cls);
         EventReactorClass<S> result = (EventReactorClass<S>)
