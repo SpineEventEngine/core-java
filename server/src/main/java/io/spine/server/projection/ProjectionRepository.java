@@ -338,11 +338,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return subscriber.isPresent();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Sends a system command to dispatch the given event to a subscriber.
-     */
     @Override
     protected final void dispatchTo(I id, Event event) {
         inbox().send(EventEnvelope.of(event))
@@ -359,6 +354,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     public Timestamp readLastHandledEventTime() {
         Timestamp timestamp = projectionStorage().readLastHandledEventTime();
         return nullToDefault(timestamp);
+    }
+
+    /**
+     * Repeats the dispatching of the events from the event log to the requested entities
+     * since the specified time.
+     *
+     * <p>At the beginning of the process the state of each of the entities is set to the default.
+     *
+     * @param ids
+     *         identifiers of the entities to catch-up
+     * @param since
+     *         point in the past, since which the catch-up should be performed
+     */
+    public void catchUp(Set<I> ids, Timestamp since) {
     }
 
     @VisibleForTesting

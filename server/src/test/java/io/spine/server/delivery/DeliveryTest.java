@@ -25,8 +25,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.truth.Truth8;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
+import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.Messages;
@@ -384,33 +387,56 @@ public class DeliveryTest {
                                                                 .with(repo);
 
         String[] ids = {"first", "second", "third", "fourth"};
-        Iterator<String> idIterator = Iterators.cycle(ids);
-        int eventCount = 200;
-        List<NumberAdded> events = new ArrayList<>(eventCount);
-        for(int i = 0; i < eventCount; i++) {
+        List<NumberAdded> events = generateEvents(200, ids);
+
+        int initialWeight = 1;
+        CounterView.changeWeightTo(initialWeight);
+        dispatchInParallel(ctx, events, 20);
+
+        String firstId = ids[0];
+        CounterView firstView = findView(repo, firstId);
+        Counter actualState = firstView.state();
+        int firstInitialTotal = actualState.getTotal();
+        assertThat(firstInitialTotal).isGreaterThan(0);
+
+        String secondId = ids[1];
+        CounterView secondView = findView(repo, secondId);
+        int secondInitialTotal = secondView.state().getTotal();
+
+        int newWeight = 100;
+        CounterView.changeWeightTo(newWeight);
+        Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
+
+        //TODO:2019-11-27:alex.tymchenko: run the catch-up in parallel with the dispatching.
+        repo.catchUp(ImmutableSet.of(firstId), aWhileAgo);
+        dispatchInParallel(ctx, events, 20);
+
+        CounterView updatedSecondView = findView(repo, secondId);
+        int secondUpdatedTotal = updatedSecondView.state().getTotal();
+        assertThat(secondUpdatedTotal).isEqualTo(secondInitialTotal + secondInitialTotal * newWeight / initialWeight);
+
+        CounterView updatedFirstView = findView(repo, firstId);
+        int firstUpdatedTotal = updatedFirstView.state().getTotal();
+        assertThat(firstUpdatedTotal).isEqualTo(firstInitialTotal * newWeight / initialWeight * 2);
+    }
+
+    private static List<NumberAdded> generateEvents(int howMany, String[] targets) {
+        Iterator<String> idIterator = Iterators.cycle(targets);
+        List<NumberAdded> events = new ArrayList<>(howMany);
+        for (int i = 0; i < howMany; i++) {
             events.add(NumberAdded.newBuilder()
                                   .setCalculatorId(idIterator.next())
                                   .setValue(0)
                                   .vBuild());
         }
+        return events;
+    }
 
-        CounterView.changeWeightTo(1);
-        dispatchInParallel(ctx, events, 20);
-
-        String firstId = ids[0];
-        Optional<CounterView> view = repo.find(firstId);
-        Truth8.assertThat(view)
+    private static CounterView findView(CounterView.Repository repo, String id) {
+        Optional<CounterView> firstView = repo.find(id);
+        Truth8.assertThat(firstView)
               .isPresent();
-
-        Counter actualState = view.get()
-                                  .state();
-        int totalBeforeCatchUp = actualState.getTotal();
-        assertThat(totalBeforeCatchUp).isGreaterThan(0);
-
-//        CounterView.changeWeightTo(10);
-//        Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
-//        repo.catchUp(firstId, aWhileAgo);
-//        dispatchInParallel(ctx, events, 20);
+        return firstView.get();
     }
 
     /*
