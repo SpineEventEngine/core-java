@@ -21,14 +21,18 @@
 package io.spine.server.event.model;
 
 import io.spine.server.event.model.given.classes.ConferenceSetup;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
 import io.spine.test.event.model.ConferenceAnnounced;
 import io.spine.test.event.model.SpeakerJoined;
 import io.spine.test.event.model.SpeakersInvited;
 import io.spine.test.event.model.TalkSubmissionRequested;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.event.model.EventReactorClass.asReactorClass;
 
@@ -75,6 +79,11 @@ class EventReactorClassTest {
     @Test
     @DisplayName("obtain the method by the class of the event and the class of the origin")
     void reactorOf() {
-        //TODO:2019-11-26:alexander.yevsyukov: Implement
+        EventReactorMethod method = reactorClass.reactorOf(
+                EventClass.from(ConferenceAnnounced.class),
+                EmptyClass.instance()
+        );
+        assertThat(method.rawMethod())
+            .isEqualTo(ModelTests.getMethod(ConferenceSetup.class, "invitationPolicy"));
     }
 }
