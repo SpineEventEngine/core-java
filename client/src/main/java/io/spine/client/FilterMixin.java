@@ -21,12 +21,6 @@
 package io.spine.client;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import io.spine.annotation.GeneratedMixin;
-import io.spine.base.Field;
-import io.spine.base.FieldPath;
-import io.spine.protobuf.TypeConverter;
-
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
@@ -35,15 +29,14 @@ import io.spine.base.EntityState;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.code.proto.FieldDeclaration;
+import io.spine.protobuf.TypeConverter;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.code.proto.ColumnOption.isColumn;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-
 import static io.spine.client.OperatorEvaluator.eval;
+import static io.spine.code.proto.ColumnOption.isColumn;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -111,8 +104,8 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
         checkFieldAtTopLevel();
         if (!fieldIsColumnIn(message)) {
             throw newIllegalArgumentException(
-                    "The entity column `%s` is not found in entity state type `%s`. " +
-                            "Please check the field exists and is marked with `(column)` option.",
+                    "The column `%s` is not found in entity state type `%s`. " +
+                         "Please check the field exists and is marked with the `(column)` option.",
                     field(), message.getFullName());
         }
     }
