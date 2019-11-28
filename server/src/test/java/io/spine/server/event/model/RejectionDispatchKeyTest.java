@@ -27,6 +27,7 @@ import io.spine.model.contexts.projects.rejection.ProjectRejections.SigCannotCre
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.EventClass;
 import io.spine.testing.UtilityClassTest;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,9 +48,12 @@ final class RejectionDispatchKeyTest extends UtilityClassTest<RejectionDispatchK
     @DisplayName("create a valid key")
     void createValidKey() {
         assertDoesNotThrow(() -> {
-            for (Method method : ValidSubscriber.class.getDeclaredMethods()) {
-                RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
-            }
+            Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCommand");
+            RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
+        });
+        assertDoesNotThrow(() -> {
+            Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCommandAndCtx");
+            RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
         });
     }
 
@@ -58,27 +62,16 @@ final class RejectionDispatchKeyTest extends UtilityClassTest<RejectionDispatchK
     @DisplayName("not create keys for rejections without a cause")
     void notCreateKeyForRejectionsWithoutCause() {
         assertThrows(IllegalArgumentException.class, () -> {
-            for (Method method : InvalidSubscriber.class.getDeclaredMethods()) {
-                RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
-            }
+            Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithoutCommand");
+            RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCtx");
+            RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
         });
     }
 
-    private static final class InvalidSubscriber extends AbstractEventSubscriber {
-
-        @Subscribe
-        void rejectionWithoutCommand(SigCannotCreateProject rejection) {
-            // do nothing.
-        }
-
-        @Subscribe
-        void rejectionWithNonCommandParam(SigCannotCreateProject rejection,
-                                          CommandContext ctx) {
-            // do nothing.
-        }
-    }
-
-    private static final class ValidSubscriber extends AbstractEventSubscriber {
+    private static final class Subscriber extends AbstractEventSubscriber {
 
         @Subscribe
         void rejectionWithCommand(SigCannotCreateProject rejection,
@@ -90,6 +83,17 @@ final class RejectionDispatchKeyTest extends UtilityClassTest<RejectionDispatchK
         void rejectionWithCommandAndCtx(SigCannotCreateProject rejection,
                                         SigCreateProject cmd,
                                         CommandContext ctx) {
+            // do nothing.
+        }
+
+        @Subscribe
+        void rejectionWithoutCommand(SigCannotCreateProject rejection) {
+            // do nothing.
+        }
+
+        @Subscribe
+        void rejectionWithCtx(SigCannotCreateProject rejection,
+                              CommandContext ctx) {
             // do nothing.
         }
     }
