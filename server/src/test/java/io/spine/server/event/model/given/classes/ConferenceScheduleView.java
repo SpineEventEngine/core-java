@@ -18,39 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus.given;
+package io.spine.server.event.model.given.classes;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.bus.MulticastDispatcher;
-import io.spine.server.type.MessageEnvelope;
-import io.spine.type.MessageClass;
+import io.spine.server.event.EventSubscriber;
 
-import static io.spine.base.Identifier.newUuid;
+public class ConferenceScheduleView implements EventSubscriber {
 
-public class MulticastDispatcherIdentityTestEnv {
-
-    /** Prevents instantiation of this utility class. */
-    private MulticastDispatcherIdentityTestEnv() {
-    }
-
-    public static class NoOpDispatcher
-            implements MulticastDispatcher<MessageClass, MessageEnvelope> {
-
-        public static final String ID = newUuid();
-
-        @Override
-        public ImmutableSet<MessageClass> messageClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public void dispatch(MessageEnvelope envelope) {
-            // Do nothing.
-        }
-
-        @Override
-        public String toString() {
-            return ID;
-        }
-    }
 }

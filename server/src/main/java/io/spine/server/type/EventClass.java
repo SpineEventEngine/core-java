@@ -137,9 +137,14 @@ public final class EventClass extends MessageClass<EventMessage> {
         return builder.build();
     }
 
-    /** Creates immutable set of {@code EventClass} from the passed classes. */
+    /** Creates a set of {@code EventClass} from the passed classes. */
     @SafeVarargs
     public static ImmutableSet<EventClass> setOf(Class<? extends EventMessage>... classes) {
         return setOf(Arrays.asList(classes));
+    }
+
+    /** Creates a set with only one passed event class. */
+    public static ImmutableSet<EventClass> setOf(Class<? extends EventMessage> cls) {
+        return ImmutableSet.of(from(cls));
     }
 }

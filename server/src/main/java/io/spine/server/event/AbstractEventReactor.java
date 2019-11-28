@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
@@ -42,7 +43,6 @@ import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
@@ -88,7 +88,7 @@ public abstract class AbstractEventReactor
     }
 
     @Override
-    public Set<EventClass> messageClasses() {
+    public ImmutableSet<EventClass> messageClasses() {
         return thisClass.events();
     }
 
@@ -135,12 +135,12 @@ public abstract class AbstractEventReactor
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return thisClass.externalEvents();
     }
 
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return thisClass.domesticEvents();
     }
 }

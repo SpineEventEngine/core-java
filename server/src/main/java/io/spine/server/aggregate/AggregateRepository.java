@@ -80,7 +80,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository, EventDispatcherDelegate {
@@ -311,7 +311,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public final Set<CommandClass> messageClasses() {
+    public final ImmutableSet<CommandClass> messageClasses() {
         return aggregateClass().commands();
     }
 
@@ -348,24 +348,24 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return aggregateClass().events();
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
+    public ImmutableSet<EventClass> domesticEvents() {
         return aggregateClass().domesticEvents();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return aggregateClass().externalEvents();
     }
 
     /**
      * Obtains classes of events that can be imported by aggregates of this repository.
      */
-    public Set<EventClass> importableEvents() {
+    public ImmutableSet<EventClass> importableEvents() {
         return aggregateClass().importableEvents();
     }
 

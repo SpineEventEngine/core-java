@@ -238,7 +238,7 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public final Set<EventClass> messageClasses() {
+    public final ImmutableSet<EventClass> messageClasses() {
         return processManagerClass().events();
     }
 
@@ -250,7 +250,7 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public final Set<EventClass> domesticEventClasses() {
+    public final ImmutableSet<EventClass> domesticEventClasses() {
         return processManagerClass().domesticEvents();
     }
 
@@ -262,7 +262,7 @@ public abstract class ProcessManagerRepository<I,
      *         external events
      */
     @Override
-    public final Set<EventClass> externalEventClasses() {
+    public final ImmutableSet<EventClass> externalEventClasses() {
         return processManagerClass().externalEvents();
     }
 
@@ -272,7 +272,7 @@ public abstract class ProcessManagerRepository<I,
      * @return a set of command classes or empty set if process managers do not handle commands
      */
     @Override
-    public final Set<CommandClass> commandClasses() {
+    public final ImmutableSet<CommandClass> commandClasses() {
         return processManagerClass().commands();
     }
 

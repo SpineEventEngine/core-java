@@ -20,10 +20,9 @@
 
 package io.spine.server.bus;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
-
-import java.util.Set;
 
 /**
  * A dispatcher of a message.
@@ -40,7 +39,7 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      *
      * @return non-empty set of message classes
      */
-    Set<C> messageClasses();
+    ImmutableSet<C> messageClasses();
 
     /**
      * Dispatches the message contained in the passed envelope.

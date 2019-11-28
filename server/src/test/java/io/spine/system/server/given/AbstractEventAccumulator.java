@@ -29,7 +29,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
@@ -62,17 +61,17 @@ public abstract class AbstractEventAccumulator implements EventDispatcher {
     }
 
     @Override
-    public final Set<EventClass> messageClasses() {
+    public final ImmutableSet<EventClass> messageClasses() {
         return eventClasses();
     }
 
     @Override
-    public final Set<EventClass> domesticEventClasses() {
+    public final ImmutableSet<EventClass> domesticEventClasses() {
         return eventClasses();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 
