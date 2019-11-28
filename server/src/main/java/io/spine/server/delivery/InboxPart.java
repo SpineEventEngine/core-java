@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
@@ -27,11 +28,8 @@ import io.spine.server.type.SignalEnvelope;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * An abstract base of {@link Inbox inbox} part.
@@ -144,7 +142,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                             .filter(filterByType())
                             .map(InboxMessage::getSignalId)
                             .map(InboxSignalId::getValue)
-                            .collect(Collectors.toCollection((Supplier<Set<String>>) HashSet::new));
+                            .collect(ImmutableSet.toImmutableSet());
         }
 
         protected abstract Predicate<? super InboxMessage> filterByType();
