@@ -26,8 +26,6 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -40,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class DomesticEventPublisher implements EventDispatcher, Logging {
 
-    private final Set<EventClass> eventClasses;
+    private final ImmutableSet<EventClass> eventClasses;
     private final IntegrationBroker broker;
 
     DomesticEventPublisher(IntegrationBroker broker, EventClass messageClass) {
@@ -48,9 +46,8 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
         this.eventClasses = ImmutableSet.of(messageClass);
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField")     // Returning an immutable impl.
     @Override
-    public Set<EventClass> messageClasses() {
+    public ImmutableSet<EventClass> messageClasses() {
         return eventClasses;
     }
 
@@ -60,12 +57,12 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
     }
 
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return eventClasses();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

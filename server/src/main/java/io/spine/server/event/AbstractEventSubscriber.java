@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageId;
@@ -39,7 +40,6 @@ import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -142,18 +142,17 @@ public abstract class AbstractEventSubscriber
     }
 
     @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
-    public Set<EventClass> messageClasses() {
+    public ImmutableSet<EventClass> messageClasses() {
         return thisClass.events();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return thisClass.externalEvents();
     }
 
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return thisClass.domesticEvents();
     }
 }

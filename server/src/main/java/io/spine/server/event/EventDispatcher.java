@@ -20,11 +20,10 @@
 
 package io.spine.server.event;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.bus.MulticastDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.Set;
 
 /**
  * {@code EventDispatcher} delivers events to {@linkplain EventReceiver receiving} objects.
@@ -35,19 +34,19 @@ public interface EventDispatcher
     /**
      * Obtains classes of all events processed by this dispatcher.
      */
-    default Set<EventClass> eventClasses() {
+    default ImmutableSet<EventClass> eventClasses() {
         return messageClasses();
     }
 
     /**
      * Obtains classes of external events processed by this dispatcher.
      */
-    Set<EventClass> externalEventClasses();
+    ImmutableSet<EventClass> externalEventClasses();
 
     /**
      * Obtains classes of domestic events processed by this dispatcher.
      */
-    Set<EventClass> domesticEventClasses();
+    ImmutableSet<EventClass> domesticEventClasses();
 
     /**
      * Verifies if this instance dispatches at least one event.

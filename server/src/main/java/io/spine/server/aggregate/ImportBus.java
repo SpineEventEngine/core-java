@@ -66,7 +66,7 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * <h1>Temporal Logic</h1>
  *
  * <p>Importing events through dispatching
- * {@linkplain #post(com.google.protobuf.Message, io.grpc.stub.StreamObserver) one} or
+ * {@linkplain #post(io.spine.core.Signal, io.grpc.stub.StreamObserver) one} or
  * {@linkplain #post(Iterable, io.grpc.stub.StreamObserver) several} events is designed for
  * importing of events <em>as they occur</em>.
  *

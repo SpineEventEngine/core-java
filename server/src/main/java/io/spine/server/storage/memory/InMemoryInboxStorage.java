@@ -25,6 +25,7 @@ import io.spine.logging.Logging;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
+import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.Page;
@@ -42,6 +43,10 @@ import static java.util.stream.Collectors.groupingBy;
 
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
+ *
+ * <p>Mutating operations are made {@code synchronized} to avoid simultaneous updates
+ * of the same records. That allows to operate in a concurrency-heavy environment notwithstanding
+ * the thread-safety of the underlying storage.
  */
 public final class InMemoryInboxStorage
         extends AbstractStorage<InboxMessageId, InboxMessage, InboxReadRequest>
@@ -68,7 +73,7 @@ public final class InMemoryInboxStorage
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()))
-                       .sorted((m1, m2) -> compare(m1.getWhenReceived(), m2.getWhenReceived()))
+                       .sorted(InMemoryInboxStorage::compareMessages)
                        .collect(groupingBy(m -> counter.getAndIncrement() / pageSize,
                                            toImmutableList()));
 
@@ -77,13 +82,40 @@ public final class InMemoryInboxStorage
     }
 
     @Override
-    public void write(InboxMessage message) {
+    public Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index) {
+        TenantInboxRecords storage = multitenantStorage.currentSlice();
+        Optional<InboxMessage> result =
+                storage.readAll()
+                       .stream()
+                       .filter((r) -> index.equals(r.getShardIndex()) && isToDeliver(r))
+                       .min(InMemoryInboxStorage::compareMessages);
+        return result;
+    }
+
+    private static boolean isToDeliver(InboxMessage r) {
+        return r.getStatus() == InboxMessageStatus.TO_DELIVER;
+    }
+
+    private static int compareMessages(InboxMessage m1, InboxMessage m2) {
+        int timeComparison = compare(m1.getWhenReceived(), m2.getWhenReceived());
+        if (timeComparison != 0) {
+            return timeComparison;
+        }
+        int versionComparison = Integer.compare(m1.getVersion(), m2.getVersion());
+        if(versionComparison == 0) {
+            throw new IllegalStateException("Versions must not be equal.");
+        }
+        return versionComparison;
+    }
+
+    @Override
+    public synchronized void write(InboxMessage message) {
         multitenantStorage.currentSlice()
                           .put(message.getId(), message);
     }
 
     @Override
-    public void writeAll(Iterable<InboxMessage> messages) {
+    public synchronized void writeAll(Iterable<InboxMessage> messages) {
         for (InboxMessage inboxMessage : messages) {
             write(inboxMessage);
         }
@@ -102,13 +134,13 @@ public final class InMemoryInboxStorage
     }
 
     @Override
-    public void write(InboxMessageId id, InboxMessage record) {
+    public synchronized void write(InboxMessageId id, InboxMessage record) {
         multitenantStorage.currentSlice()
                           .put(id, record);
     }
 
     @Override
-    public void removeAll(Iterable<InboxMessage> messages) {
+    public synchronized void removeAll(Iterable<InboxMessage> messages) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
         for (InboxMessage message : messages) {
             storage.remove(message);

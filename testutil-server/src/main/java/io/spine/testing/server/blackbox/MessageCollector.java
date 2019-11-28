@@ -37,6 +37,8 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Collections.synchronizedList;
+import static java.util.Collections.synchronizedMap;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -54,8 +56,8 @@ abstract class MessageCollector<I extends SignalId,
                                 E extends MessageEnvelope<I, T, ?>>
         implements Listener<E> {
 
-    private final List<T> outerObjects = new ArrayList<>();
-    private final Map<I, Message> messages = new HashMap<>();
+    private final List<T> outerObjects = synchronizedList(new ArrayList<>());
+    private final Map<I, Message> messages = synchronizedMap(new HashMap<>());
 
     /**
      * Looks up the command message by the command ID.

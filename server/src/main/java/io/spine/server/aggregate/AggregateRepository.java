@@ -37,6 +37,7 @@ import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.Repository;
@@ -79,7 +80,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository, EventDispatcherDelegate {
@@ -246,7 +247,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * producer ID} of the event as the ID of the target aggregate.
      *
      * <p>This default routing requires that {@link Event Event} instances
-     * {@linkplain ImportBus#post(com.google.protobuf.Message, io.grpc.stub.StreamObserver) posted}
+     * {@linkplain ImportBus#post(io.spine.core.Signal, io.grpc.stub.StreamObserver)}  posted}
      * for import must {@link io.spine.core.EventContext#getProducerId() contain} the ID of the
      * target aggregate. Not providing a valid aggregate ID would result in
      * {@code RuntimeException}.
@@ -310,7 +311,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public final Set<CommandClass> messageClasses() {
+    public final ImmutableSet<CommandClass> messageClasses() {
         return aggregateClass().commands();
     }
 
@@ -347,24 +348,24 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return aggregateClass().events();
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
+    public ImmutableSet<EventClass> domesticEvents() {
         return aggregateClass().domesticEvents();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return aggregateClass().externalEvents();
     }
 
     /**
      * Obtains classes of events that can be imported by aggregates of this repository.
      */
-    public Set<EventClass> importableEvents() {
+    public ImmutableSet<EventClass> importableEvents() {
         return aggregateClass().importableEvents();
     }
 
@@ -379,9 +380,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public ImmutableSet<EventClass> outgoingEvents() {
+        AggregateClass<A> aggregateClass = aggregateClass();
         SetView<EventClass> eventClasses =
-                union(aggregateClass().outgoingEvents(), importableEvents());
-        return ImmutableSet.copyOf(eventClasses);
+                union(aggregateClass.outgoingEvents(), aggregateClass.importableEvents());
+        return eventClasses.immutableCopy();
     }
 
     /**
@@ -621,8 +623,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected A play(I id, AggregateHistory history) {
         A result = create(id);
         AggregateTransaction tx = AggregateTransaction.start(result);
-        result.play(history);
+        BatchDispatchOutcome outcome = result.play(history);
+        boolean success = outcome.getSuccessful();
         tx.commitIfActive();
+        if (!success) {
+            lifecycleOf(id).onCorruptedState(outcome);
+            throw newIllegalStateException("Aggregate %s (ID: %s) cannot be loaded.%n%s",
+                                           aggregateClass().value().getName(),
+                                           result.idAsString(),
+                                           outcome);
+        }
         return result;
     }
 

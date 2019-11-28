@@ -20,11 +20,13 @@
 
 package io.spine.core;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.SPI;
+import io.spine.base.KnownMessage;
 import io.spine.base.MessageContext;
 import io.spine.base.SerializableMessage;
 import io.spine.protobuf.AnyPacker;
@@ -54,11 +56,13 @@ import static io.spine.protobuf.AnyPacker.pack;
  *         the type of the message context
  */
 @SPI
+@Immutable
 @GeneratedMixin
+@SuppressWarnings("override") // not marked with `@Override` in the generated code
 public interface Signal<I extends SignalId,
-                        M extends SerializableMessage,
+                        M extends KnownMessage,
                         C extends MessageContext>
-        extends Message {
+        extends SerializableMessage {
 
     /**
      * Obtains the identifier of the message.
@@ -121,8 +125,8 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains the type URL of the enclosed message.
      */
-    default TypeUrl typeUrl() {
-        return TypeUrl.ofEnclosed(getMessage());
+    default TypeUrl enclosedTypeUrl() {
+        return enclosedMessage().typeUrl();
     }
 
     /**
@@ -181,7 +185,7 @@ public interface Signal<I extends SignalId,
         return MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(typeUrl().value())
+                .setTypeUrl(enclosedTypeUrl().value())
                 .vBuild();
     }
 
@@ -194,7 +198,7 @@ public interface Signal<I extends SignalId,
         MessageId commandQualifier = MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(typeUrl().value())
+                .setTypeUrl(enclosedTypeUrl().value())
                 .buildPartial();
         Origin origin = Origin
                 .newBuilder()

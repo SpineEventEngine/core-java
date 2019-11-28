@@ -21,7 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -30,12 +30,12 @@ import io.spine.type.MessageClass;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides type information on an {@link AbstractEventSubscriber} class.
+ * Provides type information on an {@link EventSubscriber} class.
  *
  * @param <S>
  *         the type of event subscribers
  */
-public final class EventSubscriberClass<S extends AbstractEventSubscriber> extends ModelClass<S>
+public final class EventSubscriberClass<S extends EventSubscriber> extends ModelClass<S>
     implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
@@ -50,7 +50,7 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     /**
      * Creates new instance for the passed raw class.
      */
-    public static <S extends AbstractEventSubscriber>
+    public static <S extends EventSubscriber>
     EventSubscriberClass<S> asEventSubscriberClass(Class<S> cls) {
         checkNotNull(cls);
         EventSubscriberClass<S> result = (EventSubscriberClass<S>)
@@ -74,7 +74,8 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass) {
+    public
+    ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass) {
         return delegate.handlersOf(eventClass, originClass);
     }
 }

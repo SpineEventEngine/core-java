@@ -38,6 +38,7 @@ import "spine/base/field_path.proto";
 // the target type and various criteria.
 //
 message Target {
+    option (is).java_type = "TargetMixin";
 
     // The type of the entity or event of interest.
     //

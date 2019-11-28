@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
@@ -68,9 +68,6 @@ public class AggregateClass<A extends Aggregate>
         return result;
     }
 
-    /**
-     * Obtains the set of event classes on which this aggregate class reacts.
-     */
     @Override
     public final ImmutableSet<EventClass> events() {
         return delegate.events();
@@ -96,7 +93,8 @@ public class AggregateClass<A extends Aggregate>
      * Obtains event types produced by this aggregate class.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
-        Sets.SetView<EventClass> result = union(commandOutput(), reactionOutput());
+        SetView<EventClass> methodResults = union(commandOutput(), reactionOutput());
+        SetView<EventClass> result = union(methodResults, rejections());
         return result.immutableCopy();
     }
 
@@ -130,8 +128,8 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass) {
-        return delegate.reactorOf(eventClass, commandClass);
+    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+        return delegate.reactorOf(eventClass, originClass);
     }
 
     @Override

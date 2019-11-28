@@ -23,7 +23,9 @@ package io.spine.server.bus;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.core.Signal;
 import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.type.MessageClass;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -34,8 +36,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @see MulticastBus
  */
 @Internal
-public abstract class UnicastBus<T extends Message,
-                                 E extends MessageEnvelope<?, T, ?>,
+public abstract class UnicastBus<T extends Signal<?, ?, ?>,
+                                 E extends SignalEnvelope<?, T, ?>,
                                  C extends MessageClass<? extends Message>,
                                  D extends MessageDispatcher<C, E>>
         extends Bus<T, E, C, D> {

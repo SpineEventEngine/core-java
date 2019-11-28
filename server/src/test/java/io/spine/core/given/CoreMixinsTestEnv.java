@@ -28,7 +28,6 @@ import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.test.mixin.command.MixinCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.type.TypeUrl;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -46,8 +45,7 @@ public final class CoreMixinsTestEnv {
         return MessageId
                 .newBuilder()
                 .setId(pack(event.getId()))
-                .setTypeUrl(TypeUrl.of(event)
-                                   .value())
+                .setTypeUrl(event.typeUrl().value())
                 .setVersion(event.getContext()
                                  .getVersion())
                 .build();
@@ -55,10 +53,11 @@ public final class CoreMixinsTestEnv {
 
     public static Command command() {
         TestActorRequestFactory factory = new TestActorRequestFactory(CoreMixinsTestEnv.class);
-        MixinCreateProject cmdMessage = MixinCreateProject.newBuilder()
-                                                        .setProjectId(newUuid().hashCode())
-                                                        .setName("A Project")
-                                                        .build();
+        MixinCreateProject cmdMessage = MixinCreateProject
+                .newBuilder()
+                .setProjectId(newUuid().hashCode())
+                .setName("A Project")
+                .build();
         return factory.createCommand(cmdMessage);
     }
 

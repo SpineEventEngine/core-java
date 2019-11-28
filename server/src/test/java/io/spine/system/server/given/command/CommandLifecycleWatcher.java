@@ -20,12 +20,11 @@
 
 package io.spine.system.server.given.command;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.EventClass;
 import io.spine.system.server.CommandLog;
 import io.spine.system.server.ModelInfo;
 import io.spine.system.server.given.AbstractEventAccumulator;
-
-import java.util.Set;
 
 /**
  * Accumulates {@link CommandLog} events.
@@ -33,7 +32,7 @@ import java.util.Set;
 public class CommandLifecycleWatcher extends AbstractEventAccumulator {
 
     @Override
-    public Set<EventClass> eventClasses() {
+    public ImmutableSet<EventClass> eventClasses() {
         return ModelInfo.commandLifecycle()
                         .events();
     }

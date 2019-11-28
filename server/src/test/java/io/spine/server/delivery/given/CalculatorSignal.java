@@ -25,6 +25,7 @@ package io.spine.server.delivery.given;
  */
 public interface CalculatorSignal {
 
+    @SuppressWarnings("override")   // Overrides are located in the Protobuf-generated code.
     String getCalculatorId();
 
     int getValue();

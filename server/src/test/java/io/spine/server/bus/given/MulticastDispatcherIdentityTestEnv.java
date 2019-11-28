@@ -25,8 +25,6 @@ import io.spine.server.bus.MulticastDispatcher;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
-import java.util.Set;
-
 import static io.spine.base.Identifier.newUuid;
 
 public class MulticastDispatcherIdentityTestEnv {
@@ -41,7 +39,7 @@ public class MulticastDispatcherIdentityTestEnv {
         public static final String ID = newUuid();
 
         @Override
-        public Set<MessageClass> messageClasses() {
+        public ImmutableSet<MessageClass> messageClasses() {
             return ImmutableSet.of();
         }
 

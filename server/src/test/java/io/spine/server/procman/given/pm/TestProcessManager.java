@@ -25,7 +25,8 @@ import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
@@ -136,10 +137,9 @@ public class TestProcessManager
     }
 
     @Assign
-    List<EventMessage> handle(PmThrowEntityAlreadyArchived command)
-            throws io.spine.server.entity.rejection.EntityAlreadyArchived {
+    List<EventMessage> handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
         remember(command);
-        throw io.spine.server.entity.rejection.EntityAlreadyArchived
+        throw EntityAlreadyArchived
                 .newBuilder()
                 .setEntityId(Identifier.pack(command.getProjectId()))
                 .build();
@@ -241,8 +241,8 @@ public class TestProcessManager
     }
 
     /*
-     * Reactions on external events
-     **************************/
+     * Reactions (including commanders) on external events
+     **********************************************/
 
     @Command(external = true)
     PmCreateProject on(PmQuizStarted event) {
@@ -259,13 +259,13 @@ public class TestProcessManager
      **************************/
 
     @React
-    Nothing on(EntityAlreadyArchived rejection, PmAddTask command) {
+    Nothing on(StandardRejections.EntityAlreadyArchived rejection, PmAddTask command) {
         remember(command); // We check the command in the test.
         return nothing();
     }
 
     @React
-    Nothing on(EntityAlreadyArchived rejection) {
+    Nothing on(StandardRejections.EntityAlreadyArchived rejection) {
         remember(rejection);
         return nothing();
     }
