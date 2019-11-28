@@ -28,7 +28,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Extends the {@link Target} with validation routines.
@@ -57,7 +57,7 @@ interface TargetMixin extends TargetOrBuilder {
         boolean isEntityState = EntityState.class.isAssignableFrom(targetClass);
         boolean isEventMessage = EventMessage.class.isAssignableFrom(targetClass);
         if (!isEntityState && !isEventMessage) {
-            throw newIllegalArgumentException(
+            throw newIllegalStateException(
                     "The queried type should represent either an entity state or an event " +
                             "message. Got type `%s` instead.", targetClass.getCanonicalName());
         }
@@ -66,9 +66,9 @@ interface TargetMixin extends TargetOrBuilder {
     /**
      * Verifies that the target has valid type and filters.
      *
-     * @throws IllegalArgumentException
-     *         if either the target type is not a valid type for querying or the filters are
-     *         invalid
+     * @throws IllegalStateException
+     *         if either the target type is not a valid type for querying or the filters
+     *         are invalid
      * @see FilterMixin#checkCanApplyTo(Target)
      */
     @SuppressWarnings("ClassReferencesSubclass") // OK for a proto mixin.

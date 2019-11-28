@@ -38,12 +38,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.OperatorEvaluator.eval;
 import static io.spine.code.proto.ColumnOption.isColumn;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Augments {@link Filter} with useful methods.
  */
 @GeneratedMixin
-@SuppressWarnings("override") // to handle the absence of `@Override` in the generated code.
 interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
 
     /**
@@ -73,7 +73,7 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
     default void checkFieldPresentIn(Descriptor message) {
         checkNotNull(message);
         if (!fieldPresentIn(message)) {
-            throw newIllegalArgumentException(
+            throw newIllegalStateException(
                     "The field with path `%s` is not present in the message type `%s`.",
                     field(), message.getFullName());
         }
@@ -103,7 +103,7 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
         checkNotNull(message);
         checkFieldAtTopLevel();
         if (!fieldIsColumnIn(message)) {
-            throw newIllegalArgumentException(
+            throw newIllegalStateException(
                     "The column `%s` is not found in entity state type `%s`. " +
                          "Please check the field exists and is marked with the `(column)` option.",
                     field(), message.getFullName());
@@ -125,7 +125,7 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
      */
     default void checkFieldAtTopLevel() {
         if (!fieldAtTopLevel()) {
-            throw newIllegalArgumentException(
+            throw newIllegalStateException(
                     "The entity filter contains a nested entity column `%s`. " +
                             "Nested entity columns are currently not supported.",
                     field()
@@ -144,7 +144,6 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
      */
     default void checkCanApplyTo(Target target) {
         checkNotNull(target);
-
         TypeUrl targetType = target.typeUrl();
 
         Class<Message> javaClass = targetType.getMessageClass();
@@ -162,7 +161,7 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
      */
     @Override
     default boolean test(Message message) {
-        Field field = Field.withPath(getFieldPath());
+        Field field = field();
         Object actual = field.valueIn(message);
         Any requiredAsAny = getValue();
         Object required = TypeConverter.toObject(requiredAsAny, actual.getClass());
