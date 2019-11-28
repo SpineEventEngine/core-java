@@ -20,8 +20,20 @@
 
 package io.spine.server.event.model;
 
+import io.spine.core.CommandContext;
+import io.spine.core.Subscribe;
+import io.spine.model.contexts.projects.command.SigCreateProject;
+import io.spine.model.contexts.projects.rejection.ProjectRejections.SigCannotCreateProject;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventClass;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Method;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("RejectionDispatchKey should")
 final class RejectionDispatchKeyTest extends UtilityClassTest<RejectionDispatchKey> {
@@ -29,6 +41,56 @@ final class RejectionDispatchKeyTest extends UtilityClassTest<RejectionDispatchK
     RejectionDispatchKeyTest() {
         super(RejectionDispatchKey.class);
     }
-    
-    //TODO:2019-11-27:ysergiichuk: add method tests
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test
+    @DisplayName("create a valid key")
+    void createValidKey() {
+        assertDoesNotThrow(() -> {
+            for (Method method : ValidSubscriber.class.getDeclaredMethods()) {
+                RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
+            }
+        });
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test
+    @DisplayName("not create keys for rejections without a cause")
+    void notCreateKeyForRejectionsWithoutCause() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            for (Method method : InvalidSubscriber.class.getDeclaredMethods()) {
+                RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
+            }
+        });
+    }
+
+    private static final class InvalidSubscriber extends AbstractEventSubscriber {
+
+        @Subscribe
+        void rejectionWithoutCommand(SigCannotCreateProject rejection) {
+            // do nothing.
+        }
+
+        @Subscribe
+        void rejectionWithNonCommandParam(SigCannotCreateProject rejection,
+                                          CommandContext ctx) {
+            // do nothing.
+        }
+    }
+
+    private static final class ValidSubscriber extends AbstractEventSubscriber {
+
+        @Subscribe
+        void rejectionWithCommand(SigCannotCreateProject rejection,
+                                  SigCreateProject command) {
+            // do nothing.
+        }
+
+        @Subscribe
+        void rejectionWithCommandAndCtx(SigCannotCreateProject rejection,
+                                        SigCreateProject cmd,
+                                        CommandContext ctx) {
+            // do nothing.
+        }
+    }
 }
