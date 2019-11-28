@@ -45,7 +45,7 @@ import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.tenant.TenantAwareRunner;
-import io.spine.test.delivery.Counter;
+import io.spine.test.delivery.DCounter;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
 import io.spine.test.delivery.NumberAdded;
@@ -395,7 +395,7 @@ public class DeliveryTest {
 
         String firstId = ids[0];
         CounterView firstView = findView(repo, firstId);
-        Counter actualState = firstView.state();
+        DCounter actualState = firstView.state();
         int firstInitialTotal = actualState.getTotal();
         assertThat(firstInitialTotal).isGreaterThan(0);
 

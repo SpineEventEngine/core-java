@@ -27,7 +27,7 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.test.delivery.Counter;
+import io.spine.test.delivery.DCounter;
 import io.spine.test.delivery.NumberAdded;
 
 /**
@@ -38,13 +38,13 @@ import io.spine.test.delivery.NumberAdded;
  *
  * <p>By default, the weight is {@code 1}.
  */
-public final class CounterView extends Projection<String, Counter, Counter.Builder> {
+public final class CounterView extends Projection<String, DCounter, DCounter.Builder> {
 
     private static int weight = 1;
 
     @Subscribe
     void on(NumberAdded event) {
-        Counter.Builder builder = builder();
+        DCounter.Builder builder = builder();
         builder.setTotal(builder.getTotal() + weight);
     }
 
@@ -53,7 +53,7 @@ public final class CounterView extends Projection<String, Counter, Counter.Build
     }
 
     public static final class Repository
-            extends ProjectionRepository<String, CounterView, Counter> {
+            extends ProjectionRepository<String, CounterView, DCounter> {
 
         @OverridingMethodsMustInvokeSuper
         @Override
