@@ -20,12 +20,22 @@
 
 package io.spine.server.event.model;
 
+import io.spine.server.event.model.given.classes.ConferenceProgram;
+import io.spine.test.event.model.ConferenceAnnounced;
+import io.spine.test.event.model.SpeakerJoined;
+import io.spine.test.event.model.TalkSubmitted;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.ServerAssertions.assertExactly;
+import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
+
 @DisplayName("`EventSubscriberClass` should")
 class EventSubscriberClassTest {
+
+    private final EventSubscriberClass<?> eventSubscriberClass =
+            asEventSubscriberClass(ConferenceProgram.class);
 
     @Nested
     @DisplayName("provide classes of")
@@ -34,7 +44,10 @@ class EventSubscriberClassTest {
         @Test
         @DisplayName("events (including external) to which instances of this class subscribe")
         void events() {
-            //TODO:2019-11-26:alexander.yevsyukov: Implement
+            assertExactly(eventSubscriberClass.events(),
+                          ConferenceAnnounced.class,
+                          SpeakerJoined.class,
+                          TalkSubmitted.class);
         }
 
         @Test

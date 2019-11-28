@@ -20,8 +20,32 @@
 
 package io.spine.server.event.model.given.classes;
 
+import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
+import io.spine.test.event.model.ConferenceAnnounced;
+import io.spine.test.event.model.SpeakerJoined;
+import io.spine.test.event.model.TalkSubmitted;
 
-public class ConferenceScheduleView implements EventSubscriber {
+/**
+ * The test environment class for {@link io.spine.server.event.model.EventSubscriberClassTest}.
+ *
+ * <p>Normally, what this class does would be done by extending {@code Projection}. We do it here
+ * this way so that we can expose and collect dispatch information for the purpose of tests.
+ */
+public class ConferenceProgram implements EventSubscriber {
 
+    @Subscribe(external = true) // Pretend this is an external event.
+    void on(ConferenceAnnounced event) {
+        // Do nothing.
+    }
+
+    @Subscribe
+    void on(SpeakerJoined event) {
+        // Do nothing.
+    }
+
+    @Subscribe
+    void on(TalkSubmitted event) {
+        // Do nothing.
+    }
 }
