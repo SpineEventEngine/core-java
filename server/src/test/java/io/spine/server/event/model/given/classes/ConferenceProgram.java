@@ -35,17 +35,17 @@ import io.spine.test.event.model.TalkSubmitted;
 public class ConferenceProgram implements EventSubscriber {
 
     @Subscribe(external = true) // Pretend this is an external event.
-    void on(ConferenceAnnounced event) {
+    void setConferenceDate(ConferenceAnnounced event) {
         // Do nothing.
     }
 
     @Subscribe
-    void on(SpeakerJoined event) {
+    void addSpeaker(SpeakerJoined event) {
         // Do nothing.
     }
 
     @Subscribe
-    void on(TalkSubmitted event) {
+    void addTalk(TalkSubmitted event) {
         // Do nothing.
     }
 }

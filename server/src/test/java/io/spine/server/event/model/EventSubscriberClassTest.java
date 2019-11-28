@@ -20,7 +20,10 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.model.given.classes.ConferenceProgram;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
 import io.spine.test.event.model.ConferenceAnnounced;
 import io.spine.test.event.model.SpeakerJoined;
 import io.spine.test.event.model.TalkSubmitted;
@@ -28,13 +31,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
+import static io.spine.testing.server.model.ModelTests.getMethod;
 
 @DisplayName("`EventSubscriberClass` should")
 class EventSubscriberClassTest {
 
-    private final EventSubscriberClass<?> eventSubscriberClass =
+    private final EventSubscriberClass<?> subscriberClass =
             asEventSubscriberClass(ConferenceProgram.class);
 
     @Nested
@@ -44,7 +49,7 @@ class EventSubscriberClassTest {
         @Test
         @DisplayName("events (including external) to which instances of this class subscribe")
         void events() {
-            assertExactly(eventSubscriberClass.events(),
+            assertExactly(subscriberClass.events(),
                           ConferenceAnnounced.class,
                           SpeakerJoined.class,
                           TalkSubmitted.class);
@@ -53,20 +58,29 @@ class EventSubscriberClassTest {
         @Test
         @DisplayName("domestic events to which instances of this class subscribe")
         void domesticEvents() {
-            //TODO:2019-11-26:alexander.yevsyukov: Implement
+            assertExactly(subscriberClass.domesticEvents(),
+                          SpeakerJoined.class,
+                          TalkSubmitted.class);
         }
 
         @Test
         @DisplayName("external events to which instances of this class subscribe")
         void externalEvents() {
-            //TODO:2019-11-26:alexander.yevsyukov: Implement
+            assertExactly(subscriberClass.externalEvents(),
+                          ConferenceAnnounced.class);
         }
-
     }
 
     @Test
     @DisplayName("obtain methods subscribed to events of the passed class and the class of origin")
     void subscribersOf() {
-        //TODO:2019-11-26:alexander.yevsyukov: Implement
+        ImmutableSet<SubscriberMethod> methods = subscriberClass.subscribersOf(
+                EventClass.from(SpeakerJoined.class), EmptyClass.instance());
+
+        assertThat(methods).hasSize(1);
+        SubscriberMethod actual = methods.asList()
+                                         .get(0);
+        assertThat(actual.rawMethod())
+            .isEqualTo(getMethod(ConferenceProgram.class, "addSpeaker"));
     }
 }
