@@ -36,7 +36,7 @@ import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("RejectionDispatchKey should")
+@DisplayName("`RejectionDispatchKeys` should")
 final class RejectionDispatchKeysTest extends UtilityClassTest<RejectionDispatchKeys> {
 
     RejectionDispatchKeysTest() {
