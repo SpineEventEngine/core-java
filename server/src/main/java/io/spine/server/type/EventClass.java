@@ -71,7 +71,7 @@ public final class EventClass extends MessageClass<EventMessage> {
     }
 
     /**
-     * Obtains the class of a rejection by the class of corresponding throwable message.
+     * Obtains the class of the rejection by the class of corresponding throwable message.
      */
     public static EventClass fromThrowable(Class<? extends ThrowableMessage> cls) {
         Method messageThrownMethod;
