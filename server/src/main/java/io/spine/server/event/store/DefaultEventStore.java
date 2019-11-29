@@ -26,6 +26,7 @@ import com.google.common.flogger.LoggerConfig;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
+import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
@@ -186,13 +187,28 @@ public final class DefaultEventStore
      * Obtains iteration over entities matching the passed query.
      */
     private Iterator<EEntity> find(EventStreamQuery query) {
-        ResponseFormat format = ResponseFormat.getDefaultInstance();
+        ResponseFormat format = formatFrom(query);
         if (query.includeAll()) {
             return loadAll(format);
         } else {
             TargetFilters filters = QueryToFilters.convert(query);
             return find(filters, format);
         }
+    }
+
+    private static ResponseFormat formatFrom(EventStreamQuery query) {
+        ResponseFormat.Builder formatBuilder = ResponseFormat.newBuilder();
+        OrderBy ascendingByCreated = OrderBy
+                .newBuilder()
+                .setColumn(EEntity.CREATED_COLUMN)
+                .setDirection(OrderBy.Direction.ASCENDING)
+                .vBuild();
+        if (query.hasLimit()) {
+            formatBuilder.setOrderBy(ascendingByCreated)
+                         .setLimit(query.getLimit()
+                                        .getValue());
+        }
+        return formatBuilder.build();
     }
 
     private void store(Event event) {

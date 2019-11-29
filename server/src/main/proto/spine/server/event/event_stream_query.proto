@@ -43,14 +43,33 @@ message EventStreamQuery {
     //
     // If this parameter is not specified, all events since the start of
     // the history will be included.
+    //
     google.protobuf.Timestamp after = 1;
 
     // Include events with the timestamp before this value.
     //
     // If this parameter is not specified, all events till the end of
     // the history will be included.
+    //
     google.protobuf.Timestamp before = 2;
 
     // Specification of `Event`s to be included into resulting stream.
+    //
     repeated EventFilter filter = 3;
+
+    // Set the limit on the maximum number of events returned in scope of a single query.
+    //
+    // If this parameter is not specified, the resulting set of events is not restricted in size.
+    //
+    Limit limit = 4;
+
+    // Definition of the query `LIMIT`.
+    //
+    // Sets the maximum number of events to return from an EventStore.
+    //
+    message Limit {
+
+        // How many records to return at maximum.
+        int32 value = 1 [(min).value = "1"];
+    }
 }
