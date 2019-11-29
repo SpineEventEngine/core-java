@@ -94,14 +94,14 @@ public final class CommanderClass<C extends Commander>
     }
 
     /**
-     * Verifies if instances of this commander class substitute the commands of the passed class.
+     * Tells if instances of this commander class substitute the commands of the passed class.
      */
     public boolean substitutesCommand(CommandClass commandClass) {
         return contains(commandClass);
     }
 
     /**
-     * Verifies if instances of this commander class substitute the commands of the passed class.
+     * Tells if instances of this commander class substitute the commands of the passed class.
      */
     public boolean producesCommandsOn(EventClass eventClass) {
         return delegate.contains(eventClass);
