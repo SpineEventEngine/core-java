@@ -53,8 +53,7 @@ final class FilteringField {
      * a column (and annotated as such).
      *
      * <p>If the passed target is an event message, the field must be present in the event message.
-     * //TODO:2019-11-28:alexander.yevsyukov: or, the field must reference
-     * a field of {@link io.spine.core.EventContext}.
+     * or, the field must reference a field of {@code EventContext}.
      *
      * @throws IllegalStateException
      *         if the field does not apply to the passed target
@@ -66,12 +65,23 @@ final class FilteringField {
         if (targetIsEntityState) {
             checkFieldIsColumnIn(descriptor);
         } else {
-            checkPresentIn(descriptor);
+            // We're filtering event messages.
+            if (refersToContext()) {
+                checkPresentInContext();
+            } else {
+                checkPresentIn(descriptor);
+            }
         }
     }
 
-    private boolean presentIn(Descriptor message) {
-        return field.presentIn(message);
+    private void checkPresentInContext() {
+        //TODO:2019-11-29:alexander.yevsyukov: Implement.
+    }
+
+    private boolean refersToContext() {
+        String firstInPath = field.path()
+                                  .getFieldName(0);
+        return firstInPath.equals(EventContextField.name());
     }
 
     private boolean isTopLevel() {
@@ -80,7 +90,7 @@ final class FilteringField {
 
     private void checkPresentIn(Descriptor message) {
         checkNotNull(message);
-        if (!presentIn(message)) {
+        if (!field.presentIn(message)) {
             throw newIllegalStateException(
                     "The field with path `%s` is not present in the message type `%s`.",
                     field, message.getFullName());
