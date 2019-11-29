@@ -56,12 +56,18 @@ import io.spine.server.type.CommandEnvelope;
 @Internal
 public interface CommandDispatcherDelegate {
 
+    /**
+     * Obtains the classes of dispatched commands.
+     */
     ImmutableSet<CommandClass> commandClasses();
 
+    /**
+     * Dispatches the command.
+     */
     void dispatchCommand(CommandEnvelope envelope);
 
     /**
-     * Verifies if this instance dispatches at least one command.
+     * Tells if this instance dispatches at least one command.
      */
     default boolean dispatchesCommands() {
         return !commandClasses().isEmpty();
