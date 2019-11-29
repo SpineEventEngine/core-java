@@ -34,10 +34,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A helper utility class that allows creating {@link DispatchKey}s for rejection handling methods.
  */
-final class RejectionDispatchKey {
+final class RejectionDispatchKeys {
 
     /** Prevents direct instantiation. **/
-    private RejectionDispatchKey() {
+    private RejectionDispatchKeys() {
     }
 
     /**

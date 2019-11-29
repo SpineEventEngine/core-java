@@ -47,7 +47,7 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     @Override
     public DispatchKey key() {
         if (parameterSpec().acceptsCommand()) {
-            DispatchKey dispatchKey = RejectionDispatchKey.of(messageClass(), rawMethod());
+            DispatchKey dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
             return withFilter(dispatchKey);
         } else {
             return super.key();

@@ -37,10 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("RejectionDispatchKey should")
-final class RejectionDispatchKeyTest extends UtilityClassTest<RejectionDispatchKey> {
+final class RejectionDispatchKeysTest extends UtilityClassTest<RejectionDispatchKeys> {
 
-    RejectionDispatchKeyTest() {
-        super(RejectionDispatchKey.class);
+    RejectionDispatchKeysTest() {
+        super(RejectionDispatchKeys.class);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -49,11 +49,11 @@ final class RejectionDispatchKeyTest extends UtilityClassTest<RejectionDispatchK
     void createValidKey() {
         assertDoesNotThrow(() -> {
             Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCommand");
-            RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
+            RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
         assertDoesNotThrow(() -> {
             Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCommandAndCtx");
-            RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
+            RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
     }
 
@@ -63,11 +63,11 @@ final class RejectionDispatchKeyTest extends UtilityClassTest<RejectionDispatchK
     void notCreateKeyForRejectionsWithoutCause() {
         assertThrows(IllegalArgumentException.class, () -> {
             Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithoutCommand");
-            RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
+            RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
         assertThrows(IllegalArgumentException.class, () -> {
             Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCtx");
-            RejectionDispatchKey.of(EventClass.from(SigCannotCreateProject.class), method);
+            RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
     }
 
