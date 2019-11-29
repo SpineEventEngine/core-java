@@ -51,7 +51,10 @@ final class RejectionDispatchKey {
         checkNotNull(eventClass);
         checkNotNull(rawMethod);
         Class<?>[] parameters = rawMethod.getParameterTypes();
-        checkArgument(parameters.length >= 2, "The method should have at least 2 parameters.");
+        checkArgument(parameters.length >= 2,
+                      "The method `%s` should have at least 2 parameters, but had `%s`.",
+                      rawMethod.getName(),
+                      parameters.length);
         Class<? extends CommandMessage> commandMessageClass = toCommandMessage(parameters[1]);
         CommandClass commandClass = CommandClass.from(commandMessageClass);
         return new DispatchKey(eventClass.value(), null, commandClass.value());
