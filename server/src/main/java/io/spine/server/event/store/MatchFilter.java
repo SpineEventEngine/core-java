@@ -122,10 +122,7 @@ final class MatchFilter implements Predicate<Event> {
     }
 
     private boolean checkEventType(EventMessage event) {
-        boolean result =
-                (eventTypeUrl == null)
-                        || event.typeUrl()
-                                .equals(eventTypeUrl);
+        boolean result = (eventTypeUrl == null) || eventTypeUrl.equals(event.typeUrl());
         return result;
     }
 
