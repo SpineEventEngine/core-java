@@ -88,7 +88,7 @@ public final class CommandClass extends MessageClass<CommandMessage> {
     }
 
     /**
-     * Creates immutable set of {@code CommandClass} from the passed classes.
+     * Creates a set of {@code CommandClass} from the passed classes.
      */
     @SafeVarargs
     public static ImmutableSet<CommandClass> setOf(Class<? extends CommandMessage>... classes) {
