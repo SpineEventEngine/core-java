@@ -78,9 +78,13 @@ abstract class UpdateHandler implements Logging {
      *         the event which may trigger subscription updates
      */
     void handle(EventEnvelope event) {
-        checkState(isActive(),
-                   "Dispatched an event of type `%s` to the non-active subscription with ID `%s`.",
-                   event.typeUrl(), subscription.getId().getValue());
+        checkState(
+                isActive(),
+                "Dispatched an event of type `%s` to the non-active subscription with the ID `%s`.",
+                event.typeUrl(),
+                subscription.getId()
+                            .getValue()
+        );
         detectUpdate(event).ifPresent(this::deliverUpdate);
     }
 
