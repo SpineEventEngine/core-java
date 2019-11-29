@@ -42,7 +42,7 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
      * <p>Makes sure the field specified in the filter is a valid entity column or a message field
      * in the type enclosed by the {@code target}.
      *
-     * @throws IllegalArgumentException
+     * @throws IllegalStateException
      *         if the field is not present in the target type or doesn't satisfy the constraints
      */
     default void checkCanApplyTo(Target target) {
