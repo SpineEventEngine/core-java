@@ -117,7 +117,7 @@ class ClientTest extends AbstractClientTest {
             Subscription loginStatus =
                     client.onBehalfOf(currentUser)
                     .subscribeTo(LoginStatus.class)
-                    .where(eq(userField, currentUser))
+                    .where(eq("user_id", currentUser.getValue()))
                     .observe((s) -> {})
                     .post();
 

@@ -35,17 +35,21 @@ final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus
 
     @Assign
     UserLoggedIn on(LogInUser c) {
-        builder().setLoggedIn(true);
-        return UserLoggedIn.newBuilder()
-                           .setUser(c.getUser())
-                           .vBuild();
+        UserId user = c.getUser();
+        builder().setLoggedIn(true)
+                 .setUserId(user.getValue());
+        return UserLoggedIn
+                .newBuilder()
+                .setUser(user)
+                .vBuild();
     }
 
     @Assign
     UserLoggedOut on(LogOutUser c) {
         builder().setLoggedIn(false);
-        return UserLoggedOut.newBuilder()
-                            .setUser(c.getUser())
-                            .vBuild();
+        return UserLoggedOut
+                .newBuilder()
+                .setUser(c.getUser())
+                .vBuild();
     }
 }
