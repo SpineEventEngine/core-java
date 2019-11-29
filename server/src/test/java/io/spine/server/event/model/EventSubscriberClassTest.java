@@ -31,6 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
@@ -78,8 +79,7 @@ class EventSubscriberClassTest {
                 EventClass.from(SpeakerJoined.class), EmptyClass.instance());
 
         assertThat(methods).hasSize(1);
-        SubscriberMethod actual = methods.asList()
-                                         .get(0);
+        SubscriberMethod actual = getFirst(methods, null);
         assertThat(actual.rawMethod())
             .isEqualTo(getMethod(ConferenceProgram.class, "addSpeaker"));
     }

@@ -32,7 +32,7 @@ import static com.google.common.truth.Truth.assertThat;
 /**
  * Useful assertions for server-side tests.
  */
-public class ServerAssertions {
+public final class ServerAssertions {
 
     /** Prevents instantiation of this utility class. */
     private ServerAssertions() {

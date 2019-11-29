@@ -87,11 +87,12 @@ class AggregateClassTest {
         }
 
         @Test
-        @DisplayName("events (including rejections) produced by the aggregate")
+        @DisplayName("events (including rejections and importable) produced by the aggregate")
         void producedEvents() {
             assertExactly(aggregateClass.outgoingEvents(),
                           EngineStarted.class,
                           EngineStopped.class,
+                          SettingsAdjusted.class,
                           Rejections.EngineAlreadyStarted.class,
                           Rejections.EngineAlreadyStopped.class);
         }
