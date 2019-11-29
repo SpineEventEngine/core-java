@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
@@ -66,14 +67,15 @@ public abstract class SubscriberMethod
     @Override
     public DispatchKey key() {
         DispatchKey typeBasedKey = super.key();
-        return withFilter(typeBasedKey);
+        return applyFilter(typeBasedKey);
     }
 
     /**
      * Applies {@link #filter() filter} if a specific one is supplied. Otherwise returns the
      * supplied {@code key}.
      */
-    DispatchKey withFilter(DispatchKey key) {
+    @Internal
+    DispatchKey applyFilter(DispatchKey key) {
         ArgumentFilter filter = filter();
         return filter.acceptsAll()
                ? key
