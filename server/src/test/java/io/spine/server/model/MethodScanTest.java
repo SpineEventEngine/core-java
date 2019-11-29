@@ -59,8 +59,8 @@ class MethodScanTest {
     @Test
     @DisplayName("allow multiple rejection subscription methods with same names")
     void multipleRejectionSubscriptions() {
-        ImmutableSetMultimap<DispatchKey, SubscriberMethod> map = MethodScan
-                .findMethodsBy(ARejectionSubscriber.class, new SubscriberSignature());
+        ImmutableSetMultimap<DispatchKey, SubscriberMethod> map =
+                findMethodsBy(ARejectionSubscriber.class, new SubscriberSignature());
         assertThat(map.keys()).hasSize(2);
     }
 }
