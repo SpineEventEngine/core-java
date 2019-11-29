@@ -63,7 +63,6 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     @Override
     protected void checkAttributesMatch(EventEnvelope event) throws IllegalArgumentException {
         super.checkAttributesMatch(event);
-        ensureExternalMatch(event.context()
-                                 .getExternal());
+        ensureExternalMatch(event.isExternal());
     }
 }
