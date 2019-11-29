@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class EventFilter implements MessageFilter<Event> {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // local semantic: field name in `Event`
-    private static final String CONTEXT_PREFIX = "context";
     private final Filter filter;
 
     EventFilter(Filter filter) {
@@ -42,7 +40,7 @@ final class EventFilter implements MessageFilter<Event> {
         boolean byContext =
                 filter.getFieldPath()
                       .getFieldName(0)
-                      .equals(CONTEXT_PREFIX);
+                      .equals(EventContextField.name());
         if (byContext) {
             // Since we reference the context field with `context` prefix, we need to pass
             // the whole `Event` instance.
