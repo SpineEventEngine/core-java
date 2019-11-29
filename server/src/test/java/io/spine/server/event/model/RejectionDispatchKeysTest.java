@@ -20,11 +20,8 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.CommandContext;
-import io.spine.core.Subscribe;
-import io.spine.model.contexts.projects.command.SigCreateProject;
 import io.spine.model.contexts.projects.rejection.ProjectRejections.SigCannotCreateProject;
-import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.model.given.subscriber.RejectionSubscriber;
 import io.spine.server.type.EventClass;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.server.model.ModelTests;
@@ -48,11 +45,12 @@ final class RejectionDispatchKeysTest extends UtilityClassTest<RejectionDispatch
     @DisplayName("create a valid key")
     void createValidKey() {
         assertDoesNotThrow(() -> {
-            Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCommand");
+            Method method = ModelTests.getMethod(RejectionSubscriber.class, "rejectionWithCommand");
             RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
         assertDoesNotThrow(() -> {
-            Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCommandAndCtx");
+            Method method = ModelTests.getMethod(RejectionSubscriber.class,
+                                                 "rejectionWithCommandAndCtx");
             RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
     }
@@ -62,39 +60,13 @@ final class RejectionDispatchKeysTest extends UtilityClassTest<RejectionDispatch
     @DisplayName("not create keys for rejections without a cause")
     void notCreateKeyForRejectionsWithoutCause() {
         assertThrows(IllegalArgumentException.class, () -> {
-            Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithoutCommand");
+            Method method = ModelTests.getMethod(RejectionSubscriber.class,
+                                                 "rejectionWithoutCommand");
             RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            Method method = ModelTests.getMethod(Subscriber.class, "rejectionWithCtx");
+            Method method = ModelTests.getMethod(RejectionSubscriber.class, "rejectionWithCtx");
             RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
-    }
-
-    private static final class Subscriber extends AbstractEventSubscriber {
-
-        @Subscribe
-        void rejectionWithCommand(SigCannotCreateProject rejection,
-                                  SigCreateProject command) {
-            // do nothing.
-        }
-
-        @Subscribe
-        void rejectionWithCommandAndCtx(SigCannotCreateProject rejection,
-                                        SigCreateProject cmd,
-                                        CommandContext ctx) {
-            // do nothing.
-        }
-
-        @Subscribe
-        void rejectionWithoutCommand(SigCannotCreateProject rejection) {
-            // do nothing.
-        }
-
-        @Subscribe
-        void rejectionWithCtx(SigCannotCreateProject rejection,
-                              CommandContext ctx) {
-            // do nothing.
-        }
     }
 }
