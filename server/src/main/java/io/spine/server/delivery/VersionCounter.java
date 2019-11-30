@@ -18,16 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
+package io.spine.server.delivery;
 
-import io.spine.core.Subscribe;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import javax.annotation.concurrent.ThreadSafe;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The class which subscribes to a rejection message, not an event message.
+ * A counter providing the version for the incoming {@code InboxMessage}s.
+ *
+ * <p>Serves to distinguish the messages arrived at the very same millisecond, even from
+ * different threads.
+ *
+ * <p>Hard-coded to reset the value to zero every {@link #MAX_VERSION} times. This allows
+ * to avoid any number overflows, but still is sufficient for realistic use-cases.
  */
-public class ARejectionSubscriber extends TestEventSubscriber {
-    @Subscribe
-    void handle(EntityAlreadyArchived rejection) {
+@ThreadSafe
+final class VersionCounter {
+
+    private static final int MAX_VERSION = 10_000;
+    private static final VersionCounter instance = new VersionCounter();
+
+    private final AtomicInteger counter = new AtomicInteger();
+
+    private synchronized int getNextValue() {
+        return counter.updateAndGet(n -> (n >= MAX_VERSION) ? 1 : n + 1);
+    }
+
+    /**
+     * Obtains the next version value.
+     */
+    static int next() {
+        return instance.getNextValue();
     }
 }

@@ -83,6 +83,10 @@ public class DeliveryMonitor {
         // do nothing.
     }
 
+    public void onDeliveryStarted(ShardIndex index) {
+        // do nothing.
+    }
+
     /**
      * Returns an instance of {@code DeliveryMonitor} which always tells to continue.
      */

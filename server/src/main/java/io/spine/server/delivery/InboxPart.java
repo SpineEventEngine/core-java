@@ -101,7 +101,8 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setShardIndex(shardIndex)
                 .setLabel(label)
                 .setStatus(determineStatus(envelope))
-                .setWhenReceived(Time.currentTime());
+                .setWhenReceived(Time.currentTime())
+                .setVersion(VersionCounter.next());
         setRecordPayload(envelope, builder);
         InboxMessage message = builder.vBuild();
 

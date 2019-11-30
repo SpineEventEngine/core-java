@@ -33,8 +33,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Set;
-
 /**
  * Test environment class for testing {@code BoundedContext} configuration from
  * outside the framework.
@@ -64,7 +62,7 @@ public final class ForeignContextConfig {
     private static CommandDispatcher newCommandDispatcher() {
         return new CommandDispatcher() {
             @Override
-            public Set<CommandClass> messageClasses() {
+            public ImmutableSet<CommandClass> messageClasses() {
                 return ImmutableSet.of();
             }
 
@@ -76,20 +74,21 @@ public final class ForeignContextConfig {
         };
     }
 
+    @SuppressWarnings("OverlyComplexAnonymousInnerClass")
     private static EventDispatcher newEventDispatcher() {
         return new EventDispatcher() {
             @Override
-            public Set<EventClass> externalEventClasses() {
+            public ImmutableSet<EventClass> externalEventClasses() {
                 return ImmutableSet.of();
             }
 
             @Override
-            public Set<EventClass> domesticEventClasses() {
+            public ImmutableSet<EventClass> domesticEventClasses() {
                 return eventClasses();
             }
 
             @Override
-            public Set<EventClass> messageClasses() {
+            public ImmutableSet<EventClass> messageClasses() {
                 return ImmutableSet.of();
             }
 

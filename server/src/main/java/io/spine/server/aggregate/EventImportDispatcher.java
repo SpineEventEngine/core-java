@@ -28,8 +28,6 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -61,12 +59,12 @@ public final class EventImportDispatcher<I> implements EventDispatcher, Logging 
     }
 
     @Override
-    public Set<EventClass> messageClasses() {
+    public ImmutableSet<EventClass> messageClasses() {
         return repository.importableEvents();
     }
 
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return eventClasses();
     }
 
@@ -74,7 +72,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher, Logging 
      * Always returns empty set because external events cannot be imported.
      */
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

@@ -28,7 +28,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.model.HandlerMap;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.RejectionClass;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
@@ -53,8 +52,8 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     }
 
     @Override
-    public ImmutableSet<RejectionClass> rejections() {
-        ImmutableSet<RejectionClass> result =
+    public ImmutableSet<EventClass> rejections() {
+        ImmutableSet<EventClass> result =
                 commands.methods()
                         .stream()
                         .flatMap(m -> m.rejections().stream())

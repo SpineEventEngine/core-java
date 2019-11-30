@@ -84,9 +84,10 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.ServerAssertions.assertCommandsExactly;
+import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.procman.given.dispatch.PmDispatcher.dispatch;
 import static io.spine.server.procman.given.pm.GivenMessages.addTask;
 import static io.spine.server.procman.given.pm.GivenMessages.cancelIteration;
@@ -530,14 +531,13 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<CommandClass> commands = pmClass.outgoingCommands();
-            assertThat(commands).containsExactlyElementsIn(CommandClass.setOf(
+            assertCommandsExactly(commands,
                     PmCreateProject.class,
                     PmAddTask.class,
                     PmReviewBacklog.class,
                     PmScheduleRetrospective.class,
                     PmPlanIteration.class,
-                    PmStartIteration.class
-            ));
+                    PmStartIteration.class);
         }
 
         @Test
@@ -546,13 +546,13 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<EventClass> events = pmClass.outgoingEvents();
-            assertThat(events).containsExactlyElementsIn(EventClass.setOf(
-                    PmProjectCreated.class,
-                    PmTaskAdded.class,
-                    PmNotificationSent.class,
-                    PmIterationPlanned.class,
-                    PmIterationStarted.class
-            ));
+            assertExactly(events,
+                          PmProjectCreated.class,
+                          PmTaskAdded.class,
+                          PmNotificationSent.class,
+                          PmIterationPlanned.class,
+                          PmIterationStarted.class,
+                          StandardRejections.EntityAlreadyArchived.class);
         }
 
         @Test
@@ -561,10 +561,9 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<EventClass> externalEvents = pmClass.externalEvents();
-            assertThat(externalEvents).containsExactlyElementsIn(EventClass.setOf(
-                    PmQuizStarted.class,
-                    PmQuestionAnswered.class
-            ));
+            assertExactly(externalEvents,
+                          PmQuizStarted.class,
+                          PmQuestionAnswered.class);
         }
     }
 }

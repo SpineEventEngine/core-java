@@ -91,8 +91,7 @@ public class ProjectionRepositoryTestEnv {
     }
 
     /** Stub projection repository. */
-    public static class TestProjectionRepository
-            extends TestProjection.Repository {
+    public static class TestProjectionRepository extends TestProjection.Repository {
 
         @Subscribe
         void apply(PrjProjectCreated event, EventContext eventContext) {

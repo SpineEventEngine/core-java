@@ -34,8 +34,6 @@ import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
 
-import java.util.Set;
-
 import static com.google.common.collect.Sets.union;
 
 public class Given {
@@ -72,7 +70,7 @@ public class Given {
         private final CommandClass commandClass = CommandClass.from(BcCreateProject.class);
 
         @Override
-        public Set<CommandClass> messageClasses() {
+        public ImmutableSet<CommandClass> messageClasses() {
             return ImmutableSet.of(commandClass);
         }
 
@@ -88,18 +86,18 @@ public class Given {
         private final EventClass eventClass = EventClass.from(BcProjectCreated.class);
 
         @Override
-        public Set<EventClass> externalEventClasses() {
+        public ImmutableSet<EventClass> externalEventClasses() {
             return ImmutableSet.of(eventClass);
         }
 
         @Override
-        public Set<EventClass> domesticEventClasses() {
+        public ImmutableSet<EventClass> domesticEventClasses() {
             return ImmutableSet.of();
         }
 
         @Override
-        public Set<EventClass> messageClasses() {
-            return union(externalEventClasses(), domesticEventClasses());
+        public ImmutableSet<EventClass> messageClasses() {
+            return union(externalEventClasses(), domesticEventClasses()).immutableCopy();
         }
 
         @CanIgnoreReturnValue

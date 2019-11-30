@@ -25,7 +25,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.server.model.HandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.CommandClass;
-import io.spine.server.type.RejectionClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -68,8 +68,8 @@ public abstract class AbstractCommandHandlingClass<C,
     }
 
     @Override
-    public ImmutableSet<RejectionClass> rejections() {
-        ImmutableSet<RejectionClass> result =
+    public ImmutableSet<EventClass> rejections() {
+        ImmutableSet<EventClass> result =
                 commands.methods()
                         .stream()
                         .flatMap(m -> m.rejections().stream())

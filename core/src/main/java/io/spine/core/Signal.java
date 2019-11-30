@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.SPI;
+import io.spine.base.KnownMessage;
 import io.spine.base.MessageContext;
 import io.spine.base.SerializableMessage;
 import io.spine.protobuf.AnyPacker;
@@ -59,7 +60,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 @GeneratedMixin
 @SuppressWarnings("override") // not marked with `@Override` in the generated code
 public interface Signal<I extends SignalId,
-                        M extends SerializableMessage,
+                        M extends KnownMessage,
                         C extends MessageContext>
         extends SerializableMessage {
 
@@ -124,7 +125,7 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains the type URL of the enclosed message.
      */
-    default TypeUrl messageTypeUrl() {
+    default TypeUrl enclosedTypeUrl() {
         return enclosedMessage().typeUrl();
     }
 
@@ -184,7 +185,7 @@ public interface Signal<I extends SignalId,
         return MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(enclosedMessage().typeUrl().value())
+                .setTypeUrl(enclosedTypeUrl().value())
                 .vBuild();
     }
 
@@ -197,7 +198,7 @@ public interface Signal<I extends SignalId,
         MessageId commandQualifier = MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(enclosedMessage().typeUrl().value())
+                .setTypeUrl(enclosedTypeUrl().value())
                 .buildPartial();
         Origin origin = Origin
                 .newBuilder()

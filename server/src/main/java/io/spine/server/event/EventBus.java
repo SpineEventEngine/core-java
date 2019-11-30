@@ -29,6 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.Signal;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
@@ -73,7 +74,7 @@ import static java.lang.String.format;
  *
  * <h1>Posting Events</h1>
  *
- * <p>Events are posted to an EventBus using {@link #post(Message, StreamObserver)} method.
+ * <p>Events are posted to an EventBus using {@link #post(Signal, StreamObserver)} method.
  * Normally this is done by an
  * {@link io.spine.server.aggregate.AggregateRepository AggregateRepository} in the process
  * of handling a command or by a {@link io.spine.server.procman.ProcessManager ProcessManager}.
@@ -187,11 +188,11 @@ public final class EventBus
      * Posts the event for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain io.spine.server.bus.Bus#post(Message, StreamObserver)} parent method},
+     * {@linkplain io.spine.server.bus.Bus#post(Signal, StreamObserver)} parent method},
      * but does not require any response observer.
      *
      * @param event the event to be handled
-     * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
+     * @see io.spine.server.bus.Bus#post(Signal, StreamObserver)
      */
     public final void post(Event event) {
         post(event, observer());
@@ -207,7 +208,7 @@ public final class EventBus
      * <p>This method should be used if the callee does not care about the events acknowledgement.
      *
      * @param events the events to be handled
-     * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
+     * @see io.spine.server.bus.Bus#post(Signal, StreamObserver)
      */
     public final void post(Iterable<Event> events) {
         post(events, observer());
@@ -293,7 +294,7 @@ public final class EventBus
          */
         private @Nullable EventEnricher enricher;
 
-        /** The observer for {@link #post(Message, StreamObserver)} operations. */
+        /** The observer for {@link #post(Signal, StreamObserver)} operations. */
         private @Nullable StreamObserver<Ack> observer;
 
         /** Prevents direct instantiation. */
@@ -328,7 +329,7 @@ public final class EventBus
         }
 
         /**
-         * Assigns the observer for the {@link #post(Message, StreamObserver)} operations.
+         * Assigns the observer for the {@link #post(Signal, StreamObserver)} operations.
          */
         public Builder setObserver(StreamObserver<Ack> observer) {
             this.observer = observer;

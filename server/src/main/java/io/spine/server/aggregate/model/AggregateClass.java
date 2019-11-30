@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
@@ -68,9 +68,6 @@ public class AggregateClass<A extends Aggregate>
         return result;
     }
 
-    /**
-     * Obtains the set of event classes on which this aggregate class reacts.
-     */
     @Override
     public final ImmutableSet<EventClass> events() {
         return delegate.events();
@@ -93,10 +90,25 @@ public class AggregateClass<A extends Aggregate>
     }
 
     /**
-     * Obtains event types produced by this aggregate class.
+     * Obtains types of events that are going to be posted to {@code EventBus} as the result
+     * of handling messages dispatched to aggregates of this class.
+     *
+     * <p>This includes:
+     * <ol>
+     *     <li>Events generated in response to commands.
+     *     <li>Events generated as reaction to incoming events.
+     *     <li>Rejections that may be thrown if incoming commands cannot be handled.
+     *     <li>Events imported by the aggregate.
+     * </ol>
+     *
+     * <p>Although technically imported events are not "produced" by the aggregates,
+     * they end up in the same {@code EventBus} and have the same behaviour as the ones
+      * emitted by the aggregates.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
-        Sets.SetView<EventClass> result = union(commandOutput(), reactionOutput());
+        SetView<EventClass> methodResults = union(commandOutput(), reactionOutput());
+        SetView<EventClass> generatedEvents = union(methodResults, rejections());
+        SetView<EventClass> result = union(generatedEvents, importableEvents());
         return result.immutableCopy();
     }
 
@@ -130,8 +142,8 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass) {
-        return delegate.reactorOf(eventClass, commandClass);
+    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+        return delegate.reactorOf(eventClass, originClass);
     }
 
     @Override

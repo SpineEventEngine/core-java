@@ -36,9 +36,15 @@ import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
+import static java.util.Collections.synchronizedList;
+import static java.util.Collections.synchronizedSet;
 
 /**
  * Test environment for {@link Delivery} tests.
@@ -150,12 +156,10 @@ public class DeliveryTestEnv {
             } else {
                 packed = update.getEvent()
                                .getMessage();
-
             }
             CalculatorSignal msg =
                     (CalculatorSignal) AnyPacker.unpack(packed);
             signals.put(msg.getCalculatorId(), msg);
-
         }
 
         public ImmutableSet<CalculatorSignal> messagesBy(String id) {
@@ -170,7 +174,7 @@ public class DeliveryTestEnv {
      */
     public static class RawMessageMemoizer implements ShardObserver {
 
-        private final ImmutableList.Builder<InboxMessage> rawMessages = ImmutableList.builder();
+        private final List<InboxMessage> rawMessages = synchronizedList(new ArrayList<>());
 
         @Override
         public void onMessage(InboxMessage update) {
@@ -178,7 +182,7 @@ public class DeliveryTestEnv {
         }
 
         public ImmutableList<InboxMessage> messages() {
-            return rawMessages.build();
+            return ImmutableList.copyOf(rawMessages);
         }
     }
 
@@ -187,7 +191,7 @@ public class DeliveryTestEnv {
      */
     public static class ShardIndexMemoizer implements ShardObserver {
 
-        private final ImmutableSet.Builder<ShardIndex> observedShards = ImmutableSet.builder();
+        private final Set<ShardIndex> observedShards = synchronizedSet(new HashSet<>());
 
         @Override
         public void onMessage(InboxMessage update) {
@@ -195,7 +199,7 @@ public class DeliveryTestEnv {
         }
 
         public ImmutableSet<ShardIndex> shards() {
-            return observedShards.build();
+            return ImmutableSet.copyOf(observedShards);
         }
     }
 }

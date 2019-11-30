@@ -21,6 +21,7 @@ package io.spine.server.stand;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets.SetView;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
@@ -61,7 +62,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -201,10 +201,10 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Also receives {@link EntityStateChanged} event class to enable entity subscriptions.
      */
     @Override
-    public Set<EventClass> messageClasses() {
-        Set<EventClass> result =
+    public ImmutableSet<EventClass> messageClasses() {
+        SetView<EventClass> result =
                 union(eventRegistry.eventClasses(), singleton(StateClass.updateEvent()));
-        return result;
+        return result.immutableCopy();
     }
 
     /**
@@ -213,7 +213,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Stand does not consume external events.
      */
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 
@@ -223,7 +223,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * <p>Stand only consumes the domestic events.
      */
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return eventClasses();
     }
 
@@ -425,7 +425,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @see #cancel(Subscription, StreamObserver)
      */
     public interface SubscriptionCallback extends Consumer<SubscriptionUpdate> {
-
     }
 
     /**

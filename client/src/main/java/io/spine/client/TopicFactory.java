@@ -28,7 +28,6 @@ import io.spine.core.ActorContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.Targets.composeTarget;
 import static java.lang.String.format;
 
 /**
@@ -77,8 +76,8 @@ public final class TopicFactory {
     public Topic allOf(Class<? extends Message> targetType) {
         checkNotNull(targetType);
 
-        Target target = composeTarget(targetType, null, null);
-        Topic result = forTarget(target);
+        TopicBuilder builder = new TopicBuilder(targetType, this);
+        Topic result = builder.build();
         return result;
     }
 
@@ -112,6 +111,8 @@ public final class TopicFactory {
      * @param target
      *         a {@code Target} to create a topic for
      * @return an instance of {@code Topic}
+     * @apiNote Assumes the passed target is {@linkplain TargetMixin#checkValid() valid} and
+     *        doesn't do any additional checks.
      */
     @Internal
     public Topic forTarget(Target target) {

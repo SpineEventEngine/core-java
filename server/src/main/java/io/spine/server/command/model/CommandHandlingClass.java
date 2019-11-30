@@ -22,7 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.CommandClass;
-import io.spine.server.type.RejectionClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 /**
@@ -50,7 +50,7 @@ public interface CommandHandlingClass<R extends MessageClass<?>,
      * Obtains classes of rejections that command handling methods of this class throw,
      * or empty set if no rejections are thrown.
      */
-    ImmutableSet<RejectionClass> rejections();
+    ImmutableSet<EventClass> rejections();
 
     /**
      * Obtains the handler method for the passed command class.
