@@ -102,7 +102,8 @@ public final class ProcessManagerClass<P extends ProcessManager>
      * Obtains event classes produced by this process manager class.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
-        SetView<EventClass> result = union(commandOutput(), reactionOutput());
+        SetView<EventClass> methodResults = union(commandOutput(), reactionOutput());
+        SetView<EventClass> result = union(methodResults, rejections());
         return result.immutableCopy();
     }
 
@@ -134,7 +135,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
      * event with the passed class.
      */
     public CommandReactionMethod commanderOf(EventClass eventClass) {
-        return commanderDelegate.getCommander(eventClass);
+        return commanderDelegate.commanderOn(eventClass);
     }
 
     /**

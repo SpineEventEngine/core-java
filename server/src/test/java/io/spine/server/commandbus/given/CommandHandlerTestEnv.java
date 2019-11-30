@@ -48,7 +48,6 @@ import io.spine.test.commandbus.event.CmdBusTaskStarted;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
 
@@ -63,7 +62,7 @@ public class CommandHandlerTestEnv {
         private final List<EventEnvelope> dispatched = newLinkedList();
 
         @Override
-        public Set<EventClass> messageClasses() {
+        public ImmutableSet<EventClass> messageClasses() {
             return EventClass.setOf(
                     CmdBusProjectStarted.class,
                     CmdBusTaskAssigned.class,
@@ -72,12 +71,12 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
-        public Set<EventClass> domesticEventClasses() {
+        public ImmutableSet<EventClass> domesticEventClasses() {
             return eventClasses();
         }
 
         @Override
-        public Set<EventClass> externalEventClasses() {
+        public ImmutableSet<EventClass> externalEventClasses() {
             return ImmutableSet.of();
         }
 
@@ -86,9 +85,8 @@ public class CommandHandlerTestEnv {
             dispatched.add(event);
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
-        public List<EventEnvelope> getDispatched() {
-            return dispatched;
+        public List<EventEnvelope> dispatched() {
+            return ImmutableList.copyOf(dispatched);
         }
     }
 

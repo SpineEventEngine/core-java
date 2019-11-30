@@ -23,10 +23,8 @@ package io.spine.client;
 import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
-import io.spine.base.Field;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,7 +33,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.client.Filters.eq;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
-import static java.lang.String.format;
 
 /**
  * Subscribes to events which originate from the given command and arranges the delivery
@@ -82,7 +79,7 @@ final class EventsAfterCommand implements Logging {
      * as the origin.
      */
     private ImmutableSet<Topic> eventsOf(Command c) {
-        String fieldName = pastMessageField();
+        String fieldName = EventContextField.pastMessage();
         ImmutableSet<Class<? extends EventMessage>> eventTypes = consumers.eventTypes();
         TopicFactory topic = client.requestOf(user)
                                    .topic();
@@ -93,18 +90,5 @@ final class EventsAfterCommand implements Logging {
                                                    .build())
                           .collect(toImmutableSet());
         return topics;
-    }
-
-    /**
-     * Obtains the path to the "context.past_message" field of {@code Event}.
-     *
-     * <p>This method is safer than using a string constant because it relies on field numbers,
-     * rather than names (that might be changed).
-     */
-    private static String pastMessageField() {
-        Field context = Field.withNumberIn(Event.CONTEXT_FIELD_NUMBER, Event.getDescriptor());
-        Field pastMessage = Field.withNumberIn(EventContext.PAST_MESSAGE_FIELD_NUMBER,
-                                               EventContext.getDescriptor());
-        return format("%s.%s", context.toString(), pastMessage.toString());
     }
 }

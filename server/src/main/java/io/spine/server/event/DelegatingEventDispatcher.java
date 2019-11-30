@@ -21,11 +21,10 @@
 package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -60,17 +59,17 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
     }
 
     @Override
-    public Set<EventClass> messageClasses() {
+    public ImmutableSet<EventClass> messageClasses() {
         return delegate.events();
     }
 
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return delegate.domesticEvents();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return delegate.externalEvents();
     }
 

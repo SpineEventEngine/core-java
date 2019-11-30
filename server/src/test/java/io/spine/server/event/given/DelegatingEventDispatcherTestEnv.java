@@ -26,8 +26,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EvTeamCreated;
 
-import java.util.Set;
-
 import static com.google.common.collect.Sets.union;
 
 public class DelegatingEventDispatcherTestEnv {
@@ -40,17 +38,17 @@ public class DelegatingEventDispatcherTestEnv {
             implements EventDispatcherDelegate {
 
         @Override
-        public Set<EventClass> events() {
-            return union(domesticEvents(), externalEvents());
+        public ImmutableSet<EventClass> events() {
+            return union(domesticEvents(), externalEvents()).immutableCopy();
         }
 
         @Override
-        public Set<EventClass> domesticEvents() {
+        public ImmutableSet<EventClass> domesticEvents() {
             return ImmutableSet.of();
         }
 
         @Override
-        public Set<EventClass> externalEvents() {
+        public ImmutableSet<EventClass> externalEvents() {
             // Return at least one event class so that we can create external delegate.
             return EventClass.setOf(EvTeamCreated.class);
         }
@@ -65,17 +63,17 @@ public class DelegatingEventDispatcherTestEnv {
             implements EventDispatcherDelegate {
 
         @Override
-        public Set<EventClass> events() {
+        public ImmutableSet<EventClass> events() {
             return EventClass.setOf(EvTeamCreated.class);
         }
 
         @Override
-        public Set<EventClass> domesticEvents() {
+        public ImmutableSet<EventClass> domesticEvents() {
             return events();
         }
 
         @Override
-        public Set<EventClass> externalEvents() {
+        public ImmutableSet<EventClass> externalEvents() {
             return ImmutableSet.of();
         }
 

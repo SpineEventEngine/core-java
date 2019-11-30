@@ -54,6 +54,7 @@ import static io.spine.server.projection.given.dispatch.ProjectionEventDispatche
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("`ProjectionClass` should")
 class ProjectionClassTest {
 
     private static final TestEventFactory eventFactory =

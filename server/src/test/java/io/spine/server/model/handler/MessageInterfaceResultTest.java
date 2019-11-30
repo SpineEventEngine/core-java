@@ -28,14 +28,13 @@ import io.spine.server.model.handler.given.event.MovedEast;
 import io.spine.server.model.handler.given.event.MovedNorth;
 import io.spine.server.model.handler.given.event.MovedSouth;
 import io.spine.server.model.handler.given.event.MovedWest;
-import io.spine.server.type.EventClass;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.TestValues.random;
 
@@ -59,10 +58,8 @@ class MessageInterfaceResultTest {
     @Test
     @DisplayName("provide state events")
     void generatedEvents() {
-        assertThat(aggregateClass.stateEvents())
-                .containsExactlyElementsIn(EventClass.setOf(
-                        MovedNorth.class, MovedEast.class, MovedSouth.class, MovedWest.class
-                ));
+        assertExactly(aggregateClass.stateEvents(),
+                      MovedNorth.class, MovedEast.class, MovedSouth.class, MovedWest.class);
     }
 
     @Test

@@ -18,16 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
+package io.spine.server.command.model.given.commander;
 
-import io.spine.core.Subscribe;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.model.contexts.projects.command.SigAddTaskToProject;
+import io.spine.model.contexts.projects.command.SigAssignTask;
+import io.spine.model.contexts.projects.command.SigPauseTask;
+import io.spine.model.contexts.projects.command.SigStartTask;
 
 /**
- * The class which subscribes to a rejection message, not an event message.
+ * A test environment class which provides command messages.
  */
-public class ARejectionSubscriber extends TestEventSubscriber {
-    @Subscribe
-    void handle(EntityAlreadyArchived rejection) {
+final class TestCommandMessage {
+
+    /** Prevents instantiation of this test environment utility. */
+    private TestCommandMessage() {
+    }
+
+    static SigAssignTask assignTask() {
+        return SigAssignTask.getDefaultInstance();
+    }
+
+    static SigAddTaskToProject addTask() {
+        return SigAddTaskToProject.getDefaultInstance();
+    }
+
+    static SigStartTask startTask() {
+        return SigStartTask.getDefaultInstance();
+    }
+
+    static SigPauseTask pauseTask() {
+        return SigPauseTask.getDefaultInstance();
     }
 }

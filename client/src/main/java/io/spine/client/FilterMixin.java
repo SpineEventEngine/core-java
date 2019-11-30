@@ -24,9 +24,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.base.Field;
-import io.spine.base.FieldPath;
 import io.spine.protobuf.TypeConverter;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -34,12 +34,22 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * Augments {@link Filter} with useful methods.
  */
 @GeneratedMixin
-@SuppressWarnings("override") // to handle the absence of `@Override` in the generated code.
-interface FilterMixin extends Message, MessageFilter<Message> {
+interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
 
-    Any getValue();
-    FieldPath getFieldPath();
-    Filter.Operator getOperator();
+    /**
+     * Verifies that the filter can be applied to the given {@code target}.
+     *
+     * <p>Makes sure the field specified in the filter is a valid entity column or a message field
+     * in the type enclosed by the {@code target}.
+     *
+     * @throws IllegalStateException
+     *         if the field is not present in the target type or doesn't satisfy the constraints
+     */
+    default void checkCanApplyTo(Target target) {
+        checkNotNull(target);
+        FilteringField field = new FilteringField(this);
+        field.checkAppliesTo(target);
+    }
 
     /**
      * Verifies if this filter passed the message.

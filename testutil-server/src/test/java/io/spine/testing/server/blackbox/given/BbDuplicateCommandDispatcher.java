@@ -26,8 +26,6 @@ import io.spine.server.command.AbstractCommandDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
-import java.util.Set;
-
 /**
  * A command dispatcher that dispatches the same type of commands as
  * {@link io.spine.testing.server.blackbox.given.BbCommandDispatcher}.
@@ -44,7 +42,7 @@ public final class BbDuplicateCommandDispatcher extends AbstractCommandDispatche
     }
 
     @Override
-    public Set<CommandClass> messageClasses() {
+    public ImmutableSet<CommandClass> messageClasses() {
         return ImmutableSet.of(commandToIntercept);
     }
 

@@ -20,9 +20,10 @@
 
 package io.spine.server.bus;
 
-import com.google.protobuf.Message;
 import io.spine.core.Ack;
+import io.spine.core.Signal;
 import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,11 +36,10 @@ import static com.google.common.truth.Truth.assertThat;
  *
  * @see io.spine.server.commandbus.CommandBusBuilderTest
  * @see io.spine.server.event.EventBusBuilderTest
- * @see io.spine.server.rejection.RejectionBusBuilderTest
  */
 public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
-                                     E extends MessageEnvelope<?, T, ?>,
-                                     T extends Message> {
+                                     E extends SignalEnvelope<?, T, ?>,
+                                     T extends Signal<?, ?, ?>> {
 
     protected abstract B builder();
 

@@ -34,4 +34,6 @@ message LoginStatus {
     option (entity) = { kind: PROCESS_MANAGER visibility: SUBSCRIBE };
     core.UserId user = 1;
     bool logged_in = 2;
+    // The column field used for subscribing to the login status from the client.
+    string user_id = 3 [(required) = true, (column) = true];
 }

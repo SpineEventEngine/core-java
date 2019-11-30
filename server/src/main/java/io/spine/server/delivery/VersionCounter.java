@@ -17,21 +17,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.type;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+package io.spine.server.delivery;
 
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import javax.annotation.concurrent.ThreadSafe;
+import java.util.concurrent.atomic.AtomicInteger;
 
-@DisplayName("RejectionClass should")
-class RejectionClassTest {
+/**
+ * A counter providing the version for the incoming {@code InboxMessage}s.
+ *
+ * <p>Serves to distinguish the messages arrived at the very same millisecond, even from
+ * different threads.
+ *
+ * <p>Hard-coded to reset the value to zero every {@link #MAX_VERSION} times. This allows
+ * to avoid any number overflows, but still is sufficient for realistic use-cases.
+ */
+@ThreadSafe
+final class VersionCounter {
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(RejectionClass.class);
+    private static final int MAX_VERSION = 10_000;
+    private static final VersionCounter instance = new VersionCounter();
+
+    private final AtomicInteger counter = new AtomicInteger();
+
+    private synchronized int getNextValue() {
+        return counter.updateAndGet(n -> (n >= MAX_VERSION) ? 1 : n + 1);
+    }
+
+    /**
+     * Obtains the next version value.
+     */
+    static int next() {
+        return instance.getNextValue();
     }
 }

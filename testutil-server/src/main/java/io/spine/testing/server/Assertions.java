@@ -23,10 +23,8 @@ package io.spine.testing.server;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.base.RejectionMessage;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.RejectionClass;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -61,15 +59,6 @@ public final class Assertions {
     public static void assertEventClasses(Collection<EventClass> expected,
                                           Class<? extends EventMessage>... eventClass) {
         assertContains(expected, EventClass::from, eventClass);
-    }
-
-    /**
-     * Asserts that each of the {@code rejectionClass} is available in {@code expected}.
-     */
-    @SafeVarargs
-    public static void assertRejectionClasses(Collection<RejectionClass> expected,
-                                              Class<? extends RejectionMessage>... rejectionClass) {
-        assertContains(expected, RejectionClass::of, rejectionClass);
     }
 
     @SafeVarargs

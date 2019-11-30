@@ -20,11 +20,10 @@
 package io.spine.server.commandbus;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
-
-import java.util.Set;
 
 /**
  * A {@link CommandDispatcher}, that delegates the responsibilities to an aggregated
@@ -55,7 +54,7 @@ public class DelegatingCommandDispatcher implements CommandDispatcher {
     }
 
     @Override
-    public final Set<CommandClass> messageClasses() {
+    public final ImmutableSet<CommandClass> messageClasses() {
         return delegate.commandClasses();
     }
 

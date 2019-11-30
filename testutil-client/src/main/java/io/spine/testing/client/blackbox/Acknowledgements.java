@@ -239,7 +239,7 @@ public class Acknowledgements {
             }
             @SuppressWarnings("unchecked") /* The cast is protected by the check above. */
                     T message = (T) unpacked;
-            return typeUrl.equals(TypeUrl.of(message)) && predicate.matches(message);
+            return typeUrl.equals(message.typeUrl()) && predicate.matches(message);
         }
     }
 }
