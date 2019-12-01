@@ -52,7 +52,7 @@ public final class ForeignContextConfig {
     }
 
     public static void eventDispatcherRegistration() {
-        context().registerEventDispatcher(newEventDispatcher());
+        context().registerEventDispatcher(EmptyEventDispatcher.newInstance());
     }
 
     private static BoundedContext context() {
@@ -74,29 +74,31 @@ public final class ForeignContextConfig {
         };
     }
 
-    @SuppressWarnings("OverlyComplexAnonymousInnerClass")
-    private static EventDispatcher newEventDispatcher() {
-        return new EventDispatcher() {
-            @Override
-            public ImmutableSet<EventClass> externalEventClasses() {
-                return ImmutableSet.of();
-            }
+    private static class EmptyEventDispatcher implements EventDispatcher {
 
-            @Override
-            public ImmutableSet<EventClass> domesticEventClasses() {
-                return eventClasses();
-            }
+        private static EventDispatcher newInstance() {
+            return new EmptyEventDispatcher();
+        }
 
-            @Override
-            public ImmutableSet<EventClass> messageClasses() {
-                return ImmutableSet.of();
-            }
+        @Override
+        public ImmutableSet<EventClass> externalEventClasses() {
+            return ImmutableSet.of();
+        }
 
-            @CanIgnoreReturnValue
-            @Override
-            public void dispatch(EventEnvelope envelope) {
-                // Do nothing.
-            }
-        };
+        @Override
+        public ImmutableSet<EventClass> domesticEventClasses() {
+            return eventClasses();
+        }
+
+        @Override
+        public ImmutableSet<EventClass> messageClasses() {
+            return ImmutableSet.of();
+        }
+
+        @CanIgnoreReturnValue
+        @Override
+        public void dispatch(EventEnvelope envelope) {
+            // Do nothing.
+        }
     }
 }

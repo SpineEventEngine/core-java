@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,36 +45,58 @@ public final class Assertions {
     }
 
     /**
-     * Asserts that each of the {@code commandClass} is available in {@code expected}.
+     * Asserts that each of the expected command class is available in the passed collection.
      */
     @SafeVarargs
-    public static void assertCommandClasses(Collection<CommandClass> expected,
-                                            Class<? extends CommandMessage>... commandClass) {
-        assertContains(expected, CommandClass::from, commandClass);
+    public static void assertCommandClasses(Collection<CommandClass> commandClasses,
+                                            Class<? extends CommandMessage>... expected) {
+        assertContains(commandClasses, CommandClass::from, expected);
     }
 
     /**
-     * Asserts that each of the {@code eventClass} is available in {@code expected}.
+     * Asserts that each of the expected event class is available in the passed collection.
      */
     @SafeVarargs
-    public static void assertEventClasses(Collection<EventClass> expected,
-                                          Class<? extends EventMessage>... eventClass) {
-        assertContains(expected, EventClass::from, eventClass);
+    public static void assertEventClasses(Collection<EventClass> eventClasses,
+                                          Class<? extends EventMessage>... expected) {
+        assertContains(eventClasses, EventClass::from, expected);
     }
 
     @SafeVarargs
     private static <C extends MessageClass, M extends Message>
-    void assertContains(Collection<C> expected,
+    void assertContains(Collection<C> collection,
                         Function<Class<M>, C> func,
                         Class<? extends M>...classes) {
-        checkNotNull(expected);
+        checkNotNull(collection);
         checkNotNull(classes);
         for (Class<? extends M> cls : classes) {
             assertNotNull(cls);
             @SuppressWarnings("unchecked") // OK for tests.
             Class<M> messageType = (Class<M>) cls;
             C messageClass = func.apply(messageType);
-            assertTrue(expected.contains(messageClass));
+            assertTrue(collection.contains(messageClass));
         }
+    }
+
+    /**
+     * Asserts that passed event classes are exactly as expected.
+     *
+     * <p>The order is not taken into account.
+     */
+    @SafeVarargs
+    public static void assertEventClassesExactly(Iterable<EventClass> eventClasses,
+                                                 Class<? extends EventMessage>... expected) {
+        assertThat(eventClasses).containsExactlyElementsIn(EventClass.setOf(expected));
+    }
+
+    /**
+     * Asserts that passed command classes are exactly as expected.
+     *
+     * <p>The order is not taken into account.
+     */
+    @SafeVarargs
+    public static void assertCommandClassesExactly(Iterable<CommandClass> commandClasses,
+                                                   Class<? extends CommandMessage>... expected) {
+        assertThat(commandClasses).containsExactlyElementsIn(CommandClass.setOf(expected));
     }
 }

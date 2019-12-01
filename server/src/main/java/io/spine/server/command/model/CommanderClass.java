@@ -101,7 +101,8 @@ public final class CommanderClass<C extends Commander>
     }
 
     /**
-     * Tells if instances of this commander class substitute the commands of the passed class.
+     * Tells if instances of this commander class produce commands in response to
+     * the passed event class.
      */
     public boolean producesCommandsOn(EventClass eventClass) {
         return delegate.contains(eventClass);

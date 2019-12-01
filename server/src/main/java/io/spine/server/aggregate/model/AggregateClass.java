@@ -103,7 +103,7 @@ public class AggregateClass<A extends Aggregate>
      *
      * <p>Although technically imported events are not "produced" by the aggregates,
      * they end up in the same {@code EventBus} and have the same behaviour as the ones
-      * emitted by the aggregates.
+     * emitted by the aggregates.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
         SetView<EventClass> methodResults = union(commandOutput(), reactionOutput());

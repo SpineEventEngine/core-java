@@ -18,30 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.handler;
 
-import io.spine.server.command.Command;
-import io.spine.server.command.model.given.reaction.InvalidCommander;
-import io.spine.server.command.model.given.reaction.ValidCommander;
-import io.spine.server.model.MethodSignatureTest;
+import io.spine.model.contexts.projects.event.SigProjectCreated;
+import io.spine.model.contexts.projects.event.SigProjectStarted;
+import io.spine.model.contexts.projects.event.SigTaskPaused;
+import io.spine.model.contexts.projects.event.SigTaskStarted;
 
-import java.lang.reflect.Method;
-import java.util.stream.Stream;
+/**
+ * A test environment for {@link io.spine.server.command.CommandHandlerSignatureTest
+ * CommandHandlerSignatureTest}.
+ */
+final class EventMessages {
 
-class CommandReactionSignatureTest extends MethodSignatureTest<CommandReactionSignature> {
-
-    @Override
-    protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(Command.class, ValidCommander.class).stream();
+    /** Prevents this test environment from direct initialization. */
+    private EventMessages() {
     }
 
-    @Override
-    protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(Command.class, InvalidCommander.class).stream();
+    static SigTaskStarted taskStarted() {
+        return SigTaskStarted.getDefaultInstance();
     }
 
-    @Override
-    protected CommandReactionSignature signature() {
-        return new CommandReactionSignature();
+    static SigTaskPaused taskPaused() {
+        return SigTaskPaused.getDefaultInstance();
+    }
+
+    static SigProjectStarted projectStarted() {
+        return SigProjectStarted.getDefaultInstance();
+    }
+
+    static SigProjectCreated projectCreated() {
+        return SigProjectCreated.getDefaultInstance();
     }
 }

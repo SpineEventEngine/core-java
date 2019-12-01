@@ -77,7 +77,7 @@ public final class CommandClass extends MessageClass<CommandMessage> {
     }
 
     /**
-     * Creates immutable set of {@code CommandClass} from the passed set.
+     * Creates a set of {@code CommandClass} from the passed set.
      */
     public static ImmutableSet<CommandClass> setOf(Iterable<Class<? extends CommandMessage>> classes) {
         ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();

@@ -34,9 +34,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.TestValues.random;
+import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 
 @DisplayName("An aggregate class with a handler returning events via common interface should")
 class MessageInterfaceResultTest {
@@ -58,8 +58,10 @@ class MessageInterfaceResultTest {
     @Test
     @DisplayName("provide state events")
     void generatedEvents() {
-        assertExactly(aggregateClass.stateEvents(),
-                      MovedNorth.class, MovedEast.class, MovedSouth.class, MovedWest.class);
+        assertEventClassesExactly(
+                aggregateClass.stateEvents(),
+                MovedNorth.class, MovedEast.class, MovedSouth.class, MovedWest.class
+        );
     }
 
     @Test
