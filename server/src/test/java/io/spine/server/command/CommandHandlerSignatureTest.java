@@ -21,8 +21,8 @@
 package io.spine.server.command;
 
 import io.spine.server.command.model.CommandHandlerSignature;
-import io.spine.server.command.model.given.handler.CommandHandlerSignatureTestEnv.InvalidHandler;
-import io.spine.server.command.model.given.handler.CommandHandlerSignatureTestEnv.ValidHandler;
+import io.spine.server.command.model.given.handler.InvalidHandler;
+import io.spine.server.command.model.given.handler.ValidHandler;
 import io.spine.server.model.MethodSignatureTest;
 
 import java.lang.reflect.Method;
