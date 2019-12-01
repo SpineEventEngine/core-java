@@ -38,6 +38,8 @@ import io.spine.type.TypeUrl;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.flogger.LazyArgs.lazy;
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 
 /**
@@ -66,7 +68,7 @@ public final class QueryService
      */
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
-        _debug().log("Incoming query: %s.", query);
+        _debug().log("Incoming query: %s.", lazy(() -> shortDebugString(query)));
 
         TypeUrl type = Queries.typeOf(query);
         BoundedContext context = typeToContextMap.get(type);
