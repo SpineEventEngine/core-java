@@ -72,7 +72,8 @@ public abstract class AbstractCommandHandlingClass<C,
         ImmutableSet<EventClass> result =
                 commands.methods()
                         .stream()
-                        .flatMap(m -> m.rejections().stream())
+                        .map(CommandAcceptingMethod::rejections)
+                        .flatMap(ImmutableSet::stream)
                         .collect(toImmutableSet());
         return result;
     }
