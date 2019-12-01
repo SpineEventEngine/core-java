@@ -47,7 +47,8 @@ final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus
                     .build();
         }
         builder().setUser(user)
-                 .setLoggedIn(true);
+                 .setLoggedIn(true)
+                 .setUserId(user.getValue());
         return Pair.of(
                 UserLoggedIn
                         .newBuilder()
