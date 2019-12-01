@@ -44,6 +44,7 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 public final class EventClass extends MessageClass<EventMessage> {
 
     private static final long serialVersionUID = 0L;
+    
     /**
      * The name of the {@link ThrowableMessage#messageThrown()} method.
      *
