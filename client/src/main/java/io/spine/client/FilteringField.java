@@ -20,8 +20,8 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.ProtocolStringList;
 import io.spine.base.EntityState;
 import io.spine.base.Field;
@@ -31,7 +31,6 @@ import io.spine.core.EventContext;
 
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.code.proto.ColumnOption.isColumn;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -43,7 +42,6 @@ final class FilteringField {
     private final Field field;
 
     FilteringField(FilterOrBuilder filter) {
-        checkNotNull(filter);
         FieldPath fieldPath = filter.getFieldPath();
         this.field = Field.withPath(fieldPath);
     }
@@ -61,7 +59,6 @@ final class FilteringField {
      *         if the field does not apply to the passed target
      */
     void checkAppliesTo(Target target) {
-        checkNotNull(target);
         Descriptor descriptor = target.messageDescriptor();
         boolean targetIsEntityState = EntityState.class.isAssignableFrom(target.messageClass());
         if (targetIsEntityState) {
@@ -75,7 +72,7 @@ final class FilteringField {
         if (refersToContext()) {
             checkPresentInEventContext();
         } else {
-            checkPresentIn(descriptor);
+            checkPresentInEventMessage(descriptor);
         }
     }
 
@@ -114,8 +111,7 @@ final class FilteringField {
         return !field.isNested();
     }
 
-    private void checkPresentIn(Descriptor message) {
-        checkNotNull(message);
+    private void checkPresentInEventMessage(Descriptor message) {
         if (!field.presentIn(message)) {
             throw newIllegalStateException(
                     "The field with path `%s` is not present in the message type `%s`.",
@@ -124,7 +120,6 @@ final class FilteringField {
     }
 
     private void checkFieldOfEntityState(Descriptor message) {
-        checkNotNull(message);
         checkFieldAtTopLevel();
         if (!isColumnIn(message)) {
             throw newIllegalStateException(
@@ -135,8 +130,7 @@ final class FilteringField {
     }
 
     private boolean isColumnIn(Descriptor message) {
-        checkNotNull(message);
-        Optional<Descriptors.FieldDescriptor> fieldDescriptor = field.findDescriptor(message);
+        Optional<FieldDescriptor> fieldDescriptor = field.findDescriptor(message);
         if (!fieldDescriptor.isPresent()) {
             return false;
         }
