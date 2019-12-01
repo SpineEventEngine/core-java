@@ -17,39 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.client;
 
-import com.google.common.testing.NullPointerTester;
 import io.spine.test.client.TestEntity;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Queries utility should")
-class QueriesTest {
+@DisplayName("`Query` should")
+class QueryTest {
 
     private static final String TARGET_ENTITY_TYPE_URL =
             "type.spine.io/spine.test.queries.TestEntity";
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Queries.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Queries.class);
-    }
 
     @Test
     @DisplayName("obtain entity type url for known query target type")
@@ -59,13 +43,13 @@ class QueriesTest {
                 .newBuilder()
                 .setTarget(target)
                 .build();
-        TypeUrl type = Queries.typeOf(query);
+        TypeUrl type = query.targetType();
         assertNotNull(type);
         assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
     }
 
     @Test
-    @DisplayName("throw IllegalStateException for unknown query target type")
+    @DisplayName("throw `IllegalStateException` for unknown query target type")
     void throwErrorForUnknownType() {
         Target target = Target
                 .newBuilder()
@@ -75,6 +59,6 @@ class QueriesTest {
                 .newBuilder()
                 .setTarget(target)
                 .build();
-        assertThrows(IllegalStateException.class, () -> Queries.typeOf(query));
+        assertThrows(IllegalStateException.class, query::targetType);
     }
 }

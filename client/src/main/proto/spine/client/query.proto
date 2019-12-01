@@ -92,6 +92,8 @@ message OrderBy {
 //
 message Query {
 
+    option (is).java_type = "QueryMixin";
+
     // The ID of the query.
     QueryId id = 1 [(required) = true];
 

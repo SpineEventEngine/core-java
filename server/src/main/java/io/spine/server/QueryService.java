@@ -25,7 +25,6 @@ import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
@@ -70,7 +69,7 @@ public final class QueryService
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
         _debug().log("Incoming query: %s.", lazy(() -> shortDebugString(query)));
 
-        TypeUrl type = Queries.typeOf(query);
+        TypeUrl type = query.targetType();
         BoundedContext context = typeToContextMap.get(type);
         if (context == null) {
             handleUnsupported(type, responseObserver);

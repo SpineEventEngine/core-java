@@ -65,7 +65,6 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.union;
-import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.ack;
 import static java.util.Collections.singleton;
 
@@ -373,7 +372,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             throws InvalidRequestException {
         queryValidator.validate(query);
 
-        TypeUrl type = typeOf(query);
+        TypeUrl type = query.targetType();
         QueryProcessor queryProcessor = processorFor(type);
 
         QueryOperation op = new QueryOperation(query) {
