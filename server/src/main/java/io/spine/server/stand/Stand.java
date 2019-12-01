@@ -32,7 +32,6 @@ import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
-import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
@@ -62,7 +61,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -416,15 +414,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     public void close() throws Exception {
         typeRegistry.close();
         eventRegistry.close();
-    }
-
-    /**
-     * Delivers the given subscription update to the read-side.
-     *
-     * @see #activate(Subscription, SubscriptionCallback, StreamObserver)
-     * @see #cancel(Subscription, StreamObserver)
-     */
-    public interface SubscriptionCallback extends Consumer<SubscriptionUpdate> {
     }
 
     /**

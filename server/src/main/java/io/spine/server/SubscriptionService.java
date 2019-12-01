@@ -31,7 +31,7 @@ import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
-import io.spine.server.stand.Stand.SubscriptionCallback;
+import io.spine.server.stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
@@ -97,12 +97,8 @@ public final class SubscriptionService
         try {
             BoundedContext context = findContextOf(subscription)
                     .orElseThrow(() -> unknownSubscription(subscription));
-            SubscriptionCallback callback = update -> {
-                checkNotNull(update);
-                observer.onNext(update);
-            };
+            SubscriptionCallback callback = SubscriptionCallback.forwardingTo(observer);
             Stand targetStand = context.stand();
-
             targetStand.activate(subscription, callback, forwardErrorsOnly(observer));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)

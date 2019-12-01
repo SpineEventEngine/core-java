@@ -27,7 +27,6 @@ import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
-import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;

@@ -58,7 +58,6 @@ import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.stand.given.StandTestEnv.MemoizeSubscriptionCallback;
