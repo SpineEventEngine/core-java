@@ -33,6 +33,7 @@ import io.spine.core.TenantId;
 import io.spine.server.enrich.EnrichmentService;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 
@@ -87,6 +88,13 @@ public final class EventEnvelope
     @Override
     public EventMessage message() {
         return outerObject().enclosedMessage();
+    }
+
+    /**
+     * Obtains the type URL of the event message.
+     */
+    public TypeUrl typeUrl() {
+        return message().typeUrl();
     }
 
     /**

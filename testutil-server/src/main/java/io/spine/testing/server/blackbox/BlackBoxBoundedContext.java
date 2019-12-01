@@ -90,7 +90,6 @@ import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -293,9 +292,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     @Override
-    public Set<EventClass> messageClasses() {
-        Set<EventClass> result = singleton(EventClass.from(CommandErrored.class));
-        return result;
+    public ImmutableSet<EventClass> messageClasses() {
+        return EventClass.setOf(CommandErrored.class);
     }
 
     /**
@@ -304,7 +302,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>The {@code BlackBoxBoundedContext} only consumes domestic events.
      */
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return eventClasses();
     }
 
@@ -314,7 +312,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>The {@code BlackBoxBoundedContext} does not consume external events.
      */
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

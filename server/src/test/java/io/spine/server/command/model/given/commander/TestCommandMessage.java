@@ -17,21 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.type;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+package io.spine.server.command.model.given.commander;
 
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import io.spine.model.contexts.projects.command.SigAddTaskToProject;
+import io.spine.model.contexts.projects.command.SigAssignTask;
+import io.spine.model.contexts.projects.command.SigPauseTask;
+import io.spine.model.contexts.projects.command.SigStartTask;
 
-@DisplayName("RejectionClass should")
-class RejectionClassTest {
+/**
+ * A test environment class which provides command messages.
+ */
+final class TestCommandMessage {
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(RejectionClass.class);
+    /** Prevents instantiation of this test environment utility. */
+    private TestCommandMessage() {
+    }
+
+    static SigAssignTask assignTask() {
+        return SigAssignTask.getDefaultInstance();
+    }
+
+    static SigAddTaskToProject addTask() {
+        return SigAddTaskToProject.getDefaultInstance();
+    }
+
+    static SigStartTask startTask() {
+        return SigStartTask.getDefaultInstance();
+    }
+
+    static SigPauseTask pauseTask() {
+        return SigPauseTask.getDefaultInstance();
     }
 }

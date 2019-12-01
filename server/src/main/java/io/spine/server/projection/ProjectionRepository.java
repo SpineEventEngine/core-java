@@ -317,17 +317,17 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    public final Set<EventClass> messageClasses() {
+    public final ImmutableSet<EventClass> messageClasses() {
         return projectionClass().events();
     }
 
     @Override
-    public final Set<EventClass> domesticEventClasses() {
+    public final ImmutableSet<EventClass> domesticEventClasses() {
         return projectionClass().domesticEvents();
     }
 
     @Override
-    public final Set<EventClass> externalEventClasses() {
+    public final ImmutableSet<EventClass> externalEventClasses() {
         return projectionClass().externalEvents();
     }
 

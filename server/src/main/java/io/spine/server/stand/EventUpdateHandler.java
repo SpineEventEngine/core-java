@@ -31,7 +31,6 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Responses;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 
@@ -64,8 +63,7 @@ final class EventUpdateHandler extends UpdateHandler {
     @Override
     boolean isTypeMatching(EventEnvelope event) {
         String expectedTypeUrl = target().getType();
-        String actualTypeUrl = TypeUrl.of(event.message())
-                                      .value();
+        String actualTypeUrl = event.typeUrl().value();
         return expectedTypeUrl.equals(actualTypeUrl);
     }
 

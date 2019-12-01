@@ -77,7 +77,7 @@ public final class TraceEventObserver extends AbstractEventSubscriber implements
             tracer.processedBy(event.getReceiver(), event.getEntityType());
         } catch (Exception e) {
             _error().withCause(e)
-                    .log("Error during trace construction on event `%s`.",
+                    .log("Error during trace construction on the event with type `%s`.",
                          payload.enclosedTypeUrl());
         }
     }

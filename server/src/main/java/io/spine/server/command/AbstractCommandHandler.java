@@ -20,6 +20,7 @@
 
 package io.spine.server.command;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.core.Version;
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
@@ -28,8 +29,6 @@ import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
-
-import java.util.Set;
 
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
 
@@ -84,9 +83,8 @@ public abstract class AbstractCommandHandler
                 .handle();
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
     @Override
-    public Set<CommandClass> messageClasses() {
+    public ImmutableSet<CommandClass> messageClasses() {
         return thisClass.commands();
     }
 

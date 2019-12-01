@@ -26,8 +26,6 @@ import io.spine.server.command.AbstractCommandDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
-import java.util.Set;
-
 /**
  * Increments a counter on receiving a command of the specified type.
  *
@@ -44,7 +42,7 @@ public final class BbCommandDispatcher extends AbstractCommandDispatcher {
     }
 
     @Override
-    public Set<CommandClass> messageClasses() {
+    public ImmutableSet<CommandClass> messageClasses() {
         return ImmutableSet.of(commandToDispatch);
     }
 

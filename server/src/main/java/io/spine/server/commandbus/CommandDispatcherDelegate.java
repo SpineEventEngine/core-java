@@ -19,11 +19,10 @@
  */
 package io.spine.server.commandbus;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
-
-import java.util.Set;
 
 /**
  * A common interface for objects which need to dispatch the
@@ -57,12 +56,18 @@ import java.util.Set;
 @Internal
 public interface CommandDispatcherDelegate {
 
-    Set<CommandClass> commandClasses();
+    /**
+     * Obtains the classes of dispatched commands.
+     */
+    ImmutableSet<CommandClass> commandClasses();
 
+    /**
+     * Dispatches the command.
+     */
     void dispatchCommand(CommandEnvelope envelope);
 
     /**
-     * Verifies if this instance dispatches at least one command.
+     * Tells if this instance dispatches at least one command.
      */
     default boolean dispatchesCommands() {
         return !commandClasses().isEmpty();

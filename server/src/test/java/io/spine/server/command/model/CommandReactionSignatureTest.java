@@ -21,8 +21,8 @@
 package io.spine.server.command.model;
 
 import io.spine.server.command.Command;
-import io.spine.server.command.model.given.reaction.CommandReactionTestEnv.InvalidCommander;
-import io.spine.server.command.model.given.reaction.CommandReactionTestEnv.ValidCommander;
+import io.spine.server.command.model.given.reaction.InvalidCommander;
+import io.spine.server.command.model.given.reaction.ValidCommander;
 import io.spine.server.model.MethodSignatureTest;
 
 import java.lang.reflect.Method;
