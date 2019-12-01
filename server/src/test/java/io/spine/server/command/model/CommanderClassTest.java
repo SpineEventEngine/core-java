@@ -39,9 +39,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.ServerAssertions.assertCommandsExactly;
-import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
+import static io.spine.testing.server.Assertions.assertCommandClassesExactly;
+import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 
 @DisplayName("`CommanderClass` should")
 class CommanderClassTest {
@@ -55,50 +55,50 @@ class CommanderClassTest {
         @Test
         @DisplayName("transformed commands")
         void commands() {
-            assertCommandsExactly(commanderClass.commands(),
-                                  SigCreateTask.class,
-                                  SigCreateProject.class,
-                                  SigRemoveTaskFromProject.class,
-                                  SigAssignTask.class);
+            assertCommandClassesExactly(commanderClass.commands(),
+                                        SigCreateTask.class,
+                                        SigCreateProject.class,
+                                        SigRemoveTaskFromProject.class,
+                                        SigAssignTask.class);
         }
 
         @Test
         @DisplayName("produced commands")
         void outgoingCommands() {
-            assertCommandsExactly(commanderClass.outgoingCommands(),
-                            SigAddTaskToProject.class,
-                            SigStartTask.class,
-                            SigSetProjectOwner.class,
-                            SigStopTask.class,
-                            SigAssignTask.class,
-                            SigPauseTask.class,
-                            SigRemoveTaskFromProject.class);
+            assertCommandClassesExactly(commanderClass.outgoingCommands(),
+                                        SigAddTaskToProject.class,
+                                        SigStartTask.class,
+                                        SigSetProjectOwner.class,
+                                        SigStopTask.class,
+                                        SigAssignTask.class,
+                                        SigPauseTask.class,
+                                        SigRemoveTaskFromProject.class);
         }
 
         @Test
         @DisplayName("thrown rejections")
         void events() {
-            assertExactly(commanderClass.rejections(),
-                          ProjectRejections.SigCannotCreateProject.class);
+            assertEventClassesExactly(commanderClass.rejections(),
+                                      ProjectRejections.SigCannotCreateProject.class);
         }
 
         @Test
         @DisplayName("events (including external) in response to which the commander produces commands")
         void domesticEvents() {
-            assertExactly(commanderClass.events(),
-                          SigProjectCreated.class,
-                          SigProjectStopped.class,
-                          // External events
-                          SigTaskDeleted.class,
-                          SigTaskMoved.class);
+            assertEventClassesExactly(commanderClass.events(),
+                                      SigProjectCreated.class,
+                                      SigProjectStopped.class,
+                                      // External events
+                                      SigTaskDeleted.class,
+                                      SigTaskMoved.class);
         }
 
         @Test
         @DisplayName("external events in response to which the commander produces commands")
         void externalEvents() {
-            assertExactly(commanderClass.externalEvents(),
-                          SigTaskDeleted.class,
-                          SigTaskMoved.class);
+            assertEventClassesExactly(commanderClass.externalEvents(),
+                                      SigTaskDeleted.class,
+                                      SigTaskMoved.class);
         }
     }
 }

@@ -86,8 +86,6 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.ServerAssertions.assertCommandsExactly;
-import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.procman.given.dispatch.PmDispatcher.dispatch;
 import static io.spine.server.procman.given.pm.GivenMessages.addTask;
 import static io.spine.server.procman.given.pm.GivenMessages.cancelIteration;
@@ -105,6 +103,8 @@ import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testdata.Sample.messageOfType;
+import static io.spine.testing.server.Assertions.assertCommandClassesExactly;
+import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -531,13 +531,13 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<CommandClass> commands = pmClass.outgoingCommands();
-            assertCommandsExactly(commands,
-                    PmCreateProject.class,
-                    PmAddTask.class,
-                    PmReviewBacklog.class,
-                    PmScheduleRetrospective.class,
-                    PmPlanIteration.class,
-                    PmStartIteration.class);
+            assertCommandClassesExactly(commands,
+                                        PmCreateProject.class,
+                                        PmAddTask.class,
+                                        PmReviewBacklog.class,
+                                        PmScheduleRetrospective.class,
+                                        PmPlanIteration.class,
+                                        PmStartIteration.class);
         }
 
         @Test
@@ -546,13 +546,13 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<EventClass> events = pmClass.outgoingEvents();
-            assertExactly(events,
-                          PmProjectCreated.class,
-                          PmTaskAdded.class,
-                          PmNotificationSent.class,
-                          PmIterationPlanned.class,
-                          PmIterationStarted.class,
-                          StandardRejections.EntityAlreadyArchived.class);
+            assertEventClassesExactly(events,
+                                      PmProjectCreated.class,
+                                      PmTaskAdded.class,
+                                      PmNotificationSent.class,
+                                      PmIterationPlanned.class,
+                                      PmIterationStarted.class,
+                                      StandardRejections.EntityAlreadyArchived.class);
         }
 
         @Test
@@ -561,9 +561,9 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<EventClass> externalEvents = pmClass.externalEvents();
-            assertExactly(externalEvents,
-                          PmQuizStarted.class,
-                          PmQuestionAnswered.class);
+            assertEventClassesExactly(externalEvents,
+                                      PmQuizStarted.class,
+                                      PmQuestionAnswered.class);
         }
     }
 }

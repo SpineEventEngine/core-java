@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
+import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 import static io.spine.testing.server.model.ModelTests.getMethod;
 
 @DisplayName("`EventSubscriberClass` should")
@@ -50,25 +50,25 @@ class EventSubscriberClassTest {
         @Test
         @DisplayName("events (including external) to which instances of this class subscribe")
         void events() {
-            assertExactly(subscriberClass.events(),
-                          ConferenceAnnounced.class,
-                          SpeakerJoined.class,
-                          TalkSubmitted.class);
+            assertEventClassesExactly(subscriberClass.events(),
+                                      ConferenceAnnounced.class,
+                                      SpeakerJoined.class,
+                                      TalkSubmitted.class);
         }
 
         @Test
         @DisplayName("domestic events to which instances of this class subscribe")
         void domesticEvents() {
-            assertExactly(subscriberClass.domesticEvents(),
-                          SpeakerJoined.class,
-                          TalkSubmitted.class);
+            assertEventClassesExactly(subscriberClass.domesticEvents(),
+                                      SpeakerJoined.class,
+                                      TalkSubmitted.class);
         }
 
         @Test
         @DisplayName("external events to which instances of this class subscribe")
         void externalEvents() {
-            assertExactly(subscriberClass.externalEvents(),
-                          ConferenceAnnounced.class);
+            assertEventClassesExactly(subscriberClass.externalEvents(),
+                                      ConferenceAnnounced.class);
         }
     }
 

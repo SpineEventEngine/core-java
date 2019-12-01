@@ -34,9 +34,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.ServerAssertions.assertCommandsExactly;
-import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.testing.server.Assertions.assertCommandClassesExactly;
+import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 
 /**
  * Test obtaining dispatched message classes from {@link AggregateClass}.
@@ -53,56 +53,56 @@ class AggregateClassTest {
         @Test
         @DisplayName("commands handled by the aggregate")
         void commandClasses() {
-            assertCommandsExactly(aggregateClass.commands(),
-                                  StartEngine.class, StopEngine.class);
+            assertCommandClassesExactly(aggregateClass.commands(),
+                                        StartEngine.class, StopEngine.class);
         }
 
         @Test
         @DisplayName("events (including rejections) on which the aggregate reacts")
         void eventClasses() {
-            assertExactly(aggregateClass.events(),
-                          TankEmpty.class,
-                          Rejections.EngineAlreadyStopped.class,
-                          Rejections.EngineAlreadyStarted.class,
-                          EmissionTestStarted.class,
-                          EmissionTestStopped.class,
-                          Rejections.CannotStartEmissionTest.class);
+            assertEventClassesExactly(aggregateClass.events(),
+                                      TankEmpty.class,
+                                      Rejections.EngineAlreadyStopped.class,
+                                      Rejections.EngineAlreadyStarted.class,
+                                      EmissionTestStarted.class,
+                                      EmissionTestStopped.class,
+                                      Rejections.CannotStartEmissionTest.class);
         }
 
         @Test
         @DisplayName("external events (including rejections) on which the aggregate reacts")
         void externalEventClasses() {
-            assertExactly(aggregateClass.externalEvents(),
-                          EmissionTestStarted.class,
-                          EmissionTestStopped.class,
-                          Rejections.CannotStartEmissionTest.class);
+            assertEventClassesExactly(aggregateClass.externalEvents(),
+                                      EmissionTestStarted.class,
+                                      EmissionTestStopped.class,
+                                      Rejections.CannotStartEmissionTest.class);
         }
 
         @Test
         @DisplayName("events imported by the aggregate")
         void importedEvents() {
-            assertExactly(aggregateClass.importableEvents(),
-                          EngineStopped.class,
-                          SettingsAdjusted.class);
+            assertEventClassesExactly(aggregateClass.importableEvents(),
+                                      EngineStopped.class,
+                                      SettingsAdjusted.class);
         }
 
         @Test
         @DisplayName("events (including rejections and importable) produced by the aggregate")
         void producedEvents() {
-            assertExactly(aggregateClass.outgoingEvents(),
-                          EngineStarted.class,
-                          EngineStopped.class,
-                          SettingsAdjusted.class,
-                          Rejections.EngineAlreadyStarted.class,
-                          Rejections.EngineAlreadyStopped.class);
+            assertEventClassesExactly(aggregateClass.outgoingEvents(),
+                                      EngineStarted.class,
+                                      EngineStopped.class,
+                                      SettingsAdjusted.class,
+                                      Rejections.EngineAlreadyStarted.class,
+                                      Rejections.EngineAlreadyStopped.class);
         }
 
         @Test
         @DisplayName("rejections produced by the aggregate")
         void producedRejections() {
-            assertExactly(aggregateClass.rejections(),
-                        Rejections.EngineAlreadyStarted.class,
-                        Rejections.EngineAlreadyStopped.class);
+            assertEventClassesExactly(aggregateClass.rejections(),
+                                      Rejections.EngineAlreadyStarted.class,
+                                      Rejections.EngineAlreadyStopped.class);
         }
     }
 }

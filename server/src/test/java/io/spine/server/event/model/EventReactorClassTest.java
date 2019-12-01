@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.ServerAssertions.assertExactly;
 import static io.spine.server.event.model.EventReactorClass.asReactorClass;
+import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 
 @DisplayName("`EventReactorClass` should")
 class EventReactorClassTest {
@@ -48,31 +48,31 @@ class EventReactorClassTest {
         @Test
         @DisplayName("events (including external) to which instances of this class react")
         void events() {
-            assertExactly(reactorClass.events(),
-                            ConferenceAnnounced.class,
-                            SpeakerJoined.class);
+            assertEventClassesExactly(reactorClass.events(),
+                                      ConferenceAnnounced.class,
+                                      SpeakerJoined.class);
         }
 
         @Test
         @DisplayName("domestic events to which instances of this class react")
         void domesticEvents() {
-            assertExactly(reactorClass.domesticEvents(),
-                          SpeakerJoined.class);
+            assertEventClassesExactly(reactorClass.domesticEvents(),
+                                      SpeakerJoined.class);
         }
 
         @Test
         @DisplayName("external events to which instances of this class react")
         void externalEvents() {
-            assertExactly(reactorClass.externalEvents(),
-                          ConferenceAnnounced.class);
+            assertEventClassesExactly(reactorClass.externalEvents(),
+                                      ConferenceAnnounced.class);
         }
 
         @Test
         @DisplayName("events which instances of this class produce")
         void reactionOutput() {
-            assertExactly(reactorClass.reactionOutput(),
-                          SpeakersInvited.class,
-                          TalkSubmissionRequested.class);
+            assertEventClassesExactly(reactorClass.reactionOutput(),
+                                      SpeakersInvited.class,
+                                      TalkSubmissionRequested.class);
         }
     }
 
