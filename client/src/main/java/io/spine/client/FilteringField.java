@@ -22,10 +22,12 @@ package io.spine.client;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.ProtocolStringList;
 import io.spine.base.EntityState;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.code.proto.FieldDeclaration;
+import io.spine.core.EventContext;
 
 import java.util.Optional;
 
@@ -63,25 +65,49 @@ final class FilteringField {
         Descriptor descriptor = target.messageDescriptor();
         boolean targetIsEntityState = EntityState.class.isAssignableFrom(target.messageClass());
         if (targetIsEntityState) {
-            checkFieldIsColumnIn(descriptor);
+            checkFieldOfEntityState(descriptor);
         } else {
-            // We're filtering event messages.
-            if (refersToContext()) {
-                checkPresentInContext();
-            } else {
-                checkPresentIn(descriptor);
-            }
+            checkFieldOfEvent(descriptor);
         }
     }
 
-    private void checkPresentInContext() {
-        //TODO:2019-11-29:alexander.yevsyukov: Implement.
+    private void checkFieldOfEvent(Descriptor descriptor) {
+        if (refersToContext()) {
+            checkPresentInEventContext();
+        } else {
+            checkPresentIn(descriptor);
+        }
     }
 
     private boolean refersToContext() {
         String firstInPath = field.path()
                                   .getFieldName(0);
         return firstInPath.equals(EventContextField.name());
+    }
+
+    private void checkPresentInEventContext() {
+        Field contextField = fieldInContext();
+        Descriptor eventContext = EventContext.getDescriptor();
+        if (!contextField.presentIn(eventContext)) {
+            throw newIllegalStateException(
+                    "The filter for event messages references a field of `%s` as `%s`." +
+                    " There is no field named `%s` in the `%s` type.",
+                    field.toString(),
+                    eventContext.getFullName(),
+                    contextField.toString(),
+                    eventContext.getName()
+            );
+        }
+    }
+
+    private Field fieldInContext() {
+        FieldPath pathInEvent = field.path();
+        ProtocolStringList fieldNames = pathInEvent.getFieldNameList();
+        FieldPath pathInEventContext = FieldPath
+                .newBuilder()
+                .addAllFieldName(fieldNames.subList(1, fieldNames.size()))
+                .vBuild();
+        return Field.withPath(pathInEventContext);
     }
 
     private boolean isTopLevel() {
@@ -97,7 +123,7 @@ final class FilteringField {
         }
     }
 
-    private void checkFieldIsColumnIn(Descriptor message) {
+    private void checkFieldOfEntityState(Descriptor message) {
         checkNotNull(message);
         checkFieldAtTopLevel();
         if (!isColumnIn(message)) {
