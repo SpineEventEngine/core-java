@@ -42,7 +42,6 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
-import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 
 /**
  * Registry for subscription management in a multi-tenant context.
@@ -137,8 +136,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
                     .setId(subscriptionId)
                     .setTopic(topic)
                     .build();
-            SubscriptionRecord record = newRecordFor(subscription);
-            TypeUrl type = record.getType();
+            SubscriptionRecord record = SubscriptionRecord.of(subscription);
+            TypeUrl type = record.targetType();
             lockAndRun(() -> {
                 typeToRecord.put(type, record);
                 subscriptionToAttrs.put(subscription, record);
@@ -153,7 +152,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
                     return;
                 }
                 SubscriptionRecord record = subscriptionToAttrs.get(subscription);
-                typeToRecord.get(record.getType()).remove(record);
+                typeToRecord.get(record.targetType()).remove(record);
                 subscriptionToAttrs.remove(subscription);
             });
         }

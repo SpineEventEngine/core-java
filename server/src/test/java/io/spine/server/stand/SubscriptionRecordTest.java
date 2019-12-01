@@ -49,7 +49,6 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.client.Targets.composeTarget;
-import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.OTHER_TYPE;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.projectCreatedEnvelope;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.stateChangedEnvelope;
@@ -68,7 +67,7 @@ class SubscriptionRecordTest {
     @Test
     @DisplayName("detect an update according to type")
     void notMatchImproperType() {
-        SubscriptionRecord record = newRecordFor(subscription());
+        SubscriptionRecord record = SubscriptionRecord.of(subscription());
         ProjectId id = ProjectId.getDefaultInstance();
 
         EventEnvelope matches = stateChangedEnvelope(id, EMPTY_PRJ, EMPTY_PRJ);
@@ -87,7 +86,7 @@ class SubscriptionRecordTest {
         void entitySubscription() {
             ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
             Project state = Project.getDefaultInstance();
-            SubscriptionRecord record = newRecordFor(subscription(targetId));
+            SubscriptionRecord record = SubscriptionRecord.of(subscription(targetId));
 
             EventEnvelope envelope = stateChangedEnvelope(targetId, state, state);
             assertThat(record.detectUpdate(envelope)).isPresent();
@@ -106,7 +105,7 @@ class SubscriptionRecordTest {
                     .build();
             Target target = composeTarget(ProjectCreated.class, singleton(targetId), null);
             Subscription subscription = subscription(target);
-            SubscriptionRecord record = newRecordFor(subscription);
+            SubscriptionRecord record = SubscriptionRecord.of(subscription);
 
             EventEnvelope envelope = projectCreatedEnvelope(targetId);
             assertThat(record.detectUpdate(envelope)).isPresent();
@@ -158,7 +157,7 @@ class SubscriptionRecordTest {
             Target target = composeTarget(ProjectCreated.class, singleton(targetId), filters);
 
             Subscription subscription = subscription(target);
-            SubscriptionRecord record = newRecordFor(subscription);
+            SubscriptionRecord record = SubscriptionRecord.of(subscription);
 
             EvTeamId matchingTeamId = EvTeamId
                     .newBuilder()
@@ -220,9 +219,9 @@ class SubscriptionRecordTest {
                 .setId(breakingId)
                 .build();
         @SuppressWarnings("QuestionableName")
-        SubscriptionRecord one = newRecordFor(oneSubscription);
-        SubscriptionRecord similar = newRecordFor(otherSubscription);
-        SubscriptionRecord same = newRecordFor(oneSubscription);
+        SubscriptionRecord one = SubscriptionRecord.of(oneSubscription);
+        SubscriptionRecord similar = SubscriptionRecord.of(otherSubscription);
+        SubscriptionRecord same = SubscriptionRecord.of(oneSubscription);
         assertNotEquals(one, similar);
         assertEquals(one, same);
     }
@@ -240,7 +239,7 @@ class SubscriptionRecordTest {
         Target target = composeTarget(Project.class, singleton(targetId), filters);
 
         Subscription subscription = subscription(target);
-        return newRecordFor(subscription);
+        return SubscriptionRecord.of(subscription);
     }
 
 

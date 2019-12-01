@@ -25,6 +25,7 @@ import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
@@ -34,14 +35,49 @@ import java.util.Optional;
  */
 final class SubscriptionRecord {
 
+    private static final TypeUrl ENTITY_STATE_CHANGED = TypeUrl.of(EntityStateChanged.class);
     private final Subscription subscription;
     private final TypeUrl type;
     private final UpdateHandler handler;
 
-    SubscriptionRecord(Subscription subscription, TypeUrl type, UpdateHandler handler) {
-        this.subscription = subscription;
-        this.type = type;
+    private SubscriptionRecord(Subscription s, TypeUrl targetType, UpdateHandler handler) {
+        this.subscription = s;
+        this.type = targetType;
         this.handler = handler;
+    }
+
+    /**
+     * Creates a subscription record for the given subscription.
+     *
+     * <p>Distinguishes event and entity subscriptions via the target type URL.
+     *
+     * <p>By default, assumes that all subscriptions with a non-event type are entity
+     * subscriptions.
+     */
+    static SubscriptionRecord of(Subscription subscription) {
+        if (subscription.ofEvent()) {
+            return createEventRecord(subscription);
+        }
+        return createEntityRecord(subscription);
+    }
+
+    /**
+     * Creates a record managing an event subscription.
+     */
+    private static SubscriptionRecord createEventRecord(Subscription subscription) {
+        EventUpdateHandler handler = new EventUpdateHandler(subscription);
+        return new SubscriptionRecord(subscription, subscription.targetType(), handler);
+    }
+
+    /**
+     * Creates a record managing an entity subscription.
+     *
+     * <p>In fact, this is a subscription to an {@link EntityStateChanged} event with a custom
+     * callback and matcher (to validate the entity state packed inside the event).
+     */
+    private static SubscriptionRecord createEntityRecord(Subscription subscription) {
+        EntityUpdateHandler handler = new EntityUpdateHandler(subscription);
+        return new SubscriptionRecord(subscription, ENTITY_STATE_CHANGED, handler);
     }
 
     /**
@@ -86,7 +122,7 @@ final class SubscriptionRecord {
         return handler.detectUpdate(event);
     }
 
-    TypeUrl getType() {
+    TypeUrl targetType() {
         return type;
     }
 
