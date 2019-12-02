@@ -24,6 +24,7 @@ import com.google.protobuf.Empty;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.CommandId;
+import io.spine.core.EventId;
 import io.spine.core.MessageId;
 import io.spine.system.server.AggregateHistoryCorrupted;
 import io.spine.system.server.CannotDispatchDuplicateCommand;
@@ -34,9 +35,7 @@ import io.spine.system.server.RoutingFailed;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.type.TypeUrl;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,18 +57,6 @@ class DashboardTest {
     private ByteArrayOutputStream output;
     private PrintStream stderr;
 
-    @BeforeAll
-    static void prepareLogger() {
-        Logger.getLogger(Dashboard.class.getName())
-              .setLevel(Level.OFF);
-    }
-
-    @AfterAll
-    static void resetLogger() {
-        Logger.getLogger(Dashboard.class.getName())
-              .setLevel(Level.ALL);
-    }
-
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     @BeforeEach
     void setUpStderr() {
@@ -77,6 +64,8 @@ class DashboardTest {
         output = new ByteArrayOutputStream();
         PrintStream testStream = new PrintStream(output, true);
         System.setErr(testStream);
+        Logger.getLogger(Dashboard.class.getName())
+              .setLevel(Level.OFF);
     }
 
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
@@ -84,6 +73,8 @@ class DashboardTest {
     void resetStderr() {
         System.err.close();
         System.setErr(stderr);
+        Logger.getLogger(Dashboard.class.getName())
+              .setLevel(Level.ALL);
     }
 
     @Test
@@ -121,7 +112,9 @@ class DashboardTest {
     void acceptCannotDispatchDuplicateEvent() {
         MessageId event = MessageId
                 .newBuilder()
-                .setId(pack(CommandId.generate()))
+                .setId(pack(EventId.newBuilder()
+                                   .setValue(newUuid())
+                                   .build()))
                 .setTypeUrl(TypeUrl.of(BbProjectCreated.class).value())
                 .vBuild();
         Dashboard.instance()
@@ -131,7 +124,7 @@ class DashboardTest {
                              .setDuplicateEvent(event)
                              .vBuild());
         assertLogged(event.getTypeUrl());
-        assertLogged(event.asCommandId().getUuid());
+        assertLogged(event.asEventId().getValue());
     }
 
     @Test
