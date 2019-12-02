@@ -367,22 +367,26 @@ public class EntityLifecycle {
         }
     }
 
-    public void onDuplicateEvent(EventId eventId) {
+    public void onDuplicateEvent(MessageId eventId) {
         checkNotNull(eventId);
+        @SuppressWarnings("deprecation") // Set the deprecated field for compatibility.
         CannotDispatchDuplicateEvent event = CannotDispatchDuplicateEvent
                 .newBuilder()
                 .setEntity(entityId)
-                .setEvent(eventId)
+                .setEvent(eventId.asEventId())
+                .setDuplicateEvent(eventId)
                 .vBuild();
         postEvent(event);
     }
 
-    public void onDuplicateCommand(CommandId commandId) {
+    public void onDuplicateCommand(MessageId commandId) {
         checkNotNull(commandId);
+        @SuppressWarnings("deprecation") // Set the deprecated field for compatibility.
         CannotDispatchDuplicateCommand event = CannotDispatchDuplicateCommand
                 .newBuilder()
                 .setEntity(entityId)
-                .setCommand(commandId)
+                .setCommand(commandId.asCommandId())
+                .setDuplicateCommand(commandId)
                 .vBuild();
         postEvent(event);
     }
@@ -534,7 +538,7 @@ public class EntityLifecycle {
                 errorType.equals(CommandValidationError.class.getSimpleName())
                         && errorCode == DUPLICATE_COMMAND_VALUE;
         if (duplicateCommand) {
-            onDuplicateCommand(handledSignal.asCommandId());
+            onDuplicateCommand(handledSignal);
         }
         return duplicateCommand;
     }
@@ -546,7 +550,7 @@ public class EntityLifecycle {
                 errorType.equals(EventValidationError.class.getSimpleName())
                         && errorCode == DUPLICATE_EVENT_VALUE;
         if (duplicateEvent) {
-            onDuplicateEvent(handledSignal.asEventId());
+            onDuplicateEvent(handledSignal);
         }
         return duplicateEvent;
     }
