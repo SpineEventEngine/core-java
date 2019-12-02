@@ -45,6 +45,18 @@ final class Dashboard
         extends AbstractEventSubscriber
         implements Logging {
 
+    private static final Dashboard instance = new Dashboard();
+
+    private static Dashboard instance() {
+        return instance;
+    }
+
+    /**
+     * Prevents direct instantiation.
+     */
+    private Dashboard() {
+    }
+
     @Subscribe
     public void on(ConstraintViolated event) {
         String typeUrl = event.getEntity()
