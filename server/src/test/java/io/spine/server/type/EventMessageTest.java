@@ -32,6 +32,7 @@ import io.spine.test.core.ProjectId;
 import io.spine.test.core.TaskAssigned;
 import io.spine.test.core.TaskId;
 import io.spine.validate.ValidationException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -54,6 +55,7 @@ class EventMessageTest {
         checkValid(event);
     }
 
+    @Disabled
     @Test
     @DisplayName("not be invalid")
     void invalid() {

@@ -389,7 +389,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     private <R> void checkMatchesIdType(R result) {
         Class routingResultType = null;
         if (result instanceof Collection) {
-            Collection asCollection = (Collection) result;
+            Collection<?> asCollection = (Collection<?>) result;
             Object element = getFirst(asCollection, null);
             if (element != null) {
                 routingResultType = element.getClass();
