@@ -20,7 +20,6 @@
 
 package io.spine.server.event.model;
 
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.server.model.DispatchKey;
 import io.spine.server.type.CommandClass;
@@ -51,19 +50,20 @@ final class RejectionDispatchKeys {
         checkNotNull(eventClass);
         checkNotNull(rawMethod);
         Class<?>[] parameters = rawMethod.getParameterTypes();
+        String methodName = rawMethod.getName();
         checkArgument(parameters.length >= 2,
-                      "The method `%s` should have at least 2 parameters, but had `%s`.",
-                      rawMethod.getName(),
+                      "The method `%s` should have at least 2 parameters, but has `%s`.",
+                      methodName,
                       parameters.length);
-        Class<? extends CommandMessage> commandMessageClass = toCommandMessage(parameters[1]);
+        Class<?> secondParameter = parameters[1];
+        checkArgument(CommandMessage.class.isAssignableFrom(secondParameter),
+                      "The method `%s` should have the second parameter assignable from CommandMessage, but has `%s`.",
+                      methodName,
+                      secondParameter);
+        @SuppressWarnings("unchecked") // checked above
+        Class<? extends CommandMessage> commandMessageClass =
+                (Class<? extends CommandMessage>) secondParameter;
         CommandClass commandClass = CommandClass.from(commandMessageClass);
         return new DispatchKey(eventClass.value(), null, commandClass.value());
-    }
-
-    private static <T extends Message> Class<T> toCommandMessage(Class<?> raw) {
-        checkArgument(CommandMessage.class.isAssignableFrom(raw));
-        @SuppressWarnings("unchecked") // Checked above.
-        Class<T> result = (Class<T>) raw;
-        return result;
     }
 }
