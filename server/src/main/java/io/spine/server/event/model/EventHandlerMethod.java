@@ -60,7 +60,7 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
     @Override
     public DispatchKey key() {
         if (parameterSpec().acceptsCommand()) {
-            DispatchKey dispatchKey = RejectionDispatchKey.of(messageClass(), rawMethod());
+            DispatchKey dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
             return dispatchKey;
         } else {
             return super.key();

@@ -47,8 +47,8 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     @Override
     public DispatchKey key() {
         if (parameterSpec().acceptsCommand()) {
-            DispatchKey dispatchKey = RejectionDispatchKey.of(messageClass(), rawMethod());
-            return withFilter(dispatchKey);
+            DispatchKey dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
+            return applyFilter(dispatchKey);
         } else {
             return super.key();
         }
@@ -63,7 +63,6 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     @Override
     protected void checkAttributesMatch(EventEnvelope event) throws IllegalArgumentException {
         super.checkAttributesMatch(event);
-        ensureExternalMatch(event.context()
-                                 .getExternal());
+        ensureExternalMatch(event.isExternal());
     }
 }
