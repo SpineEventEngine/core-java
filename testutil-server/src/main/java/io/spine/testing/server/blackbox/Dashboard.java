@@ -41,6 +41,11 @@ import java.io.PrintStream;
 import static io.spine.json.Json.toJson;
 import static java.lang.String.format;
 
+/**
+ * A subscriber for diagnostic events.
+ *
+ * <p>Logs all the received diagnostic events with a meaningful message.
+ */
 final class Dashboard
         extends AbstractEventSubscriber
         implements Logging {
@@ -55,6 +60,7 @@ final class Dashboard
      * Prevents direct instantiation.
      */
     private Dashboard() {
+        super();
     }
 
     @Subscribe
