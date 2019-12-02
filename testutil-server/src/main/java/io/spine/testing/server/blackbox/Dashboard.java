@@ -42,7 +42,7 @@ import static io.spine.json.Json.toJson;
 import static java.lang.String.format;
 
 /**
- * A subscriber for diagnostic events.
+ * A subscriber for all the diagnostic events.
  *
  * <p>Logs all the received diagnostic events with a meaningful message.
  */
@@ -76,12 +76,20 @@ final class Dashboard
 
     @Subscribe
     void on(CannotDispatchDuplicateCommand event) {
-        log(event, "Command should not be dispatched twice.");
+        MessageId command = event.getDuplicateCommand();
+        log(event, "Command %s (ID: %s) should not be dispatched twice.",
+            command.getTypeUrl(),
+            command.asCommandId()
+                   .getUuid());
     }
 
     @Subscribe
     void on(CannotDispatchDuplicateEvent event) {
-        log(event, "Event should not be dispatched twice.");
+        MessageId duplicateEvent = event.getDuplicateEvent();
+        log(event, "Event %s (ID: %s) should not be dispatched twice.",
+            duplicateEvent.getTypeUrl(),
+            duplicateEvent.asEventId()
+                          .getValue());
     }
 
     @Subscribe
