@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class RejectionDispatchKeys {
 
-    /** Prevents direct instantiation. **/
+    /** Prevents instantiation of this utility class. **/
     private RejectionDispatchKeys() {
     }
 
