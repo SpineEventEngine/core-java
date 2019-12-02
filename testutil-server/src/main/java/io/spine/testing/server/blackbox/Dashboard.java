@@ -52,6 +52,9 @@ final class Dashboard
 
     private static final Dashboard instance = new Dashboard();
 
+    /**
+     * Obtains the only instance of {@code Dashboard}.
+     */
     static Dashboard instance() {
         return instance;
     }
