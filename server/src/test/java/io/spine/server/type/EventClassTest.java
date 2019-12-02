@@ -21,6 +21,8 @@
 package io.spine.server.type;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.type.given.rejection.PhoneNotFound;
+import io.spine.server.type.given.rejection.TestRejections;
 import com.google.protobuf.Any;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
@@ -86,5 +88,12 @@ class EventClassTest {
     void throwOnNonEventType() {
         TypeUrl typeUrl = TypeUrl.from(ProjectId.getDescriptor());
         assertThrows(IllegalArgumentException.class, () -> EventClass.from(typeUrl));
+    }
+
+    @Test
+    @DisplayName("obtain the value by `ThrowableMessage` class")
+    void byThrowableMessage() {
+        assertThat(EventClass.fromThrowable(PhoneNotFound.class).value())
+                .isEqualTo(TestRejections.PhoneNotFound.class);
     }
 }

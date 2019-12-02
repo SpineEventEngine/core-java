@@ -21,8 +21,8 @@
 package io.spine.server.event.model;
 
 import io.spine.core.Subscribe;
-import io.spine.server.event.model.given.subscriber.EventSubscriberSignatureTestEnv.InvalidSubscriber;
-import io.spine.server.event.model.given.subscriber.EventSubscriberSignatureTestEnv.ValidSubscriber;
+import io.spine.server.event.model.given.subscriber.InvalidSubscriber;
+import io.spine.server.event.model.given.subscriber.ValidSubscriber;
 import io.spine.server.model.MethodSignatureTest;
 
 import java.lang.reflect.Method;

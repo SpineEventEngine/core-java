@@ -25,7 +25,10 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.server.model.HandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  * Abstract base for classes providing message handling information of classes that handle commands.
@@ -62,6 +65,17 @@ public abstract class AbstractCommandHandlingClass<C,
     @Override
     public ImmutableSet<R> commandOutput() {
         return commands.producedTypes();
+    }
+
+    @Override
+    public ImmutableSet<EventClass> rejections() {
+        ImmutableSet<EventClass> result =
+                commands.methods()
+                        .stream()
+                        .map(CommandAcceptingMethod::rejections)
+                        .flatMap(ImmutableSet::stream)
+                        .collect(toImmutableSet());
+        return result;
     }
 
     /** Obtains the handler method for the passed command class. */

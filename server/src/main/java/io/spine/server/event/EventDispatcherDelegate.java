@@ -25,8 +25,6 @@ import io.spine.annotation.Internal;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Set;
-
 /**
  * A common interface for objects which need to dispatch {@linkplain io.spine.core.Event events},
  * but are unable to implement {@link io.spine.server.event.EventDispatcher EventDispatcher}.
@@ -44,17 +42,17 @@ public interface EventDispatcherDelegate {
     /**
      * Obtains all event classes dispatched by this delegate.
      */
-    Set<EventClass> events();
+    ImmutableSet<EventClass> events();
 
     /**
      * Obtains domestic event classes dispatched by this delegate.
      */
-    Set<EventClass> domesticEvents();
+    ImmutableSet<EventClass> domesticEvents();
 
     /**
      * Obtains external event classes dispatched by this delegate.
      */
-    Set<EventClass> externalEvents();
+    ImmutableSet<EventClass> externalEvents();
 
     /**
      * Dispatches the event.
@@ -70,7 +68,7 @@ public interface EventDispatcherDelegate {
      *
      * @return immutable set with the dispatcher delegate identity
      */
-    default Set<String> identity() {
+    default ImmutableSet<String> identity() {
         return ImmutableSet.of(this.toString());
     }
 

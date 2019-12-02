@@ -187,6 +187,14 @@ class CommandReactionMethodTest {
             assertThat(outcome.getSuccess().getProducedCommands().getCommandList())
                     .isEmpty();
         }
+
+        private static CmdProjectCreated createVoidEvent(ProjectId givenId) {
+            return CmdProjectCreated
+                    .newBuilder()
+                    .setProjectId(givenId)
+                    .setInitialize(false) // This will make the method return `Optional.empty()`.
+                    .build();
+        }
     }
 
     @Nested
@@ -229,14 +237,6 @@ class CommandReactionMethodTest {
                 .newBuilder()
                 .setProjectId(givenId)
                 .setInitialize(true) // This will make the method return result with a value.
-                .build();
-    }
-
-    private static CmdProjectCreated createVoidEvent(ProjectId givenId) {
-        return CmdProjectCreated
-                .newBuilder()
-                .setProjectId(givenId)
-                .setInitialize(false) // This will make the method return `Optional.empty()`.
                 .build();
     }
 

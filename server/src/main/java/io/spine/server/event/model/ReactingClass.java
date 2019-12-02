@@ -30,9 +30,14 @@ import io.spine.type.MessageClass;
 public interface ReactingClass extends EventReceiverClass {
 
     /**
-     * Obtains the method that reacts on the passed projection class.
+     * Obtains the method that reacts on the events of the passed class.
+     *
+     * @param eventClass
+     *         the class of the events on which the method reacts
+     * @param originClass
+     *         the class of messages that are origins of these events
      */
-    EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass);
+    EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass);
 
     /**
      * Obtains the classes of events produced from the event reaction.

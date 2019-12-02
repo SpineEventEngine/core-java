@@ -38,7 +38,6 @@ import io.spine.server.type.AbstractMessageEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.RejectionClass;
 import io.spine.server.type.SignalEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -168,12 +167,12 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public RejectionClass messageClass() {
+    public EventClass messageClass() {
         EventClass eventClass = event.messageClass();
         @SuppressWarnings("unchecked") // Checked at runtime.
         Class<? extends RejectionMessage> value =
                 (Class<? extends RejectionMessage>) eventClass.value();
-        RejectionClass rejectionClass = RejectionClass.of(value);
+        EventClass rejectionClass = EventClass.from(value);
         return rejectionClass;
     }
 

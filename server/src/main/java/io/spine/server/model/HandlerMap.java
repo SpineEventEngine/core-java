@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
@@ -259,5 +260,12 @@ public final class HandlerMap<M extends MessageClass<?>,
                               .map(HandlerMethod::messageClass)
                               .collect(toImmutableSet());
         return result;
+    }
+
+    /**
+     * Obtains handler methods matching the passed criteria.
+     */
+    public ImmutableCollection<H> methods() {
+        return map.values();
     }
 }

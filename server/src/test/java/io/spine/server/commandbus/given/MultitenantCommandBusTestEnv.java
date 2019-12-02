@@ -20,13 +20,12 @@
 
 package io.spine.server.commandbus.given;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.test.commandbus.command.CmdBusAddTask;
-
-import java.util.Set;
 
 public class MultitenantCommandBusTestEnv {
 
@@ -44,7 +43,7 @@ public class MultitenantCommandBusTestEnv {
         private boolean dispatcherInvoked = false;
 
         @Override
-        public Set<CommandClass> messageClasses() {
+        public ImmutableSet<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdBusAddTask.class);
         }
 

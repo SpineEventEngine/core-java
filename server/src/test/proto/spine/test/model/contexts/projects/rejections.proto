@@ -27,6 +27,7 @@ option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.model.contexts.projects.rejection";
 option java_outer_classname = "ProjectRejections";
 
+import "spine/core/user_id.proto";
 import "spine/test/model/contexts/projects/project.proto";
 
 //
@@ -35,4 +36,9 @@ import "spine/test/model/contexts/projects/project.proto";
 
 message SigCannotCreateProject {
     ProjectId project_id = 1;
+}
+
+message SigOwnerAlreadyAssigned {
+    ProjectId project_id = 1;
+    core.UserId current_owner = 2;
 }

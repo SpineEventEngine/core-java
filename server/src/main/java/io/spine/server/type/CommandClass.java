@@ -30,7 +30,6 @@ import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
 import java.util.Arrays;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -77,8 +76,10 @@ public final class CommandClass extends MessageClass<CommandMessage> {
         return new CommandClass(commandMessage.getClass(), typeUrl);
     }
 
-    /** Creates immutable set of {@code CommandClass} from the passed set. */
-    public static Set<CommandClass> setOf(Iterable<Class<? extends CommandMessage>> classes) {
+    /**
+     * Creates a set of {@code CommandClass} from the passed set.
+     */
+    public static ImmutableSet<CommandClass> setOf(Iterable<Class<? extends CommandMessage>> classes) {
         ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends CommandMessage> cls : classes) {
             builder.add(from(cls));
@@ -86,9 +87,11 @@ public final class CommandClass extends MessageClass<CommandMessage> {
         return builder.build();
     }
 
-    /** Creates immutable set of {@code CommandClass} from the passed classes. */
+    /**
+     * Creates a set of {@code CommandClass} from the passed classes.
+     */
     @SafeVarargs
-    public static Set<CommandClass> setOf(Class<? extends CommandMessage>... classes) {
+    public static ImmutableSet<CommandClass> setOf(Class<? extends CommandMessage>... classes) {
         return setOf(Arrays.asList(classes));
     }
 }

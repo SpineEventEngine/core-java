@@ -18,16 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
-
-import io.spine.core.Subscribe;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
-
 /**
- * The class which subscribes to a rejection message, not an event message.
+ * Test environment for {@link io.spine.server.event.model.EventReactorClassTest} and
+ * {@link io.spine.server.event.model.EventSubscriberClassTest}.
  */
-public class ARejectionSubscriber extends TestEventSubscriber {
-    @Subscribe
-    void handle(EntityAlreadyArchived rejection) {
-    }
-}
+
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.event.model.given.classes;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

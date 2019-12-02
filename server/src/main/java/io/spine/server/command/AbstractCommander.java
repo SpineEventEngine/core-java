@@ -21,6 +21,7 @@
 package io.spine.server.command;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.core.Command;
@@ -41,7 +42,6 @@ import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -69,7 +69,7 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public Set<CommandClass> messageClasses() {
+    public ImmutableSet<CommandClass> messageClasses() {
         return thisClass.commands();
     }
 
@@ -85,23 +85,23 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return thisClass.events();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return thisClass.externalEvents();
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
+    public ImmutableSet<EventClass> domesticEvents() {
         return thisClass.domesticEvents();
     }
 
     @Override
     public void dispatchEvent(EventEnvelope event) {
-        CommandReactionMethod method = thisClass.getCommander(event.messageClass());
+        CommandReactionMethod method = thisClass.commanderOn(event.messageClass());
         DispatchOutcomeHandler
                 .from(method.invoke(this, event))
                 .onCommands(this::postCommands)
