@@ -47,7 +47,7 @@ final class Dashboard
 
     private static final Dashboard instance = new Dashboard();
 
-    private static Dashboard instance() {
+    static Dashboard instance() {
         return instance;
     }
 
@@ -58,7 +58,7 @@ final class Dashboard
     }
 
     @Subscribe
-    public void on(ConstraintViolated event) {
+    void on(ConstraintViolated event) {
         String typeUrl = event.getEntity()
                               .getTypeUrl();
         String idAsString = Identifier.toString(event.getEntity().getId());
@@ -66,17 +66,17 @@ final class Dashboard
     }
 
     @Subscribe
-    public void on(CannotDispatchDuplicateCommand event) {
+    void on(CannotDispatchDuplicateCommand event) {
         log(event, "Command should not be dispatched twice.");
     }
 
     @Subscribe
-    public void on(CannotDispatchDuplicateEvent event) {
+    void on(CannotDispatchDuplicateEvent event) {
         log(event, "Event should not be dispatched twice.");
     }
 
     @Subscribe
-    public void on(HandlerFailedUnexpectedly event) {
+    void on(HandlerFailedUnexpectedly event) {
         log(event, "Signal %s could not be handled by %s:%n%s",
             event.getHandledSignal()
                  .getTypeUrl(),
@@ -87,7 +87,7 @@ final class Dashboard
     }
 
     @Subscribe
-    public void on(RoutingFailed event) {
+    void on(RoutingFailed event) {
         log(event, "Signal %s could not be routed to %s:%n%s",
             event.getHandledSignal()
                  .getTypeUrl(),
@@ -98,7 +98,7 @@ final class Dashboard
     }
 
     @Subscribe
-    public void on(AggregateHistoryCorrupted event) {
+    void on(AggregateHistoryCorrupted event) {
         MessageId aggregate = event.getEntity();
         String idAsString = Identifier.toString(aggregate.getId());
         log(event, "History of aggregate %s (ID: %s) could not be loaded:%n%s",
