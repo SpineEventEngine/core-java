@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.server.model.DispatchKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.type.EventClass;
@@ -28,7 +29,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
 /**
- * A handler method that handles rejections.
+ * A handler method that may handle rejections.
  */
 @Immutable
 interface RejectionHandler<T, R extends MessageClass<?>>
@@ -47,9 +48,11 @@ interface RejectionHandler<T, R extends MessageClass<?>>
     /**
      * {@inheritDoc}
      *
-     * <p>If a handler method spec is for a rejection — creates rejection dispatch key.
+     * <p>In case this method is declared to handle a rejection, a rejection-specific
+     * dispatch key is created.
      */
     @Override
+    @OverridingMethodsMustInvokeSuper
     default DispatchKey key() {
         if (handlesRejection()) {
             DispatchKey dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
