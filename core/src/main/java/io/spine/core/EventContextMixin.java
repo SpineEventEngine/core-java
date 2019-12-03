@@ -134,8 +134,7 @@ interface EventContextMixin extends EnrichableMessageContext,
      * @see #timestamp()
      */
     default Instant instant() {
-        Instant result = InstantConverter.instance()
-                                         .reverse()
+        Instant result = InstantConverter.reversed()
                                          .convert(getTimestamp());
         return result;
     }
