@@ -21,7 +21,6 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.server.model.DispatchKey;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.type.EventClass;
@@ -52,7 +51,6 @@ interface RejectionHandler<T, R extends MessageClass<?>>
      * dispatch key is created.
      */
     @Override
-    @OverridingMethodsMustInvokeSuper
     default DispatchKey key() {
         if (handlesRejection()) {
             DispatchKey dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
