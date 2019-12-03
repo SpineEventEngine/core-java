@@ -40,7 +40,8 @@ import java.lang.reflect.Method;
  *         the type of the produced message classes
  */
 public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
-        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R> {
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R>
+        implements RejectionHandler<T, R> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -53,23 +54,18 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
     }
 
     @Override
-    protected EventAcceptingMethodParams parameterSpec() {
+    public EventAcceptingMethodParams parameterSpec() {
         return (EventAcceptingMethodParams) super.parameterSpec();
     }
 
     @Override
     public DispatchKey key() {
-        if (parameterSpec().acceptsCommand()) {
-            DispatchKey dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
-            return dispatchKey;
-        } else {
-            return super.key();
-        }
+        return RejectionHandler.super.key();
     }
 
     @Override
     public MethodParams params() {
-        if (parameterSpec().acceptsCommand()) {
+        if (RejectionHandler.super.handlesRejection()) {
             MethodParams result = MethodParams.of(rawMethod());
             return result;
         }

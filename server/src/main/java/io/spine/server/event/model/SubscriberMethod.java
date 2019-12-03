@@ -64,12 +64,6 @@ public abstract class SubscriberMethod
         super(method, parameterSpec);
     }
 
-    @Override
-    public DispatchKey key() {
-        DispatchKey typeBasedKey = super.key();
-        return applyFilter(typeBasedKey);
-    }
-
     /**
      * Applies {@link #filter() filter} if a specific one is supplied. Otherwise returns the
      * supplied {@code key}.
