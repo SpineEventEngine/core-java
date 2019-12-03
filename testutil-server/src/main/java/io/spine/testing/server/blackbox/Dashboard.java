@@ -71,13 +71,13 @@ final class Dashboard
         String typeUrl = event.getEntity()
                               .getTypeUrl();
         String idAsString = Identifier.toString(event.getEntity().getId());
-        log(event, "Entity state (ID: %s, type: %s) is invalid.", idAsString, typeUrl);
+        log(event, "Entity state (ID: `%s`, type: `%s`) is invalid.", idAsString, typeUrl);
     }
 
     @Subscribe
     void on(CannotDispatchDuplicateCommand event) {
         MessageId command = event.getDuplicateCommand();
-        log(event, "Command %s (ID: %s) should not be dispatched twice.",
+        log(event, "Command `%s` (ID: `%s`) should not be dispatched twice.",
             command.getTypeUrl(),
             command.asCommandId()
                    .getUuid());
@@ -86,7 +86,7 @@ final class Dashboard
     @Subscribe
     void on(CannotDispatchDuplicateEvent event) {
         MessageId duplicateEvent = event.getDuplicateEvent();
-        log(event, "Event %s (ID: %s) should not be dispatched twice.",
+        log(event, "Event `%s` (ID: `%s`) should not be dispatched twice.",
             duplicateEvent.getTypeUrl(),
             duplicateEvent.asEventId()
                           .getValue());
@@ -94,7 +94,7 @@ final class Dashboard
 
     @Subscribe
     void on(HandlerFailedUnexpectedly event) {
-        log(event, "Signal %s could not be handled by %s:%n%s",
+        log(event, "Signal `%s` could not be handled by %s:%n%s%n",
             event.getHandledSignal()
                  .getTypeUrl(),
             event.getEntity()
@@ -105,7 +105,7 @@ final class Dashboard
 
     @Subscribe
     void on(RoutingFailed event) {
-        log(event, "Signal %s could not be routed to %s:%n%s",
+        log(event, "Signal `%s` could not be routed to `%s`:%n%s%n",
             event.getHandledSignal()
                  .getTypeUrl(),
             event.getEntityType()
@@ -118,7 +118,7 @@ final class Dashboard
     void on(AggregateHistoryCorrupted event) {
         MessageId aggregate = event.getEntity();
         String idAsString = Identifier.toString(aggregate.getId());
-        log(event, "History of aggregate %s (ID: %s) could not be loaded:%n%s",
+        log(event, "History of aggregate `%s` (ID: `%s`) could not be loaded:%n%s%n",
             aggregate.getTypeUrl(),
             idAsString,
             event.getError()
