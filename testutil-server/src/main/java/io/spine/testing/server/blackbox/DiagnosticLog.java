@@ -46,23 +46,23 @@ import static java.lang.String.format;
  *
  * <p>Logs all the received diagnostic events with a meaningful message.
  */
-final class Dashboard
+final class DiagnosticLog
         extends AbstractEventSubscriber
         implements Logging {
 
-    private static final Dashboard instance = new Dashboard();
+    private static final DiagnosticLog instance = new DiagnosticLog();
 
     /**
-     * Obtains the only instance of {@code Dashboard}.
+     * Obtains the only instance of {@code DiagnosticLog}.
      */
-    static Dashboard instance() {
+    static DiagnosticLog instance() {
         return instance;
     }
 
     /**
      * Prevents direct instantiation.
      */
-    private Dashboard() {
+    private DiagnosticLog() {
         super();
     }
 

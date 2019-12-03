@@ -52,7 +52,7 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 
 @DisplayName("`Dashboard` should")
-class DashboardTest {
+class DiagnosticLogTest {
 
     private ByteArrayOutputStream output;
     private PrintStream stderr;
@@ -64,7 +64,7 @@ class DashboardTest {
         output = new ByteArrayOutputStream();
         PrintStream testStream = new PrintStream(output, true);
         System.setErr(testStream);
-        Logger.getLogger(Dashboard.class.getName())
+        Logger.getLogger(DiagnosticLog.class.getName())
               .setLevel(Level.OFF);
     }
 
@@ -73,7 +73,7 @@ class DashboardTest {
     void resetStderr() {
         System.err.close();
         System.setErr(stderr);
-        Logger.getLogger(Dashboard.class.getName())
+        Logger.getLogger(DiagnosticLog.class.getName())
               .setLevel(Level.ALL);
     }
 
@@ -81,8 +81,8 @@ class DashboardTest {
     @DisplayName("log `ConstraintViolated` event")
     void acceptConstraintViolated() {
         MessageId entity = entityId();
-        Dashboard.instance()
-                 .on(ConstraintViolated
+        DiagnosticLog.instance()
+                     .on(ConstraintViolated
                              .newBuilder()
                              .setEntity(entity)
                              .vBuild());
@@ -97,8 +97,8 @@ class DashboardTest {
                 .setId(pack(CommandId.generate()))
                 .setTypeUrl(TypeUrl.of(BbCreateProject.class).value())
                 .vBuild();
-        Dashboard.instance()
-                 .on(CannotDispatchDuplicateCommand
+        DiagnosticLog.instance()
+                     .on(CannotDispatchDuplicateCommand
                              .newBuilder()
                              .setEntity(entityId())
                              .setDuplicateCommand(command)
@@ -117,8 +117,8 @@ class DashboardTest {
                                    .build()))
                 .setTypeUrl(TypeUrl.of(BbProjectCreated.class).value())
                 .vBuild();
-        Dashboard.instance()
-                 .on(CannotDispatchDuplicateEvent
+        DiagnosticLog.instance()
+                     .on(CannotDispatchDuplicateEvent
                              .newBuilder()
                              .setEntity(entityId())
                              .setDuplicateEvent(event)
@@ -132,8 +132,8 @@ class DashboardTest {
     void acceptHandlerFailedUnexpectedly() {
         MessageId entity = entityId();
         Error error = causeOf(new IllegalStateException("Test exception. Handler is fine."));
-        Dashboard.instance()
-                 .on(HandlerFailedUnexpectedly
+        DiagnosticLog.instance()
+                     .on(HandlerFailedUnexpectedly
                              .newBuilder()
                              .setEntity(entity)
                              .setError(error)
@@ -145,8 +145,8 @@ class DashboardTest {
     @DisplayName("log `RoutingFailed` event")
     void acceptRoutingFailed() {
         Error error = causeOf(new IllegalStateException("Test exception. Routing is fine."));
-        Dashboard.instance()
-                 .on(RoutingFailed
+        DiagnosticLog.instance()
+                     .on(RoutingFailed
                              .newBuilder()
                              .setError(error)
                              .vBuild());
@@ -159,8 +159,8 @@ class DashboardTest {
         Error error =
                 fromThrowable(new IllegalStateException("Test exception. Aggregates are fine."));
         MessageId entityId = entityId();
-        Dashboard.instance()
-                 .on(AggregateHistoryCorrupted
+        DiagnosticLog.instance()
+                     .on(AggregateHistoryCorrupted
                              .newBuilder()
                              .setEntity(entityId)
                              .setError(error)
