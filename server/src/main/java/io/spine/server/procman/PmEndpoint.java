@@ -83,7 +83,7 @@ abstract class PmEndpoint<I,
 
     private void dispatchingFailed(I id, Error error) {
         repository().lifecycleOf(id)
-                    .onDispatchingFailed(envelope().messageId(), error);
+                    .onDispatchingFailed(envelope(), error);
     }
 
     private void postRejection(Event rejectionEvent) {

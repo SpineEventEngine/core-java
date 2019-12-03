@@ -33,6 +33,6 @@ public interface CommandEndpoint<I> extends MessageEndpoint<I, CommandEnvelope> 
     @Override
     default void onDuplicate(I target, CommandEnvelope envelope) {
         repository().lifecycleOf(target)
-                    .onDuplicateCommand(envelope.messageId());
+                    .onDuplicateCommand(envelope);
     }
 }
