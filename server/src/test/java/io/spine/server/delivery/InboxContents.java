@@ -41,7 +41,7 @@ final class InboxContents {
     static ImmutableMap<ShardIndex, Page<InboxMessage>> get() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
-        InboxStorage storage = delivery.storage();
+        InboxStorage storage = delivery.inboxStorage();
         int shardCount = delivery.shardCount();
         ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
                 ImmutableMap.builder();

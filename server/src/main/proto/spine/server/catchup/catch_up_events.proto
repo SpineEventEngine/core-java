@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package spine.server.catchup;
+
+import "spine/options.proto";
+import "spine/time_options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option (internal_all) = true;
+option (every_is).java_type = "io.spine.server.catchup.CatchUpSignal";
+
+option java_package = "io.spine.server.catchup.event";
+option java_outer_classname = "CatchUpEventsProto";
+option java_multiple_files = true;
+
+import "spine/server/catchup/catch_up.proto";
+
+// The catch-up has been requested.
+message CatchUpRequested {
+
+    CatchUpId id = 1;
+
+    // A request describing the catch-up properties.
+    CatchUp.Request request = 2;
+}
+
+// The catch-up process has been finalized.
+message CatchUpFinalized {
+
+    CatchUpId id = 1;
+}
+
+
+// The catch-up process has been completed.
+message CatchUpCompleted {
+
+    CatchUpId id = 1;
+}

@@ -42,6 +42,7 @@ public final class DeliveryBuilder {
     private static final int DEFAULT_PAGE_SIZE = 500;
 
     private @MonotonicNonNull InboxStorage inboxStorage;
+    private @MonotonicNonNull CatchUpStorage catchUpStorage;
     private @MonotonicNonNull DeliveryStrategy strategy;
     private @MonotonicNonNull ShardedWorkRegistry workRegistry;
     private @MonotonicNonNull Duration idempotenceWindow;
@@ -67,6 +68,21 @@ public final class DeliveryBuilder {
      */
     InboxStorage getInboxStorage() {
         return checkNotNull(inboxStorage);
+    }
+
+    /**
+     * Returns the value of the configured {@code CatchUpStorage} or {@code Optional.empty()} if no
+     * such value was configured.
+     */
+    public Optional<CatchUpStorage> catchUpStorage() {
+        return Optional.ofNullable(catchUpStorage);
+    }
+
+    /**
+     * Returns the non-{@code null} value of the configured {@code CatchUpStorage}.
+     */
+    CatchUpStorage getCatchUpStorage() {
+        return checkNotNull(catchUpStorage);
     }
 
     /**
@@ -216,6 +232,12 @@ public final class DeliveryBuilder {
             this.inboxStorage = ServerEnvironment.instance()
                                                  .storageFactory()
                                                  .createInboxStorage(true);
+        }
+
+        if (this.catchUpStorage == null) {
+            this.catchUpStorage = ServerEnvironment.instance()
+                                                   .storageFactory()
+                                                   .createCatchUpStorage(true);
         }
 
         if (workRegistry == null) {

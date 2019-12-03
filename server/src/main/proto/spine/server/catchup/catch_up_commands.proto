@@ -1,28 +1,19 @@
 syntax = "proto3";
 
-package spine.system.server;
+package spine.server.catchup;
 
 import "spine/options.proto";
 import "spine/time_options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
+option (every_is).java_type = "io.spine.server.catchup.CatchUpSignal";
 
-option java_package = "io.spine.system.server.command";
+option java_package = "io.spine.server.catchup.command";
 option java_outer_classname = "CatchUpCommandsProto";
 option java_multiple_files = true;
 
-import "spine/system/server/catch_up.proto";
-
-// Starts the catch-up process.
-//
-message StartCatchUp {
-
-    CatchUpId id = 1;
-
-    // A request describing the catch-up properties.
-    CatchUp.Request request = 2;
-}
+import "spine/server/catchup/catch_up.proto";
 
 // Tells the ongoing catch-up process to read more events from the event log and send those to
 // the respective target inboxes.
@@ -39,9 +30,3 @@ message FinalizeCatchUp {
     CatchUpId id = 1;
 }
 
-// Tells to complete the catch-up process.
-//
-message CompleteCatchUp {
-
-    CatchUpId id = 1;
-}

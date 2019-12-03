@@ -25,6 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
@@ -100,6 +101,11 @@ public final class SystemAwareStorageFactory implements StorageFactory {
     @Override
     public InboxStorage createInboxStorage(boolean multitenant) {
         return delegate.createInboxStorage(multitenant);
+    }
+
+    @Override
+    public CatchUpStorage createCatchUpStorage(boolean multitenant) {
+        return delegate.createCatchUpStorage(multitenant);
     }
 
     /**

@@ -175,6 +175,11 @@ public final class Delivery implements Logging {
     private final InboxStorage inboxStorage;
 
     /**
+     * The storage of ongoing catch-up process states.
+     */
+    private final CatchUpStorage catchUpStorage;
+
+    /**
      * The monitor of delivery stages.
      */
     private final DeliveryMonitor monitor;
@@ -197,6 +202,7 @@ public final class Delivery implements Logging {
         this.workRegistry = builder.getWorkRegistry();
         this.idempotenceWindow = builder.getIdempotenceWindow();
         this.inboxStorage = builder.getInboxStorage();
+        this.catchUpStorage = builder.getCatchUpStorage();
         this.monitor = builder.getMonitor();
         this.pageSize = builder.getPageSize();
         this.inboxDeliveries = Maps.newConcurrentMap();
@@ -494,8 +500,13 @@ public final class Delivery implements Logging {
     }
 
     @VisibleForTesting
-    InboxStorage storage() {
+    InboxStorage inboxStorage() {
         return inboxStorage;
+    }
+
+    //TODO:2019-12-03:alex.tymchenko: hide this from the public API.
+    public CatchUpStorage catchUpStorage() {
+        return catchUpStorage;
     }
 
     @VisibleForTesting

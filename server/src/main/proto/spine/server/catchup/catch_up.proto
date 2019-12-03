@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package spine.system.server;
+package spine.server.catchup;
 
 import "spine/options.proto";
 import "spine/time_options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.system.server";
+option java_package = "io.spine.server.catchup";
 option java_outer_classname = "CatchUpProto";
 option java_multiple_files = true;
 
@@ -34,6 +34,9 @@ message CatchUp {
         // be applicable.
         //
         google.protobuf.Timestamp since_when = 3 [(required) = true, (when).in = PAST];
+
+        // The type URLs of events to read from the Event Store.
+        repeated string event_type = 4;
     }
 
     Request request = 2 [(required) = true, (validate) = true];
@@ -44,6 +47,15 @@ message CatchUp {
     //TODO:2019-11-28:alex.tymchenko: store more props to tell between the "simultaneous" events.
 
     CatchUpStatus status = 6 [(required) = true];
+
+    // The index of the current catch-up round.
+    //
+    // In each round the batch of the events is read from the Event Store and posted
+    // to the respective `Inbox`es.
+    //
+    // The index of the first round is 0.
+    //
+    int32 current_round = 7;
 }
 
 // An ID of a catch-up process.

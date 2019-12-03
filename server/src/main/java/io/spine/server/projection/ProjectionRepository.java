@@ -24,12 +24,17 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.catchup.CatchUp;
+import io.spine.server.catchup.CatchUpId;
+import io.spine.server.catchup.event.CatchUpRequested;
 import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
@@ -368,6 +373,37 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *         point in the past, since which the catch-up should be performed
      */
     public void catchUp(Set<I> ids, Timestamp since) {
+        CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder();
+        requestBuilder
+                .setProjectionType(entityStateType().value())
+                .setSinceWhen(since);
+        for (I id : ids) {
+            Any packed = Identifier.pack(id);
+            requestBuilder.addTarget(packed);
+        }
+        Set<EventClass> classes = eventClasses();
+        for (EventClass eventClass : classes) {
+            //TODO:2019-11-29:alex.tymchenko: `TypeName` or `TypeUrl`?
+            TypeName name = eventClass.typeName();
+            requestBuilder.addEventType(name.value());
+        }
+        CatchUp.Request request = requestBuilder.vBuild();
+        CatchUpRequested event = CatchUpRequested
+                .newBuilder()
+                .setId(CatchUpId.generate())
+                .setRequest(request)
+                .vBuild();
+        context().systemClient()
+                 .writeSide()
+                 .postEvent(event);
+    }
+
+    public void dispatchCatchingUp(Event event, Set<I> ids) {
+        Inbox<I> inbox = inbox();
+        for (I id : ids) {
+            inbox.send(EventEnvelope.of(event))
+                 .toCatchUp(id);
+        }
     }
 
     @VisibleForTesting

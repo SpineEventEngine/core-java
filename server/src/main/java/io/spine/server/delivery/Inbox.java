@@ -29,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.delivery.InboxLabel.CATCH_UP;
 import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
 import static io.spine.server.delivery.InboxLabel.IMPORT_EVENT;
 import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
@@ -243,6 +244,13 @@ public final class Inbox<I> {
          */
         public void toSubscriber(I entityId) {
             eventPart.store(event, entityId, UPDATE_SUBSCRIBER);
+        }
+
+        /**
+         * Sends to the catch-up handler of the entity with the specified ID.
+         */
+        public void toCatchUp(I entityId) {
+            eventPart.store(event, entityId, CATCH_UP);
         }
     }
 

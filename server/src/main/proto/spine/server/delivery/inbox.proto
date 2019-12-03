@@ -65,6 +65,9 @@ enum InboxLabel {
 
     // Pass an event message to a `@Apply(allowImport = "true")`-annotated event handler.
     IMPORT_EVENT = 5;
+
+    // Pass an event message to the projection in scope of a catch-up process.
+    CATCH_UP = 6;
 }
 
 // A status of the message in the `Inbox`.
@@ -81,6 +84,9 @@ enum InboxMessageStatus {
     // The message is already delivered and can be removed once it's no longer needed
     // for de-duplication.
     DELIVERED = 3;
+
+    // The message is sent as a part of a catch-up process.
+    CATCHING_UP = 4;
 }
 
 // Identifies the message in the `Inbox`.
