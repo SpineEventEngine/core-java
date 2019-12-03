@@ -26,6 +26,7 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.time.InstantConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,7 +37,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.type.given.EventsTestEnv.event;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("EventContext should")
+@DisplayName("`EventContext` should")
 class EventContextTest {
 
     private static final TestActorRequestFactory requestFactory =
@@ -112,6 +113,21 @@ class EventContextTest {
             String id = (String) context.producer();
             assertThat(id)
                  .isEqualTo(msg.getValue());
+        }
+
+        @Test
+        @DisplayName("timestamp")
+        void timestamp() {
+            assertThat(context.timestamp())
+                .isEqualTo(context.getTimestamp());
+        }
+
+        @Test
+        @DisplayName("instant")
+        void instant() {
+            assertThat(context.instant())
+                .isEqualTo(InstantConverter.reversed()
+                                           .convert(context.timestamp()));
         }
     }
 }
