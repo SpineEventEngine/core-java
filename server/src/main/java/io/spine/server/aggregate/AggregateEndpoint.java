@@ -78,7 +78,7 @@ abstract class AggregateEndpoint<I,
         } else if (outcome.hasError()) {
             Error error = outcome.getError();
             repository().lifecycleOf(aggregateId)
-                        .onDispatchingFailed(envelope().messageId(), error);
+                        .onDispatchingFailed(envelope(), error);
         }
     }
 

@@ -431,7 +431,8 @@ class ProjectionRepositoryTest
             List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
             assertThat(events).hasSize(1);
             CannotDispatchDuplicateEvent systemEvent = events.get(0);
-            assertThat(systemEvent.getEvent()).isEqualTo(event.id());
+            assertThat(systemEvent.getDuplicateEvent())
+                    .isEqualTo(event.messageId());
         }
     }
 

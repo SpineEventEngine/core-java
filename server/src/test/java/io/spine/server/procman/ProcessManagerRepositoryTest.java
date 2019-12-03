@@ -87,6 +87,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -322,10 +323,13 @@ class ProcessManagerRepositoryTest
             List<CannotDispatchDuplicateEvent> duplicateEventEvents = monitor.duplicateEventEvents();
             assertThat(duplicateEventEvents).hasSize(1);
             CannotDispatchDuplicateEvent systemEvent = duplicateEventEvents.get(0);
-            assertThat(systemEvent.getEvent()).isEqualTo(event.id());
+            assertThat(systemEvent.getDuplicateEvent())
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(event.messageId());
             PmProjectStarted eventMessage = (PmProjectStarted) event.enclosedMessage();
             assertThat(unpack(systemEvent.getEntity().getId()))
-                    .isEqualTo(eventMessage.getProjectId());
+                      .comparingExpectedFieldsOnly()
+                      .isEqualTo(eventMessage.getProjectId());
         }
 
         @Test
@@ -343,7 +347,8 @@ class ProcessManagerRepositoryTest
                     monitor.duplicateCommandEvents();
             assertThat(duplicateCommandEvents).hasSize(1);
             CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
-            assertThat(event.getCommand()).isEqualTo(command.id());
+            assertThat(event.getDuplicateCommand())
+                    .isEqualTo(command.messageId());
             PmCreateProject commandMessage = (PmCreateProject) command.enclosedMessage();
             assertThat(unpack(event.getEntity().getId()))
                     .isEqualTo(commandMessage.getProjectId());

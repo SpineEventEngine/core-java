@@ -33,6 +33,6 @@ public interface EventEndpoint<I> extends MessageEndpoint<I, EventEnvelope> {
     @Override
     default void onDuplicate(I target, EventEnvelope envelope) {
         repository().lifecycleOf(target)
-                    .onDuplicateEvent(envelope.id());
+                    .onDuplicateEvent(envelope);
     }
 }
