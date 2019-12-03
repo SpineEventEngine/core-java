@@ -57,7 +57,7 @@ final class RejectionDispatchKeys {
                       parameters.length);
         Class<?> secondParameter = parameters[1];
         checkArgument(CommandMessage.class.isAssignableFrom(secondParameter),
-                      "The method `%s` should have the second parameter assignable from CommandMessage, but has `%s`.",
+                      "The method `%s` should have the second parameter assignable from `CommandMessage`, but has `%s`.",
                       methodName,
                       secondParameter);
         @SuppressWarnings("unchecked") // checked above
