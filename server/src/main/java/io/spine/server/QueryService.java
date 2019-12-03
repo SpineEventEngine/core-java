@@ -67,7 +67,7 @@ public final class QueryService
      */
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
-        _debug().log("Incoming query: %s.", lazy(() -> shortDebugString(query)));
+        _debug().log("Incoming query: `%s`.", lazy(() -> shortDebugString(query)));
 
         TypeUrl type = query.targetType();
         BoundedContext context = typeToContextMap.get(type);
