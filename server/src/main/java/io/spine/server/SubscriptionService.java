@@ -67,7 +67,7 @@ public final class SubscriptionService
 
     @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
-        _debug().log("Creating the subscription to a topic: `%s`.", topic);
+        _debug().log("Creating the subscription to the topic: `%s`.", topic);
         try {
             Target target = topic.getTarget();
             BoundedContext context = findContextOf(target)
