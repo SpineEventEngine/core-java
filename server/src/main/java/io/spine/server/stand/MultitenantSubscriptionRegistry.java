@@ -19,12 +19,8 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.SetMultimap;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
-import io.spine.client.Subscriptions;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
@@ -34,13 +30,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 
 /**
  * Registry for subscription management in a multi-tenant context.
@@ -90,7 +81,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         return registrySlice().hasType(type);
     }
 
-    boolean isMultitenant() {
+    private boolean isMultitenant() {
         return multitenant;
     }
 
@@ -100,99 +91,14 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
                     @Override
                     public SubscriptionRegistry apply(@Nullable TenantId tenantId) {
                         checkNotNull(tenantId);
-                        SubscriptionRegistry registryForTenant =
-                                tenantSlices.computeIfAbsent(tenantId, id -> new TenantRegistry());
-                        return registryForTenant;
+                        SubscriptionRegistry slice = tenantSlices.computeIfAbsent(
+                                tenantId,
+                                id -> new TenantSubscriptionRegistry()
+                        );
+                        return slice;
                     }
                 };
         SubscriptionRegistry result = func.execute();
         return result;
-    }
-
-    private static class TenantRegistry implements SubscriptionRegistry {
-
-        private final SetMultimap<TypeUrl, SubscriptionRecord> typeToRecord =
-                synchronizedSetMultimap(HashMultimap.create());
-        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs =
-                new ConcurrentHashMap<>();
-        private final Lock lock = new ReentrantLock();
-
-        @Override
-        public void activate(Subscription subscription, SubscriptionCallback callback) {
-            lockAndRun(() -> {
-                checkState(subscriptionToAttrs.containsKey(subscription),
-                           "Cannot find the subscription in the registry.");
-                SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
-                subscriptionRecord.activate(callback);
-            });
-        }
-
-        @Override
-        public Subscription add(Topic topic) {
-            SubscriptionId subscriptionId = Subscriptions.generateId();
-            Subscription subscription = Subscription
-                    .newBuilder()
-                    .setId(subscriptionId)
-                    .setTopic(topic)
-                    .build();
-            SubscriptionRecord record = SubscriptionRecord.of(subscription);
-            TypeUrl type = record.targetType();
-            lockAndRun(() -> {
-                typeToRecord.put(type, record);
-                subscriptionToAttrs.put(subscription, record);
-            });
-            return subscription;
-        }
-
-        @Override
-        public void remove(Subscription subscription) {
-            lockAndRun(() -> {
-                if (!subscriptionToAttrs.containsKey(subscription)) {
-                    return;
-                }
-                SubscriptionRecord record = subscriptionToAttrs.get(subscription);
-                typeToRecord.get(record.targetType()).remove(record);
-                subscriptionToAttrs.remove(subscription);
-            });
-        }
-
-        @Override
-        public Set<SubscriptionRecord> byType(TypeUrl type) {
-            return lockAndGet(() -> ImmutableSet.copyOf(typeToRecord.get(type)));
-        }
-
-        @Override
-        public boolean hasType(TypeUrl type) {
-            boolean result = typeToRecord.containsKey(type);
-            return result;
-        }
-
-        @Override
-        public boolean containsId(SubscriptionId subscriptionId) {
-            for (Subscription existingItem : subscriptionToAttrs.keySet()) {
-                if (existingItem.getId().equals(subscriptionId)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private void lockAndRun(Runnable operation) {
-            lock.lock();
-            try {
-                operation.run();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        private <T> T lockAndGet(Supplier<T> operation) {
-            lock.lock();
-            try {
-                return operation.get();
-            } finally {
-                lock.unlock();
-            }
-        }
     }
 }
