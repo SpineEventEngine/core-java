@@ -22,6 +22,7 @@ package io.spine.client;
 
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.client.SubscriptionUpdate.UpdateCase;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.unsupported;
@@ -51,12 +52,13 @@ final class SubscriptionObserver<M extends Message>
     @SuppressWarnings("unchecked") // Logically correct.
     @Override
     public void onNext(SubscriptionUpdate value) {
-        SubscriptionUpdate.UpdateCase updateCase = value.getUpdateCase();
+        UpdateCase updateCase = value.getUpdateCase();
         switch (updateCase) {
             case ENTITY_UPDATES:
                 value.getEntityUpdates()
                      .getUpdateList()
                      .stream()
+                     .filter(u -> u.getKindCase() == EntityStateUpdate.KindCase.STATE)
                      .map(EntityStateUpdate::getState)
                      .map(any -> (M) unpack(any))
                      .forEach(delegate::onNext);
