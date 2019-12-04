@@ -151,7 +151,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *         IDs of applied messages, etc.
      */
     @VisibleForTesting
-    void post(Entity entity, EntityLifecycle lifecycle) {
+    void post(Entity<?, ?> entity, EntityLifecycle lifecycle) {
         Any id = Identifier.pack(entity.id());
         Any state = AnyPacker.pack(entity.state());
         EntityRecord record = EntityRecord
