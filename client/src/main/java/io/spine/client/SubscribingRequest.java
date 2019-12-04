@@ -57,6 +57,9 @@ SubscribingRequest<M extends Message,
 
     abstract MessageConsumer<M, C> toMessageConsumer(Consumer<M> consumer);
 
+    /**
+     * Subscribes the passed consumer to receive messages of the subscribed type.
+     */
     @CanIgnoreReturnValue
     public B observe(Consumer<M> consumer) {
         consumers().add(toMessageConsumer(consumer));
