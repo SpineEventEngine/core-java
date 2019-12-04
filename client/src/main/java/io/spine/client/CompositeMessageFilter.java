@@ -35,7 +35,16 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 interface CompositeMessageFilter<M extends Message> extends MessageFilter<M> {
 
+    /**
+     * Obtains message filters included into this composite message filter.
+     */
     List<MessageFilter<M>> filters();
+
+    /**
+     * Obtains the operator which will be used for combining enclosed message filters.
+     *
+     * @see CompositeOperator
+     */
     CompositeOperator operator();
 
     /**
