@@ -24,7 +24,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 
 /**
- * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() server} level
+ * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() severe} level
  * of the passed logger.
  *
  * @param <M>
