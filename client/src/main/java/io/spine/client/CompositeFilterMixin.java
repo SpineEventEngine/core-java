@@ -20,7 +20,6 @@
 
 package io.spine.client;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.client.CompositeFilter.CompositeOperator;
@@ -30,17 +29,18 @@ import java.util.List;
 /**
  * Augments {@link CompositeFilter} with useful methods.
  */
-@SuppressWarnings("override") // to handle the absence of `@Override` in the generated code.
 @GeneratedMixin
-interface CompositeFilterMixin extends Message, CompositeMessageFilter<Message> {
-
-    List<Filter> getFilterList();
-    CompositeOperator getOperator();
+interface CompositeFilterMixin extends CompositeFilterOrBuilder, CompositeMessageFilter<Message> {
 
     @Override
     default List<MessageFilter<Message>> filters() {
-        List<Filter> list = getFilterList();
-        return ImmutableList.copyOf(list);
+        List<Filter> filterList = getFilterList();
+        @SuppressWarnings("unchecked") /* The cast below is safe (see
+         https://docs.oracle.com/javase/tutorial/java/generics/subtyping.html for details).
+         `Filter` does implement `MessageFilter<Message>` via `FilterMixin` */
+        List<MessageFilter<Message>> list =
+                (List<MessageFilter<Message>>) (List<?>) filterList;
+        return list;
     }
 
     @Override
