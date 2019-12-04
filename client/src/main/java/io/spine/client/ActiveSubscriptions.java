@@ -53,7 +53,7 @@ final class ActiveSubscriptions {
         subscriptions.remove(checkNotNull(s));
     }
 
-    /** Cancels all the remembered subscription. */
+    /** Cancels all the remembered subscriptions. */
     void cancelAll(Client client) {
         // Use the loop approach to avoid concurrent modification because the `Client` modifies
         // active subscriptions when canceling.
