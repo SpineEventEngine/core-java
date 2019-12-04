@@ -757,7 +757,8 @@ public class AggregateTest {
                 monitor.duplicateCommandEvents();
         assertThat(duplicateCommandEvents).hasSize(1);
         CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
-        assertThat(event.getCommand()).isEqualTo(envelope.id());
+        assertThat(event.getDuplicateCommand())
+                .isEqualTo(envelope.messageId());
     }
 
     @Test
@@ -775,7 +776,8 @@ public class AggregateTest {
         List<CannotDispatchDuplicateCommand> events = monitor.duplicateCommandEvents();
         assertThat(events).hasSize(1);
         CannotDispatchDuplicateCommand systemEvent = events.get(0);
-        assertThat(systemEvent.getCommand()).isEqualTo(cmd.id());
+        assertThat(systemEvent.getDuplicateCommand())
+                .isEqualTo(cmd.messageId());
     }
 
     @Test
@@ -797,7 +799,8 @@ public class AggregateTest {
         List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
         assertThat(events).hasSize(1);
         CannotDispatchDuplicateEvent systemEvent = events.get(0);
-        assertThat(systemEvent.getEvent()).isEqualTo(envelope.id());
+        assertThat(systemEvent.getDuplicateEvent())
+                .isEqualTo(envelope.messageId());
     }
 
     private static void dispatch(TenantId tenant,

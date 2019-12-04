@@ -183,6 +183,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         this.unsupportedCommandGuard = new UnsupportedCommandGuard(name);
         this.repositories = newHashMap();
         this.context.registerEventDispatcher(this);
+        this.context.registerEventDispatcher(DiagnosticLog.instance());
     }
 
     /**

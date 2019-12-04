@@ -68,6 +68,7 @@ import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
@@ -307,6 +308,7 @@ class ProcessManagerTest {
         }
     }
 
+    @MuteLogging
     @Nested
     @DisplayName("rollback state on")
     class RollbackOn {

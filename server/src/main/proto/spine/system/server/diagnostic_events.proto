@@ -42,7 +42,13 @@ message CannotDispatchDuplicateCommand {
 
     core.MessageId entity = 1;
 
-    core.CommandId command = 2;
+    // ID of the duplicate command.
+    //
+    // Deprecated: use `duplicate_command` instead.
+    //
+    core.CommandId command = 2 [deprecated = true];
+
+    core.MessageId duplicate_command = 3;
 }
 
 // An event emitted whenever an event is dispatched to an entity for the second time.
@@ -52,7 +58,13 @@ message CannotDispatchDuplicateEvent {
     // The violated entity info.
     core.MessageId entity = 1;
 
-    core.EventId event = 2;
+    // ID of the duplicate event.
+    //
+    // Deprecated: use `duplicate_event` instead.
+    //
+    core.EventId event = 2 [deprecated = true];
+
+    core.MessageId duplicate_event = 3;
 }
 
 // An event emitted whenever a handler method fails with a runtime exception.
