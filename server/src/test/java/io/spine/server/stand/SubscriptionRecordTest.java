@@ -33,7 +33,6 @@ import io.spine.client.Target;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.stand.given.SubscriptionRecordTestEnv;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -51,6 +50,8 @@ import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.client.Targets.composeTarget;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.OTHER_TYPE;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.projectCreatedEnvelope;
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.projectId;
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.projectWithName;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.stateChangedEnvelope;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.subscription;
 import static java.util.Collections.singleton;
@@ -84,14 +85,14 @@ class SubscriptionRecordTest {
         @Test
         @DisplayName("in case of entity subscription")
         void entitySubscription() {
-            ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
+            ProjectId targetId = projectId(TARGET_ID);
             Project state = Project.getDefaultInstance();
             SubscriptionRecord record = SubscriptionRecord.of(subscription(targetId));
 
             EventEnvelope envelope = stateChangedEnvelope(targetId, state, state);
             assertThat(record.detectUpdate(envelope)).isPresent();
 
-            ProjectId otherId = SubscriptionRecordTestEnv.projectId("some-other-ID");
+            ProjectId otherId = projectId("some-other-ID");
             EventEnvelope envelope2 = stateChangedEnvelope(otherId, state, state);
             assertThat(record.detectUpdate(envelope2)).isEmpty();
         }
@@ -127,17 +128,17 @@ class SubscriptionRecordTest {
         @DisplayName("in case of entity subscription")
         void entitySubscription() {
             String targetName = "super-project";
-            ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
+            ProjectId targetId = projectId(TARGET_ID);
             SubscriptionRecord record = projectRecord(targetId,
                                                       Filters.eq("name", targetName));
-            Project matching = SubscriptionRecordTestEnv.projectWithName(targetName);
+            Project matching = projectWithName(targetName);
             EventEnvelope envelope = stateChangedEnvelope(targetId, EMPTY_PRJ, matching);
             Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
             assertThat(maybeUpdate).isPresent();
             EntityStateUpdate entityUpdate = firstEntityUpdate(maybeUpdate);
             assertEquals(matching, AnyPacker.unpack(entityUpdate.getState()));
 
-            Project nonMatching = SubscriptionRecordTestEnv.projectWithName("some-other-name");
+            Project nonMatching = projectWithName("some-other-name");
             EventEnvelope envelope2 = stateChangedEnvelope(targetId, EMPTY_PRJ, nonMatching);
             assertThat(record.detectUpdate(envelope2)).isEmpty();
         }
@@ -192,14 +193,14 @@ class SubscriptionRecordTest {
     @Test
     @DisplayName("detect that the entity state stopped matching the subscription criteria")
     void tellNoLongerMatching() {
-        ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
+        ProjectId targetId = projectId(TARGET_ID);
         String targetName = "previously-matching-project";
 
         SubscriptionRecord record = projectRecord(targetId,
                                                   Filters.eq("name", targetName));
 
-        Project matching = SubscriptionRecordTestEnv.projectWithName(targetName);
-        Project nonMatching = SubscriptionRecordTestEnv.projectWithName("not-matching-anymore");
+        Project matching = projectWithName(targetName);
+        Project nonMatching = projectWithName("not-matching-anymore");
 
         EventEnvelope envelope = stateChangedEnvelope(targetId, matching, nonMatching);
         Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
