@@ -21,7 +21,10 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
@@ -31,6 +34,7 @@ import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -40,10 +44,13 @@ import static io.spine.client.Filters.eq;
 @DisplayName("`EventSubscriptionRequest` should")
 class EventSubscriptionRequestTest extends AbstractClientTest {
 
-    /** Registers which event consumers were called. */
-    private final ConsumerCallCounter counter = new ConsumerCallCounter();
     private CommandRequest commandRequest;
     private UserId userId;
+
+    /** Registers which event consumers were called. */
+    private final ConsumerCallCounter counter = new ConsumerCallCounter();
+    private EventMessage rememberedMessage;
+    private EventContext rememberedContext;
 
     @Override
     protected ImmutableList<BoundedContextBuilder> contexts() {
@@ -53,6 +60,7 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
     @BeforeEach
     void createCommandRequest() {
         counter.clear();
+        rememberedContext = EventContext.getDefaultInstance();
         userId = GivenUserId.generated();
         CommandMessage cmd = LogInUser
                 .newBuilder()
@@ -71,12 +79,8 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
     @Test
     @DisplayName("allow to receive event messages")
     void observeEventMessage() {
-        UserId guestUser = client().asGuest()
-                              .user();
         client().asGuest()
                 .subscribeToEvent(UserLoggedIn.class)
-                .where(all(eq("user", userId),
-                           eq("context.past_message.actor_context.actor", guestUser)))
                 .observe(counter::add)
                 .post();
         commandRequest.post();
@@ -85,16 +89,49 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
             .isTrue();
     }
 
-    @Test
-    @DisplayName("allow to receive event messages and contexts")
-    void observeEventMessageAndContext() {
-        client().asGuest()
-                .subscribeToEvent(UserLoggedIn.class)
-                .observe((e, c) -> counter.add(e))
-                .post();
-        commandRequest.post();
+    @Nested
+    @DisplayName("allow to receive event messages and contexts, filtering by")
+    class Filtering {
 
-        assertThat(counter.contains(UserLoggedIn.class))
-                .isTrue();
+        private UserId guestUser;
+
+        @BeforeEach
+        void subscribeWithFiltering() {
+            guestUser = client().asGuest()
+                                .user();
+            client().asGuest()
+                    .subscribeToEvent(UserLoggedIn.class)
+                    .where(all(eq("user", userId),
+                               eq("context.past_message.actor_context.actor", guestUser)))
+                    .observe((e, c) -> {
+                        rememberedMessage = e;
+                        rememberedContext = c;
+                    })
+                    .post();
+            commandRequest.post();
+        }
+
+        @Test
+        @DisplayName("event message field")
+        void byMessageField() {
+            assertThat(rememberedMessage)
+                    .isInstanceOf(UserLoggedIn.class);
+            UserLoggedIn expected = UserLoggedIn
+                    .newBuilder()
+                    .setUser(userId)
+                    .build();
+            ProtoTruth.assertThat(rememberedMessage)
+                      .comparingExpectedFieldsOnly()
+                      .isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("context fields")
+        void observeEventMessageAndContext() {
+            assertThat(rememberedContext.getPastMessage()
+                                        .getActorContext()
+                                        .getActor())
+                    .isEqualTo(guestUser);
+        }
     }
 }
