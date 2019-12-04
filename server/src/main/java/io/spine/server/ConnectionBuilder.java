@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -38,18 +37,20 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public abstract class ConnectionBuilder {
 
-    private @MonotonicNonNull Integer port;
-    private @MonotonicNonNull String serverName;
+    private final @Nullable Integer port;
+    private final @Nullable String serverName;
 
     ConnectionBuilder(@Nullable Integer port, @Nullable String serverName) {
         if (port != null) {
             checkArgument(serverName == null,
                           "`serverName` must be `null` if `port` is defined.");
             this.port = port;
+            this.serverName = null;
         } else {
             checkArgument(serverName != null,
                           "Either `port` or `serverName` must be defined.");
             this.serverName = serverName;
+            this.port = null;
         }
     }
 
