@@ -143,7 +143,7 @@ public final class SubscriptionService
     }
 
     private Optional<BoundedContext> findContextOf(Target target) {
-        TypeUrl type = TypeUrl.parse(target.getType());
+        TypeUrl type = target.type();
         BoundedContext selected = typeToContextMap.get(type);
         Optional<BoundedContext> result = Optional.ofNullable(selected);
         return result;
