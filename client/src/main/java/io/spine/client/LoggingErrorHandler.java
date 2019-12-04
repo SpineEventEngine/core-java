@@ -41,7 +41,7 @@ final class LoggingErrorHandler<M extends Message>
     @Override
     public void accept(Throwable throwable) {
         logger().atSevere()
-              .withCause(throwable)
-              .log(messageFormat(), type());
+                .withCause(throwable)
+                .log(messageFormat(), type());
     }
 }
