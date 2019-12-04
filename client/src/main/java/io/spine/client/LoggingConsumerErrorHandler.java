@@ -55,7 +55,7 @@ final class LoggingConsumerErrorHandler<M extends Message>
     public void accept(MessageConsumer<M, ?> consumer, Throwable throwable) {
         Object consumerToReport = toRealConsumer(consumer);
         logger().atSevere()
-              .withCause(throwable)
-              .log(messageFormat(), consumerToReport, type());
+                .withCause(throwable)
+                .log(messageFormat(), consumerToReport, type());
     }
 }
