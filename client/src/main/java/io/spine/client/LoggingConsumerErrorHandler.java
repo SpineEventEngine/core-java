@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import static io.spine.client.DelegatingConsumer.toRealConsumer;
 
 /**
- * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() server} level
+ * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() severe} level
  * of the passed logger.
  *
  * @param <M>

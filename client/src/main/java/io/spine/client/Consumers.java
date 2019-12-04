@@ -49,7 +49,7 @@ import static com.google.common.base.Preconditions.checkState;
  *      supply a streaming {@link Builder#onStreamingError(ErrorHandler) ErrorHandler}.
  *      If no handler is configured, default implementation will log the error.
  *
- *     <li><strong>Consuming errors</strong> occur when one of a consumer throws. Such an error
+ *     <li><strong>Consuming errors</strong> occur when one of the consumers throws. Such an error
  *     does not prevent delivery of a message to other consumers. To handle such an error, please
  *     supply a {@link Builder#onConsumingError(ConsumerErrorHandler) ConsumingErrorHandler}.
  *     If no handler is configured, default implementation will log the error.
