@@ -27,5 +27,6 @@ import java.util.function.Predicate;
 /**
  * Tells whether or not a message satisfies the specified criteria.
  */
+@FunctionalInterface
 interface MessageFilter<M extends Message> extends Predicate<M> {
 }
