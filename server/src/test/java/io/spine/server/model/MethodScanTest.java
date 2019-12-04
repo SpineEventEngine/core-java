@@ -23,6 +23,7 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableSetMultimap;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.event.model.SubscriberSignature;
+import io.spine.server.model.given.map.ARejectionSubscriber;
 import io.spine.server.model.given.map.FilteredSubscription;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.model.MethodScan.findMethodsBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -52,5 +54,13 @@ class MethodScanTest {
                 findMethodsBy(FilteredSubscription.class, new SubscriberSignature());
         map.keySet()
            .forEach(key -> assertEquals(key.withoutFilter(), key));
+    }
+
+    @Test
+    @DisplayName("allow multiple subscriptions to the same rejection with different causes")
+    void multipleRejectionSubscriptions() {
+        ImmutableSetMultimap<DispatchKey, SubscriberMethod> map =
+                findMethodsBy(ARejectionSubscriber.class, new SubscriberSignature());
+        assertThat(map.keys()).hasSize(2);
     }
 }

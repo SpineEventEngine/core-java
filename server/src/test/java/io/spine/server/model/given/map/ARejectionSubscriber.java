@@ -18,21 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery;
+package io.spine.server.model.given.map;
 
-import io.spine.server.type.EventEnvelope;
+import io.spine.core.Subscribe;
+import io.spine.model.contexts.projects.command.SigCreateProject;
+import io.spine.model.contexts.projects.command.SigStartProject;
+import io.spine.model.contexts.projects.rejection.ProjectRejections;
+import io.spine.server.event.AbstractEventSubscriber;
 
-/**
- * An endpoint which accepts events.
- *
- * @param <I>
- *         the type of target identifier
- */
-public interface EventEndpoint<I> extends MessageEndpoint<I, EventEnvelope> {
+public class ARejectionSubscriber extends AbstractEventSubscriber {
 
-    @Override
-    default void onDuplicate(I target, EventEnvelope envelope) {
-        repository().lifecycleOf(target)
-                    .onDuplicateEvent(envelope);
+    @Subscribe
+    void handle2(ProjectRejections.SigCannotCreateProject rejection, SigCreateProject cmd) {
+        // do nothing.
+    }
+
+    @Subscribe
+    void handle(ProjectRejections.SigCannotCreateProject rejection, SigStartProject cmd) {
+        // do nothing.
     }
 }

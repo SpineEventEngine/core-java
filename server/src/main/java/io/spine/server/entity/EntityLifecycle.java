@@ -44,6 +44,7 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.AggregateHistoryCorrupted;
 import io.spine.system.server.CannotDispatchDuplicateCommand;
 import io.spine.system.server.CannotDispatchDuplicateEvent;
@@ -353,38 +354,42 @@ public class EntityLifecycle {
      * <p>Depending on the error type and code, may emit {@link HandlerFailedUnexpectedly},
      * {@link CannotDispatchDuplicateEvent}, or {@link CannotDispatchDuplicateCommand}.
      *
-     * @param dispatchedSignal
-     *         the ID of the dispatched signal
+     * @param signal
+     *         the dispatched signal
      * @param error
      *         the dispatching error
      */
-    public final void onDispatchingFailed(MessageId dispatchedSignal, Error error) {
-        checkNotNull(dispatchedSignal);
+    public final void onDispatchingFailed(SignalEnvelope<?, ?, ?> signal, Error error) {
+        checkNotNull(signal);
         checkNotNull(error);
-        boolean duplicate = postIfDuplicate(dispatchedSignal, error);
+        boolean duplicate = postIfDuplicate(signal, error);
         if (!duplicate) {
-            postHandlerFailed(dispatchedSignal, error);
+            postHandlerFailed(signal.messageId(), error);
         }
     }
 
-    public void onDuplicateEvent(EventId eventId) {
-        checkNotNull(eventId);
-        CannotDispatchDuplicateEvent event = CannotDispatchDuplicateEvent
+    public void onDuplicateEvent(EventEnvelope event) {
+        checkNotNull(event);
+        @SuppressWarnings("deprecation") // Set the deprecated field for compatibility.
+        CannotDispatchDuplicateEvent systemEvent = CannotDispatchDuplicateEvent
                 .newBuilder()
                 .setEntity(entityId)
-                .setEvent(eventId)
+                .setEvent(event.id())
+                .setDuplicateEvent(event.messageId())
                 .vBuild();
-        postEvent(event);
+        postEvent(systemEvent);
     }
 
-    public void onDuplicateCommand(CommandId commandId) {
-        checkNotNull(commandId);
-        CannotDispatchDuplicateCommand event = CannotDispatchDuplicateCommand
+    public void onDuplicateCommand(CommandEnvelope command) {
+        checkNotNull(command);
+        @SuppressWarnings("deprecation") // Set the deprecated field for compatibility.
+        CannotDispatchDuplicateCommand systemEvent = CannotDispatchDuplicateCommand
                 .newBuilder()
                 .setEntity(entityId)
-                .setCommand(commandId)
+                .setCommand(command.id())
+                .setDuplicateCommand(command.messageId())
                 .vBuild();
-        postEvent(event);
+        postEvent(systemEvent);
     }
 
     public void onCorruptedState(BatchDispatchOutcome outcome) {
@@ -522,31 +527,33 @@ public class EntityLifecycle {
         }
     }
 
-    private boolean postIfDuplicate(MessageId handledSignal, Error error) {
+    private boolean postIfDuplicate(SignalEnvelope<?, ?, ?> handledSignal, Error error) {
         return postIfDuplicateCommand(handledSignal, error)
             || postIfDuplicateEvent(handledSignal, error);
     }
 
-    private boolean postIfDuplicateCommand(MessageId handledSignal, Error error) {
+    private boolean postIfDuplicateCommand(SignalEnvelope<?, ?, ?> handledSignal, Error error) {
         String errorType = error.getType();
         int errorCode = error.getCode();
         boolean duplicateCommand =
                 errorType.equals(CommandValidationError.class.getSimpleName())
                         && errorCode == DUPLICATE_COMMAND_VALUE;
         if (duplicateCommand) {
-            onDuplicateCommand(handledSignal.asCommandId());
+            CommandEnvelope asCommand = (CommandEnvelope) handledSignal;
+            onDuplicateCommand(asCommand);
         }
         return duplicateCommand;
     }
 
-    private boolean postIfDuplicateEvent(MessageId handledSignal, Error error) {
+    private boolean postIfDuplicateEvent(SignalEnvelope<?, ?, ?> handledSignal, Error error) {
         String errorType = error.getType();
         int errorCode = error.getCode();
         boolean duplicateEvent =
                 errorType.equals(EventValidationError.class.getSimpleName())
                         && errorCode == DUPLICATE_EVENT_VALUE;
         if (duplicateEvent) {
-            onDuplicateEvent(handledSignal.asEventId());
+            EventEnvelope asEvent = (EventEnvelope) handledSignal;
+            onDuplicateEvent(asEvent);
         }
         return duplicateEvent;
     }
