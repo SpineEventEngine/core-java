@@ -38,7 +38,7 @@ public interface ConsumerErrorHandler<M extends Message>
 
     /**
      * Obtains the handler which logs the fact of the error using
-     * the {@linkplain FluentLogger#atSevere() server} level of the passed logger.
+     * the {@linkplain FluentLogger#atSevere() severe} level of the passed logger.
      *
      * @param logger
      *         the instance of the logger to use for reporting the error
