@@ -29,9 +29,9 @@ import java.util.function.BiConsumer;
  * Functional interface for consumers of messages.
  *
  * @param <M>
- *     the type of the messages consumed
+ *         the type of the messages consumed
  * @param <C>
- *     the type of the context of messages
+ *         the type of the context of messages
  */
 @FunctionalInterface
 interface MessageConsumer<M extends Message, C extends MessageContext>
