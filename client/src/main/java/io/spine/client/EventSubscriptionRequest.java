@@ -28,6 +28,32 @@ import io.spine.core.EventContext;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Allows to subscribe to events using filtering conditions.
+ *
+ * <p>Similarly to subscriptions to entity states, event subscriptions may use filtering by
+ * values of the proto types of subscribed messages:
+ * <pre>{@code
+ * clientRequest.subscribeToEvent(MyEventMessage.class)
+ *              .where(eq("my_proto_field"), fieldValue)
+ *              .observe((event, context) -> {...})
+ *              .post();
+ * }</pre>
+ *
+ * <p>In addition to regular filtering conditions, event subscription requests may also reference
+ * fields of {@code "spine.core.EventContext"} using {@code "context."} notation. For example,
+ * in order to filter events originate from commands of the given user, please use the following
+ * code:
+ * <pre>{@code
+ * clientRequest.subscribeToEvent(MyEventMessage.class)
+ *              .where(eq("context.past_message.actor_context.actor"), userId)
+ *              .observe((event, context) -> {...})
+ *              .post();
+ * }</pre>
+ *
+ * @param <E>
+ *         the type of the event messages
+ */
 public final class EventSubscriptionRequest<E extends EventMessage>
         extends SubscribingRequest<E, EventContext, Event, EventSubscriptionRequest<E>> {
 
