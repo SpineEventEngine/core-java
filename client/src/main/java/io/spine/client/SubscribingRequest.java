@@ -104,15 +104,6 @@ SubscribingRequest<M extends Message,
         return subscribe(topic, observer);
     }
 
-    /**
-     * Subscribes to receive all messages of the specified type.
-     */
-    public Subscription all() {
-        Topic topic = factory().topic().allOf(messageType());
-        StreamObserver<W> observer = createObserver();
-        return subscribe(topic, observer);
-    }
-
     private StreamObserver<W> createObserver() {
         return consumers().build().toObserver();
     }

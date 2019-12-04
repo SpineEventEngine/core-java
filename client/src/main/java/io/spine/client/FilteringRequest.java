@@ -85,13 +85,6 @@ FilteringRequest<M extends Message,
     }
 
     /**
-     * Obtains the request factory.
-     */
-    final ActorRequestFactory factory() {
-        return factory;
-    }
-
-    /**
      * Obtains the builder for the request.
      */
     final A builder() {
