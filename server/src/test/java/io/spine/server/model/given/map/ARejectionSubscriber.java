@@ -18,22 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package io.spine.server.model.given.map;
 
-final def spineVersion = '1.2.8'
+import io.spine.core.Subscribe;
+import io.spine.model.contexts.projects.command.SigCreateProject;
+import io.spine.model.contexts.projects.command.SigStartProject;
+import io.spine.model.contexts.projects.rejection.ProjectRejections;
+import io.spine.server.event.AbstractEventSubscriber;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
+public class ARejectionSubscriber extends AbstractEventSubscriber {
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.2.3'
+    @Subscribe
+    void handle2(ProjectRejections.SigCannotCreateProject rejection, SigCreateProject cmd) {
+        // do nothing.
+    }
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.2.1'
+    @Subscribe
+    void handle(ProjectRejections.SigCannotCreateProject rejection, SigStartProject cmd) {
+        // do nothing.
+    }
 }

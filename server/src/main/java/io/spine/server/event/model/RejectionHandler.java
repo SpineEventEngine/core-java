@@ -21,47 +21,41 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.server.event.EventSubscriber;
-import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.DispatchKey;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.type.EmptyClass;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-
-import java.lang.reflect.Method;
+import io.spine.type.MessageClass;
 
 /**
- * A wrapper for an event subscriber method.
+ * A handler method that may handle rejections.
  */
 @Immutable
-public final class EventSubscriberMethod extends SubscriberMethod
-        implements RejectionHandler<EventSubscriber, EmptyClass> {
+interface RejectionHandler<T, R extends MessageClass<?>>
+        extends HandlerMethod<T, EventClass, EventEnvelope, R> {
 
-    /** Creates a new instance. */
-    EventSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec);
+    /**
+     * Obtains the specification of parameters for this method.
+     */
+    EventAcceptingMethodParams parameterSpec();
+
+    /** Tells whether the handler method is for a rejection. **/
+    default boolean handlesRejection() {
+        return parameterSpec().acceptsCommand();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>In case this method is declared to handle a rejection, a rejection-specific
+     * dispatch key is created.
+     */
     @Override
-    public EventAcceptingMethodParams parameterSpec() {
-        return (EventAcceptingMethodParams) super.parameterSpec();
-    }
-
-    @Override
-    public DispatchKey key() {
-        DispatchKey dispatchKey = RejectionHandler.super.key();
-        return applyFilter(dispatchKey);
-    }
-
-    @Override
-    public ArgumentFilter createFilter() {
-        ArgumentFilter result = ArgumentFilter.createFilter(rawMethod());
-        return result;
-    }
-
-    @Override
-    protected void checkAttributesMatch(EventEnvelope event) throws IllegalArgumentException {
-        super.checkAttributesMatch(event);
-        ensureExternalMatch(event.isExternal());
+    default DispatchKey key() {
+        if (handlesRejection()) {
+            DispatchKey dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
+            return dispatchKey;
+        }
+        return HandlerMethod.super.key();
     }
 }

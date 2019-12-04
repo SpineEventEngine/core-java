@@ -139,6 +139,9 @@ public interface HandlerMethod<T,
         }
     }
 
+    /**
+     * Creates a handler method dispatch key out of the {@linkplain #messageClass() message class}.
+     */
     default DispatchKey key() {
         Class<? extends Message> rawCls = messageClass().value();
         return new DispatchKey(rawCls, null, null);
