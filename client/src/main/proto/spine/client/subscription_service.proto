@@ -31,31 +31,49 @@ option java_outer_classname = "SubscriptionServiceProto";
 import "spine/client/subscription.proto";
 import "spine/core/response.proto";
 
-// A service for subscribing to the read-side changes by clients.
+// A service for subscribing to receive updates by a specified topic.
+//
+// The subscription topic define a type in updates of which the client code is interested in, and
+// filtering conditions (e.g. by values of fields or identity).
+//
+// Creating a subscriptions consists of two steps:
+//  * Step 1: creating `Subscription` instance. This steps verifies that type specified in
+//    the `Topic` is available at the server, and prepares backend structures for delivering
+//    updates. Subscription is created by the `Subscribe(Topic)` call.
+//    together with the contexts of the events.
+//
+//  * Step 2: activating the subscription. This step turns the subscription on.
+//    Activation is performed by the `Activate(Subscription)` call.
+//
+// The client will receive updates until the subscription is cancelled via `Cancel(Subscription)`.
+//
 service SubscriptionService {
 
     // Creates the subscription to the particular read-side updates.
     //
     // Topic defines the target of subscription and other attributes (like field masks).
     //
-    // NOTE: this method serves for Topic creation; to start listening for updates
-    // use #Activate(Subscription).
-    rpc Subscribe (Topic) returns (Subscription);
-
-
-    // Activates the subscription to the particular read-side updates.
+    // NOTE: this method only creates a `Subscription` for the passed `Topic`.
+    // To start listening for updates please call `Activate(Subscription)`.
     //
-    // The client will start receiving the subscription updates upon new topic target changes in
-    // the read-side.
+    rpc Subscribe(Topic) returns (Subscription);
+
+    // Activates the subscription.
     //
-    // Cancelled subscriptions cannot be activated.
+    // The client will start receiving the updates when 1) an instance of the type specified
+    // in the topic changes and 2) filtering conditions are met. See `spine.client.Target`.
+    //
+    // Cancelled subscriptions cannot be activated. Passing a cancelled subscription will result
+    // in run-time error.
+    //
     rpc Activate(Subscription) returns (stream SubscriptionUpdate);
-
 
     // Cancels the given subscription.
     //
-    // Clients will stop receiving the SubscriptionUpdate after this method is called.
+    // Clients will stop receiving the `SubscriptionUpdate` after this method is called.
     //
-    // The subscription is destroyed as a result of invocation.
-    rpc Cancel (Subscription) returns (core.Response);
+    // The subscription is destroyed as the result of this call. To restore the subscription
+    // please call `Subscribe(Topic)` and then `Activate(Subscription)` again.
+    //
+    rpc Cancel(Subscription) returns (core.Response);
 }

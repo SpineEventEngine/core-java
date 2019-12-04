@@ -23,12 +23,15 @@ package io.spine.client;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.core.Version;
+import io.spine.core.Event;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -260,5 +263,17 @@ public final class Filters {
         boolean result = (Number.class.isAssignableFrom(wrapperClass)
                 && Comparable.class.isAssignableFrom(wrapperClass));
         return result;
+    }
+
+    /**
+     * Creates a filter of events which can apply conditions from the passed
+     * {@code CompositeFilter} to both event message and its context.
+     *
+     * <p>Please use the {@code "context."} prefix for referencing a field of the event context.
+     */
+    @Internal
+    public static Predicate<Event> toEventFilter(CompositeFilter filterData) {
+        checkNotNull(filterData);
+        return new CompositeEventFilter(filterData);
     }
 }

@@ -20,9 +20,11 @@
 
 package io.spine.server.tenant;
 
-import io.spine.client.Queries;
 import io.spine.client.Query;
+import io.spine.client.QueryFactory;
 import io.spine.client.QueryId;
+import io.spine.core.Event;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -65,11 +67,9 @@ class QueryOperationTest {
     @Test
     @DisplayName("return query ID")
     void returnQueryId() {
-        QueryId id = Queries.generateId();
-        Query query = Query.newBuilder()
-                           .setId(id)
-                           .build();
-
+        QueryFactory factory = new TestActorRequestFactory(getClass()).query();
+        Query query = factory.all(Event.class);
+        QueryId id = query.getId();
         QueryOperation op = new QueryOperation(query) {
             @Override
             public void run() {

@@ -42,32 +42,28 @@ import static java.util.Collections.singleton;
  * <p>The {@link Target} matching the builder configuration is created with {@link #buildTarget()},
  * while the {@link FieldMask} is composed with {@link #composeMask()}.
  *
- * <p>The public API of this class is inspired by SQL syntax.
- * <pre>
- *     {@code
+ * <p>The public API of this class is inspired by SQL syntax:
+ * <pre>{@code
  *     select(Customer.class) // returning <AbstractTargetBuilder> descendant instance
- *         .byId(getWestCoastCustomerIds())
+ *         .byId(westCoastCustomerIds())
  *         .withMask("name", "address", "email")
  *         .where(eq("type", "permanent"),
  *                eq("discountPercent", 10),
  *                eq("companySize", Company.Size.SMALL))
- *     }
- * </pre>
+ *         .build();
+ * }</pre>
  *
  * <p>Calling any of the builder methods overrides the previous call of the given method or
- * any of its overloads. For example, calling sequentially
- * <pre>
- *     {@code
+ * any of its overloads. For example, calling sequentially:
+ * <pre>{@code
  *     builder.withMask(mask1)
  *            .withMask(mask2)
  *            // optionally some other invocations
  *            .withMask(mask3)
  *            .build();
- *     }
- * </pre>
- * is equivalent to calling
- * <pre>
- *     {@code
+ * }</pre>
+ * is equivalent to calling:
+ * <pre>{@code
  *     builder.withMask(mask3)
  *            .build();
  *     }
@@ -228,15 +224,13 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder> 
      * this query if it matches all the composite filters.
      *
      * <p>Example of usage:
-     * <pre>
-     *     {@code
+     * <pre>{@code
      *     factory.select(Customer.class)
      *            // Possibly other parameters
      *            .where(all(ge("companySize", 50), le("companySize", 1000)),
      *                   either(gt("establishedTime", twoYearsAgo), eq("country", "Germany")))
      *            .build();
-     *     }
-     * </pre>
+     * }</pre>
      *
      * <p>In the example above, the {@code Customer} records match the built query if they
      * represent
@@ -246,8 +240,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder> 
      * <p>Note that the filters which belong to different {@link Filters#all all(...)} groups
      * may be represented as a single {@link Filters#all all(...)} group. For example, two
      * following queries would be identical:
-     * <pre>
-     *     {@code
+     * <pre>{@code
      *     // Option 1
      *     factory.select(Customer.class)
      *            .where(all(
@@ -264,8 +257,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder> 
      *                       ge("companySize", 50),
      *                       le("companySize", 100)))
      *            .build();
-     *     }
-     * </pre>
+     * }</pre>
      *
      * <p>The {@code Option 1} is recommended in this case, since the filters are grouped
      * logically,

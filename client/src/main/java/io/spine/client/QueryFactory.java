@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.client.Queries.queryBuilderFor;
+import static io.spine.client.Targets.composeTarget;
 import static java.lang.String.format;
 
 /**
@@ -50,7 +50,7 @@ public final class QueryFactory {
      */
     private static final String QUERY_ID_FORMAT = "query-%s";
 
-    private static final String ENTITY_IDS_EMPTY_MSG = "Entity ID set must not be empty";
+    private static final String ENTITY_IDS_EMPTY_MSG = "Entity ID set must not be empty.";
 
     private final ActorContext actorContext;
 
@@ -109,6 +109,7 @@ public final class QueryFactory {
     public Query byIdsWithMask(Class<? extends EntityState> entityClass,
                                Set<?> ids,
                                String... maskPaths) {
+        checkSpecified(entityClass);
         checkNotNull(ids);
         checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
         FieldMask fieldMask = fromStringList(null, ImmutableList.copyOf(maskPaths));
@@ -136,9 +137,8 @@ public final class QueryFactory {
      *         if any of IDs have invalid type or are {@code null}
      */
     public Query byIds(Class<? extends EntityState> entityClass, Set<?> ids) {
-        checkNotNull(entityClass);
+        checkSpecified(entityClass);
         checkNotNull(ids);
-
         return composeQuery(entityClass, ids, null, null);
     }
 
@@ -161,6 +161,8 @@ public final class QueryFactory {
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends EntityState> entityClass, String... maskPaths) {
+        checkSpecified(entityClass);
+        checkNotNull(maskPaths);
         FieldMask fieldMask = fromStringList(null, ImmutableList.copyOf(maskPaths));
         Query result = composeQuery(entityClass, null, null, fieldMask);
         return result;
@@ -177,21 +179,31 @@ public final class QueryFactory {
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query all(Class<? extends EntityState> entityClass) {
-        checkNotNull(entityClass);
-
+        checkSpecified(entityClass);
         return composeQuery(entityClass, null, null, null);
     }
 
-    Query composeQuery(Class<? extends EntityState> entityClass,
-                       @Nullable Set<?> ids,
-                       @Nullable Set<CompositeFilter> filters,
-                       @Nullable FieldMask fieldMask) {
-        checkNotNull(entityClass, "The class of Entity must be specified for a Query");
+    private Query composeQuery(Class<? extends EntityState> entityClass,
+                               @Nullable Set<?> ids,
+                               @Nullable Set<CompositeFilter> filters,
+                               @Nullable FieldMask fieldMask) {
         ResponseFormat format = responseFormat(fieldMask, null, 0);
         Query.Builder builder = queryBuilderFor(entityClass, ids, filters)
                 .setFormat(format);
         Query query = newQuery(builder);
         return query;
+    }
+
+    private static void checkSpecified(Class<? extends EntityState> entityClass) {
+        checkNotNull(entityClass, "The class of `Entity` must be specified for a `Query`.");
+    }
+
+    private static Query.Builder queryBuilderFor(Class<? extends EntityState> entityClass,
+                                                 @Nullable Set<?> ids,
+                                                 @Nullable Set<CompositeFilter> filters) {
+        Target target = composeTarget(entityClass, ids, filters);
+        Query.Builder builder = queryBuilderFor(target);
+        return builder;
     }
 
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
@@ -201,6 +213,13 @@ public final class QueryFactory {
                 .setFormat(format);
         Query query = newQuery(builder);
         return query;
+    }
+
+    @SuppressWarnings("CheckReturnValue")
+    private static Query.Builder queryBuilderFor(Target target) {
+        Query.Builder builder = Query.newBuilder()
+                                     .setTarget(target);
+        return builder;
     }
 
     Query composeQuery(Target target,
@@ -230,7 +249,7 @@ public final class QueryFactory {
     }
 
     private static void checkTargetNotNull(Target target) {
-        checkNotNull(target, "Target must be specified to compose a Query");
+        checkNotNull(target, "Target must be specified to compose a `Query`.");
     }
 
     private Query newQuery(Query.Builder builder) {

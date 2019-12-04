@@ -58,7 +58,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -285,8 +284,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public ImmutableSet<EventClass> outgoingEvents() {
-        Set<EventClass> eventClasses = processManagerClass().outgoingEvents();
-        return ImmutableSet.copyOf(eventClasses);
+        return processManagerClass().outgoingEvents();
     }
 
     /**

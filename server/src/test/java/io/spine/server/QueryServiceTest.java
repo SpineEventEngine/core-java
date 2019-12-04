@@ -38,7 +38,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.Given.PROJECTS_CONTEXT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -124,7 +123,8 @@ class QueryServiceTest {
         ThrowableSubject assertError = assertThat(error);
         assertError.isNotNull();
         assertError.isInstanceOf(UnknownEntityTypeException.class);
-        String unknownTypeUrl = typeOf(query).value();
+        String unknownTypeUrl = query.targetType()
+                                     .value();
         assertError.hasMessageThat().contains(unknownTypeUrl);
     }
 

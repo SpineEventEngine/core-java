@@ -21,28 +21,18 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import io.spine.base.Field;
-import io.spine.client.CompositeFilter;
-import io.spine.client.Filter;
 import io.spine.client.IdFilter;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.logging.Logging;
-import io.spine.protobuf.TypeConverter;
-import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.storage.OperatorEvaluator.eval;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Handles the domain and system events which correspond to the specified {@code Subscription}.
@@ -87,13 +77,14 @@ abstract class UpdateHandler implements Logging {
      * the information on the passed event.
      */
     private void checkActive(EventEnvelope event) {
-        checkState(
-                isActive(),
-                "Dispatched an event of type `%s` to the non-active subscription with the ID `%s`.",
-                event.typeUrl(),
-                subscription.getId()
-                            .getValue()
-        );
+        if (!isActive()) {
+            throw newIllegalStateException(
+                    "Dispatched an event of type `%s` to the non-active subscription with the ID `%s`.",
+                    event.typeUrl(),
+                    subscription.getId()
+                                .getValue()
+            );
+        }
     }
 
     private void deliverUpdate(SubscriptionUpdate update) {
@@ -147,12 +138,12 @@ abstract class UpdateHandler implements Logging {
      *         system event transmitting the {@code Entity} update info
      *         or the domain event to which a subscription exists
      */
-    abstract boolean isTypeMatching(EventEnvelope event);
+    abstract boolean typeMatches(EventEnvelope event);
 
     /**
      * Checks if the event matches the subscription ID filter.
      */
-    boolean isIdMatching(EventEnvelope event) {
+    boolean idMatches(EventEnvelope event) {
         TargetFilters filters = target().getFilters();
         IdFilter idFilter = filters.getIdFilter();
         boolean idFilterSet = !IdFilter.getDefaultInstance()
@@ -185,39 +176,5 @@ abstract class UpdateHandler implements Logging {
      */
     boolean isActive() {
         return callback != null;
-    }
-
-    @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // OK for Proto enum.
-    static boolean checkPasses(Message message, CompositeFilter filter) {
-        Stream<Filter> filters = filter.getFilterList()
-                                       .stream();
-        CompositeFilter.CompositeOperator operator = filter.getOperator();
-        Predicate<Filter> passesFilter = f -> checkPasses(message, f);
-        switch (operator) {
-            case ALL:
-                return filters.allMatch(passesFilter);
-            case EITHER:
-                return filters.anyMatch(passesFilter);
-            default:
-                throw newIllegalArgumentException("Unknown composite filter operator `%s`.",
-                                                  operator);
-        }
-    }
-
-    private static boolean checkPasses(Message state, Filter filter) {
-        Field field = Field.withPath(filter.getFieldPath());
-        Object actual = field.valueIn(state);
-        Any requiredAsAny = filter.getValue();
-        Object required = TypeConverter.toObject(requiredAsAny, actual.getClass());
-        try {
-            return eval(actual, filter.getOperator(), required);
-        } catch (IllegalArgumentException e) {
-            throw newIllegalArgumentException(
-                    e,
-                    "Filter value `%s` cannot be properly compared to" +
-                            " the message field `%s` of the class `%s`.",
-                    required, field, actual.getClass().getName()
-            );
-        }
     }
 }

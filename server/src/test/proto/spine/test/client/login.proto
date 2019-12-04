@@ -17,22 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.storage.given;
+package spine.test.client;
 
-public class OperatorEvaluatorTestEnv {
+import "spine/options.proto";
 
-    /** Prevents instantiation of this utility class. */
-    private OperatorEvaluatorTestEnv() {
-    }
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.client";
+option java_outer_classname = "LoginProto";
+option java_multiple_files = true;
 
-    public static class FaultyComparisonType {
+import "spine/core/user_id.proto";
 
-        @SuppressWarnings("InstantiationOfUtilityClass") // Not a utility class
-        public static final FaultyComparisonType INSTANCE = new FaultyComparisonType();
-
-        private FaultyComparisonType() {
-            // Singleton type.
-        }
-    }
+message LoginStatus {
+    option (entity) = { kind: PROCESS_MANAGER visibility: SUBSCRIBE };
+    core.UserId user = 1;
+    bool logged_in = 2;
+    // The column field used for subscribing to the login status from the client.
+    string user_id = 3 [(required) = true, (column) = true];
 }

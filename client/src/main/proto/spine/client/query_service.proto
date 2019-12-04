@@ -34,5 +34,5 @@ import "spine/client/query.proto";
 service QueryService {
 
     // Reads a certain data from the read-side by setting the criteria via Query.
-    rpc Read (Query) returns (QueryResponse);
+    rpc Read(Query) returns (QueryResponse);
 }

@@ -21,18 +21,19 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.EventUpdates;
+import io.spine.client.Filters;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.Responses;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
+
+import static io.spine.core.Responses.ok;
 
 /**
  * The update handler of {@code Subscription}s for {@code Event}s.
@@ -45,7 +46,7 @@ final class EventUpdateHandler extends UpdateHandler {
 
     @Override
     Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
-        boolean matches = isTypeMatching(event) && (includeAll() || matchByFilters(event));
+        boolean matches = typeMatches(event) && (includeAll() || matchByFilters(event));
         if (!matches) {
             return Optional.empty();
         }
@@ -61,7 +62,7 @@ final class EventUpdateHandler extends UpdateHandler {
     }
 
     @Override
-    boolean isTypeMatching(EventEnvelope event) {
+    boolean typeMatches(EventEnvelope event) {
         String expectedTypeUrl = target().getType();
         String actualTypeUrl = event.typeUrl().value();
         return expectedTypeUrl.equals(actualTypeUrl);
@@ -71,7 +72,9 @@ final class EventUpdateHandler extends UpdateHandler {
      * Matches an event to the subscription filters.
      */
     private boolean matchByFilters(EventEnvelope event) {
-        return isIdMatching(event) && checkEventMessageMatches(event);
+        boolean idMatches = idMatches(event);
+        boolean eventMatches = eventMatches(event);
+        return idMatches && eventMatches;
     }
 
     /**
@@ -82,7 +85,7 @@ final class EventUpdateHandler extends UpdateHandler {
         SubscriptionUpdate result = SubscriptionUpdate
                 .newBuilder()
                 .setSubscription(subscription())
-                .setResponse(Responses.ok())
+                .setResponse(ok())
                 .setEventUpdates(updates)
                 .build();
         return result;
@@ -100,13 +103,14 @@ final class EventUpdateHandler extends UpdateHandler {
     /**
      * Checks if the event message matches the subscription filters.
      */
-    private boolean checkEventMessageMatches(EventEnvelope event) {
-        Message message = event.message();
+    private boolean eventMatches(EventEnvelope event) {
         TargetFilters filters = target().getFilters();
+        Event evt = event.outerObject();
         boolean result = filters
                 .getFilterList()
                 .stream()
-                .allMatch(f -> checkPasses(message, f));
+                .map(Filters::toEventFilter)
+                .allMatch(f -> f.test(evt));
         return result;
     }
 }
