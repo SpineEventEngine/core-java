@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.projection;
+package io.spine.server.catchup;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -28,19 +28,18 @@ import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.catchup.CatchUp;
-import io.spine.server.catchup.CatchUpId;
-import io.spine.server.catchup.CatchUpSignal;
-import io.spine.server.catchup.CatchUpStatus;
 import io.spine.server.catchup.command.FinalizeCatchUp;
-import io.spine.server.catchup.command.RecallMoreHistoryEvents;
 import io.spine.server.catchup.event.CatchUpCompleted;
+import io.spine.server.catchup.event.CatchUpFinalized;
 import io.spine.server.catchup.event.CatchUpRequested;
-import io.spine.server.command.AbstractCommander;
-import io.spine.server.command.Assign;
-import io.spine.server.command.Command;
+import io.spine.server.catchup.event.CatchUpStarted;
+import io.spine.server.catchup.event.HistoryEventsRecalled;
+import io.spine.server.catchup.event.HistoryFullyRecalled;
+import io.spine.server.catchup.event.LiveEventsPickedUp;
 import io.spine.server.delivery.CatchUpReadRequest;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.Delivery;
@@ -48,28 +47,33 @@ import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.React;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tuple.EitherOf2;
-import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.SignalEnvelope;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
+import static com.google.protobuf.util.Durations.fromMillis;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A process that performs a projection catch-up.
  */
-public final class CatchUpProcess extends AbstractCommander {
+public class CatchUpProcess extends AbstractEventReactor {
 
     //TODO:2019-11-29:alex.tymchenko: consider making this configurable via the `ServerEnvironment`.
     private static final EventStreamQuery.Limit LIMIT = limitOf(500);
@@ -93,53 +97,114 @@ public final class CatchUpProcess extends AbstractCommander {
 
     private Inbox<CatchUpId> configureInbox(Delivery delivery) {
         Inbox.Builder<CatchUpId> builder = delivery.newInbox(TYPE);
-        builder.addCommandEndpoint(HANDLE_COMMAND, CommandEndpoint::new)
-               .addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new);
+        builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new);
 
         return builder.build();
     }
 
     @CanIgnoreReturnValue
     @Override
-    public void dispatch(CommandEnvelope command) {
-        CatchUpId target = targetOf(command.message());
-        inbox.send(command)
-             .toHandler(target);
-    }
-
-    @Override
-    public void dispatchEvent(EventEnvelope event) {
+    public void dispatch(EventEnvelope event) {
         CatchUpId target = targetOf(event.message());
         inbox.send(event)
              .toReactor(target);
     }
 
-    @Command
-    RecallMoreHistoryEvents handle(CatchUpRequested event) {
+    @React
+    CatchUpStarted handle(CatchUpRequested event) {
+        Timestamp when = event.getRequest()
+                              .getSinceWhen();
         builder.setStatus(CatchUpStatus.STARTED)
-               .setWhenLastRead(event.getRequest()
-                                     .getSinceWhen())
+               .setWhenLastRead(withWindow(when))
                .setRequest(event.getRequest());
+        return started(event.getId());
+    }
 
-        return recallMore(event.getId());
+    private static Timestamp withWindow(Timestamp when) {
+        return subtract(when, fromMillis(1));
     }
 
     //TODO:2019-11-28:alex.tymchenko: maintain inclusiveness.
-
-    @Command
-    EitherOf2<RecallMoreHistoryEvents, FinalizeCatchUp> handle(RecallMoreHistoryEvents command) {
-        //TODO:2019-11-29:alex.tymchenko: build the event filters once and include it to the state?
-        CatchUp.Request request = builder.getRequest();
-        List<Event> events = readMore(request);
-        if (events.isEmpty()) {
-            return EitherOf2.withB(finalize(command.getId()));
+    @React
+    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
+    handle(CatchUpStarted event, EventContext context) {
+        Event firstEvent = null;
+        int currentRound = builder.getCurrentRound();
+        if (currentRound == 0) {
+            EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
+            firstEvent = factory.createEvent(event, null);
         }
+        return recallMoreEvents(event.getId(), firstEvent);
+    }
+
+    @React
+    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
+        return recallMoreEvents(event.getId(), null);
+    }
+
+    private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
+    recallMoreEvents(CatchUpId id, @Nullable Event toPostFirst) {
+        CatchUp.Request request = builder.getRequest();
+        List<Event> events = new ArrayList<>();
+        if(toPostFirst != null) {
+            events.add(toPostFirst);
+        }
+        List<Event> readInThisRound = readMore(request, builder.getLastRead());
+        events.addAll(readInThisRound);
+
+        if (events.isEmpty()) {
+            return EitherOf2.withB(fullyRecalled(id));
+        }
+        //TODO:2019-12-04:alex.tymchenko: handle the events with the same timestamp.
+        Event lastEvent = events.get(events.size() - 1);
+        Timestamp lastEventTimestamp = lastEvent.getContext()
+                                                .getTimestamp();
+        builder.setWhenLastRead(withWindow(lastEventTimestamp));
+        builder.setLastRead(lastEvent.getId());
+
         dispatchAll(request, events);
 
         int nextRound = builder.getCurrentRound() + 1;
         builder.setCurrentRound(nextRound);
 
-        return EitherOf2.withA(recallMore(command.getId()));
+        return EitherOf2.withA(recalled(id));
+    }
+
+    private static HistoryEventsRecalled recalled(CatchUpId id) {
+        return HistoryEventsRecalled.newBuilder()
+                                    .setId(id)
+                                    .vBuild();
+    }
+
+    private static HistoryFullyRecalled fullyRecalled(CatchUpId id) {
+        return HistoryFullyRecalled.newBuilder()
+                                   .setId(id)
+                                   .vBuild();
+    }
+
+    @React
+    EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled command) {
+        CatchUpId id = command.getId();
+        builder.setStatus(CatchUpStatus.FINALIZING);
+
+        CatchUp.Request request = builder.getRequest();
+        List<Event> events = readMore(request, builder.getLastRead());
+
+        if (events.isEmpty()) {
+            return EitherOf2.withB(completeProcess(id));
+        }
+        dispatchAll(request, events);
+        return EitherOf2.withA(liveEventsPickedUp(id));
+    }
+
+    @React
+    CatchUpCompleted on(CatchUpFinalized event) {
+        return completeProcess(event.getId());
+    }
+
+    private CatchUpCompleted completeProcess(CatchUpId id) {
+        builder.setStatus(CatchUpStatus.COMPLETED);
+        return catchUpCompleted(id);
     }
 
     private void dispatchAll(CatchUp.Request request, List<Event> events) {
@@ -151,29 +216,30 @@ public final class CatchUpProcess extends AbstractCommander {
         }
     }
 
-    private List<Event> readMore(CatchUp.Request request) {
+    private List<Event> readMore(CatchUp.Request request, EventId afterEvent) {
         EventStreamQuery query = toEventQuery(request);
         MemoizingObserver<Event> observer = new MemoizingObserver<>();
         eventStore.read(query, observer);
-        return observer.responses();
-    }
-
-    //TODO:2019-12-03:alex.tymchenko: deal with this handler?
-    @Assign
-    CatchUpCompleted handle(FinalizeCatchUp command) {
-        builder.setStatus(CatchUpStatus.FINALIZING);
-
-        CatchUp.Request request = builder.getRequest();
-        List<Event> events = readMore(request);
-        if (events.isEmpty()) {
-            builder.setStatus(CatchUpStatus.COMPLETED);
-            return catchUpCompleted(command.getId());
-        } else {
-            dispatchAll(request, events);
+        List<Event> allEvents = observer.responses();
+        for (int index = 0; index < allEvents.size(); index++) {
+            Event event = allEvents.get(index);
+            if (event.getId()
+                     .equals(afterEvent)) {
+                int lastIndex = allEvents.size() - 1;
+                if(index == lastIndex) {
+                    return ImmutableList.of();
+                }
+                return allEvents.subList(index + 1, lastIndex);
+            }
         }
 
-        //TODO:2019-12-03:alex.tymchenko: return `CatchUpFinalized`.
-        return catchUpCompleted(command.getId());
+        return allEvents;
+    }
+
+    private static LiveEventsPickedUp liveEventsPickedUp(CatchUpId id) {
+        return LiveEventsPickedUp.newBuilder()
+                                 .setId(id)
+                                 .vBuild();
     }
 
     private static CatchUpCompleted catchUpCompleted(CatchUpId id) {
@@ -223,10 +289,10 @@ public final class CatchUpProcess extends AbstractCommander {
                               .vBuild();
     }
 
-    private static RecallMoreHistoryEvents recallMore(CatchUpId id) {
-        return RecallMoreHistoryEvents.newBuilder()
-                                      .setId(id)
-                                      .vBuild();
+    private static CatchUpStarted started(CatchUpId id) {
+        return CatchUpStarted.newBuilder()
+                             .setId(id)
+                             .vBuild();
     }
 
     private static EventStreamQuery.Limit limitOf(int value) {
@@ -238,72 +304,46 @@ public final class CatchUpProcess extends AbstractCommander {
     @FunctionalInterface
     public interface RepositoryLocator
             extends Function<TypeUrl, ProjectionRepository<Object, ?, ?>> {
+
     }
 
-    private abstract class AbstractCommandEndpoint<I, E extends SignalEnvelope<?, ?, ?>>
-            implements MessageEndpoint<I, E> {
+    private final class EventEndpoint implements MessageEndpoint<CatchUpId, EventEnvelope> {
 
-        private final E envelope;
+        private final EventEnvelope envelope;
 
-        AbstractCommandEndpoint(E envelope) {
+        EventEndpoint(EventEnvelope envelope) {
             this.envelope = envelope;
         }
 
         @Override
-        public final void onDuplicate(I target, E envelope) {
+        public void dispatchTo(CatchUpId targetId) {
+            load(targetId);
+            CatchUpProcess.super.dispatch(envelope);
+            store();
+        }
+
+        @Override
+        public final void onDuplicate(CatchUpId target, EventEnvelope envelope) {
             // do nothing.
         }
 
         @Override
-        public Repository<I, ?> repository() {
+        public Repository<CatchUpId, ?> repository() {
             throw newIllegalStateException("`AbstractCommander`s have no repository.");
         }
 
-        protected final E envelope() {
-            return envelope;
-        }
-
-        protected final void store() {
+        private void store() {
             CatchUp modifiedState = builder.vBuild();
             storage.write(modifiedState);
         }
 
-        protected final void load(CatchUpId target) {
+        private void load(CatchUpId target) {
             CatchUpReadRequest request = new CatchUpReadRequest(target);
             builder = storage.read(request)
                              .orElse(CatchUp.newBuilder()
                                             .setId(target)
                                             .buildPartial())
                              .toBuilder();
-        }
-    }
-
-    private final class CommandEndpoint extends AbstractCommandEndpoint<CatchUpId, CommandEnvelope> {
-
-        private CommandEndpoint(CommandEnvelope envelope) {
-            super(envelope);
-        }
-
-        @Override
-        public void dispatchTo(CatchUpId targetId) {
-            load(targetId);
-            CatchUpProcess.super.dispatch(envelope());
-            store();
-        }
-    }
-
-    private final class EventEndpoint extends AbstractCommandEndpoint<CatchUpId, EventEnvelope> {
-
-        EventEndpoint(EventEnvelope envelope) {
-            super(envelope);
-        }
-
-        @Override
-        public void dispatchTo(CatchUpId targetId) {
-            load(targetId);
-            CatchUpProcess.super.dispatchEvent(envelope());
-            store();
-
         }
     }
 }

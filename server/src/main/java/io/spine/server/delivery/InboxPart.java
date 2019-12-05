@@ -77,7 +77,8 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
     /**
      * Determines the status of the message.
      */
-    protected InboxMessageStatus determineStatus(M message) {
+    protected InboxMessageStatus determineStatus(M message,
+                                                 InboxLabel label) {
         return InboxMessageStatus.TO_DELIVER;
     }
 
@@ -98,7 +99,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setInboxId(inboxId)
                 .setShardIndex(shardIndex)
                 .setLabel(label)
-                .setStatus(determineStatus(envelope))
+                .setStatus(determineStatus(envelope, label))
                 .setWhenReceived(Time.currentTime())
                 .setVersion(VersionCounter.next());
         setRecordPayload(envelope, builder);

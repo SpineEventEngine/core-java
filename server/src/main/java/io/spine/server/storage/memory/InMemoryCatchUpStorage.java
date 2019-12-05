@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
 import io.spine.server.catchup.CatchUp;
 import io.spine.server.catchup.CatchUpId;
@@ -37,30 +36,45 @@ import java.util.Optional;
 public class InMemoryCatchUpStorage extends AbstractStorage<CatchUpId, CatchUp, CatchUpReadRequest>
         implements CatchUpStorage, Logging {
 
+    private final MultitenantStorage<TenantCatchUpRecords> multitenantStorage;
+
     protected InMemoryCatchUpStorage(boolean multitenant) {
         super(multitenant);
+        this.multitenantStorage = new MultitenantStorage<TenantCatchUpRecords>(multitenant) {
+            @Override
+            TenantCatchUpRecords createSlice() {
+                return new TenantCatchUpRecords();
+            }
+        };
     }
 
     @Override
     public void write(CatchUp message) {
+        multitenantStorage.currentSlice()
+                          .put(message.getId(), message);
     }
 
     @Override
     public Iterable<CatchUp> readAll() {
-        return ImmutableList.of();
+        return multitenantStorage.currentSlice()
+                                 .readAll();
     }
 
     @Override
     public Iterator<CatchUpId> index() {
-        return ImmutableList.<CatchUpId>of().iterator();
+        return multitenantStorage.currentSlice()
+                                 .index();
     }
 
     @Override
     public Optional<CatchUp> read(CatchUpReadRequest request) {
-        return Optional.empty();
+        TenantCatchUpRecords records = multitenantStorage.currentSlice();
+        return records.get(request.recordId());
     }
 
     @Override
     public void write(CatchUpId id, CatchUp record) {
+        TenantCatchUpRecords records = multitenantStorage.currentSlice();
+        records.put(id, record);
     }
 }

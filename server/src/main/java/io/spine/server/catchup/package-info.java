@@ -21,4 +21,10 @@
 /**
  * A package devoted to the projection catch-up routines.
  */
+@ParametersAreNonnullByDefault
+@CheckReturnValue
 package io.spine.server.catchup;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

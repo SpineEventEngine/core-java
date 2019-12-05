@@ -180,7 +180,28 @@ public final class DefaultEventStore
      * Returns comparator which compares events by their timestamp in chronological order.
      */
     private static Comparator<Event> chronologically() {
-        return (e1, e2) -> Timestamps.compare(e1.time(), e2.time());
+
+        return (e1, e2) -> {
+            int timeComparison = Timestamps.compare(e1.time(), e2.time());
+            if (timeComparison != 0) {
+                return timeComparison;
+            }
+            int v1 = e1.context()
+                       .getVersion()
+                       .getNumber();
+            int v2 = e2.context()
+                       .getVersion()
+                       .getNumber();
+            int versionComparison = Integer.compare(v1, v2);
+            if (versionComparison != 0) {
+                return versionComparison;
+            }
+            String id1 = e1.getId()
+                           .getValue();
+            String id2 = e2.getId()
+                           .getValue();
+            return id1.compareTo(id2);
+        };
     }
 
     /**

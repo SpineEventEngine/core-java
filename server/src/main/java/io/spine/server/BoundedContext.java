@@ -50,6 +50,7 @@ import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 import java.util.Set;
@@ -354,6 +355,12 @@ public abstract class BoundedContext implements Closeable, Logging {
                                            stateClass.getName());
         }
         Optional<Repository> repository = guard.repositoryFor(stateClass);
+        return repository;
+    }
+
+    @Internal
+    public Optional<Repository> findRepository(TypeUrl stateType) {
+        Optional<Repository> repository = guard.repositoryFor(stateType);
         return repository;
     }
 

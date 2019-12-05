@@ -59,6 +59,14 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
         return new EventDispatcher(deduplicationSource);
     }
 
+    @Override
+    protected InboxMessageStatus determineStatus(EventEnvelope message, InboxLabel label) {
+        if(label == InboxLabel.CATCH_UP) {
+            return InboxMessageStatus.CATCHING_UP;
+        }
+        return super.determineStatus(message, label);
+    }
+
     /**
      * A strategy of event delivery from this {@code Inbox} to the event targets.
      */

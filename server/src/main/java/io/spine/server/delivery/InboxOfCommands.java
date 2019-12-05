@@ -60,11 +60,12 @@ final class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     }
 
     @Override
-    protected InboxMessageStatus determineStatus(CommandEnvelope message) {
+    protected InboxMessageStatus determineStatus(CommandEnvelope message,
+                                                 InboxLabel label) {
         if(message.context().hasSchedule()) {
             return InboxMessageStatus.SCHEDULED;
         }
-        return super.determineStatus(message);
+        return super.determineStatus(message, label);
     }
 
     /**

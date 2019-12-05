@@ -23,17 +23,24 @@ package io.spine.server.projection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.client.ActorRequestFactory;
+import io.spine.core.ActorContext;
 import io.spine.core.Event;
+import io.spine.core.TenantId;
+import io.spine.core.UserId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.catchup.CatchUp;
 import io.spine.server.catchup.CatchUpId;
+import io.spine.server.catchup.CatchUpSignal;
 import io.spine.server.catchup.event.CatchUpRequested;
 import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
@@ -42,6 +49,7 @@ import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
+import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
@@ -52,6 +60,7 @@ import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.tenant.TenantFunction;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
@@ -134,6 +143,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 })
                 .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
                                   e -> ProjectionEndpoint.of(this, e))
+                .addEventEndpoint(InboxLabel.CATCH_UP,
+                                  e -> CatchUpEndpoint.of(this, e))
                 .build();
     }
 
@@ -388,21 +399,50 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             requestBuilder.addEventType(name.value());
         }
         CatchUp.Request request = requestBuilder.vBuild();
-        CatchUpRequested event = CatchUpRequested
+        CatchUpRequested eventMessage = CatchUpRequested
                 .newBuilder()
                 .setId(CatchUpId.generate())
                 .setRequest(request)
                 .vBuild();
-        context().systemClient()
-                 .writeSide()
-                 .postEvent(event);
+        UserId actor = UserId.newBuilder()
+                             .setValue(getClass().getName())
+                             .build();
+        ActorRequestFactory requestFactory = requestFactory(actor, context().isMultitenant());
+        Any producerId = AnyPacker.pack(actor);
+        ActorContext actorContext = requestFactory.newActorContext();
+        EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
+        Event event = eventFactory.createEvent(eventMessage, null);
+        context().eventBus().post(event);
+    }
+
+    private static ActorRequestFactory requestFactory(UserId actor, boolean multitenant) {
+        TenantFunction<ActorRequestFactory> function =
+                new TenantFunction<ActorRequestFactory>(multitenant) {
+                    @Override
+                    public ActorRequestFactory apply(TenantId id) {
+                        return ActorRequestFactory.newBuilder()
+                                                  .setActor(actor)
+                                                  .setTenantId(id)
+                                                  .build();
+                    }
+                };
+        return function.execute();
     }
 
     public void dispatchCatchingUp(Event event, Set<I> ids) {
+        EventEnvelope envelope = EventEnvelope.of(event);
+        Set<I> catchUpTargets;
+        if(envelope.message() instanceof CatchUpSignal) {
+            catchUpTargets = ids;
+        } else {
+            Set<I> routedTargets = route(envelope);
+            catchUpTargets = Sets.intersection(routedTargets, ids)
+                                 .immutableCopy();
+        }
         Inbox<I> inbox = inbox();
-        for (I id : ids) {
-            inbox.send(EventEnvelope.of(event))
-                 .toCatchUp(id);
+        for (I target : catchUpTargets) {
+            inbox.send(envelope)
+                 .toCatchUp(target);
         }
     }
 

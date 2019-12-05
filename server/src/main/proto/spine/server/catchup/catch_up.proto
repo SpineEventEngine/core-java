@@ -13,6 +13,8 @@ option java_multiple_files = true;
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
+import "spine/core/event.proto";
+
 // A state of a catch-up process.
 //
 message CatchUp {
@@ -44,9 +46,10 @@ message CatchUp {
     // During the catch-up, this field holds the timestamp of the last event already processed.
     google.protobuf.Timestamp when_last_read = 5;
 
-    //TODO:2019-11-28:alex.tymchenko: store more props to tell between the "simultaneous" events.
+    // During the catch-up, this field records the ID of the last event already processed.
+    spine.core.EventId last_read = 6;
 
-    CatchUpStatus status = 6 [(required) = true];
+    CatchUpStatus status = 7 [(required) = true];
 
     // The index of the current catch-up round.
     //
@@ -55,7 +58,7 @@ message CatchUp {
     //
     // The index of the first round is 0.
     //
-    int32 current_round = 7;
+    int32 current_round = 8;
 }
 
 // An ID of a catch-up process.

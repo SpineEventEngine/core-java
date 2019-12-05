@@ -31,6 +31,7 @@ import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.Listener;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.catchup.CatchUpProcess;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.enrich.Enricher;
@@ -40,6 +41,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.integration.IntegrationBroker;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
@@ -62,6 +64,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.ContextSpec.singleTenant;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A builder for producing {@code BoundedContext} instances.
@@ -565,6 +568,18 @@ public final class BoundedContextBuilder implements Logging {
     private void registerDispatchers(BoundedContext result) {
         commandDispatchers.forEach(result::registerCommandDispatcher);
         eventDispatchers.forEach(result::registerEventDispatcher);
+
+        CatchUpProcess.RepositoryLocator locator = url -> {
+            Optional<Repository> repo = result.findRepository(url);
+            if(!repo.isPresent()) {
+                throw newIllegalStateException(
+                        "Cannot find a Projection repository for a state type URL `%s`.", url);
+            }
+            return (ProjectionRepository<Object, ?, ?>) repo.get();
+        };
+
+        result.registerEventDispatcher(new CatchUpProcess(result.eventBus()
+                                                                .eventStore(), locator));
     }
 
     private BoundedContext buildDomain(SystemContext system) {

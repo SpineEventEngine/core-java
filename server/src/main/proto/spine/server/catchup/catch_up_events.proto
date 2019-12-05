@@ -24,12 +24,31 @@ message CatchUpRequested {
     CatchUp.Request request = 2;
 }
 
+message CatchUpStarted {
+
+    CatchUpId id = 1;
+}
+
+message HistoryEventsRecalled {
+
+    CatchUpId id = 1;
+}
+
+message HistoryFullyRecalled {
+
+    CatchUpId id = 1;
+}
+
+message LiveEventsPickedUp {
+
+    CatchUpId id = 1;
+}
+
 // The catch-up process has been finalized.
 message CatchUpFinalized {
 
     CatchUpId id = 1;
 }
-
 
 // The catch-up process has been completed.
 message CatchUpCompleted {

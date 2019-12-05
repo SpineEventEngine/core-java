@@ -37,6 +37,7 @@ import io.spine.logging.Logging;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.MulticastDispatchListener;
+import io.spine.server.catchup.CatchUp;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.model.ModelError;
 import io.spine.server.tenant.TenantAwareRunner;
@@ -320,6 +321,7 @@ public final class Delivery implements Logging {
         Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
 
         Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
+        Iterable<CatchUp> catchUpJobs = catchUpStorage.readAll();
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
         int totalMessagesDelivered = 0;
@@ -328,7 +330,31 @@ public final class Delivery implements Logging {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
-                MessageClassifier classifier = MessageClassifier.of(messages, idempotenceWndStart);
+
+                CatchUpClassifier catchUpClassifier = CatchUpClassifier.of(messages, catchUpJobs);
+                ImmutableList<InboxMessage> toCatchUp = catchUpClassifier.catchUp();
+
+                if(!toCatchUp.isEmpty()) {
+                    DeliveryErrors observedExceptions = deliverByType(toCatchUp,
+                                                                      ImmutableList.of());
+                    observedExceptions.throwIfAny();
+                    totalMessagesDelivered += toCatchUp.size();
+                    inboxStorage.removeAll(toCatchUp);
+                }
+
+                ImmutableList<InboxMessage> catchUpRemovals = catchUpClassifier.removal();
+                if(!catchUpRemovals.isEmpty()) {
+                    inboxStorage.removeAll(catchUpRemovals);
+                }
+
+                ImmutableList<InboxMessage> pausedCatchUp = catchUpClassifier.paused();
+                if(!pausedCatchUp.isEmpty()) {
+                    inboxStorage.markCatchingUp(pausedCatchUp);
+                }
+
+                ImmutableList<InboxMessage> stillToDeliver = catchUpClassifier.delivery();
+                MessageClassifier classifier = MessageClassifier.of(stillToDeliver,
+                                                                    idempotenceWndStart);
                 int deliveredInBatch = deliverClassified(classifier);
                 totalMessagesDelivered += deliveredInBatch;
 
