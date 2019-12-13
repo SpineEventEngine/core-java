@@ -29,7 +29,9 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -42,6 +44,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
+import static java.util.stream.Collectors.toList;
 
 /**
  * The memory-based storage for {@link EntityRecord} that represents
@@ -93,7 +96,9 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
 
     Iterator<EntityRecord> readAll(EntityQuery<I> query, ResponseFormat format) {
         FieldMask fieldMask = format.getFieldMask();
-        return findRecords(query, format)
+        List<EntityRecordWithColumns> records = findRecords(query, format).collect(toList());
+        return records
+                .stream()
                 .map(UNPACKER)
                 .map(new FieldMaskApplier(fieldMask))
                 .iterator();
@@ -101,7 +106,7 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
 
     private Stream<EntityRecordWithColumns>
     findRecords(EntityQuery<I> query, ResponseFormat format) {
-        Map<I, EntityRecordWithColumns> records = filterRecords(query);
+        Map<I, EntityRecordWithColumns> records = new HashMap<>(filterRecords(query));
         Stream<EntityRecordWithColumns> stream = records.values()
                                                         .stream();
         return orderAndLimit(stream, format);

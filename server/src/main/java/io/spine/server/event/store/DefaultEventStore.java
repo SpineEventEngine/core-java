@@ -30,6 +30,7 @@ import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -65,6 +66,8 @@ public final class DefaultEventStore
                     "Observed tenants are: %s.";
 
     private final Log log;
+
+    private final OrderCounter orderCounter = new OrderCounter();
 
     /**
      * Constructs new instance.
@@ -160,14 +163,15 @@ public final class DefaultEventStore
      */
     private Iterator<Event> iterator(EventStreamQuery query) {
         checkNotNull(query);
-        Iterator<EEntity> entities = find(query);
+        Iterator<EEntity> iterator = find(query);
+        ImmutableList<EEntity> entities = ImmutableList.copyOf(iterator);
         Predicate<Event> predicate = new MatchesStreamQuery(query);
-        Iterator<Event> result =
-                Streams.stream(entities)
-                       .map(EEntity::state)
-                       .filter(predicate)
-                       .sorted(chronologically())
-                       .iterator();
+        Iterator<Event> result = entities
+                .stream()
+                .map(EEntity::state)
+                .filter(predicate)
+                .sorted(chronologically())
+                .iterator();
         return result;
     }
 
@@ -186,15 +190,21 @@ public final class DefaultEventStore
             if (timeComparison != 0) {
                 return timeComparison;
             }
-            int v1 = e1.context()
-                       .getVersion()
-                       .getNumber();
-            int v2 = e2.context()
-                       .getVersion()
-                       .getNumber();
+            EventContext ctx1 = e1.context();
+            EventContext ctx2 = e2.context();
+            int v1 = ctx1.getVersion()
+                         .getNumber();
+            int v2 = ctx2.getVersion()
+                         .getNumber();
             int versionComparison = Integer.compare(v1, v2);
             if (versionComparison != 0) {
                 return versionComparison;
+            }
+            int o1 = ctx1.getOrder();
+            int o2 = ctx2.getOrder();
+            int orderComparison = Integer.compare(o1, o2);
+            if (orderComparison != 0) {
+                return orderComparison;
             }
             String id1 = e1.getId()
                            .getValue();
@@ -233,13 +243,24 @@ public final class DefaultEventStore
     }
 
     private void store(Event event) {
-        EEntity entity = EEntity.create(event);
+        EEntity entity = EEntity.create(setOrder(event));
         store(entity);
+    }
+
+    private Event setOrder(Event event) {
+        EventContext updatedCtx = event.getContext()
+                                       .toBuilder()
+                                       .setOrder(orderCounter.getNextValue())
+                                       .build();
+        return event.toBuilder()
+                           .setContext(updatedCtx)
+                           .build();
     }
 
     private void store(Iterable<Event> events) {
         ImmutableList<EEntity> entities =
                 Streams.stream(events)
+                       .map(this::setOrder)
                        .map(EEntity::create)
                        .collect(toImmutableList());
         store(entities);
@@ -279,6 +300,27 @@ public final class DefaultEventStore
 
         private void readingComplete(StreamObserver<Event> observer) {
             debug.log("Observer `%s` got all queried events.", observer);
+        }
+    }
+
+    static final class OrderCounter {
+
+        private static final int MAX_VERSION = 10_000;
+        private static final OrderCounter instance = new OrderCounter();
+
+        private int counter;
+
+        private synchronized int getNextValue() {
+            counter++;
+            counter = counter % MAX_VERSION;
+            return counter;
+        }
+
+        /**
+         * Obtains the next version value.
+         */
+        static int next() {
+            return instance.getNextValue();
         }
     }
 }

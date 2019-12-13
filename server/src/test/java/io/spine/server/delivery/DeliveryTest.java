@@ -30,8 +30,11 @@ import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.Messages;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
@@ -44,8 +47,9 @@ import io.spine.server.delivery.given.TaskAggregate;
 import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareRunner;
-import io.spine.test.delivery.DCounter;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
 import io.spine.test.delivery.NumberAdded;
@@ -54,12 +58,14 @@ import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
+import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -67,11 +73,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
+import static io.spine.testing.Tests.nullRef;
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.toList;
@@ -389,35 +397,82 @@ public class DeliveryTest {
         String[] ids = {"first", "second", "third", "fourth"};
         List<NumberAdded> events = generateEvents(200, ids);
 
+        // Round 1. Fight!
+
         int initialWeight = 1;
         CounterView.changeWeightTo(initialWeight);
         dispatchInParallel(ctx, events, 20);
 
-        String firstId = ids[0];
-        CounterView firstView = findView(repo, firstId);
-        DCounter actualState = firstView.state();
-        int firstInitialTotal = actualState.getTotal();
-        assertThat(firstInitialTotal).isGreaterThan(0);
+        List<Integer> initialTotals = readTotals(repo, ids);
+        int sumInRound = events.size() / ids.length * initialWeight;
+        IntStream sums = IntStream.iterate(sumInRound, i -> i)
+                                  .limit(ids.length);
+        assertThat(initialTotals).isEqualTo(sums.boxed()
+                                                .collect(toList()));
 
-        String secondId = ids[1];
-        CounterView secondView = findView(repo, secondId);
-        int secondInitialTotal = secondView.state().getTotal();
+        // Round 2. Catch up the first one and fight!
 
         int newWeight = 100;
         CounterView.changeWeightTo(newWeight);
         Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
 
-        //TODO:2019-11-27:alex.tymchenko: run the catch-up in parallel with the dispatching.
-        repo.catchUp(ImmutableSet.of(firstId), aWhileAgo);
-        dispatchInParallel(ctx, events, 20);
+        ExecutorService service = newFixedThreadPool(20);
+        List<Callable<Object>> jobs = new ArrayList<>();
 
-        CounterView updatedSecondView = findView(repo, secondId);
-        int secondUpdatedTotal = updatedSecondView.state().getTotal();
-        assertThat(secondUpdatedTotal).isEqualTo(secondInitialTotal + secondInitialTotal * newWeight / initialWeight);
+        // Do the same, but add the catch-up for ID #0 as the first job.
+        String firstId = ids[0];
+        Callable<Object> catchUpCallable = () -> {
+            repo.catchUp(ImmutableSet.of(firstId), aWhileAgo);
+            return nullRef();
+        };
+        jobs.add(catchUpCallable);
+        jobs.addAll(asPostJobs(ctx, events));
+        service.invokeAll(jobs);
+        List<Runnable> leftovers = service.shutdownNow();
+        assertThat(leftovers).isEmpty();
 
-        CounterView updatedFirstView = findView(repo, firstId);
-        int firstUpdatedTotal = updatedFirstView.state().getTotal();
-        assertThat(firstUpdatedTotal).isEqualTo(firstInitialTotal * newWeight / initialWeight * 2);
+        EventFilter numberAdded = EventFilter
+                .newBuilder()
+                .setEventType(TypeName.of(NumberAdded.class)
+                                      .value())
+                .build();
+        MemoizingObserver<Event> allEvents = new MemoizingObserver<>();
+        ctx.eventBus()
+           .eventStore()
+           .read(EventStreamQuery.newBuilder()
+                                 .addFilter(numberAdded)
+                                 .vBuild(), allEvents);
+        System.out.println("---- ALL events: ---");
+        for (Event event : allEvents.responses()) {
+            EventContext context = event.getContext();
+            Timestamp timestamp = context.getTimestamp();
+            System.out.println(timestamp.getSeconds()
+                                       + "." + timestamp.getNanos() + " -> "
+                                       + context.getOrder());
+        }
+
+        List<Integer> totalsAfterCatchUp = readTotals(repo, ids);
+        List<Integer> expectedTotals = new ArrayList<>();
+        expectedTotals.add(sumInRound * newWeight / initialWeight * 2);
+        IntStream.range(1, ids.length)
+                 .forEach((i) -> expectedTotals.add(
+                         sumInRound + sumInRound * newWeight / initialWeight));
+        assertThat(totalsAfterCatchUp).isEqualTo(expectedTotals);
+
+    }
+
+    private static List<Callable<Object>> asPostJobs(SingleTenantBlackBoxContext ctx,
+                                                     List<NumberAdded> events) {
+        return events.stream()
+                     .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
+                     .collect(toList());
+    }
+
+    private static List<Integer> readTotals(CounterView.Repository repo, String[] ids) {
+        return Arrays.stream(ids)
+                     .map((id) -> findView(repo, id).state()
+                                                    .getTotal())
+                     .collect(toList());
     }
 
     private static List<NumberAdded> generateEvents(int howMany, String[] targets) {
@@ -434,6 +489,9 @@ public class DeliveryTest {
 
     private static CounterView findView(CounterView.Repository repo, String id) {
         Optional<CounterView> firstView = repo.find(id);
+        if(!firstView.isPresent()) {
+            System.out.println("`CounterView`#" + id + " not found.");
+        }
         Truth8.assertThat(firstView)
               .isPresent();
         return firstView.get();
@@ -501,9 +559,7 @@ public class DeliveryTest {
                                            List<NumberAdded> events,
                                            int threads) throws InterruptedException {
         ExecutorService service = newFixedThreadPool(threads);
-        service.invokeAll(events.stream()
-                                .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
-                                .collect(toList()));
+        service.invokeAll(asPostJobs(ctx, events));
         List<Runnable> leftovers = service.shutdownNow();
         assertThat(leftovers).isEmpty();
     }

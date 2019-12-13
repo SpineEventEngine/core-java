@@ -65,8 +65,7 @@ final class MessageClassifier {
 
         for (InboxMessage message : messages) {
             Timestamp msgTime = message.getWhenReceived();
-            boolean insideIdempotentWnd =
-                    Timestamps.compare(msgTime, idempotenceWndStart) > 0;
+            boolean insideIdempotentWnd = Timestamps.compare(msgTime, idempotenceWndStart) > 0;
             InboxMessageStatus status = message.getStatus();
 
             if (insideIdempotentWnd) {

@@ -25,6 +25,7 @@ import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
+import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -105,6 +106,10 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
         setRecordPayload(envelope, builder);
         InboxMessage message = builder.vBuild();
 
+        if(message.getStatus() == InboxMessageStatus.CATCHING_UP) {
+            System.out.println("Storing catch-up message " + Stringifiers.toString(message));
+
+        }
         TenantAwareRunner
                 .with(envelope.tenantId())
                 .run(() -> writer.write(message));

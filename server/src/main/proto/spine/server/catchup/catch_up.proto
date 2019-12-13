@@ -46,8 +46,7 @@ message CatchUp {
     // During the catch-up, this field holds the timestamp of the last event already processed.
     google.protobuf.Timestamp when_last_read = 5;
 
-    // During the catch-up, this field records the ID of the last event already processed.
-    spine.core.EventId last_read = 6;
+    int32 last_order_read = 6;
 
     CatchUpStatus status = 7 [(required) = true];
 

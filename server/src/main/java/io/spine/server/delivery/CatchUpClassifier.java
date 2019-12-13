@@ -25,7 +25,10 @@ import com.google.protobuf.Any;
 import io.spine.server.catchup.CatchUp;
 import io.spine.server.catchup.CatchUpStatus;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static io.spine.server.catchup.CatchUpStatus.COMPLETED;
 import static io.spine.server.catchup.CatchUpStatus.FINALIZING;
@@ -62,6 +65,8 @@ public class CatchUpClassifier {
         ImmutableList.Builder<InboxMessage> removalBuilder = ImmutableList.builder();
         ImmutableList.Builder<InboxMessage> pausedBuilder = ImmutableList.builder();
 
+        Set<DispatchingId> forDispatching = new HashSet<>();
+
         for (InboxMessage message : messages) {
 
             boolean underCatchUp = false;
@@ -81,10 +86,28 @@ public class CatchUpClassifier {
                             pausedBuilder.add(message);
                         }
                     } else if (jobStatus == COMPLETED) {
+
+                        //TODO:2019-12-13:alex.tymchenko: de-duplicate here!
+
                         if (message.getStatus() == CATCHING_UP) {
-                            catchUpBuilder.add(message);
+                            DispatchingId dispatchingId = new DispatchingId(message);
+                            if(!forDispatching.contains(dispatchingId)) {
+                                System.out.println("Found a message in `CATCHING_UP` status.");
+                                catchUpBuilder.add(message);
+                                forDispatching.add(dispatchingId);
+                            } else {
+                                System.out.println("A duplicate in `CATCHING_UP` status found.");
+                                removalBuilder.add(message);
+                            }
                         } else if (message.getStatus() == TO_DELIVER) {
-                            deliveryBuilder.add(message);
+                            DispatchingId dispatchingId = new DispatchingId(message);
+                            if(!forDispatching.contains(dispatchingId)) {
+                                System.out.println("Found a message in `TO_DELIVER` status.");
+                                deliveryBuilder.add(message);
+                            } else {
+                                System.out.println("A duplicate in `TO_DELIVER` status found.");
+                                removalBuilder.add(message);
+                            }
                         }
                     }
                 }
@@ -124,6 +147,35 @@ public class CatchUpClassifier {
                                  .getId();
         return targets.stream()
                       .anyMatch((t) -> t.equals(rawEntityId));
+    }
+    
+    private static final class DispatchingId {
+        
+        private final InboxSignalId signal;
+        private final InboxId inbox;
+
+        private DispatchingId(InboxMessage message) {
+            this.signal = message.getSignalId();
+            this.inbox = message.getInboxId();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            DispatchingId id = (DispatchingId) o;
+            return Objects.equals(signal, id.signal) &&
+                    Objects.equals(inbox, id.inbox);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(signal, inbox);
+        }
     }
 }
 

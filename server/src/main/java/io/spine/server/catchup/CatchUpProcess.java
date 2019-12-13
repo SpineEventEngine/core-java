@@ -22,19 +22,16 @@ package io.spine.server.catchup;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import com.google.protobuf.ProtocolStringList;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
+import com.google.protobuf.util.Durations;
+import com.google.protobuf.util.Timestamps;
+import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.catchup.command.FinalizeCatchUp;
 import io.spine.server.catchup.event.CatchUpCompleted;
-import io.spine.server.catchup.event.CatchUpFinalized;
 import io.spine.server.catchup.event.CatchUpRequested;
 import io.spine.server.catchup.event.CatchUpStarted;
 import io.spine.server.catchup.event.HistoryEventsRecalled;
@@ -63,12 +60,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.protobuf.util.Durations.fromMillis;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.server.catchup.CatchUpMessages.catchUpCompleted;
+import static io.spine.server.catchup.CatchUpMessages.fullyRecalled;
+import static io.spine.server.catchup.CatchUpMessages.limitOf;
+import static io.spine.server.catchup.CatchUpMessages.liveEventsPickedUp;
+import static io.spine.server.catchup.CatchUpMessages.recalled;
+import static io.spine.server.catchup.CatchUpMessages.started;
+import static io.spine.server.catchup.CatchUpMessages.targetIdsFrom;
+import static io.spine.server.catchup.CatchUpMessages.targetOf;
+import static io.spine.server.catchup.CatchUpMessages.toFilters;
+import static io.spine.server.catchup.CatchUpMessages.withWindow;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.String.format;
 
 /**
  * A process that performs a projection catch-up.
@@ -79,6 +84,8 @@ public class CatchUpProcess extends AbstractEventReactor {
     private static final EventStreamQuery.Limit LIMIT = limitOf(500);
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
 
+    //TODO:2019-12-13:alex.tymchenko: make this configurable.
+    private final Duration turbulencePeriod = Durations.fromMillis(500);
     private final EventStore eventStore;
     private final RepositoryLocator repositoryLocator;
     private final Inbox<CatchUpId> inbox;
@@ -111,17 +118,24 @@ public class CatchUpProcess extends AbstractEventReactor {
     }
 
     @React
-    CatchUpStarted handle(CatchUpRequested event) {
-        Timestamp when = event.getRequest()
-                              .getSinceWhen();
-        builder.setStatus(CatchUpStatus.STARTED)
-               .setWhenLastRead(withWindow(when))
+    EitherOf2<CatchUpStarted, HistoryFullyRecalled> handle(CatchUpRequested event) {
+        CatchUpId id = event.getId();
+        Timestamp sinceWhen = event.getRequest()
+                                   .getSinceWhen();
+        builder.setWhenLastRead(withWindow(sinceWhen))
                .setRequest(event.getRequest());
-        return started(event.getId());
+        Timestamp turbulenceStart = turbulenceStart();
+        if (Timestamps.compare(sinceWhen, turbulenceStart) >= 0) {
+            builder.setStatus(CatchUpStatus.FINALIZING);
+            return EitherOf2.withB(fullyRecalled(id));
+        } else {
+            builder.setStatus(CatchUpStatus.STARTED);
+            return EitherOf2.withA(started(id));
+        }
     }
 
-    private static Timestamp withWindow(Timestamp when) {
-        return subtract(when, fromMillis(1));
+    private Timestamp turbulenceStart() {
+        return subtract(Time.currentTime(), turbulencePeriod);
     }
 
     //TODO:2019-11-28:alex.tymchenko: maintain inclusiveness.
@@ -131,10 +145,16 @@ public class CatchUpProcess extends AbstractEventReactor {
         Event firstEvent = null;
         int currentRound = builder.getCurrentRound();
         if (currentRound == 0) {
-            EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
-            firstEvent = factory.createEvent(event, null);
+            firstEvent = wrapAsEvent(event, context);
         }
         return recallMoreEvents(event.getId(), firstEvent);
+    }
+
+    private Event wrapAsEvent(CatchUpSignal event, EventContext context) {
+        Event firstEvent;
+        EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
+        firstEvent = factory.createEvent(event, null);
+        return firstEvent;
     }
 
     @React
@@ -144,24 +164,32 @@ public class CatchUpProcess extends AbstractEventReactor {
 
     private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
     recallMoreEvents(CatchUpId id, @Nullable Event toPostFirst) {
+        log("Recalling more events...");
         CatchUp.Request request = builder.getRequest();
         List<Event> events = new ArrayList<>();
-        if(toPostFirst != null) {
+        if (toPostFirst != null) {
             events.add(toPostFirst);
         }
-        List<Event> readInThisRound = readMore(request, builder.getLastRead());
+        log("Reading the events starting from " + builder.getLastOrderRead());
+        List<Event> readInThisRound = readMore(request, builder.getLastOrderRead(),
+                                               turbulenceStart()
+        );
         events.addAll(readInThisRound);
 
+        log(format("Recalled %s events.", readInThisRound.size()));
         if (events.isEmpty()) {
             return EitherOf2.withB(fullyRecalled(id));
         }
-        //TODO:2019-12-04:alex.tymchenko: handle the events with the same timestamp.
-        Event lastEvent = events.get(events.size() - 1);
-        Timestamp lastEventTimestamp = lastEvent.getContext()
-                                                .getTimestamp();
-        builder.setWhenLastRead(withWindow(lastEventTimestamp));
-        builder.setLastRead(lastEvent.getId());
+        if (!readInThisRound.isEmpty()) {
+            Event lastEvent = events.get(events.size() - 1);
+            Timestamp lastEventTimestamp = lastEvent.getContext()
+                                                    .getTimestamp();
+            builder.setWhenLastRead(withWindow(lastEventTimestamp));
+            builder.setLastOrderRead(lastEvent.getContext()
+                                              .getOrder());
+        }
 
+        log(format("Dispatching %s events.", events.size()));
         dispatchAll(request, events);
 
         int nextRound = builder.getCurrentRound() + 1;
@@ -170,41 +198,43 @@ public class CatchUpProcess extends AbstractEventReactor {
         return EitherOf2.withA(recalled(id));
     }
 
-    private static HistoryEventsRecalled recalled(CatchUpId id) {
-        return HistoryEventsRecalled.newBuilder()
-                                    .setId(id)
-                                    .vBuild();
-    }
-
-    private static HistoryFullyRecalled fullyRecalled(CatchUpId id) {
-        return HistoryFullyRecalled.newBuilder()
-                                   .setId(id)
-                                   .vBuild();
-    }
-
     @React
-    EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled command) {
-        CatchUpId id = command.getId();
+    EitherOf2<LiveEventsPickedUp, CatchUpCompleted>
+    handle(HistoryFullyRecalled event, EventContext context) {
+        CatchUpId id = event.getId();
+        log("Finalizing the catch up.");
         builder.setStatus(CatchUpStatus.FINALIZING);
+        commitState();
 
         CatchUp.Request request = builder.getRequest();
-        List<Event> events = readMore(request, builder.getLastRead());
+        log("Reading the events since " + builder.getWhenLastRead());
+        List<Event> events = readMore(request, builder.getLastOrderRead(), null);
 
         if (events.isEmpty()) {
-            return EitherOf2.withB(completeProcess(id));
+            return EitherOf2.withB(completeProcess(id, context));
         }
         dispatchAll(request, events);
         return EitherOf2.withA(liveEventsPickedUp(id));
     }
 
-    @React
-    CatchUpCompleted on(CatchUpFinalized event) {
-        return completeProcess(event.getId());
+    private void commitState() {
+        storage.write(builder.vBuild());
     }
 
-    private CatchUpCompleted completeProcess(CatchUpId id) {
+    @React
+    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
+        return completeProcess(event.getId(), context);
+    }
+
+    //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
+    private CatchUpCompleted completeProcess(CatchUpId id, EventContext originContext) {
+        log("The catch up completed.");
         builder.setStatus(CatchUpStatus.COMPLETED);
-        return catchUpCompleted(id);
+        commitState();
+        CatchUpCompleted completed = catchUpCompleted(id);
+        Event event = wrapAsEvent(completed, originContext);
+        dispatchAll(builder.getRequest(), ImmutableList.of(event));
+        return completed;
     }
 
     private void dispatchAll(CatchUp.Request request, List<Event> events) {
@@ -212,51 +242,56 @@ public class CatchUpProcess extends AbstractEventReactor {
         ProjectionRepository<Object, ?, ?> targetRepo = projectionRepoFor(request);
 
         for (Event event : events) {
+
+            EventContext context = event.getContext();
+            log("Dispatching: "
+                        + context.getTimestamp()
+                                 .getNanos()
+                        + " -> " + context.getOrder());
             targetRepo.dispatchCatchingUp(event, ids);
         }
     }
 
-    private List<Event> readMore(CatchUp.Request request, EventId afterEvent) {
-        EventStreamQuery query = toEventQuery(request);
+    private static void log(String value) {
+        System.out.println(value);
+    }
+
+    private List<Event> readMore(CatchUp.Request request, int afterEvent,
+                                 @Nullable Timestamp readBefore) {
+        if (readBefore != null) {
+            if (Timestamps.compare(readBefore, builder.getWhenLastRead()) >= 0) {
+                //TODO:2019-12-13:alex.tymchenko: looks an `IllegalStateException` though.
+                return ImmutableList.of();
+            }
+        }
+        EventStreamQuery query = toEventQuery(request, readBefore);
         MemoizingObserver<Event> observer = new MemoizingObserver<>();
         eventStore.read(query, observer);
         List<Event> allEvents = observer.responses();
+        printEvents(allEvents);
         for (int index = 0; index < allEvents.size(); index++) {
             Event event = allEvents.get(index);
-            if (event.getId()
-                     .equals(afterEvent)) {
+            if (event.getContext()
+                     .getOrder() == afterEvent) {
                 int lastIndex = allEvents.size() - 1;
-                if(index == lastIndex) {
+                if (index == lastIndex) {
                     return ImmutableList.of();
                 }
-                return allEvents.subList(index + 1, lastIndex);
+                return allEvents.subList(index + 1, lastIndex + 1);
             }
         }
 
         return allEvents;
     }
 
-    private static LiveEventsPickedUp liveEventsPickedUp(CatchUpId id) {
-        return LiveEventsPickedUp.newBuilder()
-                                 .setId(id)
-                                 .vBuild();
-    }
-
-    private static CatchUpCompleted catchUpCompleted(CatchUpId id) {
-        return CatchUpCompleted.newBuilder()
-                               .setId(id)
-                               .vBuild();
-    }
-
-    private static CatchUpId targetOf(Message message) {
-        return ((CatchUpSignal) message).getId();
-    }
-
-    private static Set<Object> targetIdsFrom(CatchUp.Request request) {
-        List<Any> packedIds = request.getTargetList();
-        return packedIds.stream()
-                        .map(Identifier::unpack)
-                        .collect(Collectors.toSet());
+    private static void printEvents(List<Event> allEvents) {
+        log(format("There were %s events read in total. Props:",
+                   allEvents.size()));
+        for (Event event : allEvents) {
+            EventContext context = event.getContext();
+            log(context.getTimestamp()
+                       .getNanos() + " -> " + context.getOrder());
+        }
     }
 
     private ProjectionRepository<Object, ?, ?> projectionRepoFor(CatchUp.Request request) {
@@ -264,41 +299,18 @@ public class CatchUpProcess extends AbstractEventReactor {
         return repositoryLocator.apply(projectionStateType);
     }
 
-    private EventStreamQuery toEventQuery(CatchUp.Request request) {
+    private EventStreamQuery toEventQuery(CatchUp.Request request, @Nullable Timestamp readBefore) {
         ImmutableList<EventFilter> filters = toFilters(request.getEventTypeList());
         Timestamp readAfter = builder.getWhenLastRead();
-        return EventStreamQuery.newBuilder()
-                               .setAfter(readAfter)
-                               .addAllFilter(filters)
-                               .setLimit(LIMIT)
-                               .vBuild();
-    }
-
-    private static ImmutableList<EventFilter> toFilters(ProtocolStringList rawEventTypes) {
-        return rawEventTypes.stream()
-                            .map(type -> EventFilter
-                                    .newBuilder()
-                                    .setEventType(type)
-                                    .build())
-                            .collect(toImmutableList());
-    }
-
-    private static FinalizeCatchUp finalize(CatchUpId id) {
-        return FinalizeCatchUp.newBuilder()
-                              .setId(id)
-                              .vBuild();
-    }
-
-    private static CatchUpStarted started(CatchUpId id) {
-        return CatchUpStarted.newBuilder()
-                             .setId(id)
-                             .vBuild();
-    }
-
-    private static EventStreamQuery.Limit limitOf(int value) {
-        return EventStreamQuery.Limit.newBuilder()
-                                     .setValue(value)
-                                     .build();
+        EventStreamQuery.Builder builder =
+                EventStreamQuery.newBuilder()
+                                .setAfter(readAfter)
+                                .addAllFilter(filters)
+                                .setLimit(LIMIT);
+        if (readBefore != null) {
+            builder.setBefore(readBefore);
+        }
+        return builder.vBuild();
     }
 
     @FunctionalInterface

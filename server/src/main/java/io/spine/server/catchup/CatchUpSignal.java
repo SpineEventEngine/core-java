@@ -20,10 +20,12 @@
 
 package io.spine.server.catchup;
 
+import io.spine.base.EventMessage;
+
 /**
  * A marker interface for the signals controlling the execution of catch-up processes.
  */
-public interface CatchUpSignal {
+public interface CatchUpSignal extends EventMessage {
 
     CatchUpId getId();
 }

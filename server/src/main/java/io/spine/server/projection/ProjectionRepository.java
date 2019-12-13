@@ -33,6 +33,7 @@ import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
@@ -63,6 +64,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.string.Stringifiers;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -440,7 +442,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                  .immutableCopy();
         }
         Inbox<I> inbox = inbox();
+        EventContext context = event.getContext();
         for (I target : catchUpTargets) {
+            System.out.println("Sending " + context.getTimestamp()
+                                                   .getNanos()
+                                       + " -> " + context.getOrder()
+                                       + " to "
+                                       + Stringifiers.toString(target));
             inbox.send(envelope)
                  .toCatchUp(target);
         }
