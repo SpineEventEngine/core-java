@@ -86,26 +86,19 @@ public class CatchUpClassifier {
                             pausedBuilder.add(message);
                         }
                     } else if (jobStatus == COMPLETED) {
-
-                        //TODO:2019-12-13:alex.tymchenko: de-duplicate here!
-
                         if (message.getStatus() == CATCHING_UP) {
                             DispatchingId dispatchingId = new DispatchingId(message);
                             if(!forDispatching.contains(dispatchingId)) {
-                                System.out.println("Found a message in `CATCHING_UP` status.");
                                 catchUpBuilder.add(message);
                                 forDispatching.add(dispatchingId);
                             } else {
-                                System.out.println("A duplicate in `CATCHING_UP` status found.");
                                 removalBuilder.add(message);
                             }
                         } else if (message.getStatus() == TO_DELIVER) {
                             DispatchingId dispatchingId = new DispatchingId(message);
                             if(!forDispatching.contains(dispatchingId)) {
-                                System.out.println("Found a message in `TO_DELIVER` status.");
                                 deliveryBuilder.add(message);
                             } else {
-                                System.out.println("A duplicate in `TO_DELIVER` status found.");
                                 removalBuilder.add(message);
                             }
                         }

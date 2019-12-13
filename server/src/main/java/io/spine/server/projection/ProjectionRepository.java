@@ -33,7 +33,6 @@ import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
@@ -64,7 +63,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.string.Stringifiers;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -82,9 +80,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Abstract base for repositories managing {@link Projection}s.
  *
- * @param <I> the type of IDs of projections
- * @param <P> the type of projections
- * @param <S> the type of projection state messages
+ * @param <I>
+ *         the type of IDs of projections
+ * @param <P>
+ *         the type of projections
+ * @param <S>
+ *         the type of projection state messages
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState>
         extends EventDispatchingRepository<I, P, S> {
@@ -180,7 +181,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * which projections of this repository are subscribed.
      *
      * @throws IllegalStateException
-     *          if one of the subscribed state classes cannot be served by the created state routing
+     *         if one of the subscribed state classes cannot be served by the created state routing
      */
     private StateUpdateRouting<I> createStateRouting() {
         StateUpdateRouting<I> routing = StateUpdateRouting.newInstance(idClass());
@@ -281,7 +282,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Ensures that the repository has the storage.
      *
      * @return storage instance
-     * @throws IllegalStateException if the storage is null
+     * @throws IllegalStateException
+     *         if the storage is null
      */
     @Override
     protected final RecordStorage<I> recordStorage() {
@@ -326,7 +328,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Ensures that the repository has the storage.
      *
      * @return storage instance
-     * @throws IllegalStateException if the storage is null
+     * @throws IllegalStateException
+     *         if the storage is null
      */
     protected ProjectionStorage<I> projectionStorage() {
         @SuppressWarnings("unchecked") /* OK as we control the creation in createStorage(). */
@@ -414,7 +417,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         ActorContext actorContext = requestFactory.newActorContext();
         EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
         Event event = eventFactory.createEvent(eventMessage, null);
-        context().eventBus().post(event);
+        context().eventBus()
+                 .post(event);
     }
 
     private static ActorRequestFactory requestFactory(UserId actor, boolean multitenant) {
@@ -434,7 +438,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     public void dispatchCatchingUp(Event event, Set<I> ids) {
         EventEnvelope envelope = EventEnvelope.of(event);
         Set<I> catchUpTargets;
-        if(envelope.message() instanceof CatchUpSignal) {
+        if (envelope.message() instanceof CatchUpSignal) {
             catchUpTargets = ids;
         } else {
             Set<I> routedTargets = route(envelope);
@@ -442,13 +446,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                  .immutableCopy();
         }
         Inbox<I> inbox = inbox();
-        EventContext context = event.getContext();
         for (I target : catchUpTargets) {
-            System.out.println("Sending " + context.getTimestamp()
-                                                   .getNanos()
-                                       + " -> " + context.getOrder()
-                                       + " to "
-                                       + Stringifiers.toString(target));
             inbox.send(envelope)
                  .toCatchUp(target);
         }

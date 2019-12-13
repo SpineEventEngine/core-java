@@ -31,7 +31,6 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
@@ -442,14 +441,6 @@ public class DeliveryTest {
            .read(EventStreamQuery.newBuilder()
                                  .addFilter(numberAdded)
                                  .vBuild(), allEvents);
-        System.out.println("---- ALL events: ---");
-        for (Event event : allEvents.responses()) {
-            EventContext context = event.getContext();
-            Timestamp timestamp = context.getTimestamp();
-            System.out.println(timestamp.getSeconds()
-                                       + "." + timestamp.getNanos() + " -> "
-                                       + context.getOrder());
-        }
 
         List<Integer> totalsAfterCatchUp = readTotals(repo, ids);
         List<Integer> expectedTotals = new ArrayList<>();
@@ -489,9 +480,6 @@ public class DeliveryTest {
 
     private static CounterView findView(CounterView.Repository repo, String id) {
         Optional<CounterView> firstView = repo.find(id);
-        if(!firstView.isPresent()) {
-            System.out.println("`CounterView`#" + id + " not found.");
-        }
         Truth8.assertThat(firstView)
               .isPresent();
         return firstView.get();

@@ -22,8 +22,6 @@ package io.spine.server.delivery;
 
 import io.spine.server.ServerEnvironment;
 
-import java.util.Optional;
-
 /**
  * An observer of changes to the shard contents, which triggers immediate delivery of the
  * sharded messages.
@@ -36,18 +34,6 @@ final class LocalDispatchingObserver implements ShardObserver {
     public void onMessage(InboxMessage update) {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
-
-        Optional<DeliveryStats> result = delivery.deliverMessagesFrom(update.getShardIndex());
-        if (update.getStatus() == InboxMessageStatus.CATCHING_UP) {
-            if (result.isPresent()) {
-                DeliveryStats stats = result.get();
-                System.out.println("The delivery for CATCHING_UP message has processed "
-                                           + stats.deliveredCount()
-                                           + " messages in shard # " + stats.shardIndex().getIndex());
-            } else {
-                System.out.println("The delivery for CATCHING_UP message was NOT performed" +
-                                           " in the shard # " + update.getShardIndex().getIndex());
-            }
-        }
+        delivery.deliverMessagesFrom(update.getShardIndex());
     }
 }

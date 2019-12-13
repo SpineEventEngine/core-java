@@ -73,7 +73,6 @@ import static io.spine.server.catchup.CatchUpMessages.targetOf;
 import static io.spine.server.catchup.CatchUpMessages.toFilters;
 import static io.spine.server.catchup.CatchUpMessages.withWindow;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 
 /**
  * A process that performs a projection catch-up.
@@ -164,19 +163,16 @@ public class CatchUpProcess extends AbstractEventReactor {
 
     private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
     recallMoreEvents(CatchUpId id, @Nullable Event toPostFirst) {
-        log("Recalling more events...");
         CatchUp.Request request = builder.getRequest();
         List<Event> events = new ArrayList<>();
         if (toPostFirst != null) {
             events.add(toPostFirst);
         }
-        log("Reading the events starting from " + builder.getLastOrderRead());
         List<Event> readInThisRound = readMore(request, builder.getLastOrderRead(),
                                                turbulenceStart()
         );
         events.addAll(readInThisRound);
 
-        log(format("Recalled %s events.", readInThisRound.size()));
         if (events.isEmpty()) {
             return EitherOf2.withB(fullyRecalled(id));
         }
@@ -189,7 +185,6 @@ public class CatchUpProcess extends AbstractEventReactor {
                                               .getOrder());
         }
 
-        log(format("Dispatching %s events.", events.size()));
         dispatchAll(request, events);
 
         int nextRound = builder.getCurrentRound() + 1;
@@ -202,12 +197,10 @@ public class CatchUpProcess extends AbstractEventReactor {
     EitherOf2<LiveEventsPickedUp, CatchUpCompleted>
     handle(HistoryFullyRecalled event, EventContext context) {
         CatchUpId id = event.getId();
-        log("Finalizing the catch up.");
         builder.setStatus(CatchUpStatus.FINALIZING);
         commitState();
 
         CatchUp.Request request = builder.getRequest();
-        log("Reading the events since " + builder.getWhenLastRead());
         List<Event> events = readMore(request, builder.getLastOrderRead(), null);
 
         if (events.isEmpty()) {
@@ -228,7 +221,6 @@ public class CatchUpProcess extends AbstractEventReactor {
 
     //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
     private CatchUpCompleted completeProcess(CatchUpId id, EventContext originContext) {
-        log("The catch up completed.");
         builder.setStatus(CatchUpStatus.COMPLETED);
         commitState();
         CatchUpCompleted completed = catchUpCompleted(id);
@@ -242,19 +234,10 @@ public class CatchUpProcess extends AbstractEventReactor {
         ProjectionRepository<Object, ?, ?> targetRepo = projectionRepoFor(request);
 
         for (Event event : events) {
-
-            EventContext context = event.getContext();
-            log("Dispatching: "
-                        + context.getTimestamp()
-                                 .getNanos()
-                        + " -> " + context.getOrder());
             targetRepo.dispatchCatchingUp(event, ids);
         }
     }
 
-    private static void log(String value) {
-        System.out.println(value);
-    }
 
     private List<Event> readMore(CatchUp.Request request, int afterEvent,
                                  @Nullable Timestamp readBefore) {
@@ -268,7 +251,6 @@ public class CatchUpProcess extends AbstractEventReactor {
         MemoizingObserver<Event> observer = new MemoizingObserver<>();
         eventStore.read(query, observer);
         List<Event> allEvents = observer.responses();
-        printEvents(allEvents);
         for (int index = 0; index < allEvents.size(); index++) {
             Event event = allEvents.get(index);
             if (event.getContext()
@@ -282,16 +264,6 @@ public class CatchUpProcess extends AbstractEventReactor {
         }
 
         return allEvents;
-    }
-
-    private static void printEvents(List<Event> allEvents) {
-        log(format("There were %s events read in total. Props:",
-                   allEvents.size()));
-        for (Event event : allEvents) {
-            EventContext context = event.getContext();
-            log(context.getTimestamp()
-                       .getNanos() + " -> " + context.getOrder());
-        }
     }
 
     private ProjectionRepository<Object, ?, ?> projectionRepoFor(CatchUp.Request request) {

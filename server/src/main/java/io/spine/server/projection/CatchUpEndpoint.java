@@ -30,10 +30,12 @@ import io.spine.type.TypeName;
  * Dispatches an event to projections during the catch-up.
  */
 public class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
-        extends ProjectionEndpoint<I ,P> {
+        extends ProjectionEndpoint<I, P> {
 
-    private static final TypeName CATCH_UP_STARTED = TypeName.from(CatchUpStarted.getDescriptor());
-    private static final TypeName CATCH_UP_COMPLETED = TypeName.from(CatchUpCompleted.getDescriptor());
+    private static final TypeName CATCH_UP_STARTED =
+            TypeName.from(CatchUpStarted.getDescriptor());
+    private static final TypeName CATCH_UP_COMPLETED =
+            TypeName.from(CatchUpCompleted.getDescriptor());
 
     private CatchUpEndpoint(Repository<I, P> repository,
                             EventEnvelope event) {
@@ -44,7 +46,6 @@ public class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
     CatchUpEndpoint<I, P> of(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
         return new CatchUpEndpoint<>(repository, event);
     }
-
 
     /**
      * Does nothing, as no lifecycle events should be emitted during the catch-up.
@@ -57,13 +58,11 @@ public class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
     @Override
     public void dispatchTo(I entityId) {
         TypeName actualTypeName = envelope().messageTypeName();
-        if(CATCH_UP_STARTED.equals(actualTypeName)) {
-            System.out.println("Killing the state of the projection...");
+        if (CATCH_UP_STARTED.equals(actualTypeName)) {
             ProjectionRepository<I, P, ?> repository = repository();
             repository.recordStorage()
                       .delete(entityId);
-        } else if(CATCH_UP_COMPLETED.equals(actualTypeName)) {
-            System.out.println("CATCH_UP_COMPLETED event arrived.");
+        } else if (CATCH_UP_COMPLETED.equals(actualTypeName)) {
             // do nothing.
         } else {
             super.dispatchTo(entityId);

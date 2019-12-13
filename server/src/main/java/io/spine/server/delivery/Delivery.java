@@ -299,7 +299,6 @@ public final class Delivery implements Logging {
         DeliveryStats stats = new DeliveryStats(index, totalDelivered);
         monitor.onDeliveryCompleted(stats);
         Optional<InboxMessage> lateMessage = inboxStorage.newestMessageToDeliver(index);
-        lateMessage.ifPresent((m) -> System.out.println("--- A late message discovered: " + Stringifiers.toString(m)));
         lateMessage.ifPresent(this::onNewMessage);
 
         return Optional.of(stats);
@@ -328,54 +327,40 @@ public final class Delivery implements Logging {
         boolean continueAllowed = true;
         while (continueAllowed && maybePage.isPresent()) {
             Iterable<CatchUp> catchUpJobs = catchUpStorage.readAll();
-            if(catchUpJobs.iterator().hasNext()) {
-                System.out.println("[#" + index.getIndex() + "] Catch-up job: "
-                                           + Stringifiers.toString(catchUpJobs.iterator()
-                                                                              .next()));
-            }
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
 
-                try {
-                    CatchUpClassifier catchUpClassifier = CatchUpClassifier.of(messages, catchUpJobs);
-                    ImmutableList<InboxMessage> toCatchUp = catchUpClassifier.catchUp();
+                CatchUpClassifier catchUpClassifier = CatchUpClassifier.of(messages, catchUpJobs);
+                ImmutableList<InboxMessage> toCatchUp = catchUpClassifier.catchUp();
 
-                    if(!toCatchUp.isEmpty()) {
-                        DeliveryErrors observedErrors = deliverByType(toCatchUp, ImmutableList.of());
-                        observedErrors.throwIfAny();
-                        totalMessagesDelivered += toCatchUp.size();
-                        System.out.println("Removing  " + toCatchUp.size() + " events after the catch-up.");
-                        inboxStorage.removeAll(toCatchUp);
-                    }
-
-                    ImmutableList<InboxMessage> catchUpRemovals = catchUpClassifier.removal();
-                    if(!catchUpRemovals.isEmpty()) {
-                        System.out.println("Removing " + catchUpRemovals.size() + " events classified as REMOVAL.");
-                        inboxStorage.removeAll(catchUpRemovals);
-                    }
-
-                    ImmutableList<InboxMessage> pausedCatchUp = catchUpClassifier.paused();
-                    if(!pausedCatchUp.isEmpty()) {
-                        System.out.println("Marking " + pausedCatchUp.size() + " events as catching-up.");
-                        inboxStorage.markCatchingUp(pausedCatchUp);
-                    }
-
-                    ImmutableList<InboxMessage> stillToDeliver = catchUpClassifier.delivery();
-                    MessageClassifier classifier = MessageClassifier.of(stillToDeliver,
-                                                                        idempotenceWndStart);
-                    int deliveredInBatch = deliverClassified(classifier);
-                    totalMessagesDelivered += deliveredInBatch;
-
-                    ImmutableList<InboxMessage> toRemove = classifier.removals();
-                    inboxStorage.removeAll(toRemove);
-                    DeliveryStage stage = newStage(index, deliveredInBatch);
-                    continueAllowed = monitorTellsToContinue(stage);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if (!toCatchUp.isEmpty()) {
+                    DeliveryErrors observedErrors = deliverByType(toCatchUp, ImmutableList.of());
+                    observedErrors.throwIfAny();
+                    totalMessagesDelivered += toCatchUp.size();
+                    inboxStorage.removeAll(toCatchUp);
                 }
-            } else {
-                System.out.println("No more messages found to deliver in the shard # " + index.getIndex());
+
+                ImmutableList<InboxMessage> catchUpRemovals = catchUpClassifier.removal();
+                if (!catchUpRemovals.isEmpty()) {
+                    inboxStorage.removeAll(catchUpRemovals);
+                }
+
+                ImmutableList<InboxMessage> pausedCatchUp = catchUpClassifier.paused();
+                if (!pausedCatchUp.isEmpty()) {
+                    inboxStorage.markCatchingUp(pausedCatchUp);
+                }
+
+                ImmutableList<InboxMessage> stillToDeliver = catchUpClassifier.delivery();
+                MessageClassifier classifier = MessageClassifier.of(stillToDeliver,
+                                                                    idempotenceWndStart);
+                int deliveredInBatch = deliverClassified(classifier);
+                totalMessagesDelivered += deliveredInBatch;
+
+                ImmutableList<InboxMessage> toRemove = classifier.removals();
+                inboxStorage.removeAll(toRemove);
+                DeliveryStage stage = newStage(index, deliveredInBatch);
+                continueAllowed = monitorTellsToContinue(stage);
             }
             if (continueAllowed) {
                 maybePage = currentPage.next();
@@ -443,10 +428,8 @@ public final class Delivery implements Logging {
                 delivery.deliver(deliveryPackage, idempotenceWnd);
             } catch (RuntimeException exception) {
                 errors.addException(exception);
-                exception.printStackTrace();
             } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {
                 errors.addError(error);
-                error.printStackTrace();
             }
         }
         inboxStorage.markDelivered(toDeliver);
@@ -583,7 +566,6 @@ public final class Delivery implements Logging {
                 synchronizedListMultimap(MultimapBuilder.hashKeys()
                                                         .arrayListValues()
                                                         .build());
-
 
         private final Set<SignalId> currentlyDispatching = synchronizedSet(new HashSet<>());
 
