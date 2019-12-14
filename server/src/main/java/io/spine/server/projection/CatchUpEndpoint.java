@@ -37,8 +37,7 @@ final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
     private static final TypeName CATCH_UP_COMPLETED =
             TypeName.from(CatchUpCompleted.getDescriptor());
 
-    private CatchUpEndpoint(Repository<I, P> repository,
-                            EventEnvelope event) {
+    private CatchUpEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
     }
 
