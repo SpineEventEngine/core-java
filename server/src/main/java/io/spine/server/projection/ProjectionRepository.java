@@ -40,7 +40,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.catchup.CatchUp;
 import io.spine.server.catchup.CatchUpId;
-import io.spine.server.catchup.CatchUpSignal;
 import io.spine.server.catchup.event.CatchUpRequested;
 import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
@@ -69,6 +68,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -119,6 +119,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         ensureDispatchesEvents();
         initCache(context.isMultitenant());
         initInbox();
+        Supplier<EventStore> eventStore = () -> context.eventBus()
+                                                       .eventStore();
+        CatchUpProcess<I> process = new CatchUpProcess<>(eventStore, this);
+        context.registerEventDispatcher(process);
     }
 
     private void initCache(boolean multitenant) {
@@ -390,9 +394,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     public void catchUp(Set<I> ids, Timestamp since) {
         CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder();
-        requestBuilder
-                .setProjectionType(entityStateType().value())
-                .setSinceWhen(since);
+        requestBuilder.setSinceWhen(since);
         for (I id : ids) {
             Any packed = Identifier.pack(id);
             requestBuilder.addTarget(packed);
@@ -404,9 +406,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             requestBuilder.addEventType(name.value());
         }
         CatchUp.Request request = requestBuilder.vBuild();
+        CatchUpId id = CatchUpId.newBuilder()
+                                .setUuid(Identifier.newUuid())
+                                .setProjectionType(entityStateType().value())
+                                .vBuild();
         CatchUpRequested eventMessage = CatchUpRequested
                 .newBuilder()
-                .setId(CatchUpId.generate())
+                .setId(id)
                 .setRequest(request)
                 .vBuild();
         UserId actor = UserId.newBuilder()
@@ -435,7 +441,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return function.execute();
     }
 
-    public void dispatchCatchingUp(Event event, Set<I> ids) {
+    void dispatchCatchingUp(Event event, Set<I> ids) {
         EventEnvelope envelope = EventEnvelope.of(event);
         Set<I> catchUpTargets;
         if (envelope.message() instanceof CatchUpSignal) {

@@ -18,13 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.catchup;
+package io.spine.server.projection;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
+import io.spine.server.catchup.CatchUpId;
 
 /**
  * A marker interface for the signals controlling the execution of catch-up processes.
  */
+@Immutable
 public interface CatchUpSignal extends EventMessage {
 
     CatchUpId getId();

@@ -18,14 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.catchup;
+package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
+import io.spine.server.catchup.CatchUpId;
 import io.spine.server.catchup.event.CatchUpCompleted;
 import io.spine.server.catchup.event.CatchUpStarted;
 import io.spine.server.catchup.event.HistoryEventsRecalled;
@@ -33,10 +32,6 @@ import io.spine.server.catchup.event.HistoryFullyRecalled;
 import io.spine.server.catchup.event.LiveEventsPickedUp;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.protobuf.util.Durations.fromMillis;
@@ -81,13 +76,6 @@ final class CatchUpMessages {
 
     static CatchUpId targetOf(Message message) {
         return ((CatchUpSignal) message).getId();
-    }
-
-    static Set<Object> targetIdsFrom(CatchUp.Request request) {
-        List<Any> packedIds = request.getTargetList();
-        return packedIds.stream()
-                        .map(Identifier::unpack)
-                        .collect(Collectors.toSet());
     }
 
     static Timestamp withWindow(Timestamp value) {

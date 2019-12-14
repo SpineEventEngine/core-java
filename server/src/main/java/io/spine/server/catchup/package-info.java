@@ -19,7 +19,7 @@
  */
 
 /**
- * A package devoted to the projection catch-up routines.
+ * A package defining the catch-up related commands and events.
  */
 @ParametersAreNonnullByDefault
 @CheckReturnValue

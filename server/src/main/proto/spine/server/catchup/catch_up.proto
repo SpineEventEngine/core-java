@@ -24,31 +24,29 @@ message CatchUp {
 
     // A description of a catch-up requested.
     message Request {
-        // A type URL of the projection under catch-up.
-        string projection_type = 1 [(required) = true];
 
         // IDs of the projections under catch-up, packed as `Any`.
-        repeated google.protobuf.Any target = 2;
+        repeated google.protobuf.Any target = 1;
 
         // Since which point in time the catch-up has been originally requested.
         //
         // This value is inclusive as for the timestamp of events to which this catch-up should
         // be applicable.
         //
-        google.protobuf.Timestamp since_when = 3 [(required) = true, (when).in = PAST];
+        google.protobuf.Timestamp since_when = 2 [(required) = true, (when).in = PAST];
 
         // The type URLs of events to read from the Event Store.
-        repeated string event_type = 4;
+        repeated string event_type = 3;
     }
 
     Request request = 2 [(required) = true, (validate) = true];
 
     // During the catch-up, this field holds the timestamp of the last event already processed.
-    google.protobuf.Timestamp when_last_read = 5;
+    google.protobuf.Timestamp when_last_read = 3;
 
-    int32 last_order_read = 6;
+    int32 last_order_read = 4;
 
-    CatchUpStatus status = 7 [(required) = true];
+    CatchUpStatus status = 5 [(required) = true];
 
     // The index of the current catch-up round.
     //
@@ -57,7 +55,7 @@ message CatchUp {
     //
     // The index of the first round is 0.
     //
-    int32 current_round = 8;
+    int32 current_round = 6;
 }
 
 // An ID of a catch-up process.
@@ -65,6 +63,9 @@ message CatchUp {
 message CatchUpId {
 
     string uuid = 1;
+
+    // A type URL of the projection under catch-up.
+    string projection_type = 2 [(required) = true];
 }
 
 enum CatchUpStatus {

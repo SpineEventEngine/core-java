@@ -18,19 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.catchup;
+package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.EventMessage;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.catchup.CatchUp;
+import io.spine.server.catchup.CatchUpId;
+import io.spine.server.catchup.CatchUpStatus;
 import io.spine.server.catchup.event.CatchUpCompleted;
 import io.spine.server.catchup.event.CatchUpRequested;
 import io.spine.server.catchup.event.CatchUpStarted;
@@ -50,7 +56,6 @@ import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.React;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
@@ -59,25 +64,25 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.server.catchup.CatchUpMessages.catchUpCompleted;
-import static io.spine.server.catchup.CatchUpMessages.fullyRecalled;
-import static io.spine.server.catchup.CatchUpMessages.limitOf;
-import static io.spine.server.catchup.CatchUpMessages.liveEventsPickedUp;
-import static io.spine.server.catchup.CatchUpMessages.recalled;
-import static io.spine.server.catchup.CatchUpMessages.started;
-import static io.spine.server.catchup.CatchUpMessages.targetIdsFrom;
-import static io.spine.server.catchup.CatchUpMessages.targetOf;
-import static io.spine.server.catchup.CatchUpMessages.toFilters;
-import static io.spine.server.catchup.CatchUpMessages.withWindow;
+import static io.spine.server.projection.CatchUpMessages.catchUpCompleted;
+import static io.spine.server.projection.CatchUpMessages.fullyRecalled;
+import static io.spine.server.projection.CatchUpMessages.limitOf;
+import static io.spine.server.projection.CatchUpMessages.liveEventsPickedUp;
+import static io.spine.server.projection.CatchUpMessages.recalled;
+import static io.spine.server.projection.CatchUpMessages.started;
+import static io.spine.server.projection.CatchUpMessages.targetOf;
+import static io.spine.server.projection.CatchUpMessages.toFilters;
+import static io.spine.server.projection.CatchUpMessages.withWindow;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A process that performs a projection catch-up.
  */
-public class CatchUpProcess extends AbstractEventReactor {
+public class CatchUpProcess<I> extends AbstractEventReactor {
 
     //TODO:2019-11-29:alex.tymchenko: consider making this configurable via the `ServerEnvironment`.
     private static final EventStreamQuery.Limit LIMIT = limitOf(500);
@@ -85,16 +90,16 @@ public class CatchUpProcess extends AbstractEventReactor {
 
     //TODO:2019-12-13:alex.tymchenko: make this configurable.
     private final Duration turbulencePeriod = Durations.fromMillis(500);
-    private final EventStore eventStore;
-    private final RepositoryLocator repositoryLocator;
+    private final Supplier<EventStore> eventStore;
+    private final ProjectionRepository<I, ?, ?> repository;
     private final Inbox<CatchUpId> inbox;
     private final CatchUpStorage storage;
 
     private CatchUp.Builder builder = null;
 
-    public CatchUpProcess(EventStore eventStore, RepositoryLocator locator) {
+    CatchUpProcess(Supplier<EventStore> eventStore, ProjectionRepository<I, ?, ?> repository) {
         this.eventStore = eventStore;
-        this.repositoryLocator = locator;
+        this.repository = repository;
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         this.storage = delivery.catchUpStorage();
@@ -104,8 +109,21 @@ public class CatchUpProcess extends AbstractEventReactor {
     private Inbox<CatchUpId> configureInbox(Delivery delivery) {
         Inbox.Builder<CatchUpId> builder = delivery.newInbox(TYPE);
         builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new);
-
         return builder.build();
+    }
+
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        EventMessage raw = envelope.message();
+        if (!(raw instanceof CatchUpSignal)) {
+            return false;
+        }
+        CatchUpSignal asSignal = (CatchUpSignal) raw;
+        String actualType = asSignal.getId()
+                                    .getProjectionType();
+        String expectedType = repository.entityStateType()
+                                        .value();
+        return expectedType.equals(actualType);
     }
 
     @CanIgnoreReturnValue
@@ -185,7 +203,7 @@ public class CatchUpProcess extends AbstractEventReactor {
                                               .getOrder());
         }
 
-        dispatchAll(request, events);
+        dispatchAll(events);
 
         int nextRound = builder.getCurrentRound() + 1;
         builder.setCurrentRound(nextRound);
@@ -206,7 +224,7 @@ public class CatchUpProcess extends AbstractEventReactor {
         if (events.isEmpty()) {
             return EitherOf2.withB(completeProcess(id, context));
         }
-        dispatchAll(request, events);
+        dispatchAll(events);
         return EitherOf2.withA(liveEventsPickedUp(id));
     }
 
@@ -225,19 +243,22 @@ public class CatchUpProcess extends AbstractEventReactor {
         commitState();
         CatchUpCompleted completed = catchUpCompleted(id);
         Event event = wrapAsEvent(completed, originContext);
-        dispatchAll(builder.getRequest(), ImmutableList.of(event));
+        dispatchAll(ImmutableList.of(event));
         return completed;
     }
 
-    private void dispatchAll(CatchUp.Request request, List<Event> events) {
-        Set<Object> ids = targetIdsFrom(request);
-        ProjectionRepository<Object, ?, ?> targetRepo = projectionRepoFor(request);
+    private void dispatchAll(List<Event> events) {
+        CatchUp.Request request = builder.getRequest();
+
+        List<Any> packedIds = request.getTargetList();
+        Set<I> ids = packedIds.stream()
+                              .map((any) -> Identifier.unpack(any, repository.idClass()))
+                              .collect(Collectors.toSet());
 
         for (Event event : events) {
-            targetRepo.dispatchCatchingUp(event, ids);
+            repository.dispatchCatchingUp(event, ids);
         }
     }
-
 
     private List<Event> readMore(CatchUp.Request request, int afterEvent,
                                  @Nullable Timestamp readBefore) {
@@ -249,7 +270,7 @@ public class CatchUpProcess extends AbstractEventReactor {
         }
         EventStreamQuery query = toEventQuery(request, readBefore);
         MemoizingObserver<Event> observer = new MemoizingObserver<>();
-        eventStore.read(query, observer);
+        eventStore.get().read(query, observer);
         List<Event> allEvents = observer.responses();
         for (int index = 0; index < allEvents.size(); index++) {
             Event event = allEvents.get(index);
@@ -266,11 +287,6 @@ public class CatchUpProcess extends AbstractEventReactor {
         return allEvents;
     }
 
-    private ProjectionRepository<Object, ?, ?> projectionRepoFor(CatchUp.Request request) {
-        TypeUrl projectionStateType = TypeUrl.parse(request.getProjectionType());
-        return repositoryLocator.apply(projectionStateType);
-    }
-
     private EventStreamQuery toEventQuery(CatchUp.Request request, @Nullable Timestamp readBefore) {
         ImmutableList<EventFilter> filters = toFilters(request.getEventTypeList());
         Timestamp readAfter = builder.getWhenLastRead();
@@ -283,12 +299,6 @@ public class CatchUpProcess extends AbstractEventReactor {
             builder.setBefore(readBefore);
         }
         return builder.vBuild();
-    }
-
-    @FunctionalInterface
-    public interface RepositoryLocator
-            extends Function<TypeUrl, ProjectionRepository<Object, ?, ?>> {
-
     }
 
     private final class EventEndpoint implements MessageEndpoint<CatchUpId, EventEnvelope> {
