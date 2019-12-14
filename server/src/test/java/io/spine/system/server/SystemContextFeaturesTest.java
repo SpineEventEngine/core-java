@@ -24,6 +24,7 @@ import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
@@ -140,13 +141,22 @@ class SystemContextFeaturesTest {
                 .newBuilder()
                 .setEntity(MessageId.newBuilder()
                                     .setId(Identifier.pack(42))
-                                    .setTypeUrl(TypeUrl.of(EmptyEntityState.class).value()))
+                                    .setTypeUrl(TypeUrl.of(EmptyEntityState.class)
+                                                       .value()))
                 .setOldState(pack(StringValue.of("0")))
                 .setNewState(pack(StringValue.of("42")))
                 .addSignalId(MessageId.newBuilder()
                                       .setId(Identifier.pack(CommandId.generate()))
-                                      .setTypeUrl(TypeUrl.of(EntityStateChanged.class).value()))
+                                      .setTypeUrl(TypeUrl.of(EntityStateChanged.class)
+                                                         .value()))
                 .vBuild();
-        return events.createEvent(eventMessage);
+        Event event = events.createEvent(eventMessage);
+        EventContext modifiedContext = event.getContext()
+                                            .toBuilder()
+                                            .setOrder(1)
+                                            .vBuild();
+        return event.toBuilder()
+                    .setContext(modifiedContext)
+                    .vBuild();
     }
 }
