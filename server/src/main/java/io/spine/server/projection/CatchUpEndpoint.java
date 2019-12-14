@@ -29,7 +29,7 @@ import io.spine.type.TypeName;
 /**
  * Dispatches an event to projections during the catch-up.
  */
-public class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
+final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
         extends ProjectionEndpoint<I, P> {
 
     private static final TypeName CATCH_UP_STARTED =

@@ -82,7 +82,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A process that performs a projection catch-up.
  */
-public class CatchUpProcess<I> extends AbstractEventReactor {
+final class CatchUpProcess<I> extends AbstractEventReactor {
 
     //TODO:2019-11-29:alex.tymchenko: consider making this configurable via the `ServerEnvironment`.
     private static final EventStreamQuery.Limit LIMIT = limitOf(500);
