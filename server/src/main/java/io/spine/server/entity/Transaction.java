@@ -479,9 +479,9 @@ public abstract class Transaction<I,
      * getter to the entity state.
      *
      * <p>The enum-typed columns require an additional conversion as the
-     * {@link Message.Builder#setField(Descriptors.FieldDescriptor, Object) setField(...)} method
-     * should receive a {@link com.google.protobuf.Descriptors.EnumValueDescriptor
-     * EnumValueDescriptor} instance per Protobuf rules.
+     * {@link Message.Builder#setField(Descriptors.FieldDescriptor, Object)} method should receive
+     * a {@link com.google.protobuf.Descriptors.EnumValueDescriptor EnumValueDescriptor} instance
+     * per Protobuf rules.
      */
     private void propagateValue(InterfaceBasedColumn column, Message.Builder entityState) {
         Object value = column.valueIn(entity);
