@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests for {@link io.spine.server.projection.ProjectionTransaction}.
  */
-@DisplayName("ProjectionTransaction should")
+@DisplayName("`ProjectionTransaction` should")
 class ProjectionTransactionTest
         extends TransactionTest<Id,
         Projection<Id, ProjectionState, ProjectionState.Builder>,
@@ -117,6 +117,7 @@ class ProjectionTransactionTest
                             .contains(actualMessage));
     }
 
+    @SuppressWarnings("rawtypes") // For the brevity of the test.
     @Override
     protected DispatchOutcome applyEvent(Transaction tx, Event event) {
         ProjectionTransaction cast = (ProjectionTransaction) tx;
