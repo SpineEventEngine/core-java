@@ -12,7 +12,7 @@ all modules and does not describe the project structure per-subproject.
 
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>1.2.10</version>
+<version>1.3.0</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -70,25 +70,25 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-model-compiler</artifactId>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-plugin-base</artifactId>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -130,25 +130,25 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testlib</artifactId>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testutil-time</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mute-logging</artifactId>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-plugin-testlib</artifactId>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -210,12 +210,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-javadoc-filter</artifactId>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-protoc-plugin</artifactId>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
