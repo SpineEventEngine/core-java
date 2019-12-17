@@ -481,7 +481,7 @@ public abstract class Transaction<I,
      * <p>The enum-typed columns require an additional conversion as the
      * {@link Message.Builder#setField(Descriptors.FieldDescriptor, Object)} method should receive
      * a {@link com.google.protobuf.Descriptors.EnumValueDescriptor EnumValueDescriptor} instance
-     * per Protobuf rules.
+     * by the Protobuf rules.
      */
     private void propagateValue(InterfaceBasedColumn column, Message.Builder entityState) {
         Object value = column.valueIn(entity);
