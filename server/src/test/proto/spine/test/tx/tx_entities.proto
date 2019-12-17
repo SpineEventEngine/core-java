@@ -48,4 +48,10 @@ message ProjectionState {
     Id id = 1;
     string name = 2 [(required) = true];
     int32 name_length = 3 [(column) = true];
+    ProjectionType type = 4 [(column) = true];
+
+    enum ProjectionType {
+        USEFUL = 0;
+        VERY_USEFUL = 1;
+    }
 }

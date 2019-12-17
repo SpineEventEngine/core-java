@@ -30,6 +30,7 @@ import io.spine.server.entity.TransactionTest;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.ProjectionState;
+import io.spine.server.entity.given.tx.ProjectionState.ProjectionType;
 import io.spine.server.entity.given.tx.TxProjection;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.type.EventEnvelope;
@@ -40,13 +41,14 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.given.tx.ProjectionState.ProjectionType.VERY_USEFUL;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link io.spine.server.projection.ProjectionTransaction}.
  */
-@DisplayName("ProjectionTransaction should")
+@DisplayName("`ProjectionTransaction` should")
 class ProjectionTransactionTest
         extends TransactionTest<Id,
         Projection<Id, ProjectionState, ProjectionState.Builder>,
@@ -99,6 +101,7 @@ class ProjectionTransactionTest
                 .setId(id())
                 .setName(nameString)
                 .setNameLength(nameString.length())
+                .setType(VERY_USEFUL)
                 .build();
     }
 
@@ -114,6 +117,7 @@ class ProjectionTransactionTest
                             .contains(actualMessage));
     }
 
+    @SuppressWarnings("rawtypes") // For the brevity of the test.
     @Override
     protected DispatchOutcome applyEvent(Transaction tx, Event event) {
         ProjectionTransaction cast = (ProjectionTransaction) tx;
@@ -156,7 +160,7 @@ class ProjectionTransactionTest
     @Test
     @DisplayName("propagate column values to the entity state on commit")
     void propagateColumnValues() {
-        Projection<Id, ProjectionState, ProjectionState.Builder> entity = createEntity();
+        TxProjection entity = (TxProjection) createEntity();
         String name = "some-projection-name";
         TxCreated txCreated = TxCreated
                 .newBuilder()
@@ -168,6 +172,10 @@ class ProjectionTransactionTest
 
         int nameLength = entity.state()
                                .getNameLength();
-        assertThat(nameLength).isEqualTo(name.length());
+        assertThat(nameLength).isEqualTo(entity.getNameLength());
+
+        ProjectionType type = entity.state()
+                                    .getType();
+        assertThat(type).isEqualTo(entity.getType());
     }
 }
