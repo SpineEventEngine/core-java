@@ -4,8 +4,8 @@
 [![license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Gitter chat](https://badges.gitter.im/SpineEventEngine.png)](https://gitter.im/SpineEventEngine)
 
-Spine Event Engine is a Java framework for building Event Sourcing and CQRS applications that are accessed by
-clients built with JavaScript, Java Nano (Android), C++, and Java.
+Spine Event Engine is a Java framework for building Event Sourcing and CQRS applications that are 
+accessed by clients built with JavaScript, Java Nano (Android), C++, and Java.
 
 Requires Java 8 or higher.
 
