@@ -918,16 +918,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *
      * <p>The method may be used as follows:
      * <pre>
-     *     {@code
-     *         VerifyingCounter updateCounter =
-     *               context.assertSubscriptionUpdates(
-     *                       topic,
-     *                       assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
-     *                                                               .isEqualTo(expected)
-     *               );
-     *         context.receivesCommand(createProject); // Some command creating the `expected`.
-     *         updateCounter.verifyEquals(1);
-     *     }
+     * VerifyingCounter updateCounter =
+     *         context.assertSubscriptionUpdates(
+     *                 topic,
+     *                 assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
+     *                                                         .isEqualTo(expected)
+     *         );
+     * context.receivesCommand(createProject); // Some command creating the `expected`.
+     * updateCounter.verifyEquals(1);
      * </pre>
      *
      * <p>Please note that the return value may be ignored, but then receiving {@code 0} incoming

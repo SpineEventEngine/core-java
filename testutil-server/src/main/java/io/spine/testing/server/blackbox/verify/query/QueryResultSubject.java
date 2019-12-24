@@ -52,6 +52,12 @@ import static io.spine.testing.server.entity.IterableEntityVersionSubject.entity
  *        .containsExactly(state1, state2);
  * </pre>
  *
+ * <p>If the actual queried messages are required, the subject can return them as follows:
+ * <pre>
+ * context.assertQueryResult(query)
+ *        .actual();
+ * </pre>
+ *
  * <p>There are also convenience methods for checking response {@link Status} and received entity
  * {@linkplain Version versions}, as well as some others.
  *
@@ -80,12 +86,27 @@ public final class QueryResultSubject
      */
     private IterableEntityVersionSubject versionsSubject;
 
-    private final Iterable<EntityState> actual;
+    private final ImmutableList<EntityState> actual;
 
     private QueryResultSubject(FailureMetadata failureMetadata,
                                Iterable<EntityState> entityStates) {
         super(failureMetadata, entityStates);
-        this.actual = entityStates;
+        this.actual = ImmutableList.copyOf(entityStates);
+    }
+
+    /**
+     * Creates a new instance of the subject.
+     *
+     * <p>Unlike other {@code Subject}s, the {@code QueryResultSubject} does not accept
+     * {@code null} arguments, as {@code null} {@code QueryResponse} always indicates an error.
+     */
+    public static QueryResultSubject assertQueryResult(QueryResponse queryResponse) {
+        checkNotNull(queryResponse, "`QueryResponse` must never be `null`.");
+
+        Iterable<EntityState> entityStates = extractEntityStates(queryResponse);
+        QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
+        subject.initChildSubjects(queryResponse);
+        return subject;
     }
 
     private void initChildSubjects(QueryResponse queryResponse) {
@@ -99,19 +120,10 @@ public final class QueryResultSubject
     }
 
     /**
-     * Creates a new instance of the subject.
-     *
-     * <p>Unlike other {@code Subject}s, the {@code QueryResultSubject} does not accept
-     * {@code null} arguments, as {@code null} {@code QueryResponse} always indicates an error.
+     * Obtains the actually queried entity states.
      */
-    public static
-    QueryResultSubject assertQueryResult(QueryResponse queryResponse) {
-        checkNotNull(queryResponse, "`QueryResponse` must never be `null`.");
-
-        Iterable<EntityState> entityStates = extractEntityStates(queryResponse);
-        QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
-        subject.initChildSubjects(queryResponse);
-        return subject;
+    public ImmutableList<EntityState> actual(){
+        return actual;
     }
 
     /**
@@ -135,8 +147,10 @@ public final class QueryResultSubject
      */
     public ProtoSubject containsSingleEntityStateThat() {
         assertContainsSingleItem();
-        EntityState state = actual.iterator().next();
-        ProtoSubject subject = check("singleEntityState()").about(protos()).that(state);
+        EntityState state = actual.iterator()
+                                  .next();
+        ProtoSubject subject = check("singleEntityState()").about(protos())
+                                                           .that(state);
         return subject;
     }
 
@@ -160,7 +174,7 @@ public final class QueryResultSubject
         hasSize(1);
     }
 
-    private static Iterable<EntityState> extractEntityStates(QueryResponse queryResponse) {
+    private static ImmutableList<EntityState> extractEntityStates(QueryResponse queryResponse) {
         ImmutableList<EntityState> result = ImmutableList.copyOf(queryResponse.states());
         return result;
     }
@@ -170,8 +184,9 @@ public final class QueryResultSubject
     }
 
     private static Status extractStatus(QueryResponse queryResponse) {
-        return queryResponse.getResponse()
-                            .getStatus();
+        return queryResponse
+                .getResponse()
+                .getStatus();
     }
 
     static Subject.Factory<QueryResultSubject, Iterable<EntityState>> queryResult() {
