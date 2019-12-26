@@ -46,7 +46,7 @@ import static io.spine.server.event.EventOrigin.fromAnotherMessage;
 import static io.spine.validate.Validate.checkValid;
 
 /**
- * Produces events in response to a command.
+ * Produces events.
  */
 public class EventFactory {
 
@@ -75,7 +75,7 @@ public class EventFactory {
     }
 
     /**
-     * Creates a new event factory for producing events to be imported into a Bounced Context.
+     * Creates a new event factory for producing events to be imported into a Bounded Context.
      *
      * @param actorContext
      *         the description of the actor who imports the events
