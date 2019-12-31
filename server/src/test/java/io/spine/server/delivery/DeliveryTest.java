@@ -31,6 +31,7 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
@@ -47,6 +48,7 @@ import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.DCreateTask;
@@ -54,6 +56,7 @@ import io.spine.test.delivery.DTaskView;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
@@ -359,11 +362,12 @@ public class DeliveryTest {
     public void deliverMessagesInOrderOfEmission() throws InterruptedException {
         changeShardCountTo(20);
 
-        SingleTenantBlackBoxContext context = BlackBoxBoundedContext.singleTenant()
-                                                                    .with(DefaultRepository.of(
-                                                                            TaskAggregate.class))
-                                                                    .with(new TaskAssignment.Repository())
-                                                                    .with(new TaskView.Repository());
+        SingleTenantBlackBoxContext context =
+                BlackBoxBoundedContext.singleTenant()
+                                      .with(DefaultRepository.of(
+                                              TaskAggregate.class))
+                                      .with(new TaskAssignment.Repository())
+                                      .with(new TaskView.Repository());
         List<DCreateTask> commands = generateCommands(200);
         ExecutorService service = newFixedThreadPool(20);
         service.invokeAll(commands.stream()
@@ -388,13 +392,18 @@ public class DeliveryTest {
 
     @Test
     public void catchUp() throws InterruptedException {
+
+        Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
+        Timestamp aMinuteAgo = Timestamps.subtract(Time.currentTime(), Durations.fromMinutes(1));
+
+        String[] ids = {"first", "second", "third", "fourth"};
+        List<NumberAdded> events = generateEvents(200, ids);
+
         changeShardCountTo(2);
         CounterView.Repository repo = new CounterView.Repository();
         SingleTenantBlackBoxContext ctx = BlackBoxBoundedContext.singleTenant()
                                                                 .with(repo);
-
-        String[] ids = {"first", "second", "third", "fourth"};
-        List<NumberAdded> events = generateEvents(200, ids);
+        addHistory(aWhileAgo, events, ctx);
 
         // Round 1. Fight!
 
@@ -409,22 +418,30 @@ public class DeliveryTest {
         assertThat(initialTotals).isEqualTo(sums.boxed()
                                                 .collect(toList()));
 
-        // Round 2. Catch up the first one and fight!
+        // Round 2. Catch up the first and the second and fight!
 
         int newWeight = 100;
         CounterView.changeWeightTo(newWeight);
-        Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
 
         ExecutorService service = newFixedThreadPool(20);
         List<Callable<Object>> jobs = new ArrayList<>();
 
         // Do the same, but add the catch-up for ID #0 as the first job.
         String firstId = ids[0];
-        Callable<Object> catchUpCallable = () -> {
+        Callable<Object> firstCatchUp = () -> {
             repo.catchUp(ImmutableSet.of(firstId), aWhileAgo);
             return nullRef();
         };
-        jobs.add(catchUpCallable);
+
+        // And add the catch-up for ID #1 as the second job.
+        String secondId = ids[1];
+        Callable<Object> secondCatchUp = () -> {
+            repo.catchUp(ImmutableSet.of(secondId), aMinuteAgo);
+            return nullRef();
+        };
+
+        jobs.add(firstCatchUp);
+        jobs.add(secondCatchUp);
         jobs.addAll(asPostJobs(ctx, events));
         service.invokeAll(jobs);
         List<Runnable> leftovers = service.shutdownNow();
@@ -436,20 +453,45 @@ public class DeliveryTest {
                                       .value())
                 .build();
         MemoizingObserver<Event> allEvents = new MemoizingObserver<>();
-        ctx.eventBus()
-           .eventStore()
-           .read(EventStreamQuery.newBuilder()
-                                 .addFilter(numberAdded)
-                                 .vBuild(), allEvents);
+        EventStore eventStore = ctx.eventBus()
+                                   .eventStore();
+        eventStore.read(EventStreamQuery.newBuilder()
+                                        .addFilter(numberAdded)
+                                        .vBuild(), allEvents);
 
         List<Integer> totalsAfterCatchUp = readTotals(repo, ids);
         List<Integer> expectedTotals = new ArrayList<>();
-        expectedTotals.add(sumInRound * newWeight / initialWeight * 2);
-        IntStream.range(1, ids.length)
-                 .forEach((i) -> expectedTotals.add(
-                         sumInRound + sumInRound * newWeight / initialWeight));
+        int firstSumExpected = sumInRound * newWeight / initialWeight * 3;
+        int secondSumExpected = sumInRound * newWeight / initialWeight * 2;
+        int untouchedSum = sumInRound + sumInRound * newWeight / initialWeight;
+
+        expectedTotals.add(firstSumExpected);
+        expectedTotals.add(secondSumExpected);
+        expectedTotals.add(untouchedSum);
+        expectedTotals.add(untouchedSum);
+
         assertThat(totalsAfterCatchUp).isEqualTo(expectedTotals);
 
+    }
+
+    private static void addHistory(Timestamp when,
+                                   List<NumberAdded> events,
+                                   SingleTenantBlackBoxContext ctx) {
+        EventStore eventStore = ctx.eventBus()
+                                   .eventStore();
+        TestEventFactory factory = TestEventFactory.newInstance(DeliveryTest.class);
+        for (NumberAdded message : events) {
+            Event event = factory.createEvent(message, null);
+            EventContext context = event.getContext();
+            EventContext modifiedContext = context.toBuilder()
+                                                  .setTimestamp(factory.withNanosAsOrder(when))
+                                                  .vBuild();
+
+            Event eventAtTime = event.toBuilder()
+                                     .setContext(modifiedContext)
+                                     .vBuild();
+            eventStore.append(eventAtTime);
+        }
     }
 
     private static List<Callable<Object>> asPostJobs(SingleTenantBlackBoxContext ctx,

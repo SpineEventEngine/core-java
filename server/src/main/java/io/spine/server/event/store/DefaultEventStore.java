@@ -24,13 +24,11 @@ import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LoggerConfig;
 import com.google.protobuf.TextFormat;
-import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -40,7 +38,6 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
@@ -51,6 +48,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.flogger.LazyArgs.lazy;
+import static io.spine.server.event.EventComparator.chronologically;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -66,8 +64,6 @@ public final class DefaultEventStore
                     "Observed tenants are: %s.";
 
     private final Log log;
-
-    private final OrderCounter orderCounter = new OrderCounter();
 
     /**
      * Constructs new instance.
@@ -170,7 +166,7 @@ public final class DefaultEventStore
                 .stream()
                 .map(EEntity::state)
                 .filter(predicate)
-                .sorted(chronologically())
+                .sorted(chronologically)
                 .iterator();
         return result;
     }
@@ -178,40 +174,6 @@ public final class DefaultEventStore
     @Override
     protected boolean isTypeSupplier() {
         return false;
-    }
-
-    /**
-     * Returns comparator which compares events by their timestamp in chronological order.
-     */
-    private static Comparator<Event> chronologically() {
-
-        return (e1, e2) -> {
-            int timeComparison = Timestamps.compare(e1.time(), e2.time());
-            if (timeComparison != 0) {
-                return timeComparison;
-            }
-            EventContext ctx1 = e1.context();
-            EventContext ctx2 = e2.context();
-            int v1 = ctx1.getVersion()
-                         .getNumber();
-            int v2 = ctx2.getVersion()
-                         .getNumber();
-            int versionComparison = Integer.compare(v1, v2);
-            if (versionComparison != 0) {
-                return versionComparison;
-            }
-            int o1 = ctx1.getOrder();
-            int o2 = ctx2.getOrder();
-            int orderComparison = Integer.compare(o1, o2);
-            if (orderComparison != 0) {
-                return orderComparison;
-            }
-            String id1 = e1.getId()
-                           .getValue();
-            String id2 = e2.getId()
-                           .getValue();
-            return id1.compareTo(id2);
-        };
     }
 
     /**
@@ -243,24 +205,13 @@ public final class DefaultEventStore
     }
 
     private void store(Event event) {
-        EEntity entity = EEntity.create(setOrder(event));
+        EEntity entity = EEntity.create(event);
         store(entity);
-    }
-
-    private Event setOrder(Event event) {
-        EventContext updatedCtx = event.getContext()
-                                       .toBuilder()
-                                       .setOrder(orderCounter.getNextValue())
-                                       .build();
-        return event.toBuilder()
-                           .setContext(updatedCtx)
-                           .build();
     }
 
     private void store(Iterable<Event> events) {
         ImmutableList<EEntity> entities =
                 Streams.stream(events)
-                       .map(this::setOrder)
                        .map(EEntity::create)
                        .collect(toImmutableList());
         store(entities);
@@ -300,27 +251,6 @@ public final class DefaultEventStore
 
         private void readingComplete(StreamObserver<Event> observer) {
             debug.log("Observer `%s` got all queried events.", observer);
-        }
-    }
-
-    static final class OrderCounter {
-
-        private static final int MAX_VERSION = 10_000;
-        private static final OrderCounter instance = new OrderCounter();
-
-        private int counter;
-
-        private synchronized int getNextValue() {
-            counter++;
-            counter = counter % MAX_VERSION;
-            return counter;
-        }
-
-        /**
-         * Obtains the next version value.
-         */
-        static int next() {
-            return instance.getNextValue();
         }
     }
 }

@@ -20,6 +20,8 @@
 
 package io.spine.server.projection;
 
+import com.google.protobuf.Timestamp;
+import io.spine.core.EventContext;
 import io.spine.server.catchup.event.CatchUpCompleted;
 import io.spine.server.catchup.event.CatchUpStarted;
 import io.spine.server.entity.Repository;
@@ -29,13 +31,15 @@ import io.spine.type.TypeName;
 /**
  * Dispatches an event to projections during the catch-up.
  */
-final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
+public final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
         extends ProjectionEndpoint<I, P> {
 
     private static final TypeName CATCH_UP_STARTED =
             TypeName.from(CatchUpStarted.getDescriptor());
     private static final TypeName CATCH_UP_COMPLETED =
             TypeName.from(CatchUpCompleted.getDescriptor());
+
+    public static boolean secondTargetCatchUpCompleted = false;
 
     private CatchUpEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
@@ -58,12 +62,25 @@ final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
     public void dispatchTo(I entityId) {
         TypeName actualTypeName = envelope().messageTypeName();
         if (CATCH_UP_STARTED.equals(actualTypeName)) {
+            System.out.println("[" + entityId + "] Killing the projection state.");
             ProjectionRepository<I, P, ?> repository = repository();
             repository.recordStorage()
                       .delete(entityId);
+//            CatchUpSignal signal = (CatchUpSignal) envelope().message();
+//            repository.onCatchUpStarted(entityId, signal.getId());
         } else if (CATCH_UP_COMPLETED.equals(actualTypeName)) {
+            System.out.println("[" + entityId + "] `CatchUpCompleted` seen by the endpoint.");
+            if(entityId.equals("second")) {
+                secondTargetCatchUpCompleted = true;
+            }
             // do nothing.
         } else {
+            EventContext context = envelope().context();
+            Timestamp timestamp = context.getTimestamp();
+
+            System.out.println(" ---- [" + entityId + "] Endpoint is dispatched with "
+                                       + timestamp.getSeconds()
+                                       + '.' + timestamp.getNanos());
             super.dispatchTo(entityId);
         }
     }

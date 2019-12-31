@@ -24,7 +24,6 @@ import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
@@ -151,12 +150,6 @@ class SystemContextFeaturesTest {
                                                          .value()))
                 .vBuild();
         Event event = events.createEvent(eventMessage);
-        EventContext modifiedContext = event.getContext()
-                                            .toBuilder()
-                                            .setOrder(1)
-                                            .vBuild();
-        return event.toBuilder()
-                    .setContext(modifiedContext)
-                    .vBuild();
+        return event;
     }
 }

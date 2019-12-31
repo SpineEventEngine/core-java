@@ -20,43 +20,35 @@
 
 package io.spine.server.delivery;
 
-import io.spine.server.type.EventEnvelope;
+import com.google.protobuf.util.Timestamps;
+import io.spine.annotation.Internal;
+
+import java.io.Serializable;
+import java.util.Comparator;
 
 /**
- * The part of {@link Inbox} responsible for processing incoming
- * {@link io.spine.server.type.EventEnvelope events}.
- *
- * @param <I>
- *         the type of identifier or inbox target entities
+ * A comparator comparing the {@link InboxMessage}s so that they appear in a chronological order
+ * of their appearance in the corresponding {@code Inbox}.
  */
-final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
+@Internal
+public final class InboxMessageComparator implements Comparator<InboxMessage>, Serializable {
 
-    InboxOfEvents(Inbox.Builder<I> builder) {
-        super(builder, builder.eventEndpoints());
+    private static final long serialVersionUID = 0L;
+    public static final InboxMessageComparator chronologically = new InboxMessageComparator();
+
+    private InboxMessageComparator() {
     }
 
     @Override
-    protected void setRecordPayload(EventEnvelope envelope, InboxMessage.Builder builder) {
-        builder.setEvent(envelope.outerObject());
-    }
-
-    @Override
-    protected String extractUuidFrom(EventEnvelope envelope) {
-        return  envelope.id()
-                        .getValue();
-    }
-
-    @Override
-    protected EventEnvelope asEnvelope(InboxMessage message) {
-        return EventEnvelope.of(message.getEvent());
-    }
-
-
-    @Override
-    protected InboxMessageStatus determineStatus(EventEnvelope message, InboxLabel label) {
-        if(label == InboxLabel.CATCH_UP) {
-            return InboxMessageStatus.TO_CATCH_UP;
+    public int compare(InboxMessage m1, InboxMessage m2) {
+        int timeComparison = Timestamps.compare(m1.getWhenReceived(), m2.getWhenReceived());
+        if (timeComparison != 0) {
+            return timeComparison;
         }
-        return super.determineStatus(message, label);
+        int versionComparison = Integer.compare(m1.getVersion(), m2.getVersion());
+        if(versionComparison != 0) {
+            return versionComparison;
+        }
+        return m1.getId().getUuid().compareTo(m2.getId().getUuid());
     }
 }

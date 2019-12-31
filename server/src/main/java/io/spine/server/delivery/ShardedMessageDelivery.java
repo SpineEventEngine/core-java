@@ -45,8 +45,10 @@ interface ShardedMessageDelivery<M extends ShardedRecord> {
      *
      * @param incoming
      *         the incoming messages to deliver
-     * @param deduplicationSource
+     * @ param deduplicationSource
      *         the messages to look for duplicates amongst
      */
-    void deliver(List<M> incoming, List<M> deduplicationSource);
+    void deliver(List<M> incoming
+//            , List<M> deduplicationSource
+    );
 }

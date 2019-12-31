@@ -86,7 +86,7 @@ enum InboxMessageStatus {
     DELIVERED = 3;
 
     // The message is sent as a part of a catch-up process.
-    CATCHING_UP = 4;
+    TO_CATCH_UP = 4;
 }
 
 // Identifies the message in the `Inbox`.
@@ -142,4 +142,11 @@ message InboxMessage {
     // Used to order the messages received at the very same millisecond.
     //
     int32 version = 10 [(min).value = "0"];
+
+    // If set, this value determines for how long the message should be kept in the `Inbox`
+    // after delivered. During this time it may be used for de-duplication.
+    //
+    // If not set, the message will not be kept any longer than required to deliver it.
+    //
+    google.protobuf.Timestamp keep_until = 11;
 }

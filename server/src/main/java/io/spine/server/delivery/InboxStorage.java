@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Streams.stream;
-import static io.spine.server.delivery.InboxMessageStatus.CATCHING_UP;
 import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
+import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -118,7 +118,7 @@ public interface InboxStorage
     default void markCatchingUp(Iterable<InboxMessage> messages) {
         List<@Validated InboxMessage> updated =
                 stream(messages).map((m) -> m.toBuilder()
-                                             .setStatus(CATCHING_UP)
+                                             .setStatus(TO_CATCH_UP)
                                              .build())
                                 .collect(toList());
         writeAll(updated);

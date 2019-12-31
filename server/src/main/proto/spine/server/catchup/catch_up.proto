@@ -44,9 +44,7 @@ message CatchUp {
     // During the catch-up, this field holds the timestamp of the last event already processed.
     google.protobuf.Timestamp when_last_read = 3;
 
-    int32 last_order_read = 4;
-
-    CatchUpStatus status = 5 [(required) = true];
+    CatchUpStatus status = 4 [(required) = true];
 
     // The index of the current catch-up round.
     //
@@ -55,7 +53,7 @@ message CatchUp {
     //
     // The index of the first round is 0.
     //
-    int32 current_round = 6;
+    int32 current_round = 5;
 }
 
 // An ID of a catch-up process.

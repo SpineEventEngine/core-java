@@ -34,7 +34,7 @@ import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.protobuf.util.Durations.fromMillis;
+import static com.google.protobuf.util.Durations.fromNanos;
 import static com.google.protobuf.util.Timestamps.subtract;
 
 final class CatchUpMessages {
@@ -79,7 +79,7 @@ final class CatchUpMessages {
     }
 
     static Timestamp withWindow(Timestamp value) {
-        return subtract(value, fromMillis(1));
+        return subtract(value, fromNanos(1));
     }
 
     static LiveEventsPickedUp liveEventsPickedUp(CatchUpId id) {

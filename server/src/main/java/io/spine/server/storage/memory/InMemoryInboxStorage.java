@@ -22,8 +22,10 @@ package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
+import io.spine.server.catchup.event.CatchUpStarted;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxMessage;
+import io.spine.server.delivery.InboxMessageComparator;
 import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
@@ -31,6 +33,8 @@ import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.Page;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.storage.AbstractStorage;
+import io.spine.server.type.EventEnvelope;
+import io.spine.string.Stringifiers;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -38,7 +42,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.protobuf.util.Timestamps.compare;
 import static java.util.stream.Collectors.groupingBy;
 
 /**
@@ -73,7 +76,7 @@ public final class InMemoryInboxStorage
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()))
-                       .sorted(InMemoryInboxStorage::compareMessages)
+                       .sorted(InboxMessageComparator.chronologically)
                        .collect(groupingBy(m -> counter.getAndIncrement() / pageSize,
                                            toImmutableList()));
 
@@ -88,7 +91,7 @@ public final class InMemoryInboxStorage
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()) && isToDeliver(r))
-                       .min(InMemoryInboxStorage::compareMessages);
+                       .min(InboxMessageComparator.chronologically);
         return result;
     }
 
@@ -96,20 +99,14 @@ public final class InMemoryInboxStorage
         return r.getStatus() == InboxMessageStatus.TO_DELIVER;
     }
 
-    private static int compareMessages(InboxMessage m1, InboxMessage m2) {
-        int timeComparison = compare(m1.getWhenReceived(), m2.getWhenReceived());
-        if (timeComparison != 0) {
-            return timeComparison;
-        }
-        int versionComparison = Integer.compare(m1.getVersion(), m2.getVersion());
-        if(versionComparison == 0) {
-            throw new IllegalStateException("Versions must not be equal.");
-        }
-        return versionComparison;
-    }
-
     @Override
     public synchronized void write(InboxMessage message) {
+        if(message.hasEvent()) {
+            EventEnvelope envelope = EventEnvelope.of(message.getEvent());
+            if(envelope.message() instanceof CatchUpStarted) {
+                System.out.println(" --- Writing `CatchUpStarted` " + Stringifiers.toString(message));
+            }
+        }
         multitenantStorage.currentSlice()
                           .put(message.getId(), message);
     }

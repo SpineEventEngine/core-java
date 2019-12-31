@@ -18,28 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.delivery;
 
-import com.google.protobuf.Message;
+import java.util.Objects;
 
 /**
- * An interface for the generated {@link EventStreamQuery} type.
+ * @author Alex Tymchenko
  */
-interface EventStreamQueryMixin extends Message, EventStreamQueryOrBuilder {
+final class DispatchingId {
 
-    /**
-     * Checks if the query should retrieve all the events in the store.
-     *
-     * <p>If the query specifies no filters, no time bounds and no limit,
-     * it is aimed for all the events.
-     *
-     * @return {@code true} if this is a default instance, {@code false} otherwise
-     */
-    @SuppressWarnings("OverlyComplexBooleanExpression")
-    default boolean includeAll() {
-        return getFilterCount() == 0
-                && !hasBefore()
-                && !hasAfter()
-                && !hasLimit();
+    private final InboxSignalId signal;
+    private final InboxId inbox;
+
+    DispatchingId(InboxMessage message) {
+        this.signal = message.getSignalId();
+        this.inbox = message.getInboxId();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DispatchingId id = (DispatchingId) o;
+        return Objects.equals(signal, id.signal) &&
+                Objects.equals(inbox, id.inbox);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(signal, inbox);
     }
 }

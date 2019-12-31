@@ -26,6 +26,7 @@ import io.spine.server.catchup.CatchUpId;
 import io.spine.server.delivery.CatchUpReadRequest;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.storage.AbstractStorage;
+import io.spine.string.Stringifiers;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -50,6 +51,7 @@ public class InMemoryCatchUpStorage extends AbstractStorage<CatchUpId, CatchUp, 
 
     @Override
     public void write(CatchUp message) {
+        System.out.println(" Writing the catch-up state: " + Stringifiers.toString(message));
         multitenantStorage.currentSlice()
                           .put(message.getId(), message);
     }

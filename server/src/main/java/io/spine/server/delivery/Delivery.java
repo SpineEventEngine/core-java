@@ -26,11 +26,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
-import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
-import io.spine.base.Time;
 import io.spine.core.SignalId;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
@@ -57,6 +54,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static com.google.common.flogger.LazyArgs.lazy;
+import static java.lang.String.format;
 import static java.util.Collections.synchronizedList;
 import static java.util.Collections.synchronizedSet;
 import static java.util.stream.Collectors.groupingBy;
@@ -317,11 +315,11 @@ public final class Delivery implements Logging {
      */
     private RunResult doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
-        Timestamp now = Time.currentTime();
-        Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
 
         Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
+
+        int pageIndex = 0;
 
         int totalMessagesDelivered = 0;
         boolean continueAllowed = true;
@@ -330,41 +328,39 @@ public final class Delivery implements Logging {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
-
-                CatchUpClassifier catchUpClassifier = CatchUpClassifier.of(messages, catchUpJobs);
-                ImmutableList<InboxMessage> toCatchUp = catchUpClassifier.catchUp();
-
-                if (!toCatchUp.isEmpty()) {
-                    DeliveryErrors observedErrors = deliverByType(toCatchUp, ImmutableList.of());
-                    observedErrors.throwIfAny();
-                    totalMessagesDelivered += toCatchUp.size();
-                    inboxStorage.removeAll(toCatchUp);
+                System.out.println(format("(%s, Shard %d) serving page #%d with %d messages.",
+                                          Thread.currentThread()
+                                                .getName(),
+                                          index.getIndex(),
+                                          pageIndex, messages.size()));
+                int deliveredInBatch = 0;
+                Conveyor conveyor = new Conveyor(messages);
+                DeliverByType action = new DeliverByType();
+                ImmutableList<Station> stations = ImmutableList.of(
+                        new CatchUpStation(action, catchUpJobs),
+                        new LiveDeliveryStation(action, idempotenceWindow),
+                        new CleanupStation());
+                for (Station station : stations) {
+                    Station.Result result = station.process(conveyor);
+                    result.errors()
+                          .throwIfAny();
+                    totalMessagesDelivered += result.deliveredCount();
+                    deliveredInBatch += result.deliveredCount();
                 }
-
-                ImmutableList<InboxMessage> catchUpRemovals = catchUpClassifier.removal();
-                if (!catchUpRemovals.isEmpty()) {
-                    inboxStorage.removeAll(catchUpRemovals);
-                }
-
-                ImmutableList<InboxMessage> pausedCatchUp = catchUpClassifier.paused();
-                if (!pausedCatchUp.isEmpty()) {
-                    inboxStorage.markCatchingUp(pausedCatchUp);
-                }
-
-                ImmutableList<InboxMessage> stillToDeliver = catchUpClassifier.delivery();
-                MessageClassifier classifier = MessageClassifier.of(stillToDeliver,
-                                                                    idempotenceWndStart);
-                int deliveredInBatch = deliverClassified(classifier);
-                totalMessagesDelivered += deliveredInBatch;
-
-                ImmutableList<InboxMessage> toRemove = classifier.removals();
-                inboxStorage.removeAll(toRemove);
+                conveyor.flushTo(inboxStorage);
                 DeliveryStage stage = newStage(index, deliveredInBatch);
                 continueAllowed = monitorTellsToContinue(stage);
             }
             if (continueAllowed) {
                 maybePage = currentPage.next();
             }
+            System.out.println(format("(%s, Shard %d) COMPLETED serving page #%d with %d messages.",
+                                      Thread.currentThread()
+                                            .getName(),
+                                      index.getIndex(),
+                                      pageIndex, messages.size()));
+
+            pageIndex++;
         }
         return new RunResult(totalMessagesDelivered, !continueAllowed);
     }
@@ -404,7 +400,7 @@ public final class Delivery implements Logging {
         ImmutableList<InboxMessage> toDeliver = classifier.toDeliver();
         if (!toDeliver.isEmpty()) {
             ImmutableList<InboxMessage> idempotenceSource = classifier.idempotenceSource();
-            DeliveryErrors observedExceptions = deliverByType(toDeliver, idempotenceSource);
+            DeliveryErrors observedExceptions = deliverByType(toDeliver);
             observedExceptions.throwIfAny();
             return toDeliver.size();
         } else {
@@ -413,19 +409,16 @@ public final class Delivery implements Logging {
     }
 
     private DeliveryErrors
-    deliverByType(ImmutableList<InboxMessage> toDeliver, ImmutableList<InboxMessage> idmptSource) {
+    deliverByType(ImmutableList<InboxMessage> toDeliver) {
 
         Map<String, List<InboxMessage>> messagesByType = groupByTargetType(toDeliver);
-        Map<String, List<InboxMessage>> idmptSourceByType = groupByTargetType(idmptSource);
 
         DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
         for (String typeUrl : messagesByType.keySet()) {
             ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
             List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
-            List<InboxMessage> idempotenceWnd = idmptSourceByType.getOrDefault(typeUrl,
-                                                                               ImmutableList.of());
             try {
-                delivery.deliver(deliveryPackage, idempotenceWnd);
+                delivery.deliver(deliveryPackage);
             } catch (RuntimeException exception) {
                 errors.addException(exception);
             } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {
@@ -434,6 +427,34 @@ public final class Delivery implements Logging {
         }
         inboxStorage.markDelivered(toDeliver);
         return errors.build();
+    }
+
+    final class DeliverByType {
+
+        DeliveryErrors executeFor(Collection<InboxMessage> messages,
+                                  List<InboxMessage> idempotenceSource) {
+            Map<String, List<InboxMessage>> messagesByType = groupByTargetType(messages);
+//            Map<String, List<InboxMessage>> idmptSourceByType = groupByTargetType(
+//                    idempotenceSource);
+
+            DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
+            for (String typeUrl : messagesByType.keySet()) {
+                ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
+                List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
+//                List<InboxMessage> idempotenceWnd = idmptSourceByType.getOrDefault(typeUrl,
+//                                                                                   ImmutableList.of());
+                try {
+                    delivery.deliver(deliveryPackage
+//                            , idempotenceWnd
+                    );
+                } catch (RuntimeException exception) {
+                    errors.addException(exception);
+                } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {
+                    errors.addError(error);
+                }
+            }
+            return errors.build();
+        }
     }
 
     /**
@@ -549,7 +570,8 @@ public final class Delivery implements Logging {
         };
     }
 
-    private static Map<String, List<InboxMessage>> groupByTargetType(List<InboxMessage> messages) {
+    private static Map<String, List<InboxMessage>> groupByTargetType(
+            Collection<InboxMessage> messages) {
         return messages.stream()
                        .collect(groupingBy(m -> m.getInboxId()
                                                  .getTypeUrl()));

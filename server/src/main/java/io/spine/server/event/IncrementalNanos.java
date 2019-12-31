@@ -20,26 +20,26 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.Message;
-
 /**
- * An interface for the generated {@link EventStreamQuery} type.
+ * @author Alex Tymchenko
  */
-interface EventStreamQueryMixin extends Message, EventStreamQueryOrBuilder {
+final class IncrementalNanos {
+
+    private static final int MAX_VALUE = 999_999;
+    private static final IncrementalNanos instance = new IncrementalNanos();
+
+    private int counter;
+
+    private synchronized int getNextValue() {
+        counter++;
+        counter = counter % MAX_VALUE;
+        return counter;
+    }
 
     /**
-     * Checks if the query should retrieve all the events in the store.
-     *
-     * <p>If the query specifies no filters, no time bounds and no limit,
-     * it is aimed for all the events.
-     *
-     * @return {@code true} if this is a default instance, {@code false} otherwise
+     * Obtains the next version value.
      */
-    @SuppressWarnings("OverlyComplexBooleanExpression")
-    default boolean includeAll() {
-        return getFilterCount() == 0
-                && !hasBefore()
-                && !hasAfter()
-                && !hasLimit();
+    static int value() {
+        return instance.getNextValue();
     }
 }

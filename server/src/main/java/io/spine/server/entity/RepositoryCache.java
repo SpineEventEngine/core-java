@@ -20,11 +20,12 @@
 
 package io.spine.server.entity;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import io.spine.annotation.Internal;
 import io.spine.server.tenant.IdInTenant;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -47,12 +48,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class RepositoryCache<I, E extends Entity<I, ?>> {
 
-    private final Map<IdInTenant<I>, E> cache = Maps.newConcurrentMap();
-    private final Set<IdInTenant<I>> idsToCache = Sets.newConcurrentHashSet();
+    private final Map<IdInTenant<I>, E> cache = Collections.synchronizedMap(new HashMap<>());
+    private final Set<IdInTenant<I>> idsToCache = Collections.synchronizedSet(new HashSet<>());
 
     private final boolean multitenant;
     private final Load<I, E> loadFn;
     private final Store<E> storeFn;
+    private Boolean intendedToCache = null;
+    private IdInTenant<I> lastAskedId;
 
     public RepositoryCache(boolean multitenant, Load<I, E> loadFn, Store<E> storeFn) {
         this.multitenant = multitenant;
@@ -60,9 +63,11 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
         this.storeFn = storeFn;
     }
 
-    public E load(I id) {
+    public synchronized E load(I id) {
         IdInTenant<I> idInTenant = idInTenant(id);
-        if (!idsToCache.contains(idInTenant)) {
+        intendedToCache = idsToCache.contains(idInTenant);
+        lastAskedId = idInTenant;
+        if (!intendedToCache) {
             return loadFn.apply(idInTenant.value());
         }
 
@@ -81,8 +86,13 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
      * @param id
      *         an identifier of the entity to cache
      */
-    public void startCaching(I id) {
-        idsToCache.add(idInTenant(id));
+    public synchronized void startCaching(I id) {
+        boolean unique = idsToCache.add(idInTenant(id));
+        if(!unique) {
+            String msg = String.format(" -------------- Element %s is not unique!", id);
+            System.err.println(msg);
+            throw new RuntimeException(msg);
+        }
     }
 
     /**
@@ -96,9 +106,19 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
      * @param id
      *         an identifier of the entity to cache
      */
-    public void stopCaching(I id) {
+    public synchronized void stopCaching(I id) {
         IdInTenant<I> idInTenant = idInTenant(id);
-        E entity = checkNotNull(cache.get(idInTenant));
+        E entity = checkNotNull(cache.get(idInTenant),
+                                "Cannot find the cached entity in the cache for ID `%s`. " +
+                                        "Cache keys: %s. " +
+                                        "IDs to cache: %s." +
+                                        "Last asked ID: %s. " +
+                                        "Was it intended to cache? %s",
+                                idInTenant,
+                                cache.keySet(),
+                                idsToCache,
+                                lastAskedId,
+                                intendedToCache);
         storeFn.accept(entity);
         cache.remove(idInTenant);
         idsToCache.remove(idInTenant);
@@ -108,7 +128,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
         return IdInTenant.of(id, multitenant);
     }
 
-    public void store(E entity) {
+    public synchronized void store(E entity) {
         I id = entity.id();
         IdInTenant<I> idInTenant = idInTenant(id);
         if (idsToCache.contains(idInTenant)) {

@@ -25,11 +25,15 @@ import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.IdInTenant;
 import io.spine.server.type.SignalEnvelope;
+import io.spine.string.Stringifiers;
+import io.spine.util.Exceptions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
+import static java.lang.String.format;
 
 /**
  * Takes the messages, which were previously sent to their targets via this inbox, and
@@ -41,18 +45,18 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
     private final InboxOfCommands<I> inboxOfCmds;
     private final InboxOfEvents<I> inboxOfEvents;
-    private final @Nullable BatchDeliveryListener<I> batchDispatcher;
+    private final @Nullable BatchDeliveryListener<I> batchListener;
 
     TargetDelivery(InboxOfCommands<I> inboxOfCmds,
                    InboxOfEvents<I> inboxOfEvents,
-                   @Nullable BatchDeliveryListener<I> batchDispatcher) {
+                   @Nullable BatchDeliveryListener<I> batchListener) {
         this.inboxOfCmds = inboxOfCmds;
         this.inboxOfEvents = inboxOfEvents;
-        this.batchDispatcher = batchDispatcher;
+        this.batchListener = batchListener;
     }
 
-    private static void doDeliver(InboxPart.Dispatcher cmdDispatcher,
-                                  InboxPart.Dispatcher eventDispatcher,
+    private static <I> void doDeliver(InboxOfCommands<I>  cmdDispatcher,
+                                  InboxOfEvents<I> eventDispatcher,
                                   InboxMessage incomingMessage) {
         if (incomingMessage.hasCommand()) {
             cmdDispatcher.deliver(incomingMessage);
@@ -62,28 +66,23 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
     }
 
     @Override
-    public void deliver(List<InboxMessage> incoming,
-                        List<InboxMessage> deduplicationSource) {
-        InboxPart.Dispatcher cmdDispatcher = inboxOfCmds.dispatcherWith(deduplicationSource);
-        InboxPart.Dispatcher eventDispatcher = inboxOfEvents.dispatcherWith(deduplicationSource);
+    public void deliver(List<InboxMessage> incoming) {
 
-        if (batchDispatcher == null) {
+        if (batchListener == null) {
             for (InboxMessage incomingMessage : incoming) {
-                doDeliver(cmdDispatcher, eventDispatcher, incomingMessage);
+                doDeliver(inboxOfCmds, inboxOfEvents, incomingMessage);
             }
         } else {
-            deliverInBatch(incoming, batchDispatcher, cmdDispatcher, eventDispatcher);
+            deliverInBatch(incoming, batchListener);
         }
     }
 
     private void deliverInBatch(List<InboxMessage> incoming,
-                                BatchDeliveryListener<I> batchDispatcher,
-                                InboxPart.Dispatcher cmdDispatcher,
-                                InboxPart.Dispatcher eventDispatcher) {
+                                BatchDeliveryListener<I> batchDispatcher) {
         List<Batch<I>> batches = Batch.byInboxId(incoming, this::asEnvelope);
 
         for (Batch<I> batch : batches) {
-            batch.deliverVia(batchDispatcher, cmdDispatcher, eventDispatcher);
+            batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents);
         }
     }
 
@@ -151,21 +150,58 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         }
 
         private void deliverVia(BatchDeliveryListener<I> dispatcher,
-                                InboxPart.Dispatcher cmdDispatcher,
-                                InboxPart.Dispatcher eventDispatcher) {
+                                InboxOfCommands<I> cmdDispatcher,
+                                InboxOfEvents<I> eventDispatcher) {
             if (messages.size() > 1) {
+                String threadName = Thread.currentThread().getName();
+
                 Any packedId = inboxId.value()
                                       .getEntityId()
                                       .getId();
                 @SuppressWarnings("unchecked")      // Only IDs of type `I` are stored.
                         I id = (I) Identifier.unpack(packedId);
+                boolean shouldLog =
+                        "second".equals(id) || inboxId.value().getTypeUrl().contains("CatchUp");
+                if(shouldLog) {
+                    System.out.println(
+                            format("(%s, shard %d) Starting to dispatch %d messages to [%s]...",
+                                   threadName,
+                                   messages.get(0).getShardIndex().getIndex(),
+                                   messages.size(),
+                                   id));
+                }
                 dispatcher.onStart(id);
                 try {
                     for (InboxMessage message : messages) {
                         doDeliver(cmdDispatcher, eventDispatcher, message);
+                        if(shouldLog) {
+                            System.out.println(format("(%s, shard %d). Delivered %d to [%s] in status %s.",
+                                                      threadName,
+                                                      message.getShardIndex().getIndex(),
+                                                      message.getEvent()
+                                                             .getContext()
+                                                             .getTimestamp()
+                                                             .getNanos(),
+                                                      id,
+                                                      message.getStatus()
+                                                      ));
+                        }
                     }
                 } finally {
-                    dispatcher.onEnd(id);
+                    try {
+                        if(shouldLog) {
+                            System.out.println(
+                                    format("(%s, shard %d) Ending the dispatching of %d messages to [%s]...",
+                                           threadName,
+                                           messages.get(0).getShardIndex().getIndex(),
+                                           messages.size(),
+                                           id));
+                        }
+                        dispatcher.onEnd(id);
+                    } catch (Exception e) {
+                        throw Exceptions.newIllegalStateException(e, "Error dispatching the batch of messages: " +
+                                Stringifiers.newForListOf(InboxMessage.class, '|').convert(messages));
+                    }
                 }
             } else {
                 doDeliver(cmdDispatcher, eventDispatcher, messages.get(0));

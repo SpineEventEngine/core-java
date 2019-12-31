@@ -20,16 +20,11 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.type.TypeUrl;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * An abstract base of {@link Inbox inbox} part.
@@ -82,11 +77,6 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
         return InboxMessageStatus.TO_DELIVER;
     }
 
-    /**
-     * Creates an instance of dispatcher along with the de-duplication source messages.
-     */
-    protected abstract Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource);
-
     void store(M envelope, I entityId, InboxLabel label) {
         InboxId inboxId = InboxIds.wrap(entityId, entityStateType);
         Delivery delivery = ServerEnvironment.instance()
@@ -115,6 +105,23 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
         return InboxIds.newSignalId(targetId, uuid);
     }
 
+    void deliver(InboxMessage message) {
+        M envelope = asEnvelope(message);
+        InboxLabel label = message.getLabel();
+        InboxId inboxId = message.getInboxId();
+        MessageEndpoint<I, M> endpoint =
+                endpoints.get(label, envelope)
+                         .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
+
+        @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
+                I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
+        TenantAwareRunner
+                .with(envelope.tenantId())
+                .run(() -> {
+                    endpoint.dispatchTo(unpackedId);
+                });
+    }
+
     /**
      * An abstract base for routines which dispatch {@code InboxMessage}s to their endpoints.
      *
@@ -125,61 +132,8 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
      * <p>In case a duplication is found, the respective endpoint is
      * {@linkplain MessageEndpoint#onDuplicate(Object, SignalEnvelope) notified}.
      */
-    abstract class Dispatcher {
+    class Dispatcher {
 
-        /**
-         * A set of IDs of previously dispatched messages, stored as {@code String} values.
-         */
-        private final Set<String> rawIds;
 
-        @SuppressWarnings({ /* To avoid extra filtering in descendants and improve performance. */
-                "AbstractMethodCallInConstructor",
-                "OverridableMethodCallDuringObjectConstruction",
-                "OverriddenMethodCallDuringObjectConstruction"})
-        Dispatcher(Collection<InboxMessage> deduplicationSource) {
-            this.rawIds =
-                    deduplicationSource
-                            .stream()
-                            .filter(filterByType())
-                            .map(InboxMessage::getSignalId)
-                            .map(InboxSignalId::getValue)
-                            .collect(ImmutableSet.toImmutableSet());
-        }
-
-        protected abstract Predicate<? super InboxMessage> filterByType();
-
-        void deliver(InboxMessage message) {
-            M envelope = asEnvelope(message);
-            InboxLabel label = message.getLabel();
-            InboxId inboxId = message.getInboxId();
-            MessageEndpoint<I, M> endpoint =
-                    endpoints.get(label, envelope)
-                             .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
-
-            @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
-            I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
-            TenantAwareRunner
-                    .with(envelope.tenantId())
-                    .run(() -> {
-                        if (duplicate(message)) {
-                            endpoint.onDuplicate(unpackedId, envelope);
-                        } else {
-                            endpoint.dispatchTo(unpackedId);
-                        }
-                    });
-        }
-
-        /**
-         * Checks whether the message has already been stored in the inbox.
-         *
-         * <p>In case of duplication returns an {@code Optional} containing the duplication
-         * exception wrapped into a inbox-specific runtime exception for further handling.
-         */
-        private boolean duplicate(InboxMessage message) {
-            String currentId = message.getSignalId()
-                                      .getValue();
-            boolean hasDuplicate = rawIds.contains(currentId);
-            return hasDuplicate;
-        }
     }
 }

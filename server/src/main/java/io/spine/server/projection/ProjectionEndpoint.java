@@ -32,6 +32,7 @@ import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.EventEnvelope;
+import io.spine.string.Stringifiers;
 
 import static io.spine.server.projection.ProjectionTransaction.start;
 
@@ -117,6 +118,8 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
      */
     @Override
     protected void onEmptyResult(P entity) {
+        System.err.println(String.format("PROJECTION HAS NOT BEEN MODIFIED! %s",
+                                         Stringifiers.toString(entity.state())));
         // Do nothing.
     }
 }

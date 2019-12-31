@@ -23,6 +23,8 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.Identifier;
+import io.spine.server.catchup.event.CatchUpStarted;
 
 /**
  * Classifies the {@code InboxMessage}s messages by their purpose.
@@ -73,7 +75,19 @@ final class MessageClassifier {
                     idempotenceBuilder.add(message);
                 }
             } else {
-                removalBuilder.add(message);
+                if (message.hasEvent() && message.getEvent()
+                                                 .enclosedMessage() instanceof CatchUpStarted) {
+                    InboxId inboxId = message.getInboxId();
+                    Object targetId = Identifier.unpack(inboxId.getEntityId()
+                                                               .getId());
+                    System.out.println(
+                            " Message Classifier encountered `CatchUpStarted` for `"
+                                    + targetId + "`.");
+                }
+                if(status == InboxMessageStatus.TO_DELIVER
+                        || status == InboxMessageStatus.DELIVERED) {
+                    removalBuilder.add(message);
+                }
             }
 
             if (InboxMessageStatus.TO_DELIVER == status) {

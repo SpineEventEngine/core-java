@@ -58,7 +58,10 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.React;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.type.EventEnvelope;
+import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -78,6 +81,7 @@ import static io.spine.server.projection.CatchUpMessages.targetOf;
 import static io.spine.server.projection.CatchUpMessages.toFilters;
 import static io.spine.server.projection.CatchUpMessages.withWindow;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.String.format;
 
 /**
  * A process that performs a projection catch-up.
@@ -88,6 +92,8 @@ final class CatchUpProcess<I> extends AbstractEventReactor {
     private static final EventStreamQuery.Limit LIMIT = limitOf(500);
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
 
+    private final Object endpointLock = new Object();
+
     //TODO:2019-12-13:alex.tymchenko: make this configurable.
     private final Duration turbulencePeriod = Durations.fromMillis(500);
     private final Supplier<EventStore> eventStore;
@@ -95,7 +101,7 @@ final class CatchUpProcess<I> extends AbstractEventReactor {
     private final Inbox<CatchUpId> inbox;
     private final CatchUpStorage storage;
 
-    private CatchUp.Builder builder = null;
+    private CatchUp.Builder builder = CatchUp.newBuilder();
 
     CatchUpProcess(Supplier<EventStore> eventStore, ProjectionRepository<I, ?, ?> repository) {
         this.eventStore = eventStore;
@@ -106,10 +112,256 @@ final class CatchUpProcess<I> extends AbstractEventReactor {
         this.inbox = configureInbox(delivery);
     }
 
+    private CatchUp.Builder builder() {
+        return builder;
+    }
+
     private Inbox<CatchUpId> configureInbox(Delivery delivery) {
         Inbox.Builder<CatchUpId> builder = delivery.newInbox(TYPE);
         builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new);
         return builder.build();
+    }
+
+    @React
+    EitherOf2<CatchUpStarted, HistoryFullyRecalled> handle(CatchUpRequested e, EventContext ctx) {
+        CatchUpId id = e.getId();
+
+        String idAsString = Stringifiers.toString(Identifier.unpack(e.getRequest()
+                                                                     .getTargetList()
+                                                                     .get(0)));
+        System.out.println('[' + idAsString + "] `CatchUpRequested` received.");
+
+        Timestamp sinceWhen = e.getRequest()
+                               .getSinceWhen();
+        builder().setWhenLastRead(withWindow(sinceWhen))
+                 .setRequest(e.getRequest());
+//        Timestamp turbulenceStart = turbulenceStart();
+        CatchUpStarted started = started(id);
+//        if (Timestamps.compare(sinceWhen, turbulenceStart) >= 0) {
+//            Event event = maybeWrap(started, ctx);
+//            if(event != null) {
+//                dispatchAll(ImmutableList.of(event));
+//            }
+//            builder().setStatus(CatchUpStatus.FINALIZING);
+//            return EitherOf2.withB(fullyRecalled(id));
+//        } else {
+        builder().setStatus(CatchUpStatus.STARTED);
+        commitState();
+
+        Event event = wrapAsEvent(started, ctx);
+        dispatchAll(ImmutableList.of(event));
+
+        System.out.println('[' + idAsString + "] Returning `CatchUpStarted`.");
+        builder().vBuild();
+
+        return EitherOf2.withA(started);
+//        }
+    }
+
+    private Timestamp turbulenceStart() {
+        return subtract(Time.currentTime(), turbulencePeriod);
+    }
+
+    //TODO:2019-11-28:alex.tymchenko: maintain inclusiveness.
+    @React
+    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
+    handle(CatchUpStarted event, EventContext context) {
+        System.out.println(idTag() + " `CatchUpStarted` received.");
+        return recallMoreEvents(event.getId(), null);
+    }
+
+    private @Nullable Event maybeWrap(CatchUpStarted event, EventContext context) {
+        Event firstEvent = null;
+        int currentRound = builder().getCurrentRound();
+        if (currentRound == 0) {
+            firstEvent = wrapAsEvent(event, context);
+        }
+        return firstEvent;
+    }
+
+    private String idTag() {
+        return Thread.currentThread()
+                     .getName() + " - [" + Identifier.unpack(builder().getRequest()
+                                                                      .getTargetList()
+                                                                      .get(0)) + ']';
+    }
+
+    private Event wrapAsEvent(CatchUpSignal event, EventContext context) {
+        Event firstEvent;
+        EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
+        firstEvent = factory.createEvent(event, null);
+        return firstEvent;
+    }
+
+    @React
+    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
+        System.out.println(idTag() + " `HistoryEventsRecalled` received.");
+        return recallMoreEvents(event.getId(), null);
+    }
+
+    private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
+    recallMoreEvents(CatchUpId id, @Nullable Event toPostFirst) {
+        CatchUp.Request request = builder().getRequest();
+        List<Event> events = new ArrayList<>();
+        if (toPostFirst != null) {
+            events.add(toPostFirst);
+        }
+        List<Event> readInThisRound = readMore(request, turbulenceStart(), LIMIT);
+        events.addAll(readInThisRound);
+
+        if (!readInThisRound.isEmpty()) {
+            Event lastEvent = events.get(events.size() - 1);
+            Timestamp lastEventTimestamp = lastEvent.getContext()
+                                                    .getTimestamp();
+            builder().setWhenLastRead(lastEventTimestamp);
+        }
+        dispatchAll(events);
+
+        int nextRound = builder().getCurrentRound() + 1;
+        builder().setCurrentRound(nextRound);
+
+        if (events.isEmpty()) {
+            return EitherOf2.withB(fullyRecalled(id));
+        }
+
+        return EitherOf2.withA(recalled(id));
+    }
+
+    @React
+    EitherOf2<LiveEventsPickedUp, CatchUpCompleted>
+    handle(HistoryFullyRecalled event, EventContext context) {
+        System.out.println(idTag() + " `HistoryFullyRecalled` received.");
+        CatchUpId id = event.getId();
+        builder().setStatus(CatchUpStatus.FINALIZING);
+        commitState();
+
+        CatchUp.Request request = builder().getRequest();
+        List<Event> events = readMore(request, null, null);
+
+        if (events.isEmpty()) {
+            return EitherOf2.withB(completeProcess(id, context));
+        }
+        dispatchAll(events);
+        return EitherOf2.withA(liveEventsPickedUp(id));
+    }
+
+    private void commitState() {
+        storage.write(builder().vBuild());
+    }
+
+    @React
+    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
+        System.out.println(idTag() + " `LiveEventsPickedUp` received.");
+        return completeProcess(event.getId(), context);
+    }
+
+    //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
+    private CatchUpCompleted completeProcess(CatchUpId id, EventContext originContext) {
+        builder().setStatus(CatchUpStatus.COMPLETED);
+        commitState();
+        CatchUpCompleted completed = catchUpCompleted(id);
+        Event event = wrapAsEvent(completed, originContext);
+        dispatchAll(ImmutableList.of(event));
+        return completed;
+    }
+
+    private void dispatchAll(List<Event> events) {
+        System.out.println(format(idTag() + " Dispatching %s events.", events.size()));
+        if (events.isEmpty()) {
+            return;
+        }
+        try {
+            CatchUp.Request request = builder().getRequest();
+
+            List<Any> packedIds = request.getTargetList();
+            Set<I> ids = packedIds.stream()
+                                  .map((any) -> Identifier.unpack(any, repository.idClass()))
+                                  .collect(Collectors.toSet());
+
+            for (Event event : events) {
+                repository.dispatchCatchingUp(event, ids);
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new RuntimeException(t);
+        }
+    }
+
+    private List<Event> readMore(CatchUp.Request request,
+                                 @Nullable Timestamp readBefore,
+                                 EventStreamQuery.@Nullable Limit limit) {
+        System.out.println(idTag() + " Preparing to read more events. "
+                                   + "\n `readBefore` is " + readBefore
+                                   + "\n the `sinceWhen` is " + request.getSinceWhen()
+                                   + "\n the `whenLastRead` is " + builder().getWhenLastRead()
+        );
+        if (readBefore != null) {
+            if (Timestamps.compare(readBefore, builder().getWhenLastRead()) <= 0) {
+                System.out.println("Read-before is EARLIER than when-last-read!");
+                //TODO:2019-12-13:alex.tymchenko: looks an `IllegalStateException` though.
+                return ImmutableList.of();
+            }
+        }
+        EventStreamQuery query = toEventQuery(request, readBefore, limit);
+        MemoizingObserver<Event> observer = new MemoizingObserver<>();
+        eventStore.get()
+                  .read(query, observer);
+        List<Event> allEvents = observer.responses();
+        System.out.println(
+                format(idTag() +
+                               " There were %s events read in total. The first one was [ %s ], the last one was [ %s ].",
+                       allEvents.size(),
+                       allEvents.isEmpty() ? "" : printEvent(allEvents.get(0)),
+                       allEvents.isEmpty() ? "" : printEvent(allEvents.get(allEvents.size() - 1))
+                )
+        );
+
+//        for (int index = 0; index < allEvents.size(); index++) {
+//            Event event = allEvents.get(index);
+//            if (event.getContext()
+//                     .getOrder() == afterEvent) {
+//                int lastIndex = allEvents.size() - 1;
+//                if (index == lastIndex) {
+//                    return ImmutableList.of();
+//                }
+//                return allEvents.subList(index + 1, lastIndex + 1);
+//            }
+//        }
+
+        return allEvents;
+    }
+
+    private void printEvents(List<Event> allEvents) {
+
+        for (Event event : allEvents) {
+            System.out.println(printEvent(event));
+        }
+    }
+
+    public static String printEvent(Event event) {
+        EventContext context = event.getContext();
+        Timestamp timestamp = context.getTimestamp();
+        String strRepresentation = timestamp.getSeconds()
+                + "." + timestamp.getNanos();
+        return strRepresentation;
+    }
+
+    private EventStreamQuery toEventQuery(CatchUp.Request request,
+                                          @Nullable Timestamp readBefore,
+                                          EventStreamQuery.@Nullable Limit limit) {
+        ImmutableList<EventFilter> filters = toFilters(request.getEventTypeList());
+        Timestamp readAfter = builder().getWhenLastRead();
+        EventStreamQuery.Builder builder =
+                EventStreamQuery.newBuilder()
+                                .setAfter(readAfter)
+                                .addAllFilter(filters);
+        if (readBefore != null) {
+            builder.setBefore(readBefore);
+        }
+        if (limit != null) {
+            builder.setLimit(limit);
+        }
+        return builder.vBuild();
     }
 
     @Override
@@ -134,186 +386,21 @@ final class CatchUpProcess<I> extends AbstractEventReactor {
              .toReactor(target);
     }
 
-    @React
-    EitherOf2<CatchUpStarted, HistoryFullyRecalled> handle(CatchUpRequested event) {
-        CatchUpId id = event.getId();
-        Timestamp sinceWhen = event.getRequest()
-                                   .getSinceWhen();
-        builder.setWhenLastRead(withWindow(sinceWhen))
-               .setRequest(event.getRequest());
-        Timestamp turbulenceStart = turbulenceStart();
-        if (Timestamps.compare(sinceWhen, turbulenceStart) >= 0) {
-            builder.setStatus(CatchUpStatus.FINALIZING);
-            return EitherOf2.withB(fullyRecalled(id));
-        } else {
-            builder.setStatus(CatchUpStatus.STARTED);
-            return EitherOf2.withA(started(id));
-        }
-    }
-
-    private Timestamp turbulenceStart() {
-        return subtract(Time.currentTime(), turbulencePeriod);
-    }
-
-    //TODO:2019-11-28:alex.tymchenko: maintain inclusiveness.
-    @React
-    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
-    handle(CatchUpStarted event, EventContext context) {
-        Event firstEvent = null;
-        int currentRound = builder.getCurrentRound();
-        if (currentRound == 0) {
-            firstEvent = wrapAsEvent(event, context);
-        }
-        return recallMoreEvents(event.getId(), firstEvent);
-    }
-
-    private Event wrapAsEvent(CatchUpSignal event, EventContext context) {
-        Event firstEvent;
-        EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
-        firstEvent = factory.createEvent(event, null);
-        return firstEvent;
-    }
-
-    @React
-    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
-        return recallMoreEvents(event.getId(), null);
-    }
-
-    private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
-    recallMoreEvents(CatchUpId id, @Nullable Event toPostFirst) {
-        CatchUp.Request request = builder.getRequest();
-        List<Event> events = new ArrayList<>();
-        if (toPostFirst != null) {
-            events.add(toPostFirst);
-        }
-        List<Event> readInThisRound = readMore(request, builder.getLastOrderRead(),
-                                               turbulenceStart()
-        );
-        events.addAll(readInThisRound);
-
-        if (events.isEmpty()) {
-            return EitherOf2.withB(fullyRecalled(id));
-        }
-        if (!readInThisRound.isEmpty()) {
-            Event lastEvent = events.get(events.size() - 1);
-            Timestamp lastEventTimestamp = lastEvent.getContext()
-                                                    .getTimestamp();
-            builder.setWhenLastRead(withWindow(lastEventTimestamp));
-            builder.setLastOrderRead(lastEvent.getContext()
-                                              .getOrder());
-        }
-
-        dispatchAll(events);
-
-        int nextRound = builder.getCurrentRound() + 1;
-        builder.setCurrentRound(nextRound);
-
-        return EitherOf2.withA(recalled(id));
-    }
-
-    @React
-    EitherOf2<LiveEventsPickedUp, CatchUpCompleted>
-    handle(HistoryFullyRecalled event, EventContext context) {
-        CatchUpId id = event.getId();
-        builder.setStatus(CatchUpStatus.FINALIZING);
-        commitState();
-
-        CatchUp.Request request = builder.getRequest();
-        List<Event> events = readMore(request, builder.getLastOrderRead(), null);
-
-        if (events.isEmpty()) {
-            return EitherOf2.withB(completeProcess(id, context));
-        }
-        dispatchAll(events);
-        return EitherOf2.withA(liveEventsPickedUp(id));
-    }
-
-    private void commitState() {
-        storage.write(builder.vBuild());
-    }
-
-    @React
-    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
-        return completeProcess(event.getId(), context);
-    }
-
-    //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
-    private CatchUpCompleted completeProcess(CatchUpId id, EventContext originContext) {
-        builder.setStatus(CatchUpStatus.COMPLETED);
-        commitState();
-        CatchUpCompleted completed = catchUpCompleted(id);
-        Event event = wrapAsEvent(completed, originContext);
-        dispatchAll(ImmutableList.of(event));
-        return completed;
-    }
-
-    private void dispatchAll(List<Event> events) {
-        CatchUp.Request request = builder.getRequest();
-
-        List<Any> packedIds = request.getTargetList();
-        Set<I> ids = packedIds.stream()
-                              .map((any) -> Identifier.unpack(any, repository.idClass()))
-                              .collect(Collectors.toSet());
-
-        for (Event event : events) {
-            repository.dispatchCatchingUp(event, ids);
-        }
-    }
-
-    private List<Event> readMore(CatchUp.Request request, int afterEvent,
-                                 @Nullable Timestamp readBefore) {
-        if (readBefore != null) {
-            if (Timestamps.compare(readBefore, builder.getWhenLastRead()) >= 0) {
-                //TODO:2019-12-13:alex.tymchenko: looks an `IllegalStateException` though.
-                return ImmutableList.of();
-            }
-        }
-        EventStreamQuery query = toEventQuery(request, readBefore);
-        MemoizingObserver<Event> observer = new MemoizingObserver<>();
-        eventStore.get().read(query, observer);
-        List<Event> allEvents = observer.responses();
-        for (int index = 0; index < allEvents.size(); index++) {
-            Event event = allEvents.get(index);
-            if (event.getContext()
-                     .getOrder() == afterEvent) {
-                int lastIndex = allEvents.size() - 1;
-                if (index == lastIndex) {
-                    return ImmutableList.of();
-                }
-                return allEvents.subList(index + 1, lastIndex + 1);
-            }
-        }
-
-        return allEvents;
-    }
-
-    private EventStreamQuery toEventQuery(CatchUp.Request request, @Nullable Timestamp readBefore) {
-        ImmutableList<EventFilter> filters = toFilters(request.getEventTypeList());
-        Timestamp readAfter = builder.getWhenLastRead();
-        EventStreamQuery.Builder builder =
-                EventStreamQuery.newBuilder()
-                                .setAfter(readAfter)
-                                .addAllFilter(filters)
-                                .setLimit(LIMIT);
-        if (readBefore != null) {
-            builder.setBefore(readBefore);
-        }
-        return builder.vBuild();
-    }
-
     private final class EventEndpoint implements MessageEndpoint<CatchUpId, EventEnvelope> {
 
         private final EventEnvelope envelope;
 
-        EventEndpoint(EventEnvelope envelope) {
+        private EventEndpoint(EventEnvelope envelope) {
             this.envelope = envelope;
         }
 
         @Override
         public void dispatchTo(CatchUpId targetId) {
-            load(targetId);
-            CatchUpProcess.super.dispatch(envelope);
-            store();
+            synchronized (endpointLock) {
+                load(targetId);
+                CatchUpProcess.super.dispatch(envelope);
+                store();
+            }
         }
 
         @Override
@@ -323,11 +410,16 @@ final class CatchUpProcess<I> extends AbstractEventReactor {
 
         @Override
         public Repository<CatchUpId, ?> repository() {
-            throw newIllegalStateException("`AbstractCommander`s have no repository.");
+            throw newIllegalStateException("`CatchUpProcess` has no repository.");
         }
 
         private void store() {
-            CatchUp modifiedState = builder.vBuild();
+            CatchUp rawMsg = builder().build();
+            List<ConstraintViolation> violations = MessageValidator.validate(rawMsg);
+            if (!violations.isEmpty()) {
+                System.err.println("The message is invalid: " + Stringifiers.toString(rawMsg));
+            }
+            CatchUp modifiedState = builder().vBuild();
             storage.write(modifiedState);
         }
 
