@@ -30,6 +30,7 @@ import io.spine.core.BoundedContext;
 import io.spine.core.BoundedContextName;
 import io.spine.logging.Logging;
 import io.spine.server.model.ArgumentFilter;
+import io.spine.server.model.DispatchKey;
 import io.spine.server.model.Model;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
@@ -57,6 +58,12 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         this.stateType = firstParamType(rawMethod());
         checkExternal();
+    }
+
+    @Override
+    public DispatchKey key() {
+        DispatchKey typeBasedKey = super.key();
+        return applyFilter(typeBasedKey);
     }
 
     private static Method checkNotFiltered(Method method) {
@@ -95,7 +102,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     }
 
     @SuppressWarnings("TestOnlyProblems")
-        // Checks that the resulting context is not `AssumingTests` in production environment.
+    // Checks that the resulting context is not `AssumingTests` in production environment.
     private BoundedContextName contextOf(Class<?> cls) {
         Model model = Model.inContextOf(cls);
         BoundedContextName name = model.contextName();

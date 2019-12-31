@@ -20,6 +20,7 @@
 
 package io.spine.server.procman.given.pm;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -30,8 +31,6 @@ import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartIteration;
 
-import java.util.Set;
-
 /**
  * A simple NO-OP dispatcher for {@link TestProcessManager}.
  *
@@ -41,7 +40,7 @@ import java.util.Set;
 public class TestProcessManagerDispatcher implements CommandDispatcher {
 
     @Override
-    public Set<CommandClass> messageClasses() {
+    public ImmutableSet<CommandClass> messageClasses() {
         return CommandClass.setOf(PmCreateProject.class,
                                   PmAddTask.class,
                                   PmReviewBacklog.class,

@@ -121,12 +121,8 @@ final class MatchFilter implements Predicate<Event> {
         return result;
     }
 
-    private boolean checkEventType(Message message) {
-        TypeUrl actualTypeUrl = TypeUrl.of(message);
-        if (eventTypeUrl == null) {
-            return true;
-        }
-        boolean result = actualTypeUrl.equals(eventTypeUrl);
+    private boolean checkEventType(EventMessage event) {
+        boolean result = (eventTypeUrl == null) || eventTypeUrl.equals(event.typeUrl());
         return result;
     }
 

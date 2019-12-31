@@ -31,7 +31,6 @@ import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
-import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
@@ -40,7 +39,6 @@ import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.Identity;
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
@@ -61,31 +59,35 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Sets.union;
-import static io.spine.client.Queries.typeOf;
 import static io.spine.grpc.StreamObservers.ack;
-import static java.util.Collections.singleton;
 
 /**
- * A container for storing the latest {@link io.spine.server.aggregate.Aggregate Aggregate}
- * states.
- *
- * <p>Provides an optimal way to access the latest state of published aggregates
- * for read-side services. The aggregate states are delivered to the instance of {@code Stand}
- * from {@link AggregateRepository} instances.
- *
- * <p>In order to provide a flexibility in defining data access policies,
- * {@code Stand} contains only the states of published aggregates.
- * Please refer to {@link io.spine.server.aggregate.Aggregate Aggregate} for details on
- * publishing aggregates.
+ * A bridge which connects {@link io.spine.server.QueryService QueryService} and
+ * {@link io.spine.server.SubscriptionService SubscriptionService} with a Read-side of
+ * a Bounded Context.
  *
  * <p>Each {@link io.spine.server.BoundedContext BoundedContext} contains only one
  * instance of {@code Stand}.
+ *
+ * <p>To deliver subscription updates to {@link io.spine.server.SubscriptionService
+ * SubscriptionService} the {@code Stand} subscribes to all the {@linkplain #messageClasses()
+ * domestic events} produced in the {@code BoundedContext} to which it belongs.
+ *
+ * <p>The {@code Stand} is responsible for obtaining results of
+ * {@linkplain #execute(Query, StreamObserver) queries} sent by
+ * the {@link io.spine.server.QueryService QueryService}.
+ *
+ * <p>The {@code Stand} also manages {@linkplain #subscribe(Topic, StreamObserver)
+ * creation of subscriptions}, their
+ * {@linkplain #activate(Subscription, SubscriptionCallback, StreamObserver) activation}, and
+ * {@linkplain #handle(EventEnvelope) delivering updates} to the subscribers when requested by
+ * the {@linkplain io.spine.server.SubscriptionService SubscriptionService}.
+ *
+ * @see <a href="https://spine.io/docs/concepts/diagrams/spine-architecture-diagram-full-screen.html">
+ *     Spine Architecture Diagram</a>
  */
 @SuppressWarnings("OverlyCoupledClass")
 public class Stand extends AbstractEventSubscriber implements AutoCloseable {
@@ -149,7 +151,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *         IDs of applied messages, etc.
      */
     @VisibleForTesting
-    void post(Entity entity, EntityLifecycle lifecycle) {
+    void post(Entity<?, ?> entity, EntityLifecycle lifecycle) {
         Any id = Identifier.pack(entity.id());
         Any state = AnyPacker.pack(entity.state());
         EntityRecord record = EntityRecord
@@ -172,7 +174,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     @Override
     protected void handle(EventEnvelope event) {
-        TypeUrl typeUrl = TypeUrl.of(event.message());
+        TypeUrl typeUrl = event.typeUrl();
         if (subscriptionRegistry.hasType(typeUrl)) {
             subscriptionRegistry.byType(typeUrl)
                                 .stream()
@@ -192,38 +194,39 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains all classes of all the events to which the {@code Stand} subscribes.
      *
-     * <p>As dynamically changed event classes for subscribers are currently not supported,
-     * {@code Stand} receives all events produced by the associated repositories and then notifies
-     * subscriptions if necessary.
-     *
-     * <p>Also receives {@link EntityStateChanged} event class to enable entity subscriptions.
+     * <p>This includes all types of the events produced by the associated repositories and
+     * {@link EntityStateChanged}. The latter is for the {@code Stand} to notify subscriptions
+     * on updated entity states.
      */
     @Override
-    public Set<EventClass> messageClasses() {
-        Set<EventClass> result =
-                union(eventRegistry.eventClasses(), singleton(StateClass.updateEvent()));
-        return result;
+    public ImmutableSet<EventClass> messageClasses() {
+        ImmutableSet<EventClass> resultSet =
+                ImmutableSet.<EventClass>builder()
+                        .addAll(eventRegistry.eventClasses())
+                        .add(StateClass.updateEvent())
+                        .build();
+        return resultSet;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Stand does not consume external events.
+     * Returns empty set because {@code Stand} does not consume external events.
      */
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains the set of event classes to which the {@code Stand} subscribes.
      *
-     * <p>Stand only consumes the domestic events.
+     * <p>Returns the same as {@link #messageClasses()}.
+     *
+     * @see #messageClasses()
      */
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return eventClasses();
     }
 
@@ -234,14 +237,12 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * Subscribes to the updates of entity state or to the specific types of events, according to
-     * {@link Topic}.
-     *
-     * <p>Once this instance of {@code Stand} receives an update of an entity or a matching event
-     * with the given {@code TypeUrl}, all such callbacks are executed.
+     * Creates a subscription for the passed topic.
      *
      * @param topic
-     *         a {@link Topic} defining the subscription target
+     *         defines the subscription target
+     * @param responseObserver
+     *         the observer for obtaining created subscription
      */
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver)
             throws InvalidRequestException {
@@ -262,20 +263,21 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     /**
      * Activates the subscription created via {@link #subscribe(Topic, StreamObserver)
-     * subscribe() method call}.
+     * subscribe()} method.
      *
-     * <p>After the activation, the clients will start receiving the updates via
-     * {@code SubscriptionCallback} upon entity state changes or new events arrival.
+     * <p>After the activation, the clients will start receiving the updates via the passed
+     * {@code SubscriptionCallback}.
      *
      * @param subscription
      *         the subscription to activate
      * @param callback
      *         the action which notifies the subscribers about an update
      * @param responseObserver
-     *         an observer to notify of a successful acknowledgement of the subscription activation.
+     *         an observer to notify of a successful acknowledgement of the subscription activation
      * @see #subscribe(Topic, StreamObserver)
      */
-    public void activate(Subscription subscription, SubscriptionCallback callback,
+    public void activate(Subscription subscription,
+                         SubscriptionCallback callback,
                          StreamObserver<Response> responseObserver)
             throws InvalidRequestException {
         checkNotNull(subscription);
@@ -375,7 +377,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             throws InvalidRequestException {
         queryValidator.validate(query);
 
-        TypeUrl type = typeOf(query);
+        TypeUrl type = query.targetType();
         QueryProcessor queryProcessor = processorFor(type);
 
         QueryOperation op = new QueryOperation(query) {
@@ -395,14 +397,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * Registers a {@code Repository} as an entity/event type supplier.
-     *
-     * <p>In case of an {@link AggregateRepository}, the repository is not registered as
-     * a supplier for read operations, since the {@code Aggregate} reads are performed by
-     * accessing the latest state in the corresponding {@code MirrorProjection}.
-     *
-     * <p>However, the type of the {@code AggregateRepository} instance is recorded for
-     * the postponed processing of updates.
+     * Registers the passed {@code Repository} as an entity/event type supplier.
      */
     public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
         typeRegistry.register(repository);
@@ -410,22 +405,12 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * Dumps all {@link TypeUrl}-to-{@link RecordBasedRepository} relations.
+     * Closes the {@code Stand} performing necessary cleanups.
      */
     @Override
     public void close() throws Exception {
         typeRegistry.close();
         eventRegistry.close();
-    }
-
-    /**
-     * Delivers the given subscription update to the read-side.
-     *
-     * @see #activate(Subscription, SubscriptionCallback, StreamObserver)
-     * @see #cancel(Subscription, StreamObserver)
-     */
-    public interface SubscriptionCallback extends Consumer<SubscriptionUpdate> {
-
     }
 
     /**

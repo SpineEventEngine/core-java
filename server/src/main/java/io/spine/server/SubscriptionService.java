@@ -31,10 +31,9 @@ import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
-import io.spine.server.stand.Stand.SubscriptionCallback;
+import io.spine.server.stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -57,9 +56,9 @@ public final class SubscriptionService
 
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
-    private SubscriptionService(Map<TypeUrl, BoundedContext> map) {
+    private SubscriptionService(ImmutableMap<TypeUrl, BoundedContext> map) {
         super();
-        this.typeToContextMap = ImmutableMap.copyOf(map);
+        this.typeToContextMap = checkNotNull(map);
     }
 
     public static Builder newBuilder() {
@@ -68,17 +67,12 @@ public final class SubscriptionService
 
     @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
-        _debug().log("Creating the subscription to a topic: `%s`.", topic);
-
+        _debug().log("Creating the subscription to the topic: `%s`.", topic);
         try {
             Target target = topic.getTarget();
-            Optional<BoundedContext> selected = selectBoundedContext(target);
-            BoundedContext context = selected.orElseThrow(
-                    () -> newIllegalArgumentException(
-                            "Trying to subscribe to an unknown type: `%s`.", target.getType())
-            );
+            BoundedContext context = findContextOf(target)
+                    .orElseThrow(() -> unknownTargetType(target));
             Stand stand = context.stand();
-
             stand.subscribe(topic, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
@@ -87,22 +81,24 @@ public final class SubscriptionService
         }
     }
 
+    private static IllegalArgumentException unknownTargetType(Target target) {
+        return newIllegalArgumentException(
+                "Unable to subscribe to the type `%s` which is not a part of" +
+                        " any of Bounded Contexts handled by this `SubscriptionService`." +
+                        " Please check that the method" +
+                        " `SubscriptionService.Builder.add(BoundedContext)` is called for" +
+                        " the context which produces this type.",
+                target.getType());
+    }
+
     @Override
     public void activate(Subscription subscription, StreamObserver<SubscriptionUpdate> observer) {
         _debug().log("Activating the subscription: `%s`.", subscription);
         try {
-            Optional<BoundedContext> selected = selectBoundedContext(subscription);
-            BoundedContext context = selected.orElseThrow(
-                    () -> newIllegalArgumentException(
-                            "Target subscription `%s` could not be found for activation.",
-                            toShortString(subscription))
-            );
-            SubscriptionCallback callback = update -> {
-                checkNotNull(update);
-                observer.onNext(update);
-            };
+            BoundedContext context = findContextOf(subscription)
+                    .orElseThrow(() -> unknownSubscription(subscription));
+            SubscriptionCallback callback = SubscriptionCallback.forwardingTo(observer);
             Stand targetStand = context.stand();
-
             targetStand.activate(subscription, callback, forwardErrorsOnly(observer));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
@@ -111,11 +107,17 @@ public final class SubscriptionService
         }
     }
 
+    private static IllegalArgumentException unknownSubscription(Subscription subscription) {
+        return newIllegalArgumentException(
+                "Target subscription `%s` could not be found for activation.",
+                toShortString(subscription));
+    }
+
     @Override
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
         _debug().log("Incoming cancel request for the subscription topic: `%s`.", subscription);
 
-        Optional<BoundedContext> selected = selectBoundedContext(subscription);
+        Optional<BoundedContext> selected = findContextOf(subscription);
         if (!selected.isPresent()) {
             _warn().log("Trying to cancel a subscription `%s` which could not be found.",
                         lazy(() -> toShortString(subscription)));
@@ -128,39 +130,45 @@ public final class SubscriptionService
             stand.cancel(subscription, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
-                    .log("Error processing cancel subscription request");
+                    .log("Error processing cancel subscription request.");
             responseObserver.onError(e);
         }
     }
 
-    private Optional<BoundedContext> selectBoundedContext(Subscription subscription) {
+    private Optional<BoundedContext> findContextOf(Subscription subscription) {
         Target target = subscription.getTopic()
                                     .getTarget();
-        Optional<BoundedContext> result = selectBoundedContext(target);
+        Optional<BoundedContext> result = findContextOf(target);
         return result;
     }
 
-    private Optional<BoundedContext> selectBoundedContext(Target target) {
-        TypeUrl type = TypeUrl.parse(target.getType());
+    private Optional<BoundedContext> findContextOf(Target target) {
+        TypeUrl type = target.type();
         BoundedContext selected = typeToContextMap.get(type);
         Optional<BoundedContext> result = Optional.ofNullable(selected);
         return result;
     }
 
+    /**
+     * The builder for the {@link SubscriptionService}.
+     */
     public static class Builder {
         private final Set<BoundedContext> contexts = Sets.newHashSet();
 
+        /** Adds the context to be handled by the subscription service. */
         public Builder add(BoundedContext context) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             contexts.add(context);
             return this;
         }
 
+        /** Removes the context from being handled by the subscription service. */
         public Builder remove(BoundedContext context) {
             contexts.remove(context);
             return this;
         }
 
+        /** Obtains the context added to the subscription service by the time of the call. */
         public ImmutableList<BoundedContext> contexts() {
             return ImmutableList.copyOf(contexts);
         }

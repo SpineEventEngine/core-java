@@ -22,9 +22,13 @@ package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.time.InstantConverter;
 import io.spine.validate.FieldAwareMessage;
+
+import java.time.Instant;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -113,6 +117,26 @@ interface EventContextMixin extends EnrichableMessageContext,
         @SuppressWarnings("ClassReferencesSubclass")  // which is the only impl.
         EventContext thisContext = (EventContext) this;
         return Identifier.unpack(thisContext.getProducerId());
+    }
+
+    /**
+     * Obtains the time of the event as {@link Timestamp}.
+     *
+     * @see #instant()
+     */
+    default Timestamp timestamp() {
+        return getTimestamp();
+    }
+
+    /**
+     * Obtains the time of the event as {@link Instant}.
+     *
+     * @see #timestamp()
+     */
+    default Instant instant() {
+        Instant result = InstantConverter.reversed()
+                                         .convert(getTimestamp());
+        return result;
     }
 
     /**

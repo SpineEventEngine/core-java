@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
@@ -30,10 +31,14 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Optional;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.
@@ -53,12 +58,28 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
     }
 
     @Override
-    public CommandClass messageClass() {
+    public final CommandClass messageClass() {
         return CommandClass.from(rawMessageClass());
     }
 
+    /**
+     * Obtains the classes of rejections thrown by this method, or empty set
+     * if no rejections are thrown.
+     */
+    public ImmutableSet<EventClass> rejections() {
+        Class<?>[] exceptionTypes = rawMethod().getExceptionTypes();
+        @SuppressWarnings("unchecked") // The cast is safe as we filter before.
+        ImmutableSet<EventClass> result =
+                Arrays.stream(exceptionTypes)
+                      .filter(ThrowableMessage.class::isAssignableFrom)
+                      .map(c -> (Class<ThrowableMessage>) c)
+                      .map(EventClass::fromThrowable)
+                      .collect(toImmutableSet());
+        return result;
+    }
+
     @Override
-    protected Optional<Success>
+    protected final Optional<Success>
     handleRejection(ThrowableMessage throwableMessage, T target, CommandEnvelope origin) {
         throwableMessage.initProducer(target.producerId());
         RejectionEnvelope envelope = RejectionEnvelope.from(origin, throwableMessage);

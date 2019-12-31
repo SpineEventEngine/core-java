@@ -22,9 +22,11 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
-import io.spine.server.transport.GrpcContainer;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -32,15 +34,14 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
  * Exposes one or more Bounded Contexts using {@link io.spine.server.CommandService CommandService}
  * and {@link io.spine.server.QueryService QueryService}.
  */
 public final class Server implements Logging {
-
-    /** The port assigned to the server. */
-    private final int port;
 
     /** Bounded Contexts exposed by the server. */
     private final ImmutableSet<BoundedContext> contexts;
@@ -50,15 +51,34 @@ public final class Server implements Logging {
 
     /**
      * Creates a new builder for the server.
+     *
+     * @deprecated please use {@link #atPort(int)} or {@link #inProcess(String)}
      */
+    @Deprecated
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(DEFAULT_CLIENT_SERVICE_PORT, null);
+    }
+
+    /**
+     * Initiates creating a server exposed at the passed port.
+     */
+    public static Builder atPort(int port) {
+        return new Builder(port, null);
+    }
+
+    /**
+     * Initiates creating an in-process server exposed with the given name.
+     *
+     * <p>The server is full-featured, high performance, and is useful in testing.
+     */
+    public static Builder inProcess(String serverName) {
+        checkNotEmptyOrBlank(serverName);
+        return new Builder(null, serverName);
     }
 
     private Server(Builder builder) {
-        this.port = builder.port;
-        this.contexts = ImmutableSet.copyOf(builder.contexts);
-        this.grpcContainer = createContainer(contexts);
+        this.contexts = builder.contexts();
+        this.grpcContainer = builder.createContainer();
     }
 
     /**
@@ -69,8 +89,13 @@ public final class Server implements Logging {
     public void start() throws IOException {
         grpcContainer.start();
         grpcContainer.addShutdownHook();
-
-        _info().log("Server started, listening to the port %d.", port);
+        FluentLogger.Api info = _info();
+        grpcContainer
+                .port()
+                .ifPresent(p -> info.log("Server started, listening to the port %d.", p));
+        grpcContainer
+                .serverName()
+                .ifPresent(n -> info.log("In-process server started with the name `%s`.", n));
     }
 
     /**
@@ -85,7 +110,8 @@ public final class Server implements Logging {
      * Initiates an orderly shutdown in which existing calls continue but new calls are rejected.
      */
     public void shutdown() {
-        _info().log("Shutting down the server...");
+        FluentLogger.Api info = _info();
+        info.log("Shutting down the server...");
         grpcContainer.shutdown();
         contexts.forEach(context -> {
             try {
@@ -97,6 +123,7 @@ public final class Server implements Logging {
                         .log("Unable to close the `%s` Context.", contextName);
             }
         });
+        info.log("Server shut down.");
     }
 
     /**
@@ -112,60 +139,45 @@ public final class Server implements Logging {
     }
 
     /**
-     * Obtains the port assigned to the server.
+     * Always returns zero.
+     *
+     * @deprecated please do not use
      */
+    @Deprecated
     public int port() {
-        return port;
+        return 0;
     }
 
     /**
-     * Creates a container for the passed Bounded Contexts.
+     * The builder for the server.
      */
-    private GrpcContainer createContainer(Set<BoundedContext> contexts) {
-        CommandService.Builder commandService = CommandService.newBuilder();
-        QueryService.Builder queryService = QueryService.newBuilder();
+    public static final class Builder extends ConnectionBuilder {
 
-        contexts.forEach(context -> {
-            commandService.add(context);
-            queryService.add(context);
-        });
-
-        GrpcContainer result = GrpcContainer
-                .newBuilder()
-                .setPort(port)
-                .addService(commandService.build())
-                .addService(queryService.build())
-                .build();
-        return result;
-    }
-
-    public static class Builder {
-
-        private int port = DEFAULT_CLIENT_SERVICE_PORT;
         private final Set<BoundedContextBuilder> contextBuilders = new HashSet<>();
+        private @MonotonicNonNull ImmutableSet<BoundedContext> contexts;
 
-        private final Set<BoundedContext> contexts = new HashSet<>();
-
-        /** Prevents instantiation from outside. */
-        private Builder() {
+        private Builder(@Nullable Integer port, @Nullable String serverName) {
+            super(port, serverName);
         }
 
         /**
          * Adds a builder for a {@code BoundedContext} to be added the server.
          */
         @CanIgnoreReturnValue
-        public Builder add(BoundedContextBuilder contextBuilder) {
-            checkNotNull(contextBuilder);
-            contextBuilders.add(contextBuilder);
+        public Builder add(BoundedContextBuilder context) {
+            checkNotNull(context);
+            contextBuilders.add(context);
             return this;
         }
 
         /**
-         * Defines a port for the server.
+         * Does nothing.
+         *
+         * @deprecated please use {@link Server#atPort(int)}.
          */
         @CanIgnoreReturnValue
-        public Builder setPort(int port) {
-            this.port = port;
+        @Deprecated
+        public Builder setPort(@SuppressWarnings("unused") int port) {
             return this;
         }
 
@@ -173,15 +185,51 @@ public final class Server implements Logging {
          * Creates a new instance of the server.
          */
         public Server build() {
-            buildContexts();
             Server result = new Server(this);
             return result;
         }
 
-        private void buildContexts() {
-            for (BoundedContextBuilder builder : contextBuilders) {
-                contexts.add(builder.build());
+        private ImmutableSet<BoundedContext> contexts() {
+            if (contexts == null) {
+                ImmutableSet.Builder<BoundedContext> result = ImmutableSet.builder();
+                contextBuilders.forEach(c -> result.add(c.build()));
+                contexts = result.build();
             }
+            return contexts;
+        }
+
+        /**
+         * Creates a container for the passed Bounded Contexts.
+         */
+        private GrpcContainer createContainer() {
+            CommandService.Builder commandService = CommandService.newBuilder();
+            QueryService.Builder queryService = QueryService.newBuilder();
+            SubscriptionService.Builder subscriptionService = SubscriptionService.newBuilder();
+
+            contexts().forEach(context -> {
+                commandService.add(context);
+                queryService.add(context);
+                subscriptionService.add(context);
+            });
+            GrpcContainer.Builder builder = createContainerBuilder();
+            GrpcContainer result = builder
+                    .addService(commandService.build())
+                    .addService(queryService.build())
+                    .addService(subscriptionService.build())
+                    .build();
+            return result;
+        }
+
+        private GrpcContainer.Builder createContainerBuilder() {
+            GrpcContainer.Builder result;
+            if (serverName().isPresent()) {
+                result = GrpcContainer.inProcess(serverName().get());
+            } else {
+                int port = port().orElseThrow(() -> newIllegalStateException(
+                        "Neither `port` nor `serverName` assigned."));
+                result = GrpcContainer.atPort(port);
+            }
+            return result;
         }
     }
 }

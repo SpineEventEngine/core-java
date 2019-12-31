@@ -68,6 +68,7 @@ import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
@@ -84,7 +85,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.dispatch.PmDispatcher.dispatch;
@@ -104,6 +104,8 @@ import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testdata.Sample.messageOfType;
+import static io.spine.testing.server.Assertions.assertCommandClassesExactly;
+import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -306,6 +308,7 @@ class ProcessManagerTest {
         }
     }
 
+    @MuteLogging
     @Nested
     @DisplayName("rollback state on")
     class RollbackOn {
@@ -530,14 +533,13 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<CommandClass> commands = pmClass.outgoingCommands();
-            assertThat(commands).containsExactlyElementsIn(CommandClass.setOf(
-                    PmCreateProject.class,
-                    PmAddTask.class,
-                    PmReviewBacklog.class,
-                    PmScheduleRetrospective.class,
-                    PmPlanIteration.class,
-                    PmStartIteration.class
-            ));
+            assertCommandClassesExactly(commands,
+                                        PmCreateProject.class,
+                                        PmAddTask.class,
+                                        PmReviewBacklog.class,
+                                        PmScheduleRetrospective.class,
+                                        PmPlanIteration.class,
+                                        PmStartIteration.class);
         }
 
         @Test
@@ -546,13 +548,13 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<EventClass> events = pmClass.outgoingEvents();
-            assertThat(events).containsExactlyElementsIn(EventClass.setOf(
-                    PmProjectCreated.class,
-                    PmTaskAdded.class,
-                    PmNotificationSent.class,
-                    PmIterationPlanned.class,
-                    PmIterationStarted.class
-            ));
+            assertEventClassesExactly(events,
+                                      PmProjectCreated.class,
+                                      PmTaskAdded.class,
+                                      PmNotificationSent.class,
+                                      PmIterationPlanned.class,
+                                      PmIterationStarted.class,
+                                      StandardRejections.EntityAlreadyArchived.class);
         }
 
         @Test
@@ -561,10 +563,9 @@ class ProcessManagerTest {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<EventClass> externalEvents = pmClass.externalEvents();
-            assertThat(externalEvents).containsExactlyElementsIn(EventClass.setOf(
-                    PmQuizStarted.class,
-                    PmQuestionAnswered.class
-            ));
+            assertEventClassesExactly(externalEvents,
+                                      PmQuizStarted.class,
+                                      PmQuestionAnswered.class);
         }
     }
 }

@@ -32,7 +32,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
-import io.spine.server.stand.Stand.SubscriptionCallback;
+import io.spine.server.stand.SubscriptionCallback;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

@@ -20,12 +20,11 @@
 
 package io.spine.server.command;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
-
-import java.util.Set;
 
 import static io.spine.server.type.CommandClass.setOf;
 
@@ -34,7 +33,7 @@ import static io.spine.server.type.CommandClass.setOf;
  */
 public final class CommandInterceptor extends AbstractCommandHandler {
 
-    private final Set<CommandClass> intercept;
+    private final ImmutableSet<CommandClass> intercept;
     private final CommandHistory history = new CommandHistory();
 
     @SafeVarargs
@@ -49,7 +48,7 @@ public final class CommandInterceptor extends AbstractCommandHandler {
     }
 
     @Override
-    public Set<CommandClass> messageClasses() {
+    public ImmutableSet<CommandClass> messageClasses() {
         return intercept;
     }
 

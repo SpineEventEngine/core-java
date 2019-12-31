@@ -34,15 +34,17 @@ import "spine/base/field_path.proto";
 
 // Defines the target type and filters.
 //
-// Use Target to specify and narrow down the source for Topic and Query by the target type and
-// various criteria.
+// Use `Target` to specify and narrow down the source for `Topic` and `Query` by
+// the target type and various criteria.
+//
 message Target {
-    option (is).java_type = "io.spine.client.TargetMixin";
+    option (is).java_type = "TargetMixin";
 
     // The type of the entity or event of interest.
     //
-    // Queries support only entity targets while subscriptions work with both event and entity
-    // types.
+    // Queries support only entity targets while subscriptions work with both event and
+    // entity state types.
+    //
     string type = 1 [(required) = true];
 
     // The filters which are applied to the received entity state or event message.
@@ -72,6 +74,7 @@ message TargetFilters {
 
 // The filter grouping a number of simple filters with a specified logical operator.
 message CompositeFilter {
+    option (is).java_type = "CompositeFilterMixin";
 
     // The list of filters.
     //
@@ -97,7 +100,7 @@ message CompositeFilter {
 
 // A filter matching some value in the event message/entity state.
 message Filter {
-    option (is).java_type = "io.spine.client.FilterMixin";
+    option (is).java_type = "FilterMixin";
 
     // The path to the field to be matched.
     //
@@ -135,8 +138,8 @@ message Filter {
 
 // Allows to add an ID filter for the read operations.
 //
-// Used to filter out all objects with identifiers not included into the filter. SQL equivalent is
-// "... where row.id IN (...)".
+// Used to filter out all objects with identifiers not included into the filter.
+// SQL equivalent is "... where row.id IN (...)".
 //
 message IdFilter {
 

@@ -34,7 +34,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
  * Extends {@link QueryResponse} with useful methods.
  */
 @GeneratedMixin
-public interface QueryResponseMixin {
+interface QueryResponseMixin {
 
     @SuppressWarnings("override") // in generated code
     List<EntityStateWithVersion> getMessageList();

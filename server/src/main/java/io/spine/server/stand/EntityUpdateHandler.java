@@ -63,14 +63,14 @@ final class EntityUpdateHandler extends UpdateHandler {
     Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
         SubscriptionUpdate result = null;
 
-        if (isTypeMatching(event)) {
+        if (typeMatches(event)) {
             if (includeAll()) {
                 result = newStateUpdate(event);
             } else {
-                if (isIdMatching(event)) {
-                    if (isStateMatching(newStateFrom(event))) {
+                if (idMatches(event)) {
+                    if (stateMatches(newStateFrom(event))) {
                         result = newStateUpdate(event);
-                    } else if (isStateMatching(oldStateFrom(event))) {
+                    } else if (stateMatches(oldStateFrom(event))) {
                         result = noLongerMatching(event);
                     }
                 }
@@ -80,7 +80,7 @@ final class EntityUpdateHandler extends UpdateHandler {
     }
 
     @Override
-    protected boolean isTypeMatching(EventEnvelope event) {
+    protected boolean typeMatches(EventEnvelope event) {
         String expectedTypeUrl = target().getType();
         String actualTypeUrl = asEntityEvent(event).getEntity()
                                                    .getTypeUrl();
@@ -101,12 +101,12 @@ final class EntityUpdateHandler extends UpdateHandler {
     /**
      * Checks if the event message matches the subscription filters.
      */
-    private boolean isStateMatching(EntityState state) {
+    private boolean stateMatches(EntityState state) {
         TargetFilters filters = target().getFilters();
         boolean result = filters
                 .getFilterList()
                 .stream()
-                .allMatch(f -> checkPasses(state, f));
+                .allMatch(f -> f.test(state));
         return result;
     }
 

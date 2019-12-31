@@ -24,7 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
@@ -247,8 +249,7 @@ public abstract class Transaction<I,
      * Obtains the {@link MessageId} of the entity under the transaction.
      */
     MessageId entityId() {
-        TypeUrl typeUrl = TypeUrl.of(entity.state()
-                                           .getClass());
+        TypeUrl typeUrl = entity.state().typeUrl();
         return MessageId
                 .newBuilder()
                 .setId(Identifier.pack(entity.id()))
@@ -455,7 +456,7 @@ public abstract class Transaction<I,
      *
      * <p>Some of the columns may be {@linkplain InterfaceBasedColumn implemented} with custom
      * getters declared in the entity class. The values of such columns need to be propagated to
-     * the entity state during transaction commit.
+     * the entity state during the transaction commit.
      */
     @SuppressWarnings("unchecked") // Logically correct.
     private S stateWithColumns() {
@@ -468,12 +469,26 @@ public abstract class Transaction<I,
         Message.Builder stateWithColumns = entity.state()
                                                  .toBuilder();
         columns.values()
-               .forEach(column -> {
-                   Object value = column.valueIn(entity);
-                   stateWithColumns.setField(column.protoField().descriptor(), value);
-               });
+               .forEach(column -> propagateValue(column, stateWithColumns));
         S result = (S) stateWithColumns.build();
         return result;
+    }
+
+    /**
+     * Propagates a column value which is obtained with the help of a manually implemented column
+     * getter to the entity state.
+     *
+     * <p>The enum-typed columns require an additional conversion as the
+     * {@link Message.Builder#setField(Descriptors.FieldDescriptor, Object)} method should receive
+     * a {@link com.google.protobuf.Descriptors.EnumValueDescriptor EnumValueDescriptor} instance
+     * by the Protobuf rules.
+     */
+    private void propagateValue(InterfaceBasedColumn column, Message.Builder entityState) {
+        Object value = column.valueIn(entity);
+        if (value instanceof ProtocolMessageEnum) {
+            value = ((ProtocolMessageEnum) value).getValueDescriptor();
+        }
+        entityState.setField(column.protoField().descriptor(), value);
     }
 
     /**

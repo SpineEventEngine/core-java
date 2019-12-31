@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
@@ -63,13 +64,16 @@ public abstract class SubscriberMethod
         super(method, parameterSpec);
     }
 
-    @Override
-    public DispatchKey key() {
-        DispatchKey typeBasedKey = super.key();
+    /**
+     * Applies {@link #filter() filter} if a specific one is supplied. Otherwise returns the
+     * supplied {@code key}.
+     */
+    @Internal
+    DispatchKey applyFilter(DispatchKey key) {
         ArgumentFilter filter = filter();
         return filter.acceptsAll()
-               ? typeBasedKey
-               : typeBasedKey.withFilter(filter);
+               ? key
+               : key.withFilter(filter);
     }
 
     @Override
@@ -98,7 +102,8 @@ public abstract class SubscriberMethod
      * <p>It is assumed that the type of the event is correct and only the field filter should be
      * checked.
      *
-     * @param event the event to check
+     * @param event
+     *         the event to check
      * @return {@code true} if this method can handle the given event, {@code false} otherwise
      */
     final boolean canHandle(EventEnvelope event) {

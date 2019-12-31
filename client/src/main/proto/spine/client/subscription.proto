@@ -157,9 +157,13 @@ message SubscriptionId {
 // The subscription object.
 //
 // Created when the client subscribes to a topic inside the read-side implementation.
-// Generally should not be created in the client code.
+// Generally should not be created directly in the client code.
+//
 // See SubscriptionService#Subscribe(Topic).
+//
 message Subscription {
+
+    option (is).java_type = "SubscriptionMixin";
 
     // Unique identifier of the subscription.
     //

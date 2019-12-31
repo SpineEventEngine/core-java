@@ -85,7 +85,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         } else if (outcome.hasError()) {
             Error error = outcome.getError();
             repository().lifecycleOf(projection.id())
-                        .onDispatchingFailed(envelope().messageId(), error);
+                        .onDispatchingFailed(envelope(), error);
         }
     }
 

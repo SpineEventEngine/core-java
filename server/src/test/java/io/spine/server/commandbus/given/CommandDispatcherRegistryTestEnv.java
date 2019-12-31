@@ -43,9 +43,6 @@ import io.spine.test.commandbus.event.CmdBusProjectCreated;
 import io.spine.test.commandbus.event.CmdBusProjectStarted;
 import io.spine.test.commandbus.event.CmdBusTaskAdded;
 
-import java.util.Collections;
-import java.util.Set;
-
 public class CommandDispatcherRegistryTestEnv {
 
     private CommandDispatcherRegistryTestEnv() {
@@ -118,8 +115,8 @@ public class CommandDispatcherRegistryTestEnv {
     public static class EmptyDispatcher implements CommandDispatcher {
 
         @Override
-        public Set<CommandClass> messageClasses() {
-            return Collections.emptySet();
+        public ImmutableSet<CommandClass> messageClasses() {
+            return ImmutableSet.of();
         }
 
         @Override
@@ -136,7 +133,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class AllCommandDispatcher implements CommandDispatcher {
 
         @Override
-        public Set<CommandClass> messageClasses() {
+        public ImmutableSet<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdBusCreateProject.class,
                                       CmdBusStartProject.class,
                                       CmdBusAddTask.class);
@@ -151,7 +148,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class CreateProjectDispatcher implements CommandDispatcher {
 
         @Override
-        public Set<CommandClass> messageClasses() {
+        public ImmutableSet<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdBusCreateProject.class);
         }
 
@@ -164,7 +161,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class AddTaskDispatcher implements CommandDispatcher {
 
         @Override
-        public Set<CommandClass> messageClasses() {
+        public ImmutableSet<CommandClass> messageClasses() {
             return CommandClass.setOf(CmdBusAddTask.class);
         }
 
@@ -207,7 +204,7 @@ public class CommandDispatcherRegistryTestEnv {
     public static class EmptyCommandHandler extends AbstractCommandHandler {
 
         @Override
-        public Set<CommandClass> messageClasses() {
+        public ImmutableSet<CommandClass> messageClasses() {
             return ImmutableSet.of();
         }
     }

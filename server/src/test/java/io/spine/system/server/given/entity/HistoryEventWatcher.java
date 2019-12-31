@@ -20,6 +20,7 @@
 
 package io.spine.system.server.given.entity;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.EventClass;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EntityArchived;
@@ -32,15 +33,13 @@ import io.spine.system.server.event.EventDispatchedToReactor;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.given.AbstractEventAccumulator;
 
-import java.util.Set;
-
 /**
  * Accumulates the entity history events.
  */
 public class HistoryEventWatcher extends AbstractEventAccumulator {
 
     @Override
-    public Set<EventClass> eventClasses() {
+    public ImmutableSet<EventClass> eventClasses() {
         return EventClass.setOf(
                 CommandDispatchedToHandler.class,
                 EntityArchived.class,
