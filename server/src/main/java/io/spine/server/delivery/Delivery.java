@@ -112,7 +112,7 @@ import static java.util.Collections.synchronizedList;
  * {@code synchronized} in-memory data structures and prevents several threads from picking up the
  * same shard.
  */
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // It's fine for a centerpiece.
+@SuppressWarnings({"OverlyCoupledClass"}) // It's fine for a centerpiece.
 public final class Delivery implements Logging {
 
     /**
