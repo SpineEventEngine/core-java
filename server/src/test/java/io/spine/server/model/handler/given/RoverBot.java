@@ -58,13 +58,21 @@ public class RoverBot extends Aggregate<Integer, Position, Position.Builder> {
         Integer id = id();
         switch (nextMove) {
             case 0:
-                return MovedNorth.newBuilder().setBotId(id).vBuild();
+                return MovedNorth.newBuilder()
+                                 .setBotId(id)
+                                 .vBuild();
             case 1:
-                return MovedEast.newBuilder().setBotId(id).vBuild();
+                return MovedEast.newBuilder()
+                                .setBotId(id)
+                                .vBuild();
             case 2:
-                return MovedSouth.newBuilder().setBotId(id).vBuild();
+                return MovedSouth.newBuilder()
+                                 .setBotId(id)
+                                 .vBuild();
             case 3:
-                return MovedWest.newBuilder().setBotId(id).vBuild();
+                return MovedWest.newBuilder()
+                                .setBotId(id)
+                                .vBuild();
             default:
                 throw newIllegalStateException("Unable to create a move event for %d.", nextMove);
         }
@@ -80,21 +88,25 @@ public class RoverBot extends Aggregate<Integer, Position, Position.Builder> {
 
     @Apply
     private void on(MovedNorth e) {
-        builder().setY(currentY() + 1);
+        builder().setId(e.getBotId())
+                 .setY(currentY() + 1);
     }
 
     @Apply
     private void on(MovedEast e) {
-        builder().setX(currentX() + 1);
+        builder().setId(e.getBotId())
+                 .setX(currentX() + 1);
     }
 
     @Apply
     private void on(MovedSouth e) {
-        builder().setY(currentY() - 1);
+        builder().setId(e.getBotId())
+                 .setY(currentY() - 1);
     }
 
     @Apply
     private void on(MovedWest e) {
-        builder().setX(currentX() - 1);
+        builder().setId(e.getBotId())
+                 .setX(currentX() - 1);
     }
 }

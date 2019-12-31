@@ -45,7 +45,9 @@ final class Dot extends Aggregate<ObjectId, Point, Point.Builder> {
     @Apply(allowImport = true)
     private void event(Moved event) {
         Point newPosition = move(state(), event.getDirection());
-        builder().setX(newPosition.getX())
+
+        builder().setId(event.getObject())
+                 .setX(newPosition.getX())
                  .setY(newPosition.getY());
     }
 

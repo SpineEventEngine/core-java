@@ -61,7 +61,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageValidator;
+import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -415,7 +415,7 @@ final class CatchUpProcess<I> extends AbstractEventReactor {
 
         private void store() {
             CatchUp rawMsg = builder().build();
-            List<ConstraintViolation> violations = MessageValidator.validate(rawMsg);
+            List<ConstraintViolation> violations = Validate.violationsOf(rawMsg);
             if (!violations.isEmpty()) {
                 System.err.println("The message is invalid: " + Stringifiers.toString(rawMsg));
             }

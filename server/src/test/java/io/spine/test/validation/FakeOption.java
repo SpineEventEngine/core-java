@@ -23,10 +23,16 @@ package io.spine.test.validation;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.DescriptorProtos.FieldOptions;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
+import io.spine.code.proto.FieldContext;
 import io.spine.option.OptionsProto;
-import io.spine.validate.FieldValue;
-import io.spine.validate.option.Constraint;
+import io.spine.type.MessageType;
+import io.spine.validate.Constraint;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.CustomConstraint;
+import io.spine.validate.MessageValue;
 import io.spine.validate.option.FieldValidatingOption;
+import jdk.nashorn.internal.ir.annotations.Immutable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A test-only implementation of a validating option.
@@ -41,8 +47,8 @@ import io.spine.validate.option.FieldValidatingOption;
  * thrown by the constraint produced by this option. Otherwise, the constraint never discovers any
  * violations.
  */
-@SuppressWarnings("Immutable") // effectively the 2nd type argument is an immutable Object.
-public final class FakeOption extends FieldValidatingOption<Void, Object> {
+@Immutable
+public final class FakeOption extends FieldValidatingOption<Void> {
 
     FakeOption() {
         super(createExtension());
@@ -55,17 +61,39 @@ public final class FakeOption extends FieldValidatingOption<Void, Object> {
     }
 
     @Override
-    public Constraint<FieldValue<Object>> constraintFor(FieldValue<Object> value) {
+    public Constraint constraintFor(FieldContext value) {
         RuntimeException exception = FakeOptionFactory.plannedException();
-        if (exception != null) {
-            return v -> { throw exception; };
-        } else {
-            return v -> ImmutableList.of();
-        }
+        return new FakeConstraint(value, exception);
     }
 
-    @Override
-    public boolean shouldValidate(FieldValue<Object> value) {
-        return true;
+    @SuppressWarnings("Immutable")  // effectively immutable.
+    private static final class FakeConstraint implements CustomConstraint {
+
+        private final FieldContext value;
+        private final @Nullable RuntimeException exception;
+
+        private FakeConstraint(FieldContext value, @Nullable RuntimeException exception) {
+            this.value = value;
+            this.exception = exception;
+        }
+
+        @Override
+        public ImmutableList<ConstraintViolation> validate(MessageValue value) {
+            if (exception != null) {
+                throw exception;
+            }
+            return ImmutableList.of();
+        }
+
+        @Override
+        public MessageType targetType() {
+            return new MessageType(value.target()
+                                        .getMessageType());
+        }
+
+        @Override
+        public String errorMessage(FieldContext context) {
+            return "";
+        }
     }
 }

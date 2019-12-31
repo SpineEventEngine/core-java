@@ -484,9 +484,8 @@ public class DeliveryTest {
             Event event = factory.createEvent(message, null);
             EventContext context = event.getContext();
             EventContext modifiedContext = context.toBuilder()
-                                                  .setTimestamp(factory.withNanosAsOrder(when))
+                                                  .setTimestamp(when)
                                                   .vBuild();
-
             Event eventAtTime = event.toBuilder()
                                      .setContext(modifiedContext)
                                      .vBuild();

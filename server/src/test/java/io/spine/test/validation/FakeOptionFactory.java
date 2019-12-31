@@ -22,9 +22,6 @@ package io.spine.test.validation;
 
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
 import io.spine.validate.option.FieldValidatingOption;
 import io.spine.validate.option.ValidatingOptionFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -68,54 +65,54 @@ public final class FakeOptionFactory implements ValidatingOptionFactory {
     }
 
     @Override
-    public Set<FieldValidatingOption<?, Boolean>> forBoolean() {
+    public Set<FieldValidatingOption<?>> forBoolean() {
         return fakeOption();
     }
 
     @Override
-    public Set<FieldValidatingOption<?, ByteString>> forByteString() {
+    public Set<FieldValidatingOption<?>> forByteString() {
         return fakeOption();
     }
 
     @Override
-    public Set<FieldValidatingOption<?, Double>> forDouble() {
+    public Set<FieldValidatingOption<?>> forDouble() {
         return fakeOption();
     }
 
     @Override
-    public Set<FieldValidatingOption<?, Descriptors.EnumValueDescriptor>> forEnum() {
+    public Set<FieldValidatingOption<?>> forEnum() {
         return fakeOption();
     }
 
     @Override
-    public Set<FieldValidatingOption<?, Float>> forFloat() {
+    public Set<FieldValidatingOption<?>> forFloat() {
         return fakeOption();
     }
 
     @Override
-    public Set<FieldValidatingOption<?, Integer>> forInt() {
+    public Set<FieldValidatingOption<?>> forInt() {
         return fakeOption();
     }
 
     @Override
-    public Set<FieldValidatingOption<?, Long>> forLong() {
+    public Set<FieldValidatingOption<?>> forLong() {
         return fakeOption();
     }
 
     @Override
-    public Set<FieldValidatingOption<?, Message>> forMessage() {
+    public Set<FieldValidatingOption<?>> forMessage() {
         return fakeOption();
     }
 
     @Override
-    public Set<FieldValidatingOption<?, String>> forString() {
+    public Set<FieldValidatingOption<?>> forString() {
         return fakeOption();
     }
 
-    private static <T> Set<FieldValidatingOption<?, T>> fakeOption() {
+    private static <T> Set<FieldValidatingOption<?>> fakeOption() {
         FakeOption option = new FakeOption();
         @SuppressWarnings("unchecked") // OK for tests.
-        FieldValidatingOption<?, T> castOption = (FieldValidatingOption<?, T>) option;
+        FieldValidatingOption<?> castOption = option;
         return ImmutableSet.of(castOption);
     }
 }
