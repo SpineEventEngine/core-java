@@ -34,7 +34,6 @@ import io.spine.server.event.EventComparator;
 import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,10 +53,10 @@ final class CatchUpStation extends Station {
     private static final Duration HOW_LONG_TO_KEEP = Durations.fromMillis(1000);
     private static final Comparator<InboxMessage> COMPARATOR = new CatchUpMessageComparator();
 
-    private final Delivery.DeliverByType action;
+    private final DeliverByType action;
     private final Iterable<CatchUp> jobs;
 
-    CatchUpStation(Delivery.DeliverByType action, Iterable<CatchUp> jobs) {
+    CatchUpStation(DeliverByType action, Iterable<CatchUp> jobs) {
         this.action = action;
         this.jobs = jobs;
     }
@@ -114,7 +113,7 @@ final class CatchUpStation extends Station {
         List<InboxMessage> messages = deduplicateAndSort(dispatchToCatchUp.values(),
                                                          conveyor,
                                                          COMPARATOR);
-        DeliveryErrors errors = action.executeFor(messages, new ArrayList<>());
+        DeliveryErrors errors = action.executeFor(messages);
         for (InboxMessage dispatched : messages) {
             conveyor.markDelivered(dispatched);
         }

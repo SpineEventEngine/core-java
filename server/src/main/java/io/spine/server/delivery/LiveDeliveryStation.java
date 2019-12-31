@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import com.google.protobuf.Duration;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,10 +33,10 @@ import java.util.Map;
  */
 final class LiveDeliveryStation extends Station {
 
-    private final Delivery.DeliverByType action;
+    private final DeliverByType action;
     private final @Nullable Duration idempotenceWindow;
 
-    LiveDeliveryStation(Delivery.DeliverByType action, Duration idempotenceWindow) {
+    LiveDeliveryStation(DeliverByType action, Duration idempotenceWindow) {
         this.action = action;
         this.idempotenceWindow = !idempotenceWindow.equals(Duration.getDefaultInstance())
                                  ? idempotenceWindow
@@ -76,7 +75,7 @@ final class LiveDeliveryStation extends Station {
         List<InboxMessage> toDispatch = deduplicateAndSort(toProcess,
                                                            conveyor,
                                                            InboxMessageComparator.chronologically);
-        DeliveryErrors errors = action.executeFor(toDispatch, new ArrayList<>());
+        DeliveryErrors errors = action.executeFor(toDispatch);
         for (InboxMessage justDelivered : toProcess) {
             conveyor.markDelivered(justDelivered);
         }

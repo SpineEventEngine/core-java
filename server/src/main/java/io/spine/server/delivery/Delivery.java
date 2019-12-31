@@ -23,41 +23,29 @@ package io.spine.server.delivery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.Internal;
-import io.spine.core.SignalId;
-import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.MulticastDispatchListener;
 import io.spine.server.catchup.CatchUp;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
-import io.spine.server.model.ModelError;
-import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedList;
-import static java.util.Collections.synchronizedSet;
-import static java.util.stream.Collectors.groupingBy;
 
 /**
  * Delivers the messages to the entities.
@@ -194,7 +182,8 @@ public final class Delivery implements Logging {
      *
      * <p>Responsible for sending the notifications to the shard observers.
      */
-    private final DeliveryDispatchListener dispatchListener = new DeliveryDispatchListener();
+    private final DeliveryDispatchListener dispatchListener =
+            new DeliveryDispatchListener(this::onNewMessage);
 
     Delivery(DeliveryBuilder builder) {
         this.strategy = builder.getStrategy();
@@ -335,7 +324,7 @@ public final class Delivery implements Logging {
                                           pageIndex, messages.size()));
                 int deliveredInBatch = 0;
                 Conveyor conveyor = new Conveyor(messages);
-                DeliverByType action = new DeliverByType();
+                DeliverByType action = new DeliverByType(inboxDeliveries);
                 ImmutableList<Station> stations = ImmutableList.of(
                         new CatchUpStation(action, catchUpJobs),
                         new LiveDeliveryStation(action, idempotenceWindow),
@@ -378,83 +367,6 @@ public final class Delivery implements Logging {
             return true;
         }
         return monitor.shouldContinueAfter(stage);
-    }
-
-    /**
-     * Takes the messages classified as those to deliver and performs the actual delivery.
-     *
-     * <p>If an exception is thrown during delivery, this method propagates it. If many exceptions
-     * are thrown, all of them are added to the first one as {@code suppressed}, and the first one
-     * is propagated.
-     *
-     * <p>In case of an exception, the messages are marked as delivered, in order to avoid
-     * repetitive delivery. However, if a JVM {@link Error} is thrown, only the messages which were
-     * delivered successfully are marked as delivered. Moreover, an JVM {@link Error} halts delivery
-     * for all the subsequent messages in the batch. However, this is not true for
-     * {@link ModelError}s, which are treated in the same way as exceptions.
-     *
-     * @return the number of messages delivered, {@code 0} if no messages are classified for
-     *         delivery
-     */
-    private int deliverClassified(MessageClassifier classifier) {
-        ImmutableList<InboxMessage> toDeliver = classifier.toDeliver();
-        if (!toDeliver.isEmpty()) {
-            ImmutableList<InboxMessage> idempotenceSource = classifier.idempotenceSource();
-            DeliveryErrors observedExceptions = deliverByType(toDeliver);
-            observedExceptions.throwIfAny();
-            return toDeliver.size();
-        } else {
-            return 0;
-        }
-    }
-
-    private DeliveryErrors
-    deliverByType(ImmutableList<InboxMessage> toDeliver) {
-
-        Map<String, List<InboxMessage>> messagesByType = groupByTargetType(toDeliver);
-
-        DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
-        for (String typeUrl : messagesByType.keySet()) {
-            ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
-            List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
-            try {
-                delivery.deliver(deliveryPackage);
-            } catch (RuntimeException exception) {
-                errors.addException(exception);
-            } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {
-                errors.addError(error);
-            }
-        }
-        inboxStorage.markDelivered(toDeliver);
-        return errors.build();
-    }
-
-    final class DeliverByType {
-
-        DeliveryErrors executeFor(Collection<InboxMessage> messages,
-                                  List<InboxMessage> idempotenceSource) {
-            Map<String, List<InboxMessage>> messagesByType = groupByTargetType(messages);
-//            Map<String, List<InboxMessage>> idmptSourceByType = groupByTargetType(
-//                    idempotenceSource);
-
-            DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
-            for (String typeUrl : messagesByType.keySet()) {
-                ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
-                List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
-//                List<InboxMessage> idempotenceWnd = idmptSourceByType.getOrDefault(typeUrl,
-//                                                                                   ImmutableList.of());
-                try {
-                    delivery.deliver(deliveryPackage
-//                            , idempotenceWnd
-                    );
-                } catch (RuntimeException exception) {
-                    errors.addException(exception);
-                } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {
-                    errors.addError(error);
-                }
-            }
-            return errors.build();
-        }
     }
 
     /**
@@ -568,67 +480,5 @@ public final class Delivery implements Logging {
                 Delivery.this.dispatchListener.notifyOf(message);
             }
         };
-    }
-
-    private static Map<String, List<InboxMessage>> groupByTargetType(
-            Collection<InboxMessage> messages) {
-        return messages.stream()
-                       .collect(groupingBy(m -> m.getInboxId()
-                                                 .getTypeUrl()));
-    }
-
-    /**
-     * Listens to the signals dispatched via the {@code MulticastBus}es and notifies the shard
-     * observers of a new {@code InboxMessage} only when it has been dispatched to all of
-     * its multicast targets.
-     */
-    private class DeliveryDispatchListener implements MulticastDispatchListener {
-
-        private final Multimap<SignalId, InboxMessage> pending =
-                synchronizedListMultimap(MultimapBuilder.hashKeys()
-                                                        .arrayListValues()
-                                                        .build());
-
-        private final Set<SignalId> currentlyDispatching = synchronizedSet(new HashSet<>());
-
-        @Override
-        public void onStarted(SignalId signal) {
-            currentlyDispatching.add(signal);
-        }
-
-        @Override
-        public void onCompleted(SignalId signal) {
-            boolean removed = currentlyDispatching.remove(signal);
-            if (removed) {
-                Collection<InboxMessage> messages = pending.removeAll(signal);
-                for (InboxMessage message : messages) {
-                    propagateMessage(message);
-                }
-            }
-        }
-
-        private void notifyOf(InboxMessage message) {
-            SignalId id = message.hasEvent()
-                          ? message.getEvent()
-                                   .getId()
-                          : message.getCommand()
-                                   .getId();
-            if (currentlyDispatching.contains(id)) {
-                pending.put(id, message);
-            } else {
-                propagateMessage(message);
-            }
-        }
-
-        private void propagateMessage(InboxMessage message) {
-            TenantId tenant =
-                    message.hasEvent() ? message.getEvent()
-                                                .tenant()
-                                       : message.getCommand()
-                                                .tenant();
-            TenantAwareRunner
-                    .with(tenant)
-                    .run(() -> onNewMessage(message));
-        }
     }
 }
