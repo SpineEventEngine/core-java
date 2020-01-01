@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.Internal;
@@ -38,8 +37,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -144,7 +143,7 @@ public final class Delivery implements Logging {
      * as {@code String} to avoid an extra boxing into {@code TypeUrl} of the value,
      * which resides as a Protobuf {@code string} inside an incoming message.
      */
-    private final Map<String, ShardedMessageDelivery<InboxMessage>> inboxDeliveries;
+    private final InboxDeliveries deliveries;
 
     /**
      * The observers that are notified when a message is written into a particular shard.
@@ -193,7 +192,7 @@ public final class Delivery implements Logging {
         this.catchUpStorage = builder.getCatchUpStorage();
         this.monitor = builder.getMonitor();
         this.pageSize = builder.getPageSize();
-        this.inboxDeliveries = Maps.newConcurrentMap();
+        this.deliveries = new InboxDeliveries();
         this.shardObservers = synchronizedList(new ArrayList<>());
     }
 
@@ -324,7 +323,7 @@ public final class Delivery implements Logging {
                                           pageIndex, messages.size()));
                 int deliveredInBatch = 0;
                 Conveyor conveyor = new Conveyor(messages);
-                DeliverByType action = new DeliverByType(inboxDeliveries);
+                DeliverByType action = new DeliverByType(deliveries);
                 ImmutableList<Station> stations = ImmutableList.of(
                         new CatchUpStation(action, catchUpJobs),
                         new LiveDeliveryStation(action, idempotenceWindow),
@@ -336,6 +335,7 @@ public final class Delivery implements Logging {
                     totalMessagesDelivered += result.deliveredCount();
                     deliveredInBatch += result.deliveredCount();
                 }
+                notifyOfDuplicatesIn(conveyor);
                 conveyor.flushTo(inboxStorage);
                 DeliveryStage stage = newStage(index, deliveredInBatch);
                 continueAllowed = monitorTellsToContinue(stage);
@@ -352,6 +352,14 @@ public final class Delivery implements Logging {
             pageIndex++;
         }
         return new RunResult(totalMessagesDelivered, !continueAllowed);
+    }
+
+    private void notifyOfDuplicatesIn(Conveyor conveyor) {
+        Stream<InboxMessage> streamOfDuplicates = conveyor.knownDuplicates();
+        streamOfDuplicates.forEach((message) -> {
+            ShardedMessageDelivery<InboxMessage> delivery = deliveries.get(message);
+            delivery.onDuplicate(message);
+        });
     }
 
     private static DeliveryStage newStage(ShardIndex index, int deliveredInBatch) {
@@ -430,8 +438,7 @@ public final class Delivery implements Logging {
      * are dispatched to their targets.
      */
     void register(Inbox<?> inbox) {
-        TypeUrl entityType = inbox.entityStateType();
-        inboxDeliveries.put(entityType.value(), inbox.delivery());
+        deliveries.register(inbox);
     }
 
     /**
@@ -453,8 +460,7 @@ public final class Delivery implements Logging {
      * delivery callbacks} previously registered by this {@code Inbox}.
      */
     void unregister(Inbox<?> inbox) {
-        TypeUrl entityType = inbox.entityStateType();
-        inboxDeliveries.remove(entityType.value());
+        deliveries.unregister(inbox);
     }
 
     @VisibleForTesting

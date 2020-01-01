@@ -36,10 +36,14 @@ import java.util.function.Function;
 import static java.lang.String.format;
 
 /**
- * Takes the messages, which were previously sent to their targets via this inbox, and
- * delivers them, performing their de-duplication.
+ * Takes the messages, which were previously sent to their targets via their inbox, and
+ * delivers them.
  *
- * <p>Source messages for the de-duplication are supplied separately.
+ * <p>Groups messages sent to the same target, but preserving the original order
+ * throughout all the batches. Each of the resulting batches is delivered with a prior notification
+ * of the supplied {@linkplain BatchDeliveryListener listener}. Underlying listener implementations
+ * may then optimize loading of their targets, e.g. use a single read and single write operation
+ * per batch.
  */
 final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
@@ -55,16 +59,6 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         this.batchListener = batchListener;
     }
 
-    private static <I> void doDeliver(InboxOfCommands<I>  cmdDispatcher,
-                                  InboxOfEvents<I> eventDispatcher,
-                                  InboxMessage incomingMessage) {
-        if (incomingMessage.hasCommand()) {
-            cmdDispatcher.deliver(incomingMessage);
-        } else {
-            eventDispatcher.deliver(incomingMessage);
-        }
-    }
-
     @Override
     public void deliver(List<InboxMessage> incoming) {
 
@@ -74,6 +68,25 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
             }
         } else {
             deliverInBatch(incoming, batchListener);
+        }
+    }
+
+    @Override
+    public void onDuplicate(InboxMessage message) {
+        if(message.hasCommand()) {
+            inboxOfCmds.notifyOfDuplicated(message);
+        } else {
+            inboxOfEvents.notifyOfDuplicated(message);
+        }
+    }
+
+    private static <I> void doDeliver(InboxOfCommands<I>  cmdDispatcher,
+                                      InboxOfEvents<I> eventDispatcher,
+                                      InboxMessage incomingMessage) {
+        if (incomingMessage.hasCommand()) {
+            cmdDispatcher.deliver(incomingMessage);
+        } else {
+            eventDispatcher.deliver(incomingMessage);
         }
     }
 

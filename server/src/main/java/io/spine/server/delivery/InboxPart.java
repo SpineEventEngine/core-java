@@ -105,7 +105,21 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
         return InboxIds.newSignalId(targetId, uuid);
     }
 
+    /**
+     * Delivers the message to its message endpoint.
+     */
     void deliver(InboxMessage message) {
+        callEndpoint(message, (endpoint, targetId, envelope) -> endpoint.dispatchTo(targetId));
+    }
+
+    /**
+     * Notifies the message endpoint of the duplicate.
+     */
+    void notifyOfDuplicated(InboxMessage message) {
+        callEndpoint(message, MessageEndpoint::onDuplicate);
+    }
+
+    private void callEndpoint(InboxMessage message, EndpointCall<I, M> call) {
         M envelope = asEnvelope(message);
         InboxLabel label = message.getLabel();
         InboxId inboxId = message.getInboxId();
@@ -117,23 +131,24 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
         TenantAwareRunner
                 .with(envelope.tenantId())
-                .run(() -> {
-                    endpoint.dispatchTo(unpackedId);
-                });
+                .run(() -> call.invoke(endpoint, unpackedId, envelope));
     }
 
     /**
-     * An abstract base for routines which dispatch {@code InboxMessage}s to their endpoints.
+     * Determines how to perform the call to the endpoint.
      *
-     *
-     * <p>Takes care of de-duplication of the messages, using the prepared collection of previously
-     * dispatched messages to look for duplicate amongst.
-     *
-     * <p>In case a duplication is found, the respective endpoint is
-     * {@linkplain MessageEndpoint#onDuplicate(Object, SignalEnvelope) notified}.
+     * @param <I>
+     *         the type of identifiers of the entity, served by the endpoint
+     * @param <M>
+     *         the type of envelopes which the endpoint takes
      */
-    class Dispatcher {
+    @FunctionalInterface
+    private interface EndpointCall<I, M extends SignalEnvelope<?, ?, ?>> {
 
-
+        /**
+         * Invokes the method of the endpoint taking the ID of the target and the envelope as args
+         * if needed.
+         */
+        void invoke(MessageEndpoint<I, M> endpoint, I targetId, M envelope);
     }
 }

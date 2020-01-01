@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -44,6 +45,7 @@ final class Conveyor implements Iterable<InboxMessage> {
     private final Map<InboxMessageId, InboxMessage> messages = new LinkedHashMap<>();
     private final Set<InboxMessageId> dirtyMessages = new HashSet<>();
     private final Set<InboxMessage> removals = new HashSet<>();
+    private final Set<InboxMessage> duplicates = new HashSet<>();
 
     Conveyor(Collection<InboxMessage> messages) {
         for (InboxMessage message : messages) {
@@ -56,14 +58,25 @@ final class Conveyor implements Iterable<InboxMessage> {
         return new ArrayList<>(messages.values()).iterator();
     }
 
-    void markDelivered(InboxMessage message) {
+    private void markDelivered(InboxMessage message) {
         changeStatus(message, InboxMessageStatus.DELIVERED);
+    }
+
+    void markDelivered(Collection<InboxMessage> messages) {
+        for (InboxMessage message : messages) {
+            markDelivered(message);
+        };
     }
 
     void remove(InboxMessage message) {
         messages.remove(message.getId());
         removals.add(message);
         dirtyMessages.remove(message.getId());
+    }
+
+    void markDuplicateAndRemove(InboxMessage message) {
+        duplicates.add(message);
+        remove(message);
     }
 
     void markCatchUp(InboxMessage message) {
@@ -95,6 +108,10 @@ final class Conveyor implements Iterable<InboxMessage> {
         dirtyMessages.add(message.getId());
     }
 
+    Stream<InboxMessage> knownDuplicates() {
+        return duplicates.stream();
+    }
+
     void flushTo(InboxStorage storage) {
         List<InboxMessage> dirtyMessages =
                 messages.values()
@@ -105,5 +122,6 @@ final class Conveyor implements Iterable<InboxMessage> {
         storage.removeAll(removals);
         dirtyMessages.clear();
         removals.clear();
+        duplicates.clear();
     }
 }

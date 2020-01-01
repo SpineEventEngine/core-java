@@ -50,9 +50,8 @@ final class LiveDeliveryStation extends Station {
             InboxMessageStatus status = message.getStatus();
             if (status == InboxMessageStatus.TO_DELIVER) {
                 DispatchingId dispatchingId = new DispatchingId(message);
-                //TODO:2019-12-20:alex.tymchenko: proper de-duplication!
                 if (seen.containsKey(dispatchingId)) {
-                    conveyor.remove(message);
+                    conveyor.markDuplicateAndRemove(message);
                 } else {
                     seen.put(dispatchingId, message);
                     if (idempotenceWindow != null) {
@@ -60,25 +59,13 @@ final class LiveDeliveryStation extends Station {
                     }
                 }
             }
-
-//            if (message.hasEvent() && message.getEvent()
-//                                             .enclosedMessage() instanceof CatchUpStarted) {
-//                InboxId inboxId = message.getInboxId();
-//                Object targetId = Identifier.unpack(inboxId.getEntityId()
-//                                                           .getId());
-//                System.out.println(
-//                        "Live Delivery encountered `CatchUpStarted` for `"
-//                                + targetId + "`.");
-//            }
         }
-        Collection<InboxMessage> toProcess = seen.values();
-        List<InboxMessage> toDispatch = deduplicateAndSort(toProcess,
+        Collection<InboxMessage> toDeliver = seen.values();
+        List<InboxMessage> toDispatch = deduplicateAndSort(toDeliver,
                                                            conveyor,
                                                            InboxMessageComparator.chronologically);
         DeliveryErrors errors = action.executeFor(toDispatch);
-        for (InboxMessage justDelivered : toProcess) {
-            conveyor.markDelivered(justDelivered);
-        }
+        conveyor.markDelivered(toDeliver);
         Result result = new Result(seen.size(), errors);
         return result;
     }

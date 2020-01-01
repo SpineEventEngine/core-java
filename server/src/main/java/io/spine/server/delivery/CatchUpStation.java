@@ -84,11 +84,6 @@ final class CatchUpStation extends Station {
                                     "Pausing the `TO_DELIVER` message: " + eventDetails(message));
                             conveyor.markCatchUp(message);
                         }
-//                        if(message.hasEvent() && message.getEvent().enclosedMessage() instanceof CatchUpStarted) {
-//                            System.out.println("`CatchUpStarted` encountered. Moving all paused to removals.");
-//                            removalBuilder.addAll(toPause);
-//                            toPause.clear();
-//                        }
                     } else if (jobStatus == COMPLETED) {
                         if (message.getStatus() == TO_CATCH_UP) {
                             if (!dispatchToCatchUp.containsKey(dispatchingId)) {
@@ -114,9 +109,7 @@ final class CatchUpStation extends Station {
                                                          conveyor,
                                                          COMPARATOR);
         DeliveryErrors errors = action.executeFor(messages);
-        for (InboxMessage dispatched : messages) {
-            conveyor.markDelivered(dispatched);
-        }
+        conveyor.markDelivered(messages);
         Result result = new Result(dispatchToCatchUp.size(), errors);
         return result;
     }

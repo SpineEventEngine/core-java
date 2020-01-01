@@ -39,16 +39,14 @@ interface ShardedMessageDelivery<M extends ShardedRecord> {
      * <p>Any runtime issues should be handled by the descendants by emitting the corresponding
      * rejection events and potentially notifying the respective entity repositories.
      *
-     * <p>The messages passed as {@code deduplicationSource} reside in
-     * {@code now - de-duplication depth} timeframe. In most of cases, the set of messages sent
-     * for processing are included in the set of those to be used for de-duplication.
-     *
      * @param incoming
      *         the incoming messages to deliver
-     * @ param deduplicationSource
-     *         the messages to look for duplicates amongst
      */
-    void deliver(List<M> incoming
-//            , List<M> deduplicationSource
-    );
+    void deliver(List<M> incoming);
+
+    /**
+     * Serves to notify that the given message was originally sent to be {@linkplain #deliver(List)
+     * delivered}, but turned out to be a duplicate.
+     */
+    void onDuplicate(M message);
 }

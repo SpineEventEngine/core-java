@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import io.spine.server.model.ModelError;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,10 +34,10 @@ import static java.util.stream.Collectors.groupingBy;
  */
 final class DeliverByType {
 
-    private final Map<String, ShardedMessageDelivery<InboxMessage>> inboxDeliveries;
+    private final InboxDeliveries inboxDeliveries;
 
-    DeliverByType(Map<String, ShardedMessageDelivery<InboxMessage>> deliveries) {
-        inboxDeliveries = new HashMap<>(deliveries);
+    DeliverByType(InboxDeliveries deliveries) {
+        inboxDeliveries = deliveries;
     }
 
     /**

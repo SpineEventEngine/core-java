@@ -70,7 +70,7 @@ class MessageInterfaceResultTest {
         int numberOfMoves = random(1, 5);
         Start command = Start
                 .newBuilder()
-                .setBotId(random(7))
+                .setBotId(random(1, 7))
                 .setNumberOfMoves(numberOfMoves)
                 .build();
         context.receivesCommand(command);
