@@ -83,7 +83,7 @@ class ConstraintViolatedTest {
                .isEqualTo(InvalidText
                                   .newBuilder()
                                   .setId(DEFAULT)
-                                  .setErrorMessage("Value must be set.")
+                                  .setErrorMessage("A value must be set.")
                                   .buildPartial());
     }
 }

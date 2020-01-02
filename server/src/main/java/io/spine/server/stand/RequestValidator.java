@@ -24,7 +24,7 @@ import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageValidator;
+import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
 import io.spine.validate.diags.ViolationText;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -142,7 +142,7 @@ abstract class RequestValidator<M extends Message> {
      * @return an instance of exception or null if the request message is valid.
      */
     private @Nullable InvalidRequestException validateMessage(M request) {
-        List<ConstraintViolation> violations = MessageValidator.validate(request);
+        List<ConstraintViolation> violations = Validate.violationsOf(request);
         if (violations.isEmpty()) {
             return null;
         }

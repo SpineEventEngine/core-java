@@ -21,12 +21,18 @@
 package io.spine.test.validation;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.DescriptorProtos.FieldOptions;
-import com.google.protobuf.GeneratedMessage.GeneratedExtension;
+import io.spine.code.proto.FieldContext;
+import io.spine.code.proto.FieldDeclaration;
 import io.spine.option.OptionsProto;
-import io.spine.validate.FieldValue;
-import io.spine.validate.option.Constraint;
+import io.spine.validate.Constraint;
+import io.spine.validate.ConstraintTranslator;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.CustomConstraint;
+import io.spine.validate.MessageValue;
+import io.spine.validate.option.FieldConstraint;
 import io.spine.validate.option.FieldValidatingOption;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A test-only implementation of a validating option.
@@ -42,30 +48,60 @@ import io.spine.validate.option.FieldValidatingOption;
  * violations.
  */
 @SuppressWarnings("Immutable") // effectively the 2nd type argument is an immutable Object.
-public final class FakeOption extends FieldValidatingOption<Void, Object> {
+public final class FakeOption extends FieldValidatingOption<Boolean> {
 
     FakeOption() {
-        super(createExtension());
-    }
-
-    @SuppressWarnings("unchecked") // OK for tests.
-    private static GeneratedExtension<FieldOptions, Void> createExtension() {
-        GeneratedExtension<FieldOptions, ?> beta = OptionsProto.beta;
-        return (GeneratedExtension<FieldOptions, Void>) beta;
+        super(OptionsProto.beta);
     }
 
     @Override
-    public Constraint<FieldValue<Object>> constraintFor(FieldValue<Object> value) {
+    public Constraint constraintFor(FieldContext field) {
         RuntimeException exception = FakeOptionFactory.plannedException();
-        if (exception != null) {
-            return v -> { throw exception; };
-        } else {
-            return v -> ImmutableList.of();
+        return exception != null
+               ? new FaultyConstraint(field.targetDeclaration())
+               : new NoOpConstraint(field.targetDeclaration());
+    }
+
+    @Override
+    public boolean shouldValidate(FieldContext value) {
+        return true;
+    }
+
+    private static final class FaultyConstraint extends FieldConstraint<Boolean>
+            implements CustomConstraint  {
+
+        private FaultyConstraint(FieldDeclaration field) {
+            super(true, field);
+        }
+
+        @Override
+        public ImmutableList<ConstraintViolation> validate(MessageValue value) {
+            RuntimeException exception = FakeOptionFactory.plannedException();
+            checkNotNull(exception);
+            throw exception;
+        }
+
+        @Override
+        public String errorMessage(FieldContext context) {
+            return "";
         }
     }
 
-    @Override
-    public boolean shouldValidate(FieldValue<Object> value) {
-        return true;
+    private static final class NoOpConstraint extends FieldConstraint<Boolean>
+            implements CustomConstraint {
+
+        private NoOpConstraint(FieldDeclaration field) {
+            super(true, field);
+        }
+
+        @Override
+        public ImmutableList<ConstraintViolation> validate(MessageValue value) {
+            return ImmutableList.of();
+        }
+
+        @Override
+        public String errorMessage(FieldContext context) {
+            return "";
+        }
     }
 }
