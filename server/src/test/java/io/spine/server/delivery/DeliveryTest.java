@@ -175,14 +175,9 @@ public class DeliveryTest {
     @Test
     @DisplayName("multiple shards to multiple targets in a single-threaded env")
     public void manyTargets_manyShards_singleThread() {
-        long start = System.currentTimeMillis();
         changeShardCountTo(2019);
         ImmutableSet<String> targets = manyTargets(13);
         new ThreadSimulator(1).runWith(targets);
-        long end = System.currentTimeMillis();
-        System.err.println("------------");
-        System.err.println(end - start);
-        System.err.println("------------");
     }
 
     @Test
