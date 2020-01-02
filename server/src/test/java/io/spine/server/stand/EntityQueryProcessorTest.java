@@ -44,7 +44,6 @@ import io.spine.type.TypeName;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -124,7 +123,6 @@ class EntityQueryProcessorTest {
         assertRecords.isInOrder(uuidOrder.reversed());
     }
 
-    @Disabled
     @Test
     @DisplayName("fail if the query does not specify filters and `include_all` is not set")
     void failOnInvalidQuery() {

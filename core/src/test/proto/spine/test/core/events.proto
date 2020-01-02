@@ -43,5 +43,5 @@ message TaskAssigned {
 
     ProjectId project_id = 2 [(required) = true];
 
-    string user_name = 3 [(pattern).regex = ".{3,}"];
+    string user_name = 3 [(required) = true, (pattern).regex = ".{3,}"];
 }
