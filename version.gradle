@@ -19,10 +19,10 @@
  */
 
 /**
- *  The versions of the libraries used.
+ * The versions of the libraries used.
  *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * This file is used in both module `build.gradle` scripts and in the integration tests,
+ * as we want to manage the versions in a single source.
  */
 
 final def spineVersion = '1.3.1'
