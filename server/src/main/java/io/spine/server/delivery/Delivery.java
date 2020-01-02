@@ -170,6 +170,8 @@ public final class Delivery implements Logging {
      */
     private final DeliveryMonitor monitor;
 
+    private final DeliveredMessages deliveredMessages;
+
     /**
      * The maximum amount of messages to deliver within a {@link DeliveryStage}.
      */
@@ -194,6 +196,7 @@ public final class Delivery implements Logging {
         this.pageSize = builder.getPageSize();
         this.deliveries = new InboxDeliveries();
         this.shardObservers = synchronizedList(new ArrayList<>());
+        this.deliveredMessages = new DeliveredMessages();
     }
 
     /**
@@ -322,7 +325,7 @@ public final class Delivery implements Logging {
                                           index.getIndex(),
                                           pageIndex, messages.size()));
                 int deliveredInBatch = 0;
-                Conveyor conveyor = new Conveyor(messages);
+                Conveyor conveyor = new Conveyor(messages, deliveredMessages);
                 DeliverByType action = new DeliverByType(deliveries);
                 ImmutableList<Station> stations = ImmutableList.of(
                         new CatchUpStation(action, catchUpJobs),
@@ -355,7 +358,7 @@ public final class Delivery implements Logging {
     }
 
     private void notifyOfDuplicatesIn(Conveyor conveyor) {
-        Stream<InboxMessage> streamOfDuplicates = conveyor.knownDuplicates();
+        Stream<InboxMessage> streamOfDuplicates = conveyor.recentDuplicates();
         streamOfDuplicates.forEach((message) -> {
             ShardedMessageDelivery<InboxMessage> delivery = deliveries.get(message);
             delivery.onDuplicate(message);

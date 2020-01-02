@@ -23,13 +23,17 @@ package io.spine.server.delivery;
 import com.google.protobuf.Duration;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * @author Alex Tymchenko
+ * A station that delivers those messages which are incoming in a live mode.
+ *
+ * @see CatchUpStation for the station performing the catch-up
  */
 final class LiveDeliveryStation extends Station {
 
@@ -45,7 +49,7 @@ final class LiveDeliveryStation extends Station {
 
     @Override
     public final Result process(Conveyor conveyor) {
-        Map<DispatchingId, InboxMessage> seen = new LinkedHashMap<>();
+        Map<DispatchingId, InboxMessage> seen = new HashMap<>();
         for (InboxMessage message : conveyor) {
             InboxMessageStatus status = message.getStatus();
             if (status == InboxMessageStatus.TO_DELIVER) {
@@ -61,12 +65,42 @@ final class LiveDeliveryStation extends Station {
             }
         }
         Collection<InboxMessage> toDeliver = seen.values();
-        List<InboxMessage> toDispatch = deduplicateAndSort(toDeliver,
-                                                           conveyor,
-                                                           InboxMessageComparator.chronologically);
+        List<InboxMessage> toDispatch = deduplicateAndSort(toDeliver, conveyor);
         DeliveryErrors errors = action.executeFor(toDispatch);
         conveyor.markDelivered(toDeliver);
         Result result = new Result(seen.size(), errors);
+        return result;
+    }
+
+    /**
+     * De-duplicates and sorts the messages.
+     *
+     * <p>The conveyor is used to understand which messages were previously delivered and should
+     * be used as a de-duplication source.
+     *
+     * <p>Duplicated messages are {@linkplain Conveyor#recentDuplicates() remembered by the
+     * conveyor} and marked for removal.
+     *
+     * <p>Messages are sorted {@linkplain InboxMessageComparator#chronologically chronologically}.
+     *
+     * @param messages
+     *         message to de-duplicate and sort
+     * @param conveyor
+     *         current conveyor
+     * @return de-duplicated and sorted messages
+     */
+    List<InboxMessage> deduplicateAndSort(Collection<InboxMessage> messages, Conveyor conveyor) {
+        Set<DispatchingId> previouslyDelivered = conveyor.previouslyDelivered();
+        List<InboxMessage> result = new ArrayList<>();
+        for (InboxMessage message : messages) {
+            DispatchingId id = new DispatchingId(message);
+            if (previouslyDelivered.contains(id)) {
+                conveyor.markDuplicateAndRemove(message);
+            } else {
+                result.add(message);
+            }
+        }
+        result.sort(InboxMessageComparator.chronologically);
         return result;
     }
 }

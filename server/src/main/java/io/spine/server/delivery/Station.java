@@ -20,13 +20,6 @@
 
 package io.spine.server.delivery;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 /**
  * A stage of processing the messages on the {@link Conveyor}.
  *
@@ -42,46 +35,6 @@ abstract class Station {
      * @return the processing result
      */
     abstract Result process(Conveyor conveyor);
-
-    /**
-     * De-duplicates and sorts the messages.
-     *
-     * <p>The conveyor is used to understand which messages were previously delivered and should
-     * be used as a de-duplication source.
-     *
-     * <p>Duplicated messages are {@linkplain Conveyor#knownDuplicates() remembered by the conveyor}
-     * and marked for removal.
-     *
-     * <p>The comparator for the messages is customizable. This is requires as long as different
-     * stations may have their own requirements on sorting.
-     *
-     * @param messages
-     *         message to de-duplicate and sort
-     * @param conveyor
-     *         current conveyor
-     * @param comparator
-     *         to sort messages
-     * @return de-duplicated and sorted messages
-     */
-    List<InboxMessage> deduplicateAndSort(Collection<InboxMessage> messages,
-                                          Conveyor conveyor,
-                                          Comparator<InboxMessage> comparator) {
-        List<InboxMessage> previouslyDelivered = conveyor.previouslyDelivered();
-        Set<DispatchingId> dispatchedIds = previouslyDelivered.stream()
-                                                              .map(DispatchingId::new)
-                                                              .collect(Collectors.toSet());
-        List<InboxMessage> result = new ArrayList<>();
-        for (InboxMessage message : messages) {
-            DispatchingId id = new DispatchingId(message);
-            if (dispatchedIds.contains(id)) {
-                conveyor.markDuplicateAndRemove(message);
-            } else {
-                result.add(message);
-            }
-        }
-        result.sort(comparator);
-        return result;
-    }
 
     /**
      * Tells what the results of the processing at a particular station were.

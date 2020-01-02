@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.Sets;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -33,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -43,11 +45,13 @@ import static java.util.stream.Collectors.toList;
 final class Conveyor implements Iterable<InboxMessage> {
 
     private final Map<InboxMessageId, InboxMessage> messages = new LinkedHashMap<>();
+    private final DeliveredMessages deliveredMessages;
     private final Set<InboxMessageId> dirtyMessages = new HashSet<>();
     private final Set<InboxMessage> removals = new HashSet<>();
     private final Set<InboxMessage> duplicates = new HashSet<>();
 
-    Conveyor(Collection<InboxMessage> messages) {
+    Conveyor(Collection<InboxMessage> messages, DeliveredMessages deliveredMessages) {
+        this.deliveredMessages = deliveredMessages;
         for (InboxMessage message : messages) {
             this.messages.put(message.getId(), message);
         }
@@ -60,6 +64,7 @@ final class Conveyor implements Iterable<InboxMessage> {
 
     private void markDelivered(InboxMessage message) {
         changeStatus(message, InboxMessageStatus.DELIVERED);
+        deliveredMessages.recordDelivered(message);
     }
 
     void markDelivered(Collection<InboxMessage> messages) {
@@ -91,12 +96,17 @@ final class Conveyor implements Iterable<InboxMessage> {
         dirtyMessages.add(message.getId());
     }
 
-    //TODO:2019-12-20:alex.tymchenko: how to return a view on this?!
-    List<InboxMessage> previouslyDelivered() {
-        return messages.values()
-                       .stream()
-                       .filter(m -> m.getStatus() == InboxMessageStatus.DELIVERED)
-                       .collect(toList());
+    Set<DispatchingId> previouslyDelivered() {
+        Set<DispatchingId> recentlyDelivered =
+                messages.values()
+                        .stream()
+                        .filter(m -> m.getStatus() ==
+                                InboxMessageStatus.DELIVERED)
+                        .map(DispatchingId::new)
+                        .collect(Collectors.toSet());
+        Sets.SetView<DispatchingId> result = Sets.union(recentlyDelivered,
+                                                        deliveredMessages.allDelivered());
+        return result;
     }
 
     void keepForLonger(InboxMessage message, Duration howLongTooKeep) {
@@ -108,7 +118,7 @@ final class Conveyor implements Iterable<InboxMessage> {
         dirtyMessages.add(message.getId());
     }
 
-    Stream<InboxMessage> knownDuplicates() {
+    Stream<InboxMessage> recentDuplicates() {
         return duplicates.stream();
     }
 

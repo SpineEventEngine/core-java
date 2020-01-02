@@ -34,8 +34,9 @@ import io.spine.server.event.EventComparator;
 import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 
 /**
- * @author Alex Tymchenko
+ * A station that performs the delivery of messages to the catching-up targets.
  */
 final class CatchUpStation extends Station {
 
@@ -64,7 +65,7 @@ final class CatchUpStation extends Station {
     @Override
     public final Result process(Conveyor conveyor) {
 
-        Map<DispatchingId, InboxMessage> dispatchToCatchUp = new LinkedHashMap<>();
+        Map<DispatchingId, InboxMessage> dispatchToCatchUp = new HashMap<>();
 
         for (InboxMessage message : conveyor) {
             for (CatchUp job : jobs) {
@@ -105,9 +106,10 @@ final class CatchUpStation extends Station {
                 }
             }
         }
-        List<InboxMessage> messages = deduplicateAndSort(dispatchToCatchUp.values(),
-                                                         conveyor,
-                                                         COMPARATOR);
+
+        List<InboxMessage> messages = new ArrayList<>(dispatchToCatchUp.values());
+        messages.sort(COMPARATOR);
+
         DeliveryErrors errors = action.executeFor(messages);
         conveyor.markDelivered(messages);
         Result result = new Result(dispatchToCatchUp.size(), errors);
@@ -150,6 +152,10 @@ final class CatchUpStation extends Station {
                 + " in version " + version;
     }
 
+    /**
+     * The comparator which sorts the messages chronologically, but ensures that if there is
+     * a {@link CatchUpStarted} event in the sorted batch, it goes on top.
+     */
     private static final class CatchUpMessageComparator
             implements Comparator<InboxMessage>, Serializable {
 

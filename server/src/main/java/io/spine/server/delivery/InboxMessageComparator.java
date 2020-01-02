@@ -29,6 +29,12 @@ import java.util.Comparator;
 /**
  * A comparator comparing the {@link InboxMessage}s so that they appear in a chronological order
  * of their appearance in the corresponding {@code Inbox}.
+ *
+ * <p>If case the timestamps are equal, the {@linkplain InboxMessage#getVersion() versions}
+ * are compared.
+ *
+ * <p>If the versions are the same too, the messages are compared according to their ID values
+ * taken as UUID-strings.
  */
 @Internal
 public final class InboxMessageComparator implements Comparator<InboxMessage>, Serializable {
