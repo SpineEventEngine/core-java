@@ -26,8 +26,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCreated;
 
-import java.util.Set;
-
 /**
  * A simple dispatcher class, which only dispatch and does not have own event
  * subscribing methods.
@@ -37,17 +35,17 @@ public class BareDispatcher implements EventDispatcher {
     private boolean dispatchCalled = false;
 
     @Override
-    public Set<EventClass> messageClasses() {
+    public ImmutableSet<EventClass> messageClasses() {
         return ImmutableSet.of(EventClass.from(ProjectCreated.class));
     }
 
     @Override
-    public Set<EventClass> domesticEventClasses() {
+    public ImmutableSet<EventClass> domesticEventClasses() {
         return eventClasses();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public ImmutableSet<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 

@@ -19,9 +19,34 @@
  */
 
 /**
- * This package provides utility classes for client-side code.
+ * This package provides classes and interfaces for performing client requests like
+ * posting commands, running queries, or creating subscriptions.
+ *
+ * <p>The term <em>actor</em> used in this API means the user on behalf of whom requests
+ * are created and executed. The package provides two levels of API.
+ *
+ * <dl>
+ *   <dt><strong>High-level {@link io.spine.client.Client} API</strong></dt>
+ *   <dd>is meant for client-side Java applications that would communicate with backend
+ *   services via a gRPC connection. An instance of the {@link io.spine.client.Client} class
+ *   establishes this connection and serves as a fluent API gateway for composing and posting
+ *   requests.
+ *   </dd>
+ *
+ *   <dt><strong>Low-level {@link io.spine.client.ActorRequestFactory} API</strong></dt>
+ *   <dd>is meant for server-side code which needs to speak to backend services without involving
+ *   gRPC. This API is also by the High-level API implementation.</dd>
+ * </dl>
+ *
+ * <p>The {@link io.spine.client.Filters} utility class provides methods for composing filtering
+ * conditions for both levels of the API.
+ *
+ * <p>When subscribing the Client API accepts an implementation of a functional interface
+ * (see {@link io.spine.client.StateConsumer} and {@link io.spine.client.EventConsumer}).
+ * Errors occurred when streaming or consuming messages are handled via
+ * {@link io.spine.client.ErrorHandler} and {@link io.spine.client.ConsumerErrorHandler}
+ * correspondingly.
  */
-
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.client;

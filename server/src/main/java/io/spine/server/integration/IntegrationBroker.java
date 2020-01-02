@@ -218,7 +218,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     }
 
     private static ChannelId toChannelId(EventClass cls) {
-        TypeUrl targetType = TypeUrl.of(cls.value());
+        TypeUrl targetType = cls.typeUrl();
         return channelIdFor(targetType);
     }
 

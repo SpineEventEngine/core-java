@@ -21,8 +21,11 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.ArgumentFilter;
+import io.spine.server.model.DispatchKey;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
@@ -31,11 +34,23 @@ import java.lang.reflect.Method;
  * A wrapper for an event subscriber method.
  */
 @Immutable
-public final class EventSubscriberMethod extends SubscriberMethod {
+public final class EventSubscriberMethod extends SubscriberMethod
+        implements RejectionHandler<EventSubscriber, EmptyClass> {
 
     /** Creates a new instance. */
     EventSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
+    }
+
+    @Override
+    public EventAcceptingMethodParams parameterSpec() {
+        return (EventAcceptingMethodParams) super.parameterSpec();
+    }
+
+    @Override
+    public DispatchKey key() {
+        DispatchKey dispatchKey = RejectionHandler.super.key();
+        return applyFilter(dispatchKey);
     }
 
     @Override
@@ -47,6 +62,6 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     @Override
     protected void checkAttributesMatch(EventEnvelope event) throws IllegalArgumentException {
         super.checkAttributesMatch(event);
-        ensureExternalMatch(event.context().getExternal());
+        ensureExternalMatch(event.isExternal());
     }
 }

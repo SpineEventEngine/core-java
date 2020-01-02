@@ -25,8 +25,6 @@ import io.spine.base.EntityState;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
-import io.spine.client.Target;
-import io.spine.client.TargetFilters;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.RecordBasedRepository;
@@ -50,9 +48,8 @@ class EntityQueryProcessor implements QueryProcessor {
 
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
-        Target target = query.getTarget();
-        Iterator<EntityRecord> entities = target.getIncludeAll()
-                                          ? loadAll(query.getFormat())
+        Iterator<EntityRecord> entities = query.all()
+                                          ? loadAll(query.responseFormat())
                                           : loadByQuery(query);
         ImmutableList<EntityStateWithVersion> result = stream(entities)
                 .map(EntityQueryProcessor::toEntityState)
@@ -61,9 +58,8 @@ class EntityQueryProcessor implements QueryProcessor {
     }
 
     private Iterator<EntityRecord> loadByQuery(Query query) {
-        Target target = query.getTarget();
-        TargetFilters filters = target.getFilters();
-        Iterator<EntityRecord> entities = repository.findRecords(filters, query.getFormat());
+        Iterator<EntityRecord> entities =
+            repository.findRecords(query.filters(), query.responseFormat());
         return entities;
     }
 

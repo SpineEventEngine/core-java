@@ -25,7 +25,6 @@ import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
@@ -38,6 +37,8 @@ import io.spine.type.TypeUrl;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.flogger.LazyArgs.lazy;
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 
 /**
@@ -56,27 +57,31 @@ public final class QueryService
         this.typeToContextMap = ImmutableMap.copyOf(map);
     }
 
+    /** Creates a new builder for the service. */
     public static Builder newBuilder() {
         return new Builder();
     }
 
+    /**
+     * Executes the passed query returning results to the passed observer.
+     */
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
-        _debug().log("Incoming query: %s.", query);
+        _debug().log("Incoming query: `%s`.", lazy(() -> shortDebugString(query)));
 
-        TypeUrl type = Queries.typeOf(query);
-        BoundedContext boundedContext = typeToContextMap.get(type);
-        if (boundedContext == null) {
+        TypeUrl type = query.targetType();
+        BoundedContext context = typeToContextMap.get(type);
+        if (context == null) {
             handleUnsupported(type, responseObserver);
         } else {
-            handleQuery(boundedContext, query, responseObserver);
+            handleQuery(context, query, responseObserver);
         }
     }
 
-    private void handleQuery(BoundedContext boundedContext,
+    private void handleQuery(BoundedContext context,
                              Query query,
                              StreamObserver<QueryResponse> responseObserver) {
-        Stand stand = boundedContext.stand();
+        Stand stand = context.stand();
         try {
             stand.execute(query, responseObserver);
         } catch (InvalidRequestException e) {
@@ -97,24 +102,36 @@ public final class QueryService
         observer.onError(exception);
     }
 
+    /**
+     * The builder for a {@code QueryService}.
+     */
     public static class Builder {
-        private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
 
+        private final Set<BoundedContext> contexts = Sets.newHashSet();
+
+        /**
+         * Adds the passed bounded context to be served by the query service.
+         */
         @CanIgnoreReturnValue
-        public Builder add(BoundedContext boundedContext) {
-            // Save it to a temporary set so that it is easy to remove it if needed.
-            boundedContexts.add(boundedContext);
+        public Builder add(BoundedContext context) {
+            contexts.add(context);
             return this;
         }
 
+        /**
+         * Excludes the passed bounded context from being served by the query service.
+         */
         @CanIgnoreReturnValue
-        public Builder remove(BoundedContext boundedContext) {
-            boundedContexts.remove(boundedContext);
+        public Builder remove(BoundedContext context) {
+            contexts.remove(context);
             return this;
         }
 
-        public boolean contains(BoundedContext boundedContext) {
-            return boundedContexts.contains(boundedContext);
+        /**
+         * Tells if the builder already contains the passed bounded context.
+         */
+        public boolean contains(BoundedContext context) {
+            return contexts.contains(context);
         }
 
         /**
@@ -123,7 +140,7 @@ public final class QueryService
          * @throws IllegalStateException if no bounded contexts were added.
          */
         public QueryService build() throws IllegalStateException {
-            if (boundedContexts.isEmpty()) {
+            if (contexts.isEmpty()) {
                 String message = "Query service must have at least one `BoundedContext`.";
                 throw new IllegalStateException(message);
             }
@@ -133,21 +150,19 @@ public final class QueryService
         }
 
         private ImmutableMap<TypeUrl, BoundedContext> createMap() {
-            ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
-            for (BoundedContext boundedContext : boundedContexts) {
-                putIntoMap(boundedContext, builder);
+            ImmutableMap.Builder<TypeUrl, BoundedContext> map = ImmutableMap.builder();
+            for (BoundedContext context : contexts) {
+                putExposedTypes(context, map);
             }
-            return builder.build();
+            return map.build();
         }
 
-        private static void putIntoMap(BoundedContext boundedContext,
-                                       ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
-
-            Stand stand = boundedContext.stand();
+        private static void putExposedTypes(BoundedContext context,
+                                            ImmutableMap.Builder<TypeUrl, BoundedContext> map) {
+            Stand stand = context.stand();
             ImmutableSet<TypeUrl> exposedTypes = stand.exposedTypes();
-
-            for (TypeUrl availableType : exposedTypes) {
-                mapBuilder.put(availableType, boundedContext);
+            for (TypeUrl type : exposedTypes) {
+                map.put(type, context);
             }
         }
     }

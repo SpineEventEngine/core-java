@@ -68,7 +68,7 @@ public interface SubscribingClass extends Logging {
      * Obtains all subscriber methods that handle the passed event class.
      *
      * <p>There can be more than one method, if the subscriptions used
-     * the {@linkplain io.spine.core.Subscribe#filter() field filtering}.
+     * the {@linkplain io.spine.core.Where field filtering}.
      *
      * @param eventClass
      *          the class of the events

@@ -20,6 +20,7 @@
 
 package io.spine.client;
 
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.base.EntityState;
@@ -28,7 +29,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Extends the {@link Target} with validation routines.
@@ -39,9 +40,26 @@ interface TargetMixin extends TargetOrBuilder {
     /**
      * Returns the URL of the target type.
      */
-    default TypeUrl typeUrl() {
+    default TypeUrl type() {
         String type = getType();
         return TypeUrl.parse(type);
+    }
+
+    /**
+     * Obtains the class of the target.
+     */
+    default Class<Message> messageClass() {
+        Class<Message> result = type().getMessageClass();
+        return result;
+    }
+
+    /**
+     * Obtains the descriptor of the target type.
+     */
+    default Descriptor messageDescriptor() {
+        Descriptor result = type().toTypeName()
+                                  .messageDescriptor();
+        return result;
     }
 
     /**
@@ -51,13 +69,11 @@ interface TargetMixin extends TargetOrBuilder {
      *         if the target type is not a valid type for querying
      */
     default void checkTypeValid() {
-        String type = getType();
-        Class<Message> targetClass = TypeUrl.parse(type)
-                                            .getMessageClass();
+        Class<Message> targetClass = messageClass();
         boolean isEntityState = EntityState.class.isAssignableFrom(targetClass);
         boolean isEventMessage = EventMessage.class.isAssignableFrom(targetClass);
         if (!isEntityState && !isEventMessage) {
-            throw newIllegalArgumentException(
+            throw newIllegalStateException(
                     "The queried type should represent either an entity state or an event " +
                             "message. Got type `%s` instead.", targetClass.getCanonicalName());
         }
@@ -66,9 +82,9 @@ interface TargetMixin extends TargetOrBuilder {
     /**
      * Verifies that the target has valid type and filters.
      *
-     * @throws IllegalArgumentException
-     *         if either the target type is not a valid type for querying or the filters are
-     *         invalid
+     * @throws IllegalStateException
+     *         if either the target type is not a valid type for querying or the filters
+     *         are invalid
      * @see FilterMixin#checkCanApplyTo(Target)
      */
     @SuppressWarnings("ClassReferencesSubclass") // OK for a proto mixin.

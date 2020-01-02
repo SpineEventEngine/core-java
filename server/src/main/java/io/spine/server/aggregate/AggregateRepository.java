@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets.SetView;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
@@ -65,7 +64,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
-import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -80,7 +78,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository, EventDispatcherDelegate {
@@ -311,7 +309,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public final Set<CommandClass> messageClasses() {
+    public final ImmutableSet<CommandClass> messageClasses() {
         return aggregateClass().commands();
     }
 
@@ -348,41 +346,30 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public Set<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return aggregateClass().events();
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
+    public ImmutableSet<EventClass> domesticEvents() {
         return aggregateClass().domesticEvents();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return aggregateClass().externalEvents();
     }
 
     /**
      * Obtains classes of events that can be imported by aggregates of this repository.
      */
-    public Set<EventClass> importableEvents() {
+    public ImmutableSet<EventClass> importableEvents() {
         return aggregateClass().importableEvents();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Returns events emitted by the aggregate class as well as importable events.
-     *
-     * <p>Although technically imported events are not "produced" in this repository, they end up
-     * in the same {@code EventBus} and have the same behaviour as the ones emitted by the
-     * aggregates.
-     */
     @Override
     public ImmutableSet<EventClass> outgoingEvents() {
-        SetView<EventClass> eventClasses =
-                union(aggregateClass().outgoingEvents(), importableEvents());
-        return ImmutableSet.copyOf(eventClasses);
+        return aggregateClass().outgoingEvents();
     }
 
     /**

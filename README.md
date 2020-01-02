@@ -4,8 +4,8 @@
 [![license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Gitter chat](https://badges.gitter.im/SpineEventEngine.png)](https://gitter.im/SpineEventEngine)
 
-Spine Event Engine is a Java framework for building Event Sourcing and CQRS applications that are accessed by
-clients built with JavaScript, Java Nano (Android), C++, and Java.
+Spine Event Engine is a Java framework for building Event Sourcing and CQRS applications that are 
+accessed by clients built with JavaScript, Java Nano (Android), C++, and Java.
 
 Requires Java 8 or higher.
 
@@ -14,7 +14,7 @@ Gradle is used as a build and dependency management system.
 ## Releases
 The project is under active ongoing development. You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.2.0][latest-release].  
+The latest stable version is [1.3.0][latest-release].  
 
 ## Quickstart and Examples
 
@@ -51,7 +51,7 @@ or provide custom storage implementations.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:spine-developers@teamdev.com
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.2.0-release
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.3.0-release
 [spine-site]: https://spine.io/
 [wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
 [java-code-style]: https://github.com/SpineEventEngine/core-java/wiki/Java-Code-Style 

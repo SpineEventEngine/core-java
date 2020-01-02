@@ -39,8 +39,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.OperatorEvaluator.eval;
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toSet;
 

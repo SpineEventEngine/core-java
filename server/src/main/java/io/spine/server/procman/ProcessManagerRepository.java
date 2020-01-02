@@ -58,7 +58,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -238,7 +237,7 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public final Set<EventClass> messageClasses() {
+    public final ImmutableSet<EventClass> messageClasses() {
         return processManagerClass().events();
     }
 
@@ -250,7 +249,7 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public final Set<EventClass> domesticEventClasses() {
+    public final ImmutableSet<EventClass> domesticEventClasses() {
         return processManagerClass().domesticEvents();
     }
 
@@ -262,7 +261,7 @@ public abstract class ProcessManagerRepository<I,
      *         external events
      */
     @Override
-    public final Set<EventClass> externalEventClasses() {
+    public final ImmutableSet<EventClass> externalEventClasses() {
         return processManagerClass().externalEvents();
     }
 
@@ -272,7 +271,7 @@ public abstract class ProcessManagerRepository<I,
      * @return a set of command classes or empty set if process managers do not handle commands
      */
     @Override
-    public final Set<CommandClass> commandClasses() {
+    public final ImmutableSet<CommandClass> commandClasses() {
         return processManagerClass().commands();
     }
 
@@ -285,8 +284,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public ImmutableSet<EventClass> outgoingEvents() {
-        Set<EventClass> eventClasses = processManagerClass().outgoingEvents();
-        return ImmutableSet.copyOf(eventClasses);
+        return processManagerClass().outgoingEvents();
     }
 
     /**

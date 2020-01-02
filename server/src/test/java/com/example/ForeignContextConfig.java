@@ -33,8 +33,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Set;
-
 /**
  * Test environment class for testing {@code BoundedContext} configuration from
  * outside the framework.
@@ -54,7 +52,7 @@ public final class ForeignContextConfig {
     }
 
     public static void eventDispatcherRegistration() {
-        context().registerEventDispatcher(newEventDispatcher());
+        context().registerEventDispatcher(EmptyEventDispatcher.newInstance());
     }
 
     private static BoundedContext context() {
@@ -64,7 +62,7 @@ public final class ForeignContextConfig {
     private static CommandDispatcher newCommandDispatcher() {
         return new CommandDispatcher() {
             @Override
-            public Set<CommandClass> messageClasses() {
+            public ImmutableSet<CommandClass> messageClasses() {
                 return ImmutableSet.of();
             }
 
@@ -76,28 +74,31 @@ public final class ForeignContextConfig {
         };
     }
 
-    private static EventDispatcher newEventDispatcher() {
-        return new EventDispatcher() {
-            @Override
-            public Set<EventClass> externalEventClasses() {
-                return ImmutableSet.of();
-            }
+    private static class EmptyEventDispatcher implements EventDispatcher {
 
-            @Override
-            public Set<EventClass> domesticEventClasses() {
-                return eventClasses();
-            }
+        private static EventDispatcher newInstance() {
+            return new EmptyEventDispatcher();
+        }
 
-            @Override
-            public Set<EventClass> messageClasses() {
-                return ImmutableSet.of();
-            }
+        @Override
+        public ImmutableSet<EventClass> externalEventClasses() {
+            return ImmutableSet.of();
+        }
 
-            @CanIgnoreReturnValue
-            @Override
-            public void dispatch(EventEnvelope envelope) {
-                // Do nothing.
-            }
-        };
+        @Override
+        public ImmutableSet<EventClass> domesticEventClasses() {
+            return eventClasses();
+        }
+
+        @Override
+        public ImmutableSet<EventClass> messageClasses() {
+            return ImmutableSet.of();
+        }
+
+        @CanIgnoreReturnValue
+        @Override
+        public void dispatch(EventEnvelope envelope) {
+            // Do nothing.
+        }
     }
 }

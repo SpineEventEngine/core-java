@@ -27,6 +27,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Response;
 import io.spine.core.Responses;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
@@ -105,16 +106,16 @@ public class StreamObservers {
     @SuppressWarnings("ChainOfInstanceofChecks") // Only way to check an exact throwable type.
     public static Optional<Error> fromStreamError(Throwable throwable) {
         checkNotNull(throwable);
-
         if (throwable instanceof StatusRuntimeException) {
-            Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
-            return MetadataConverter.toError(metadata);
+            @Nullable Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
+            return metadata == null
+                   ? Optional.empty()
+                   : MetadataConverter.toError(metadata);
         }
         if (throwable instanceof StatusException) {
             Metadata metadata = ((StatusException) throwable).getTrailers();
             return MetadataConverter.toError(metadata);
         }
-
         return Optional.empty();
     }
 

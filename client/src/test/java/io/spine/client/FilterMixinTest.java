@@ -68,8 +68,7 @@ class FilterMixinTest {
         @DisplayName("when the field is not present in the target type")
         void whenFieldNotPresent() {
             Filter filter = Filters.eq("non_existing_field", "some entity column value");
-            assertThrows(IllegalArgumentException.class,
-                         () -> filter.checkCanApplyTo(testEntityTarget()));
+            assertNotApplies(filter, testEntityTarget());
         }
 
         @Nested
@@ -80,8 +79,7 @@ class FilterMixinTest {
             @DisplayName("and the target field is not top-level")
             void whenFieldNotTopLevel() {
                 Filter filter = Filters.eq("name.value", "a test entity name");
-                assertThrows(IllegalArgumentException.class,
-                             () -> filter.checkCanApplyTo(testEntityTarget()));
+                assertNotApplies(filter, testEntityTarget());
             }
 
             @Test
@@ -92,9 +90,13 @@ class FilterMixinTest {
                         .setValue("the entity name")
                         .build();
                 Filter filter = Filters.eq("name", name);
-                assertThrows(IllegalArgumentException.class,
-                             () -> filter.checkCanApplyTo(testEntityTarget()));
+                assertNotApplies(filter, testEntityTarget());
             }
+        }
+
+        void assertNotApplies(Filter filter, Target target) {
+            assertThrows(IllegalStateException.class,
+                         () -> filter.checkCanApplyTo(target));
         }
     }
 

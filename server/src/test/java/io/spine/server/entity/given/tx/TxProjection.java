@@ -23,6 +23,7 @@ package io.spine.server.entity.given.tx;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Subscribe;
+import io.spine.server.entity.given.tx.ProjectionState.ProjectionType;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
@@ -31,11 +32,12 @@ import io.spine.server.projection.Projection;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.entity.given.tx.ProjectionState.ProjectionType.VERY_USEFUL;
 
 /**
  * Test environment projection for {@link io.spine.server.projection.ProjectionTransactionTest}.
  */
-public class TxProjection
+public final class TxProjection
         extends Projection<Id, ProjectionState, ProjectionState.Builder>
         implements ProjectionStateWithColumns {
 
@@ -78,5 +80,10 @@ public class TxProjection
     public int getNameLength() {
         return state().getName()
                       .length();
+    }
+
+    @Override
+    public ProjectionType getType() {
+        return VERY_USEFUL;
     }
 }

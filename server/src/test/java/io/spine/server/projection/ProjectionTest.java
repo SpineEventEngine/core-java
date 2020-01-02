@@ -50,7 +50,6 @@ import io.spine.test.projection.event.Int32Imported;
 import io.spine.test.projection.event.StringImported;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -147,7 +146,7 @@ class ProjectionTest {
         Project previousAggState = stateBuilder.setName("Old " + stateBuilder.getName()).build();
         MessageId entityId = MessageId
                 .newBuilder()
-                .setTypeUrl(TypeUrl.of(aggregateState).value())
+                .setTypeUrl(aggregateState.typeUrl().value())
                 .setId(pack(id))
                 .setVersion(Versions.zero())
                 .build();

@@ -74,7 +74,7 @@ final class InMemoryEventRegistry implements EventRegistry {
     }
 
     private void putIntoMap(EventClass eventClass) {
-        TypeUrl typeUrl = TypeUrl.of(eventClass.value());
+        TypeUrl typeUrl = eventClass.typeUrl();
         eventClasses.put(typeUrl, eventClass);
     }
 }

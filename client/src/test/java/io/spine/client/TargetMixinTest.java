@@ -57,7 +57,7 @@ class TargetMixinTest {
         void withInvalidType() {
             Filter filter = Filters.eq("second_field", false);
             Target target = target(PROJECT_ID_TYPE, filter);
-            assertThrows(IllegalArgumentException.class, target::checkValid);
+            assertInvalid(target);
         }
 
         @Test
@@ -65,7 +65,11 @@ class TargetMixinTest {
         void withInvalidFilters() {
             Filter filter = Filters.eq("non_existent_field", false);
             Target target = target(TEST_ENTITY_TYPE, filter);
-            assertThrows(IllegalArgumentException.class, target::checkValid);
+            assertInvalid(target);
+        }
+
+        private void assertInvalid(Target target) {
+            assertThrows(IllegalStateException.class, target::checkValid);
         }
     }
 

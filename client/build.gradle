@@ -20,7 +20,10 @@
 dependencies {
     api deps.grpc.grpcStub
     compile project(':core')
-    implementation deps.grpc.grpcProtobuf
+    implementation(
+            deps.grpc.grpcProtobuf,
+            deps.grpc.grpcCore
+    )
     testImplementation(
             "io.spine:spine-testlib:$spineBaseVersion",
             project(':testutil-client'),

@@ -22,7 +22,7 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
-import com.google.common.truth.Truth;
+import com.google.common.truth.StringSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
@@ -59,10 +60,6 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -142,9 +139,8 @@ class TopicBuilderTest {
                     .map(id -> toObject(id, int.class))
                     .collect(Collectors.toList());
 
-            Truth.assertThat(idValues)
-                 .hasSize(2);
-            assertThat(intIdValues, containsInAnyOrder(id1, id2));
+            assertThat(intIdValues)
+                 .containsExactly(id1, id2);
         }
 
         @Test
@@ -160,7 +156,7 @@ class TopicBuilderTest {
             FieldMask mask = topic.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
 
-            IterableSubject assertFieldNames = Truth.assertThat(fieldNames);
+            IterableSubject assertFieldNames = assertThat(fieldNames);
             assertFieldNames.hasSize(1);
             assertFieldNames.containsExactly(fieldName);
         }
@@ -180,11 +176,11 @@ class TopicBuilderTest {
 
             TargetFilters entityFilters = target.getFilters();
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
-            Truth.assertThat(aggregatingFilters)
+            assertThat(aggregatingFilters)
                  .hasSize(1);
             CompositeFilter aggregatingFilter = aggregatingFilters.get(0);
             Collection<Filter> filters = aggregatingFilter.getFilterList();
-            Truth.assertThat(filters)
+            assertThat(filters)
                  .hasSize(1);
             Any actualValue = findByName(filters, columnName).getValue();
             assertNotNull(columnValue);
@@ -211,7 +207,7 @@ class TopicBuilderTest {
 
             TargetFilters entityFilters = target.getFilters();
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
-            Truth.assertThat(aggregatingFilters)
+            assertThat(aggregatingFilters)
                  .hasSize(1);
             Collection<Filter> filters = aggregatingFilters.get(0)
                                                            .getFilterList();
@@ -245,7 +241,7 @@ class TopicBuilderTest {
             Target target = topic.getTarget();
             List<CompositeFilter> filters = target.getFilters()
                                                   .getFilterList();
-            Truth.assertThat(filters)
+            assertThat(filters)
                  .hasSize(2);
 
             CompositeFilter firstFilter = filters.get(0);
@@ -262,9 +258,9 @@ class TopicBuilderTest {
                 eitherFilters = firstFilter.getFilterList();
                 allFilters = secondFilter.getFilterList();
             }
-            Truth.assertThat(allFilters)
+            assertThat(allFilters)
                  .hasSize(2);
-            Truth.assertThat(eitherFilters)
+            assertThat(eitherFilters)
                  .hasSize(2);
 
             Filter lowerBound = allFilters.get(0);
@@ -320,7 +316,7 @@ class TopicBuilderTest {
             FieldMask mask = query.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
 
-            IterableSubject assertFieldNames = Truth.assertThat(fieldNames);
+            IterableSubject assertFieldNames = assertThat(fieldNames);
             assertFieldNames.hasSize(1);
             assertFieldNames.containsExactly(fieldName);
 
@@ -335,17 +331,16 @@ class TopicBuilderTest {
                     .stream()
                     .map(id -> toObject(id, int.class))
                     .collect(Collectors.toList());
-            Truth.assertThat(idValues)
-                 .hasSize(2);
-            assertThat(intIdValues, containsInAnyOrder(id1, id2));
+            assertThat(intIdValues)
+                .containsExactly(id1, id2);
 
             // Check query params
             List<CompositeFilter> aggregatingFilters = targetFilters.getFilterList();
-            Truth.assertThat(aggregatingFilters)
+            assertThat(aggregatingFilters)
                  .hasSize(1);
             Collection<Filter> filters = aggregatingFilters.get(0)
                                                            .getFilterList();
-            Truth.assertThat(filters)
+            assertThat(filters)
                  .hasSize(2);
 
             Any actualValue1 = findByName(filters, columnName1).getValue();
@@ -367,7 +362,7 @@ class TopicBuilderTest {
         TopicBuilder builder = new TopicBuilder(TEST_ENTITY_TYPE, factory);
         builder.where(eq("non_existent_column", "some value"));
 
-        assertThrows(IllegalArgumentException.class, builder::build);
+        assertThrows(IllegalStateException.class, builder::build);
     }
 
     @Nested
@@ -396,13 +391,14 @@ class TopicBuilderTest {
             TargetFilters filters = target.getFilters();
             Collection<Any> entityIds = filters.getIdFilter()
                                                .getIdList();
-            Truth.assertThat(entityIds)
+            assertThat(entityIds)
                  .hasSize(messageIds.length);
             Iterable<? extends Message> actualValues = entityIds
                     .stream()
                     .map(id -> toObject(id, TestEntityId.class))
                     .collect(Collectors.toList());
-            assertThat(actualValues, containsInAnyOrder(messageIds));
+            assertThat(actualValues)
+                .containsExactlyElementsIn(messageIds);
         }
 
         @Test
@@ -419,9 +415,9 @@ class TopicBuilderTest {
             FieldMask mask = topic.getFieldMask();
 
             Collection<String> maskFields = mask.getPathsList();
-            Truth.assertThat(maskFields)
-                 .hasSize(arrayFields.length);
-            assertThat(maskFields, contains(arrayFields));
+            IterableSubject assertMaskFields = assertThat(maskFields);
+            assertMaskFields.hasSize(arrayFields.length);
+            assertMaskFields.containsExactlyElementsIn(arrayFields);
         }
     }
 
@@ -442,10 +438,11 @@ class TopicBuilderTest {
                                              eq(columnName2, columnValue2));
         String topicString = builder.toString();
 
-        assertThat(topicString, containsString(TEST_ENTITY_TYPE.getSimpleName()));
-        assertThat(topicString, containsString(valueOf(id1)));
-        assertThat(topicString, containsString(valueOf(id2)));
-        assertThat(topicString, containsString(columnName1));
-        assertThat(topicString, containsString(columnName2));
+        StringSubject assertTopic = assertThat(topicString);
+        assertTopic.contains(TEST_ENTITY_TYPE.getSimpleName());
+        assertTopic.contains(valueOf(id1));
+        assertTopic.contains(valueOf(id2));
+        assertTopic.contains(columnName1);
+        assertTopic.contains(columnName2);
     }
 }
