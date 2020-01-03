@@ -99,7 +99,7 @@ final class EntityUpdateHandler extends UpdateHandler {
     }
 
     /**
-     * Checks if the event message matches the subscription filters.
+     * Checks if the entity state matches the subscription filters.
      */
     private boolean stateMatches(EntityState state) {
         TargetFilters filters = target().getFilters();
