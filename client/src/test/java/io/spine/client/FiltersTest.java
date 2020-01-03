@@ -25,9 +25,12 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EntityColumn;
+import io.spine.base.SubscribableField;
 import io.spine.client.Filter.Operator;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.test.client.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -80,6 +83,8 @@ class FiltersTest {
         new NullPointerTester()
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
                 .setDefault(Filter.class, Filter.getDefaultInstance())
+                .setDefault(EntityColumn.class, TestEntity.Columns.firstField())
+                .setDefault(SubscribableField.class, TestEntity.Fields.id())
                 .testAllPublicStaticMethods(Filters.class);
     }
 
@@ -135,6 +140,22 @@ class FiltersTest {
             assertEquals(pack(REQUESTED_VALUE), filter.getValue());
             assertEquals(operator, filter.getOperator());
         }
+    }
+
+    @Test
+    @DisplayName("create a filter for an entity column")
+    void createForEntityColumn() {
+        Filter eq = eq(TestEntity.Columns.firstField(), "some-value");
+        System.out.println("Entity column filter");
+        System.out.println(eq);
+    }
+
+    @Test
+    @DisplayName("create a filter for a subscribable field")
+    void createForField() {
+        Filter eq = Filters.eq(TestEntity.Fields.name().value(), "some-name");
+        System.out.println("Field filter");
+        System.out.println(eq);
     }
 
     @Nested

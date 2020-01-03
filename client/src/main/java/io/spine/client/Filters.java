@@ -24,11 +24,13 @@ import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityColumn;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
+import io.spine.base.SubscribableField;
 import io.spine.client.CompositeFilter.CompositeOperator;
-import io.spine.core.Version;
 import io.spine.core.Event;
+import io.spine.core.Version;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -80,6 +82,19 @@ public final class Filters {
     private Filters() {
     }
 
+    public static Filter eq(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        checkNotNull(value);
+        return createFilter(column, value, EQUAL);
+    }
+
+    public static Filter eq(SubscribableField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field, value, EQUAL);
+    }
+
     /**
      * Creates new equality {@link Filter}.
      *
@@ -93,6 +108,18 @@ public final class Filters {
         checkNotNull(fieldPath);
         checkNotNull(value);
         return createFilter(fieldPath, value, EQUAL);
+    }
+
+    public static Filter gt(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column, value, GREATER_THAN);
+    }
+
+    public static Filter gt(SubscribableField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field, value, GREATER_THAN);
     }
 
     /**
@@ -113,6 +140,18 @@ public final class Filters {
         return createFilter(fieldPath, value, GREATER_THAN);
     }
 
+    public static Filter lt(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column, value, LESS_THAN);
+    }
+
+    public static Filter lt(SubscribableField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field, value, LESS_THAN);
+    }
+
     /**
      * Creates new "less than" {@link Filter}.
      *
@@ -131,6 +170,18 @@ public final class Filters {
         return createFilter(fieldPath, value, LESS_THAN);
     }
 
+    public static Filter ge(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column, value, GREATER_OR_EQUAL);
+    }
+
+    public static Filter ge(SubscribableField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field, value, GREATER_OR_EQUAL);
+    }
+
     /**
      * Creates new "greater or equal" {@link Filter}.
      *
@@ -147,6 +198,18 @@ public final class Filters {
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(fieldPath, value, GREATER_OR_EQUAL);
+    }
+
+    public static Filter le(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column, value, LESS_OR_EQUAL);
+    }
+
+    public static Filter le(SubscribableField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field, value, LESS_OR_EQUAL);
     }
 
     /**
@@ -226,8 +289,20 @@ public final class Filters {
         return composeFilters(filters, ALL);
     }
 
+    private static Filter createFilter(EntityColumn column, Object value, Operator operator) {
+        return createFilter(column.value(), value, operator);
+    }
+
+    private static Filter createFilter(SubscribableField field, Object value, Operator operator) {
+        return createFilter(field.getFieldPath(), value, operator);
+    }
+
     private static Filter createFilter(String fieldPath, Object value, Operator operator) {
         FieldPath path = Field.parse(fieldPath).path();
+        return createFilter(path, value, operator);
+    }
+
+    private static Filter createFilter(FieldPath path, Object value, Operator operator) {
         Any wrappedValue = toAny(value);
         Filter filter = Filter
                 .newBuilder()
