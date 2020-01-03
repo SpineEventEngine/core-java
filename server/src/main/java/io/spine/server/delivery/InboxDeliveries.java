@@ -24,34 +24,55 @@ import io.spine.type.TypeUrl;
 
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
- * @author Alex Tymchenko
+ * The container for the {@linkplain ShardedMessageDelivery message deliveries} for each
+ * {@link Inbox} registered.
  */
 final class InboxDeliveries {
 
     private final Map<String, ShardedMessageDelivery<InboxMessage>> contents = newConcurrentMap();
 
+    /**
+     * Obtains the proper delivery for the given type URL of a message target.
+     *
+     * @throws IllegalStateException
+     *         if there is no delivery found
+     */
     ShardedMessageDelivery<InboxMessage> get(String typeUrl) {
         ShardedMessageDelivery<InboxMessage> result = contents.get(typeUrl);
-        checkNotNull(result,
-                     "The delivery is not registered for the Inbox of type `%s`.", typeUrl);
+        checkState(result != null,
+                   "Cannot find the registered Inbox for the type URL `%s`.", typeUrl);
         return result;
     }
 
+    /**
+     * Obtains the proper delivery for the message passed according to the type URL of its target.
+     *
+     * @throws IllegalStateException
+     *         if there is no delivery found
+     */
     ShardedMessageDelivery<InboxMessage> get(InboxMessage message) {
         String typeUrl = message.getInboxId()
                                 .getTypeUrl();
         return get(typeUrl);
     }
 
+    /**
+     * Registers the given {@code Inbox}.
+     */
     void register(Inbox<?> inbox) {
         TypeUrl entityType = inbox.entityStateType();
         contents.put(entityType.value(), inbox.delivery());
     }
 
+    /**
+     * Unregisters the given {@code Inbox}.
+     *
+     * <p>If there was no such {@code Inbox} registered, does nothing.
+     */
     void unregister(Inbox<?> inbox) {
         TypeUrl entityType = inbox.entityStateType();
         contents.remove(entityType.value());
