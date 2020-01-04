@@ -427,10 +427,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                  .post(event);
     }
 
-    void onCatchUpStarted(I entity, CatchUpId id) {
-
-    }
-
     private static ActorRequestFactory requestFactory(UserId actor, boolean multitenant) {
         TenantFunction<ActorRequestFactory> function =
                 new TenantFunction<ActorRequestFactory>(multitenant) {

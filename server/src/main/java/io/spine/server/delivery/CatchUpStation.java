@@ -58,6 +58,7 @@ final class CatchUpStation extends Station {
     private final Iterable<CatchUp> jobs;
 
     CatchUpStation(DeliverByType action, Iterable<CatchUp> jobs) {
+        super();
         this.action = action;
         this.jobs = jobs;
     }
@@ -95,12 +96,11 @@ final class CatchUpStation extends Station {
                                                            eventDetails(message));
                                 conveyor.remove(message);
                             }
-                        } else if (message.getStatus() == TO_DELIVER) {
-                            if (dispatchToCatchUp.containsKey(dispatchingId)) {
-                                System.out.println("Removing `TO_DELIVER` duplicate: " +
-                                                           eventDetails(message));
-                                conveyor.remove(message);
-                            }
+                        } else if (message.getStatus() == TO_DELIVER &&
+                                dispatchToCatchUp.containsKey(dispatchingId)) {
+                            System.out.println("Removing `TO_DELIVER` duplicate: " +
+                                                       eventDetails(message));
+                            conveyor.remove(message);
                         }
                     }
                 }

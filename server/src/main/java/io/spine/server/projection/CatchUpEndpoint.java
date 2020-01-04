@@ -66,11 +66,9 @@ public final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
             ProjectionRepository<I, P, ?> repository = repository();
             repository.recordStorage()
                       .delete(entityId);
-//            CatchUpSignal signal = (CatchUpSignal) envelope().message();
-//            repository.onCatchUpStarted(entityId, signal.getId());
         } else if (CATCH_UP_COMPLETED.equals(actualTypeName)) {
             System.out.println("[" + entityId + "] `CatchUpCompleted` seen by the endpoint.");
-            if(entityId.equals("second")) {
+            if("second".equals(entityId)) {
                 secondTargetCatchUpCompleted = true;
             }
             // do nothing.

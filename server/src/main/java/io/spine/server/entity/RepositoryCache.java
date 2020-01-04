@@ -91,7 +91,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
         if(!unique) {
             String msg = String.format(" -------------- Element %s is not unique!", id);
             System.err.println(msg);
-            throw new RuntimeException(msg);
+            throw new IllegalStateException(msg);
         }
     }
 
