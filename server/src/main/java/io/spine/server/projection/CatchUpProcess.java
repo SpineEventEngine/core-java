@@ -207,14 +207,18 @@ final class CatchUpProcess<I> extends AbstractEventReactor {
             events.add(toPostFirst);
         }
         List<Event> readInThisRound = readMore(request, turbulenceStart(), LIMIT);
-        events.addAll(readInThisRound);
 
         if (!readInThisRound.isEmpty()) {
-            Event lastEvent = events.get(events.size() - 1);
-            Timestamp lastEventTimestamp = lastEvent.getContext()
-                                                    .getTimestamp();
-            builder().setWhenLastRead(lastEventTimestamp);
+            List<Event> stripped = stripLastTimestamp(readInThisRound);
+
+                Event lastEvent = stripped.get(stripped.size() - 1);
+                Timestamp lastEventTimestamp = lastEvent.getContext()
+                                                        .getTimestamp();
+                builder().setWhenLastRead(lastEventTimestamp);
+                events.addAll(stripped);
         }
+
+
         dispatchAll(events);
 
         int nextRound = builder().getCurrentRound() + 1;
@@ -225,6 +229,23 @@ final class CatchUpProcess<I> extends AbstractEventReactor {
         }
 
         return EitherOf2.withA(recalled(id));
+    }
+
+    private static List<Event> stripLastTimestamp(List<Event> round) {
+        int lastIndex = round.size() - 1;
+        Event lastEvent = round.get(lastIndex);
+        Timestamp lastTimestamp = lastEvent.getContext()
+                                           .getTimestamp();
+        for (int index = lastIndex; index >= 0; index--) {
+            Event event = round.get(index);
+            Timestamp timestamp = event.getContext()
+                                       .getTimestamp();
+            if (!timestamp.equals(lastTimestamp)) {
+                List<Event> result = round.subList(0, index + 1);
+                return result;
+            }
+        }
+        return round;
     }
 
     @React
