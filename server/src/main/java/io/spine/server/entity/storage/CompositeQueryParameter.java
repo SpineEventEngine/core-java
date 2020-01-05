@@ -30,8 +30,6 @@ import com.google.common.collect.Streams;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
 
-import java.util.function.Predicate;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
@@ -43,13 +41,6 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * {@link CompositeOperator composite operator}.
  */
 public final class CompositeQueryParameter {
-
-    private static final Predicate<Column> isLifecycleColumn = column -> {
-        checkNotNull(column);
-        boolean result = archived.name().equals(column.name().value())
-                || deleted.name().equals(column.name().value());
-        return result;
-    };
 
     private final CompositeOperator operator;
 
@@ -89,7 +80,14 @@ public final class CompositeQueryParameter {
 
     private static boolean containsLifecycle(Iterable<Column> columns) {
         boolean result = Streams.stream(columns)
-                                .anyMatch(isLifecycleColumn);
+                                .anyMatch(CompositeQueryParameter::isLifecycleColumn);
+        return result;
+    }
+
+    private static boolean isLifecycleColumn(Column column) {
+        checkNotNull(column);
+        boolean result = archived.name().equals(column.name().value())
+                || deleted.name().equals(column.name().value());
         return result;
     }
 
@@ -179,6 +177,7 @@ public final class CompositeQueryParameter {
         return Objects.hashCode(operator(), filters());
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // In generated code.
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

@@ -31,12 +31,13 @@ class RejectionMessageCriterionTest {
     @Test
     @DisplayName("contain default error message")
     void containDefaultErrorMessage() {
-        RejectionCriterion predicate = acceptAll();
+        RejectionCriterion<?> predicate = acceptAll();
         String message = predicate.description();
         assertNotNull(message);
     }
 
-    private static RejectionCriterion acceptAll() {
+    @SuppressWarnings("UnnecessaryLambda") // Type is required for default methods.
+    private static RejectionCriterion<?> acceptAll() {
         return target -> true;
     }
 }

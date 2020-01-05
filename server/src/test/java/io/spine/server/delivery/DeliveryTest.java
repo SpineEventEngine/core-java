@@ -62,6 +62,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -72,7 +73,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -428,7 +428,7 @@ public class DeliveryTest {
         // Sleep for some time to accumulate messages in shards before starting to process them.
         delivery.subscribe(update -> {
             if (latch.getCount() > 0) {
-                sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
+                sleepUninterruptibly(Duration.ofMillis(10));
                 latch.countDown();
             } else {
                 delivery.deliverMessagesFrom(update.getShardIndex());
@@ -612,7 +612,7 @@ public class DeliveryTest {
             }
         }
 
-        private void postAsync(BlackBoxBoundedContext context,
+        private void postAsync(BlackBoxBoundedContext<?> context,
                                List<AddNumber> commands,
                                List<NumberImported> eventsToImport,
                                List<NumberReacted> eventsToReact) {
@@ -652,8 +652,8 @@ public class DeliveryTest {
             }
         }
 
-        private static Stream<Callable<Object>> commandCallables(BlackBoxBoundedContext context,
-                                                                 List<AddNumber> commands) {
+        private static Stream<Callable<Object>>
+        commandCallables(BlackBoxBoundedContext<?> context, List<AddNumber> commands) {
             return commands.stream()
                            .map((c) -> () -> {
                                context.receivesCommand(c);
@@ -661,8 +661,8 @@ public class DeliveryTest {
                            });
         }
 
-        private static Stream<Callable<Object>> importEventCallables(BlackBoxBoundedContext context,
-                                                                     List<NumberImported> events) {
+        private static Stream<Callable<Object>>
+        importEventCallables(BlackBoxBoundedContext<?> context, List<NumberImported> events) {
             return events.stream()
                          .map((e) -> () -> {
                              context.importsEvent(e);
@@ -670,8 +670,8 @@ public class DeliveryTest {
                          });
         }
 
-        private static Stream<Callable<Object>> reactEventsCallables(BlackBoxBoundedContext context,
-                                                                     List<NumberReacted> events) {
+        private static Stream<Callable<Object>>
+        reactEventsCallables(BlackBoxBoundedContext<?> context, List<NumberReacted> events) {
             return events.stream()
                          .map((e) -> () -> {
                              context.receivesEvent(e);

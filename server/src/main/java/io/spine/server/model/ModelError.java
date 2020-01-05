@@ -20,6 +20,8 @@
 
 package io.spine.server.model;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import io.spine.string.Diags;
 
 import java.util.stream.Collector;
@@ -38,7 +40,8 @@ public class ModelError extends Error {
         super(message);
     }
 
-    public ModelError(String messageFormat, Object... args) {
+    @FormatMethod
+    public ModelError(@FormatString String messageFormat, Object... args) {
         super(format(messageFormat, args));
     }
 

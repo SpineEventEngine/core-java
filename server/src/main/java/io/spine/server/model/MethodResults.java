@@ -33,7 +33,6 @@ import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -48,23 +47,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * the set would be empty.
  */
 final class MethodResults {
-
-    /**
-     * Checks if the class is a concrete {@linkplain CommandMessage command} or
-     * {@linkplain EventMessage event}.
-     */
-    private static final Predicate<Class<?>> IS_COMMAND_OR_EVENT = cls -> {
-        if (cls.isInterface()) {
-            return false;
-        }
-        if (Nothing.class.equals(cls)) {
-            return false;
-        }
-        boolean isCommandOrEvent =
-                CommandMessage.class.isAssignableFrom(cls)
-                        || EventMessage.class.isAssignableFrom(cls);
-        return isCommandOrEvent;
-    };
 
     /** Prevents instantiation of this utility class. */
     private MethodResults() {
@@ -99,10 +81,26 @@ final class MethodResults {
                 Streams.stream(allTypes)
                        .map(TypeToken::of)
                        .map(TypeToken::getRawType)
-                       .filter(IS_COMMAND_OR_EVENT)
+                       .filter(MethodResults::isCommandOrEvent)
                        .map(c -> (P) toMessageClass(c))
                        .collect(toImmutableSet());
         return result;
+    }
+
+    /**
+     * Checks if the class is a concrete {@linkplain CommandMessage command} or
+     * {@linkplain EventMessage event}.
+     */
+    private static boolean isCommandOrEvent(Class<?> cls) {
+        if (cls.isInterface()) {
+            return false;
+        }
+        if (Nothing.class.equals(cls)) {
+            return false;
+        }
+        boolean isCommandOrEvent = CommandMessage.class.isAssignableFrom(cls)
+                                || EventMessage.class.isAssignableFrom(cls);
+        return isCommandOrEvent;
     }
 
     /**

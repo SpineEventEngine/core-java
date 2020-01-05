@@ -69,7 +69,6 @@ import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
-import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
@@ -572,8 +571,8 @@ class QueryBuilderTest {
         String stringRepr = builder.toString();
 
         assertThat(stringRepr, containsString(TEST_ENTITY_TYPE.getSimpleName()));
-        assertThat(stringRepr, containsString(valueOf(id1)));
-        assertThat(stringRepr, containsString(valueOf(id2)));
+        assertThat(stringRepr, containsString(String.valueOf(id1)));
+        assertThat(stringRepr, containsString(String.valueOf(id2)));
         assertThat(stringRepr, containsString(columnName1));
         assertThat(stringRepr, containsString(columnName2));
     }

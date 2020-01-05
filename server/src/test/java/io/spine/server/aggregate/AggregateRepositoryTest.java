@@ -332,7 +332,7 @@ public class AggregateRepositoryTest {
         void archived() {
             ProjectAggregate aggregate = givenStoredAggregate();
 
-            AggregateTransaction tx = AggregateTransaction.start(aggregate);
+            AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
             aggregate.archive();
             tx.commit();
             repository().store(aggregate);
@@ -346,7 +346,7 @@ public class AggregateRepositoryTest {
         void deleted() {
             ProjectAggregate aggregate = givenStoredAggregate();
 
-            AggregateTransaction tx = AggregateTransaction.start(aggregate);
+            AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
             aggregate.archive();
             tx.commit();
 
@@ -609,17 +609,21 @@ public class AggregateRepositoryTest {
                     .with(new EventDiscardingAggregateRepository())
                     .receivesCommands(create, start)
                     .receivesEvent(archived);
-            context.assertEvents().isEmpty();
+            context.assertEvents()
+                   .isEmpty();
             context.close();
         }
 
         private void assertEventVersions(int... expectedVersions) {
-            List<Event> events = context.assertEvents().actual();
+            List<Event> events = context.assertEvents()
+                                        .actual();
             assertThat(events).hasSize(expectedVersions.length);
             for (int i = 0; i < events.size(); i++) {
                 Event event = events.get(i);
                 int expectedVersion = expectedVersions[i];
-                assertThat(event.context().getVersion().getNumber())
+                assertThat(event.context()
+                                .getVersion()
+                                .getNumber())
                         .isEqualTo(expectedVersion);
             }
         }
@@ -682,9 +686,12 @@ public class AggregateRepositoryTest {
         assertThat(handlerFailureEvents).hasSize(1);
         HandlerFailedUnexpectedly event = handlerFailureEvents.get(0);
         assertThat(event.getHandledSignal()).isEqualTo(envelope.messageId());
-        assertThat(event.getEntity().getTypeUrl())
-                .isEqualTo(repository.entityStateType().value());
-        assertThat(event.getError().getType())
+        assertThat(event.getEntity()
+                        .getTypeUrl())
+                .isEqualTo(repository.entityStateType()
+                                     .value());
+        assertThat(event.getError()
+                        .getType())
                 .isEqualTo(IllegalArgumentException.class.getCanonicalName());
     }
 
@@ -755,6 +762,7 @@ public class AggregateRepositoryTest {
 
     private static MirrorRepository mirrorRepository(BoundedContext context) {
         BoundedContext systemContext = systemOf(context);
+        @SuppressWarnings("rawtypes")
         Optional<Repository> repository = systemContext.findRepository(Mirror.class);
         assertThat(repository).isPresent();
         MirrorRepository result = (MirrorRepository) repository.get();

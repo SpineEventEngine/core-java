@@ -38,10 +38,8 @@ import java.util.Optional;
 public final class EventDiscardingProcManRepository
         extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
-    private static final EventFilter eventFilter = anyEvent -> Optional.empty();
-
     @Override
     public EventFilter eventFilter() {
-        return eventFilter;
+        return anyEvent -> Optional.empty();
     }
 }

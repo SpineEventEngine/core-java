@@ -139,7 +139,7 @@ abstract class AggregateEndpoint<I,
         List<Event> events = commandOutcome.getSuccess()
                                            .getProducedEvents()
                                            .getEventList();
-        AggregateTransaction tx = startTransaction(aggregate);
+        AggregateTransaction<I, ?, ?> tx = startTransaction(aggregate);
         BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events);
         if (batchDispatchOutcome.getSuccessful()) {
             tx.commitIfActive();
@@ -202,10 +202,9 @@ abstract class AggregateEndpoint<I,
         return erroneous;
     }
 
-    @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
-    private AggregateTransaction startTransaction(A aggregate) {
-        AggregateTransaction tx = AggregateTransaction.start(aggregate);
-        TransactionListener listener =
+    private AggregateTransaction<I, ?, ?> startTransaction(A aggregate) {
+        AggregateTransaction<I, ?, ?> tx = AggregateTransaction.start(aggregate);
+        TransactionListener<I> listener =
                 EntityLifecycleMonitor.newInstance(repository(), aggregate.id());
         tx.setListener(listener);
         return tx;

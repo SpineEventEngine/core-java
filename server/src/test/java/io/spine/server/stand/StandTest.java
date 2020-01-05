@@ -113,7 +113,6 @@ import static io.spine.test.projection.Project.Status.CANCELLED;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.test.projection.Project.Status.UNDEFINED;
 import static io.spine.testing.Tests.assertMatchesMask;
-import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -311,7 +310,7 @@ class StandTest extends TenantAwareTest {
                 Project project = Project
                         .newBuilder()
                         .setId(projectIdFor(i))
-                        .setName(valueOf(i))
+                        .setName(String.valueOf(i))
                         .setStatus(STARTED)
                         .build();
                 repository.store(projectionOfClass(StandTestProjection.class)
@@ -622,7 +621,7 @@ class StandTest extends TenantAwareTest {
 
     private static ProjectId projectIdFor(int numericId) {
         return ProjectId.newBuilder()
-                        .setId(valueOf(numericId))
+                        .setId(String.valueOf(numericId))
                         .build();
     }
 
@@ -1007,7 +1006,7 @@ class StandTest extends TenantAwareTest {
         return generate(numberOfProjects,
                         numericId -> Project.newBuilder()
                                             .setId(projectIdFor(numericId))
-                                            .setName(valueOf(numericId))
+                                            .setName(String.valueOf(numericId))
                                             .build());
     }
 
@@ -1064,6 +1063,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(expectedTypeUrl, actualTypeUrl, "Type was registered incorrectly");
     }
 
+    @SuppressWarnings("UnnecessaryLambda") // To give a name to an empty callback.
     private static SubscriptionCallback emptyUpdateCallback() {
         return newEntityState -> {
             //do nothing
