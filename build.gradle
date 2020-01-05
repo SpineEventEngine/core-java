@@ -66,7 +66,6 @@ ext {
 }
 
 allprojects {
-    apply plugin: 'maven'
     apply plugin: 'jacoco'
     apply plugin: 'idea'
     apply plugin: 'project-report'
@@ -104,6 +103,10 @@ subprojects {
     apply from: deps.scripts.javacArgs
     apply from: deps.scripts.modelCompiler
     apply from: deps.scripts.projectLicenseReport
+
+    modelCompiler {
+        generateValidation = true
+    }
 
     // Specific setup for a Travis build,
     // which prevents appearing of warning messages in build logs.

@@ -395,11 +395,12 @@ public class AggregateRepositoryTest {
         ProjectAggregate aggregate = givenStoredAggregate();
         RecentHistory history = aggregate.recentHistory();
         Event.Builder eventBuilder = history.stream()
-                                       .findFirst()
-                                       .orElseGet(Assertions::fail)
-                                       .toBuilder();
+                                            .findFirst()
+                                            .orElseGet(Assertions::fail)
+                                            .toBuilder();
         eventBuilder.setId(Events.generateId());
-        eventBuilder.getContextBuilder().setTimestamp(currentTime());
+        eventBuilder.getContextBuilder()
+                    .setTimestamp(currentTime());
         Event duplicateEvent = eventBuilder.build();
         AggregateHistory corruptedHistory = AggregateHistory
                 .newBuilder()

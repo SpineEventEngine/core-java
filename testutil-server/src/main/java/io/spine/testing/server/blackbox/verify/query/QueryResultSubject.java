@@ -122,7 +122,7 @@ public final class QueryResultSubject
     /**
      * Obtains the actually queried entity states.
      */
-    public ImmutableList<EntityState> actual(){
+    public ImmutableList<EntityState> actual() {
         return actual;
     }
 

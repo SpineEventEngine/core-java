@@ -165,7 +165,7 @@ public class DeliveryTest {
     }
 
     @Test
-    @DisplayName("a single shard to mutiple targets in a single-threaded env")
+    @DisplayName("a single shard to multiple targets in a single-threaded env")
     public void manyTargets_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(11);

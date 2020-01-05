@@ -36,7 +36,7 @@ import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageValidator;
+import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -246,7 +246,7 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
     /**
      * Verifies the new entity state and returns {@link ConstraintViolation}s, if any.
      *
-     * <p>Default implementation uses the {@linkplain MessageValidator#validate(Message) message
+     * <p>Default implementation uses the {@linkplain Validate#violationsOf(Message) message
      * validation}.
      *
      * @param newState
@@ -255,7 +255,7 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
      */
     protected final List<ConstraintViolation> checkEntityState(S newState) {
         checkNotNull(newState);
-        return MessageValidator.validate(newState);
+        return Validate.violationsOf(newState);
     }
 
     /**
