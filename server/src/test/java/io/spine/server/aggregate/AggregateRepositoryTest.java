@@ -22,8 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.protobuf.util.Durations;
-import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
@@ -91,7 +89,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.boundedContext;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
@@ -402,7 +399,7 @@ public class AggregateRepositoryTest {
                                             .toBuilder();
         eventBuilder.setId(Events.generateId());
         eventBuilder.getContextBuilder()
-                    .setTimestamp(Timestamps.add(currentTime(), Durations.fromSeconds(5)));
+                    .setTimestamp(currentTime());
         Event duplicateEvent = eventBuilder.build();
         AggregateHistory corruptedHistory = AggregateHistory
                 .newBuilder()
