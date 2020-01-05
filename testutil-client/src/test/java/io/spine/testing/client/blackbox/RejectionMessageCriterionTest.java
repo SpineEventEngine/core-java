@@ -36,7 +36,7 @@ class RejectionMessageCriterionTest {
         assertNotNull(message);
     }
 
-    @SuppressWarnings("UnnecessaryLambda") // Type is required for default methods.
+    @SuppressWarnings("UnnecessaryLambda") // The type is required for default methods.
     private static RejectionCriterion<?> acceptAll() {
         return target -> true;
     }
