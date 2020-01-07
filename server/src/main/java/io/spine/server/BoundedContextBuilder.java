@@ -542,6 +542,9 @@ public final class BoundedContextBuilder implements Logging {
 
         registerRepositories(result);
         registerDispatchers(result);
+        ServerEnvironment.instance()
+                         .delivery()
+                         .register(result);
         return result;
     }
 

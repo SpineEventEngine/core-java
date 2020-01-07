@@ -26,6 +26,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
+import io.spine.server.BoundedContext;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.MulticastDispatchListener;
@@ -420,6 +421,11 @@ public final class Delivery implements Logging {
         return builder.withStorage(catchUpStorage);
     }
 
+    @Internal
+    public void register(BoundedContext builder) {
+        builder.registerEventDispatcher(new ShardDeliveryTrigger(this));
+    }
+
     /**
      * Returns a listener of the dispatching operations occurring in the
      * {@link io.spine.server.bus.MulticastBus MulticastBus}es.
@@ -463,7 +469,7 @@ public final class Delivery implements Logging {
      */
     //TODO:2020-01-07:alex.tymchenko: hide from the public API?
     public ShardIndex whichShardFor(Object entityId, TypeUrl entityStateType) {
-        return strategy.indexFor(entityId, entityStateType);
+        return strategy.determineIndex(entityId, entityStateType);
     }
 
     /**

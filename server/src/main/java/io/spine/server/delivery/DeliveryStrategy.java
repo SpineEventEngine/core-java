@@ -29,7 +29,7 @@ import io.spine.type.TypeUrl;
  * on several app nodes. Therefore an entity is put into a shard, which in turn is designed to
  * process all the shard-incoming messages on a single application node at a time.
  */
-public interface DeliveryStrategy {
+public abstract class DeliveryStrategy {
 
     /**
      * Determines the shard index for the messages heading to the entity with the specified target
@@ -41,12 +41,20 @@ public interface DeliveryStrategy {
      *         the type URL of the entity, to which the messages are dispatched
      * @return the shard index
      */
-    ShardIndex indexFor(Object entityId, TypeUrl entityStateType);
+    protected abstract ShardIndex indexFor(Object entityId, TypeUrl entityStateType);
 
     /**
      * Tells how many shards there are according to this strategy.
      *
      * @return total count of shards
      */
-    int shardCount();
+    protected abstract int shardCount();
+
+    public final ShardIndex determineIndex(Object entityId, TypeUrl entityStateType) {
+        //TODO:2020-01-07:alex.tymchenko: migrate the ShardDeliveryTrigger to its own state, reflecting the delivery state and use it here. Rename it accordingly
+        if(entityId instanceof ShardIndex) {
+            return (ShardIndex) entityId;
+        }
+        return indexFor(entityId, entityStateType);
+    }
 }

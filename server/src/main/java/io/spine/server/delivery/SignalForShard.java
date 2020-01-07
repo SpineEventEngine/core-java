@@ -27,5 +27,7 @@ import io.spine.base.EventMessage;
  * @author Alex Tymchenko
  */
 @Immutable
-public interface DeliverySignal extends EventMessage {
+public interface SignalForShard extends EventMessage {
+
+    ShardIndex getId();
 }

@@ -32,7 +32,7 @@ import static io.spine.server.delivery.given.DeliveryTestEnv.newShardIndex;
 /**
  * A delivery strategy which always deliver all the items to the first shard.
  */
-public class FixedShardStrategy implements DeliveryStrategy, Serializable {
+public class FixedShardStrategy extends DeliveryStrategy implements Serializable {
 
     private static final long serialVersionUID = 0;
 

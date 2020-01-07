@@ -45,7 +45,7 @@ import static java.lang.Math.abs;
  * solutions.
  */
 @Immutable
-public final class UniformAcrossAllShards implements DeliveryStrategy, Serializable {
+public final class UniformAcrossAllShards extends DeliveryStrategy implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -64,6 +64,7 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
      *         a number of shards; must be greater than zero
      */
     private UniformAcrossAllShards(int numberOfShards) {
+        super();
         checkArgument(numberOfShards > 0, "Number of shards must be positive");
         this.numberOfShards = numberOfShards;
     }

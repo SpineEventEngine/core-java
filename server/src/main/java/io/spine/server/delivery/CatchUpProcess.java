@@ -20,7 +20,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -248,8 +247,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     }
 
     @React
-    EitherOf2<LiveEventsPickedUp, CatchUpCompleted>
-    handle(HistoryFullyRecalled event, EventContext context) {
+    EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled event) {
         System.out.println(idTag() + " `HistoryFullyRecalled` received.");
         CatchUpId id = event.getId();
         builder().setStatus(CatchUpStatus.FINALIZING);
@@ -259,7 +257,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         List<Event> events = readMore(request, null, null);
 
         if (events.isEmpty()) {
-            return EitherOf2.withB(completeProcess(id, context));
+            return EitherOf2.withB(completeProcess(id));
         }
         dispatchAll(events);
         return EitherOf2.withA(liveEventsPickedUp(id));
@@ -299,19 +297,14 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     @React
     CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
         System.out.println(idTag() + " `LiveEventsPickedUp` received.");
-        return completeProcess(event.getId(), context);
+        return completeProcess(event.getId());
     }
 
     //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
-    private CatchUpCompleted completeProcess(CatchUpId id, EventContext originContext) {
+    private CatchUpCompleted completeProcess(CatchUpId id) {
         builder().setStatus(CatchUpStatus.COMPLETED);
         commitState();
         CatchUpCompleted completed = catchUpCompleted(id);
-        Event event = wrapAsEvent(completed, originContext);
-        Set<I> targets = targetsForCatchUpSignals(builder.getRequest());
-        System.out.println("Going to send `CatchUpCompleted` over to the targets: "
-                                   + Joiner.on(", ").join(targets));
-        dispatchAll(ImmutableList.of(event), targets);
         return completed;
     }
 
