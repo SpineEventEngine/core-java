@@ -70,7 +70,7 @@ final class Conveyor implements Iterable<InboxMessage> {
     void markDelivered(Collection<InboxMessage> messages) {
         for (InboxMessage message : messages) {
             markDelivered(message);
-        };
+        }
     }
 
     void remove(InboxMessage message) {

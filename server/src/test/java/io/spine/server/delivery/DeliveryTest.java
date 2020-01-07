@@ -34,10 +34,11 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.Messages;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.given.ConsecutiveNumberProcess;
+import io.spine.server.delivery.given.ConsecutiveProjection;
 import io.spine.server.delivery.given.CounterView;
 import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
@@ -47,12 +48,12 @@ import io.spine.server.delivery.given.TaskAggregate;
 import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
-import io.spine.server.event.EventFilter;
+import io.spine.server.entity.Repository;
 import io.spine.server.event.EventStore;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
+import io.spine.test.delivery.EmitNextNumber;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
@@ -60,12 +61,12 @@ import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
-import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -74,6 +75,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
@@ -82,9 +85,11 @@ import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterrup
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.testing.Tests.nullRef;
+import static java.lang.String.format;
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Integration tests on message delivery that use different settings of sharding configuration and
@@ -104,12 +109,25 @@ public class DeliveryTest {
     public void setUp() {
         this.originalDelivery = ServerEnvironment.instance()
                                                  .delivery();
+        Time.setProvider(withMillisOnlyResolution());
     }
 
     @AfterEach
     public void tearDown() {
         ServerEnvironment.instance()
                          .configureDelivery(originalDelivery);
+        Time.resetProvider();
+    }
+
+    private static Time.Provider withMillisOnlyResolution() {
+        return () -> {
+            Instant now = Instant.now();
+            Timestamp result = Timestamp.newBuilder()
+                                        .setSeconds(now.getEpochSecond())
+                                        .setNanos(now.getNano())
+                                        .build();
+            return result;
+        };
     }
 
     @Test
@@ -391,10 +409,9 @@ public class DeliveryTest {
     }
 
     @Test
-    public void catchUp() throws InterruptedException {
+    public void catchUpById() throws InterruptedException {
 
         Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
-        Timestamp aMinuteAgo = Timestamps.subtract(Time.currentTime(), Durations.fromMinutes(1));
 
         String[] ids = {"first", "second", "third", "fourth"};
         List<NumberAdded> events = generateEvents(200, ids);
@@ -423,7 +440,7 @@ public class DeliveryTest {
         int newWeight = 100;
         CounterView.changeWeightTo(newWeight);
 
-        ExecutorService service = newFixedThreadPool(20);
+        ExecutorService service = threadPoolWithTime(20, withMillisOnlyResolution());
         List<Callable<Object>> jobs = new ArrayList<>();
 
         // Do the same, but add the catch-up for ID #0 as the first job.
@@ -436,28 +453,16 @@ public class DeliveryTest {
         // And add the catch-up for ID #1 as the second job.
         String secondId = ids[1];
         Callable<Object> secondCatchUp = () -> {
-            repo.catchUp(ImmutableSet.of(secondId), aMinuteAgo);
+            repo.catchUp(ImmutableSet.of(secondId), aMinuteAgo());
             return nullRef();
         };
 
         jobs.add(firstCatchUp);
         jobs.add(secondCatchUp);
-        jobs.addAll(asPostJobs(ctx, events));
+        jobs.addAll(asPostEventJobs(ctx, events));
         service.invokeAll(jobs);
         List<Runnable> leftovers = service.shutdownNow();
         assertThat(leftovers).isEmpty();
-
-        EventFilter numberAdded = EventFilter
-                .newBuilder()
-                .setEventType(TypeName.of(NumberAdded.class)
-                                      .value())
-                .build();
-        MemoizingObserver<Event> allEvents = new MemoizingObserver<>();
-        EventStore eventStore = ctx.eventBus()
-                                   .eventStore();
-        eventStore.read(EventStreamQuery.newBuilder()
-                                        .addFilter(numberAdded)
-                                        .vBuild(), allEvents);
 
         List<Integer> totalsAfterCatchUp = readTotals(repo, ids);
         List<Integer> expectedTotals = new ArrayList<>();
@@ -471,7 +476,72 @@ public class DeliveryTest {
         expectedTotals.add(untouchedSum);
 
         assertThat(totalsAfterCatchUp).isEqualTo(expectedTotals);
+    }
 
+    @Test
+    public void catchUpAll() throws InterruptedException {
+        Time.setProvider(withMillisOnlyResolution());
+        ConsecutiveProjection.usePositives();
+
+        String[] ids = {"erste", "zweite", "dritte", "vierte"};
+        int totalCommands = 300;
+        List<EmitNextNumber> commands = generateEmissionCommands(totalCommands, ids);
+
+        changeShardCountTo(3);
+        ConsecutiveProjection.Repository projectionRepo = new ConsecutiveProjection.Repository();
+        Repository<String, ConsecutiveNumberProcess> pmRepo =
+                DefaultRepository.of(ConsecutiveNumberProcess.class);
+        SingleTenantBlackBoxContext ctx = BlackBoxBoundedContext.singleTenant()
+                                                                .with(projectionRepo)
+                                                                .with(pmRepo);
+
+        ExecutorService service = threadPoolWithTime(20, withMillisOnlyResolution());
+        List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
+
+        service.invokeAll(jobs);
+        List<Runnable> leftovers = service.shutdownNow();
+        assertThat(leftovers).isEmpty();
+
+        int positiveExpected = totalCommands / ids.length;
+        int negativeExpected = -1 * positiveExpected;
+        List<Integer> positiveValues =
+                ImmutableList.of(positiveExpected, positiveExpected,
+                                 positiveExpected, positiveExpected);
+
+        List<Integer> negativeValues =
+                ImmutableList.of(negativeExpected, negativeExpected,
+                                 negativeExpected, negativeExpected);
+
+        List<Integer> actualLastValues = readLastValues(ids, projectionRepo);
+        assertThat(actualLastValues).isEqualTo(positiveValues);
+
+        ConsecutiveProjection.useNegatives();
+        projectionRepo.catchUpAll(aMinuteAgo());
+        List<Integer> lastValuesAfterCatchUp = readLastValues(ids, projectionRepo);
+        assertThat(lastValuesAfterCatchUp).isEqualTo(negativeValues);
+    }
+
+    private static Timestamp aMinuteAgo() {
+        return Timestamps.subtract(Time.currentTime(), Durations.fromMinutes(1));
+    }
+
+    private static List<Integer> readLastValues(String[] ids,
+                                                ConsecutiveProjection.Repository repo) {
+        return Arrays.stream(ids)
+                     .map((id) -> findConsecutiveView(repo, id).state()
+                                                                  .getLastValue())
+                     .collect(toList());
+    }
+
+    private static List<EmitNextNumber> generateEmissionCommands(int howMany, String[] ids) {
+        Iterator<String> idIterator = Iterators.cycle(ids);
+        List<EmitNextNumber> commands = new ArrayList<>(howMany);
+        for (int i = 0; i < howMany; i++) {
+            commands.add(EmitNextNumber.newBuilder()
+                                       .setId(idIterator.next())
+                                       .vBuild());
+        }
+        return commands;
     }
 
     private static void addHistory(Timestamp when,
@@ -493,17 +563,24 @@ public class DeliveryTest {
         }
     }
 
-    private static List<Callable<Object>> asPostJobs(SingleTenantBlackBoxContext ctx,
-                                                     List<NumberAdded> events) {
+    private static List<Callable<Object>> asPostEventJobs(SingleTenantBlackBoxContext ctx,
+                                                          List<NumberAdded> events) {
         return events.stream()
                      .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
                      .collect(toList());
     }
 
+    private static List<Callable<Object>> asPostCommandJobs(SingleTenantBlackBoxContext ctx,
+                                                            List<EmitNextNumber> commands) {
+        return commands.stream()
+                       .map(cmd -> (Callable<Object>) () -> ctx.receivesCommand(cmd))
+                       .collect(toList());
+    }
+
     private static List<Integer> readTotals(CounterView.Repository repo, String[] ids) {
         return Arrays.stream(ids)
-                     .map((id) -> findView(repo, id).state()
-                                                    .getTotal())
+                     .map((id) -> findCounterView(repo, id).state()
+                                                           .getTotal())
                      .collect(toList());
     }
 
@@ -519,11 +596,20 @@ public class DeliveryTest {
         return events;
     }
 
-    private static CounterView findView(CounterView.Repository repo, String id) {
-        Optional<CounterView> firstView = repo.find(id);
-        Truth8.assertThat(firstView)
+    private static CounterView findCounterView(CounterView.Repository repo, String id) {
+        Optional<CounterView> view = repo.find(id);
+        Truth8.assertThat(view)
               .isPresent();
-        return firstView.get();
+        return view.get();
+    }
+
+    private static ConsecutiveProjection findConsecutiveView(ConsecutiveProjection.Repository repo,
+                                                             String id) {
+        Optional<ConsecutiveProjection> view = repo.find(id);
+        if(!view.isPresent()) {
+            fail(format("Cannot find the `ConsecutiveProjection` for ID `%s`.", id));
+        }
+        return view.get();
     }
 
     /*
@@ -587,10 +673,18 @@ public class DeliveryTest {
     private static void dispatchInParallel(SingleTenantBlackBoxContext ctx,
                                            List<NumberAdded> events,
                                            int threads) throws InterruptedException {
-        ExecutorService service = newFixedThreadPool(threads);
-        service.invokeAll(asPostJobs(ctx, events));
+        ExecutorService service = threadPoolWithTime(threads, withMillisOnlyResolution());
+        service.invokeAll(asPostEventJobs(ctx, events));
         List<Runnable> leftovers = service.shutdownNow();
         assertThat(leftovers).isEmpty();
+    }
+
+    private static ExecutorService threadPoolWithTime(int threadCount, Time.Provider provider) {
+        ThreadFactory factory = Executors.defaultThreadFactory();
+        return Executors.newFixedThreadPool(threadCount, r -> factory.newThread(() -> {
+            Time.setProvider(provider);
+            r.run();
+        }));
     }
 
     private static final class MonitorUnderTest extends DeliveryMonitor {

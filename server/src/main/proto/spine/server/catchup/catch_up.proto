@@ -26,6 +26,10 @@ message CatchUp {
     message Request {
 
         // IDs of the projections under catch-up, packed as `Any`.
+        //
+        // If no particular targets are set, the catch-up is requested for all entities
+        // of the respective kind.
+        //
         repeated google.protobuf.Any target = 1;
 
         // Since which point in time the catch-up has been originally requested.
@@ -54,6 +58,10 @@ message CatchUp {
     // The index of the first round is 0.
     //
     int32 current_round = 5;
+
+    int32 total_shards = 6;
+
+    repeated int32 affected_shard = 7;
 }
 
 // An ID of a catch-up process.
@@ -75,4 +83,9 @@ enum CatchUpStatus {
     FINALIZING = 2;
 
     COMPLETED = 3;
+}
+
+message CatchUpTargets {
+
+    repeated google.protobuf.Any id = 1;
 }

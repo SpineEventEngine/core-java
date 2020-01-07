@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package spine.server.delivery;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option (internal_all) = true;
+option (every_is).java_type = "io.spine.server.delivery.DeliverySignal";
+
+option java_package = "io.spine.server.delivery.event";
+option java_outer_classname = "DeliveryEventsProto";
+option java_multiple_files = true;
+
+import "spine/server/delivery/delivery.proto";
+
+// The processing of the messages in the particular shards was requested by the framework.
+message ShardProcessingRequested {
+
+    ShardIndex id = 1;
+}

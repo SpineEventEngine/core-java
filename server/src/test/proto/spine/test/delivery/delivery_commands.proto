@@ -20,3 +20,7 @@ message AddNumber {
 message DCreateTask {
     string id = 1;
 }
+
+message EmitNextNumber {
+    string id = 1;
+}

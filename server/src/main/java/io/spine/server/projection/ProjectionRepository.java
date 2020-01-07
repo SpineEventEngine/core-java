@@ -23,7 +23,6 @@ package io.spine.server.projection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
@@ -42,6 +41,9 @@ import io.spine.server.catchup.CatchUp;
 import io.spine.server.catchup.CatchUpId;
 import io.spine.server.catchup.event.CatchUpRequested;
 import io.spine.server.delivery.BatchDeliveryListener;
+import io.spine.server.delivery.CatchUpProcess;
+import io.spine.server.delivery.CatchUpProcessBuilder;
+import io.spine.server.delivery.CatchUpSignal;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
@@ -66,12 +68,13 @@ import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Sets.intersection;
 import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
@@ -118,10 +121,19 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         super.registerWith(context);
         ensureDispatchesEvents();
         initCache(context.isMultitenant());
-        initInbox();
-        Supplier<EventStore> eventStore = () -> context.eventBus()
-                                                       .eventStore();
-        CatchUpProcess<I> process = new CatchUpProcess<>(eventStore, this);
+        Delivery delivery = ServerEnvironment.instance()
+                                             .delivery();
+        initInbox(delivery);
+        initCatchUp(context, delivery);
+    }
+
+    private void initCatchUp(BoundedContext context, Delivery delivery) {
+        CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
+        builder.withDispatchOp(this::dispatchCatchingUp)
+               .withIndex(() -> ImmutableSet.copyOf(recordStorage().index()))
+               .withEventStore(() -> context.eventBus()
+                                            .eventStore());
+        CatchUpProcess<I> process = builder.build();
         context.registerEventDispatcher(process);
     }
 
@@ -131,10 +143,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /**
      * Initializes the {@code Inbox}.
+     * @param delivery the delivery of the current server environment
      */
-    private void initInbox() {
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
+    private void initInbox(Delivery delivery) {
         inbox = delivery
                 .<I>newInbox(entityStateType())
                 .withBatchListener(new BatchDeliveryListener<I>() {
@@ -394,11 +405,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     public void catchUp(Set<I> ids, Timestamp since) {
         CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder();
-        requestBuilder.setSinceWhen(since);
-        for (I id : ids) {
-            Any packed = Identifier.pack(id);
-            requestBuilder.addTarget(packed);
+        if(!ids.isEmpty()) {
+            for (I id : ids) {
+                Any packed = Identifier.pack(id);
+                requestBuilder.addTarget(packed);
+            }
         }
+
+        requestBuilder.setSinceWhen(since);
         Set<EventClass> classes = eventClasses();
         for (EventClass eventClass : classes) {
             //TODO:2019-11-29:alex.tymchenko: `TypeName` or `TypeUrl`?
@@ -427,6 +441,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                  .post(event);
     }
 
+    public void catchUpAll(Timestamp since) {
+        catchUp(new HashSet<>(), since);
+    }
+
     private static ActorRequestFactory requestFactory(UserId actor, boolean multitenant) {
         TenantFunction<ActorRequestFactory> function =
                 new TenantFunction<ActorRequestFactory>(multitenant) {
@@ -441,21 +459,24 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return function.execute();
     }
 
-    void dispatchCatchingUp(Event event, Set<I> ids) {
+    Set<I> dispatchCatchingUp(Event event, @Nullable Set<I> restrictToIds) {
         EventEnvelope envelope = EventEnvelope.of(event);
         Set<I> catchUpTargets;
         if (envelope.message() instanceof CatchUpSignal) {
-            catchUpTargets = ids;
+            checkNotNull(restrictToIds);
+            catchUpTargets = restrictToIds;
         } else {
             Set<I> routedTargets = route(envelope);
-            catchUpTargets = Sets.intersection(routedTargets, ids)
-                                 .immutableCopy();
+            catchUpTargets = restrictToIds == null
+                             ? routedTargets
+                             : intersection(routedTargets,restrictToIds).immutableCopy();
         }
         Inbox<I> inbox = inbox();
         for (I target : catchUpTargets) {
             inbox.send(envelope)
                  .toCatchUp(target);
         }
+        return catchUpTargets;
     }
 
     @VisibleForTesting

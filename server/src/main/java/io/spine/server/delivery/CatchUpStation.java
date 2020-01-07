@@ -117,8 +117,18 @@ final class CatchUpStation extends Station {
     }
 
     private static boolean matches(CatchUp job, InboxMessage message) {
+        String expectedProjectionType = job.getId()
+                                           .getProjectionType();
+        String actualTargetType = message.getInboxId()
+                                         .getTypeUrl();
+        if (!expectedProjectionType.equals(actualTargetType)) {
+            return false;
+        }
         List<Any> targets = job.getRequest()
                                .getTargetList();
+        if (targets.isEmpty()) {
+            return true;
+        }
         Any rawEntityId = message.getInboxId()
                                  .getEntityId()
                                  .getId();

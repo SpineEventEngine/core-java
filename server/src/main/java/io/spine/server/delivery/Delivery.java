@@ -31,6 +31,7 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.MulticastDispatchListener;
 import io.spine.server.catchup.CatchUp;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -284,6 +285,7 @@ public final class Delivery implements Logging {
             } while (runResult.shouldRunAgain());
         } finally {
             session.complete();
+            System.out.println(" --- Releasing shard #" + index.getIndex());
         }
         DeliveryStats stats = new DeliveryStats(index, totalDelivered);
         monitor.onDeliveryCompleted(stats);
@@ -413,6 +415,11 @@ public final class Delivery implements Logging {
         return Inbox.newBuilder(entityType, inboxWriter());
     }
 
+    public <I> CatchUpProcessBuilder<I> newCatchUpProcess(ProjectionRepository<I, ?, ?> repository) {
+        CatchUpProcessBuilder<I> builder = CatchUpProcess.newBuilder(repository);
+        return builder.withStorage(catchUpStorage);
+    }
+
     /**
      * Returns a listener of the dispatching operations occurring in the
      * {@link io.spine.server.bus.MulticastBus MulticastBus}es.
@@ -454,7 +461,8 @@ public final class Delivery implements Logging {
      *         the state type of the entity, to which the message is heading
      * @return the index of the shard for the message
      */
-    ShardIndex whichShardFor(Object entityId, TypeUrl entityStateType) {
+    //TODO:2020-01-07:alex.tymchenko: hide from the public API?
+    public ShardIndex whichShardFor(Object entityId, TypeUrl entityStateType) {
         return strategy.indexFor(entityId, entityStateType);
     }
 
@@ -471,13 +479,9 @@ public final class Delivery implements Logging {
         return inboxStorage;
     }
 
-    //TODO:2019-12-03:alex.tymchenko: hide this from the public API.
-    public CatchUpStorage catchUpStorage() {
-        return catchUpStorage;
-    }
-
     @VisibleForTesting
-    int shardCount() {
+    //TODO:2019-12-03:alex.tymchenko: hide this from the public API.
+    public int shardCount() {
         return strategy.shardCount();
     }
 
