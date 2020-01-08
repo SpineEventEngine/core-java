@@ -36,6 +36,8 @@ import io.spine.server.delivery.given.ConsecutiveProjection;
 import io.spine.server.delivery.given.CounterView;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventStore;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.EmitNextNumber;
 import io.spine.test.delivery.NumberAdded;
@@ -61,9 +63,7 @@ import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.Tests.nullRef;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @SlowTest
 @DisplayName("Catch-up of projection instances should")
@@ -112,7 +112,6 @@ public class CatchUpTest extends AbstractDeliveryTest {
         int newWeight = 100;
         CounterView.changeWeightTo(newWeight);
 
-        ExecutorService service = threadPoolWithTime(20, provider);
         List<Callable<Object>> jobs = new ArrayList<>();
 
         // Do the same, but add the catch-up for ID #0 as the first job.
@@ -132,9 +131,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         jobs.add(firstCatchUp);
         jobs.add(secondCatchUp);
         jobs.addAll(asPostEventJobs(ctx, events));
-        service.invokeAll(jobs);
-        List<Runnable> leftovers = service.shutdownNow();
-        assertThat(leftovers).isEmpty();
+        post(jobs, provider);
 
         List<Integer> totalsAfterCatchUp = readTotals(repo, ids);
 
@@ -174,7 +171,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
                 ImmutableList.of(positiveExpected, positiveExpected,
                                  positiveExpected, positiveExpected);
 
-        List<Integer> actualLastValues = readLastValues(ids, projectionRepo);
+        List<Integer> actualLastValues = readLastValues(projectionRepo, ids);
         assertThat(actualLastValues).isEqualTo(positiveValues);
 
         ConsecutiveProjection.useNegatives();
@@ -220,16 +217,16 @@ public class CatchUpTest extends AbstractDeliveryTest {
         return Timestamps.subtract(Time.currentTime(), Durations.fromMinutes(1));
     }
 
-    private static List<Integer> readLastValues(String[] ids,
-                                                ConsecutiveProjection.Repository repo) {
+    private static List<Integer> readLastValues(ConsecutiveProjection.Repository repo,
+                                                String[] ids) {
         return Arrays.stream(ids)
                      .map((id) -> readLastValue(repo, id))
                      .collect(toList());
     }
 
     private static int readLastValue(ConsecutiveProjection.Repository repo, String id) {
-        return findConsecutiveView(repo, id).state()
-                                            .getLastValue();
+        return findView(repo, id).state()
+                                 .getLastValue();
     }
 
     private static List<EmitNextNumber> generateEmissionCommands(int howMany, String[] ids) {
@@ -271,8 +268,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
     private static List<Integer> readTotals(CounterView.Repository repo, String[] ids) {
         return Arrays.stream(ids)
-                     .map((id) -> findCounterView(repo, id).state()
-                                                           .getTotal())
+                     .map((id) -> findView(repo, id).state()
+                                                    .getTotal())
                      .collect(toList());
     }
 
@@ -288,19 +285,11 @@ public class CatchUpTest extends AbstractDeliveryTest {
         return events;
     }
 
-    private static CounterView findCounterView(CounterView.Repository repo, String id) {
-        Optional<CounterView> view = repo.find(id);
+    private static <P extends Projection<String, ?, ?>> P
+    findView(ProjectionRepository<String, P, ?> repo, String id) {
+        Optional<P> view = repo.find(id);
         Truth8.assertThat(view)
               .isPresent();
-        return view.get();
-    }
-
-    private static ConsecutiveProjection findConsecutiveView(ConsecutiveProjection.Repository repo,
-                                                             String id) {
-        Optional<ConsecutiveProjection> view = repo.find(id);
-        if(!view.isPresent()) {
-            fail(format("Cannot find the `ConsecutiveProjection` for ID `%s`.", id));
-        }
         return view.get();
     }
 
