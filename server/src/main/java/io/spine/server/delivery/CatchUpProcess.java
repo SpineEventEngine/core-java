@@ -51,6 +51,7 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.EventStreamQuery.Limit;
 import io.spine.server.event.React;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tuple.EitherOf2;
@@ -89,7 +90,7 @@ import static java.util.stream.Collectors.toSet;
 public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     //TODO:2019-11-29:alex.tymchenko: consider making this configurable via the `ServerEnvironment`.
-    private static final EventStreamQuery.Limit LIMIT = limitOf(500);
+    private static final Limit LIMIT = limitOf(500);
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
 
     private final Object endpointLock = new Object();
@@ -107,6 +108,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     private CatchUp.Builder builder = CatchUp.newBuilder();
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
+        super();
         this.idClass = builder.idClass();
         this.projectionStateType = builder.projectionStateType();
         this.eventStore = builder.eventStore();
@@ -371,18 +373,17 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     private List<Event> readMore(CatchUp.Request request,
                                  @Nullable Timestamp readBefore,
-                                 EventStreamQuery.@Nullable Limit limit) {
+                                 @Nullable Limit limit) {
         System.out.println(idTag() + " Preparing to read more events. "
                                    + "\n `readBefore` is " + readBefore
                                    + "\n the `sinceWhen` is " + request.getSinceWhen()
                                    + "\n the `whenLastRead` is " + builder().getWhenLastRead()
         );
-        if (readBefore != null) {
-            if (Timestamps.compare(readBefore, builder().getWhenLastRead()) <= 0) {
-                System.out.println("Read-before is EARLIER than when-last-read!");
-                //TODO:2019-12-13:alex.tymchenko: looks an `IllegalStateException` though.
-                return ImmutableList.of();
-            }
+        if (readBefore != null
+                && Timestamps.compare(readBefore, builder().getWhenLastRead()) <= 0) {
+            System.out.println("Read-before is EARLIER than when-last-read!");
+            //TODO:2019-12-13:alex.tymchenko: looks an `IllegalStateException` though.
+            return ImmutableList.of();
         }
         EventStreamQuery query = toEventQuery(request, readBefore, limit);
         MemoizingObserver<Event> observer = new MemoizingObserver<>();
@@ -411,7 +412,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     private EventStreamQuery toEventQuery(CatchUp.Request request,
                                           @Nullable Timestamp readBefore,
-                                          EventStreamQuery.@Nullable Limit limit) {
+                                          @Nullable Limit limit) {
         ImmutableList<EventFilter> filters = toFilters(request.getEventTypeList());
         Timestamp readAfter = builder().getWhenLastRead();
         EventStreamQuery.Builder builder =
@@ -495,14 +496,39 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         }
     }
 
+    /**
+     * A function providing the index of identifiers of the existing entities for some repository.
+     *
+     * @param <I>
+     *         the type of identifiers of the entities managed by the repository.
+     */
     @FunctionalInterface
     public interface RepositoryIndex<I> extends Supplier<Set<I>> {
 
     }
 
+    /**
+     * A method object dispatching the event to catch-up.
+     *
+     * @param <I>
+     *         the type of the identifiers of the entities to which the event should be dispatched.
+     */
     @FunctionalInterface
     public interface DispatchCatchingUp<I> {
 
-        Set<I> perform(Event event, @Nullable Set<I> restrictToIds);
+        /**
+         * Dispatches the given event and optionally narrowing down the entities by the set
+         * of entity identifiers to dispatch the event to.
+         *
+         * <p>If no particular IDs are specified, the event will be dispatched according to the
+         * repository routing rules.
+         *
+         * @param event
+         *         event to dispatch
+         * @param narrowDownToIds
+         *         optional set of identifiers of the targets to narrow down the event targets
+         * @return the set of identifiers to which the event was actually dispatched
+         */
+        Set<I> perform(Event event, @Nullable Set<I> narrowDownToIds);
     }
 }

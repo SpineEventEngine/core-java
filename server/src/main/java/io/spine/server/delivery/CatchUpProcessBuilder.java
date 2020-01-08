@@ -20,6 +20,8 @@
 
 package io.spine.server.delivery;
 
+import io.spine.server.delivery.CatchUpProcess.DispatchCatchingUp;
+import io.spine.server.delivery.CatchUpProcess.RepositoryIndex;
 import io.spine.server.event.EventStore;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -30,7 +32,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * @author Alex Tymchenko
+ * A builder for {@link CatchUpProcess}.
  */
 public final class CatchUpProcessBuilder<I> {
 
@@ -38,8 +40,8 @@ public final class CatchUpProcessBuilder<I> {
     private final TypeUrl projectionStateType;
     private @Nullable Supplier<EventStore> eventStore;
     private @Nullable CatchUpStorage storage;
-    private CatchUpProcess.@Nullable RepositoryIndex<I> index;
-    private CatchUpProcess.@Nullable DispatchCatchingUp<I> dispatchOp;
+    private @Nullable RepositoryIndex<I> index;
+    private @Nullable DispatchCatchingUp<I> dispatchOp;
 
     CatchUpProcessBuilder(Class<I> aClass, TypeUrl type) {
         idClass = aClass;
@@ -79,28 +81,28 @@ public final class CatchUpProcessBuilder<I> {
         return this;
     }
 
-    public Optional<CatchUpProcess.RepositoryIndex<I>> getIndex() {
+    public Optional<RepositoryIndex<I>> getIndex() {
         return Optional.ofNullable(index);
     }
 
-    public CatchUpProcess.RepositoryIndex<I> index() {
+    public RepositoryIndex<I> index() {
         return checkNotNull(index);
     }
 
-    public CatchUpProcessBuilder<I> withIndex(CatchUpProcess.RepositoryIndex<I> index) {
+    public CatchUpProcessBuilder<I> withIndex(RepositoryIndex<I> index) {
         this.index = checkNotNull(index);
         return this;
     }
 
-    public Optional<CatchUpProcess.DispatchCatchingUp<I>> getDispatchOp() {
+    public Optional<DispatchCatchingUp<I>> getDispatchOp() {
         return Optional.ofNullable(dispatchOp);
     }
 
-    public  CatchUpProcess.DispatchCatchingUp<I> dispatchOp() {
+    public  DispatchCatchingUp<I> dispatchOp() {
         return checkNotNull(dispatchOp);
     }
 
-    public CatchUpProcessBuilder<I> withDispatchOp(CatchUpProcess.DispatchCatchingUp<I> operation) {
+    public CatchUpProcessBuilder<I> withDispatchOp(DispatchCatchingUp<I> operation) {
         this.dispatchOp = checkNotNull(operation);
         return this;
     }
