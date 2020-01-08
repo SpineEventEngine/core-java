@@ -128,7 +128,7 @@ public class ConsecutiveProjection
             return Sets.difference(original, excludedTargets);
         }
 
-        public void excludeTarget(String targetId) {
+        public void excludeFromRouting(String targetId) {
             excludedTargets.add(targetId);
         }
     }

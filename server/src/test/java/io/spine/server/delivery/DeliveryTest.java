@@ -51,6 +51,7 @@ import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventStore;
 import io.spine.server.tenant.TenantAwareRunner;
+import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
 import io.spine.test.delivery.EmitNextNumber;
@@ -508,17 +509,25 @@ public class DeliveryTest {
                 ImmutableList.of(positiveExpected, positiveExpected,
                                  positiveExpected, positiveExpected);
 
-        List<Integer> negativeValues =
-                ImmutableList.of(negativeExpected, negativeExpected,
-                                 negativeExpected, negativeExpected);
-
         List<Integer> actualLastValues = readLastValues(ids, projectionRepo);
         assertThat(actualLastValues).isEqualTo(positiveValues);
 
         ConsecutiveProjection.useNegatives();
+
+        String excludedTarget = ids[0];
+        projectionRepo.excludeFromRouting(excludedTarget);
+
         projectionRepo.catchUpAll(aMinuteAgo());
-        List<Integer> lastValuesAfterCatchUp = readLastValues(ids, projectionRepo);
-        assertThat(lastValuesAfterCatchUp).isEqualTo(negativeValues);
+        Truth8.assertThat(projectionRepo.find(excludedTarget)).isEmpty();
+        for(int idIndex = 1; idIndex < ids.length; idIndex++) {
+            String identifier = ids[idIndex];
+            Optional<ConsecutiveProjection> maybeState = projectionRepo.find(identifier);
+            Truth8.assertThat(maybeState).isPresent();
+
+            ConsecutiveNumberView state = maybeState.get()
+                                                    .state();
+            assertThat(state.getLastValue()).isEqualTo(negativeExpected);
+        }
     }
 
     private static Timestamp aMinuteAgo() {
@@ -528,9 +537,13 @@ public class DeliveryTest {
     private static List<Integer> readLastValues(String[] ids,
                                                 ConsecutiveProjection.Repository repo) {
         return Arrays.stream(ids)
-                     .map((id) -> findConsecutiveView(repo, id).state()
-                                                                  .getLastValue())
+                     .map((id) -> readLastValue(repo, id))
                      .collect(toList());
+    }
+
+    private static int readLastValue(ConsecutiveProjection.Repository repo, String id) {
+        return findConsecutiveView(repo, id).state()
+                                                     .getLastValue();
     }
 
     private static List<EmitNextNumber> generateEmissionCommands(int howMany, String[] ids) {
