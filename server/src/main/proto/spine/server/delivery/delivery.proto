@@ -77,3 +77,13 @@ message DeliveryStage {
     // How many messages were delivered in scope of this stage.
     int32 messagesDelivered = 2 [(min).value = "0"];
 }
+
+// A process performing the maintenance of the shard with its messages.
+//
+// Represented in each of the bounded contexts as an event reactor,
+// as it's impossible to have several process managers of the same state across bounded contexts.
+//
+message ShardMaintenance {
+
+    ShardIndex id = 1;
+}

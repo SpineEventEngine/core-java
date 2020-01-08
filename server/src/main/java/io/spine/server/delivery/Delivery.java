@@ -423,7 +423,7 @@ public final class Delivery implements Logging {
 
     @Internal
     public void register(BoundedContext builder) {
-        builder.registerEventDispatcher(new ShardDeliveryTrigger(this));
+        builder.registerEventDispatcher(new ShardMaintenanceProcess(this));
     }
 
     /**

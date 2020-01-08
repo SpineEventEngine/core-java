@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EventMessage;
-import io.spine.server.NodeId;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.AbstractEventReactor;
@@ -37,13 +36,13 @@ import static java.lang.String.format;
 /**
  * @author Alex Tymchenko
  */
-class ShardDeliveryTrigger extends AbstractEventReactor {
+class ShardMaintenanceProcess extends AbstractEventReactor {
 
-    private static final TypeUrl TYPE = TypeUrl.of(NodeId.getDefaultInstance());
+    static final TypeUrl TYPE = TypeUrl.of(ShardMaintenance.getDefaultInstance());
 
     private final Inbox<ShardIndex> inbox;
 
-    ShardDeliveryTrigger(Delivery delivery) {
+    ShardMaintenanceProcess(Delivery delivery) {
         super();
         Inbox.Builder<ShardIndex> builder = delivery.newInbox(TYPE);
         builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new);
@@ -83,7 +82,7 @@ class ShardDeliveryTrigger extends AbstractEventReactor {
 
         @Override
         public void dispatchTo(ShardIndex targetId) {
-            ShardDeliveryTrigger.super.dispatch(envelope);
+            ShardMaintenanceProcess.super.dispatch(envelope);
         }
 
         @Override

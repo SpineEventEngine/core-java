@@ -51,8 +51,7 @@ public abstract class DeliveryStrategy {
     protected abstract int shardCount();
 
     public final ShardIndex determineIndex(Object entityId, TypeUrl entityStateType) {
-        //TODO:2020-01-07:alex.tymchenko: migrate the ShardDeliveryTrigger to its own state, reflecting the delivery state and use it here. Rename it accordingly
-        if(entityId instanceof ShardIndex) {
+        if (entityStateType.equals(ShardMaintenanceProcess.TYPE)) {
             return (ShardIndex) entityId;
         }
         return indexFor(entityId, entityStateType);
