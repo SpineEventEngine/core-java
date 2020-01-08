@@ -110,7 +110,6 @@ public class DeliveryTest {
     public void setUp() {
         this.originalDelivery = ServerEnvironment.instance()
                                                  .delivery();
-        Time.setProvider(withMillisOnlyResolution());
     }
 
     @AfterEach
@@ -410,7 +409,9 @@ public class DeliveryTest {
     }
 
     @Test
-    public void catchUpById() throws InterruptedException {
+    public void catchUpByIdWithMillisResolution() throws InterruptedException {
+        Time.Provider provider = withMillisOnlyResolution();
+        Time.setProvider(provider);
 
         Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
 
@@ -427,7 +428,7 @@ public class DeliveryTest {
 
         int initialWeight = 1;
         CounterView.changeWeightTo(initialWeight);
-        dispatchInParallel(ctx, events, 20);
+        dispatchInParallel(ctx, events, 20, provider);
 
         List<Integer> initialTotals = readTotals(repo, ids);
         int sumInRound = events.size() / ids.length * initialWeight;
@@ -441,7 +442,7 @@ public class DeliveryTest {
         int newWeight = 100;
         CounterView.changeWeightTo(newWeight);
 
-        ExecutorService service = threadPoolWithTime(20, withMillisOnlyResolution());
+        ExecutorService service = threadPoolWithTime(20, provider);
         List<Callable<Object>> jobs = new ArrayList<>();
 
         // Do the same, but add the catch-up for ID #0 as the first job.
@@ -480,8 +481,9 @@ public class DeliveryTest {
     }
 
     @Test
-    public void catchUpAll() throws InterruptedException {
-        Time.setProvider(withMillisOnlyResolution());
+    public void catchUpAllInOrderWithMillisResolution() throws InterruptedException {
+        Time.Provider provider = withMillisOnlyResolution();
+        Time.setProvider(provider);
         ConsecutiveProjection.usePositives();
 
         String[] ids = {"erste", "zweite", "dritte", "vierte"};
@@ -495,16 +497,10 @@ public class DeliveryTest {
         SingleTenantBlackBoxContext ctx = BlackBoxBoundedContext.singleTenant()
                                                                 .with(projectionRepo)
                                                                 .with(pmRepo);
-
-        ExecutorService service = threadPoolWithTime(20, withMillisOnlyResolution());
         List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
-
-        service.invokeAll(jobs);
-        List<Runnable> leftovers = service.shutdownNow();
-        assertThat(leftovers).isEmpty();
+        post(jobs, withMillisOnlyResolution());
 
         int positiveExpected = totalCommands / ids.length;
-        int negativeExpected = -1 * positiveExpected;
         List<Integer> positiveValues =
                 ImmutableList.of(positiveExpected, positiveExpected,
                                  positiveExpected, positiveExpected);
@@ -517,7 +513,18 @@ public class DeliveryTest {
         String excludedTarget = ids[0];
         projectionRepo.excludeFromRouting(excludedTarget);
 
-        projectionRepo.catchUpAll(aMinuteAgo());
+        List<Callable<Object>> sameWithCatchUp =
+                ImmutableList.<Callable<Object>>builder()
+                        .addAll(jobs)
+                        .add(() -> {
+                            projectionRepo.catchUpAll(aMinuteAgo());
+                            return nullRef();
+                        })
+                        .build();
+        post(sameWithCatchUp, provider);
+
+        int negativeExpected = -1 * positiveExpected * 2;
+
         Truth8.assertThat(projectionRepo.find(excludedTarget)).isEmpty();
         for(int idIndex = 1; idIndex < ids.length; idIndex++) {
             String identifier = ids[idIndex];
@@ -528,6 +535,14 @@ public class DeliveryTest {
                                                     .state();
             assertThat(state.getLastValue()).isEqualTo(negativeExpected);
         }
+    }
+
+    private static void post(List<Callable<Object>> jobs,
+                             Time.Provider provider) throws InterruptedException {
+        ExecutorService service = threadPoolWithTime(20, provider);
+        service.invokeAll(jobs);
+        List<Runnable> leftovers = service.shutdownNow();
+        assertThat(leftovers).isEmpty();
     }
 
     private static Timestamp aMinuteAgo() {
@@ -685,8 +700,9 @@ public class DeliveryTest {
 
     private static void dispatchInParallel(SingleTenantBlackBoxContext ctx,
                                            List<NumberAdded> events,
-                                           int threads) throws InterruptedException {
-        ExecutorService service = threadPoolWithTime(threads, withMillisOnlyResolution());
+                                           int threads,
+                                           Time.Provider provider) throws InterruptedException {
+        ExecutorService service = threadPoolWithTime(threads, provider);
         service.invokeAll(asPostEventJobs(ctx, events));
         List<Runnable> leftovers = service.shutdownNow();
         assertThat(leftovers).isEmpty();
