@@ -69,13 +69,12 @@ public class ConsecutiveProjection
     private void updateState(String id, int newValue) {
         builder().setId(id);
 
-        System.out.println(String.format("[%s] got `%d`.", id, newValue));
         mode.validate(newValue);
 
         int lastValue = state().getLastValue();
         if (abs(newValue) - abs(lastValue) != 1) {
             throw newIllegalStateException(
-                    "ConsecutiveNumberProjection with ID `%s` got wrong value. " +
+                    "`ConsecutiveNumberProjection` with ID `%s` got wrong value. " +
                             "Current value is %d, but got `%d`.",
                     id, lastValue, newValue);
         }

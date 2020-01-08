@@ -22,7 +22,6 @@ package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
-import io.spine.server.catchup.event.CatchUpStarted;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageComparator;
@@ -33,8 +32,6 @@ import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.Page;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.storage.AbstractStorage;
-import io.spine.server.type.EventEnvelope;
-import io.spine.string.Stringifiers;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -101,12 +98,6 @@ public final class InMemoryInboxStorage
 
     @Override
     public synchronized void write(InboxMessage message) {
-        if(message.hasEvent()) {
-            EventEnvelope envelope = EventEnvelope.of(message.getEvent());
-            if(envelope.message() instanceof CatchUpStarted) {
-                System.out.println(" --- Writing `CatchUpStarted` " + Stringifiers.toString(message));
-            }
-        }
         multitenantStorage.currentSlice()
                           .put(message.getId(), message);
     }

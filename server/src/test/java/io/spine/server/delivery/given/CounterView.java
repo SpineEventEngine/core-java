@@ -22,7 +22,6 @@ package io.spine.server.delivery.given;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
@@ -46,12 +45,6 @@ public final class CounterView extends Projection<String, DCounter, DCounter.Bui
 
     @Subscribe
     void on(NumberAdded event, EventContext context) {
-        String id = id();
-        Timestamp timestamp = context.getTimestamp();
-        if((id.equals("first") || id.equals("second")) && weight != 1) {
-//            System.out.println('[' + id + "] received an event " + timestamp.getSeconds()
-//                                       + '.' + timestamp.getNanos());
-        }
         DCounter.Builder builder = builder();
         builder.setTotal(builder.getTotal() + weight);
     }

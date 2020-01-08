@@ -82,8 +82,6 @@ final class CatchUpStation extends Station {
                         }
                     } else if (jobStatus == FINALIZING) {
                         if (message.getStatus() == TO_DELIVER) {
-                            System.out.println(
-                                    "Pausing the `TO_DELIVER` message: " + eventDetails(message));
                             conveyor.markCatchUp(message);
                         }
                     } else if (jobStatus == COMPLETED) {
@@ -92,14 +90,10 @@ final class CatchUpStation extends Station {
                                 dispatchToCatchUp.put(dispatchingId, message);
                                 conveyor.keepForLonger(message, HOW_LONG_TO_KEEP);
                             } else {
-                                System.out.println("Removing `TO_CATCH_UP` duplicate: " +
-                                                           eventDetails(message));
                                 conveyor.remove(message);
                             }
                         } else if (message.getStatus() == TO_DELIVER &&
                                 dispatchToCatchUp.containsKey(dispatchingId)) {
-                            System.out.println("Removing `TO_DELIVER` duplicate: " +
-                                                       eventDetails(message));
                             conveyor.remove(message);
                         }
                     }

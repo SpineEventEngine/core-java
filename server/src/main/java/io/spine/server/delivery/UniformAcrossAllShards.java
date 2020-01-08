@@ -90,9 +90,6 @@ public final class UniformAcrossAllShards extends DeliveryStrategy implements Se
         int totalShards = shardCount();
         int indexValue = abs(hashValue % totalShards);
         ShardIndex result = newIndex(indexValue);
-        if(entityStateType.value().contains("ConsecutiveNumber")) {
-            System.out.println(String.format("[%s] got index %d.", entityId, indexValue));
-        }
         return result;
     }
 

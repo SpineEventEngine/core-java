@@ -45,7 +45,6 @@ import java.util.stream.Stream;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
-import static java.lang.String.format;
 import static java.util.Collections.synchronizedList;
 
 /**
@@ -286,7 +285,6 @@ public final class Delivery implements Logging {
             } while (runResult.shouldRunAgain());
         } finally {
             session.complete();
-            System.out.println(" --- Releasing shard #" + index.getIndex());
         }
         DeliveryStats stats = new DeliveryStats(index, totalDelivered);
         monitor.onDeliveryCompleted(stats);
@@ -322,11 +320,6 @@ public final class Delivery implements Logging {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
-                System.out.println(format("(%s, Shard %d) serving page #%d with %d messages.",
-                                          Thread.currentThread()
-                                                .getName(),
-                                          index.getIndex(),
-                                          pageIndex, messages.size()));
                 int deliveredInBatch = 0;
                 Conveyor conveyor = new Conveyor(messages, deliveredMessages);
                 DeliverByType action = new DeliverByType(deliveries);
@@ -349,11 +342,6 @@ public final class Delivery implements Logging {
             if (continueAllowed) {
                 maybePage = currentPage.next();
             }
-            System.out.println(format("(%s, Shard %d) COMPLETED serving page #%d with %d messages.",
-                                      Thread.currentThread()
-                                            .getName(),
-                                      index.getIndex(),
-                                      pageIndex, messages.size()));
 
             pageIndex++;
         }

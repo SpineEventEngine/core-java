@@ -80,7 +80,6 @@ import static io.spine.server.delivery.CatchUpMessages.targetOf;
 import static io.spine.server.delivery.CatchUpMessages.toFilters;
 import static io.spine.server.delivery.CatchUpMessages.withWindow;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -140,7 +139,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         CatchUpId id = e.getId();
 
         CatchUp.Request request = e.getRequest();
-        System.out.println('[' + idAsString() + "] `CatchUpRequested` received.");
 
         Timestamp sinceWhen = request
                 .getSinceWhen();
@@ -150,13 +148,9 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         builder().setStatus(CatchUpStatus.STARTED);
         commitState();
 
-        Set<I> ids;
         Event event = wrapAsEvent(started, ctx);
-        ids = targetsForCatchUpSignals(request);
+        Set<I> ids = targetsForCatchUpSignals(request);
         dispatchAll(ImmutableList.of(event), ids);
-
-        System.out.println('[' + idAsString() + "] Returning `CatchUpStarted`.");
-        builder().vBuild();
 
         return started;
     }
@@ -178,7 +172,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     @React
     EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
-        System.out.println(idTag() + " `CatchUpStarted` received.");
         return recallMoreEvents(event.getId());
     }
 
@@ -206,7 +199,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     @React
     EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
-        System.out.println(idTag() + " `HistoryEventsRecalled` received.");
         return recallMoreEvents(event.getId());
     }
 
@@ -250,7 +242,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     @React
     EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled event) {
-        System.out.println(idTag() + " `HistoryFullyRecalled` received.");
         CatchUpId id = event.getId();
         builder().setStatus(CatchUpStatus.FINALIZING);
         commitState();
@@ -267,7 +258,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     @React
     List<ShardProcessingRequested> on(CatchUpCompleted ignored) {
-        System.out.println("Sending out the `ShardProcessingRequested` events.");
         int shardCount = builder().getTotalShards();
         List<Integer> affectedShards = builder().getAffectedShardList();
         List<ShardProcessingRequested> events = toShardProcessingEvents(shardCount, affectedShards);
@@ -298,7 +288,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     @React
     CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
-        System.out.println(idTag() + " `LiveEventsPickedUp` received.");
         return completeProcess(event.getId());
     }
 
@@ -311,7 +300,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     }
 
     private void dispatchAll(List<Event> events, Set<I> targets) {
-        System.out.println(format(idTag() + " Dispatching %s events.", events.size()));
         if (events.isEmpty()) {
             return;
         }
@@ -351,7 +339,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     }
 
     private void dispatchAll(List<Event> events) {
-        System.out.println(format(idTag() + " Dispatching %s events.", events.size()));
         if (events.isEmpty()) {
             return;
         }
@@ -374,14 +361,8 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     private List<Event> readMore(CatchUp.Request request,
                                  @Nullable Timestamp readBefore,
                                  @Nullable Limit limit) {
-        System.out.println(idTag() + " Preparing to read more events. "
-                                   + "\n `readBefore` is " + readBefore
-                                   + "\n the `sinceWhen` is " + request.getSinceWhen()
-                                   + "\n the `whenLastRead` is " + builder().getWhenLastRead()
-        );
         if (readBefore != null
                 && Timestamps.compare(readBefore, builder().getWhenLastRead()) <= 0) {
-            System.out.println("Read-before is EARLIER than when-last-read!");
             //TODO:2019-12-13:alex.tymchenko: looks an `IllegalStateException` though.
             return ImmutableList.of();
         }
@@ -390,24 +371,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         eventStore.get()
                   .read(query, observer);
         List<Event> allEvents = observer.responses();
-        System.out.println(
-                format(idTag() +
-                               " There were %s events read in total. The first one was [ %s ], the last one was [ %s ].",
-                       allEvents.size(),
-                       allEvents.isEmpty() ? "" : printEvent(allEvents.get(0)),
-                       allEvents.isEmpty() ? "" : printEvent(allEvents.get(allEvents.size() - 1))
-                )
-        );
-
         return allEvents;
-    }
-
-    private static String printEvent(Event event) {
-        EventContext context = event.getContext();
-        Timestamp timestamp = context.getTimestamp();
-        String strRepresentation = timestamp.getSeconds()
-                + "." + timestamp.getNanos();
-        return strRepresentation;
     }
 
     private EventStreamQuery toEventQuery(CatchUp.Request request,

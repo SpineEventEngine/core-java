@@ -20,9 +20,7 @@
 
 package io.spine.server.delivery;
 
-import io.spine.base.Identifier;
 import io.spine.base.Time;
-import io.spine.core.Event;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
@@ -111,13 +109,6 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
      * Delivers the message to its message endpoint.
      */
     void deliver(InboxMessage message) {
-        if(message.hasEvent()) {
-            Event event = message.getEvent();
-            System.out.println(String.format("Calling endpoint with `%s` delivered to [%s] in version %d.",
-                                             event.getMessage().getTypeUrl(),
-                                             Identifier.unpack(message.getInboxId().getEntityId().getId()),
-                                             message.getVersion()));
-        }
         callEndpoint(message, (endpoint, targetId, envelope) -> endpoint.dispatchTo(targetId));
     }
 

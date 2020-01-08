@@ -25,15 +25,11 @@ import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.IdInTenant;
 import io.spine.server.type.SignalEnvelope;
-import io.spine.string.Stringifiers;
-import io.spine.util.Exceptions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-
-import static java.lang.String.format;
 
 /**
  * Takes the messages, which were previously sent to their targets via their inbox, and
@@ -166,55 +162,18 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
                                 InboxOfCommands<I> cmdDispatcher,
                                 InboxOfEvents<I> eventDispatcher) {
             if (messages.size() > 1) {
-                String threadName = Thread.currentThread().getName();
-
                 Any packedId = inboxId.value()
                                       .getEntityId()
                                       .getId();
                 @SuppressWarnings("unchecked")      // Only IDs of type `I` are stored.
                         I id = (I) Identifier.unpack(packedId);
-                boolean shouldLog =
-                        "second".equals(id) || inboxId.value().getTypeUrl().contains("CatchUp");
-                if(shouldLog) {
-                    System.out.println(
-                            format("(%s, shard %d) Starting to dispatch %d messages to [%s]...",
-                                   threadName,
-                                   messages.get(0).getShardIndex().getIndex(),
-                                   messages.size(),
-                                   id));
-                }
                 dispatcher.onStart(id);
                 try {
                     for (InboxMessage message : messages) {
                         doDeliver(cmdDispatcher, eventDispatcher, message);
-                        if(shouldLog) {
-                            System.out.println(format("(%s, shard %d). Delivered %d to [%s] in status %s.",
-                                                      threadName,
-                                                      message.getShardIndex().getIndex(),
-                                                      message.getEvent()
-                                                             .getContext()
-                                                             .getTimestamp()
-                                                             .getNanos(),
-                                                      id,
-                                                      message.getStatus()
-                                                      ));
-                        }
                     }
                 } finally {
-                    try {
-                        if(shouldLog) {
-                            System.out.println(
-                                    format("(%s, shard %d) Ending the dispatching of %d messages to [%s]...",
-                                           threadName,
-                                           messages.get(0).getShardIndex().getIndex(),
-                                           messages.size(),
-                                           id));
-                        }
-                        dispatcher.onEnd(id);
-                    } catch (Exception e) {
-                        throw Exceptions.newIllegalStateException(e, "Error dispatching the batch of messages: " +
-                                Stringifiers.newForListOf(InboxMessage.class, '|').convert(messages));
-                    }
+                    dispatcher.onEnd(id);
                 }
             } else {
                 doDeliver(cmdDispatcher, eventDispatcher, messages.get(0));
