@@ -23,6 +23,7 @@ package io.spine.client;
 import com.google.common.collect.ImmutableList;
 import io.spine.base.EntityState;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -60,6 +61,24 @@ public final class QueryRequest<S extends EntityState>
 
     QueryRequest(ClientRequest parent, Class<S> type) {
         super(parent, type);
+    }
+
+    @SafeVarargs
+    public final QueryRequest<S> where(QueryFilter<S>... filter) {
+        Filter[] filters = Arrays.stream(filter)
+                                 .map(QueryFilter::wrappedFilter)
+                                 .toArray(Filter[]::new);
+        builder().where(filters);
+        return this;
+    }
+
+    @SafeVarargs
+    public final QueryRequest<S> where(CompositeQueryFilter<S>... filter) {
+        CompositeFilter[] filters = Arrays.stream(filter)
+                                          .map(CompositeQueryFilter::filter)
+                                          .toArray(CompositeFilter[]::new);
+        builder().where(filters);
+        return this;
     }
 
     /**

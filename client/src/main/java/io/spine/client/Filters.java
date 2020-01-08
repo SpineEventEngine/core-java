@@ -22,9 +22,11 @@ package io.spine.client;
 
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityColumn;
+import io.spine.base.EntityState;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.base.SubscribableField;
@@ -82,14 +84,14 @@ public final class Filters {
     private Filters() {
     }
 
-    public static Filter eq(EntityColumn column, Object value) {
+    public static <S extends EntityState> QueryFilter<S> eq(EntityColumn<S> column, Object value) {
         checkNotNull(column);
-        checkNotNull(value);
         checkNotNull(value);
         return createFilter(column, value, EQUAL);
     }
 
-    public static Filter eq(SubscribableField field, Object value) {
+    public static <M extends Message> SubscriptionFilter<M>
+    eq(SubscribableField<M> field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
         return createFilter(field, value, EQUAL);
@@ -110,15 +112,18 @@ public final class Filters {
         return createFilter(fieldPath, value, EQUAL);
     }
 
-    public static Filter gt(EntityColumn column, Object value) {
+    public static <S extends EntityState> QueryFilter<S> gt(EntityColumn<S> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(column, value, GREATER_THAN);
     }
 
-    public static Filter gt(SubscribableField field, Object value) {
+    public static <M extends Message> SubscriptionFilter<M>
+    gt(SubscribableField<M> field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(field, value, GREATER_THAN);
     }
 
@@ -140,15 +145,18 @@ public final class Filters {
         return createFilter(fieldPath, value, GREATER_THAN);
     }
 
-    public static Filter lt(EntityColumn column, Object value) {
+    public static <S extends EntityState> QueryFilter<S> lt(EntityColumn<S> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(column, value, LESS_THAN);
     }
 
-    public static Filter lt(SubscribableField field, Object value) {
+    public static <M extends Message> SubscriptionFilter<M>
+    lt(SubscribableField<M> field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(field, value, LESS_THAN);
     }
 
@@ -170,15 +178,18 @@ public final class Filters {
         return createFilter(fieldPath, value, LESS_THAN);
     }
 
-    public static Filter ge(EntityColumn column, Object value) {
+    public static <S extends EntityState> QueryFilter<S> ge(EntityColumn<S> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(column, value, GREATER_OR_EQUAL);
     }
 
-    public static Filter ge(SubscribableField field, Object value) {
+    public static <M extends Message> SubscriptionFilter<M>
+    ge(SubscribableField<M> field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(field, value, GREATER_OR_EQUAL);
     }
 
@@ -200,15 +211,18 @@ public final class Filters {
         return createFilter(fieldPath, value, GREATER_OR_EQUAL);
     }
 
-    public static Filter le(EntityColumn column, Object value) {
+    public static <S extends EntityState> QueryFilter<S> le(EntityColumn<S> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(column, value, LESS_OR_EQUAL);
     }
 
-    public static Filter le(SubscribableField field, Object value) {
+    public static <M extends Message> SubscriptionFilter<M>
+    le(SubscribableField<M> field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(field, value, LESS_OR_EQUAL);
     }
 
@@ -230,6 +244,22 @@ public final class Filters {
         return createFilter(fieldPath, value, LESS_OR_EQUAL);
     }
 
+    @SafeVarargs
+    public static <S extends EntityState> CompositeQueryFilter<S>
+    all(QueryFilter<S> first, QueryFilter<S>... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeQueryFilter<>(asList(first, rest), ALL);
+    }
+
+    @SafeVarargs
+    public static <M extends Message> CompositeSubscriptionFilter<M>
+    all(SubscriptionFilter<M> first, SubscriptionFilter<M>... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeSubscriptionFilter<>(asList(first, rest), ALL);
+    }
+
     /**
      * Creates new conjunction composite filter.
      *
@@ -248,6 +278,22 @@ public final class Filters {
         checkNotNull(first);
         checkNotNull(rest);
         return composeFilters(asList(first, rest), ALL);
+    }
+
+    @SafeVarargs
+    public static <S extends EntityState> CompositeQueryFilter<S>
+    either(QueryFilter<S> first, QueryFilter<S>... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeQueryFilter<>(asList(first, rest), EITHER);
+    }
+
+    @SafeVarargs
+    public static <M extends Message> CompositeSubscriptionFilter<M>
+    either(SubscriptionFilter<M> first, SubscriptionFilter<M>... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeSubscriptionFilter<>(asList(first, rest), EITHER);
     }
 
     /**
@@ -289,20 +335,12 @@ public final class Filters {
         return composeFilters(filters, ALL);
     }
 
-    private static Filter createFilter(EntityColumn column, Object value, Operator operator) {
-        return createFilter(column.value(), value, operator);
-    }
-
-    private static Filter createFilter(SubscribableField field, Object value, Operator operator) {
-        return createFilter(field.getFieldPath(), value, operator);
-    }
-
-    private static Filter createFilter(String fieldPath, Object value, Operator operator) {
+    static Filter createFilter(String fieldPath, Object value, Operator operator) {
         FieldPath path = Field.parse(fieldPath).path();
         return createFilter(path, value, operator);
     }
 
-    private static Filter createFilter(FieldPath path, Object value, Operator operator) {
+    static Filter createFilter(FieldPath path, Object value, Operator operator) {
         Any wrappedValue = toAny(value);
         Filter filter = Filter
                 .newBuilder()
@@ -313,8 +351,17 @@ public final class Filters {
         return filter;
     }
 
-    private static CompositeFilter composeFilters(Collection<Filter> filters,
-                                                  CompositeOperator operator) {
+    private static <S extends EntityState> QueryFilter<S>
+    createFilter(EntityColumn<S> column, Object value, Operator operator) {
+        return new QueryFilter<>(column, value, operator);
+    }
+
+    private static <M extends Message> SubscriptionFilter<M>
+    createFilter(SubscribableField<M> field, Object value, Operator operator) {
+        return new SubscriptionFilter<>(field, value, operator);
+    }
+
+    static CompositeFilter composeFilters(Collection<Filter> filters, CompositeOperator operator) {
         CompositeFilter result = CompositeFilter
                 .newBuilder()
                 .addAllFilter(filters)
