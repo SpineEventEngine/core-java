@@ -33,6 +33,7 @@ import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Stream;
 
@@ -70,7 +71,7 @@ class DispatchingQueueSynchronisationTest {
                     .setAmount(42)
                     .vBuild();
             context.receivesCommand(buy);
-            sleepUninterruptibly(1, SECONDS);
+            sleepUninterruptibly(Duration.ofSeconds(1));
             Sell sell = Sell
                     .newBuilder()
                     .setShare(share)

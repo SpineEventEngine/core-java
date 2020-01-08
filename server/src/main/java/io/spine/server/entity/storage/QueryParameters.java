@@ -22,7 +22,6 @@ package io.spine.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -44,12 +43,12 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
  * implementations.
  */
-@SPI /* Available to SPI users providing own {@code Storage} implementations. */
+@SPI // Available to SPI users providing own `Storage` implementations.
 public final class QueryParameters implements Iterable<CompositeQueryParameter> {
 
     static final String FIELD_PARAMETERS = "parameters";
 
-    private final ImmutableCollection<CompositeQueryParameter> parameters;
+    private final ImmutableList<CompositeQueryParameter> parameters;
 
     /**
      * A flag that shows if the current instance of {@code CompositeQueryParameter} has
@@ -156,7 +155,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
      */
     public static class Builder {
 
-        private final ImmutableCollection.Builder<CompositeQueryParameter> parameters;
+        private final ImmutableList.Builder<CompositeQueryParameter> parameters;
 
         private boolean hasLifecycle;
 
@@ -179,7 +178,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
             return this;
         }
 
-        public ImmutableCollection.Builder<CompositeQueryParameter> getParameters() {
+        public ImmutableList.Builder<CompositeQueryParameter> getParameters() {
             return parameters;
         }
 

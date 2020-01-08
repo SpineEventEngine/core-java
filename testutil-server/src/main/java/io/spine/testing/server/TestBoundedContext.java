@@ -35,8 +35,6 @@ import static io.spine.core.BoundedContextNames.newName;
 @CheckReturnValue
 public final class TestBoundedContext {
 
-    private static final BusFilter<CommandEnvelope> NOP_FILTER = envelope -> Optional.empty();
-
     private static final BoundedContextName NAME = newName("TestBoundedContext");
 
     /**
@@ -51,7 +49,7 @@ public final class TestBoundedContext {
      * @return {@code BoundedContext} instance
      */
     public static BoundedContext create() {
-        return create(NOP_FILTER);
+        return create(envelope -> Optional.empty());
     }
 
     /**

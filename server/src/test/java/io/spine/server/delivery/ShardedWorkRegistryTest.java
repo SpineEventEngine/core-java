@@ -36,8 +36,8 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.generateNodeId;
 import static io.spine.server.delivery.given.DeliveryTestEnv.newShardIndex;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.time.Duration.ofMillis;
+import static java.time.Duration.ofSeconds;
 import static java.util.stream.IntStream.range;
 
 /**
@@ -85,7 +85,7 @@ public abstract class ShardedWorkRegistryTest {
         assertThat(releasedIndexes.iterator()
                                   .hasNext()).isFalse();
 
-        sleepUninterruptibly(101, MILLISECONDS);
+        sleepUninterruptibly(ofMillis(101));
         releasedIndexes = registry.releaseExpiredSessions(Durations.fromMillis(100));
         assertThat(releasedIndexes).containsExactlyElementsIn(indexes);
 
@@ -104,14 +104,14 @@ public abstract class ShardedWorkRegistryTest {
         int totalShards = 12;
 
         Duration expirationPeriod = Durations.fromMillis(1);
-        ImmutableSet<ShardIndex> allIndexes = pickUp(registry, totalShards, totalShards);
-        sleepUninterruptibly(1, SECONDS);
+        pickUp(registry, totalShards, totalShards);
+        sleepUninterruptibly(ofSeconds(1));
         registry.releaseExpiredSessions(expirationPeriod);
 
         // Pick up half of the shards and leave another half empty.
         ImmutableSet<ShardIndex> newIndexes =
                 pickUp(registry, totalShards, totalShards / 2);
-        sleepUninterruptibly(1, SECONDS);
+        sleepUninterruptibly(ofSeconds(1));
         Iterable<ShardIndex> releasedIndexes = registry.releaseExpiredSessions(expirationPeriod);
         assertThat(releasedIndexes).containsExactlyElementsIn(newIndexes);
     }

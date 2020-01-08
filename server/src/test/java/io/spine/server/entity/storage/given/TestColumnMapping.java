@@ -98,6 +98,7 @@ public final class TestColumnMapping extends AbstractColumnMapping<String> {
         return TaskView::getName;
     }
 
+    @SuppressWarnings("UnnecessaryLambda")
     private static ColumnTypeMapping<IntIdentifier, String> ofIntIdentifier() {
         return id -> String.valueOf(id.getId());
     }

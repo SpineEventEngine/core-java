@@ -178,6 +178,7 @@ public final class DefaultEventStore
     /**
      * Returns comparator which compares events by their timestamp in chronological order.
      */
+    @SuppressWarnings("UnnecessaryLambda") // For an expressive API.
     private static Comparator<Event> chronologically() {
         return (e1, e2) -> Timestamps.compare(e1.time(), e2.time());
     }
