@@ -404,14 +404,31 @@ public final class Delivery implements Logging {
         return Inbox.newBuilder(entityType, inboxWriter());
     }
 
-    public <I> CatchUpProcessBuilder<I> newCatchUpProcess(ProjectionRepository<I, ?, ?> repository) {
-        CatchUpProcessBuilder<I> builder = CatchUpProcess.newBuilder(repository);
+    /**
+     * Creates a new instance of the builder for {@link CatchUpProcess}.
+     *
+     * @param repo
+     *         projection repository for which the catch-up process will be created
+     * @param <I>
+     *         the type of identifiers of entities managed by the projection repository
+     * @return new builder for the {@code CatchUpProcess}
+     */
+    public <I> CatchUpProcessBuilder<I> newCatchUpProcess(ProjectionRepository<I, ?, ?> repo) {
+        CatchUpProcessBuilder<I> builder = CatchUpProcess.newBuilder(repo);
         return builder.withStorage(catchUpStorage);
     }
 
+    /**
+     * Registers the internal {@code Delivery} message dispatchers
+     * in the given {@code BoundedContext}.
+     *
+     * <p>The registration of the dispatchers allows to handle the {@code Delivery}-specific events.
+     *
+     * @param context Bounded Context in which the message dispatchers should be registered
+     */
     @Internal
-    public void register(BoundedContext builder) {
-        builder.registerEventDispatcher(new ShardMaintenanceProcess(this));
+    public void registerDispatchersIn(BoundedContext context) {
+        context.registerEventDispatcher(new ShardMaintenanceProcess(this));
     }
 
     /**
@@ -455,8 +472,7 @@ public final class Delivery implements Logging {
      *         the state type of the entity, to which the message is heading
      * @return the index of the shard for the message
      */
-    //TODO:2020-01-07:alex.tymchenko: hide from the public API?
-    public ShardIndex whichShardFor(Object entityId, TypeUrl entityStateType) {
+    ShardIndex whichShardFor(Object entityId, TypeUrl entityStateType) {
         return strategy.determineIndex(entityId, entityStateType);
     }
 
@@ -474,8 +490,7 @@ public final class Delivery implements Logging {
     }
 
     @VisibleForTesting
-    //TODO:2019-12-03:alex.tymchenko: hide this from the public API.
-    public int shardCount() {
+    int shardCount() {
         return strategy.shardCount();
     }
 
