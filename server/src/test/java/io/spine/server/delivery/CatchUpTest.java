@@ -80,7 +80,32 @@ public class CatchUpTest extends AbstractDeliveryTest {
             "given the time is provided with ms resolution")
     void byIdWithMillisResolution() throws InterruptedException {
         Time.setProvider(withMillisOnlyResolution());
+        testCatchUpByIds();
+    }
 
+    @Test
+    @DisplayName("catch up only particular instances by their IDs, " +
+            "given the time is provided with nanosecond resolution")
+    void byIdWithNanosResolution() throws InterruptedException {
+        testCatchUpByIds();
+    }
+
+    @Test
+    @DisplayName("catch up all of projection instances, " +
+            "given the time is provided with millisecond resolution")
+    void allInOrderWithMillisResolution() throws InterruptedException {
+        Time.setProvider(withMillisOnlyResolution());
+        testCatchUpAll();
+    }
+
+    @Test
+    @DisplayName("catch up all of projection instances, " +
+            "given the time is provided with nanos resolution")
+    void allInOrderWithNanosResolution() throws InterruptedException {
+        testCatchUpAll();
+    }
+
+    private void testCatchUpByIds() throws InterruptedException {
         Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
 
         String[] ids = {"first", "second", "third", "fourth"};
@@ -142,11 +167,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         assertThat(totalsAfterCatchUp).isEqualTo(expectedTotals);
     }
 
-    @Test
-    @DisplayName("catch up all of projection instances, " +
-            "given the time is provided with millisecond resolution")
-    void allInOrderWithMillisResolution() throws InterruptedException {
-        Time.setProvider(withMillisOnlyResolution());
+    private void testCatchUpAll() throws InterruptedException {
         ConsecutiveProjection.usePositives();
 
         String[] ids = {"erste", "zweite", "dritte", "vierte"};
