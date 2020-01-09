@@ -22,11 +22,8 @@ package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
-import io.spine.base.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.server.catchup.CatchUp;
 import io.spine.server.catchup.CatchUpStatus;
 import io.spine.server.catchup.event.CatchUpStarted;
@@ -128,32 +125,6 @@ final class CatchUpStation extends Station {
                                  .getId();
         return targets.stream()
                       .anyMatch((t) -> t.equals(rawEntityId));
-    }
-
-    private static String eventDetails(InboxMessage inboxMessage) {
-        if (!inboxMessage.hasEvent()) {
-            return "";
-        }
-        Object entityId = Identifier.unpack(inboxMessage.getInboxId()
-                                                        .getEntityId()
-                                                        .getId());
-        Event event = inboxMessage.getEvent();
-        EventContext eventContext = event.getContext();
-        Timestamp timestamp = eventContext.getTimestamp();
-        Timestamp whenReceived = inboxMessage.getWhenReceived();
-        int version = inboxMessage.getVersion();
-        return " + [" + entityId + "] "
-                + '(' + event.getId()
-                             .getValue() + ") "
-                + timestamp.getSeconds()
-                + '.' + timestamp.getNanos()
-                + " of type " + event.getMessage()
-                                     .getTypeUrl()
-                + " in status " + inboxMessage.getStatus()
-                                              .toString()
-                + ". Inbox received at " + whenReceived.getSeconds()
-                + '.' + whenReceived.getNanos()
-                + " in version " + version;
     }
 
     /**
