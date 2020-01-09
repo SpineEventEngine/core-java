@@ -56,10 +56,7 @@ import io.spine.server.event.React;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.type.EventEnvelope;
-import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
-import io.spine.validate.ConstraintViolation;
-import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;
@@ -175,21 +172,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         return recallMoreEvents(event.getId());
     }
 
-    private String idTag() {
-        return Thread.currentThread()
-                     .getName() + " - [" + idAsString() + ']';
-    }
-
-    private String idAsString() {
-        List<Any> targets = builder().getRequest()
-                                     .getTargetList();
-        if (targets.isEmpty()) {
-            return "ALL";
-        }
-        return Identifier.unpack(targets.get(0))
-                         .toString();
-    }
-
     private Event wrapAsEvent(CatchUpSignal event, EventContext context) {
         Event firstEvent;
         EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
@@ -257,15 +239,20 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     }
 
     @React
+    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
+        return completeProcess(event.getId());
+    }
+
+    @React
     List<ShardProcessingRequested> on(CatchUpCompleted ignored) {
         int shardCount = builder().getTotalShards();
         List<Integer> affectedShards = builder().getAffectedShardList();
-        List<ShardProcessingRequested> events = toShardProcessingEvents(shardCount, affectedShards);
+        List<ShardProcessingRequested> events = toShardEvents(shardCount, affectedShards);
         return events;
     }
 
-    private static List<ShardProcessingRequested>
-    toShardProcessingEvents(int shardCount, List<Integer> indexes) {
+    private static List<ShardProcessingRequested> toShardEvents(int shardCount,
+                                                                List<Integer> indexes) {
         return indexes
                 .stream()
                 .map(indexValue -> {
@@ -282,38 +269,12 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
                 .collect(toList());
     }
 
-    private void commitState() {
-        storage.write(builder().vBuild());
-    }
-
-    @React
-    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
-        return completeProcess(event.getId());
-    }
-
     //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
     private CatchUpCompleted completeProcess(CatchUpId id) {
         builder().setStatus(CatchUpStatus.COMPLETED);
         commitState();
         CatchUpCompleted completed = catchUpCompleted(id);
         return completed;
-    }
-
-    private void dispatchAll(List<Event> events, Set<I> targets) {
-        if (events.isEmpty()) {
-            return;
-        }
-        Set<I> actualTargets = new HashSet<>();
-        @Nullable Set<I> targetsForDispatch = targets.isEmpty()
-                                              ? null
-                                              : targets;
-        for (Event event : events) {
-            Set<I> targetsOfThisDispatch = dispatchOperation.perform(event, targetsForDispatch);
-            actualTargets.addAll(targetsOfThisDispatch);
-        }
-        if (!actualTargets.isEmpty()) {
-            recordAffectedShards(actualTargets);
-        }
     }
 
     private void recordAffectedShards(Set<I> actualTargets) {
@@ -352,10 +313,21 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         }
     }
 
-    private Set<I> unpack(List<Any> packedIds) {
-        return packedIds.stream()
-                        .map((any) -> Identifier.unpack(any, idClass))
-                        .collect(toSet());
+    private void dispatchAll(List<Event> events, Set<I> targets) {
+        if (events.isEmpty()) {
+            return;
+        }
+        Set<I> actualTargets = new HashSet<>();
+        @Nullable Set<I> targetsForDispatch = targets.isEmpty()
+                                              ? null
+                                              : targets;
+        for (Event event : events) {
+            Set<I> targetsOfThisDispatch = dispatchOperation.perform(event, targetsForDispatch);
+            actualTargets.addAll(targetsOfThisDispatch);
+        }
+        if (!actualTargets.isEmpty()) {
+            recordAffectedShards(actualTargets);
+        }
     }
 
     private List<Event> readMore(CatchUp.Request request,
@@ -372,6 +344,16 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
                   .read(query, observer);
         List<Event> allEvents = observer.responses();
         return allEvents;
+    }
+
+    private Set<I> unpack(List<Any> packedIds) {
+        return packedIds.stream()
+                        .map((any) -> Identifier.unpack(any, idClass))
+                        .collect(toSet());
+    }
+
+    private void commitState() {
+        storage.write(builder().vBuild());
     }
 
     private EventStreamQuery toEventQuery(CatchUp.Request request,
@@ -441,11 +423,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         }
 
         private void store() {
-            CatchUp rawMsg = builder().build();
-            List<ConstraintViolation> violations = Validate.violationsOf(rawMsg);
-            if (!violations.isEmpty()) {
-                System.err.println("The message is invalid: " + Stringifiers.toString(rawMsg));
-            }
             CatchUp modifiedState = builder().vBuild();
             storage.write(modifiedState);
         }
