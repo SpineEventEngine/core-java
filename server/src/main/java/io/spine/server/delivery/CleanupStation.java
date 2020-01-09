@@ -25,7 +25,8 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
 
 /**
- * @author Alex Tymchenko
+ * The station which removes the delivered messages, unless they are
+ * {@linkplain InboxMessage#getKeepUntil() set} to be kept for longer.
  */
 final class CleanupStation extends Station {
 
