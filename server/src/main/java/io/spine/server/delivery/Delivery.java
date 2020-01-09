@@ -311,8 +311,6 @@ public final class Delivery implements Logging {
         Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
-        int pageIndex = 0;
-
         int totalMessagesDelivered = 0;
         boolean continueAllowed = true;
         while (continueAllowed && maybePage.isPresent()) {
@@ -336,14 +334,13 @@ public final class Delivery implements Logging {
                 }
                 notifyOfDuplicatesIn(conveyor);
                 conveyor.flushTo(inboxStorage);
+
                 DeliveryStage stage = newStage(index, deliveredInBatch);
                 continueAllowed = monitorTellsToContinue(stage);
             }
             if (continueAllowed) {
                 maybePage = currentPage.next();
             }
-
-            pageIndex++;
         }
         return new RunResult(totalMessagesDelivered, !continueAllowed);
     }
