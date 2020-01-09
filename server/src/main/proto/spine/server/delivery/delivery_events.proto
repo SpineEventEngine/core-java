@@ -6,7 +6,7 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
-option (every_is).java_type = "io.spine.server.delivery.SignalForShard";
+option (every_is).java_type = "io.spine.server.delivery.ShardEvent";
 
 option java_package = "io.spine.server.delivery.event";
 option java_outer_classname = "DeliveryEventsProto";

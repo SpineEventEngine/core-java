@@ -34,7 +34,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
- * @author Alex Tymchenko
+ * The framework-internal process performing the maintenance of delivery shards.
+ *
+ * <p>Serving as a dispatcher of a special {@link ShardProcessingRequested} event, it
  */
 class ShardMaintenanceProcess extends AbstractEventReactor {
 
@@ -61,13 +63,13 @@ class ShardMaintenanceProcess extends AbstractEventReactor {
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
         EventMessage raw = envelope.message();
-        return raw instanceof SignalForShard;
+        return raw instanceof ShardEvent;
     }
 
     @CanIgnoreReturnValue
     @Override
     public void dispatch(EventEnvelope event) {
-        SignalForShard message = (SignalForShard) event.message();
+        ShardEvent message = (ShardEvent) event.message();
         inbox.send(event)
              .toReactor(message.getId());
     }
