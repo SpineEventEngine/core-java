@@ -406,6 +406,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return id;
     }
 
+    @SuppressWarnings("UnnecessaryLambda")
     private Route<? extends EventMessage, EventContext, I> eventImportRouting() {
         return (message, context) -> {
             Set<I> ids = eventImportRouting.apply(message, context);
@@ -608,7 +609,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected A play(I id, AggregateHistory history) {
         A result = create(id);
-        AggregateTransaction tx = AggregateTransaction.start(result);
+        AggregateTransaction<I, ?, ?> tx = AggregateTransaction.start(result);
         BatchDispatchOutcome outcome = result.play(history);
         boolean success = outcome.getSuccessful();
         tx.commitIfActive();

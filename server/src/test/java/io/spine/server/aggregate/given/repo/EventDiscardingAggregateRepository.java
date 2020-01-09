@@ -31,10 +31,8 @@ import static java.util.Optional.empty;
 public class EventDiscardingAggregateRepository
         extends ProjectAggregateRepository {
 
-    private static final EventFilter discardAll = anyEvent -> empty();
-
     @Override
     public EventFilter eventFilter() {
-        return discardAll;
+        return anyEvent -> empty();
     }
 }

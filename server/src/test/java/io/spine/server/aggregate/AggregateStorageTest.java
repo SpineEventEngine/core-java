@@ -60,7 +60,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -93,13 +92,10 @@ public abstract class AggregateStorageTest
                                     AggregateReadRequest<ProjectId>,
                                     AggregateStorage<ProjectId>> {
 
-    private static final Function<AggregateEventRecord, @Nullable Event> TO_EVENT =
-            record -> record != null ? record.getEvent() : null;
-
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
+
     private final TestEventFactory eventFactory = newInstance(AggregateStorageTest.class);
     private AggregateStorage<ProjectId> storage;
-
     private static Snapshot newSnapshot(Timestamp time) {
         return Snapshot.newBuilder()
                        .setState(Any.getDefaultInstance())
@@ -124,13 +120,19 @@ public abstract class AggregateStorageTest
     protected AggregateHistory newStorageRecord() {
         List<AggregateEventRecord> records = sequenceFor(id);
         List<Event> expectedEvents = records.stream()
-                                            .map(TO_EVENT)
+                                            .map(AggregateStorageTest::toEvent)
                                             .collect(toList());
         AggregateHistory record = AggregateHistory
                 .newBuilder()
                 .addAllEvent(expectedEvents)
                 .build();
         return record;
+    }
+
+    private static @Nullable Event toEvent(@Nullable AggregateEventRecord record) {
+        return record != null
+               ? record.getEvent()
+               : null;
     }
 
     @Override
@@ -755,7 +757,7 @@ public abstract class AggregateStorageTest
 
         AggregateHistory events = readRecord(id);
         List<Event> expectedEvents = records.stream()
-                                            .map(TO_EVENT)
+                                            .map(AggregateStorageTest::toEvent)
                                             .collect(Collectors.toList());
         List<Event> actualEvents = events.getEventList();
         assertEquals(expectedEvents, actualEvents);

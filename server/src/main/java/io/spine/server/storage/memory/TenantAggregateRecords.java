@@ -152,7 +152,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
             if (snapshotsHit > snapshotIndex && predicate.test(record)) {
                 this.records.remove(id, record);
             }
-            if (AggregateStorageRecordReverseComparator.isSnapshot(record)) {
+            if (record.hasSnapshot()) {
                 snapshotsHit++;
             }
         }
@@ -193,7 +193,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
 
                 // In case the wall-clock isn't accurate enough, the timestamps may be the same.
                 // In this case, compare the record type in a similar fashion.
-                if(result == 0) {
+                if (result == 0) {
                     result = compareSimilarRecords(first, second);
                 }
             }
@@ -208,27 +208,30 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
          * is a snapshot. From a snapshot and an event with the same version and timestamp,
          * a snapshot is considered "newer".
          *
-         * @param first  the first record
-         * @param second the second record
+         * @param first
+         *         the first record
+         * @param second
+         *         the second record
          * @return {@code -1}, {@code 1} or {@code 0} according to
-         * {@linkplain Comparator#compare(Object, Object) compare(..) specification}
+         *         {@linkplain Comparator#compare(Object, Object) compare(..) specification}
          */
         private static int compareSimilarRecords(AggregateEventRecord first,
                                                  AggregateEventRecord second) {
-            boolean firstIsSnapshot = isSnapshot(first);
-            boolean secondIsSnapshot = isSnapshot(second);
+            boolean firstIsSnapshot = first.hasSnapshot();
+            boolean secondIsSnapshot = second.hasSnapshot();
             if (firstIsSnapshot && !secondIsSnapshot) {
                 return -1;
             } else if (secondIsSnapshot && !firstIsSnapshot) {
                 return 1;
-            } else {
+            } else if (!first.equals(second)) {
                 // Both are of the same kind and have the same versions and timestamps.
+                // We cannot allow 2 nonidentical records to be equal in terms of `compare(..)`,
+                // so compare by hash codes.
+                return Integer.compare(first.hashCode(), second.hashCode());
+            } else {
+                // Two records are equal in terms of both `equals(..)` and `compare(..)`.
                 return 0;
             }
-        }
-
-        private static boolean isSnapshot(AggregateEventRecord record) {
-            return !isDefault(record.getSnapshot());
         }
 
         private static int compareVersions(AggregateEventRecord first,

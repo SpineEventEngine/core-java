@@ -58,9 +58,8 @@ public class AggregateTransaction<I,
      * @param aggregate the {@code Aggregate} instance to start the transaction for.
      * @return the new transaction instance
      */
-    @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
-    static AggregateTransaction start(Aggregate aggregate) {
-        AggregateTransaction tx = new AggregateTransaction(aggregate);
+    static <I> AggregateTransaction<I, ?, ?> start(Aggregate<I, ?, ?> aggregate) {
+        AggregateTransaction<I, ?, ?> tx = new AggregateTransaction<>(aggregate);
         return tx;
     }
 

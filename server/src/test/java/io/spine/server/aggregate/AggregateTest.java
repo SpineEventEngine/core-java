@@ -420,7 +420,7 @@ public class AggregateTest {
                                 .addAllEvent(events)
                                 .build();
 
-        AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
         aggregate().play(aggregateHistory);
         tx.commit();
 
@@ -436,9 +436,9 @@ public class AggregateTest {
 
         Snapshot snapshot = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.id());
+        Aggregate<?, ?, ?> anotherAggregate = newAggregate(aggregate.id());
 
-        AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
+        AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.play(AggregateHistory.newBuilder()
                                               .setSnapshot(snapshot)
                                               .build());
@@ -546,9 +546,9 @@ public class AggregateTest {
 
         Snapshot snapshotNewProject = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.id());
+        Aggregate<?, ?, ?> anotherAggregate = newAggregate(aggregate.id());
 
-        AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
+        AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.restore(snapshotNewProject);
         tx.commit();
 
@@ -644,11 +644,12 @@ public class AggregateTest {
 
             Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
             AggregateTransaction.start(faultyAggregate);
+            AggregateHistory history = AggregateHistory
+                    .newBuilder()
+                    .addEvent(event)
+                    .build();
             BatchDispatchOutcome batchDispatchOutcome =
-                    ((Aggregate) faultyAggregate).play(AggregateHistory
-                                                               .newBuilder()
-                                                               .addEvent(event)
-                                                               .build());
+                    ((Aggregate<?, ?, ?>) faultyAggregate).play(history);
             assertThat(batchDispatchOutcome.getSuccessful()).isFalse();
             MessageId expectedTarget = MessageId
                     .newBuilder()

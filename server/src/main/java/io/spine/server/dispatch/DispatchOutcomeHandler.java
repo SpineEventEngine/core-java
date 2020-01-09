@@ -34,6 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class DispatchOutcomeHandler {
 
+    @SuppressWarnings({"rawtypes", "UnnecessaryLambda"})
     private static final OutcomeHandler DO_NOTHING = o -> {
     };
 

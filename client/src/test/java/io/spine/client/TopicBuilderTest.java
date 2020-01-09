@@ -57,7 +57,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
-import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static org.junit.Assert.fail;
@@ -440,8 +439,8 @@ class TopicBuilderTest {
 
         StringSubject assertTopic = assertThat(topicString);
         assertTopic.contains(TEST_ENTITY_TYPE.getSimpleName());
-        assertTopic.contains(valueOf(id1));
-        assertTopic.contains(valueOf(id2));
+        assertTopic.contains(String.valueOf(id1));
+        assertTopic.contains(String.valueOf(id2));
         assertTopic.contains(columnName1);
         assertTopic.contains(columnName2);
     }

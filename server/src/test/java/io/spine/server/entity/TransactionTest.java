@@ -34,9 +34,7 @@ import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
-import io.spine.test.validation.FakeOptionFactory;
 import io.spine.testing.server.model.ModelTests;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -127,11 +125,6 @@ public abstract class TransactionTest<I,
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-    }
-
-    @AfterEach
-    void tearDown() {
-        FakeOptionFactory.shouldNotFail();
     }
 
     @Nested

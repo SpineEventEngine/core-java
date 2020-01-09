@@ -47,7 +47,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -384,13 +383,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>An {@code IllegalStateException} is thrown otherwise.
      *
      * @param result the result of routing
-     * @param <R> the type of the result
      */
-    private <R> void checkMatchesIdType(R result) {
+    private void checkMatchesIdType(Object result) {
         Class routingResultType = null;
-        if (result instanceof Collection) {
-            Collection<?> asCollection = (Collection) result;
-            Object element = getFirst(asCollection, null);
+        if (result instanceof Iterable) {
+            Iterable<?> asIterable = (Iterable<?>) result;
+            Object element = getFirst(asIterable, null);
             if (element != null) {
                 routingResultType = element.getClass();
             }
@@ -477,7 +475,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex<Repository> {
+    private enum GenericParameter implements GenericTypeIndex<Repository> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),

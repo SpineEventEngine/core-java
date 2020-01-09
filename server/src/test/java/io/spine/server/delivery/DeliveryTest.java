@@ -50,6 +50,7 @@ import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -127,7 +128,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
     }
 
     @Test
-    @DisplayName("a single shard to mutiple targets in a single-threaded env")
+    @DisplayName("a single shard to multiple targets in a single-threaded env")
     public void manyTargets_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(11);
@@ -401,7 +402,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         // Sleep for some time to accumulate messages in shards before starting to process them.
         delivery.subscribe(update -> {
             if (latch.getCount() > 0) {
-                sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
+                sleepUninterruptibly(Duration.ofMillis(10));
                 latch.countDown();
             } else {
                 delivery.deliverMessagesFrom(update.getShardIndex());
