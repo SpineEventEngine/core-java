@@ -22,15 +22,8 @@ package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
 import io.spine.server.storage.Storage;
-import io.spine.validate.Validated;
 
-import java.util.List;
 import java.util.Optional;
-
-import static com.google.common.collect.Streams.stream;
-import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
-import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A contract for storages of {@link Inbox} messages.
@@ -96,31 +89,4 @@ public interface InboxStorage
      *         the messages to remove
      */
     void removeAll(Iterable<InboxMessage> messages);
-
-    /**
-     * Marks the messages as {@linkplain InboxMessageStatus#DELIVERED delivered} and writes
-     * the updated messages.
-     *
-     * @param messages
-     *         the messages to mark as delivered
-     * @implNote The messages aren't additionally validated after marking as delivered to
-     *         improve the performance.
-     */
-    default void markDelivered(Iterable<InboxMessage> messages) {
-        List<@Validated InboxMessage> updated =
-                stream(messages).map((m) -> m.toBuilder()
-                                             .setStatus(DELIVERED)
-                                             .build())
-                                .collect(toList());
-        writeAll(updated);
-    }
-
-    default void markCatchingUp(Iterable<InboxMessage> messages) {
-        List<@Validated InboxMessage> updated =
-                stream(messages).map((m) -> m.toBuilder()
-                                             .setStatus(TO_CATCH_UP)
-                                             .build())
-                                .collect(toList());
-        writeAll(updated);
-    }
 }
