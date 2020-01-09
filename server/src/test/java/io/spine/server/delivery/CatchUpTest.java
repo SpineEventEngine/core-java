@@ -58,7 +58,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -80,8 +79,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
     @DisplayName("catch up only particular instances by their IDs, " +
             "given the time is provided with ms resolution")
     void byIdWithMillisResolution() throws InterruptedException {
-        Time.Provider provider = withMillisOnlyResolution();
-        Time.setProvider(provider);
+        Time.setProvider(withMillisOnlyResolution());
 
         Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
 
@@ -98,7 +96,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
         int initialWeight = 1;
         CounterView.changeWeightTo(initialWeight);
-        dispatchInParallel(ctx, events, 20, provider);
+        dispatchInParallel(ctx, events, 20);
 
         List<Integer> initialTotals = readTotals(repo, ids);
         int sumInRound = events.size() / ids.length * initialWeight;
@@ -131,7 +129,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         jobs.add(firstCatchUp);
         jobs.add(secondCatchUp);
         jobs.addAll(asPostEventJobs(ctx, events));
-        post(jobs, provider);
+        post(jobs);
 
         List<Integer> totalsAfterCatchUp = readTotals(repo, ids);
 
@@ -148,8 +146,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
     @DisplayName("catch up all of projection instances, " +
             "given the time is provided with millisecond resolution")
     void allInOrderWithMillisResolution() throws InterruptedException {
-        Time.Provider provider = withMillisOnlyResolution();
-        Time.setProvider(provider);
+        Time.setProvider(withMillisOnlyResolution());
         ConsecutiveProjection.usePositives();
 
         String[] ids = {"erste", "zweite", "dritte", "vierte"};
@@ -164,7 +161,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
                                                                 .with(projectionRepo)
                                                                 .with(pmRepo);
         List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
-        post(jobs, withMillisOnlyResolution());
+        post(jobs);
 
         int positiveExpected = totalCommands / ids.length;
         List<Integer> positiveValues =
@@ -187,7 +184,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
                             return nullRef();
                         })
                         .build();
-        post(sameWithCatchUp, provider);
+        post(sameWithCatchUp);
 
         int negativeExpected = -1 * positiveExpected * 2;
 
@@ -205,9 +202,13 @@ public class CatchUpTest extends AbstractDeliveryTest {
         }
     }
 
-    private static void post(List<Callable<Object>> jobs,
-                             Time.Provider provider) throws InterruptedException {
-        ExecutorService service = threadPoolWithTime(20, provider);
+    private static void post(List<Callable<Object>> jobs) throws InterruptedException {
+        ExecutorService service = Executors.newFixedThreadPool(20);
+        invokeAll(jobs, service);
+    }
+
+    private static void invokeAll(List<Callable<Object>> jobs,
+                                  ExecutorService service) throws InterruptedException {
         service.invokeAll(jobs);
         List<Runnable> leftovers = service.shutdownNow();
         assertThat(leftovers).isEmpty();
@@ -302,20 +303,9 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
     private static void dispatchInParallel(SingleTenantBlackBoxContext ctx,
                                            List<NumberAdded> events,
-                                           int threads,
-                                           Time.Provider provider) throws InterruptedException {
-        ExecutorService service = threadPoolWithTime(threads, provider);
-        service.invokeAll(asPostEventJobs(ctx, events));
-        List<Runnable> leftovers = service.shutdownNow();
-        assertThat(leftovers).isEmpty();
-    }
-
-    private static ExecutorService threadPoolWithTime(int threadCount, Time.Provider provider) {
-        ThreadFactory factory = Executors.defaultThreadFactory();
-        return Executors.newFixedThreadPool(threadCount, r -> factory.newThread(() -> {
-            Time.setProvider(provider);
-            r.run();
-        }));
+                                           int threads) throws InterruptedException {
+        ExecutorService service = Executors.newFixedThreadPool(threads);
+        invokeAll(asPostEventJobs(ctx, events), service);
     }
 
     private static Time.Provider withMillisOnlyResolution() {
