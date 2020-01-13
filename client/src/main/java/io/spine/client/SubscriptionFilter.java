@@ -32,7 +32,8 @@ public final class SubscriptionFilter<M extends Message> {
     private final Filter filter;
 
     public SubscriptionFilter(SubscribableField<M> field, Object expected, Operator operator) {
-        FieldPath fieldPath = field.getFieldPath();
+        FieldPath fieldPath = field.getField()
+                                   .path();
         this.filter = createFilter(fieldPath, expected, operator);
     }
 
