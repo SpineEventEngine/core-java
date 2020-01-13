@@ -34,7 +34,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.route.DefaultCommandRoute;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageValidator;
+import io.spine.validate.Validate;
 
 import java.util.List;
 import java.util.Optional;
@@ -139,7 +139,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
          */
         @Internal
         private static List<ConstraintViolation> validateId(CommandId id) {
-            List<ConstraintViolation> violations = MessageValidator.validate(id);
+            List<ConstraintViolation> violations = Validate.violationsOf(id);
             if (id.getUuid().isEmpty()) {
                 return ImmutableList.<ConstraintViolation>builder()
                         .addAll(violations)
@@ -172,7 +172,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             if (isDefault(message)) {
                 addViolation("Non-default command message must be set.");
             }
-            List<ConstraintViolation> messageViolations = MessageValidator.validate(message);
+            List<ConstraintViolation> messageViolations = Validate.violationsOf(message);
             result.addAll(messageViolations);
         }
 

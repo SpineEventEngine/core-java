@@ -26,7 +26,7 @@ import io.spine.core.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageValidator;
+import io.spine.validate.Validate;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +43,7 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
     public Optional<MessageInvalid> validate(EventEnvelope event) {
         checkNotNull(event);
         Event outerObject = event.outerObject();
-        List<ConstraintViolation> violations = MessageValidator.validate(outerObject);
+        List<ConstraintViolation> violations = Validate.violationsOf(outerObject);
         if (violations.isEmpty()) {
             return Optional.empty();
         }

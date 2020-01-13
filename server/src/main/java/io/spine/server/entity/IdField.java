@@ -87,7 +87,7 @@ final class IdField {
         }
         FieldDescriptor idField = declaration.descriptor();
         @SuppressWarnings("Immutable") // all supported types of IDs are immutable.
-        Required<I> required = Required.create(false);
+        Required required = Required.create(false);
         boolean isRequired = required.valueFrom(idField)
                                      .orElse(true); // assume required, if not set to false
         if (isRequired) {

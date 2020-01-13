@@ -55,6 +55,7 @@ public class TaskAssignment
             routing.route(DTaskCreated.class, routeTaskCreated());
         }
 
+        @SuppressWarnings("UnnecessaryLambda")
         private static EventRoute<String, DTaskCreated> routeTaskCreated() {
             return (EventRoute<String, DTaskCreated>)
                     (message, context) -> ImmutableSet.of(message.getId());

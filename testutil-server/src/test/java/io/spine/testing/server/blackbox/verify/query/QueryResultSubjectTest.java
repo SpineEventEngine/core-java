@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox.verify.query;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
 import io.spine.base.EntityState;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.ExpectFailure.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -81,6 +83,14 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
     }
 
     @Test
+    @DisplayName("return actual query results")
+    void provideActualResults() {
+        QueryResponse response = responseWithMultipleEntities();
+        ImmutableList<EntityState> actualEntities = assertWithSubjectThat(response).actual();
+        assertThat(actualEntities).hasSize(2);
+    }
+
+    @Test
     @DisplayName("provide subject for the response status")
     void provideResponseStatusSubject() {
         AssertionError error = expectFailure(
@@ -117,7 +127,7 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
         expectSomeFailure(
                 () -> assertWithSubjectThat(responseWithSingleEntity())
                         .containsSingleEntityStateThat()
-                .isEqualTo(state2())
+                        .isEqualTo(state2())
         );
     }
 

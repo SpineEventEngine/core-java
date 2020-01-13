@@ -35,11 +35,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -147,7 +147,7 @@ public abstract class InboxStorageTest {
                          (i) -> {
                              msgBuilder.add(newCommandInInbox(index, TARGET_ID));
                              // Sleep to distinguish the messages by their `when_received` values.
-                             sleepUninterruptibly(1, TimeUnit.MILLISECONDS);
+                             sleepUninterruptibly(Duration.ofMillis(1));
                          }
                  );
         return msgBuilder.build();

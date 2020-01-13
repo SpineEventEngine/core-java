@@ -68,12 +68,15 @@ class EventRoutingTest {
     private EventRouting<Long> eventRouting;
 
     /** The default route to be used by the routing under the test. */
+    @SuppressWarnings("UnnecessaryLambda")
     private final EventRoute<Long, EventMessage> defaultRoute = (event, context) -> DEFAULT_ROUTE;
 
     /** A custom route. */
+    @SuppressWarnings("UnnecessaryLambda")
     private final EventRoute<Long, UserEvent> customRoute = (event, context) -> CUSTOM_ROUTE;
 
     /** Another custom route. */
+    @SuppressWarnings("UnnecessaryLambda")
     private final EventRoute<Long, UserEvent> alternativeRoute = (event, context) -> ALT_ROUTE;
 
     @BeforeEach

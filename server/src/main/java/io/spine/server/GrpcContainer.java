@@ -23,6 +23,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -294,7 +296,9 @@ public final class GrpcContainer {
                 e.printStackTrace(System.err);
             }
         }
-        private void println(String msgFormat, Object... arg) {
+
+        @FormatMethod
+        private void println(@FormatString String msgFormat, Object... arg) {
             String msg = format(msgFormat, arg);
             System.err.println(msg);
         }
