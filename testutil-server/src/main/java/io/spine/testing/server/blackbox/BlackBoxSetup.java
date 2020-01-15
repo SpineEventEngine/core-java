@@ -37,6 +37,7 @@ import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.BlackBoxId;
 import io.spine.testing.server.TestEventFactory;
 
 import java.util.Collection;
@@ -73,7 +74,11 @@ final class BlackBoxSetup {
         this.eventBus = boundedContext.eventBus();
         this.importBus = boundedContext.importBus();
         this.requestFactory = checkNotNull(requestFactory);
-        this.eventFactory = eventFactory(requestFactory);
+        BlackBoxId defaultProducer = BlackBoxId
+                .newBuilder()
+                .setContextName(boundedContext.name())
+                .build();
+        this.eventFactory = eventFactory(requestFactory, defaultProducer);
         this.observer = checkNotNull(observer);
     }
 
@@ -242,9 +247,12 @@ final class BlackBoxSetup {
      * @param requestFactory
      *         a request factory bearing the actor and able to provide an origin for
      *         factory generated events
+     * @param defaultProducer
+     *         the ID of the default event producer
      * @return a new event factory instance
      */
-    private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
-        return TestEventFactory.newInstance(requestFactory);
+    private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory,
+                                                 BlackBoxId defaultProducer) {
+        return TestEventFactory.newInstance(defaultProducer, requestFactory);
     }
 }

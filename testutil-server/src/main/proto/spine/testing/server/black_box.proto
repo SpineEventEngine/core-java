@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package spine.testing.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.testing.server";
+option java_outer_classname = "BlackBoxProto";
+option java_multiple_files = true;
+
+import "spine/core/bounded_context.proto";
+
+message BlackBoxId {
+
+    core.BoundedContextName context_name = 1;
+}
