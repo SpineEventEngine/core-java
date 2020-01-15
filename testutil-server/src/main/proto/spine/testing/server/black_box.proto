@@ -11,7 +11,12 @@ option java_multiple_files = true;
 
 import "spine/core/bounded_context.proto";
 
+// ID of a `BlackBoxBoundedContext`.
+//
+// Identifies events posted directly into a `BlackBoxBoundedContext`.
+//
 message BlackBoxId {
 
+    // Name of the context under the test.
     core.BoundedContextName context_name = 1;
 }
