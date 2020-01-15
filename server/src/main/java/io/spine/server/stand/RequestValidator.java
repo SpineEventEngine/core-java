@@ -80,7 +80,8 @@ abstract class RequestValidator<M extends Message> {
      * <ol>
      *      <li>as a {@code Message}, according to the constraints set in its Protobuf definition;
      *      <li>meaning it is supported by a target {@code Stand}
-     *          and may be passed for the further processing.
+     *          and may be passed for the further processing;
+     *      <li>according to the {@linkplain #checkOwnRules(Message) type-specific rules}.
      * </ol>
      *
      * <p>In case the validation is not successful, an {@link InvalidRequestException} is thrown.
