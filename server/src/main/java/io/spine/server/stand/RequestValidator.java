@@ -93,6 +93,7 @@ abstract class RequestValidator<M extends Message> {
     void validate(M request) throws InvalidRequestException {
         handleValidationResult(validateMessage(request));
         handleValidationResult(checkSupported(request));
+        handleValidationResult(validateOwnRules(request));
     }
 
     /**
@@ -163,10 +164,22 @@ abstract class RequestValidator<M extends Message> {
                 .setValidationError(validationError)
                 .setMessage(errorText)
                 .build();
-
         String exceptionMsg = formatExceptionMessage(request, error);
         InvalidRequestException exception = invalidMessageException(exceptionMsg, request, error);
         return exception;
+    }
+
+    private @Nullable InvalidRequestException validateOwnRules(M request) {
+        Error error = checkOwnRules(request);
+        if (error == null) {
+            return null;
+        } else {
+            return invalidMessageException(error.getMessage(), request, error);
+        }
+    }
+
+    protected @Nullable Error checkOwnRules(M request) {
+        return null;
     }
 
     private String formatExceptionMessage(M request, Error error) {
