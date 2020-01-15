@@ -178,6 +178,13 @@ abstract class RequestValidator<M extends Message> {
         }
     }
 
+    /**
+     * Validates the request by the type-specific rules.
+     *
+     * @param request
+     *         the request message to validate
+     * @return an {@code Error} if the request is invalid, {@code null} otherwise
+     */
     protected @Nullable Error checkOwnRules(M request) {
         return null;
     }
