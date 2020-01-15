@@ -28,6 +28,6 @@ class SingleTenantBlackBoxContextTest
 
     @Override
     SingleTenantBlackBoxContext newInstance() {
-        return BlackBoxBoundedContext.singleTenant();
+        return BlackBoxBoundedContext.singleTenant(getClass().getName());
     }
 }
