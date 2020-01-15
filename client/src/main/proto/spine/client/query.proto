@@ -125,7 +125,7 @@ message ResponseFormat {
                           (if_invalid).msg_format = "Invalid query order"];
 
     // The max number of entities to retrieve.
-    uint32 limit = 3 [(goes).with = "order_by"];
+    uint32 limit = 3;
 }
 
 // The result of `Query` processing.
