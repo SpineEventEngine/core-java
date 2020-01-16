@@ -20,7 +20,7 @@
 
 dependencies {
     api deps.grpc.grpcStub
-    compile project(':core')
+    api project(':core')
     implementation(
             deps.grpc.grpcProtobuf,
             deps.grpc.grpcCore

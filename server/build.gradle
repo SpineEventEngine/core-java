@@ -19,7 +19,7 @@
  */
 
 dependencies {
-    compile project(':client')
+    api project(':client')
     implementation(
             deps.grpc.grpcProtobuf,
             deps.grpc.grpcCore

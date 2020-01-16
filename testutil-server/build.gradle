@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 dependencies {
-    compile project(path: ':server')
+    api project(path: ':server')
 
     api project(path: ':testutil-client')
     testImplementation deps.grpc.grpcNetty
