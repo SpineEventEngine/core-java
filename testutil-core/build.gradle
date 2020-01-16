@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,7 +19,7 @@
  */
 
 dependencies {
-    compile project(path: ':client')
+    api project(path: ':client')
 
     // Depend on JUnit in the production part of the code, as this module exposes testing utilities
     // that are based on JUnit.
