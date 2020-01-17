@@ -175,7 +175,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         List<EmitNextNumber> commands = generateEmissionCommands(totalCommands, ids);
 
         changeShardCountTo(3);
-        ConsecutiveProjection.Repository projectionRepo = new ConsecutiveProjection.Repository();
+        ConsecutiveProjection.Repo projectionRepo = new ConsecutiveProjection.Repo();
         Repository<String, ConsecutiveNumberProcess> pmRepo =
                 DefaultRepository.of(ConsecutiveNumberProcess.class);
         SingleTenantBlackBoxContext ctx = BlackBoxBoundedContext.singleTenant()
@@ -239,14 +239,14 @@ public class CatchUpTest extends AbstractDeliveryTest {
         return Timestamps.subtract(Time.currentTime(), Durations.fromMinutes(1));
     }
 
-    private static List<Integer> readLastValues(ConsecutiveProjection.Repository repo,
+    private static List<Integer> readLastValues(ConsecutiveProjection.Repo repo,
                                                 String[] ids) {
         return Arrays.stream(ids)
                      .map((id) -> readLastValue(repo, id))
                      .collect(toList());
     }
 
-    private static int readLastValue(ConsecutiveProjection.Repository repo, String id) {
+    private static int readLastValue(ConsecutiveProjection.Repo repo, String id) {
         return findView(repo, id).state()
                                  .getLastValue();
     }

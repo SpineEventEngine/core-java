@@ -41,7 +41,18 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.Math.abs;
 
 /**
- * @author Alex Tymchenko
+ * A projection which expects the events to be delivered with the consecutive positive
+ * or consecutive negative number data.
+ *
+ * <p>In the {@linkplain #usePositives() positives-only} mode the projection state stores {@code 0},
+ * expecting each following event to bring the next positive number increased by one.
+ *
+ * <p>In the {@linkplain #useNegatives() negatives-only} mode the projection state also
+ * stores {@code 0} at the beginning, but it expects the incoming events to bring the next negative
+ * number decreased by one.
+ *
+ * <p>In this manner it is possible to check that the ordering of the delivered events is the same
+ * as expected.
  */
 public class ConsecutiveProjection
         extends Projection<String, ConsecutiveNumberView, ConsecutiveNumberView.Builder> {
@@ -62,7 +73,7 @@ public class ConsecutiveProjection
     }
 
     @Subscribe
-    void on (NegativeNumberEmitted event) {
+    void on(NegativeNumberEmitted event) {
         updateState(event.getId(), event.getValue());
     }
 
@@ -82,6 +93,7 @@ public class ConsecutiveProjection
         builder().setLastValue(newValue);
     }
 
+    @SuppressWarnings("Immutable")  // effectively immutable.
     public enum UsageMode {
         POSITIVES_ONLY((value) -> value > 0),
         NEGATIVES_ONLY((value) -> value < 0);
@@ -102,7 +114,12 @@ public class ConsecutiveProjection
         }
     }
 
-    public static final class  Repository
+    /**
+     * A repository of {@linkplain ConsecutiveProjection} instances.
+     *
+     * <p>Allows to exclude some instances from the event routing.
+     */
+    public static final class Repo
             extends ProjectionRepository<String, ConsecutiveProjection, ConsecutiveNumberView> {
 
         private final Set<String> excludedTargets = new HashSet<>();
