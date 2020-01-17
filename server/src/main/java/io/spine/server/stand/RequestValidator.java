@@ -80,7 +80,8 @@ abstract class RequestValidator<M extends Message> {
      * <ol>
      *      <li>as a {@code Message}, according to the constraints set in its Protobuf definition;
      *      <li>meaning it is supported by a target {@code Stand}
-     *          and may be passed for the further processing.
+     *          and may be passed for the further processing;
+     *      <li>according to the {@linkplain #checkOwnRules(Message) type-specific rules}.
      * </ol>
      *
      * <p>In case the validation is not successful, an {@link InvalidRequestException} is thrown.
@@ -93,6 +94,7 @@ abstract class RequestValidator<M extends Message> {
     void validate(M request) throws InvalidRequestException {
         handleValidationResult(validateMessage(request));
         handleValidationResult(checkSupported(request));
+        handleValidationResult(validateOwnRules(request));
     }
 
     /**
@@ -163,10 +165,29 @@ abstract class RequestValidator<M extends Message> {
                 .setValidationError(validationError)
                 .setMessage(errorText)
                 .build();
-
         String exceptionMsg = formatExceptionMessage(request, error);
         InvalidRequestException exception = invalidMessageException(exceptionMsg, request, error);
         return exception;
+    }
+
+    private @Nullable InvalidRequestException validateOwnRules(M request) {
+        Error error = checkOwnRules(request);
+        if (error == null) {
+            return null;
+        } else {
+            return invalidMessageException(error.getMessage(), request, error);
+        }
+    }
+
+    /**
+     * Validates the request by the type-specific rules.
+     *
+     * @param request
+     *         the request message to validate
+     * @return an {@code Error} if the request is invalid, {@code null} otherwise
+     */
+    protected @Nullable Error checkOwnRules(M request) {
+        return null;
     }
 
     private String formatExceptionMessage(M request, Error error) {

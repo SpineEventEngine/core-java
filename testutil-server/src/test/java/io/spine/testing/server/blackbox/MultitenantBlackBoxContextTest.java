@@ -38,7 +38,7 @@ class MultitenantBlackBoxContextTest
 
     @Override
     MultitenantBlackBoxContext newInstance() {
-        return BlackBoxBoundedContext.multiTenant()
+        return BlackBoxBoundedContext.multiTenant(getClass().getName())
                                      .withTenant(generate());
     }
 

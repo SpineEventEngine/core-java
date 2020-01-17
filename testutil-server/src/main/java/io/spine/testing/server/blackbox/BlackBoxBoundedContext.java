@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -115,7 +116,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "ClassWithTooManyMethods",
         "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
+public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>>
         extends AbstractEventSubscriber
         implements Logging {
 
@@ -744,7 +745,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *
      * @see #commandMessages()
      */
-    public List<Command> commands() {
+    public ImmutableList<Command> commands() {
         Predicate<Command> wasNotReceived =
                 ((Predicate<Command>) postedCommands::contains).negate();
         return select(this.commands)
@@ -762,7 +763,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *
      * @see #commands()
      */
-    public List<CommandMessage> commandMessages() {
+    public ImmutableList<CommandMessage> commandMessages() {
         return commands().stream()
                          .map(Command::getMessage)
                          .map(AnyPacker::unpack)
@@ -773,7 +774,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Selects commands that belong to the current tenant.
      */
-    protected abstract List<Command> select(CommandCollector collector);
+    protected abstract ImmutableList<Command> select(CommandCollector collector);
 
     /**
      * Obtains acknowledgements of {@linkplain #emittedCommands()
@@ -802,12 +803,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>The returned list does <em>NOT</em> contain events posted to this Bounded Context
      * during test setup.
      */
-    public List<Event> events() {
+    public ImmutableList<Event> events() {
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         return select(this.events)
                 .stream()
                 .filter(wasNotReceived)
                 .collect(toImmutableList());
+    }
+
+    /**
+     * Obtains immutable list of all the events in this Bounded Context.
+     */
+    @VisibleForTesting
+    ImmutableList<Event> allEvents() {
+        return select(this.events);
     }
 
     /**
@@ -828,7 +837,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Selects events that belong to the current tenant.
      */
-    protected abstract List<Event> select(EventCollector collector);
+    protected abstract ImmutableList<Event> select(EventCollector collector);
 
     private static EventEnricher emptyEnricher() {
         return EventEnricher.newBuilder()
