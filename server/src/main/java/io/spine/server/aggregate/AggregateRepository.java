@@ -615,10 +615,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         tx.commitIfActive();
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
-            throw newIllegalStateException("Aggregate %s (ID: %s) cannot be loaded.%n%s",
+            throw newIllegalStateException("Aggregate %s (ID: %s) cannot be loaded.%n",
                                            aggregateClass().value().getName(),
-                                           result.idAsString(),
-                                           outcome);
+                                           result.idAsString());
         }
         return result;
     }
