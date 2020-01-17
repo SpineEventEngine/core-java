@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -83,14 +83,14 @@ abstract class MessageCollector<I extends SignalId,
     /**
      * Obtains immutable list with outer objects of messages collected so far.
      */
-    public final List<T> all() {
+    public final ImmutableList<T> all() {
         return ImmutableList.copyOf(outerObjects);
     }
 
     /**
      * Obtains immutable list with outer objects of messages belonging to the passed tenant.
      */
-    public final List<T> ofTenant(TenantId tenantId) {
+    public final ImmutableList<T> ofTenant(TenantId tenantId) {
         checkNotNull(tenantId);
         ImmutableList<T> result =
                 outerObjects.stream()

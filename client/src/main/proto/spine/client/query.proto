@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -122,10 +122,13 @@ message ResponseFormat {
 
     // An order for entities returned by the Query.
     OrderBy order_by = 2 [(validate) = true,
-                         (if_invalid).msg_format = "Invalid query order"];
+                          (if_invalid).msg_format = "Invalid query order"];
 
     // The max number of entities to retrieve.
-    uint32 limit = 3 [(goes).with = "order_by"];
+    //
+    // If greater than 0, `order_by` should be set as well.
+    //
+    uint32 limit = 3;
 }
 
 // The result of `Query` processing.

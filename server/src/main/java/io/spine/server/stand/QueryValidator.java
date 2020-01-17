@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,15 +20,19 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.ProtocolMessageEnum;
+import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.client.Query;
 import io.spine.client.QueryValidationError;
+import io.spine.client.ResponseFormat;
 import io.spine.client.Target;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 import static io.spine.option.EntityOption.Visibility.QUERY;
+import static io.spine.protobuf.Messages.isDefault;
 import static java.lang.String.format;
 
 /**
@@ -38,6 +42,31 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
 
     QueryValidator(TypeRegistry typeRegistry) {
         super(QUERY, typeRegistry);
+    }
+
+    @Override
+    protected @Nullable Error checkOwnRules(Query request) {
+        ResponseFormat format = request.getFormat();
+        int limit = format.getLimit();
+        if (limit > 0) {
+            boolean orderByMissing = isDefault(format.getOrderBy());
+            if (orderByMissing) {
+                Value limitValue = Value
+                        .newBuilder()
+                        .setNumberValue(limit)
+                        .build();
+                @SuppressWarnings("DuplicateStringLiteralInspection") // "limit" is used in tests.
+                Error error = Error
+                        .newBuilder()
+                        .setType(QueryValidationError.class.getSimpleName())
+                        .setCode(INVALID_QUERY.getNumber())
+                        .setMessage("Query limit cannot be set without ordering.")
+                        .putAttributes("limit", limitValue)
+                        .build();
+                return error;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
@@ -30,7 +31,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -70,12 +70,12 @@ public final class MultitenantBlackBoxContext
     }
 
     @Override
-    protected List<Command> select(CommandCollector collector) {
+    protected ImmutableList<Command> select(CommandCollector collector) {
         return collector.ofTenant(tenantId());
     }
 
     @Override
-    protected List<Event> select(EventCollector collector) {
+    protected ImmutableList<Event> select(EventCollector collector) {
         return collector.ofTenant(tenantId());
     }
 
