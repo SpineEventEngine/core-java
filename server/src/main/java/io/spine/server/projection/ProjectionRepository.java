@@ -37,16 +37,16 @@ import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.catchup.CatchUp;
-import io.spine.server.catchup.CatchUpId;
-import io.spine.server.catchup.event.CatchUpRequested;
 import io.spine.server.delivery.BatchDeliveryListener;
+import io.spine.server.delivery.CatchUp;
+import io.spine.server.delivery.CatchUpId;
 import io.spine.server.delivery.CatchUpProcess;
 import io.spine.server.delivery.CatchUpProcessBuilder;
 import io.spine.server.delivery.CatchUpSignal;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.delivery.event.CatchUpRequested;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
@@ -95,6 +95,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     private @MonotonicNonNull Inbox<I> inbox;
 
+    private @MonotonicNonNull CatchUpProcess<I> catchUpProcess;
+
     private @MonotonicNonNull RepositoryCache<I, P> cache;
 
     /**
@@ -133,8 +135,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                .withIndex(() -> ImmutableSet.copyOf(recordStorage().index()))
                .withEventStore(() -> context.eventBus()
                                             .eventStore());
-        CatchUpProcess<I> process = builder.build();
-        context.registerEventDispatcher(process);
+        catchUpProcess = builder.build();
+        context.registerEventDispatcher(catchUpProcess);
+
     }
 
     private void initCache(boolean multitenant) {
@@ -404,6 +407,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *         point in the past, since which the catch-up should be performed
      */
     public void catchUp(Set<I> ids, Timestamp since) {
+
+        catchUpProcess.startCatchUp(ids, since);
+
         CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder();
         if(!ids.isEmpty()) {
             for (I id : ids) {

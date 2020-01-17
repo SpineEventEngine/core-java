@@ -35,15 +35,12 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.catchup.CatchUp;
-import io.spine.server.catchup.CatchUpId;
-import io.spine.server.catchup.CatchUpStatus;
-import io.spine.server.catchup.event.CatchUpCompleted;
-import io.spine.server.catchup.event.CatchUpRequested;
-import io.spine.server.catchup.event.CatchUpStarted;
-import io.spine.server.catchup.event.HistoryEventsRecalled;
-import io.spine.server.catchup.event.HistoryFullyRecalled;
-import io.spine.server.catchup.event.LiveEventsPickedUp;
+import io.spine.server.delivery.event.CatchUpCompleted;
+import io.spine.server.delivery.event.CatchUpRequested;
+import io.spine.server.delivery.event.CatchUpStarted;
+import io.spine.server.delivery.event.HistoryEventsRecalled;
+import io.spine.server.delivery.event.HistoryFullyRecalled;
+import io.spine.server.delivery.event.LiveEventsPickedUp;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.AbstractEventReactor;
@@ -82,6 +79,10 @@ import static java.util.stream.Collectors.toSet;
 
 /**
  * A process that performs a projection catch-up.
+ *
+ * <p>Technically, the instances of this class are not
+ * {@linkplain io.spine.server.procman.ProcessManager process managers}, since it is impossible
+ * to register the process managers with the same state in a multi-bounded-context application.
  */
 public final class CatchUpProcess<I> extends AbstractEventReactor {
 
@@ -119,6 +120,11 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     public static <I> CatchUpProcessBuilder<I> newBuilder(ProjectionRepository<I, ?, ?> repo) {
         checkNotNull(repo);
         return new CatchUpProcessBuilder<>(repo.idClass(), repo.entityStateType());
+    }
+
+    public void startCatchUp(Set<I> ids, Timestamp since) throws CatchUpAlreadyStarted {
+        //Iterable<CatchUp> existing = storage.readByType(projectionStateType);
+        // do nothing for now
     }
 
     private CatchUp.Builder builder() {

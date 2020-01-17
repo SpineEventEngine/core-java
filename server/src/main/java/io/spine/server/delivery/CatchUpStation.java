@@ -24,9 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.core.Event;
-import io.spine.server.catchup.CatchUp;
-import io.spine.server.catchup.CatchUpStatus;
-import io.spine.server.catchup.event.CatchUpStarted;
+import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.event.EventComparator;
 import io.spine.type.TypeUrl;
 
@@ -37,9 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.spine.server.catchup.CatchUpStatus.COMPLETED;
-import static io.spine.server.catchup.CatchUpStatus.FINALIZING;
-import static io.spine.server.catchup.CatchUpStatus.STARTED;
+import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
+import static io.spine.server.delivery.CatchUpStatus.FINALIZING;
+import static io.spine.server.delivery.CatchUpStatus.STARTED;
 import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 
@@ -110,8 +108,8 @@ final class CatchUpStation extends Station {
     private static boolean matches(CatchUp job, InboxMessage message) {
         String expectedProjectionType = job.getId()
                                            .getProjectionType();
-        String actualTargetType = message.getInboxId()
-                                         .getTypeUrl();
+        InboxId targetInbox = message.getInboxId();
+        String actualTargetType = targetInbox.getTypeUrl();
         if (!expectedProjectionType.equals(actualTargetType)) {
             return false;
         }
@@ -120,9 +118,8 @@ final class CatchUpStation extends Station {
         if (targets.isEmpty()) {
             return true;
         }
-        Any rawEntityId = message.getInboxId()
-                                 .getEntityId()
-                                 .getId();
+        Any rawEntityId = targetInbox.getEntityId()
+                                     .getId();
         return targets.stream()
                       .anyMatch((t) -> t.equals(rawEntityId));
     }

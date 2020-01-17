@@ -24,12 +24,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.Timestamp;
-import io.spine.server.catchup.CatchUpId;
-import io.spine.server.catchup.event.CatchUpCompleted;
-import io.spine.server.catchup.event.CatchUpStarted;
-import io.spine.server.catchup.event.HistoryEventsRecalled;
-import io.spine.server.catchup.event.HistoryFullyRecalled;
-import io.spine.server.catchup.event.LiveEventsPickedUp;
+import io.spine.server.delivery.event.CatchUpCompleted;
+import io.spine.server.delivery.event.CatchUpStarted;
+import io.spine.server.delivery.event.HistoryEventsRecalled;
+import io.spine.server.delivery.event.HistoryFullyRecalled;
+import io.spine.server.delivery.event.LiveEventsPickedUp;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 

@@ -20,14 +20,9 @@
 
 package io.spine.server.delivery;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.base.EventMessage;
-
 /**
- * @author Alex Tymchenko
+ * A mixin for the state of the {@linkplain CatchUp catch-up} {@linkplain CatchUpProcess processes}.
  */
-@Immutable
-public interface SignalForShard extends EventMessage {
+public interface CatchUpMixin {
 
-    ShardIndex getId();
 }

@@ -21,8 +21,8 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.server.catchup.CatchUp;
-import io.spine.server.catchup.CatchUpId;
+import io.spine.server.delivery.CatchUp;
+import io.spine.server.delivery.CatchUpId;
 
 import java.util.HashMap;
 import java.util.Iterator;

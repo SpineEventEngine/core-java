@@ -30,7 +30,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.MulticastDispatchListener;
-import io.spine.server.catchup.CatchUp;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.string.Stringifiers;

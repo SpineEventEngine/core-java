@@ -20,7 +20,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.server.catchup.CatchUpId;
 import io.spine.server.storage.ReadRequest;
 
 /**

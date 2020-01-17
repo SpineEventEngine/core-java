@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
-import io.spine.server.catchup.CatchUpId;
 
 /**
  * A marker interface for the signals controlling the execution of catch-up processes.

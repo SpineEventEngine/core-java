@@ -20,15 +20,20 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
-import io.spine.server.catchup.CatchUp;
-import io.spine.server.catchup.CatchUpId;
+import io.spine.server.delivery.CatchUp;
+import io.spine.server.delivery.CatchUpId;
 import io.spine.server.delivery.CatchUpReadRequest;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.storage.AbstractStorage;
+import io.spine.type.TypeUrl;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * An in-memory implementation of {@code CatchUpStorage}.
@@ -76,5 +81,19 @@ public class InMemoryCatchUpStorage extends AbstractStorage<CatchUpId, CatchUp, 
     public void write(CatchUpId id, CatchUp record) {
         TenantCatchUpRecords records = multitenantStorage.currentSlice();
         records.put(id, record);
+    }
+
+    @Override
+    public Iterable<CatchUp> readByType(TypeUrl projectionType) {
+        ImmutableList<CatchUp> allInstances = multitenantStorage.currentSlice()
+                                                                .readAll();
+        String typeAsString = projectionType.toString();
+        List<CatchUp> filtered =
+                allInstances.stream()
+                            .filter(c -> c.getId()
+                                          .getProjectionType()
+                                          .equals(typeAsString))
+                            .collect(toList());
+        return filtered;
     }
 }

@@ -21,9 +21,8 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
-import io.spine.server.catchup.CatchUp;
-import io.spine.server.catchup.CatchUpId;
 import io.spine.server.storage.Storage;
+import io.spine.type.TypeUrl;
 
 /**
  * @author Alex Tymchenko
@@ -40,4 +39,6 @@ public interface CatchUpStorage extends Storage<CatchUpId, CatchUp, CatchUpReadR
     void write(CatchUp message);
 
     Iterable<CatchUp> readAll();
+
+    Iterable<CatchUp> readByType(TypeUrl projectionType);
 }
