@@ -58,8 +58,7 @@ SubscribingRequest<M extends Message,
 
     abstract MessageConsumer<M, C> toMessageConsumer(Consumer<M> consumer);
 
-    @SafeVarargs
-    public final B where(SubscriptionFilter<M>... filter) {
+    public final B where(SubscriptionFilter... filter) {
         Filter[] filters = Arrays.stream(filter)
                                  .map(SubscriptionFilter::filter)
                                  .toArray(Filter[]::new);
@@ -67,8 +66,7 @@ SubscribingRequest<M extends Message,
         return self();
     }
 
-    @SafeVarargs
-    public final B where(CompositeSubscriptionFilter<M>... filter) {
+    public final B where(CompositeSubscriptionFilter... filter) {
         CompositeFilter[] filters = Arrays.stream(filter)
                                           .map(CompositeSubscriptionFilter::filter)
                                           .toArray(CompositeFilter[]::new);

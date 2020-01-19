@@ -86,10 +86,9 @@ class FiltersTest {
                 .setDefault(EntityColumn.class, TestEntity.Columns.firstField())
                 .setDefault(SubscribableField.class, TestEntity.Fields.id())
                 .setDefault(QueryFilter.class,
-                            new QueryFilter<>(TestEntity.Columns.firstField(), "some value", EQUAL))
+                            new QueryFilter(TestEntity.Columns.firstField(), "some value", EQUAL))
                 .setDefault(SubscriptionFilter.class,
-                            new SubscriptionFilter<>(TestEntity.Fields.firstField(),
-                                                     "some value", EQUAL))
+                            new SubscriptionFilter(TestEntity.Fields.firstField(), "some value", EQUAL))
                 .testAllPublicStaticMethods(Filters.class);
     }
 
@@ -150,7 +149,7 @@ class FiltersTest {
     @Test
     @DisplayName("create a filter for an entity column")
     void createForEntityColumn() {
-        QueryFilter<TestEntity> eq = eq(TestEntity.Columns.firstField(), "some-value");
+        QueryFilter eq = eq(TestEntity.Columns.firstField(), "some-value");
         System.out.println("Entity column filter");
         System.out.println(eq);
     }
@@ -158,7 +157,7 @@ class FiltersTest {
     @Test
     @DisplayName("create a filter for a subscribable field")
     void createForField() {
-        SubscriptionFilter<TestEntity> eq = eq(TestEntity.Fields.name().value(), "some-name");
+        SubscriptionFilter eq = eq(TestEntity.Fields.name().value(), "some-name");
         System.out.println("Field filter");
         System.out.println(eq);
     }

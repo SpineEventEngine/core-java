@@ -20,7 +20,6 @@
 
 package io.spine.client;
 
-import io.spine.base.EntityState;
 import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;
@@ -29,11 +28,11 @@ import java.util.List;
 import static io.spine.client.Filters.composeFilters;
 import static java.util.stream.Collectors.toList;
 
-public final class CompositeQueryFilter<S extends EntityState> {
+public final class CompositeQueryFilter {
 
     private final CompositeFilter filter;
 
-    public CompositeQueryFilter(Collection<QueryFilter<S>> filters, CompositeOperator operator) {
+    public CompositeQueryFilter(Collection<QueryFilter> filters, CompositeOperator operator) {
         List<Filter> filterList = filters.stream()
                                          .map(QueryFilter::wrappedFilter)
                                          .collect(toList());

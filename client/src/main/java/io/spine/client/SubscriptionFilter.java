@@ -20,18 +20,17 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Message;
 import io.spine.base.FieldPath;
 import io.spine.base.SubscribableField;
 import io.spine.client.Filter.Operator;
 
 import static io.spine.client.Filters.createFilter;
 
-public final class SubscriptionFilter<M extends Message> {
+public final class SubscriptionFilter {
 
     private final Filter filter;
 
-    public SubscriptionFilter(SubscribableField<M> field, Object expected, Operator operator) {
+    public SubscriptionFilter(SubscribableField field, Object expected, Operator operator) {
         FieldPath fieldPath = field.getField()
                                    .path();
         this.filter = createFilter(fieldPath, expected, operator);

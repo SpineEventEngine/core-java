@@ -21,17 +21,16 @@
 package io.spine.client;
 
 import io.spine.base.EntityColumn;
-import io.spine.base.EntityState;
 import io.spine.client.Filter.Operator;
 
 import static io.spine.client.Filters.createFilter;
 
-public final class QueryFilter<S extends EntityState> {
+public final class QueryFilter {
 
     private final Filter wrappedFilter;
 
-    public QueryFilter(EntityColumn<S> column, Object expected, Operator operator) {
-        String fieldPath = column.value();
+    public QueryFilter(EntityColumn column, Object expected, Operator operator) {
+        String fieldPath = column.name();
         this.wrappedFilter = createFilter(fieldPath, expected, operator);
     }
 

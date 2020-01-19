@@ -63,8 +63,7 @@ public final class QueryRequest<S extends EntityState>
         super(parent, type);
     }
 
-    @SafeVarargs
-    public final QueryRequest<S> where(QueryFilter<S>... filter) {
+    public final QueryRequest<S> where(QueryFilter... filter) {
         Filter[] filters = Arrays.stream(filter)
                                  .map(QueryFilter::wrappedFilter)
                                  .toArray(Filter[]::new);
@@ -72,8 +71,7 @@ public final class QueryRequest<S extends EntityState>
         return this;
     }
 
-    @SafeVarargs
-    public final QueryRequest<S> where(CompositeQueryFilter<S>... filter) {
+    public final QueryRequest<S> where(CompositeQueryFilter... filter) {
         CompositeFilter[] filters = Arrays.stream(filter)
                                           .map(CompositeQueryFilter::filter)
                                           .toArray(CompositeFilter[]::new);

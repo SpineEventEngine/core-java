@@ -20,7 +20,6 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Message;
 import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;
@@ -29,11 +28,11 @@ import java.util.List;
 import static io.spine.client.Filters.composeFilters;
 import static java.util.stream.Collectors.toList;
 
-public final class CompositeSubscriptionFilter<M extends Message> {
+public final class CompositeSubscriptionFilter {
 
     private final CompositeFilter filter;
 
-    public CompositeSubscriptionFilter(Collection<SubscriptionFilter<M>> filters,
+    public CompositeSubscriptionFilter(Collection<SubscriptionFilter> filters,
                                        CompositeOperator operator) {
         List<Filter> filterList = filters.stream()
                                          .map(SubscriptionFilter::filter)
