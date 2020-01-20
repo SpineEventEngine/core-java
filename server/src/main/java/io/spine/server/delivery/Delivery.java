@@ -170,6 +170,9 @@ public final class Delivery implements Logging {
      */
     private final DeliveryMonitor monitor;
 
+    /**
+     * The cache of the locally delivered messages.
+     */
     private final DeliveredMessages deliveredMessages;
 
     /**
@@ -485,7 +488,6 @@ public final class Delivery implements Logging {
         return inboxStorage;
     }
 
-    @VisibleForTesting
     int shardCount() {
         return strategy.shardCount();
     }
