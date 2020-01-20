@@ -76,8 +76,8 @@ final class LiveDeliveryStation extends Station {
     /**
      * De-duplicates and sorts the messages.
      *
-     * <p>The conveyor is used to understand which messages were previously delivered and should
-     * be used as a de-duplication source.
+     * <p>The passed conveyor is used to understand which messages were previously delivered
+     * and should be used as a de-duplication source.
      *
      * <p>Duplicated messages are {@linkplain Conveyor#recentDuplicates() remembered by the
      * conveyor} and marked for removal.
@@ -90,6 +90,7 @@ final class LiveDeliveryStation extends Station {
      *         current conveyor
      * @return de-duplicated and sorted messages
      */
+    private static
     List<InboxMessage> deduplicateAndSort(Collection<InboxMessage> messages, Conveyor conveyor) {
         Set<DispatchingId> previouslyDelivered = conveyor.previouslyDelivered();
         List<InboxMessage> result = new ArrayList<>();
