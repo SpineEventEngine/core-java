@@ -35,8 +35,6 @@ import static java.lang.String.format;
 
 /**
  * The framework-internal process performing the maintenance of delivery shards.
- *
- * <p>Serving as a dispatcher of a special {@link ShardProcessingRequested} event, it
  */
 class ShardMaintenanceProcess extends AbstractEventReactor {
 
@@ -51,6 +49,7 @@ class ShardMaintenanceProcess extends AbstractEventReactor {
         this.inbox = builder.build();
     }
 
+    //TODO:2020-01-20:alex.tymchenko: describe the need.
     @React
     Nothing on(ShardProcessingRequested event) {
         System.out.println(
@@ -94,7 +93,7 @@ class ShardMaintenanceProcess extends AbstractEventReactor {
 
         @Override
         public Repository<ShardIndex, ?> repository() {
-            throw newIllegalStateException("`ShardDeliveryTrigger` has no repository.");
+            throw newIllegalStateException("`ShardMaintenanceProcess` has no repository.");
         }
     }
 }
