@@ -34,6 +34,7 @@ import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.event.CatchUpCompleted;
 import io.spine.server.delivery.event.CatchUpRequested;
@@ -54,6 +55,7 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;
@@ -89,42 +91,46 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     //TODO:2019-11-29:alex.tymchenko: consider making this configurable via the `ServerEnvironment`.
     private static final Limit LIMIT = limitOf(500);
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
-
-    private final Object endpointLock = new Object();
-
     //TODO:2019-12-13:alex.tymchenko: make this configurable.
-    private final Duration turbulencePeriod = Durations.fromMillis(500);
-    private final Class<I> idClass;
-    private final TypeUrl projectionStateType;
+    private static final Duration TURBULENCE_PERIOD = Durations.fromMillis(500);
+
+    private final ProjectionRepository<I, ?, ?> repository;
     private final Supplier<EventStore> eventStore;
-    private final RepositoryIndex<I> repositoryIndex;
     private final DispatchCatchingUp<I> dispatchOperation;
     private final Inbox<CatchUpId> inbox;
     private final CatchUpStorage storage;
+    private final CatchUpStarter.Builder<I> starterTemplate;
+    private final Object endpointLock = new Object();
 
+    private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
     private CatchUp.Builder builder = CatchUp.newBuilder();
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
         super();
-        this.idClass = builder.idClass();
-        this.projectionStateType = builder.projectionStateType();
+        this.repository = builder.repository();
         this.eventStore = builder.eventStore();
-        this.repositoryIndex = builder.index();
         this.dispatchOperation = builder.dispatchOp();
-        this.storage = builder.storage();
+        this.storage = builder.catchUpStorage();
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         this.inbox = configureInbox(delivery);
+        this.starterTemplate = CatchUpStarter.newBuilder(repository, this.storage);
     }
 
     public static <I> CatchUpProcessBuilder<I> newBuilder(ProjectionRepository<I, ?, ?> repo) {
         checkNotNull(repo);
-        return new CatchUpProcessBuilder<>(repo.idClass(), repo.entityStateType());
+        return new CatchUpProcessBuilder<>(repo);
     }
 
-    public void startCatchUp(Set<I> ids, Timestamp since) throws CatchUpAlreadyStarted {
-        //Iterable<CatchUp> existing = storage.readByType(projectionStateType);
-        // do nothing for now
+    @Override
+    public void registerWith(BoundedContext context) {
+        super.registerWith(context);
+        this.catchUpStarter = starterTemplate.withContext(context)
+                                             .build();
+    }
+
+    public void startCatchUp(Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
+        catchUpStarter.start(ids, since);
     }
 
     private CatchUp.Builder builder() {
@@ -133,8 +139,8 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     private Inbox<CatchUpId> configureInbox(Delivery delivery) {
         Inbox.Builder<CatchUpId> builder = delivery.newInbox(TYPE);
-        builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new);
-        return builder.build();
+        return builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new)
+                      .build();
     }
 
     @React
@@ -161,16 +167,14 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     private Set<I> targetsForCatchUpSignals(CatchUp.Request request) {
         Set<I> ids;
         List<Any> rawTargets = request.getTargetList();
-        if (rawTargets.isEmpty()) {
-            ids = ImmutableSet.copyOf(repositoryIndex.get());
-        } else {
-            ids = unpack(rawTargets);
-        }
+        ids = rawTargets.isEmpty()
+              ? ImmutableSet.copyOf(repository.index())
+              : unpack(rawTargets);
         return ids;
     }
 
-    private Timestamp turbulenceStart() {
-        return subtract(Time.currentTime(), turbulencePeriod);
+    private static Timestamp turbulenceStart() {
+        return subtract(Time.currentTime(), TURBULENCE_PERIOD);
     }
 
     @React
@@ -262,17 +266,21 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         return indexes
                 .stream()
                 .map(indexValue -> {
-                    ShardIndex shardIndex =
-                            ShardIndex.newBuilder()
-                                      .setIndex(indexValue)
-                                      .setOfTotal(shardCount)
-                                      .vBuild();
-                    ShardProcessingRequested event = ShardProcessingRequested.newBuilder()
-                                                                             .setId(shardIndex)
-                                                                             .vBuild();
+                    ShardIndex shardIndex = newShardIndex(shardCount, indexValue);
+                    ShardProcessingRequested event = ShardProcessingRequested
+                            .newBuilder()
+                            .setId(shardIndex)
+                            .vBuild();
                     return event;
                 })
                 .collect(toList());
+    }
+
+    private static ShardIndex newShardIndex(int shardCount, Integer indexValue) {
+        return ShardIndex.newBuilder()
+                         .setIndex(indexValue)
+                         .setOfTotal(shardCount)
+                         .vBuild();
     }
 
     //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
@@ -354,7 +362,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     private Set<I> unpack(List<Any> packedIds) {
         return packedIds.stream()
-                        .map((any) -> Identifier.unpack(any, idClass))
+                        .map((any) -> Identifier.unpack(any, repository.idClass()))
                         .collect(toSet());
     }
 
@@ -389,7 +397,8 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         CatchUpSignal asSignal = (CatchUpSignal) raw;
         String actualType = asSignal.getId()
                                     .getProjectionType();
-        String expectedType = projectionStateType.value();
+        String expectedType = repository.entityStateType()
+                                        .value();
         return expectedType.equals(actualType);
     }
 

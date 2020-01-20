@@ -23,7 +23,7 @@ package io.spine.server.delivery;
 import io.spine.server.delivery.CatchUpProcess.DispatchCatchingUp;
 import io.spine.server.delivery.CatchUpProcess.RepositoryIndex;
 import io.spine.server.event.EventStore;
-import io.spine.type.TypeUrl;
+import io.spine.server.projection.ProjectionRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -36,29 +36,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class CatchUpProcessBuilder<I> {
 
-    private final Class<I> idClass;
-    private final TypeUrl projectionStateType;
+    private final ProjectionRepository<I, ?, ?> repository;
     private @Nullable Supplier<EventStore> eventStore;
     private @Nullable CatchUpStorage storage;
     private @Nullable RepositoryIndex<I> index;
     private @Nullable DispatchCatchingUp<I> dispatchOp;
 
-    CatchUpProcessBuilder(Class<I> aClass, TypeUrl type) {
-        idClass = aClass;
-        projectionStateType = type;
+    CatchUpProcessBuilder(ProjectionRepository<I, ?, ?> repository) {
+        this.repository = repository;
     }
 
-    public Class<I> idClass() {
-        return idClass;
-    }
-
-    public TypeUrl projectionStateType() {
-        return projectionStateType;
+    public ProjectionRepository<I, ?, ?> repository() {
+        return repository;
     }
 
     public Optional<Supplier<EventStore>> getEventStore() {
         return Optional.ofNullable(eventStore);
     }
+
     public Supplier<EventStore> eventStore() {
         return checkNotNull(eventStore);
     }
@@ -72,7 +67,7 @@ public final class CatchUpProcessBuilder<I> {
         return Optional.ofNullable(storage);
     }
 
-    CatchUpStorage storage() {
+    CatchUpStorage catchUpStorage() {
         return checkNotNull(storage);
     }
 
@@ -98,7 +93,7 @@ public final class CatchUpProcessBuilder<I> {
         return Optional.ofNullable(dispatchOp);
     }
 
-    public  DispatchCatchingUp<I> dispatchOp() {
+    public DispatchCatchingUp<I> dispatchOp() {
         return checkNotNull(dispatchOp);
     }
 

@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.server.tenant.IdInTenant;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -48,14 +47,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class RepositoryCache<I, E extends Entity<I, ?>> {
 
-    private final Map<IdInTenant<I>, E> cache = Collections.synchronizedMap(new HashMap<>());
-    private final Set<IdInTenant<I>> idsToCache = Collections.synchronizedSet(new HashSet<>());
+    private final Map<IdInTenant<I>, E> cache = new HashMap<>();
+    private final Set<IdInTenant<I>> idsToCache = new HashSet<>();
 
     private final boolean multitenant;
     private final Load<I, E> loadFn;
     private final Store<E> storeFn;
-    private Boolean intendedToCache = null;
-    private IdInTenant<I> lastAskedId;
 
     public RepositoryCache(boolean multitenant, Load<I, E> loadFn, Store<E> storeFn) {
         this.multitenant = multitenant;
@@ -65,9 +62,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
 
     public synchronized E load(I id) {
         IdInTenant<I> idInTenant = idInTenant(id);
-        intendedToCache = idsToCache.contains(idInTenant);
-        lastAskedId = idInTenant;
-        if (!intendedToCache) {
+        if (! idsToCache.contains(idInTenant)) {
             return loadFn.apply(idInTenant.value());
         }
 
@@ -87,12 +82,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
      *         an identifier of the entity to cache
      */
     public synchronized void startCaching(I id) {
-        boolean unique = idsToCache.add(idInTenant(id));
-        if(!unique) {
-            String msg = String.format(" -------------- Element %s is not unique!", id);
-            System.err.println(msg);
-            throw new IllegalStateException(msg);
-        }
+        idsToCache.add(idInTenant(id));
     }
 
     /**
@@ -110,15 +100,8 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
         IdInTenant<I> idInTenant = idInTenant(id);
         E entity = checkNotNull(cache.get(idInTenant),
                                 "Cannot find the cached entity in the cache for ID `%s`. " +
-                                        "Cache keys: %s. " +
-                                        "IDs to cache: %s." +
-                                        "Last asked ID: %s. " +
-                                        "Was it intended to cache? %s",
-                                idInTenant,
-                                cache.keySet(),
-                                idsToCache,
-                                lastAskedId,
-                                intendedToCache);
+                                        "Cache keys: %s. IDs to cache: %s.",
+                                idInTenant, cache.keySet(), idsToCache);
         storeFn.accept(entity);
         cache.remove(idInTenant);
         idsToCache.remove(idInTenant);
