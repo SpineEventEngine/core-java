@@ -58,6 +58,16 @@ final class CatchUpStation extends Station {
         this.jobs = jobs;
     }
 
+    /**
+     * Processes the messages on the conveyor, delivering those sent for catch-up.
+     *
+     *  //TODO:2020-01-20:alex.tymchenko: describe in more details.
+     *
+     * @param conveyor
+     *         the conveyor on which the messages are travelling
+     * @return
+     */
+    @SuppressWarnings({"MethodWithMultipleLoops", "OverlyComplexMethod", "OverlyNestedMethod"})
     @Override
     public final Result process(Conveyor conveyor) {
 
@@ -87,8 +97,8 @@ final class CatchUpStation extends Station {
                             } else {
                                 conveyor.remove(message);
                             }
-                        } else if (message.getStatus() == TO_DELIVER &&
-                                dispatchToCatchUp.containsKey(dispatchingId)) {
+                        } else if (message.getStatus() == TO_DELIVER
+                                && dispatchToCatchUp.containsKey(dispatchingId)) {
                             conveyor.remove(message);
                         }
                     }
