@@ -453,17 +453,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     }
 
     /**
-     * A function providing the index of identifiers of the existing entities for some repository.
-     *
-     * @param <I>
-     *         the type of identifiers of the entities managed by the repository.
-     */
-    @FunctionalInterface
-    public interface RepositoryIndex<I> extends Supplier<Set<I>> {
-
-    }
-
-    /**
      * A method object dispatching the event to catch-up.
      *
      * @param <I>

@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import io.spine.server.delivery.CatchUpProcess.DispatchCatchingUp;
-import io.spine.server.delivery.CatchUpProcess.RepositoryIndex;
 import io.spine.server.event.EventStore;
 import io.spine.server.projection.ProjectionRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,7 +38,6 @@ public final class CatchUpProcessBuilder<I> {
     private final ProjectionRepository<I, ?, ?> repository;
     private @Nullable Supplier<EventStore> eventStore;
     private @Nullable CatchUpStorage storage;
-    private @Nullable RepositoryIndex<I> index;
     private @Nullable DispatchCatchingUp<I> dispatchOp;
 
     CatchUpProcessBuilder(ProjectionRepository<I, ?, ?> repository) {
@@ -76,19 +74,6 @@ public final class CatchUpProcessBuilder<I> {
         return this;
     }
 
-    public Optional<RepositoryIndex<I>> getIndex() {
-        return Optional.ofNullable(index);
-    }
-
-    public RepositoryIndex<I> index() {
-        return checkNotNull(index);
-    }
-
-    public CatchUpProcessBuilder<I> withIndex(RepositoryIndex<I> index) {
-        this.index = checkNotNull(index);
-        return this;
-    }
-
     public Optional<DispatchCatchingUp<I>> getDispatchOp() {
         return Optional.ofNullable(dispatchOp);
     }
@@ -105,7 +90,6 @@ public final class CatchUpProcessBuilder<I> {
     public CatchUpProcess<I> build() {
         checkNotNull(eventStore);
         checkNotNull(storage);
-        checkNotNull(index);
         checkNotNull(dispatchOp);
         return new CatchUpProcess<>(this);
     }
