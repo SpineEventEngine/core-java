@@ -27,6 +27,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
@@ -52,6 +53,8 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.string.Stringifiers;
+import io.spine.time.TimestampTemporal;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -60,6 +63,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Sets.intersection;
@@ -120,7 +124,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     private void initCatchUp(BoundedContext context, Delivery delivery) {
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
-        builder.withDispatchOp(this::dispatchCatchingUp)
+        builder.withDispatchOp(this::sendToCatchUp)
                .withIndex(() -> ImmutableSet.copyOf(recordStorage().index()))
                .withEventStore(() -> context.eventBus()
                                             .eventStore());
@@ -396,16 +400,83 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *         point in the past, since which the catch-up should be performed
      */
     public void catchUp(Set<I> ids, Timestamp since) {
+        TimestampTemporal asTemporal = TimestampTemporal.from(since);
+        boolean startingInPast = asTemporal.isInPast();
+        checkArgument(startingInPast, "The catch-up must be started from the moment in the past, " +
+                              "but asked to start at `%s`, when now is `%s`.",
+                      lazyArg(since),lazyArg(Time.currentTime()));
         withCurrentTenant(context().isMultitenant()).run(
                 () -> catchUpProcess.startCatchUp(ids, since)
         );
     }
 
+    /**
+     * Creates the lazily-evaluated argument for the message-formatting API in Guava's
+     * {@link com.google.common.base.Preconditions Preconditions}, such as
+     * {@link com.google.common.base.Preconditions#checkArgument(boolean, String, Object)
+     * Preconditions.checkArgument(boolean, String, Object)}.
+     *
+     * <p>Allows to postpone the resource-heavy stringification of the argument until that is
+     * really required.
+     *
+     * @param value
+     *         the value to be used as an argument
+     * @return the object to use as an argument in the message-formatting API
+     */
+    private static Object lazyArg(Object value) {
+        return new Object() {
+            @Override
+            public String toString() {
+                return Stringifiers.toString(value);
+            }
+        };
+    }
+
+    /**
+     * Repeats the dispatching of the events from the event log to the all the entities managed
+     * by this repository. The events are read from the specified point in time.
+     *
+     * <p>At the beginning of the process the state of all of the entities is set to the default.
+     *
+     * <p>The events are dispatched according to the actual event routing schema. So a historical
+     * event may be dispatched to a different set of targets, comparing to those to which it was
+     * dispatched once emitted originally.
+     *
+     * @param since
+     *         point in the past, since which the catch-up should be performed
+     */
     public void catchUpAll(Timestamp since) {
         catchUp(new HashSet<>(), since);
     }
 
-    private Set<I> dispatchCatchingUp(Event event, @Nullable Set<I> restrictToIds) {
+    /**
+     * Sends the event to the inboxes of the catching-up projection instances.
+     *
+     * <p>Allows to restrict the target entities by identifiers. In this case, the event is
+     * routed as per the repository routing schema, and the obtained set of the identifiers
+     * is narrowed down to the restricted targets.
+     *
+     * <p>Such a setting allows to catch up only the selected targets.
+     *
+     * <p>This API method also supports sending the special {@link CatchUpSignal}s
+     * to the projection. They regulate the lifecycle of the catch-up and are handled by
+     * the {@link CatchUpEndpoint} exposed by this repository.
+     *
+     * <p>Please note that the {@code CatchUpSignal}s are dispatched to the selected targets
+     * only and cannot be dispatched to all of the repository instances. The reason is that
+     * handling of {@code CatchUpSignal}s may affect the lifecycle state of the projection
+     * instances. E.g. the callee must know to what targets he is sending the "delete state" signal.
+     *
+     * @param event
+     *         the event to dispatch
+     * @param restrictToIds
+     *         optional set of the target identifiers to which the dispatching must be restricted;
+     *         if {@code null}, no restriction are applied and the event should be dispatched as per
+     *         the routing schema
+     * @return the set of the entity identifiers, which actually received the dispatched event
+     * @see CatchUpEndpoint
+     */
+    private Set<I> sendToCatchUp(Event event, @Nullable Set<I> restrictToIds) {
         EventEnvelope envelope = EventEnvelope.of(event);
         Set<I> catchUpTargets;
         if (envelope.message() instanceof CatchUpSignal) {
