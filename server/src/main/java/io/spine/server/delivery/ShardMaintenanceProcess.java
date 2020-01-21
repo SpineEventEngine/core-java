@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.base.EventMessage;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.AbstractEventReactor;
@@ -31,7 +30,6 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 
 /**
  * The framework-internal process performing the maintenance of delivery shards.
@@ -49,20 +47,9 @@ class ShardMaintenanceProcess extends AbstractEventReactor {
         this.inbox = builder.build();
     }
 
-    //TODO:2020-01-20:alex.tymchenko: describe the need.
     @React
     Nothing on(ShardProcessingRequested event) {
-        System.out.println(
-                format("Received `ShardProcessingRequested` for the shard #%d.",
-                       event.getId()
-                            .getIndex()));
         return nothing();
-    }
-
-    @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        EventMessage raw = envelope.message();
-        return raw instanceof ShardEvent;
     }
 
     @CanIgnoreReturnValue
