@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.subtract;
@@ -95,7 +94,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     private static final Duration TURBULENCE_PERIOD = Durations.fromMillis(500);
 
     private final ProjectionRepository<I, ?, ?> repository;
-    private final Supplier<EventStore> eventStore;
     private final DispatchCatchingUp<I> dispatchOperation;
     private final Inbox<CatchUpId> inbox;
     private final CatchUpStorage storage;
@@ -103,12 +101,12 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     private final Object endpointLock = new Object();
 
     private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
+    private @MonotonicNonNull EventStore eventStore;
     private CatchUp.Builder builder = CatchUp.newBuilder();
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
         super();
         this.repository = builder.repository();
-        this.eventStore = builder.eventStore();
         this.dispatchOperation = builder.dispatchOp();
         this.storage = builder.catchUpStorage();
         Delivery delivery = ServerEnvironment.instance()
@@ -125,6 +123,8 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     @Override
     public void registerWith(BoundedContext context) {
         super.registerWith(context);
+        this.eventStore = context.eventBus()
+                                 .eventStore();
         this.catchUpStarter = starterTemplate.withContext(context)
                                              .build();
     }
@@ -354,8 +354,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         }
         EventStreamQuery query = toEventQuery(request, readBefore, limit);
         MemoizingObserver<Event> observer = new MemoizingObserver<>();
-        eventStore.get()
-                  .read(query, observer);
+        eventStore.read(query, observer);
         List<Event> allEvents = observer.responses();
         return allEvents;
     }
