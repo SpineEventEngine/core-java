@@ -29,6 +29,7 @@ import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.delivery.event.HistoryEventsRecalled;
 import io.spine.server.delivery.event.HistoryFullyRecalled;
 import io.spine.server.delivery.event.LiveEventsPickedUp;
+import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 
@@ -91,5 +92,19 @@ final class CatchUpMessages {
         return CatchUpCompleted.newBuilder()
                                .setId(id)
                                .vBuild();
+    }
+
+    static ShardIndex newShardIndex(int shardCount, Integer indexValue) {
+        return ShardIndex.newBuilder()
+                         .setIndex(indexValue)
+                         .setOfTotal(shardCount)
+                         .vBuild();
+    }
+
+    static ShardProcessingRequested shardProcessingRequested(ShardIndex shardIndex) {
+        return ShardProcessingRequested
+                                .newBuilder()
+                                .setId(shardIndex)
+                                .vBuild();
     }
 }

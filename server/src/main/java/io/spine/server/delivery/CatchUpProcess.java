@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
@@ -44,8 +43,7 @@ import io.spine.server.delivery.event.HistoryEventsRecalled;
 import io.spine.server.delivery.event.HistoryFullyRecalled;
 import io.spine.server.delivery.event.LiveEventsPickedUp;
 import io.spine.server.delivery.event.ShardProcessingRequested;
-import io.spine.server.entity.Repository;
-import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.AbstractStatefulReactor;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
@@ -61,6 +59,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
@@ -71,12 +70,12 @@ import static io.spine.server.delivery.CatchUpMessages.catchUpCompleted;
 import static io.spine.server.delivery.CatchUpMessages.fullyRecalled;
 import static io.spine.server.delivery.CatchUpMessages.limitOf;
 import static io.spine.server.delivery.CatchUpMessages.liveEventsPickedUp;
+import static io.spine.server.delivery.CatchUpMessages.newShardIndex;
 import static io.spine.server.delivery.CatchUpMessages.recalled;
+import static io.spine.server.delivery.CatchUpMessages.shardProcessingRequested;
 import static io.spine.server.delivery.CatchUpMessages.started;
-import static io.spine.server.delivery.CatchUpMessages.targetOf;
 import static io.spine.server.delivery.CatchUpMessages.toFilters;
 import static io.spine.server.delivery.CatchUpMessages.withWindow;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -87,7 +86,8 @@ import static java.util.stream.Collectors.toSet;
  * {@linkplain io.spine.server.procman.ProcessManager process managers}, since it is impossible
  * to register the process managers with the same state in a multi-bounded-context application.
  */
-public final class CatchUpProcess<I> extends AbstractEventReactor {
+public final class CatchUpProcess<I>
+        extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
     //TODO:2019-11-29:alex.tymchenko: consider making this configurable via the `ServerEnvironment`.
     private static final Limit LIMIT = limitOf(500);
@@ -97,24 +97,18 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
 
     private final ProjectionRepository<I, ?, ?> repository;
     private final DispatchCatchingUp<I> dispatchOperation;
-    private final Inbox<CatchUpId> inbox;
     private final CatchUpStorage storage;
     private final CatchUpStarter.Builder<I> starterTemplate;
-    private final Object endpointLock = new Object();
 
     private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
     private @MonotonicNonNull Supplier<EventStore> eventStore;
-    private CatchUp.Builder builder = CatchUp.newBuilder();
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
-        super();
+        super(TYPE);
         this.repository = builder.repository();
         this.dispatchOperation = builder.dispatchOp();
         this.storage = builder.catchUpStorage();
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
-        this.inbox = configureInbox(delivery);
-        this.starterTemplate = CatchUpStarter.newBuilder(repository, this.storage);
+        this.starterTemplate = CatchUpStarter.newBuilder(this.repository, this.storage);
     }
 
     @Internal
@@ -153,29 +147,18 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         catchUpStarter.start(ids, since);
     }
 
-    private CatchUp.Builder builder() {
-        return builder;
-    }
-
-    private Inbox<CatchUpId> configureInbox(Delivery delivery) {
-        Inbox.Builder<CatchUpId> builder = delivery.newInbox(TYPE);
-        return builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new)
-                      .build();
-    }
-
     @React
     CatchUpStarted handle(CatchUpRequested e, EventContext ctx) {
         CatchUpId id = e.getId();
 
         CatchUp.Request request = e.getRequest();
 
-        Timestamp sinceWhen = request
-                .getSinceWhen();
+        Timestamp sinceWhen = request.getSinceWhen();
         builder().setWhenLastRead(withWindow(sinceWhen))
                  .setRequest(request);
         CatchUpStarted started = started(id);
         builder().setStatus(CatchUpStatus.STARTED);
-        commitState();
+        flushState();
 
         Event event = wrapAsEvent(started, ctx);
         Set<I> ids = targetsForCatchUpSignals(request);
@@ -256,7 +239,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled event) {
         CatchUpId id = event.getId();
         builder().setStatus(CatchUpStatus.FINALIZING);
-        commitState();
+        flushState();
 
         CatchUp.Request request = builder().getRequest();
         List<Event> events = readMore(request, null, null);
@@ -281,32 +264,23 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         return events;
     }
 
-    private static List<ShardProcessingRequested> toShardEvents(int shardCount,
-                                                                List<Integer> indexes) {
+    private static
+    List<ShardProcessingRequested> toShardEvents(int totalShards, List<Integer> indexes) {
         return indexes
                 .stream()
                 .map(indexValue -> {
-                    ShardIndex shardIndex = newShardIndex(shardCount, indexValue);
-                    ShardProcessingRequested event = ShardProcessingRequested
-                            .newBuilder()
-                            .setId(shardIndex)
-                            .vBuild();
+                    //TODO:2020-01-21:alex.tymchenko: reused the existing code!
+                    ShardIndex shardIndex = newShardIndex(totalShards, indexValue);
+                    ShardProcessingRequested event = shardProcessingRequested(shardIndex);
                     return event;
                 })
                 .collect(toList());
     }
 
-    private static ShardIndex newShardIndex(int shardCount, Integer indexValue) {
-        return ShardIndex.newBuilder()
-                         .setIndex(indexValue)
-                         .setOfTotal(shardCount)
-                         .vBuild();
-    }
-
     //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
     private CatchUpCompleted completeProcess(CatchUpId id) {
         builder().setStatus(CatchUpStatus.COMPLETED);
-        commitState();
+        flushState();
         CatchUpCompleted completed = catchUpCompleted(id);
         return completed;
     }
@@ -385,10 +359,6 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
                         .collect(toSet());
     }
 
-    private void commitState() {
-        storage.write(builder().vBuild());
-    }
-
     private EventStreamQuery toEventQuery(CatchUp.Request request,
                                           @Nullable Timestamp readBefore,
                                           @Nullable Limit limit) {
@@ -421,54 +391,26 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         return expectedType.equals(actualType);
     }
 
-    @CanIgnoreReturnValue
     @Override
-    public void dispatch(EventEnvelope event) {
-        CatchUpId target = targetOf(event.message());
-        inbox.send(event)
-             .toReactor(target);
+    protected ImmutableSet<CatchUpId> route(EventEnvelope event) {
+        CatchUpSignal message = (CatchUpSignal) event.message();
+        return ImmutableSet.of(message.getId());
     }
 
-    private final class EventEndpoint implements MessageEndpoint<CatchUpId, EventEnvelope> {
+    @Override
+    protected Optional<CatchUp> load(CatchUpId id) {
+        return storage.read(new CatchUpReadRequest(id));
+    }
 
-        private final EventEnvelope envelope;
+    @Override
+    protected void store(CatchUp updatedState) {
+        storage.write(updatedState);
+    }
 
-        private EventEndpoint(EventEnvelope envelope) {
-            this.envelope = envelope;
-        }
-
-        @Override
-        public void dispatchTo(CatchUpId targetId) {
-            synchronized (endpointLock) {
-                load(targetId);
-                CatchUpProcess.super.dispatch(envelope);
-                store();
-            }
-        }
-
-        @Override
-        public final void onDuplicate(CatchUpId target, EventEnvelope envelope) {
-            // do nothing.
-        }
-
-        @Override
-        public Repository<CatchUpId, ?> repository() {
-            throw newIllegalStateException("`CatchUpProcess` has no repository.");
-        }
-
-        private void store() {
-            CatchUp modifiedState = builder().vBuild();
-            storage.write(modifiedState);
-        }
-
-        private void load(CatchUpId target) {
-            CatchUpReadRequest request = new CatchUpReadRequest(target);
-            builder = storage.read(request)
-                             .orElse(CatchUp.newBuilder()
-                                            .setId(target)
-                                            .buildPartial())
-                             .toBuilder();
-        }
+    @Override
+    protected CatchUp.Builder newStateBuilderWith(CatchUpId id) {
+        return CatchUp.newBuilder()
+                      .setId(id);
     }
 
     /**
