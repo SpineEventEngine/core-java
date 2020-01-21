@@ -56,7 +56,6 @@ import io.spine.time.TimestampTemporal;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -348,20 +347,35 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * <p>At the beginning of the process the state of each of the entities is set to the default.
      *
-     * @param ids
-     *         identifiers of the entities to catch-up
      * @param since
      *         point in the past, since which the catch-up should be performed
+     * @param ids
+     *         identifiers of the entities to catch up
      */
-    public void catchUp(Set<I> ids, Timestamp since) {
+    public void catchUp(Timestamp since, @Nullable Set<I> ids) {
+        checkCatchUpTargets(ids);
+        checkCatchUpStartTime(since);
+
+        withCurrentTenant(context().isMultitenant()).run(
+                () -> catchUpProcess.startCatchUp(since, ids)
+        );
+    }
+
+    private static void checkCatchUpStartTime(Timestamp since) {
         TimestampTemporal asTemporal = TimestampTemporal.from(since);
         boolean startingInPast = asTemporal.isInPast();
         checkArgument(startingInPast, "The catch-up must be started from the moment in the past, " +
                               "but asked to start at `%s`, when now is `%s`.",
-                      lazyArg(since),lazyArg(Time.currentTime()));
-        withCurrentTenant(context().isMultitenant()).run(
-                () -> catchUpProcess.startCatchUp(ids, since)
-        );
+                      lazyArg(since), lazyArg(Time.currentTime()));
+    }
+
+    private void checkCatchUpTargets(@Nullable Set<I> ids) {
+        if (ids != null) {
+            checkArgument(!ids.isEmpty(),
+                          "At least one ID is required to catch up the projection of type `%s`. " +
+                                  "You may also pass `null` to catch up all of the instances.",
+                          entityStateType());
+        }
     }
 
     /**
@@ -400,7 +414,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *         point in the past, since which the catch-up should be performed
      */
     public void catchUpAll(Timestamp since) {
-        catchUp(new HashSet<>(), since);
+        catchUp(since, null);
     }
 
     /**

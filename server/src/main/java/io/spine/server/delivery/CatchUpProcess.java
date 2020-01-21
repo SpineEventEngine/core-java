@@ -28,6 +28,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
+import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
@@ -62,6 +63,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.subtract;
@@ -101,7 +103,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
     private final Object endpointLock = new Object();
 
     private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
-    private @MonotonicNonNull EventStore eventStore;
+    private @MonotonicNonNull Supplier<EventStore> eventStore;
     private CatchUp.Builder builder = CatchUp.newBuilder();
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
@@ -115,21 +117,39 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         this.starterTemplate = CatchUpStarter.newBuilder(repository, this.storage);
     }
 
+    @Internal
     public static <I> CatchUpProcessBuilder<I> newBuilder(ProjectionRepository<I, ?, ?> repo) {
         checkNotNull(repo);
         return new CatchUpProcessBuilder<>(repo);
     }
 
     @Override
+    @Internal
     public void registerWith(BoundedContext context) {
         super.registerWith(context);
-        this.eventStore = context.eventBus()
-                                 .eventStore();
+        this.eventStore = () -> context.eventBus()
+                                       .eventStore();
         this.catchUpStarter = starterTemplate.withContext(context)
                                              .build();
     }
 
-    public void startCatchUp(Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
+    /**
+     * Starts the catch-up for the projection instances selecting them by their identifiers.
+     *
+     * <p>If no identifiers is passed (i.e. {@code null}) then all of the instances should be
+     * caught up
+     *
+     * @param since
+     *         since when the catch-up should be performed
+     * @param ids
+     *         identifiers of the projections to catch up, or {@code null} if all of the
+     *         instances should be caught up
+     * @throws CatchUpAlreadyStartedException
+     *         if at least one of the selected instances is already catching up at the moment
+     */
+    @Internal
+    public void startCatchUp(Timestamp since, @Nullable Set<I> ids)
+            throws CatchUpAlreadyStartedException {
         catchUpStarter.start(ids, since);
     }
 
@@ -354,7 +374,7 @@ public final class CatchUpProcess<I> extends AbstractEventReactor {
         }
         EventStreamQuery query = toEventQuery(request, readBefore, limit);
         MemoizingObserver<Event> observer = new MemoizingObserver<>();
-        eventStore.read(query, observer);
+        eventStore.get().read(query, observer);
         List<Event> allEvents = observer.responses();
         return allEvents;
     }

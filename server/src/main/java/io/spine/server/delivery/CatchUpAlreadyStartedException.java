@@ -23,6 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 
@@ -34,13 +35,13 @@ public final class CatchUpAlreadyStartedException extends IllegalStateException 
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableSet<Object> requestedIds;
     private final TypeUrl projectionStateType;
+    private final @Nullable ImmutableSet<Object> requestedIds;
 
-    CatchUpAlreadyStartedException(TypeUrl type, Set<?> ids) {
+    CatchUpAlreadyStartedException(TypeUrl type, @Nullable Set<?> ids) {
         super();
         projectionStateType = type;
-        requestedIds = ImmutableSet.copyOf(ids);
+        requestedIds = ids == null ? null : ImmutableSet.copyOf(ids);
     }
 
     @Override
@@ -53,7 +54,7 @@ public final class CatchUpAlreadyStartedException extends IllegalStateException 
     }
 
     private String targetsAsString() {
-        if (requestedIds.isEmpty()) {
+        if (requestedIds == null) {
             return "[all instances]";
         }
         return Joiner.on(',')

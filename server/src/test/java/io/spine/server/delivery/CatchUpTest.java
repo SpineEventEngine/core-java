@@ -140,14 +140,14 @@ public class CatchUpTest extends AbstractDeliveryTest {
         // Do the same, but add the catch-up for ID #0 as the first job.
         String firstId = ids[0];
         Callable<Object> firstCatchUp = () -> {
-            repo.catchUp(ImmutableSet.of(firstId), aWhileAgo);
+            repo.catchUp(aWhileAgo, ImmutableSet.of(firstId));
             return nullRef();
         };
 
         // And add the catch-up for ID #1 as the second job.
         String secondId = ids[1];
         Callable<Object> secondCatchUp = () -> {
-            repo.catchUp(ImmutableSet.of(secondId), aMinuteAgo());
+            repo.catchUp(aMinuteAgo(), ImmutableSet.of(secondId));
             return nullRef();
         };
 

@@ -38,6 +38,7 @@ import io.spine.server.tenant.TenantFunction;
 import io.spine.server.type.EventClass;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -58,21 +59,30 @@ final class CatchUpStarter<I> {
     private final TypeUrl projectionStateType;
     private final CatchUpStorage storage;
     private final ImmutableSet<EventClass> eventClasses;
-    private final EventFactory eventFactory;
 
     private CatchUpStarter(Builder<I> builder) {
         this.context = builder.context;
         this.projectionStateType = builder.projectionStateType;
         this.storage = builder.storage;
         this.eventClasses = builder.eventClasses;
-        this.eventFactory = createEventFactory(projectionStateType, context.isMultitenant());
     }
 
     static <I> Builder<I> newBuilder(ProjectionRepository<I, ?, ?> repo, CatchUpStorage storage) {
         return new Builder<>(repo.entityStateType(), repo.messageClasses(), storage);
     }
 
-    public void start(Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
+    /**
+     * Starts the catch-up restricting it to the set of projection instances by certain identifiers.
+     *
+     * @param ids
+     *         the IDs of the projection instances to catch-up, or {@code null} if all entities of
+     *         this kind need to catch up.
+     * @param since
+     *         since when the catch-up is going to read the events
+     * @throws CatchUpAlreadyStartedException
+     *         if the catch-up is already in progress for at least one of the requested entities
+     */
+    public void start(@Nullable Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
         checkNotStartedAlready(ids);
 
         CatchUp.Request request = buildRequest(ids, since);
@@ -85,12 +95,13 @@ final class CatchUpStarter<I> {
                 .setId(id)
                 .setRequest(request)
                 .vBuild();
+        EventFactory eventFactory = newEventFactory(projectionStateType, context.isMultitenant());
         Event event = eventFactory.createEvent(eventMessage, null);
         context.eventBus()
                .post(event);
     }
 
-    private static EventFactory createEventFactory(TypeUrl stateType, boolean multitenant) {
+    private static EventFactory newEventFactory(TypeUrl stateType, boolean multitenant) {
         String userIdValue = format("`CatchUpStarter` for `%s`", stateType.value());
         UserId onBehalfOf = UserId.newBuilder()
                                   .setValue(userIdValue)
@@ -102,9 +113,9 @@ final class CatchUpStarter<I> {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
-    private CatchUp.Request buildRequest(Set<I> ids, Timestamp since) {
+    private CatchUp.Request buildRequest(@Nullable Set<I> ids, Timestamp since) {
         CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder();
-        if (!ids.isEmpty()) {
+        if (ids != null) {
             for (I id : ids) {
                 Any packed = Identifier.pack(id);
                 requestBuilder.addTarget(packed);
@@ -120,15 +131,10 @@ final class CatchUpStarter<I> {
         return requestBuilder.vBuild();
     }
 
-    private void checkNotStartedAlready(Set<I> ids) throws CatchUpAlreadyStartedException {
-        Iterable<CatchUp> existing = null;
-        try {
-            existing = storage.readByType(projectionStateType);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalStateException(e);
-        }
-        boolean alreadyCatchingUp = hasIntersections(ids, existing);
+    private void checkNotStartedAlready(@Nullable Set<I> ids) throws
+                                                              CatchUpAlreadyStartedException {
+        Iterable<CatchUp> ongoing = storage.readByType(projectionStateType);
+        boolean alreadyCatchingUp = hasIntersections(ongoing, ids);
         if (alreadyCatchingUp) {
             throw new CatchUpAlreadyStartedException(projectionStateType, ids);
         }
@@ -149,17 +155,20 @@ final class CatchUpStarter<I> {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
-    private static boolean hasIntersections(Set<?> ids, Iterable<CatchUp> existing) {
+    private static boolean hasIntersections(Iterable<CatchUp> ongoing, @Nullable Set<?> ids) {
+        if (ids == null) {
+            return ongoing.iterator()
+                          .hasNext();
+        }
         if (ids.isEmpty()) {
-            return existing.iterator()
-                           .hasNext();
+            return false;
         }
         Set<Any> packedIds = ids.stream()
                                 .map(Identifier::pack)
                                 .collect(toSet());
-        for (CatchUp existingProcess : existing) {
-            List<Any> targets = existingProcess.getRequest()
-                                               .getTargetList();
+        for (CatchUp ongoingProcess : ongoing) {
+            List<Any> targets = ongoingProcess.getRequest()
+                                              .getTargetList();
             if (targets.isEmpty()) {
                 return true;
             }
