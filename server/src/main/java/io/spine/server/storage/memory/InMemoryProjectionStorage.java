@@ -21,21 +21,14 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Timestamp;
 import io.spine.client.ResponseFormat;
-import io.spine.core.TenantId;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
  * The in-memory implementation of {@link ProjectionStorage}.
@@ -48,9 +41,6 @@ public final class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     /** The storage for projection entities. */
     private final InMemoryRecordStorage<I> recordStorage;
 
-    /** The time of the last handled event per tenant. */
-    private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
-
     InMemoryProjectionStorage(Class<? extends Projection<?, ?, ?>> projectionClass,
                               InMemoryRecordStorage<I> recordStorage) {
         super(projectionClass, recordStorage.isMultitenant());
@@ -60,33 +50,6 @@ public final class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     @Override
     public Iterator<I> index() {
         return recordStorage.index();
-    }
-
-    @Override
-    public void writeLastHandledEventTime(Timestamp timestamp) {
-        checkNotNull(timestamp);
-        TenantFunction<Void> func = new TenantFunction<Void>(isMultitenant()) {
-            @Override
-            public @Nullable Void apply(@Nullable TenantId tenantId) {
-                checkNotNull(tenantId);
-                timestampOfLastEvent.put(tenantId, timestamp);
-                return null;
-            }
-        };
-        func.execute();
-    }
-
-    @Override
-    public Timestamp readLastHandledEventTime() {
-        TenantFunction<Timestamp> func = new TenantFunction<Timestamp>(isMultitenant()) {
-            @Override
-            public @Nullable Timestamp apply(@Nullable TenantId tenantId) {
-                checkNotNull(tenantId);
-                Timestamp result = timestampOfLastEvent.get(tenantId);
-                return result;
-            }
-        };
-        return func.execute();
     }
 
     @Override

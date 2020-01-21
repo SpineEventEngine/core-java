@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Timestamp;
 import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.protobuf.AnyPacker;
@@ -47,20 +46,13 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
-import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
 import static io.spine.server.storage.given.RecordStorageTestEnv.withLifecycleColumns;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static io.spine.testing.Tests.assertMatchesMask;
-import static io.spine.testing.Tests.nullRef;
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -110,14 +102,6 @@ public abstract class ProjectionStorageTest
     @AfterEach
     void tearDownProjectionStorageTest() {
         close(storage);
-    }
-
-    @Test
-    @DisplayName("return null if no last handled event time is present in storage")
-    void getNullLastHandledTime() {
-        Timestamp time = storage.readLastHandledEventTime();
-
-        assertNull(time);
     }
 
     @Nested
@@ -214,41 +198,6 @@ public abstract class ProjectionStorageTest
             }
 
             return ids;
-        }
-    }
-
-    @Test
-    @DisplayName("throw exception when writing null event time")
-    void notWriteNullEventTime() {
-        assertThrows(NullPointerException.class,
-                     () -> storage.writeLastHandledEventTime(nullRef()));
-    }
-
-    @Nested
-    @DisplayName("write and read last event time")
-    class GetSetLastEventTime {
-
-        @Test
-        @DisplayName("once")
-        void once() {
-            writeAndReadLastEventTimeTest(currentTime());
-        }
-
-        @Test
-        @DisplayName("several times")
-        void severalTimes() {
-            Timestamp time1 = currentTime();
-            Timestamp time2 = add(time1, fromSeconds(10L));
-            writeAndReadLastEventTimeTest(time1);
-            writeAndReadLastEventTimeTest(time2);
-        }
-
-        private void writeAndReadLastEventTimeTest(Timestamp expected) {
-            storage.writeLastHandledEventTime(expected);
-
-            Timestamp actual = storage.readLastHandledEventTime();
-
-            assertEquals(expected, actual);
         }
     }
 }

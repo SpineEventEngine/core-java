@@ -41,9 +41,7 @@ import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
-import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
@@ -55,7 +53,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.time.TimestampTemporal;
-import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -124,13 +121,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     private void initCatchUp(BoundedContext context, Delivery delivery) {
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
-        builder.withDispatchOp(this::sendToCatchUp)
-               .withIndex(() -> ImmutableSet.copyOf(recordStorage().index()))
-               .withEventStore(() -> context.eventBus()
-                                            .eventStore());
-        catchUpProcess = builder.build();
+        catchUpProcess = builder.withDispatchOp(this::sendToCatchUp)
+                                .build();
         context.registerEventDispatcher(catchUpProcess);
-
     }
 
     private void initCache(boolean multitenant) {
@@ -139,7 +132,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /**
      * Initializes the {@code Inbox}.
-     * @param delivery the delivery of the current server environment
+     *
+     * @param delivery
+     *         the delivery of the current server environment
      */
     private void initInbox(Delivery delivery) {
         inbox = delivery
@@ -267,22 +262,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * Obtains event filters for event classes handled by projections of this repository.
-     */
-    private Set<EventFilter> createEventFilters() {
-        ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
-        Set<EventClass> eventClasses = messageClasses();
-        for (EventClass eventClass : eventClasses) {
-            String typeName = TypeName.of(eventClass.value())
-                                      .value();
-            builder.add(EventFilter.newBuilder()
-                                   .setEventType(typeName)
-                                   .build());
-        }
-        return builder.build();
-    }
-
-    /**
      * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
      */
     protected final Stand stand() {
@@ -335,19 +314,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         super.store(entity);
     }
 
-    /**
-     * Ensures that the repository has the storage.
-     *
-     * @return storage instance
-     * @throws IllegalStateException
-     *         if the storage is null
-     */
-    protected ProjectionStorage<I> projectionStorage() {
-        @SuppressWarnings("unchecked") /* OK as we control the creation in createStorage(). */
-        ProjectionStorage<I> storage = (ProjectionStorage<I>) storage();
-        return storage;
-    }
-
     @Override
     public final ImmutableSet<EventClass> messageClasses() {
         return projectionClass().events();
@@ -374,18 +340,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected final void dispatchTo(I id, Event event) {
         inbox().send(EventEnvelope.of(event))
                .toSubscriber(id);
-    }
-
-    @Internal
-    public void writeLastHandledEventTime(Timestamp timestamp) {
-        checkNotNull(timestamp);
-        projectionStorage().writeLastHandledEventTime(timestamp);
-    }
-
-    @Internal
-    public Timestamp readLastHandledEventTime() {
-        Timestamp timestamp = projectionStorage().readLastHandledEventTime();
-        return nullToDefault(timestamp);
     }
 
     /**
@@ -494,19 +448,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                  .toCatchUp(target);
         }
         return catchUpTargets;
-    }
-
-    @VisibleForTesting
-    final EventStreamQuery createStreamQuery() {
-        Set<EventFilter> eventFilters = createEventFilters();
-
-        // Gets the timestamp of the last event. This also ensures we have the storage.
-        Timestamp timestamp = readLastHandledEventTime();
-        EventStreamQuery.Builder builder = EventStreamQuery
-                .newBuilder()
-                .setAfter(timestamp)
-                .addAllFilter(eventFilters);
-        return builder.build();
     }
 
     @OverridingMethodsMustInvokeSuper

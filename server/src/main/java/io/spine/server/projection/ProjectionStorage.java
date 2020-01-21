@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
@@ -30,7 +29,6 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -84,20 +82,6 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
         RecordStorage<I> storage = recordStorage();
         return storage.readAll(query, format);
     }
-
-    /**
-     * Writes the time of the last handled event to the storage.
-     *
-     * @param time the time of the event
-     */
-    protected abstract void writeLastHandledEventTime(Timestamp time);
-
-    /**
-     * Reads the time of the last handled event from the storage.
-     *
-     * @return the time of the last event or {@code null} if there is no event in the storage
-     */
-    protected abstract @Nullable Timestamp readLastHandledEventTime();
 
     /** Returns an entity storage implementation. */
     protected abstract RecordStorage<I> recordStorage();
