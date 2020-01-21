@@ -25,7 +25,7 @@
  * as we want to manage the versions in a single source.
  */
 
-final def spineVersion = '1.4.2'
+final def spineVersion = '1.4.3'
 
 ext {
     // The version of the modules in this project.
