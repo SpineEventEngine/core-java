@@ -56,8 +56,7 @@ final class Scanner {
 
     Scanner(EntityClass<?> entityClass) {
         this.entityClass = entityClass;
-        this.columnsInterfaceBased =
-                EntityWithColumns.class.isAssignableFrom(entityClass.value());
+        this.columnsInterfaceBased = EntityWithColumns.class.isAssignableFrom(entityClass.value());
     }
 
     /**
