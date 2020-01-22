@@ -79,7 +79,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
     @DisplayName("catch up only particular instances by their IDs, " +
             "given the time is provided with ms resolution")
     void byIdWithMillisResolution() throws InterruptedException {
-        Time.setProvider(withMillisOnlyResolution());
+        Time.setProvider(new WithMillisOnlyResolution());
         testCatchUpByIds();
     }
 
@@ -94,7 +94,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
     @DisplayName("catch up all of projection instances, " +
             "given the time is provided with millisecond resolution")
     void allInOrderWithMillisResolution() throws InterruptedException {
-        Time.setProvider(withMillisOnlyResolution());
+        Time.setProvider(new WithMillisOnlyResolution());
         testCatchUpAll();
     }
 
@@ -105,7 +105,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
         testCatchUpAll();
     }
 
-    private void testCatchUpByIds() throws InterruptedException {
+    @SuppressWarnings("OverlyLongMethod")   // Complex environment setup.
+    private static void testCatchUpByIds() throws InterruptedException {
         Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
 
         String[] ids = {"first", "second", "third", "fourth"};
@@ -167,7 +168,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
         assertThat(totalsAfterCatchUp).isEqualTo(expectedTotals);
     }
 
-    private void testCatchUpAll() throws InterruptedException {
+    @SuppressWarnings("OverlyLongMethod")   // Complex environment setup.
+    private static void testCatchUpAll() throws InterruptedException {
         ConsecutiveProjection.usePositives();
 
         String[] ids = {"erste", "zweite", "dritte", "vierte"};
@@ -329,14 +331,20 @@ public class CatchUpTest extends AbstractDeliveryTest {
         invokeAll(asPostEventJobs(ctx, events), service);
     }
 
-    private static Time.Provider withMillisOnlyResolution() {
-        return () -> {
+    /**
+     * A time provider which provides the current time based upon JDK's wall clock, i.e. without
+     * the emulated nanoseconds.
+     */
+    private static class WithMillisOnlyResolution implements Time.Provider {
+
+        @Override
+        public Timestamp currentTime() {
             Instant now = Instant.now();
             Timestamp result = Timestamp.newBuilder()
                                         .setSeconds(now.getEpochSecond())
                                         .setNanos(now.getNano())
                                         .build();
             return result;
-        };
+        }
     }
 }
