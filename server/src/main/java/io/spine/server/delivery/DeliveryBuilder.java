@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -263,6 +264,7 @@ public final class DeliveryBuilder {
         return this;
     }
 
+    @SuppressWarnings("PMD.NPathComplexity")    // The readability of this method is fine.
     public Delivery build() {
         if (strategy == null) {
             strategy = UniformAcrossAllShards.singleShard();
@@ -272,16 +274,14 @@ public final class DeliveryBuilder {
             idempotenceWindow = Duration.getDefaultInstance();
         }
 
+        StorageFactory factory = ServerEnvironment.instance()
+                                                  .storageFactory();
         if (this.inboxStorage == null) {
-            this.inboxStorage = ServerEnvironment.instance()
-                                                 .storageFactory()
-                                                 .createInboxStorage(true);
+            this.inboxStorage = factory.createInboxStorage(true);
         }
 
         if (this.catchUpStorage == null) {
-            this.catchUpStorage = ServerEnvironment.instance()
-                                                   .storageFactory()
-                                                   .createCatchUpStorage(true);
+            this.catchUpStorage = factory.createCatchUpStorage(true);
         }
 
         if (workRegistry == null) {
@@ -297,7 +297,7 @@ public final class DeliveryBuilder {
         }
 
         if (catchUpPageSize == null) {
-            pageSize = DEFAULT_CATCH_UP_PAGE_SIZE;
+            catchUpPageSize = DEFAULT_CATCH_UP_PAGE_SIZE;
         }
 
         Delivery delivery = new Delivery(this);
