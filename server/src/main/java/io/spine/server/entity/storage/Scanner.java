@@ -28,7 +28,6 @@ import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromEntity;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromState;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.code.proto.ColumnOption.columnsOf;
@@ -67,11 +66,18 @@ final class Scanner {
     ImmutableMap<ColumnName, SysColumn> systemColumns() {
         ImmutableMap.Builder<ColumnName, SysColumn> columns = ImmutableMap.builder();
         Class<?> entityClazz = entityClass.value();
-        Method[] methods = entityClazz.getMethods();
-        Arrays.stream(methods)
-              .filter(method -> method.isAnnotationPresent(SystemColumn.class))
-              .forEach(method -> addSystemColumn(method, columns));
+        addSystemColumns(entityClazz, columns);
         return columns.build();
+    }
+
+    private static void addSystemColumns(Class<?> entityClazz,
+                                         ImmutableMap.Builder<ColumnName, SysColumn> columns) {
+        Method[] methods = entityClazz.getMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(SystemColumn.class)) {
+                addSystemColumn(method, columns);
+            }
+        }
     }
 
     private static void addSystemColumn(Method method,
@@ -93,8 +99,9 @@ final class Scanner {
             return ImmutableMap.of();
         }
         ImmutableMap.Builder<ColumnName, SimpleColumn> columns = ImmutableMap.builder();
-        columnsOf(entityClass.stateType())
-                .forEach(field -> addSimpleColumn(field, columns));
+        for (FieldDeclaration field : columnsOf(entityClass.stateType())) {
+            addSimpleColumn(field, columns);
+        }
         return columns.build();
     }
 
@@ -117,8 +124,9 @@ final class Scanner {
             return ImmutableMap.of();
         }
         ImmutableMap.Builder<ColumnName, InterfaceBasedColumn> columns = ImmutableMap.builder();
-        columnsOf(entityClass.stateType())
-                .forEach(field -> addImplementedColumn(field, columns));
+        for (FieldDeclaration field : columnsOf(entityClass.stateType())) {
+            addImplementedColumn(field, columns);
+        }
         return columns.build();
     }
 
