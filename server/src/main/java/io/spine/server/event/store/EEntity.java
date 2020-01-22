@@ -26,9 +26,8 @@ import io.spine.core.EventId;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.SystemColumn;
-import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * An entity for storing an event.
@@ -38,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
 
     /** Cached value of the event message type name. */
-    private @Nullable TypeName typeName;
+    private @MonotonicNonNull TypeName typeName;
 
     /**
      * Creates a new entity stripping enrichments from the passed event.
@@ -78,8 +77,8 @@ final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
     @SystemColumn(name = "type")
     public String getType() {
         if (typeName == null) {
-            typeName = EventEnvelope.of(state())
-                                    .messageTypeName();
+            typeName = state().enclosedTypeUrl()
+                              .toTypeName();
         }
         return typeName.value();
     }
