@@ -25,9 +25,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityColumn;
+import io.spine.base.EntityStateField;
+import io.spine.base.EventContextField;
+import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.base.SubscribableField;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.core.Event;
 import io.spine.core.Version;
@@ -85,13 +87,25 @@ public final class Filters {
     public static QueryFilter eq(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column, value, EQUAL);
+        return new QueryFilter(column, value, EQUAL);
     }
 
-    public static SubscriptionFilter eq(SubscribableField field, Object value) {
+    public static EntityStateFilter eq(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return createFilter(field, value, EQUAL);
+        return new EntityStateFilter(field, value, EQUAL);
+    }
+
+    public static EventFilter eq(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return new EventFilter(field, value, EQUAL);
+    }
+
+    public static EventFilter eq(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return new EventFilter(field, value, EQUAL);
     }
 
     /**
@@ -113,14 +127,28 @@ public final class Filters {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(column, value, GREATER_THAN);
+        return new QueryFilter(column, value, GREATER_THAN);
     }
 
-    public static SubscriptionFilter gt(SubscribableField field, Object value) {
+    public static EntityStateFilter gt(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(field, value, GREATER_THAN);
+        return new EntityStateFilter(field, value, GREATER_THAN);
+    }
+
+    public static EventFilter gt(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_THAN);
+    }
+
+    public static EventFilter gt(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_THAN);
     }
 
     /**
@@ -145,14 +173,28 @@ public final class Filters {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(column, value, LESS_THAN);
+        return new QueryFilter(column, value, LESS_THAN);
     }
 
-    public static SubscriptionFilter lt(SubscribableField field, Object value) {
+    public static EntityStateFilter lt(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(field, value, LESS_THAN);
+        return new EntityStateFilter(field, value, LESS_THAN);
+    }
+
+    public static EventFilter lt(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_THAN);
+    }
+
+    public static EventFilter lt(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_THAN);
     }
 
     /**
@@ -177,14 +219,28 @@ public final class Filters {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(column, value, GREATER_OR_EQUAL);
+        return new QueryFilter(column, value, GREATER_OR_EQUAL);
     }
 
-    public static SubscriptionFilter ge(SubscribableField field, Object value) {
+    public static EntityStateFilter ge(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(field, value, GREATER_OR_EQUAL);
+        return new EntityStateFilter(field, value, GREATER_OR_EQUAL);
+    }
+
+    public static EventFilter ge(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_OR_EQUAL);
+    }
+
+    public static EventFilter ge(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -209,14 +265,28 @@ public final class Filters {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(column, value, LESS_OR_EQUAL);
+        return new QueryFilter(column, value, LESS_OR_EQUAL);
     }
 
-    public static SubscriptionFilter le(SubscribableField field, Object value) {
+    public static EntityStateFilter le(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
-        return createFilter(field, value, LESS_OR_EQUAL);
+        return new EntityStateFilter(field, value, LESS_OR_EQUAL);
+    }
+
+    public static EventFilter le(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_OR_EQUAL);
+    }
+
+    public static EventFilter le(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_OR_EQUAL);
     }
 
     /**
@@ -243,11 +313,17 @@ public final class Filters {
         return new CompositeQueryFilter(asList(first, rest), ALL);
     }
 
-    public static CompositeSubscriptionFilter
-    all(SubscriptionFilter first, SubscriptionFilter... rest) {
+    public static CompositeEntityStateFilter
+    all(EntityStateFilter first, EntityStateFilter... rest) {
         checkNotNull(first);
         checkNotNull(rest);
-        return new CompositeSubscriptionFilter(asList(first, rest), ALL);
+        return new CompositeEntityStateFilter(asList(first, rest), ALL);
+    }
+
+    public static CompositeEventFilter all(EventFilter first, EventFilter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeEventFilter(asList(first, rest), ALL);
     }
 
     /**
@@ -276,11 +352,17 @@ public final class Filters {
         return new CompositeQueryFilter(asList(first, rest), EITHER);
     }
 
-    public static CompositeSubscriptionFilter
-    either(SubscriptionFilter first, SubscriptionFilter... rest) {
+    public static CompositeEntityStateFilter
+    either(EntityStateFilter first, EntityStateFilter... rest) {
         checkNotNull(first);
         checkNotNull(rest);
-        return new CompositeSubscriptionFilter(asList(first, rest), EITHER);
+        return new CompositeEntityStateFilter(asList(first, rest), EITHER);
+    }
+
+    public static CompositeEventFilter either(EventFilter first, EventFilter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeEventFilter(asList(first, rest), EITHER);
     }
 
     /**
@@ -323,8 +405,21 @@ public final class Filters {
     }
 
     static Filter createFilter(String fieldPath, Object value, Operator operator) {
-        FieldPath path = Field.parse(fieldPath).path();
-        return createFilter(path, value, operator);
+        Field field = Field.parse(fieldPath);
+        return createFilter(field, value, operator);
+    }
+
+    static Filter createFilter(Field field, Object value, Operator operator) {
+        FieldPath fieldPath = field.path();
+        return createFilter(fieldPath, value, operator);
+    }
+
+    static Filter createContextFilter(Field field, Object value, Operator operator) {
+        FieldPath fieldPath = Event.Fields.context()
+                                          .getField()
+                                          .nested(field)
+                                          .path();
+        return createFilter(fieldPath, value, operator);
     }
 
     static Filter createFilter(FieldPath path, Object value, Operator operator) {
@@ -336,15 +431,6 @@ public final class Filters {
                 .setOperator(operator)
                 .build();
         return filter;
-    }
-
-    private static QueryFilter createFilter(EntityColumn column, Object value, Operator operator) {
-        return new QueryFilter(column, value, operator);
-    }
-
-    private static SubscriptionFilter
-    createFilter(SubscribableField field, Object value, Operator operator) {
-        return new SubscriptionFilter(field, value, operator);
     }
 
     static CompositeFilter composeFilters(Collection<Filter> filters, CompositeOperator operator) {

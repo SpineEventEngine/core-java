@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.MessageContext;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
@@ -57,22 +56,6 @@ SubscribingRequest<M extends Message,
     abstract Consumers.Builder<M, C, W, ?> consumers();
 
     abstract MessageConsumer<M, C> toMessageConsumer(Consumer<M> consumer);
-
-    public final B where(SubscriptionFilter... filter) {
-        Filter[] filters = Arrays.stream(filter)
-                                 .map(SubscriptionFilter::filter)
-                                 .toArray(Filter[]::new);
-        builder().where(filters);
-        return self();
-    }
-
-    public final B where(CompositeSubscriptionFilter... filter) {
-        CompositeFilter[] filters = Arrays.stream(filter)
-                                          .map(CompositeSubscriptionFilter::filter)
-                                          .toArray(CompositeFilter[]::new);
-        builder().where(filters);
-        return self();
-    }
 
     /**
      * Subscribes the passed consumer to receive messages of the subscribed type.

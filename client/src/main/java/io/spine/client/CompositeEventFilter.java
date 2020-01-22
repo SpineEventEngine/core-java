@@ -23,15 +23,18 @@ package io.spine.client;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static io.spine.client.Filters.composeFilters;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Filters events by composite criteria which can test both event messages and their contexts.
  */
-final class CompositeEventFilter implements CompositeMessageFilter<Event> {
+public final class CompositeEventFilter implements CompositeMessageFilter<Event> {
 
     /** The filter data as composed when creating a topic. */
     private final CompositeFilter filter;
@@ -47,6 +50,16 @@ final class CompositeEventFilter implements CompositeMessageFilter<Event> {
                       .collect(toImmutableList());
     }
 
+    CompositeEventFilter(Collection<EventFilter> filters,
+                         CompositeFilter.CompositeOperator operator) {
+        List<Filter> filterList = checkNotNull(filters)
+                .stream()
+                .map(EventFilter::filter)
+                .collect(toList());
+        this.filter = composeFilters(filterList, operator);
+        this.filters = ImmutableList.copyOf(filters);
+    }
+
     @Override
     public List<MessageFilter<Event>> filters() {
         return filters;
@@ -55,6 +68,10 @@ final class CompositeEventFilter implements CompositeMessageFilter<Event> {
     @Override
     public CompositeFilter.CompositeOperator operator() {
         return filter.operator();
+    }
+
+    CompositeFilter filter() {
+        return filter;
     }
 
     @Override

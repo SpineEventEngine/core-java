@@ -20,33 +20,51 @@
 
 package io.spine.client;
 
+import io.spine.base.EventContextField;
+import io.spine.base.EventMessageField;
 import io.spine.core.Event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.Filters.createContextFilter;
+import static io.spine.client.Filters.createFilter;
 
 /**
  * Filters events by conditions on both message and context.
  */
-final class EventFilter implements MessageFilter<Event> {
+public final class EventFilter implements MessageFilter<Event> {
 
     private final Filter filter;
+    private final boolean byContext;
+
+    private EventFilter(Filter filter, boolean byContext) {
+        this.filter = checkNotNull(filter);
+        this.byContext = byContext;
+    }
 
     EventFilter(Filter filter) {
-        this.filter = checkNotNull(filter);
+        this(filter, isContextFilter(filter));
+    }
+
+    EventFilter(EventMessageField field, Object expected, Filter.Operator operator) {
+        this(createFilter(field.getField(), expected, operator), false);
+    }
+
+    EventFilter(EventContextField field, Object expected, Filter.Operator operator) {
+        this(createContextFilter(field.getField(), expected, operator), true);
     }
 
     @Override
     public boolean test(Event event) {
-        boolean byContext =
-                filter.getFieldPath()
-                      .getFieldName(0)
-                      .equals(EventContextField.name());
         if (byContext) {
             // Since we reference the context field with `context` prefix, we need to pass
             // the whole `Event` instance.
             return filter.test(event);
         }
         return filter.test(event.enclosedMessage());
+    }
+
+    Filter filter() {
+        return filter;
     }
 
     @Override
@@ -64,5 +82,15 @@ final class EventFilter implements MessageFilter<Event> {
     @Override
     public int hashCode() {
         return filter.hashCode();
+    }
+
+    private static boolean isContextFilter(Filter filter) {
+        String contextFieldName = Event.Fields.context()
+                                              .getField()
+                                              .toString();
+        String firstInPath = filter.getFieldPath()
+                                   .getFieldName(0);
+        boolean result = contextFieldName.equals(firstInPath);
+        return result;
     }
 }

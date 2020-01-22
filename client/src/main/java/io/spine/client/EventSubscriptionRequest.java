@@ -25,6 +25,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -62,6 +63,22 @@ public final class EventSubscriptionRequest<E extends EventMessage>
     EventSubscriptionRequest(ClientRequest parent, Class<E> type) {
         super(parent, type);
         this.consumers = EventConsumers.newBuilder();
+    }
+
+    public final EventSubscriptionRequest<E> where(EventFilter... filter) {
+        Filter[] filters = Arrays.stream(filter)
+                                 .map(EventFilter::filter)
+                                 .toArray(Filter[]::new);
+        builder().where(filters);
+        return self();
+    }
+
+    public final EventSubscriptionRequest<E> where(CompositeEventFilter... filter) {
+        CompositeFilter[] filters = Arrays.stream(filter)
+                                          .map(CompositeEventFilter::filter)
+                                          .toArray(CompositeFilter[]::new);
+        builder().where(filters);
+        return self();
     }
 
     @Override

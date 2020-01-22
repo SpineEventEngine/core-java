@@ -21,20 +21,26 @@
 package io.spine.client;
 
 import io.spine.base.EntityColumn;
+import io.spine.base.EntityState;
 import io.spine.client.Filter.Operator;
 
 import static io.spine.client.Filters.createFilter;
 
-public final class QueryFilter {
+public final class QueryFilter implements MessageFilter<EntityState> {
 
-    private final Filter wrappedFilter;
+    private final Filter filter;
 
-    public QueryFilter(EntityColumn column, Object expected, Operator operator) {
+    QueryFilter(EntityColumn column, Object expected, Operator operator) {
         String fieldPath = column.name();
-        this.wrappedFilter = createFilter(fieldPath, expected, operator);
+        this.filter = createFilter(fieldPath, expected, operator);
     }
 
-    public Filter wrappedFilter() {
-        return wrappedFilter;
+    Filter filter() {
+        return filter;
+    }
+
+    @Override
+    public boolean test(EntityState state) {
+        return filter.test(state);
     }
 }

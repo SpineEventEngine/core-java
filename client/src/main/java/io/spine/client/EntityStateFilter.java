@@ -20,23 +20,24 @@
 
 package io.spine.client;
 
-import io.spine.base.FieldPath;
-import io.spine.base.SubscribableField;
+import io.spine.base.EntityState;
+import io.spine.base.EntityStateField;
 import io.spine.client.Filter.Operator;
 
-import static io.spine.client.Filters.createFilter;
-
-public final class SubscriptionFilter {
+public final class EntityStateFilter implements MessageFilter<EntityState> {
 
     private final Filter filter;
 
-    public SubscriptionFilter(SubscribableField field, Object expected, Operator operator) {
-        FieldPath fieldPath = field.getField()
-                                   .path();
-        this.filter = createFilter(fieldPath, expected, operator);
+    EntityStateFilter(EntityStateField field, Object expected, Operator operator) {
+        this.filter = Filters.createFilter(field.getField(), expected, operator);
     }
 
-    public Filter filter() {
+    Filter filter() {
         return filter;
+    }
+
+    @Override
+    public boolean test(EntityState state) {
+        return filter.test(state);
     }
 }

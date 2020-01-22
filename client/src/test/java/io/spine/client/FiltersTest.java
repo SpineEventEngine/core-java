@@ -26,10 +26,14 @@ import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityColumn;
-import io.spine.base.SubscribableField;
+import io.spine.base.EntityStateField;
+import io.spine.base.EventContextField;
+import io.spine.base.EventMessageField;
 import io.spine.client.Filter.Operator;
+import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.test.client.ClProjectCreated;
 import io.spine.test.client.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -80,15 +84,22 @@ class FiltersTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
+        QueryFilter queryFilter =
+                new QueryFilter(TestEntity.Columns.firstField(), "some value", EQUAL);
+        EntityStateFilter entityStateFilter =
+                new EntityStateFilter(TestEntity.Fields.firstField(), "some field value", EQUAL);
+        EventFilter eventFilter =
+                new EventFilter(ClProjectCreated.Fields.name().value(), "some project name", EQUAL);
         new NullPointerTester()
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
                 .setDefault(Filter.class, Filter.getDefaultInstance())
                 .setDefault(EntityColumn.class, TestEntity.Columns.firstField())
-                .setDefault(SubscribableField.class, TestEntity.Fields.id())
-                .setDefault(QueryFilter.class,
-                            new QueryFilter(TestEntity.Columns.firstField(), "some value", EQUAL))
-                .setDefault(SubscriptionFilter.class,
-                            new SubscriptionFilter(TestEntity.Fields.firstField(), "some value", EQUAL))
+                .setDefault(EntityStateField.class, TestEntity.Fields.id())
+                .setDefault(EventMessageField.class, ClProjectCreated.Fields.id())
+                .setDefault(EventContextField.class, EventContext.Fields.timestamp())
+                .setDefault(QueryFilter.class, queryFilter)
+                .setDefault(EntityStateFilter.class, entityStateFilter)
+                .setDefault(EventFilter.class, eventFilter)
                 .testAllPublicStaticMethods(Filters.class);
     }
 
@@ -157,7 +168,7 @@ class FiltersTest {
     @Test
     @DisplayName("create a filter for a subscribable field")
     void createForField() {
-        SubscriptionFilter eq = eq(TestEntity.Fields.name().value(), "some-name");
+        EntityStateFilter eq = eq(TestEntity.Fields.name().value(), "some-name");
         System.out.println("Field filter");
         System.out.println(eq);
     }

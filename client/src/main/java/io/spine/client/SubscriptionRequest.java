@@ -23,6 +23,7 @@ package io.spine.client;
 import io.spine.base.EntityState;
 import io.spine.core.EmptyContext;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -40,6 +41,22 @@ public final class SubscriptionRequest<S extends EntityState>
     SubscriptionRequest(ClientRequest parent, Class<S> type) {
         super(parent, type);
         this.consumers = StateConsumers.newBuilder();
+    }
+
+    public final SubscriptionRequest<S> where(EntityStateFilter... filter) {
+        Filter[] filters = Arrays.stream(filter)
+                                 .map(EntityStateFilter::filter)
+                                 .toArray(Filter[]::new);
+        builder().where(filters);
+        return self();
+    }
+
+    public final SubscriptionRequest<S> where(CompositeEntityStateFilter... filter) {
+        CompositeFilter[] filters = Arrays.stream(filter)
+                                          .map(CompositeEntityStateFilter::filter)
+                                          .toArray(CompositeFilter[]::new);
+        builder().where(filters);
+        return self();
     }
 
     @Override

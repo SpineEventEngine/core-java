@@ -65,7 +65,7 @@ public final class QueryRequest<S extends EntityState>
 
     public final QueryRequest<S> where(QueryFilter... filter) {
         Filter[] filters = Arrays.stream(filter)
-                                 .map(QueryFilter::wrappedFilter)
+                                 .map(QueryFilter::filter)
                                  .toArray(Filter[]::new);
         builder().where(filters);
         return this;
