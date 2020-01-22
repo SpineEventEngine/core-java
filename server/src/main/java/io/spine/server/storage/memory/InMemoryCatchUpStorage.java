@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
 import io.spine.server.delivery.CatchUp;
@@ -43,7 +44,8 @@ public class InMemoryCatchUpStorage extends AbstractStorage<CatchUpId, CatchUp, 
 
     private final MultitenantStorage<TenantCatchUpRecords> multitenantStorage;
 
-    protected InMemoryCatchUpStorage(boolean multitenant) {
+    @VisibleForTesting
+    public InMemoryCatchUpStorage(boolean multitenant) {
         super(multitenant);
         this.multitenantStorage = new MultitenantStorage<TenantCatchUpRecords>(multitenant) {
             @Override

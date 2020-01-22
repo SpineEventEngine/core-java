@@ -216,6 +216,18 @@ public final class DeliveryBuilder {
     }
 
     /**
+     * Sets the custom {@code CatchUpStorage}.
+     *
+     * <p>If none set, the storage is initialized by the {@code StorageFactory} specific for
+     * this {@code ServerEnvironment}.
+     */
+    @CanIgnoreReturnValue
+    public DeliveryBuilder setCatchUpStorage(CatchUpStorage catchUpStorage) {
+        this.catchUpStorage = checkNotNull(catchUpStorage);
+        return this;
+    }
+
+    /**
      * Sets the custom {@code DeliveryMonitor}.
      *
      * <p>If none set, {@link DeliveryMonitor#alwaysContinue()}  is used.

@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
 import io.spine.server.delivery.Inbox;
@@ -54,6 +55,7 @@ public final class InMemoryInboxStorage
 
     private final MultitenantStorage<TenantInboxRecords> multitenantStorage;
 
+    @VisibleForTesting
     public InMemoryInboxStorage(boolean multitenant) {
         super(multitenant);
         this.multitenantStorage = new MultitenantStorage<TenantInboxRecords>(multitenant) {

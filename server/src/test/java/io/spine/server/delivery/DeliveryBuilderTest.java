@@ -23,6 +23,7 @@ package io.spine.server.delivery;
 import com.google.protobuf.Duration;
 import io.spine.protobuf.Durations2;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.storage.memory.InMemoryCatchUpStorage;
 import io.spine.server.storage.memory.InMemoryInboxStorage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -114,9 +115,18 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("Inbox storage")
         void inboxStorage() {
-            InMemoryInboxStorage storage = new InMemoryInboxStorage(false);
+            InboxStorage storage = new InMemoryInboxStorage(false);
             assertEquals(storage, builder().setInboxStorage(storage)
                                            .inboxStorage()
+                                           .get());
+        }
+
+        @Test
+        @DisplayName("Catch-up storage")
+        void catchUpStorage() {
+            CatchUpStorage storage = new InMemoryCatchUpStorage(false);
+            assertEquals(storage, builder().setCatchUpStorage(storage)
+                                           .catchUpStorage()
                                            .get());
         }
 
@@ -180,6 +190,12 @@ class DeliveryBuilderTest {
         @DisplayName("Inbox storage")
         void inboxStorage() {
             assertThrows(NullPointerException.class, () -> builder().getInboxStorage());
+        }
+
+        @Test
+        @DisplayName("Catch-up storage")
+        void catchUpStorage() {
+            assertThrows(NullPointerException.class, () -> builder().getCatchUpStorage());
         }
 
         @Test
