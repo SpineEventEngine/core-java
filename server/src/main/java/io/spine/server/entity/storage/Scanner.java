@@ -27,11 +27,13 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromEntity;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromState;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.code.proto.ColumnOption.columnsOf;
-import static io.spine.reflect.Methods.setAccessibleAndInvoke;
+import static io.spine.reflect.Methods.asHandle;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -82,7 +84,8 @@ final class Scanner {
     private static void addSystemColumn(Method method,
                                         ImmutableMap.Builder<ColumnName, SysColumn> columns) {
         ColumnData data = ColumnData.of(method);
-        SysColumn.Getter getter = entity -> setAccessibleAndInvoke(data.getter, entity);
+        MethodHandle handle = asHandle(method);
+        SysColumn.Getter getter = entity -> invoke(handle, entity);
         SysColumn column = new SysColumn(data.name, data.type, getter);
         columns.put(column.name(), column);
     }
@@ -107,7 +110,8 @@ final class Scanner {
     private void addSimpleColumn(FieldDeclaration field,
                                  ImmutableMap.Builder<ColumnName, SimpleColumn> columns) {
         ColumnData data = ColumnData.of(field, entityClass);
-        SimpleColumn.Getter getter = state -> setAccessibleAndInvoke(data.getter, state);
+        MethodHandle handle = asHandle(data.getter);
+        SimpleColumn.Getter getter = state -> invoke(handle, state);
         SimpleColumn column = new SimpleColumn(data.name, data.type, getter, field);
         columns.put(column.name(), column);
     }
@@ -132,11 +136,14 @@ final class Scanner {
     private void addImplementedColumn(FieldDeclaration field,
                                       ImmutableMap.Builder<ColumnName, InterfaceBasedColumn> columns) {
         ColumnData data = ColumnData.of(field, entityClass);
+
+        MethodHandle stateGetterHandle = asHandle(data.getter);
+        GetterFromState getterFromState = state -> invoke(stateGetterHandle, state);
+
         Method getter = getterOf(field, entityClass.value());
-        GetterFromState getterFromState =
-                state -> setAccessibleAndInvoke(data.getter, state);
-        GetterFromEntity getterFromEntity =
-                entity -> setAccessibleAndInvoke(getter, entity);
+        MethodHandle getterHandle = asHandle(getter);
+        GetterFromEntity getterFromEntity = entity -> invoke(getterHandle, entity);
+
         InterfaceBasedColumn column = new InterfaceBasedColumn(data.name,
                                                                data.type,
                                                                getterFromEntity,
@@ -164,6 +171,14 @@ final class Scanner {
                 "Expected to find a getter with name `%s` in class `%s` according to the " +
                         "declaration of column `%s`.",
                 getterName, clazz.getCanonicalName(), field.name());
+    }
+
+    private static Object invoke(MethodHandle method, Object receiver) {
+        try {
+            return method.invoke(receiver);
+        } catch (Throwable throwable) {
+            throw illegalStateWithCauseOf(throwable);
+        }
     }
 
     /**
