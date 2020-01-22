@@ -111,7 +111,7 @@ import static java.util.Collections.synchronizedList;
  * {@code synchronized} in-memory data structures and prevents several threads from picking up the
  * same shard.
  */
-@SuppressWarnings({"OverlyCoupledClass"}) // It's fine for a centerpiece.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // It's fine for a centerpiece.
 public final class Delivery implements Logging {
 
     /**
@@ -166,6 +166,12 @@ public final class Delivery implements Logging {
     private final CatchUpStorage catchUpStorage;
 
     /**
+     * How many messages to read per query when recalling the historical events from the event log
+     * during the catch-up.
+     */
+    private final int catchUpPageSize;
+
+    /**
      * The monitor of delivery stages.
      */
     private final DeliveryMonitor monitor;
@@ -195,6 +201,7 @@ public final class Delivery implements Logging {
         this.idempotenceWindow = builder.getIdempotenceWindow();
         this.inboxStorage = builder.getInboxStorage();
         this.catchUpStorage = builder.getCatchUpStorage();
+        this.catchUpPageSize = builder.getCatchUpPageSize();
         this.monitor = builder.getMonitor();
         this.pageSize = builder.getPageSize();
         this.deliveries = new InboxDeliveries();
@@ -414,7 +421,7 @@ public final class Delivery implements Logging {
      */
     public <I> CatchUpProcessBuilder<I> newCatchUpProcess(ProjectionRepository<I, ?, ?> repo) {
         CatchUpProcessBuilder<I> builder = CatchUpProcess.newBuilder(repo);
-        return builder.withStorage(catchUpStorage);
+        return builder.withStorage(catchUpStorage).withPageSize(catchUpPageSize);
     }
 
     /**

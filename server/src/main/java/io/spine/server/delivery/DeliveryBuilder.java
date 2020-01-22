@@ -34,12 +34,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A builder for {@code Delivery} instances.
  */
+@SuppressWarnings("ClassWithTooManyMethods")    // That's expected for the centerpiece configurator.
 public final class DeliveryBuilder {
 
     /**
      * The default number of messages to be delivered in scope of a single {@link DeliveryStage}.
      */
     private static final int DEFAULT_PAGE_SIZE = 500;
+
+    /**
+     * The default number of the events to recall per single read operation during the catch-up.
+     */
+    private static final int DEFAULT_CATCH_UP_PAGE_SIZE = 500;
 
     private @MonotonicNonNull InboxStorage inboxStorage;
     private @MonotonicNonNull CatchUpStorage catchUpStorage;
@@ -48,6 +54,7 @@ public final class DeliveryBuilder {
     private @MonotonicNonNull Duration idempotenceWindow;
     private @MonotonicNonNull DeliveryMonitor deliveryMonitor;
     private @MonotonicNonNull Integer pageSize;
+    private @MonotonicNonNull Integer catchUpPageSize;
 
     /**
      * Prevents a direct instantiation of this class.
@@ -154,6 +161,18 @@ public final class DeliveryBuilder {
         return checkNotNull(pageSize);
     }
 
+    /**
+     * Returns the value of the configured catch-up page size or {@code Optional.empty()}
+     * if no such value was configured.
+     */
+    public Optional<Integer> catchUpPageSize() {
+        return Optional.ofNullable(catchUpPageSize);
+    }
+
+    Integer getCatchUpPageSize() {
+        return checkNotNull(catchUpPageSize);
+    }
+
     @CanIgnoreReturnValue
     public DeliveryBuilder setWorkRegistry(ShardedWorkRegistry workRegistry) {
         this.workRegistry = checkNotNull(workRegistry);
@@ -208,7 +227,7 @@ public final class DeliveryBuilder {
     }
 
     /**
-     * Sets the  maximum amount of messages to deliver within a {@link DeliveryStage}.
+     * Sets the maximum amount of messages to deliver within a {@link DeliveryStage}.
      *
      * <p>If none set, {@linkplain #DEFAULT_PAGE_SIZE} is used.
      */
@@ -216,6 +235,19 @@ public final class DeliveryBuilder {
     public DeliveryBuilder setPageSize(int pageSize) {
         checkArgument(pageSize > 0);
         this.pageSize = pageSize;
+        return this;
+    }
+
+    /**
+     * Sets the maximum number of events to read from an event store per single read operation
+     * during the catch-up.
+     *
+     * <p>If none set, {@linkplain #DEFAULT_CATCH_UP_PAGE_SIZE} is used.
+     */
+    @CanIgnoreReturnValue
+    public DeliveryBuilder setCatchUpPageSize(int catchUpPageSize) {
+        checkArgument(catchUpPageSize > 0);
+        this.catchUpPageSize = catchUpPageSize;
         return this;
     }
 
@@ -250,6 +282,10 @@ public final class DeliveryBuilder {
 
         if (pageSize == null) {
             pageSize = DEFAULT_PAGE_SIZE;
+        }
+
+        if (catchUpPageSize == null) {
+            pageSize = DEFAULT_CATCH_UP_PAGE_SIZE;
         }
 
         Delivery delivery = new Delivery(this);

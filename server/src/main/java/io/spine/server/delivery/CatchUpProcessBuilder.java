@@ -22,11 +22,12 @@ package io.spine.server.delivery;
 
 import io.spine.server.delivery.CatchUpProcess.DispatchCatchingUp;
 import io.spine.server.projection.ProjectionRepository;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Preconditions2.checkPositive;
 
 /**
  * A builder for {@link CatchUpProcess}.
@@ -34,8 +35,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class CatchUpProcessBuilder<I> {
 
     private final ProjectionRepository<I, ?, ?> repository;
-    private @Nullable CatchUpStorage storage;
-    private @Nullable DispatchCatchingUp<I> dispatchOp;
+    private @MonotonicNonNull CatchUpStorage storage;
+    private @MonotonicNonNull DispatchCatchingUp<I> dispatchOp;
+    private int pageSize;
 
     CatchUpProcessBuilder(ProjectionRepository<I, ?, ?> repository) {
         this.repository = repository;
@@ -49,13 +51,23 @@ public final class CatchUpProcessBuilder<I> {
         return Optional.ofNullable(storage);
     }
 
-    CatchUpStorage catchUpStorage() {
+    CatchUpStorage storage() {
         return checkNotNull(storage);
     }
 
     CatchUpProcessBuilder<I> withStorage(CatchUpStorage storage) {
         this.storage = checkNotNull(storage);
         return this;
+    }
+
+    CatchUpProcessBuilder<I> withPageSize(int pageSize) {
+        checkPositive(pageSize);
+        this.pageSize = pageSize;
+        return this;
+    }
+
+    public int pageSize() {
+        return pageSize;
     }
 
     public Optional<DispatchCatchingUp<I>> getDispatchOp() {
@@ -74,6 +86,7 @@ public final class CatchUpProcessBuilder<I> {
     public CatchUpProcess<I> build() {
         checkNotNull(storage);
         checkNotNull(dispatchOp);
+        checkPositive(pageSize);
         return new CatchUpProcess<>(this);
     }
 }

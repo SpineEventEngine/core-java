@@ -89,8 +89,6 @@ import static java.util.stream.Collectors.toSet;
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
-    //TODO:2019-11-29:alex.tymchenko: consider making this configurable via the `ServerEnvironment`.
-    private static final Limit LIMIT = limitOf(500);
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
     //TODO:2019-12-13:alex.tymchenko: make this configurable.
     private static final Duration TURBULENCE_PERIOD = Durations.fromMillis(500);
@@ -99,6 +97,7 @@ public final class CatchUpProcess<I>
     private final DispatchCatchingUp<I> dispatchOperation;
     private final CatchUpStorage storage;
     private final CatchUpStarter.Builder<I> starterTemplate;
+    private final Limit queryLimit;
 
     private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
     private @MonotonicNonNull Supplier<EventStore> eventStore;
@@ -107,7 +106,8 @@ public final class CatchUpProcess<I>
         super(TYPE);
         this.repository = builder.repository();
         this.dispatchOperation = builder.dispatchOp();
-        this.storage = builder.catchUpStorage();
+        this.storage = builder.storage();
+        this.queryLimit = limitOf(builder.pageSize());
         this.starterTemplate = CatchUpStarter.newBuilder(this.repository, this.storage);
     }
 
@@ -203,7 +203,7 @@ public final class CatchUpProcess<I>
         int nextRound = builder().getCurrentRound() + 1;
         builder().setCurrentRound(nextRound);
 
-        List<Event> readInThisRound = readMore(request, turbulenceStart(), LIMIT);
+        List<Event> readInThisRound = readMore(request, turbulenceStart(), queryLimit);
         if (!readInThisRound.isEmpty()) {
             List<Event> stripped = stripLastTimestamp(readInThisRound);
 
@@ -264,8 +264,8 @@ public final class CatchUpProcess<I>
         return events;
     }
 
-    private static
-    List<ShardProcessingRequested> toShardEvents(int totalShards, List<Integer> indexes) {
+    private static List<ShardProcessingRequested> toShardEvents(int totalShards,
+                                                                List<Integer> indexes) {
         return indexes
                 .stream()
                 .map(indexValue -> {
@@ -348,7 +348,8 @@ public final class CatchUpProcess<I>
         }
         EventStreamQuery query = toEventQuery(request, readBefore, limit);
         MemoizingObserver<Event> observer = new MemoizingObserver<>();
-        eventStore.get().read(query, observer);
+        eventStore.get()
+                  .read(query, observer);
         List<Event> allEvents = observer.responses();
         return allEvents;
     }

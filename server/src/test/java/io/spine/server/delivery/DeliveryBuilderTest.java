@@ -88,6 +88,15 @@ class DeliveryBuilderTest {
                      () -> builder().setPageSize(-3));
     }
 
+    @Test
+    @DisplayName("accept only positive catch-up page size")
+    void acceptOnlyPositiveCatchUpPageSize() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> builder().setCatchUpPageSize(0));
+        assertThrows(IllegalArgumentException.class,
+                     () -> builder().setCatchUpPageSize(-3));
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")    // testing `Builder` getters.
     @Nested
     @DisplayName("return set")
@@ -145,6 +154,15 @@ class DeliveryBuilderTest {
             assertEquals(pageSize, builder().setPageSize(pageSize)
                                             .pageSize()
                                             .get());
+        }
+
+        @Test
+        @DisplayName("catch-up page size")
+        void catchUpPageSize() {
+            int catchUpPageSize = 499;
+            assertEquals(catchUpPageSize, builder().setCatchUpPageSize(catchUpPageSize)
+                                                   .catchUpPageSize()
+                                                   .get());
         }
     }
 
