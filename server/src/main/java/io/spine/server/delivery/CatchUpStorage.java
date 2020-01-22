@@ -25,7 +25,7 @@ import io.spine.server.storage.Storage;
 import io.spine.type.TypeUrl;
 
 /**
- * @author Alex Tymchenko
+ * A storage for the state of the ongoing catch-up processes.
  */
 @SPI
 public interface CatchUpStorage extends Storage<CatchUpId, CatchUp, CatchUpReadRequest> {
@@ -38,7 +38,16 @@ public interface CatchUpStorage extends Storage<CatchUpId, CatchUp, CatchUpReadR
      */
     void write(CatchUp message);
 
+    /**
+     * Returns an {@code Iterable} over all the stored catch-up processes.
+     */
     Iterable<CatchUp> readAll();
 
+    /**
+     * Reads all the catch-up processes which update the projection of the specified type.
+     *
+     * @param projectionType
+     *         the type of the projection state to use for filtering
+     */
     Iterable<CatchUp> readByType(TypeUrl projectionType);
 }
