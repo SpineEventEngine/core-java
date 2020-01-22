@@ -59,6 +59,13 @@ class DeliveryBuilderTest {
         }
 
         @Test
+        @DisplayName("Catch-up storage")
+        void catchUpStorage() {
+            assertThrows(NullPointerException.class,
+                         () -> builder().setCatchUpStorage(nullRef()));
+        }
+
+        @Test
         @DisplayName("work registry")
         void workRegistry() {
             assertThrows(NullPointerException.class,
