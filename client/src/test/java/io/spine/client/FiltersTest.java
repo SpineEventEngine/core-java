@@ -21,20 +21,23 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Correspondence;
 import com.google.protobuf.DoubleValue;
-import com.google.protobuf.ProtocolStringList;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityColumn;
 import io.spine.base.EntityStateField;
 import io.spine.base.EventContextField;
 import io.spine.base.EventMessageField;
+import io.spine.base.Field;
 import io.spine.client.Filter.Operator;
 import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.test.client.ClProjectCreated;
 import io.spine.test.client.TestEntity;
+import io.spine.test.client.TestEntityOwner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,6 +55,7 @@ import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filter.Operator.LESS_THAN;
+import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.ge;
 import static io.spine.client.Filters.gt;
@@ -60,20 +64,22 @@ import static io.spine.client.Filters.lt;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.test.client.TestEntityOwner.Role.ADMIN;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static java.lang.String.join;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Filters utility should")
+@DisplayName("`Filters` utility should")
 class FiltersTest {
 
-    private static final String FIELD_PATH = "some.field.path";
+    private static final EntityStateField FIELD = TestEntity.Fields.owner()
+                                                                   .whenLastVisited();
     private static final Timestamp REQUESTED_VALUE = currentTime();
-    private static final String ENUM_FIELD_PATH = "enum.field";
-    private static final Operator ENUM_VALUE = EQUAL;
+    private static final EntityStateField ENUM_FIELD = TestEntity.Fields.owner()
+                                                                        .role();
+    private static final TestEntityOwner.Role ENUM_VALUE = ADMIN;
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
@@ -92,7 +98,6 @@ class FiltersTest {
                 new EventFilter(ClProjectCreated.Fields.name().value(), "some project name", EQUAL);
 
         new NullPointerTester()
-                .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
                 .setDefault(Filter.class, Filter.getDefaultInstance())
                 .setDefault(EntityColumn.class, TestEntity.Columns.firstField())
                 .setDefault(EntityStateField.class, TestEntity.Fields.id())
@@ -111,67 +116,106 @@ class FiltersTest {
         @Test
         @DisplayName("`equals`")
         void equals() {
-            checkCreatesInstance(eq(FIELD_PATH, REQUESTED_VALUE), EQUAL);
+            checkCreatesInstance(eq(FIELD, REQUESTED_VALUE), EQUAL);
         }
 
         @Test
         @DisplayName("`greater than`")
         void greaterThan() {
-            checkCreatesInstance(gt(FIELD_PATH, REQUESTED_VALUE), GREATER_THAN);
+            checkCreatesInstance(gt(FIELD, REQUESTED_VALUE), GREATER_THAN);
         }
 
         @Test
         @DisplayName("`greater than or equals`")
         void greaterOrEqual() {
-            checkCreatesInstance(ge(FIELD_PATH, REQUESTED_VALUE), GREATER_OR_EQUAL);
+            checkCreatesInstance(ge(FIELD, REQUESTED_VALUE), GREATER_OR_EQUAL);
         }
 
         @Test
         @DisplayName("`less than`")
         void lessThan() {
-            checkCreatesInstance(lt(FIELD_PATH, REQUESTED_VALUE), LESS_THAN);
+            checkCreatesInstance(lt(FIELD, REQUESTED_VALUE), LESS_THAN);
         }
 
         @Test
         @DisplayName("`less than or equals`")
         void lessOrEqual() {
-            checkCreatesInstance(le(FIELD_PATH, REQUESTED_VALUE), LESS_OR_EQUAL);
+            checkCreatesInstance(le(FIELD, REQUESTED_VALUE), LESS_OR_EQUAL);
         }
 
         @Test
         @DisplayName("`equals` for enumerated types")
         void equalsForEnum() {
-            Filter filter = eq(ENUM_FIELD_PATH, ENUM_VALUE);
-            ProtocolStringList pathElements = filter.getFieldPath()
-                                                    .getFieldNameList();
-            assertEquals(ENUM_FIELD_PATH, join(".", pathElements));
+            EntityStateFilter stateFilter = eq(ENUM_FIELD, ENUM_VALUE);
+            Filter filter = stateFilter.filter();
+
+            assertEquals(ENUM_FIELD.getField().path(), filter.getFieldPath());
             assertEquals(toAny(ENUM_VALUE), filter.getValue());
             assertEquals(EQUAL, filter.getOperator());
         }
 
-        private void checkCreatesInstance(Filter filter, Operator operator) {
-            ProtocolStringList pathElements = filter.getFieldPath()
-                                                    .getFieldNameList();
-            assertEquals(FIELD_PATH, join(".", pathElements));
+        private void checkCreatesInstance(EntityStateFilter stateFilter, Operator operator) {
+            Filter filter = stateFilter.filter();
+
+            assertEquals(FIELD.getField().path(), filter.getFieldPath());
             assertEquals(pack(REQUESTED_VALUE), filter.getValue());
             assertEquals(operator, filter.getOperator());
         }
     }
 
-    @Test
-    @DisplayName("create a filter for an entity column")
-    void createForEntityColumn() {
-        QueryFilter eq = eq(TestEntity.Columns.firstField(), "some-value");
-        System.out.println("Entity column filter");
-        System.out.println(eq);
-    }
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    // Duplication needed to test the validness of the generated code.
+    @Nested
+    @DisplayName("create filter targeting")
+    class CreateFilterTargeting {
 
-    @Test
-    @DisplayName("create a filter for a subscribable field")
-    void createForField() {
-        EntityStateFilter eq = eq(TestEntity.Fields.name().value(), "some-name");
-        System.out.println("Field filter");
-        System.out.println(eq);
+        @Test
+        @DisplayName("an entity column")
+        void entityColumn() {
+            EntityColumn column = TestEntity.Columns.firstField();
+            checkFieldPath(eq(column, "some string value"), "first_field");
+        }
+
+        @Test
+        @DisplayName("an entity state field")
+        void entityField() {
+            EntityStateField field = TestEntity.Fields.name()
+                                                      .value();
+            checkFieldPath(eq(field, "some entity name"), "name.value");
+        }
+
+        @Test
+        @DisplayName("an event message field")
+        void eventField() {
+            EventMessageField field = ClProjectCreated.Fields.name()
+                                                             .value();
+            checkFieldPath(eq(field, "some project name"), "name.value");
+        }
+
+        @Test
+        @DisplayName("an event context field")
+        void eventContextField() {
+            EventContextField field = EventContext.Fields.pastMessage();
+            checkFieldPath(eq(field, "some user ID"), "context.past_message");
+        }
+
+        @Test
+        @DisplayName("a custom field passed via field path")
+        void customField() {
+            String fieldPath = "project.when_created";
+            Filter filter = eq(fieldPath, currentTime());
+            String fieldPathInFilter = Field.withPath(filter.getFieldPath())
+                                            .toString();
+
+            assertThat(fieldPathInFilter).isEqualTo(fieldPath);
+        }
+
+        private void checkFieldPath(FilterHolder<?> filterWrapper, String expectedFieldPath) {
+            Filter filter = filterWrapper.filter();
+            String fieldPath = Field.withPath(filter.getFieldPath())
+                                    .toString();
+            assertThat(fieldPath).isEqualTo(expectedFieldPath);
+        }
     }
 
     @Nested
@@ -181,9 +225,9 @@ class FiltersTest {
         @Test
         @DisplayName("`all`")
         void all() {
-            Filter[] filters = {
-                    le(FIELD_PATH, REQUESTED_VALUE),
-                    ge(FIELD_PATH, REQUESTED_VALUE)
+            EntityStateFilter[] filters = {
+                    le(FIELD, REQUESTED_VALUE),
+                    ge(FIELD, REQUESTED_VALUE)
             };
             checkCreatesInstance(Filters.all(filters[0], filters[1]), ALL, filters);
         }
@@ -191,18 +235,76 @@ class FiltersTest {
         @Test
         @DisplayName("`either`")
         void either() {
-            Filter[] filters = {
-                    lt(FIELD_PATH, REQUESTED_VALUE),
-                    gt(FIELD_PATH, REQUESTED_VALUE)
+            EntityStateFilter[] filters = {
+                    lt(FIELD, REQUESTED_VALUE),
+                    gt(FIELD, REQUESTED_VALUE)
             };
             checkCreatesInstance(Filters.either(filters[0], filters[1]), EITHER, filters);
         }
 
-        private void checkCreatesInstance(CompositeFilter filter,
+        private void checkCreatesInstance(CompositeEntityStateFilter filter,
                                           CompositeOperator operator,
-                                          Filter[] groupedFilters) {
-            assertEquals(operator, filter.getOperator());
-            assertThat(filter.getFilterList()).containsAtLeastElementsIn(groupedFilters);
+                                          EntityStateFilter[] groupedFilters) {
+            CompositeFilter compositeFilter = filter.filter();
+
+            assertEquals(operator, compositeFilter.getOperator());
+            assertThat(compositeFilter.getFilterList())
+                    .comparingElementsUsing(filterHolderCorrespondence())
+                    .containsExactlyElementsIn(groupedFilters);
+        }
+    }
+
+    @Nested
+    @DisplayName("create composite filter targeting")
+    class CreateCompositeFilterTargeting {
+
+        @Test
+        @DisplayName("entity columns")
+        void entityColumns() {
+            QueryFilter[] filters = {
+                    le(TestEntity.Columns.firstField(), "a string value"),
+                    ge(TestEntity.Columns.thirdField(), 42)
+            };
+            checkCreatesInstance(all(filters[0], filters[1]), filters);
+        }
+
+        @Test
+        @DisplayName("entity state fields")
+        void entityFields() {
+            EntityStateFilter[] filters = {
+                    le(TestEntity.Fields.name().value(), "an entity name"),
+                    ge(TestEntity.Fields.thirdField(), 42)
+            };
+            checkCreatesInstance(all(filters[0], filters[1]), filters);
+        }
+
+        @Test
+        @DisplayName("event message and event context fields")
+        void eventMessageAndContextFields() {
+            EventFilter[] filters = {
+                    le(ClProjectCreated.Fields.name().value(), "a project name"),
+                    eq(EventContext.Fields.external(), true)
+            };
+            checkCreatesInstance(all(filters[0], filters[1]), filters);
+        }
+
+        @Test
+        @DisplayName("custom fields specified through field paths")
+        void customFields() {
+            Filter[] filters = {
+                    le("first_custom_field", "a string value"),
+                    ge("second_custom_field", 154)
+            };
+            CompositeFilter compositeFilter = all(filters[0], filters[1]);
+            assertThat(compositeFilter.getFilterList()).containsExactlyElementsIn(filters);
+        }
+
+        private <M extends Message> void checkCreatesInstance(CompositeFilterHolder<M> filter,
+                                                              FilterHolder<M>[] groupedFilters) {
+            CompositeFilter compositeFilter = filter.filter();
+            assertThat(compositeFilter.getFilterList())
+                    .comparingElementsUsing(filterHolderCorrespondence())
+                    .containsExactlyElementsIn(groupedFilters);
         }
     }
 
@@ -214,8 +316,8 @@ class FiltersTest {
         @DisplayName("for numbers")
         void forNumbers() {
             double number = 3.14;
-            Filter filter = le("double_field", number);
-            assertThat(filter).isNotNull();
+            QueryFilter queryFilter = le(TestEntity.Columns.thirdField(), number);
+            Filter filter = queryFilter.filter();
             assertThat(filter.getOperator()).isEqualTo(LESS_OR_EQUAL);
 
             DoubleValue value = unpack(filter.getValue(), DoubleValue.class);
@@ -226,8 +328,8 @@ class FiltersTest {
         @DisplayName("for strings")
         void forStrings() {
             String theString = "abc";
-            Filter filter = gt("string_field", theString);
-            assertThat(filter).isNotNull();
+            QueryFilter queryFilter = gt(TestEntity.Columns.firstField(), theString);
+            Filter filter = queryFilter.filter();
             assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
 
             StringValue value = unpack(filter.getValue(), StringValue.class);
@@ -238,8 +340,10 @@ class FiltersTest {
         @DisplayName("for timestamps")
         void forTimestamps() {
             Timestamp timestamp = currentTime();
-            Filter filter = gt("timestamp_field", timestamp);
-            assertThat(filter).isNotNull();
+            EntityStateFilter stateFilter =
+                    gt(TestEntity.Fields.owner().whenLastVisited(), timestamp);
+            Filter filter = stateFilter.filter();
+
             assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
             Timestamp value = unpack(filter.getValue(), Timestamp.class);
             assertThat(value).isEqualTo(timestamp);
@@ -249,7 +353,8 @@ class FiltersTest {
         @DisplayName("for versions")
         void forVersions() {
             Version version = Versions.zero();
-            Filter filter = ge("version_field", version);
+            Filter filter = ge("some_version_field", version);
+
             assertThat(filter).isNotNull();
             assertThat(filter.getOperator()).isEqualTo(GREATER_OR_EQUAL);
             Version value = unpack(filter.getValue(), Version.class);
@@ -265,7 +370,7 @@ class FiltersTest {
         @DisplayName("for enumerated types")
         void forEnums() {
             assertThrows(IllegalArgumentException.class,
-                         () -> ge(ENUM_FIELD_PATH, ENUM_VALUE));
+                         () -> ge(ENUM_FIELD, ENUM_VALUE));
         }
 
         @Test
@@ -281,5 +386,13 @@ class FiltersTest {
             Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
             assertThrows(IllegalArgumentException.class, () -> le("invalidField", value));
         }
+    }
+
+    private static Correspondence<Filter, FilterHolder<?>> filterHolderCorrespondence() {
+        return Correspondence.from(FiltersTest::isFilterEqual, "is wrapped by");
+    }
+
+    private static boolean isFilterEqual(Filter filter, FilterHolder<?> wrapper) {
+        return filter.equals(wrapper.filter());
     }
 }

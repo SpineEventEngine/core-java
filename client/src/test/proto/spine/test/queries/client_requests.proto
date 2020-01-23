@@ -28,6 +28,9 @@ option java_package="io.spine.test.client";
 option java_multiple_files = true;
 option java_outer_classname = "ClientRequestsProto";
 
+import "google/protobuf/timestamp.proto";
+import "spine/core/user_id.proto";
+
 // Sample objects for testing Queries and Topics.
 
 // Simple ID for tests.
@@ -51,6 +54,8 @@ message TestEntity {
     int32 third_field = 4 [(column) = true];
 
     TestEntityName name = 5;
+
+    TestEntityOwner owner = 6;
 }
 
 // A simple value holder.
@@ -61,4 +66,19 @@ message TestEntityName {
     option (entity).kind = ENTITY;
 
     string value = 1 [(column) = true];
+}
+
+message TestEntityOwner {
+
+    spine.core.UserId id = 1;
+
+    google.protobuf.Timestamp when_last_visited = 2;
+
+    Role role = 3;
+
+    enum Role {
+        UNDEFINED = 0;
+        ADMIN = 1;
+        USER = 2;
+    }
 }
