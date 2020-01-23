@@ -90,6 +90,7 @@ class FiltersTest {
                 new EntityStateFilter(TestEntity.Fields.firstField(), "some field value", EQUAL);
         EventFilter eventFilter =
                 new EventFilter(ClProjectCreated.Fields.name().value(), "some project name", EQUAL);
+
         new NullPointerTester()
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
                 .setDefault(Filter.class, Filter.getDefaultInstance())
