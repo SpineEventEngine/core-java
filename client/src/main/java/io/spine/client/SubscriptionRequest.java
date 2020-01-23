@@ -23,9 +23,10 @@ package io.spine.client;
 import io.spine.base.EntityState;
 import io.spine.core.EmptyContext;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static java.util.Arrays.stream;
 
 /**
  * Allows to subscribe to updates of entity states using filtering conditions.
@@ -44,17 +45,19 @@ public final class SubscriptionRequest<S extends EntityState>
     }
 
     public final SubscriptionRequest<S> where(EntityStateFilter... filter) {
-        Filter[] filters = Arrays.stream(filter)
-                                 .map(EntityStateFilter::filter)
-                                 .toArray(Filter[]::new);
+        Filter[] filters =
+                stream(filter)
+                        .map(EntityStateFilter::filter)
+                        .toArray(Filter[]::new);
         builder().where(filters);
         return self();
     }
 
     public final SubscriptionRequest<S> where(CompositeEntityStateFilter... filter) {
-        CompositeFilter[] filters = Arrays.stream(filter)
-                                          .map(CompositeEntityStateFilter::filter)
-                                          .toArray(CompositeFilter[]::new);
+        CompositeFilter[] filters =
+                stream(filter)
+                        .map(CompositeEntityStateFilter::filter)
+                        .toArray(CompositeFilter[]::new);
         builder().where(filters);
         return self();
     }

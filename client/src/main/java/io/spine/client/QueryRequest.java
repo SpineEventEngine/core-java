@@ -23,10 +23,10 @@ package io.spine.client;
 import com.google.common.collect.ImmutableList;
 import io.spine.base.EntityState;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Arrays.stream;
 
 /**
  * Allows to create a post a query for messages of the given type.
@@ -64,17 +64,19 @@ public final class QueryRequest<S extends EntityState>
     }
 
     public final QueryRequest<S> where(QueryFilter... filter) {
-        Filter[] filters = Arrays.stream(filter)
-                                 .map(QueryFilter::filter)
-                                 .toArray(Filter[]::new);
+        Filter[] filters =
+                stream(filter)
+                        .map(QueryFilter::filter)
+                        .toArray(Filter[]::new);
         builder().where(filters);
         return this;
     }
 
     public final QueryRequest<S> where(CompositeQueryFilter... filter) {
-        CompositeFilter[] filters = Arrays.stream(filter)
-                                          .map(CompositeQueryFilter::filter)
-                                          .toArray(CompositeFilter[]::new);
+        CompositeFilter[] filters =
+                stream(filter)
+                        .map(CompositeQueryFilter::filter)
+                        .toArray(CompositeFilter[]::new);
         builder().where(filters);
         return this;
     }
