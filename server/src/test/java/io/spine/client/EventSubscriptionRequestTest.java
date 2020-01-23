@@ -101,8 +101,10 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
                                 .user();
             client().asGuest()
                     .subscribeToEvent(UserLoggedIn.class)
-                    .where(all(eq("user", userId),
-                               eq("context.past_message.actor_context.actor", guestUser)))
+                    .where(all(eq(UserLoggedIn.Fields.user(), userId),
+                               eq(EventContext.Fields.pastMessage()
+                                                     .actorContext()
+                                                     .actor(), guestUser)))
                     .observe((e, c) -> {
                         rememberedMessage = e;
                         rememberedContext = c;
