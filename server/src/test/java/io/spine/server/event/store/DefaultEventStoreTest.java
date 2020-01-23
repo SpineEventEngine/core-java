@@ -31,7 +31,6 @@ import io.spine.core.EventContext;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -41,6 +40,7 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.test.event.TaskAdded;
+import io.spine.testing.SlowTest;
 import io.spine.testing.TestValues;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
@@ -71,7 +71,7 @@ import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
 import static io.spine.testing.TestValues.random;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
 import static java.time.Duration.ofMillis;
-import static java.time.Duration.ofSeconds;
+import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -86,7 +86,7 @@ public class DefaultEventStoreTest {
 
     @BeforeEach
     void setUp() {
-        executor = Executors.newFixedThreadPool(32);
+        executor = Executors.newFixedThreadPool(64);
         context = BoundedContextBuilder.assumingTests().build();
         eventStore = context.eventBus().eventStore();
     }
@@ -257,18 +257,19 @@ public class DefaultEventStoreTest {
         assertThrows(IllegalArgumentException.class, () -> eventStore.appendAll(event));
     }
 
+    @SlowTest
     @Test
     @DisplayName("be able to store events in parallel")
     void storeInParallel() {
-        int eventCount = 1024;
+        int eventCount = 10_000;
         CompletableFuture<?>[] futures =
                 Stream.generate(GivenEvent::arbitrary)
                       .limit(eventCount)
                       .map(event -> runAsync(() -> waitAndStore(event), executor))
                       .toArray(CompletableFuture[]::new);
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures);
+        CompletableFuture<Void> allFutures = allOf(futures);
         allFutures.join();
-        MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
+        MemoizingObserver<Event> observer = memoizingObserver();
         eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
         assertThat(observer.isCompleted())
                 .isTrue();
@@ -277,7 +278,7 @@ public class DefaultEventStoreTest {
     }
 
     private void waitAndStore(Event event) {
-        sleepUninterruptibly(ofMillis(random(5, 500)));
+        sleepUninterruptibly(ofMillis(random(125, 150)));
         eventStore.append(event);
     }
 
