@@ -20,74 +20,25 @@
 
 package io.spine.client;
 
-import com.google.common.collect.ImmutableList;
+import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.core.Event;
 
 import java.util.Collection;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.client.Filters.composeFilters;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Filters events by composite criteria which can test both event messages and their contexts.
  */
-public final class CompositeEventFilter implements CompositeMessageFilter<Event> {
+public final class CompositeEventFilter extends CompositeFilterHolder<Event> {
 
-    /** The filter data as composed when creating a topic. */
-    private final CompositeFilter filter;
-    /** Filters adopted to filter events basing on the passed filter data. */
-    private final ImmutableList<MessageFilter<Event>> filters;
+    private static final long serialVersionUID = 0L;
 
     CompositeEventFilter(CompositeFilter filter) {
-        this.filter = checkNotNull(filter);
-        this.filters =
-                filter.getFilterList()
-                      .stream()
-                      .map(EventFilter::new)
-                      .collect(toImmutableList());
+        super(checkNotNull(filter), EventFilter::new);
     }
 
-    CompositeEventFilter(Collection<EventFilter> filters,
-                         CompositeFilter.CompositeOperator operator) {
-        List<Filter> filterList = checkNotNull(filters)
-                .stream()
-                .map(EventFilter::filter)
-                .collect(toList());
-        this.filter = composeFilters(filterList, operator);
-        this.filters = ImmutableList.copyOf(filters);
-    }
-
-    @Override
-    public List<MessageFilter<Event>> filters() {
-        return filters;
-    }
-
-    @Override
-    public CompositeFilter.CompositeOperator operator() {
-        return filter.operator();
-    }
-
-    CompositeFilter filter() {
-        return filter;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CompositeEventFilter other = (CompositeEventFilter) o;
-        return filter.equals(other.filter);
-    }
-
-    @Override
-    public int hashCode() {
-        return filter.hashCode();
+    CompositeEventFilter(Collection<EventFilter> filters, CompositeOperator operator) {
+        super(filters, operator);
     }
 }

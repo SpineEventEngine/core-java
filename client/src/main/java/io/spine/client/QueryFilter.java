@@ -26,21 +26,11 @@ import io.spine.client.Filter.Operator;
 
 import static io.spine.client.Filters.createFilter;
 
-public final class QueryFilter implements MessageFilter<EntityState> {
+public final class QueryFilter extends FilterHolder<EntityState> {
 
-    private final Filter filter;
+    private static final long serialVersionUID = 0L;
 
     QueryFilter(EntityColumn column, Object expected, Operator operator) {
-        String fieldPath = column.name();
-        this.filter = createFilter(fieldPath, expected, operator);
-    }
-
-    Filter filter() {
-        return filter;
-    }
-
-    @Override
-    public boolean test(EntityState state) {
-        return filter.test(state);
+        super(createFilter(column.name(), expected, operator));
     }
 }

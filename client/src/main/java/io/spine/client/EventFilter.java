@@ -24,20 +24,20 @@ import io.spine.base.EventContextField;
 import io.spine.base.EventMessageField;
 import io.spine.core.Event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filters.createContextFilter;
 import static io.spine.client.Filters.createFilter;
 
 /**
  * Filters events by conditions on both message and context.
  */
-public final class EventFilter implements MessageFilter<Event> {
+public final class EventFilter extends FilterHolder<Event> {
 
-    private final Filter filter;
+    private static final long serialVersionUID = 0L;
+
     private final boolean byContext;
 
     private EventFilter(Filter filter, boolean byContext) {
-        this.filter = checkNotNull(filter);
+        super(filter);
         this.byContext = byContext;
     }
 
@@ -58,30 +58,9 @@ public final class EventFilter implements MessageFilter<Event> {
         if (byContext) {
             // Since we reference the context field with `context` prefix, we need to pass
             // the whole `Event` instance.
-            return filter.test(event);
+            return filter().test(event);
         }
-        return filter.test(event.enclosedMessage());
-    }
-
-    Filter filter() {
-        return filter;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        EventFilter other = (EventFilter) o;
-        return filter.equals(other.filter);
-    }
-
-    @Override
-    public int hashCode() {
-        return filter.hashCode();
+        return filter().test(event.enclosedMessage());
     }
 
     private static boolean isContextFilter(Filter filter) {

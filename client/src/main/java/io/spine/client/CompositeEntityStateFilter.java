@@ -20,40 +20,16 @@
 
 package io.spine.client;
 
-import com.google.common.collect.ImmutableList;
 import io.spine.base.EntityState;
 import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;
-import java.util.List;
 
-import static io.spine.client.Filters.composeFilters;
-import static java.util.stream.Collectors.toList;
+public final class CompositeEntityStateFilter extends CompositeFilterHolder<EntityState> {
 
-public final class CompositeEntityStateFilter implements CompositeMessageFilter<EntityState> {
-
-    private final CompositeFilter filter;
-    private final ImmutableList<MessageFilter<EntityState>> filters;
+    private static final long serialVersionUID = 0L;
 
     CompositeEntityStateFilter(Collection<EntityStateFilter> filters, CompositeOperator operator) {
-        List<Filter> filterList = filters.stream()
-                                         .map(EntityStateFilter::filter)
-                                         .collect(toList());
-        this.filter = composeFilters(filterList, operator);
-        this.filters = ImmutableList.copyOf(filters);
-    }
-
-    CompositeFilter filter() {
-        return filter;
-    }
-
-    @Override
-    public List<MessageFilter<EntityState>> filters() {
-        return filters;
-    }
-
-    @Override
-    public CompositeOperator operator() {
-        return filter.operator();
+        super(filters, operator);
     }
 }

@@ -28,7 +28,7 @@ import io.spine.core.EventContext;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static java.util.Arrays.stream;
+import static io.spine.client.Filters.extractFilters;
 
 /**
  * Allows to subscribe to events using filtering conditions.
@@ -70,20 +70,12 @@ public final class EventSubscriptionRequest<E extends EventMessage>
     }
 
     public final EventSubscriptionRequest<E> where(EventFilter... filter) {
-        Filter[] filters =
-                stream(filter)
-                        .map(EventFilter::filter)
-                        .toArray(Filter[]::new);
-        builder().where(filters);
+        builder().where(extractFilters(filter));
         return self();
     }
 
     public final EventSubscriptionRequest<E> where(CompositeEventFilter... filter) {
-        CompositeFilter[] filters =
-                stream(filter)
-                        .map(CompositeEventFilter::filter)
-                        .toArray(CompositeFilter[]::new);
-        builder().where(filters);
+        builder().where(extractFilters(filter));
         return self();
     }
 

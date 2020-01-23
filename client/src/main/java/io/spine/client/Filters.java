@@ -20,8 +20,10 @@
 
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityColumn;
@@ -39,6 +41,7 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
@@ -443,10 +446,23 @@ public final class Filters {
         return result;
     }
 
-    static Filter[] extractFilters(QueryFilter[] filters) {
+    static Filter[] extractFilters(FilterHolder<?>[] filters) {
         return stream(filters)
-                .map(QueryFilter::filter)
+                .map(FilterHolder::filter)
                 .toArray(Filter[]::new);
+    }
+
+    static <M extends Message> ImmutableList<Filter>
+    extractFilters(Collection<? extends FilterHolder<M>> filters) {
+        return filters.stream()
+                      .map(FilterHolder::filter)
+                      .collect(toImmutableList());
+    }
+
+    static CompositeFilter[] extractFilters(CompositeFilterHolder<?>[] filters) {
+        return stream(filters)
+                .map(CompositeFilterHolder::filter)
+                .toArray(CompositeFilter[]::new);
     }
 
     private static void checkSupportedOrderingComparisonType(Class<?> cls) {
