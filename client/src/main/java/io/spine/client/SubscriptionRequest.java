@@ -44,12 +44,12 @@ public final class SubscriptionRequest<S extends EntityState>
         this.consumers = StateConsumers.newBuilder();
     }
 
-    public final SubscriptionRequest<S> where(EntityStateFilter... filter) {
+    public SubscriptionRequest<S> where(EntityStateFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
     }
 
-    public final SubscriptionRequest<S> where(CompositeEntityStateFilter... filter) {
+    public SubscriptionRequest<S> where(CompositeEntityStateFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
     }

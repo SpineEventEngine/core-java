@@ -48,8 +48,8 @@ import static io.spine.client.Filters.extractFilters;
  *          .run();
  * }</pre>
  *
- * <p>Filtering by field values (via {@link #where(Filter...)} and
- * {@link #where(CompositeFilter...)} methods) can be composed using the {@link Filters}
+ * <p>Filtering by field values (via {@link #where(QueryFilter...)} and
+ * {@link #where(CompositeQueryFilter...)} methods) can be composed using the {@link Filters}
  * utility class.
  *
  * @param <S>
@@ -63,12 +63,12 @@ public final class QueryRequest<S extends EntityState>
         super(parent, type);
     }
 
-    public final QueryRequest<S> where(QueryFilter... filter) {
+    public QueryRequest<S> where(QueryFilter... filter) {
         builder().where(extractFilters(filter));
         return this;
     }
 
-    public final QueryRequest<S> where(CompositeQueryFilter... filter) {
+    public QueryRequest<S> where(CompositeQueryFilter... filter) {
         builder().where(extractFilters(filter));
         return this;
     }

@@ -69,12 +69,12 @@ public final class EventSubscriptionRequest<E extends EventMessage>
         this.consumers = EventConsumers.newBuilder();
     }
 
-    public final EventSubscriptionRequest<E> where(EventFilter... filter) {
+    public EventSubscriptionRequest<E> where(EventFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
     }
 
-    public final EventSubscriptionRequest<E> where(CompositeEventFilter... filter) {
+    public EventSubscriptionRequest<E> where(CompositeEventFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
     }

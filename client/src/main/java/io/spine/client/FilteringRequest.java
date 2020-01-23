@@ -140,6 +140,7 @@ FilteringRequest<M extends Message,
     /**
      * Configures the request to return results matching all the passed filters.
      */
+    @Deprecated
     public B where(Filter... filter) {
         builder().where(filter);
         return self();
@@ -148,6 +149,7 @@ FilteringRequest<M extends Message,
     /**
      * Configures the request to return results matching all the passed filters.
      */
+    @Deprecated
     public B where(CompositeFilter... filter) {
         builder().where(filter);
         return self();

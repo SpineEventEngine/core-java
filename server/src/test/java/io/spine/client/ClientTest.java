@@ -100,24 +100,23 @@ class ClientTest extends AbstractClientTest {
         void createSubscriptions() {
             subscriptions = new ArrayList<>();
             UserId currentUser = GivenUserId.generated();
-            String userField = "user";
             Client client = client();
             Subscription userLoggedIn =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedIn.class)
-                          .where(eq(userField, currentUser))
+                          .where(eq(UserLoggedIn.Fields.user(), currentUser))
                           .observe((e) -> {})
                           .post();
             Subscription userLoggedOut =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedOut.class)
-                          .where(eq(userField, currentUser))
+                          .where(eq(UserLoggedOut.Fields.user(), currentUser))
                           .observe((e) -> {})
                           .post();
             Subscription loginStatus =
                     client.onBehalfOf(currentUser)
                     .subscribeTo(LoginStatus.class)
-                    .where(eq("user_id", currentUser.getValue()))
+                    .where(eq(LoginStatus.Fields.userId(), currentUser.getValue()))
                     .observe((s) -> {})
                     .post();
 
