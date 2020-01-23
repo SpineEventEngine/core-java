@@ -24,12 +24,14 @@ import io.spine.base.EntityState;
 import io.spine.base.EntityStateField;
 import io.spine.client.Filter.Operator;
 
+import static io.spine.client.Filters.createFilter;
+
 public final class EntityStateFilter implements MessageFilter<EntityState> {
 
     private final Filter filter;
 
     EntityStateFilter(EntityStateField field, Object expected, Operator operator) {
-        this.filter = Filters.createFilter(field.getField(), expected, operator);
+        this.filter = createFilter(field.getField(), expected, operator);
     }
 
     Filter filter() {

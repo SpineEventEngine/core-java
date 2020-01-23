@@ -49,6 +49,7 @@ import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static java.util.Arrays.stream;
 
 /**
  * A factory of {@link Filter} instances.
@@ -442,6 +443,12 @@ public final class Filters {
         return result;
     }
 
+    static Filter[] extractFilters(QueryFilter[] filters) {
+        return stream(filters)
+                .map(QueryFilter::filter)
+                .toArray(Filter[]::new);
+    }
+
     private static void checkSupportedOrderingComparisonType(Class<?> cls) {
         Class<?> dataType = Primitives.wrap(cls);
         boolean supported = isSupportedNumber(dataType)
@@ -463,6 +470,7 @@ public final class Filters {
      * Creates a filter of events which can apply conditions from the passed
      * {@code CompositeFilter} to both event message and its context.
      *
+     * // TODO:2019-12-20:dmytro.kuzmin:WIP: Update the doc here and all similar places.
      * <p>Please use the {@code "context."} prefix for referencing a field of the event context.
      */
     @Internal
