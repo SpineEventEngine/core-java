@@ -278,7 +278,7 @@ public class DefaultEventStoreTest {
     }
 
     private void waitAndStore(Event event) {
-        sleepUninterruptibly(ofMillis(random(125, 150)));
+        sleepUninterruptibly(ofMillis(random(20, 40)));
         eventStore.append(event);
     }
 
