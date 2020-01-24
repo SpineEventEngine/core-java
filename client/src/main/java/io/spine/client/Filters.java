@@ -29,6 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.code.proto.FieldName;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.gen.EntityColumn;
@@ -412,6 +413,11 @@ public final class Filters {
     static Filter createFilter(String fieldPath, Object value, Operator operator) {
         Field field = Field.parse(fieldPath);
         return createFilter(field, value, operator);
+    }
+
+    static Filter createFilter(FieldName fieldName, Object value, Operator operator) {
+        FieldPath fieldPath = fieldName.asPath();
+        return createFilter(fieldPath, value, operator);
     }
 
     static Filter createFilter(Field field, Object value, Operator operator) {
