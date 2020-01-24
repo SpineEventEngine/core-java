@@ -126,6 +126,7 @@ public final class Columns {
      * getters.
      */
     public Map<ColumnName, @Nullable Object> valuesIn(Entity<?, ?> source) {
+        checkNotNull(source);
         Map<ColumnName, @Nullable Object> result = new HashMap<>();
         systemColumns.forEach(
                 (name, column) -> result.put(name, column.valueIn(source))

@@ -38,7 +38,9 @@ import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.event.TaskAdded;
+import io.spine.testing.SlowTest;
 import io.spine.testing.TestValues;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
@@ -49,9 +51,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
@@ -61,7 +68,11 @@ import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.event.given.EventStoreTestEnv.assertDone;
 import static io.spine.server.event.given.EventStoreTestEnv.projectCreated;
 import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
+import static io.spine.testing.TestValues.random;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
+import static java.time.Duration.ofMillis;
+import static java.util.concurrent.CompletableFuture.allOf;
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -71,9 +82,11 @@ public class DefaultEventStoreTest {
 
     private BoundedContext context;
     private EventStore eventStore;
+    private ExecutorService executor;
 
     @BeforeEach
     void setUp() {
+        executor = Executors.newFixedThreadPool(64);
         context = BoundedContextBuilder.assumingTests().build();
         eventStore = context.eventBus().eventStore();
     }
@@ -81,6 +94,7 @@ public class DefaultEventStoreTest {
     @AfterEach
     void tearDown() throws Exception {
         context.close();
+        executor.shutdownNow();
     }
 
     @Nested
@@ -241,6 +255,31 @@ public class DefaultEventStoreTest {
         Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
 
         assertThrows(IllegalArgumentException.class, () -> eventStore.appendAll(event));
+    }
+
+    @SlowTest
+    @Test
+    @DisplayName("be able to store events in parallel")
+    void storeInParallel() {
+        int eventCount = 10_000;
+        CompletableFuture<?>[] futures =
+                Stream.generate(GivenEvent::arbitrary)
+                      .limit(eventCount)
+                      .map(event -> runAsync(() -> waitAndStore(event), executor))
+                      .toArray(CompletableFuture[]::new);
+        CompletableFuture<Void> allFutures = allOf(futures);
+        allFutures.join();
+        MemoizingObserver<Event> observer = memoizingObserver();
+        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
+        assertThat(observer.isCompleted())
+                .isTrue();
+        assertThat(observer.responses())
+                .hasSize(eventCount);
+    }
+
+    private void waitAndStore(Event event) {
+        sleepUninterruptibly(ofMillis(random(20, 40)));
+        eventStore.append(event);
     }
 
     @Nested
