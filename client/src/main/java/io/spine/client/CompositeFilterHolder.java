@@ -49,7 +49,7 @@ abstract class CompositeFilterHolder<M extends Message>
                              .collect(toImmutableList());
     }
 
-    CompositeFilterHolder(Collection<? extends FilterHolder<M>> filters,
+    CompositeFilterHolder(Collection<? extends TypedFilter<M>> filters,
                           CompositeOperator operator) {
         super(composeFilters(extractFilters(filters), operator));
         this.filters = ImmutableList.copyOf(filters);

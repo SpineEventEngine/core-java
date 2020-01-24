@@ -20,9 +20,9 @@
 
 package io.spine.client;
 
-import io.spine.base.EventContextField;
-import io.spine.base.EventMessageField;
 import io.spine.core.Event;
+import io.spine.gen.EventContextField;
+import io.spine.gen.EventMessageField;
 
 import static io.spine.client.Filters.createContextFilter;
 import static io.spine.client.Filters.createFilter;
@@ -30,7 +30,7 @@ import static io.spine.client.Filters.createFilter;
 /**
  * Filters events by conditions on both message and context.
  */
-public final class EventFilter extends FilterHolder<Event> {
+public final class EventFilter extends TypedFilter<Event> {
 
     private static final long serialVersionUID = 0L;
 

@@ -26,15 +26,15 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityColumn;
-import io.spine.base.EntityStateField;
-import io.spine.base.EventContextField;
-import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.gen.EntityColumn;
+import io.spine.gen.EntityStateField;
+import io.spine.gen.EventContextField;
+import io.spine.gen.EventMessageField;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -82,6 +82,7 @@ import static java.util.Arrays.stream;
  *
  * @see QueryBuilder for the application
  */
+@SuppressWarnings("ClassWithTooManyMethods") // Unifies a lot of methods for typed filter creation.
 public final class Filters {
 
     /** Prevents this utility class instantiation. */
@@ -446,16 +447,16 @@ public final class Filters {
         return result;
     }
 
-    static Filter[] extractFilters(FilterHolder<?>[] filters) {
+    static Filter[] extractFilters(TypedFilter<?>[] filters) {
         return stream(filters)
-                .map(FilterHolder::filter)
+                .map(TypedFilter::filter)
                 .toArray(Filter[]::new);
     }
 
     static <M extends Message> ImmutableList<Filter>
-    extractFilters(Collection<? extends FilterHolder<M>> filters) {
+    extractFilters(Collection<? extends TypedFilter<M>> filters) {
         return filters.stream()
-                      .map(FilterHolder::filter)
+                      .map(TypedFilter::filter)
                       .collect(toImmutableList());
     }
 

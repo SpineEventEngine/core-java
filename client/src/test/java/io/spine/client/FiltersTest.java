@@ -26,15 +26,15 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EntityColumn;
-import io.spine.base.EntityStateField;
-import io.spine.base.EventContextField;
-import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.client.Filter.Operator;
 import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.gen.EntityColumn;
+import io.spine.gen.EntityStateField;
+import io.spine.gen.EventContextField;
+import io.spine.gen.EventMessageField;
 import io.spine.test.client.ClProjectCreated;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityOwner;
@@ -210,7 +210,7 @@ class FiltersTest {
             assertThat(fieldPathInFilter).isEqualTo(fieldPath);
         }
 
-        private void checkFieldPath(FilterHolder<?> filterWrapper, String expectedFieldPath) {
+        private void checkFieldPath(TypedFilter<?> filterWrapper, String expectedFieldPath) {
             Filter filter = filterWrapper.filter();
             String fieldPath = Field.withPath(filter.getFieldPath())
                                     .toString();
@@ -249,7 +249,7 @@ class FiltersTest {
 
             assertEquals(operator, compositeFilter.getOperator());
             assertThat(compositeFilter.getFilterList())
-                    .comparingElementsUsing(filterHolderCorrespondence())
+                    .comparingElementsUsing(typedFilterCorrespondence())
                     .containsExactlyElementsIn(groupedFilters);
         }
     }
@@ -300,10 +300,10 @@ class FiltersTest {
         }
 
         private <M extends Message> void checkCreatesInstance(CompositeFilterHolder<M> filter,
-                                                              FilterHolder<M>[] groupedFilters) {
+                                                              TypedFilter<M>[] groupedFilters) {
             CompositeFilter compositeFilter = filter.filter();
             assertThat(compositeFilter.getFilterList())
-                    .comparingElementsUsing(filterHolderCorrespondence())
+                    .comparingElementsUsing(typedFilterCorrespondence())
                     .containsExactlyElementsIn(groupedFilters);
         }
     }
@@ -388,11 +388,11 @@ class FiltersTest {
         }
     }
 
-    private static Correspondence<Filter, FilterHolder<?>> filterHolderCorrespondence() {
+    private static Correspondence<Filter, TypedFilter<?>> typedFilterCorrespondence() {
         return Correspondence.from(FiltersTest::isFilterEqual, "is wrapped by");
     }
 
-    private static boolean isFilterEqual(Filter filter, FilterHolder<?> wrapper) {
+    private static boolean isFilterEqual(Filter filter, TypedFilter<?> wrapper) {
         return filter.equals(wrapper.filter());
     }
 }

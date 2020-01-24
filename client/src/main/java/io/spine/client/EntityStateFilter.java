@@ -21,12 +21,12 @@
 package io.spine.client;
 
 import io.spine.base.EntityState;
-import io.spine.base.EntityStateField;
 import io.spine.client.Filter.Operator;
+import io.spine.gen.EntityStateField;
 
 import static io.spine.client.Filters.createFilter;
 
-public final class EntityStateFilter extends FilterHolder<EntityState> {
+public final class EntityStateFilter extends TypedFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
 

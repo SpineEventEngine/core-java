@@ -24,14 +24,14 @@ import com.google.protobuf.Message;
 import io.spine.value.ValueHolder;
 
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-// Prevent instantiation of this abstract value holder in favor of concrete descendants.
-abstract class FilterHolder<M extends Message>
+// Prevent instantiation of this abstract filter in favor of concrete descendants.
+abstract class TypedFilter<M extends Message>
         extends ValueHolder<Filter>
         implements MessageFilter<M> {
 
     private static final long serialVersionUID = 0L;
 
-    FilterHolder(Filter value) {
+    TypedFilter(Filter value) {
         super(value);
     }
 
