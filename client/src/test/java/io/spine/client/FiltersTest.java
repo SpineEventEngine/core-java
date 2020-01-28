@@ -87,13 +87,8 @@ class FiltersTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-
         new NullPointerTester()
                 .setDefault(Filter.class, Filter.getDefaultInstance())
-                .setDefault(EntityColumn.class, TestEntity.Columns.firstField())
-                .setDefault(EntityStateField.class, TestEntity.Fields.id())
-                .setDefault(EventMessageField.class, ClProjectCreated.Fields.id())
-                .setDefault(EventContextField.class, EventContext.Fields.timestamp())
                 .testAllPublicStaticMethods(Filters.class);
     }
 
