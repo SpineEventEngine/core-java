@@ -44,7 +44,7 @@ import static io.spine.client.Filters.extractFilters;
  *          .where(eq(Customer.Columns.type(), "permanent"),
  *                 eq(Customer.Columns.discountPercent(), 10),
  *                 eq(Customer.Columns.companySize(), Company.Size.SMALL))
- *          .orderBy("name", ASCENDING)
+ *          .orderBy(Customer.Columns.name(), ASCENDING)
  *          .limit(20)
  *          .run();
  * }</pre>
