@@ -59,6 +59,12 @@ public final class EventFilter extends TypedFilter<Event> {
         this(createContextFilter(field.getField(), expected, operator), true);
     }
 
+    /**
+     * Creates an instance from the passed {@code Filter} message.
+     *
+     * <p>The filter is considered targeting event context if the field path in the filter starts
+     * with {@code "context."}.
+     */
     EventFilter(Filter filter) {
         this(filter, isContextFilter(filter));
     }
