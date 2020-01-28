@@ -33,7 +33,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.client.Filters.composeFilters;
 import static io.spine.client.Filters.extractFilters;
 
-abstract class CompositeFilterHolder<M extends Message>
+abstract class TypedCompositeFilter<M extends Message>
         extends ValueHolder<CompositeFilter>
         implements CompositeMessageFilter<M> {
 
@@ -41,7 +41,7 @@ abstract class CompositeFilterHolder<M extends Message>
 
     private final ImmutableList<MessageFilter<M>> filters;
 
-    CompositeFilterHolder(CompositeFilter filter, Function<Filter, MessageFilter<M>> wrapper) {
+    TypedCompositeFilter(CompositeFilter filter, Function<Filter, MessageFilter<M>> wrapper) {
         super(filter);
         this.filters = filter.getFilterList()
                              .stream()
@@ -49,8 +49,8 @@ abstract class CompositeFilterHolder<M extends Message>
                              .collect(toImmutableList());
     }
 
-    CompositeFilterHolder(Collection<? extends TypedFilter<M>> filters,
-                          CompositeOperator operator) {
+    TypedCompositeFilter(Collection<? extends TypedFilter<M>> filters,
+                         CompositeOperator operator) {
         super(composeFilters(extractFilters(filters), operator));
         this.filters = ImmutableList.copyOf(filters);
     }

@@ -467,9 +467,9 @@ public final class Filters {
                       .collect(toImmutableList());
     }
 
-    static CompositeFilter[] extractFilters(CompositeFilterHolder<?>[] filters) {
+    static CompositeFilter[] extractFilters(TypedCompositeFilter<?>[] filters) {
         return stream(filters)
-                .map(CompositeFilterHolder::filter)
+                .map(TypedCompositeFilter::filter)
                 .toArray(CompositeFilter[]::new);
     }
 

@@ -25,7 +25,7 @@ import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;
 
-public final class CompositeEntityStateFilter extends CompositeFilterHolder<EntityState> {
+public final class CompositeEntityStateFilter extends TypedCompositeFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
 

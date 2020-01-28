@@ -299,7 +299,7 @@ class FiltersTest {
             assertThat(compositeFilter.getFilterList()).containsExactlyElementsIn(filters);
         }
 
-        private <M extends Message> void checkCreatesInstance(CompositeFilterHolder<M> filter,
+        private <M extends Message> void checkCreatesInstance(TypedCompositeFilter<M> filter,
                                                               TypedFilter<M>[] groupedFilters) {
             CompositeFilter compositeFilter = filter.filter();
             assertThat(compositeFilter.getFilterList())

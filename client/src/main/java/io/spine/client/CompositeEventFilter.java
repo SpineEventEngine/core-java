@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Filters events by composite criteria which can test both event messages and their contexts.
  */
-public final class CompositeEventFilter extends CompositeFilterHolder<Event> {
+public final class CompositeEventFilter extends TypedCompositeFilter<Event> {
 
     private static final long serialVersionUID = 0L;
 
