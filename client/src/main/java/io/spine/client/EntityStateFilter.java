@@ -33,6 +33,9 @@ import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.client.Filters.checkSupportedOrderingComparisonType;
 import static io.spine.client.Filters.createFilter;
 
+/**
+ * A subscription filter which targets an {@link EntityState}.
+ */
 public final class EntityStateFilter extends TypedFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
@@ -41,12 +44,31 @@ public final class EntityStateFilter extends TypedFilter<EntityState> {
         super(createFilter(field.getField(), expected, operator));
     }
 
+    /**
+     * Creates a new equality filter.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EntityStateFilter eq(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
         return new EntityStateFilter(field, value, EQUAL);
     }
 
+    /**
+     * Creates a new "greater than" filter.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EntityStateFilter gt(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -54,6 +76,17 @@ public final class EntityStateFilter extends TypedFilter<EntityState> {
         return new EntityStateFilter(field, value, GREATER_THAN);
     }
 
+    /**
+     * Creates a new "less than" filter.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EntityStateFilter lt(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -61,6 +94,17 @@ public final class EntityStateFilter extends TypedFilter<EntityState> {
         return new EntityStateFilter(field, value, LESS_THAN);
     }
 
+    /**
+     * Creates a new "greater than or equals" filter.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EntityStateFilter ge(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -68,6 +112,17 @@ public final class EntityStateFilter extends TypedFilter<EntityState> {
         return new EntityStateFilter(field, value, GREATER_OR_EQUAL);
     }
 
+    /**
+     * Creates a new "less than or equals" filter.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EntityStateFilter le(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);

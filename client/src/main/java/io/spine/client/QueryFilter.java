@@ -33,6 +33,9 @@ import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.client.Filters.checkSupportedOrderingComparisonType;
 import static io.spine.client.Filters.createFilter;
 
+/**
+ * A query filter which targets a {@linkplain EntityColumn column} of an entity.
+ */
 public final class QueryFilter extends TypedFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
@@ -41,12 +44,31 @@ public final class QueryFilter extends TypedFilter<EntityState> {
         super(createFilter(column.name(), expected, operator));
     }
 
+    /**
+     * Creates a new equality filter.
+     *
+     * @param column
+     *         the entity column from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static QueryFilter eq(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
         return new QueryFilter(column, value, EQUAL);
     }
 
+    /**
+     * Creates a new "greater than" filter.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param column
+     *         the entity column from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static QueryFilter gt(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
@@ -54,6 +76,17 @@ public final class QueryFilter extends TypedFilter<EntityState> {
         return new QueryFilter(column, value, GREATER_THAN);
     }
 
+    /**
+     * Creates a new "less than" filter.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param column
+     *         the entity column from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static QueryFilter lt(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
@@ -61,6 +94,17 @@ public final class QueryFilter extends TypedFilter<EntityState> {
         return new QueryFilter(column, value, LESS_THAN);
     }
 
+    /**
+     * Creates a new "greater than or equals" filter.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param column
+     *         the entity column from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static QueryFilter ge(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
@@ -68,6 +112,17 @@ public final class QueryFilter extends TypedFilter<EntityState> {
         return new QueryFilter(column, value, GREATER_OR_EQUAL);
     }
 
+    /**
+     * Creates a new "less than or equals" filter.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param column
+     *         the entity column from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static QueryFilter le(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);

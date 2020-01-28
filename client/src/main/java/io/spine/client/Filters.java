@@ -89,7 +89,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new equality {@link Filter}.
+     * Creates a new equality {@link Filter}.
      *
      * @param fieldPath
      *         the field path or the entity column name for entity filters
@@ -104,7 +104,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new "greater than" {@link Filter}.
+     * Creates a new "greater than" {@link Filter}.
      *
      * <p>For the supported types description see <a href="#types">Comparison types section</a>.
      *
@@ -122,7 +122,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new "less than" {@link Filter}.
+     * Creates a new "less than" {@link Filter}.
      *
      * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
@@ -140,7 +140,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new "greater or equal" {@link Filter}.
+     * Creates a new "greater or equal" {@link Filter}.
      *
      * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
@@ -158,7 +158,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new "less or equal" {@link Filter}.
+     * Creates a new "less or equal" {@link Filter}.
      *
      * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
@@ -176,7 +176,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new conjunction composite filter.
+     * Creates a new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of the
      * aggregated filters.
@@ -196,7 +196,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new disjunction composite filter.
+     * Creates a new disjunction composite filter.
      *
      * <p>A record is considered matching this filter if it matches at least one of the aggregated
      * filters.
@@ -214,7 +214,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new conjunction composite filter.
+     * Creates a new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of
      * the aggregated filters.

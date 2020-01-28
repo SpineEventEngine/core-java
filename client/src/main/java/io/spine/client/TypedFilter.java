@@ -23,6 +23,12 @@ package io.spine.client;
 import com.google.protobuf.Message;
 import io.spine.value.ValueHolder;
 
+/**
+ * A typed wrapper around the {@link Filter} instance.
+ *
+ * @param <M>
+ *         the type of a filtered message
+ */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
 // Prevent instantiation of this abstract filter in favor of concrete descendants.
 abstract class TypedFilter<M extends Message>

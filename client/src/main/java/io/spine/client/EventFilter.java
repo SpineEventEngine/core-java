@@ -35,7 +35,10 @@ import static io.spine.client.Filters.createContextFilter;
 import static io.spine.client.Filters.createFilter;
 
 /**
- * Filters events by conditions on both message and context.
+ * A subscription filter which targets an {@link Event}.
+ *
+ * <p>Can filter events by conditions on both message and context. See factory methods of the
+ * class for details.
  */
 public final class EventFilter extends TypedFilter<Event> {
 
@@ -60,18 +63,45 @@ public final class EventFilter extends TypedFilter<Event> {
         this(filter, isContextFilter(filter));
     }
 
+    /**
+     * Creates a new equality filter which targets a field in the event message.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter eq(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
         return new EventFilter(field, value, EQUAL);
     }
 
+    /**
+     * Creates a new equality filter which targets a field in the event context.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter eq(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
         return new EventFilter(field, value, EQUAL);
     }
 
+    /**
+     * Creates a new "greater than" filter which targets a field in the event message.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter gt(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -79,6 +109,17 @@ public final class EventFilter extends TypedFilter<Event> {
         return new EventFilter(field, value, GREATER_THAN);
     }
 
+    /**
+     * Creates a new "greater than" filter which targets a field in the event context.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter gt(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -86,6 +127,17 @@ public final class EventFilter extends TypedFilter<Event> {
         return new EventFilter(field, value, GREATER_THAN);
     }
 
+    /**
+     * Creates a new "less than" filter which targets a field in the event message.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter lt(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -93,6 +145,17 @@ public final class EventFilter extends TypedFilter<Event> {
         return new EventFilter(field, value, LESS_THAN);
     }
 
+    /**
+     * Creates a new "less than" filter which targets a field in the event context.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter lt(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -100,6 +163,17 @@ public final class EventFilter extends TypedFilter<Event> {
         return new EventFilter(field, value, LESS_THAN);
     }
 
+    /**
+     * Creates a new "greater than or equals" filter which targets a field in the event message.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter ge(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -107,6 +181,17 @@ public final class EventFilter extends TypedFilter<Event> {
         return new EventFilter(field, value, GREATER_OR_EQUAL);
     }
 
+    /**
+     * Creates a new "greater than or equals" filter which targets a field in the event context.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter ge(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -114,6 +199,17 @@ public final class EventFilter extends TypedFilter<Event> {
         return new EventFilter(field, value, GREATER_OR_EQUAL);
     }
 
+    /**
+     * Creates a new "less than or equals" filter which targets a field in the event message.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter le(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -121,6 +217,17 @@ public final class EventFilter extends TypedFilter<Event> {
         return new EventFilter(field, value, LESS_OR_EQUAL);
     }
 
+    /**
+     * Creates a new "less than or equals" filter which targets a field in the event context.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
     public static EventFilter le(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
