@@ -64,11 +64,17 @@ public final class QueryRequest<S extends EntityState>
         super(parent, type);
     }
 
+    /**
+     * Configures the request to return results matching all the passed filters.
+     */
     public QueryRequest<S> where(QueryFilter... filter) {
         builder().where(extractFilters(filter));
         return this;
     }
 
+    /**
+     * Configures the request to return results matching all the passed filters.
+     */
     public QueryRequest<S> where(CompositeQueryFilter... filter) {
         builder().where(extractFilters(filter));
         return this;

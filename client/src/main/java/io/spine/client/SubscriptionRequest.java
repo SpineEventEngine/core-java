@@ -44,11 +44,17 @@ public final class SubscriptionRequest<S extends EntityState>
         this.consumers = StateConsumers.newBuilder();
     }
 
+    /**
+     * Configures the request to return results matching all the passed filters.
+     */
     public SubscriptionRequest<S> where(EntityStateFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
     }
 
+    /**
+     * Configures the request to return results matching all the passed filters.
+     */
     public SubscriptionRequest<S> where(CompositeEntityStateFilter... filter) {
         builder().where(extractFilters(filter));
         return self();

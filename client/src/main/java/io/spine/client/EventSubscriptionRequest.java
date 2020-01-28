@@ -65,11 +65,23 @@ public final class EventSubscriptionRequest<E extends EventMessage>
         this.consumers = EventConsumers.newBuilder();
     }
 
+    /**
+     * Configures the request to return results matching all the passed filters.
+     *
+     * <p>Please note that the {@link EventFilter} instances may target both event message and
+     * event context fields. See {@link EventFilter} for details.
+     */
     public EventSubscriptionRequest<E> where(EventFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
     }
 
+    /**
+     * Configures the request to return results matching all the passed filters.
+     *
+     * <p>Please note that the {@link CompositeEventFilter} instances may target both event message
+     * and event context fields. See {@link CompositeEventFilter} for details.
+     */
     public EventSubscriptionRequest<E> where(CompositeEventFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
