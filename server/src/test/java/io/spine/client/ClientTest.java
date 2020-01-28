@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.client.Filters.eq;
+import static io.spine.client.EventFilter.eq;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -116,7 +116,8 @@ class ClientTest extends AbstractClientTest {
             Subscription loginStatus =
                     client.onBehalfOf(currentUser)
                     .subscribeTo(LoginStatus.class)
-                    .where(eq(LoginStatus.Fields.userId(), currentUser.getValue()))
+                    .where(EntityStateFilter.eq(LoginStatus.Fields.userId(),
+                                                currentUser.getValue()))
                     .observe((s) -> {})
                     .post();
 
