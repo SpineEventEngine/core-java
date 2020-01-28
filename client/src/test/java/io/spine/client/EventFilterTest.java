@@ -172,10 +172,4 @@ class EventFilterTest {
             assertThat(unpacked.getValue()).isEqualTo(value);
         }
     }
-
-    @Test
-    @DisplayName("automatically prepend `context.` to the field path if the filter targets context")
-    void prependContextPath() {
-
-    }
 }
