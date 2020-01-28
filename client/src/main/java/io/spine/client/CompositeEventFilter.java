@@ -26,6 +26,9 @@ import io.spine.core.Event;
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.asList;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 
 /**
  * Filters events by composite criteria which can test both event messages and their contexts.
@@ -34,11 +37,23 @@ public final class CompositeEventFilter extends TypedCompositeFilter<Event> {
 
     private static final long serialVersionUID = 0L;
 
+    private CompositeEventFilter(Collection<EventFilter> filters, CompositeOperator operator) {
+        super(filters, operator);
+    }
+
     CompositeEventFilter(CompositeFilter filter) {
         super(checkNotNull(filter), EventFilter::new);
     }
 
-    CompositeEventFilter(Collection<EventFilter> filters, CompositeOperator operator) {
-        super(filters, operator);
+    public static CompositeEventFilter all(EventFilter first, EventFilter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeEventFilter(asList(first, rest), ALL);
+    }
+
+    public static CompositeEventFilter either(EventFilter first, EventFilter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeEventFilter(asList(first, rest), EITHER);
     }
 }

@@ -24,13 +24,54 @@ import io.spine.base.EntityState;
 import io.spine.base.EntityStateField;
 import io.spine.client.Filter.Operator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.Filter.Operator.EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_THAN;
+import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.Filter.Operator.LESS_THAN;
+import static io.spine.client.Filters.checkSupportedOrderingComparisonType;
 import static io.spine.client.Filters.createFilter;
 
 public final class EntityStateFilter extends TypedFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
 
-    EntityStateFilter(EntityStateField field, Object expected, Operator operator) {
+    private EntityStateFilter(EntityStateField field, Object expected, Operator operator) {
         super(createFilter(field.getField(), expected, operator));
+    }
+
+    public static EntityStateFilter eq(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return new EntityStateFilter(field, value, EQUAL);
+    }
+
+    public static EntityStateFilter gt(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EntityStateFilter(field, value, GREATER_THAN);
+    }
+
+    public static EntityStateFilter lt(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EntityStateFilter(field, value, LESS_THAN);
+    }
+
+    public static EntityStateFilter ge(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EntityStateFilter(field, value, GREATER_OR_EQUAL);
+    }
+
+    public static EntityStateFilter le(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EntityStateFilter(field, value, LESS_OR_EQUAL);
     }
 }

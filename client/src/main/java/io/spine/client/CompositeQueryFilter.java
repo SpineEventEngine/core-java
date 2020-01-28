@@ -25,11 +25,28 @@ import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.asList;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+
 public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
 
-    CompositeQueryFilter(Collection<QueryFilter> filters, CompositeOperator operator) {
+    private CompositeQueryFilter(Collection<QueryFilter> filters, CompositeOperator operator) {
         super(filters, operator);
+    }
+
+    public static CompositeQueryFilter all(QueryFilter first, QueryFilter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeQueryFilter(asList(first, rest), ALL);
+    }
+
+    public static CompositeQueryFilter either(QueryFilter first, QueryFilter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return new CompositeQueryFilter(asList(first, rest), EITHER);
     }
 }

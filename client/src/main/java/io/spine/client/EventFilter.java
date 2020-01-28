@@ -24,6 +24,13 @@ import io.spine.base.EventContextField;
 import io.spine.base.EventMessageField;
 import io.spine.core.Event;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.Filter.Operator.EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_THAN;
+import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.Filter.Operator.LESS_THAN;
+import static io.spine.client.Filters.checkSupportedOrderingComparisonType;
 import static io.spine.client.Filters.createContextFilter;
 import static io.spine.client.Filters.createFilter;
 
@@ -41,16 +48,84 @@ public final class EventFilter extends TypedFilter<Event> {
         this.byContext = byContext;
     }
 
+    private EventFilter(EventMessageField field, Object expected, Filter.Operator operator) {
+        this(createFilter(field.getField(), expected, operator), false);
+    }
+
+    private EventFilter(EventContextField field, Object expected, Filter.Operator operator) {
+        this(createContextFilter(field.getField(), expected, operator), true);
+    }
+
     EventFilter(Filter filter) {
         this(filter, isContextFilter(filter));
     }
 
-    EventFilter(EventMessageField field, Object expected, Filter.Operator operator) {
-        this(createFilter(field.getField(), expected, operator), false);
+    public static EventFilter eq(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return new EventFilter(field, value, EQUAL);
     }
 
-    EventFilter(EventContextField field, Object expected, Filter.Operator operator) {
-        this(createContextFilter(field.getField(), expected, operator), true);
+    public static EventFilter eq(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return new EventFilter(field, value, EQUAL);
+    }
+
+    public static EventFilter gt(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_THAN);
+    }
+
+    public static EventFilter gt(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_THAN);
+    }
+
+    public static EventFilter lt(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_THAN);
+    }
+
+    public static EventFilter lt(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_THAN);
+    }
+
+    public static EventFilter ge(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_OR_EQUAL);
+    }
+
+    public static EventFilter ge(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_OR_EQUAL);
+    }
+
+    public static EventFilter le(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_OR_EQUAL);
+    }
+
+    public static EventFilter le(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_OR_EQUAL);
     }
 
     @Override

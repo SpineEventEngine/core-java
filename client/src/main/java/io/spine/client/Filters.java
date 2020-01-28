@@ -26,10 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityColumn;
-import io.spine.base.EntityStateField;
-import io.spine.base.EventContextField;
-import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
@@ -82,37 +78,14 @@ import static java.util.Arrays.stream;
  * </ul>
  *
  * @see QueryBuilder for the application
+ * @see QueryFilter
+ * @see EntityStateFilter
+ * @see EventFilter
  */
-@SuppressWarnings("ClassWithTooManyMethods")
-// Unifies a lot of methods for convenient filter creation.
 public final class Filters {
 
     /** Prevents this utility class instantiation. */
     private Filters() {
-    }
-
-    public static QueryFilter eq(EntityColumn column, Object value) {
-        checkNotNull(column);
-        checkNotNull(value);
-        return new QueryFilter(column, value, EQUAL);
-    }
-
-    public static EntityStateFilter eq(EntityStateField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        return new EntityStateFilter(field, value, EQUAL);
-    }
-
-    public static EventFilter eq(EventMessageField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        return new EventFilter(field, value, EQUAL);
-    }
-
-    public static EventFilter eq(EventContextField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        return new EventFilter(field, value, EQUAL);
     }
 
     /**
@@ -128,34 +101,6 @@ public final class Filters {
         checkNotNull(fieldPath);
         checkNotNull(value);
         return createFilter(fieldPath, value, EQUAL);
-    }
-
-    public static QueryFilter gt(EntityColumn column, Object value) {
-        checkNotNull(column);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new QueryFilter(column, value, GREATER_THAN);
-    }
-
-    public static EntityStateFilter gt(EntityStateField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EntityStateFilter(field, value, GREATER_THAN);
-    }
-
-    public static EventFilter gt(EventMessageField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EventFilter(field, value, GREATER_THAN);
-    }
-
-    public static EventFilter gt(EventContextField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EventFilter(field, value, GREATER_THAN);
     }
 
     /**
@@ -176,34 +121,6 @@ public final class Filters {
         return createFilter(fieldPath, value, GREATER_THAN);
     }
 
-    public static QueryFilter lt(EntityColumn column, Object value) {
-        checkNotNull(column);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new QueryFilter(column, value, LESS_THAN);
-    }
-
-    public static EntityStateFilter lt(EntityStateField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EntityStateFilter(field, value, LESS_THAN);
-    }
-
-    public static EventFilter lt(EventMessageField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EventFilter(field, value, LESS_THAN);
-    }
-
-    public static EventFilter lt(EventContextField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EventFilter(field, value, LESS_THAN);
-    }
-
     /**
      * Creates new "less than" {@link Filter}.
      *
@@ -220,34 +137,6 @@ public final class Filters {
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(fieldPath, value, LESS_THAN);
-    }
-
-    public static QueryFilter ge(EntityColumn column, Object value) {
-        checkNotNull(column);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new QueryFilter(column, value, GREATER_OR_EQUAL);
-    }
-
-    public static EntityStateFilter ge(EntityStateField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EntityStateFilter(field, value, GREATER_OR_EQUAL);
-    }
-
-    public static EventFilter ge(EventMessageField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EventFilter(field, value, GREATER_OR_EQUAL);
-    }
-
-    public static EventFilter ge(EventContextField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EventFilter(field, value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -268,34 +157,6 @@ public final class Filters {
         return createFilter(fieldPath, value, GREATER_OR_EQUAL);
     }
 
-    public static QueryFilter le(EntityColumn column, Object value) {
-        checkNotNull(column);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new QueryFilter(column, value, LESS_OR_EQUAL);
-    }
-
-    public static EntityStateFilter le(EntityStateField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EntityStateFilter(field, value, LESS_OR_EQUAL);
-    }
-
-    public static EventFilter le(EventMessageField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EventFilter(field, value, LESS_OR_EQUAL);
-    }
-
-    public static EventFilter le(EventContextField field, Object value) {
-        checkNotNull(field);
-        checkNotNull(value);
-        checkSupportedOrderingComparisonType(value.getClass());
-        return new EventFilter(field, value, LESS_OR_EQUAL);
-    }
-
     /**
      * Creates new "less or equal" {@link Filter}.
      *
@@ -312,25 +173,6 @@ public final class Filters {
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(fieldPath, value, LESS_OR_EQUAL);
-    }
-
-    public static CompositeQueryFilter all(QueryFilter first, QueryFilter... rest) {
-        checkNotNull(first);
-        checkNotNull(rest);
-        return new CompositeQueryFilter(asList(first, rest), ALL);
-    }
-
-    public static CompositeEntityStateFilter
-    all(EntityStateFilter first, EntityStateFilter... rest) {
-        checkNotNull(first);
-        checkNotNull(rest);
-        return new CompositeEntityStateFilter(asList(first, rest), ALL);
-    }
-
-    public static CompositeEventFilter all(EventFilter first, EventFilter... rest) {
-        checkNotNull(first);
-        checkNotNull(rest);
-        return new CompositeEventFilter(asList(first, rest), ALL);
     }
 
     /**
@@ -354,6 +196,24 @@ public final class Filters {
     }
 
     /**
+     * Creates new disjunction composite filter.
+     *
+     * <p>A record is considered matching this filter if it matches at least one of the aggregated
+     * filters.
+     *
+     * @param first
+     *         the first {@link Filter}
+     * @param rest
+     *         the array of additional {@linkplain Filter filters}, possibly empty
+     * @return new instance of {@link CompositeFilter}
+     */
+    public static CompositeFilter either(Filter first, Filter... rest) {
+        checkNotNull(first);
+        checkNotNull(rest);
+        return composeFilters(asList(first, rest), EITHER);
+    }
+
+    /**
      * Creates new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of
@@ -372,43 +232,6 @@ public final class Filters {
         checkArgument(!filters.isEmpty(),
                       "Composite filter must contain at least one simple filter in it.");
         return composeFilters(filters, ALL);
-    }
-
-    public static CompositeQueryFilter either(QueryFilter first, QueryFilter... rest) {
-        checkNotNull(first);
-        checkNotNull(rest);
-        return new CompositeQueryFilter(asList(first, rest), EITHER);
-    }
-
-    public static CompositeEntityStateFilter
-    either(EntityStateFilter first, EntityStateFilter... rest) {
-        checkNotNull(first);
-        checkNotNull(rest);
-        return new CompositeEntityStateFilter(asList(first, rest), EITHER);
-    }
-
-    public static CompositeEventFilter either(EventFilter first, EventFilter... rest) {
-        checkNotNull(first);
-        checkNotNull(rest);
-        return new CompositeEventFilter(asList(first, rest), EITHER);
-    }
-
-    /**
-     * Creates new disjunction composite filter.
-     *
-     * <p>A record is considered matching this filter if it matches at least one of the aggregated
-     * filters.
-     *
-     * @param first
-     *         the first {@link Filter}
-     * @param rest
-     *         the array of additional {@linkplain Filter filters}, possibly empty
-     * @return new instance of {@link CompositeFilter}
-     */
-    public static CompositeFilter either(Filter first, Filter... rest) {
-        checkNotNull(first);
-        checkNotNull(rest);
-        return composeFilters(asList(first, rest), EITHER);
     }
 
     static Filter createFilter(String fieldPath, Object value, Operator operator) {
@@ -473,7 +296,7 @@ public final class Filters {
                 .toArray(CompositeFilter[]::new);
     }
 
-    private static void checkSupportedOrderingComparisonType(Class<?> cls) {
+    static void checkSupportedOrderingComparisonType(Class<?> cls) {
         Class<?> dataType = Primitives.wrap(cls);
         boolean supported = isSupportedNumber(dataType)
                 || Timestamp.class.isAssignableFrom(dataType)
