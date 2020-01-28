@@ -33,6 +33,12 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.client.Filters.composeFilters;
 import static io.spine.client.Filters.extractFilters;
 
+/**
+ * A typed wrapper around the {@link CompositeFilter} instance.
+ *
+ * @param <M>
+ *         the type of a filtered message
+ */
 abstract class TypedCompositeFilter<M extends Message>
         extends ValueHolder<CompositeFilter>
         implements CompositeMessageFilter<M> {

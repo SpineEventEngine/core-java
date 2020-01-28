@@ -30,6 +30,9 @@ import static com.google.common.collect.Lists.asList;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 
+/**
+ * A subscription filter which aggregates one or more {@link EntityState} filters.
+ */
 public final class CompositeEntityStateFilter extends TypedCompositeFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
@@ -39,6 +42,12 @@ public final class CompositeEntityStateFilter extends TypedCompositeFilter<Entit
         super(filters, operator);
     }
 
+    /**
+     * Creates a new conjunction composite filter.
+     *
+     * <p>A record is considered matching this filter if and only if it matches all of the
+     * passed filters.
+     */
     public static CompositeEntityStateFilter
     all(EntityStateFilter first, EntityStateFilter... rest) {
         checkNotNull(first);
@@ -46,6 +55,12 @@ public final class CompositeEntityStateFilter extends TypedCompositeFilter<Entit
         return new CompositeEntityStateFilter(asList(first, rest), ALL);
     }
 
+    /**
+     * Creates a new disjunction composite filter.
+     *
+     * <p>A record is considered matching this filter if it matches at least one of the passed
+     * filters.
+     */
     public static CompositeEntityStateFilter
     either(EntityStateFilter first, EntityStateFilter... rest) {
         checkNotNull(first);

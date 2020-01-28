@@ -30,6 +30,10 @@ import static com.google.common.collect.Lists.asList;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 
+/**
+ * A composite query filter which targets one or more entity
+ * {@link io.spine.base.EntityColumn columns}.
+ */
 public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
@@ -38,12 +42,24 @@ public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState
         super(filters, operator);
     }
 
+    /**
+     * Creates a new conjunction composite filter.
+     *
+     * <p>A record is considered matching this filter if and only if it matches all of the
+     * passed filters.
+     */
     public static CompositeQueryFilter all(QueryFilter first, QueryFilter... rest) {
         checkNotNull(first);
         checkNotNull(rest);
         return new CompositeQueryFilter(asList(first, rest), ALL);
     }
 
+    /**
+     * Creates a new disjunction composite filter.
+     *
+     * <p>A record is considered matching this filter if it matches at least one of the passed
+     * filters.
+     */
     public static CompositeQueryFilter either(QueryFilter first, QueryFilter... rest) {
         checkNotNull(first);
         checkNotNull(rest);
