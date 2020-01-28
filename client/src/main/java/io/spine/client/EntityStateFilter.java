@@ -21,8 +21,8 @@
 package io.spine.client;
 
 import io.spine.base.EntityState;
+import io.spine.base.EntityStateField;
 import io.spine.client.Filter.Operator;
-import io.spine.gen.EntityStateField;
 
 import static io.spine.client.Filters.createFilter;
 
