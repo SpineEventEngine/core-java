@@ -83,7 +83,8 @@ import static java.util.Arrays.stream;
  *
  * @see QueryBuilder for the application
  */
-@SuppressWarnings("ClassWithTooManyMethods") // Unifies a lot of methods for typed filter creation.
+@SuppressWarnings("ClassWithTooManyMethods")
+// Unifies a lot of methods for convenient filter creation.
 public final class Filters {
 
     /** Prevents this utility class instantiation. */
@@ -352,6 +353,27 @@ public final class Filters {
         return composeFilters(asList(first, rest), ALL);
     }
 
+    /**
+     * Creates new conjunction composite filter.
+     *
+     * <p>A record is considered matching this filter if and only if it matches all of
+     * the aggregated filters.
+     *
+     * <p>This method is used to create the default {@code ALL} filter if the user chooses to pass
+     * instances of {@link Filter} directly to the {@link QueryBuilder}.
+     *
+     * @param filters
+     *         the aggregated filters
+     * @return new instance of {@link CompositeFilter}
+     * @see #all(Filter, Filter...) for the public API equivalent
+     */
+    static CompositeFilter all(Collection<Filter> filters) {
+        checkNotNull(filters);
+        checkArgument(!filters.isEmpty(),
+                      "Composite filter must contain at least one simple filter in it.");
+        return composeFilters(filters, ALL);
+    }
+
     public static CompositeQueryFilter either(QueryFilter first, QueryFilter... rest) {
         checkNotNull(first);
         checkNotNull(rest);
@@ -389,27 +411,6 @@ public final class Filters {
         return composeFilters(asList(first, rest), EITHER);
     }
 
-    /**
-     * Creates new conjunction composite filter.
-     *
-     * <p>A record is considered matching this filter if and only if it matches all of
-     * the aggregated filters.
-     *
-     * <p>This method is used to create the default {@code ALL} filter if the user chooses to pass
-     * instances of {@link Filter} directly to the {@link QueryBuilder}.
-     *
-     * @param filters
-     *         the aggregated filters
-     * @return new instance of {@link CompositeFilter}
-     * @see #all(Filter, Filter...) for the public API equivalent
-     */
-    static CompositeFilter all(Collection<Filter> filters) {
-        checkNotNull(filters);
-        checkArgument(!filters.isEmpty(),
-                      "Composite filter must contain at least one simple filter in it.");
-        return composeFilters(filters, ALL);
-    }
-
     static Filter createFilter(String fieldPath, Object value, Operator operator) {
         Field field = Field.parse(fieldPath);
         return createFilter(field, value, operator);
@@ -425,14 +426,6 @@ public final class Filters {
         return createFilter(fieldPath, value, operator);
     }
 
-    static Filter createContextFilter(Field field, Object value, Operator operator) {
-        FieldPath fieldPath = Event.Fields.context()
-                                          .getField()
-                                          .nested(field)
-                                          .path();
-        return createFilter(fieldPath, value, operator);
-    }
-
     static Filter createFilter(FieldPath path, Object value, Operator operator) {
         Any wrappedValue = toAny(value);
         Filter filter = Filter
@@ -442,6 +435,14 @@ public final class Filters {
                 .setOperator(operator)
                 .build();
         return filter;
+    }
+
+    static Filter createContextFilter(Field field, Object value, Operator operator) {
+        FieldPath fieldPath = Event.Fields.context()
+                                          .getField()
+                                          .nested(field)
+                                          .path();
+        return createFilter(fieldPath, value, operator);
     }
 
     static CompositeFilter composeFilters(Collection<Filter> filters, CompositeOperator operator) {
