@@ -21,6 +21,7 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
+import io.spine.base.EntityColumn;
 import io.spine.base.EntityState;
 
 import java.util.function.Function;
@@ -40,9 +41,9 @@ import static io.spine.client.Filters.extractFilters;
  *          .select(Customer.class)
  *          .byId(westCoastCustomerIds())
  *          .withMask("name", "address", "email")
- *          .where(eq("type", "permanent"),
- *                 eq("discountPercent", 10),
- *                 eq("companySize", Company.Size.SMALL))
+ *          .where(eq(Customer.Columns.type(), "permanent"),
+ *                 eq(Customer.Columns.discountPercent(), 10),
+ *                 eq(Customer.Columns.companySize(), Company.Size.SMALL))
  *          .orderBy("name", ASCENDING)
  *          .limit(20)
  *          .run();
@@ -80,9 +81,27 @@ public final class QueryRequest<S extends EntityState>
      *         the column to sort by
      * @param direction
      *         sorting direction
+     * @deprecated Please use the {@linkplain #orderBy(EntityColumn, OrderBy.Direction) alternative}
+     *             which relies on strongly-typed columns instead.
      */
+    @Deprecated
     public QueryRequest<S> orderBy(String column, OrderBy.Direction direction) {
         builder().orderBy(column, direction);
+        return this;
+    }
+
+    /**
+     * Sets the sorting order by the target column and order direction.
+     *
+     * @param column
+     *         the column to sort by
+     * @param direction
+     *         sorting direction
+     */
+    public QueryRequest<S> orderBy(EntityColumn column, OrderBy.Direction direction) {
+        String columnName = column.name()
+                                  .value();
+        builder().orderBy(columnName, direction);
         return this;
     }
 
