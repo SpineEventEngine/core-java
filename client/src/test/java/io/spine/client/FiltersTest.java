@@ -24,18 +24,11 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EntityColumn;
-import io.spine.base.EntityStateField;
-import io.spine.base.EventContextField;
-import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.Filter.Operator;
-import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.test.client.ClProjectCreated;
-import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityOwner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -211,7 +204,7 @@ class FiltersTest {
         @DisplayName("for timestamps")
         void forTimestamps() {
             Timestamp timestamp = currentTime();
-            Filter filter = gt("owner.when_last_visited", timestamp);
+            Filter filter = gt(FIELD, timestamp);
 
             assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
             Timestamp value = unpack(filter.getValue(), Timestamp.class);
