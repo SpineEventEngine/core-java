@@ -31,7 +31,8 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 
 /**
- * A composite subscription filter which can aggregate both event message and event context filters.
+ * A composite subscription filter which can aggregate both event message and event context
+ * filters.
  */
 public final class CompositeEventFilter extends TypedCompositeFilter<Event> {
 
@@ -48,8 +49,8 @@ public final class CompositeEventFilter extends TypedCompositeFilter<Event> {
     /**
      * Creates a new conjunction composite filter.
      *
-     * <p>A record is considered matching this filter if and only if it matches all of the
-     * passed filters.
+     * <p>A record is considered matching this filter if and only if it matches all of the passed
+     * filters.
      */
     public static CompositeEventFilter all(EventFilter first, EventFilter... rest) {
         checkNotNull(first);
