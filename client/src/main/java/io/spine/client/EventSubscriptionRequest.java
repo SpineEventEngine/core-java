@@ -37,21 +37,17 @@ import static io.spine.client.Filters.extractFilters;
  * values of the proto types of subscribed messages:
  * <pre>{@code
  * clientRequest.subscribeToEvent(MyEventMessage.class)
- *              .where(eq("my_proto_field"), fieldValue)
+ *              .where(eq(MyEventMessage.Fields.myProtoField(), fieldValue))
  *              .observe((event, context) -> {...})
  *              .post();
  * }</pre>
  *
  * <p>In addition to regular filtering conditions, event subscription requests may also reference
- * // TODO:2019-12-20:dmytro.kuzmin:WIP: Update the doc here and all similar places.
- * fields of {@code "spine.core.EventContext"} using {@code "context."} notation. For example,
- * in order to filter events originate from commands of the given user, please use the following
- * code:
+ * fields of {@code spine.core.EventContext}. For example, in order to filter events originate from
+ * commands of the given user, please use the following code:
  * <pre>{@code
  * clientRequest.subscribeToEvent(MyEventMessage.class)
- * // TODO:2019-12-20:dmytro.kuzmin:WIP: Update the doc here and all similar places.
- *
- *              .where(eq("context.past_message.actor_context.actor"), userId)
+ *              .where(eq(EventContext.Fields.pastMessage().actorContext().actor(), userId))
  *              .observe((event, context) -> {...})
  *              .post();
  * }</pre>

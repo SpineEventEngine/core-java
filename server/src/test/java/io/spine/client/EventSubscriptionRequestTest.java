@@ -38,8 +38,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.client.Filters.all;
-import static io.spine.client.Filters.eq;
+import static io.spine.client.CompositeEventFilter.all;
+import static io.spine.client.EventFilter.eq;
 
 @DisplayName("`EventSubscriptionRequest` should")
 class EventSubscriptionRequestTest extends AbstractClientTest {

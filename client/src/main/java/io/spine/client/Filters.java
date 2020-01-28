@@ -317,8 +317,8 @@ public final class Filters {
      * Creates a filter of events which can apply conditions from the passed
      * {@code CompositeFilter} to both event message and its context.
      *
-     * // TODO:2019-12-20:dmytro.kuzmin:WIP: Update the doc here and all similar places.
-     * <p>Please use the {@code "context."} prefix for referencing a field of the event context.
+     * <p>The filter is deemed addressing the event context if the field path specified in it
+     * starts with the {@code "context."} prefix.
      */
     @Internal
     public static Predicate<Event> toEventFilter(CompositeFilter filterData) {
