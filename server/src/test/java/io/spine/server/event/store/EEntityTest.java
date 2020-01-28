@@ -23,18 +23,30 @@ package io.spine.server.event.store;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
+import io.spine.server.event.EventStore;
+import io.spine.server.event.EventStreamQuery;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.core.given.GivenEnrichment;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Stream;
+
 import static com.google.common.truth.Truth.assertThat;
+import static java.util.concurrent.CompletableFuture.runAsync;
 
 @DisplayName("EEntity should")
 final class EEntityTest {
 
-    @DisplayName("clear enrichments from an event")
     @Test
+    @DisplayName("clear enrichments from an event")
     void clearEnrichments() {
         Enrichment enrichment = GivenEnrichment.withOneAttribute();
         Event event = GivenEvent.arbitrary();
