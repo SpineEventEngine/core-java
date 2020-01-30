@@ -21,28 +21,21 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
-import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.server.DefaultRepository;
 import io.spine.server.delivery.given.ConsecutiveNumberProcess;
 import io.spine.server.delivery.given.ConsecutiveProjection;
 import io.spine.server.delivery.given.CounterView;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.EventStore;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.EmitNextNumber;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.SlowTest;
-import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
@@ -56,11 +49,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.delivery.TestRoutines.findView;
+import static io.spine.server.delivery.TestRoutines.post;
+import static io.spine.server.delivery.WhatToCatchUp.catchSince;
 import static io.spine.testing.Tests.nullRef;
 import static java.util.stream.Collectors.toList;
 
@@ -105,29 +99,29 @@ public class CatchUpTest extends AbstractDeliveryTest {
         testCatchUpAll();
     }
 
-    @SuppressWarnings("OverlyLongMethod")   // Complex environment setup.
+    // Complex environment setup.
     private static void testCatchUpByIds() throws InterruptedException {
-        Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
-
-        String[] ids = {"first", "second", "third", "fourth"};
-        List<NumberAdded> events = generateEvents(200, ids);
-
         changeShardCountTo(2);
-        CounterView.Repository repo = new CounterView.Repository();
-        SingleTenantBlackBoxContext ctx = BlackBoxBoundedContext.singleTenant()
-                                                                .with(repo);
-        addHistory(aWhileAgo, events, ctx);
+
+        CounterCatchUp counterCatchUp = new CounterCatchUp("first", "second", "third", "fourth");
+        List<NumberAdded> events = counterCatchUp.generateEvents(200);
+
+        Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
+        counterCatchUp.addHistory(aWhileAgo, events);
 
         // Round 1. Fight!
 
         int initialWeight = 1;
         CounterView.changeWeightTo(initialWeight);
-        dispatchInParallel(ctx, events, 20);
 
-        List<Integer> initialTotals = readTotals(repo, ids);
-        int sumInRound = events.size() / ids.length * initialWeight;
+        counterCatchUp.dispatch(events, 20);
+
+        String[] targets = counterCatchUp.targets();
+        int totalTargets = targets.length;
+        List<Integer> initialTotals = counterCatchUp.counterValues();
+        int sumInRound = events.size() / totalTargets * initialWeight;
         IntStream sums = IntStream.iterate(sumInRound, i -> i)
-                                  .limit(ids.length);
+                                  .limit(totalTargets);
         assertThat(initialTotals).isEqualTo(sums.boxed()
                                                 .collect(toList()));
 
@@ -135,29 +129,12 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
         int newWeight = 100;
         CounterView.changeWeightTo(newWeight);
+        counterCatchUp
+                .dispatchWithCatchUp(events, 20,
+                                     catchSince(targets[0], aWhileAgo),
+                                     catchSince(targets[1], aMinuteAgo()));
 
-        List<Callable<Object>> jobs = new ArrayList<>();
-
-        // Do the same, but add the catch-up for ID #0 as the first job.
-        String firstId = ids[0];
-        Callable<Object> firstCatchUp = () -> {
-            repo.catchUp(aWhileAgo, ImmutableSet.of(firstId));
-            return nullRef();
-        };
-
-        // And add the catch-up for ID #1 as the second job.
-        String secondId = ids[1];
-        Callable<Object> secondCatchUp = () -> {
-            repo.catchUp(aMinuteAgo(), ImmutableSet.of(secondId));
-            return nullRef();
-        };
-
-        jobs.add(firstCatchUp);
-        jobs.add(secondCatchUp);
-        jobs.addAll(asPostEventJobs(ctx, events));
-        post(jobs);
-
-        List<Integer> totalsAfterCatchUp = readTotals(repo, ids);
+        List<Integer> totalsAfterCatchUp = counterCatchUp.counterValues();
 
         int firstSumExpected = sumInRound * newWeight / initialWeight * 3;
         int secondSumExpected = sumInRound * newWeight / initialWeight * 2;
@@ -184,7 +161,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
                                                                 .with(projectionRepo)
                                                                 .with(pmRepo);
         List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
-        post(jobs);
+        post(jobs, 20);
 
         int positiveExpected = totalCommands / ids.length;
         List<Integer> positiveValues =
@@ -207,7 +184,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
                             return nullRef();
                         })
                         .build();
-        post(sameWithCatchUp);
+        post(sameWithCatchUp, 20);
 
         int negativeExpected = -1 * positiveExpected * 2;
 
@@ -225,18 +202,6 @@ public class CatchUpTest extends AbstractDeliveryTest {
         }
     }
 
-    private static void post(List<Callable<Object>> jobs) throws InterruptedException {
-        ExecutorService service = Executors.newFixedThreadPool(20);
-        invokeAll(jobs, service);
-    }
-
-    private static void invokeAll(List<Callable<Object>> jobs,
-                                  ExecutorService service) throws InterruptedException {
-        service.invokeAll(jobs);
-        List<Runnable> leftovers = service.shutdownNow();
-        assertThat(leftovers).isEmpty();
-    }
-
     private static Timestamp aMinuteAgo() {
         return Timestamps.subtract(Time.currentTime(), Durations.fromMinutes(1));
     }
@@ -244,13 +209,9 @@ public class CatchUpTest extends AbstractDeliveryTest {
     private static List<Integer> readLastValues(ConsecutiveProjection.Repo repo,
                                                 String[] ids) {
         return Arrays.stream(ids)
-                     .map((id) -> readLastValue(repo, id))
+                     .map((id) -> findView(repo, id).state()
+                                                    .getLastValue())
                      .collect(toList());
-    }
-
-    private static int readLastValue(ConsecutiveProjection.Repo repo, String id) {
-        return findView(repo, id).state()
-                                 .getLastValue();
     }
 
     private static List<EmitNextNumber> generateEmissionCommands(int howMany, String[] ids) {
@@ -264,71 +225,11 @@ public class CatchUpTest extends AbstractDeliveryTest {
         return commands;
     }
 
-    private static void addHistory(Timestamp when,
-                                   List<NumberAdded> events,
-                                   SingleTenantBlackBoxContext ctx) {
-        EventStore eventStore = ctx.eventBus()
-                                   .eventStore();
-        TestEventFactory factory = TestEventFactory.newInstance(DeliveryTest.class);
-        for (NumberAdded message : events) {
-            Event event = factory.createEvent(message, null);
-            EventContext context = event.getContext();
-            EventContext modifiedContext = context.toBuilder()
-                                                  .setTimestamp(when)
-                                                  .vBuild();
-            Event eventAtTime = event.toBuilder()
-                                     .setContext(modifiedContext)
-                                     .vBuild();
-            eventStore.append(eventAtTime);
-        }
-    }
-
     private static List<Callable<Object>> asPostCommandJobs(SingleTenantBlackBoxContext ctx,
                                                             List<EmitNextNumber> commands) {
         return commands.stream()
                        .map(cmd -> (Callable<Object>) () -> ctx.receivesCommand(cmd))
                        .collect(toList());
-    }
-
-    private static List<Integer> readTotals(CounterView.Repository repo, String[] ids) {
-        return Arrays.stream(ids)
-                     .map((id) -> findView(repo, id).state()
-                                                    .getTotal())
-                     .collect(toList());
-    }
-
-    private static List<NumberAdded> generateEvents(int howMany, String[] targets) {
-        Iterator<String> idIterator = Iterators.cycle(targets);
-        List<NumberAdded> events = new ArrayList<>(howMany);
-        for (int i = 0; i < howMany; i++) {
-            events.add(NumberAdded.newBuilder()
-                                  .setCalculatorId(idIterator.next())
-                                  .setValue(0)
-                                  .vBuild());
-        }
-        return events;
-    }
-
-    private static <P extends Projection<String, ?, ?>> P
-    findView(ProjectionRepository<String, P, ?> repo, String id) {
-        Optional<P> view = repo.find(id);
-        Truth8.assertThat(view)
-              .isPresent();
-        return view.get();
-    }
-
-    private static List<Callable<Object>> asPostEventJobs(SingleTenantBlackBoxContext ctx,
-                                                          List<NumberAdded> events) {
-        return events.stream()
-                     .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
-                     .collect(toList());
-    }
-
-    private static void dispatchInParallel(SingleTenantBlackBoxContext ctx,
-                                           List<NumberAdded> events,
-                                           int threads) throws InterruptedException {
-        ExecutorService service = Executors.newFixedThreadPool(threads);
-        invokeAll(asPostEventJobs(ctx, events), service);
     }
 
     /**
@@ -347,4 +248,5 @@ public class CatchUpTest extends AbstractDeliveryTest {
             return result;
         }
     }
+
 }
