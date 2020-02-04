@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
@@ -65,6 +64,7 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Durations.fromNanos;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.server.delivery.CatchUpMessages.catchUpCompleted;
 import static io.spine.server.delivery.CatchUpMessages.fullyRecalled;
@@ -74,7 +74,6 @@ import static io.spine.server.delivery.CatchUpMessages.recalled;
 import static io.spine.server.delivery.CatchUpMessages.shardProcessingRequested;
 import static io.spine.server.delivery.CatchUpMessages.started;
 import static io.spine.server.delivery.CatchUpMessages.toFilters;
-import static io.spine.server.delivery.CatchUpMessages.withWindow;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -90,14 +89,13 @@ public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
-    //TODO:2019-12-13:alex.tymchenko: make this configurable.
-    private static final Duration TURBULENCE_PERIOD = Durations.fromMillis(500);
 
     private final ProjectionRepository<I, ?, ?> repository;
     private final DispatchCatchingUp<I> dispatchOperation;
     private final CatchUpStorage storage;
     private final CatchUpStarter.Builder<I> starterTemplate;
     private final Limit queryLimit;
+    private final Duration turbulencePeriod;
 
     private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
     private @MonotonicNonNull Supplier<EventStore> eventStore;
@@ -108,6 +106,7 @@ public final class CatchUpProcess<I>
         this.dispatchOperation = builder.dispatchOp();
         this.storage = builder.storage();
         this.queryLimit = limitOf(builder.pageSize());
+        this.turbulencePeriod = builder.turbulencePeriod();
         this.starterTemplate = CatchUpStarter.newBuilder(this.repository, this.storage);
     }
 
@@ -154,7 +153,8 @@ public final class CatchUpProcess<I>
         CatchUp.Request request = e.getRequest();
 
         Timestamp sinceWhen = request.getSinceWhen();
-        builder().setWhenLastRead(withWindow(sinceWhen))
+        Timestamp withWindow = subtract(sinceWhen, fromNanos(1));
+        builder().setWhenLastRead(withWindow)
                  .setRequest(request);
         CatchUpStarted started = started(id);
         builder().setStatus(CatchUpStatus.STARTED);
@@ -176,8 +176,8 @@ public final class CatchUpProcess<I>
         return ids;
     }
 
-    private static Timestamp turbulenceStart() {
-        return subtract(Time.currentTime(), TURBULENCE_PERIOD);
+    private Timestamp turbulenceStart() {
+        return subtract(Time.currentTime(), turbulencePeriod);
     }
 
     @React

@@ -21,9 +21,7 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
-import com.google.protobuf.Timestamp;
 import io.spine.server.delivery.event.CatchUpCompleted;
 import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.delivery.event.HistoryEventsRecalled;
@@ -34,12 +32,11 @@ import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.protobuf.util.Durations.fromNanos;
-import static com.google.protobuf.util.Timestamps.subtract;
 
 final class CatchUpMessages {
 
-    private CatchUpMessages() {}
+    private CatchUpMessages() {
+    }
 
     static CatchUpStarted started(CatchUpId id) {
         return CatchUpStarted.newBuilder()
@@ -50,7 +47,7 @@ final class CatchUpMessages {
     static EventStreamQuery.Limit limitOf(int value) {
         return EventStreamQuery.Limit.newBuilder()
                                      .setValue(value)
-                                     .build();
+                                     .vBuild();
     }
 
     static HistoryEventsRecalled recalled(CatchUpId id) {
@@ -74,14 +71,6 @@ final class CatchUpMessages {
                             .collect(toImmutableList());
     }
 
-    static CatchUpId targetOf(Message message) {
-        return ((CatchUpSignal) message).getId();
-    }
-
-    static Timestamp withWindow(Timestamp value) {
-        return subtract(value, fromNanos(1));
-    }
-
     static LiveEventsPickedUp liveEventsPickedUp(CatchUpId id) {
         return LiveEventsPickedUp.newBuilder()
                                  .setId(id)
@@ -96,8 +85,8 @@ final class CatchUpMessages {
 
     static ShardProcessingRequested shardProcessingRequested(ShardIndex shardIndex) {
         return ShardProcessingRequested
-                                .newBuilder()
-                                .setId(shardIndex)
-                                .vBuild();
+                .newBuilder()
+                .setId(shardIndex)
+                .vBuild();
     }
 }
