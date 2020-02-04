@@ -94,13 +94,6 @@ final class CatchUpMessages {
                                .vBuild();
     }
 
-    static ShardIndex newShardIndex(int shardCount, Integer indexValue) {
-        return ShardIndex.newBuilder()
-                         .setIndex(indexValue)
-                         .setOfTotal(shardCount)
-                         .vBuild();
-    }
-
     static ShardProcessingRequested shardProcessingRequested(ShardIndex shardIndex) {
         return ShardProcessingRequested
                                 .newBuilder()

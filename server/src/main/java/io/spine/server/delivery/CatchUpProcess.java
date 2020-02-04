@@ -70,12 +70,12 @@ import static io.spine.server.delivery.CatchUpMessages.catchUpCompleted;
 import static io.spine.server.delivery.CatchUpMessages.fullyRecalled;
 import static io.spine.server.delivery.CatchUpMessages.limitOf;
 import static io.spine.server.delivery.CatchUpMessages.liveEventsPickedUp;
-import static io.spine.server.delivery.CatchUpMessages.newShardIndex;
 import static io.spine.server.delivery.CatchUpMessages.recalled;
 import static io.spine.server.delivery.CatchUpMessages.shardProcessingRequested;
 import static io.spine.server.delivery.CatchUpMessages.started;
 import static io.spine.server.delivery.CatchUpMessages.toFilters;
 import static io.spine.server.delivery.CatchUpMessages.withWindow;
+import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -269,8 +269,7 @@ public final class CatchUpProcess<I>
         return indexes
                 .stream()
                 .map(indexValue -> {
-                    //TODO:2020-01-21:alex.tymchenko: reused the existing code!
-                    ShardIndex shardIndex = newShardIndex(totalShards, indexValue);
+                    ShardIndex shardIndex = newIndex(indexValue, totalShards);
                     ShardProcessingRequested event = shardProcessingRequested(shardIndex);
                     return event;
                 })

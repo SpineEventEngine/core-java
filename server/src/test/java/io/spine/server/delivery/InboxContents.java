@@ -46,11 +46,7 @@ final class InboxContents {
         ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
                 ImmutableMap.builder();
         for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
-            ShardIndex index =
-                    ShardIndex.newBuilder()
-                              .setIndex(shardIndex)
-                              .setOfTotal(shardCount)
-                              .vBuild();
+            ShardIndex index = DeliveryStrategy.newIndex(shardIndex, shardCount);
             Page<InboxMessage> page = with(TenantId.getDefaultInstance())
                     .evaluate(() -> storage.readAll(index, Integer.MAX_VALUE));
 

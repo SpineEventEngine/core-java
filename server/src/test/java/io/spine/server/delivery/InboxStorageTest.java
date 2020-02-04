@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
-import static io.spine.server.delivery.given.DeliveryTestEnv.newShardIndex;
+import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 
 /**
  * An abstract base for tests of {@link InboxStorage} implementations.
@@ -79,7 +79,7 @@ public abstract class InboxStorageTest {
     @Test
     @DisplayName("write and read `InboxMessage`s")
     void writeAndReadRecords() {
-        ShardIndex index = newShardIndex(1, 100);
+        ShardIndex index = newIndex(1, 100);
         assertStorageEmpty(index);
 
         ImmutableList<InboxMessage> messages = generateMessages(index, 256);
@@ -101,14 +101,14 @@ public abstract class InboxStorageTest {
     @Test
     @DisplayName("read `InboxMessage`s page by page starting from the older messages")
     void readRecordsPageByPage() {
-        ShardIndex index = newShardIndex(8, 2019);
+        ShardIndex index = newIndex(8, 2019);
         int totalMessages = 79;
         int pageSize = 13;
 
         ImmutableList<InboxMessage> messages = generateMessages(index, totalMessages);
         storage.writeAll(messages);
-        storage.writeAll(generateMessages(newShardIndex(19, 2019), 19));
-        storage.writeAll(generateMessages(newShardIndex(21, 2019), 23));
+        storage.writeAll(generateMessages(newIndex(19, 2019), 19));
+        storage.writeAll(generateMessages(newIndex(21, 2019), 23));
 
         List<List<InboxMessage>> expected = Lists.partition(messages, pageSize);
         Page<InboxMessage> actualPage = storage.readAll(index, pageSize);

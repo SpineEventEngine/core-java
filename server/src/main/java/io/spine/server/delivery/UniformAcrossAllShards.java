@@ -112,10 +112,7 @@ public final class UniformAcrossAllShards extends DeliveryStrategy implements Se
     }
 
     private ShardIndex newIndex(int indexValue) {
-        return ShardIndex.newBuilder()
-                         .setIndex(indexValue)
-                         .setOfTotal(shardCount())
-                         .build();
+        return newIndex(indexValue, shardCount());
     }
 
     private enum SingleShard {

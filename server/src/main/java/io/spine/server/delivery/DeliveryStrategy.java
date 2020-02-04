@@ -22,6 +22,8 @@ package io.spine.server.delivery;
 
 import io.spine.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * Determines the {@linkplain ShardIndex index of a shard} for the given identifier of an entity.
  *
@@ -55,5 +57,18 @@ public abstract class DeliveryStrategy {
             return (ShardIndex) entityId;
         }
         return indexFor(entityId, entityStateType);
+    }
+
+    static ShardIndex newIndex(int indexValue, int ofTotal) {
+        checkArgument(indexValue < ofTotal,
+                      "The index of the shard `%s` must be less" +
+                              " than the total number of shards `%s`.",
+                      indexValue, ofTotal);
+        ShardIndex result = ShardIndex
+                .newBuilder()
+                .setIndex(indexValue)
+                .setOfTotal(ofTotal)
+                .vBuild();
+        return result;
     }
 }

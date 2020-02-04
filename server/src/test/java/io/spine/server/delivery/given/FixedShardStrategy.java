@@ -27,7 +27,6 @@ import io.spine.type.TypeUrl;
 import java.io.Serializable;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.spine.server.delivery.given.DeliveryTestEnv.newShardIndex;
 
 /**
  * A delivery strategy which always deliver all the items to the first shard.
@@ -48,7 +47,11 @@ public class FixedShardStrategy extends DeliveryStrategy implements Serializable
     public FixedShardStrategy(int shardCount) {
         checkArgument(shardCount > 0);
         this.shardCount = shardCount;
-        nonEmptyShard = newShardIndex(0, this.shardCount);
+        nonEmptyShard = ShardIndex
+                .newBuilder()
+                .setIndex(0)
+                .setOfTotal(this.shardCount)
+                .vBuild();
     }
 
     @Override
