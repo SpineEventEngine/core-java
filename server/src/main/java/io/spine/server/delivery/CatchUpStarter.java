@@ -124,7 +124,6 @@ final class CatchUpStarter<I> {
 
         requestBuilder.setSinceWhen(since);
         for (EventClass eventClass : eventClasses) {
-            //TODO:2019-11-29:alex.tymchenko: `TypeName` or `TypeUrl`?
             TypeName name = eventClass.typeName();
             requestBuilder.addEventType(name.value());
         }
