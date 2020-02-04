@@ -43,7 +43,7 @@ final class WhatToCatchUp {
         return id;
     }
 
-    public Timestamp sinceWhen() {
+    Timestamp sinceWhen() {
         return sinceWhen;
     }
 }
