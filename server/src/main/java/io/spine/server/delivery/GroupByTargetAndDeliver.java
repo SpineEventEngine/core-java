@@ -32,11 +32,11 @@ import static java.util.stream.Collectors.groupingBy;
  * A method object performing the delivery of the messages grouping them by the type of their
  * targets.
  */
-final class DeliverByType {
+final class GroupByTargetAndDeliver {
 
     private final InboxDeliveries inboxDeliveries;
 
-    DeliverByType(InboxDeliveries deliveries) {
+    GroupByTargetAndDeliver(InboxDeliveries deliveries) {
         inboxDeliveries = deliveries;
     }
 

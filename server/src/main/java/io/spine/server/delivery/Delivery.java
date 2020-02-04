@@ -289,7 +289,7 @@ public final class Delivery implements Logging {
         int totalDelivered = 0;
         try {
             do {
-                runResult = doDeliver(session);
+                runResult = runDelivery(session);
                 totalDelivered += runResult.deliveredCount();
             } while (runResult.shouldRunAgain());
         } finally {
@@ -312,46 +312,70 @@ public final class Delivery implements Logging {
      * The configured {@link #monitor DeliveryMonitor} may stop the execution according to
      * the monitored {@code DeliveryStage}.
      *
-     * @return the passed delivery stage
+     * @return the results of the run
      */
-    private RunResult doDeliver(ShardProcessingSession session) {
+    private RunResult runDelivery(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
 
         Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
-        int totalMessagesDelivered = 0;
         boolean continueAllowed = true;
+        List<DeliveryStage> stages = new ArrayList<>();
         while (continueAllowed && maybePage.isPresent()) {
-            Iterable<CatchUp> catchUpJobs = catchUpStorage.readAll();
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
-                int deliveredInBatch = 0;
+                GroupByTargetAndDeliver action = new GroupByTargetAndDeliver(deliveries);
                 Conveyor conveyor = new Conveyor(messages, deliveredMessages);
-                DeliverByType action = new DeliverByType(deliveries);
-                ImmutableList<Station> stations = ImmutableList.of(
-                        new CatchUpStation(action, catchUpJobs),
-                        new LiveDeliveryStation(action, idempotenceWindow),
-                        new CleanupStation());
-                for (Station station : stations) {
-                    Station.Result result = station.process(conveyor);
-                    result.errors()
-                          .throwIfAny();
-                    totalMessagesDelivered += result.deliveredCount();
-                    deliveredInBatch += result.deliveredCount();
-                }
-                notifyOfDuplicatesIn(conveyor);
-                conveyor.flushTo(inboxStorage);
-
-                DeliveryStage stage = newStage(index, deliveredInBatch);
+                Iterable<CatchUp> catchUpJobs = catchUpStorage.readAll();
+                List<Station> stations = conveyorStationsFor(catchUpJobs, action);
+                DeliveryStage stage = launch(conveyor, stations, index);
                 continueAllowed = monitorTellsToContinue(stage);
+                stages.add(stage);
             }
             if (continueAllowed) {
                 maybePage = currentPage.next();
             }
         }
+
+        int totalMessagesDelivered = stages.stream()
+                                       .map(DeliveryStage::getMessagesDelivered)
+                                       .reduce(0, Integer::sum);
         return new RunResult(totalMessagesDelivered, !continueAllowed);
+    }
+
+    /**
+     * Launches the conveyor, running it through the passed stations and processing the messages
+     * in the specified shard.
+     *
+     * <p>Once all the stations complete their routine, this {@code DeliveryStage} is considered
+     * completed.
+     *
+     * @return the delivery stage results
+     */
+    private DeliveryStage launch(Conveyor conveyor, Iterable<Station> stations, ShardIndex index) {
+        int deliveredInBatch = 0;
+
+        for (Station station : stations) {
+            Station.Result result = station.process(conveyor);
+            result.errors()
+                  .throwIfAny();
+            deliveredInBatch += result.deliveredCount();
+        }
+        notifyOfDuplicatesIn(conveyor);
+        conveyor.flushTo(inboxStorage);
+
+        return newStage(index, deliveredInBatch);
+    }
+
+    private ImmutableList<Station> conveyorStationsFor(Iterable<CatchUp> catchUpJobs,
+                                                       GroupByTargetAndDeliver action) {
+        return ImmutableList.of(
+                    new CatchUpStation(action, catchUpJobs),
+                    new LiveDeliveryStation(action, idempotenceWindow),
+                    new CleanupStation()
+        );
     }
 
     private void notifyOfDuplicatesIn(Conveyor conveyor) {
