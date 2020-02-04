@@ -276,7 +276,6 @@ public final class CatchUpProcess<I>
                 .collect(toList());
     }
 
-    //TODO:2019-12-13:alex.tymchenko: consider handling this event later to delete the process.
     private CatchUpCompleted completeProcess(CatchUpId id) {
         builder().setStatus(CatchUpStatus.COMPLETED);
         flushState();
