@@ -47,12 +47,4 @@ public final class DeliveryStats {
     public int deliveredCount() {
         return deliveredCount;
     }
-
-    @Override
-    public String toString() {
-        return "DeliveryStats{" +
-                "index=" + index +
-                ", deliveredCount=" + deliveredCount +
-                '}';
-    }
 }
