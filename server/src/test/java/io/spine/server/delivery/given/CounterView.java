@@ -30,6 +30,7 @@ import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.test.delivery.DCounter;
 import io.spine.test.delivery.NumberAdded;
+import io.spine.type.TypeUrl;
 
 /**
  * Counts the incoming events.
@@ -51,6 +52,10 @@ public final class CounterView extends Projection<String, DCounter, DCounter.Bui
 
     public static void changeWeightTo(int value) {
         weight = value;
+    }
+
+    public static TypeUrl projectionType() {
+        return TypeUrl.of(DCounter.class);
     }
 
     public static final class Repository

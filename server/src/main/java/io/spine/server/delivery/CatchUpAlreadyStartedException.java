@@ -53,6 +53,14 @@ public final class CatchUpAlreadyStartedException extends IllegalStateException 
         return message;
     }
 
+    public TypeUrl projectionStateType() {
+        return projectionStateType;
+    }
+
+    public ImmutableSet<Object> requestedIds() {
+        return requestedIds == null? ImmutableSet.of() : requestedIds;
+    }
+
     private String targetsAsString() {
         if (requestedIds == null) {
             return "[all instances]";

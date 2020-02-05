@@ -21,26 +21,38 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Timestamp;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A description of what target to catch-up in tests and since when.
  */
 final class WhatToCatchUp {
 
-    private final String id;
+    private final @Nullable String id;
     private final Timestamp sinceWhen;
 
-    private WhatToCatchUp(String id, Timestamp when) {
+    private WhatToCatchUp(String id, Timestamp sinceWhen) {
         this.id = id;
-        sinceWhen = when;
+        this.sinceWhen = sinceWhen;
     }
 
-    static WhatToCatchUp catchSince(String id, Timestamp sinceWhen) {
+    static WhatToCatchUp catchUpOf(String id, Timestamp sinceWhen) {
+        checkNotNull(id);
         return new WhatToCatchUp(id, sinceWhen);
     }
 
-    public String id() {
+    static WhatToCatchUp catchUpAll(Timestamp sinceWhen) {
+        return new WhatToCatchUp(null, sinceWhen);
+    }
+
+    public @Nullable String id() {
         return id;
+    }
+
+    boolean shouldCatchUpAll() {
+        return null == id;
     }
 
     Timestamp sinceWhen() {

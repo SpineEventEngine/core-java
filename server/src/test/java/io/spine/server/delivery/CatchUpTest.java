@@ -25,13 +25,15 @@ import com.google.common.collect.Iterators;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
-import com.google.protobuf.util.Timestamps;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.server.DefaultRepository;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.ConsecutiveNumberProcess;
 import io.spine.server.delivery.given.ConsecutiveProjection;
 import io.spine.server.delivery.given.CounterView;
 import io.spine.server.entity.Repository;
+import io.spine.server.storage.memory.InMemoryCatchUpStorage;
 import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.EmitNextNumber;
 import io.spine.test.delivery.NumberAdded;
@@ -40,6 +42,7 @@ import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -51,12 +54,17 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.IntStream;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.TestRoutines.findView;
 import static io.spine.server.delivery.TestRoutines.post;
-import static io.spine.server.delivery.WhatToCatchUp.catchSince;
+import static io.spine.server.delivery.WhatToCatchUp.catchUpOf;
 import static io.spine.testing.Tests.nullRef;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SlowTest
 @DisplayName("Catch-up of projection instances should")
@@ -69,44 +77,150 @@ public class CatchUpTest extends AbstractDeliveryTest {
         Time.resetProvider();
     }
 
-    @Test
-    @DisplayName("catch up only particular instances by their IDs, " +
-            "given the time is provided with ms resolution")
-    void byIdWithMillisResolution() throws InterruptedException {
-        Time.setProvider(new WithMillisOnlyResolution());
-        testCatchUpByIds();
+    /**
+     * Uses the default wall clock provider, which now emulates the nanoseconds by default.
+     */
+    @Nested
+    @DisplayName(", given the time is provided with nanosecond resolution,")
+    class WithNanosResolution {
+
+        @Test
+        @DisplayName("catch up only particular instances by their IDs")
+        void byIds() throws InterruptedException {
+            testCatchUpByIds();
+        }
+
+        @Test
+        @DisplayName("catch up all of projection instances" +
+                ", respecting the order of the delivered events")
+        void allInOrder() throws InterruptedException {
+            testCatchUpAll();
+        }
     }
 
-    @Test
-    @DisplayName("catch up only particular instances by their IDs, " +
-            "given the time is provided with nanosecond resolution")
-    void byIdWithNanosResolution() throws InterruptedException {
-        testCatchUpByIds();
+    /**
+     * Uses the custom wall clock provider, which only provides the time values with the millisecond
+     * resolution.
+     *
+     * <p>This is required in order to the test the catch-up in the scenarios close to the legacy
+     * applications. They did not have the emulated nanosecond resolution.
+     */
+    @Nested
+    @DisplayName(", given the time is provided with ms resolution,")
+    class WithMsResolution {
+
+        @Test
+        @DisplayName("catch up only the particular instances by their IDs")
+        void byId() throws InterruptedException {
+            setupMillis();
+            testCatchUpByIds();
+        }
+
+        @Test
+        @DisplayName("catch up all of the projection instances, " +
+                "preserving the order of the delivered events")
+        void allInOrder() throws InterruptedException {
+            setupMillis();
+            testCatchUpAll();
+        }
+
+        private void setupMillis() {
+            Time.setProvider(new WithMillisOnlyResolution());
+        }
     }
 
-    @Test
-    @DisplayName("catch up all of projection instances, " +
-            "given the time is provided with millisecond resolution")
-    void allInOrderWithMillisResolution() throws InterruptedException {
-        Time.setProvider(new WithMillisOnlyResolution());
-        testCatchUpAll();
+    @Nested
+    @DisplayName("not allow simultaneous catch-up")
+    class NotAllowSimultaneousCatchUp {
+
+        public static final String FIRST = "first";
+
+        @Test
+        @DisplayName("if catching up of all repository instances has started previously")
+        void ifCatchUpAllStartedPreviously() {
+            writeExistingCatchUp(WhatToCatchUp.catchUpAll(aMinuteAgo()));
+            CounterCatchUp counterCatchUp = newCounterCatchUp();
+            for (String target : counterCatchUp.targets()) {
+                assertCatchUpAlreadyStarted(counterCatchUp, target);
+            }
+        }
+
+        @Test
+        @DisplayName("of the same repository instances")
+        void ofSameInstances() {
+            String target = FIRST;
+            writeExistingCatchUp(WhatToCatchUp.catchUpOf(target, aMinuteAgo()));
+            CounterCatchUp counterCatchUp = new CounterCatchUp(target);
+
+            assertCatchUpAlreadyStarted(counterCatchUp, target);
+        }
+
+        @Test
+        @DisplayName("of all instances if at least one catch-up of an instance is in progress")
+        void ofAllIfOneAlreadyStarted() {
+            String target = "first";
+            writeExistingCatchUp(WhatToCatchUp.catchUpOf(target, aMinuteAgo()));
+            CounterCatchUp counterCatchUp = new CounterCatchUp(target);
+            try {
+                counterCatchUp.catchUp(WhatToCatchUp.catchUpAll(aMinuteAgo()));
+                fail("It must not be possible to start catching up all the instances," +
+                             " while some instance is already catching up.");
+            } catch (CatchUpAlreadyStartedException exception) {
+                assertThat(exception.projectionStateType()).isEqualTo(CounterView.projectionType());
+            }
+        }
+
+        private void assertCatchUpAlreadyStarted(CounterCatchUp counterCatchUp, String target) {
+            try {
+                counterCatchUp.catchUp(WhatToCatchUp.catchUpOf(target, aMinuteAgo()));
+                fail(format("Simultaneous catch-up was somehow started for ID `%s`.", target));
+            } catch (CatchUpAlreadyStartedException exception) {
+                assertThat(exception.projectionStateType()).isEqualTo(CounterView.projectionType());
+                assertThat(exception.requestedIds()).contains(target);
+            }
+        }
+
+        private void writeExistingCatchUp(WhatToCatchUp target) {
+            InMemoryCatchUpStorage storage = new InMemoryCatchUpStorage(false);
+            CatchUpId catchUpId = CatchUpId.newBuilder()
+                                           .setUuid(Identifier.newUuid())
+                                           .setProjectionType(CounterView.projectionType()
+                                                                         .value())
+                                           .build();
+            CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder()
+                                                                    .setSinceWhen(aMinuteAgo());
+            if (!target.shouldCatchUpAll()) {
+                String identifier = checkNotNull(target.id());
+                requestBuilder.addTarget(Identifier.pack(identifier));
+            }
+            CatchUp.Request allTargetsMinuteAgo = requestBuilder.build();
+
+            CatchUp existingState = CatchUp.newBuilder()
+                                           .setId(catchUpId)
+                                           .setStatus(CatchUpStatus.STARTED)
+                                           .setRequest(allTargetsMinuteAgo)
+                                           .vBuild();
+            storage.write(existingState);
+            Delivery delivery = Delivery.newBuilder()
+                                        .setCatchUpStorage(storage)
+                                        .build();
+            delivery.subscribe(new LocalDispatchingObserver());
+            ServerEnvironment.instance()
+                             .configureDelivery(delivery);
+        }
     }
 
-    @Test
-    @DisplayName("catch up all of projection instances, " +
-            "given the time is provided with nanos resolution")
-    void allInOrderWithNanosResolution() throws InterruptedException {
-        testCatchUpAll();
+    private static CounterCatchUp newCounterCatchUp() {
+        return new CounterCatchUp("first", "second", "third", "fourth");
     }
 
-    // Complex environment setup.
     private static void testCatchUpByIds() throws InterruptedException {
         changeShardCountTo(2);
 
-        CounterCatchUp counterCatchUp = new CounterCatchUp("first", "second", "third", "fourth");
+        CounterCatchUp counterCatchUp = newCounterCatchUp();
         List<NumberAdded> events = counterCatchUp.generateEvents(200);
 
-        Timestamp aWhileAgo = Timestamps.subtract(Time.currentTime(), Durations.fromHours(1));
+        Timestamp aWhileAgo = subtract(currentTime(), Durations.fromHours(1));
         counterCatchUp.addHistory(aWhileAgo, events);
 
         // Round 1. Fight!
@@ -131,8 +245,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
         CounterView.changeWeightTo(newWeight);
         counterCatchUp
                 .dispatchWithCatchUp(events, 20,
-                                     catchSince(targets[0], aWhileAgo),
-                                     catchSince(targets[1], aMinuteAgo()));
+                                     catchUpOf(targets[0], aWhileAgo),
+                                     catchUpOf(targets[1], aMinuteAgo()));
 
         List<Integer> totalsAfterCatchUp = counterCatchUp.counterValues();
 
@@ -203,7 +317,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
     }
 
     private static Timestamp aMinuteAgo() {
-        return Timestamps.subtract(Time.currentTime(), Durations.fromMinutes(1));
+        return subtract(currentTime(), Durations.fromMinutes(1));
     }
 
     private static List<Integer> readLastValues(ConsecutiveProjection.Repo repo,

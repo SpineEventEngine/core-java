@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
@@ -38,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.delivery.TestRoutines.findView;
 import static io.spine.server.delivery.TestRoutines.post;
 import static io.spine.testing.Tests.nullRef;
@@ -108,17 +110,30 @@ class CounterCatchUp {
     void dispatchWithCatchUp(List<NumberAdded> events, int threads, WhatToCatchUp... whatToCatchUp)
             throws InterruptedException {
         List<Callable<Object>> jobs = new ArrayList<>();
+        jobs.addAll(asCallableJobs(whatToCatchUp));
+        jobs.addAll(asPostEventJobs(ctx, events));
+        post(jobs, threads);
+    }
 
+    private ImmutableList<Callable<Object>>  asCallableJobs(WhatToCatchUp... whatToCatchUp) {
+        ImmutableList.Builder<Callable<Object>> jobs = ImmutableList.builder();
         for (WhatToCatchUp task : whatToCatchUp) {
             Callable<Object> callable = () -> {
-                repo.catchUp(task.sinceWhen(), ImmutableSet.of(task.id()));
+                catchUp(task);
                 return nullRef();
             };
             jobs.add(callable);
         }
+        return jobs.build();
+    }
 
-        jobs.addAll(asPostEventJobs(ctx, events));
-        post(jobs, threads);
+    void catchUp(WhatToCatchUp task) {
+        if (task.shouldCatchUpAll()) {
+            repo.catchUpAll(task.sinceWhen());
+        } else {
+            String targetId = checkNotNull(task.id());
+            repo.catchUp(task.sinceWhen(), ImmutableSet.of(targetId));
+        }
     }
 
     private static List<Callable<Object>> asPostEventJobs(SingleTenantBlackBoxContext ctx,
