@@ -44,7 +44,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -83,7 +85,7 @@ final class CatchUpStarter<I> {
      *         if the catch-up is already in progress for at least one of the requested entities
      */
     public void start(@Nullable Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
-        checkNotStartedAlready(ids);
+        checkNotActive(ids);
 
         CatchUp.Request request = buildRequest(ids, since);
         CatchUpId id = CatchUpId.newBuilder()
@@ -130,10 +132,12 @@ final class CatchUpStarter<I> {
         return requestBuilder.vBuild();
     }
 
-    private void checkNotStartedAlready(@Nullable Set<I> ids) throws
-                                                              CatchUpAlreadyStartedException {
+    private void checkNotActive(@Nullable Set<I> ids) throws CatchUpAlreadyStartedException {
         Iterable<CatchUp> ongoing = storage.readByType(projectionStateType);
-        boolean alreadyCatchingUp = hasIntersections(ongoing, ids);
+        List<CatchUp> active = stream(ongoing)
+                .filter(catchUp -> CatchUpStatus.COMPLETED != catchUp.getStatus())
+                .collect(toList());
+        boolean alreadyCatchingUp = hasIntersections(active, ids);
         if (alreadyCatchingUp) {
             throw new CatchUpAlreadyStartedException(projectionStateType, ids);
         }
@@ -204,7 +208,7 @@ final class CatchUpStarter<I> {
         CatchUpStarter<I> build() {
             checkNotNull(context, "The Bounded Context must be set" +
                     "in order to create an instance of `CatchUpStarter`.");
-            return new CatchUpStarter<I>(this);
+            return new CatchUpStarter<>(this);
         }
     }
 }

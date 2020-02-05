@@ -35,12 +35,12 @@ import static com.google.common.truth.Truth.assertThat;
 /**
  * Test-only routines to use when testing the catch-up and delivery API.
  */
-class TestRoutines {
+public final class TestRoutines {
 
     private TestRoutines() {
     }
 
-    static <P extends Projection<String, ?, ?>> P
+    public static <P extends Projection<String, ?, ?>> P
     findView(ProjectionRepository<String, P, ?> repo, String id) {
         Optional<P> view = repo.find(id);
         Truth8.assertThat(view)
@@ -48,7 +48,7 @@ class TestRoutines {
         return view.get();
     }
 
-    static void post(List<Callable<Object>> jobs, int threads) throws InterruptedException {
+    public static void post(List<Callable<Object>> jobs, int threads) throws InterruptedException {
         ExecutorService service = Executors.newFixedThreadPool(threads);
         service.invokeAll(jobs);
         List<Runnable> leftovers = service.shutdownNow();

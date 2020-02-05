@@ -25,15 +25,14 @@ import com.google.common.collect.Iterators;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
-import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.server.DefaultRepository;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.ConsecutiveNumberProcess;
 import io.spine.server.delivery.given.ConsecutiveProjection;
+import io.spine.server.delivery.given.CounterCatchUp;
 import io.spine.server.delivery.given.CounterView;
+import io.spine.server.delivery.given.WhatToCatchUp;
 import io.spine.server.entity.Repository;
-import io.spine.server.storage.memory.InMemoryCatchUpStorage;
 import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.EmitNextNumber;
 import io.spine.test.delivery.NumberAdded;
@@ -54,13 +53,14 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.IntStream;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
+import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
 import static io.spine.server.delivery.TestRoutines.findView;
 import static io.spine.server.delivery.TestRoutines.post;
-import static io.spine.server.delivery.WhatToCatchUp.catchUpOf;
+import static io.spine.server.delivery.given.WhatToCatchUp.catchUpAll;
+import static io.spine.server.delivery.given.WhatToCatchUp.catchUpOf;
 import static io.spine.testing.Tests.nullRef;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -130,16 +130,36 @@ public class CatchUpTest extends AbstractDeliveryTest {
     }
 
     @Nested
+    @DisplayName("allow catch-up")
+    class AllowCatchUp {
+
+        @Test
+        @DisplayName("if the event store is empty")
+        void onEmptyEventStore() {
+            CounterCatchUp counterCatchUp = catchUpForCounter();
+            counterCatchUp.catchUp(WhatToCatchUp.catchUpAll(aMinuteAgo()));
+        }
+
+        @Test
+        @DisplayName("of the same instance, if the previous catch-up is already completed")
+        void ifPreviousCatchUpCompleted() {
+            CounterCatchUp.addOngoingCatchUpRecord(catchUpAll(aMinuteAgo()), COMPLETED);
+            CounterCatchUp counterCatchUp = catchUpForCounter();
+            counterCatchUp.catchUp(WhatToCatchUp.catchUpAll(aMinuteAgo()));
+        }
+    }
+
+    @Nested
     @DisplayName("not allow simultaneous catch-up")
     class NotAllowSimultaneousCatchUp {
 
-        public static final String FIRST = "first";
+        private static final String TARGET_ID = "some target";
 
         @Test
         @DisplayName("if catching up of all repository instances has started previously")
         void ifCatchUpAllStartedPreviously() {
-            writeExistingCatchUp(WhatToCatchUp.catchUpAll(aMinuteAgo()));
-            CounterCatchUp counterCatchUp = newCounterCatchUp();
+            CounterCatchUp.addOngoingCatchUpRecord(catchUpAll(aMinuteAgo()));
+            CounterCatchUp counterCatchUp = catchUpForCounter();
             for (String target : counterCatchUp.targets()) {
                 assertCatchUpAlreadyStarted(counterCatchUp, target);
             }
@@ -148,21 +168,19 @@ public class CatchUpTest extends AbstractDeliveryTest {
         @Test
         @DisplayName("of the same repository instances")
         void ofSameInstances() {
-            String target = FIRST;
-            writeExistingCatchUp(WhatToCatchUp.catchUpOf(target, aMinuteAgo()));
-            CounterCatchUp counterCatchUp = new CounterCatchUp(target);
+            CounterCatchUp.addOngoingCatchUpRecord(catchUpOf(TARGET_ID, aMinuteAgo()));
+            CounterCatchUp counterCatchUp = new CounterCatchUp(TARGET_ID);
 
-            assertCatchUpAlreadyStarted(counterCatchUp, target);
+            assertCatchUpAlreadyStarted(counterCatchUp, TARGET_ID);
         }
 
         @Test
         @DisplayName("of all instances if at least one catch-up of an instance is in progress")
         void ofAllIfOneAlreadyStarted() {
-            String target = "first";
-            writeExistingCatchUp(WhatToCatchUp.catchUpOf(target, aMinuteAgo()));
-            CounterCatchUp counterCatchUp = new CounterCatchUp(target);
+            CounterCatchUp.addOngoingCatchUpRecord(catchUpOf(TARGET_ID, aMinuteAgo()));
+            CounterCatchUp counterCatchUp = new CounterCatchUp(TARGET_ID);
             try {
-                counterCatchUp.catchUp(WhatToCatchUp.catchUpAll(aMinuteAgo()));
+                counterCatchUp.catchUp(catchUpAll(aMinuteAgo()));
                 fail("It must not be possible to start catching up all the instances," +
                              " while some instance is already catching up.");
             } catch (CatchUpAlreadyStartedException exception) {
@@ -172,52 +190,23 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
         private void assertCatchUpAlreadyStarted(CounterCatchUp counterCatchUp, String target) {
             try {
-                counterCatchUp.catchUp(WhatToCatchUp.catchUpOf(target, aMinuteAgo()));
+                counterCatchUp.catchUp(catchUpOf(target, aMinuteAgo()));
                 fail(format("Simultaneous catch-up was somehow started for ID `%s`.", target));
             } catch (CatchUpAlreadyStartedException exception) {
                 assertThat(exception.projectionStateType()).isEqualTo(CounterView.projectionType());
                 assertThat(exception.requestedIds()).contains(target);
             }
         }
-
-        private void writeExistingCatchUp(WhatToCatchUp target) {
-            InMemoryCatchUpStorage storage = new InMemoryCatchUpStorage(false);
-            CatchUpId catchUpId = CatchUpId.newBuilder()
-                                           .setUuid(Identifier.newUuid())
-                                           .setProjectionType(CounterView.projectionType()
-                                                                         .value())
-                                           .build();
-            CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder()
-                                                                    .setSinceWhen(aMinuteAgo());
-            if (!target.shouldCatchUpAll()) {
-                String identifier = checkNotNull(target.id());
-                requestBuilder.addTarget(Identifier.pack(identifier));
-            }
-            CatchUp.Request allTargetsMinuteAgo = requestBuilder.build();
-
-            CatchUp existingState = CatchUp.newBuilder()
-                                           .setId(catchUpId)
-                                           .setStatus(CatchUpStatus.STARTED)
-                                           .setRequest(allTargetsMinuteAgo)
-                                           .vBuild();
-            storage.write(existingState);
-            Delivery delivery = Delivery.newBuilder()
-                                        .setCatchUpStorage(storage)
-                                        .build();
-            delivery.subscribe(new LocalDispatchingObserver());
-            ServerEnvironment.instance()
-                             .configureDelivery(delivery);
-        }
     }
 
-    private static CounterCatchUp newCounterCatchUp() {
+    private static CounterCatchUp catchUpForCounter() {
         return new CounterCatchUp("first", "second", "third", "fourth");
     }
 
     private static void testCatchUpByIds() throws InterruptedException {
         changeShardCountTo(2);
 
-        CounterCatchUp counterCatchUp = newCounterCatchUp();
+        CounterCatchUp counterCatchUp = catchUpForCounter();
         List<NumberAdded> events = counterCatchUp.generateEvents(200);
 
         Timestamp aWhileAgo = subtract(currentTime(), Durations.fromHours(1));

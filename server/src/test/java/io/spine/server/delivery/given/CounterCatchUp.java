@@ -18,16 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery;
+package io.spine.server.delivery.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.server.delivery.given.CounterView;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.CatchUp;
+import io.spine.server.delivery.CatchUpId;
+import io.spine.server.delivery.CatchUpStatus;
+import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.LocalDispatchingObserver;
 import io.spine.server.event.EventStore;
+import io.spine.server.storage.memory.InMemoryCatchUpStorage;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -49,20 +56,20 @@ import static java.util.stream.Collectors.toList;
  * A convenience wrapper over the {@link CounterView} repository and the BlackBox Bounded Context
  * to be used in the catch-up tests.
  */
-class CounterCatchUp {
+public class CounterCatchUp {
 
     private final CounterView.Repository repo;
     private final SingleTenantBlackBoxContext ctx;
     private final String[] ids;
 
-    CounterCatchUp(String... ids) {
+    public CounterCatchUp(String... ids) {
         this.ids = ids.clone();
         this.repo = new CounterView.Repository();
         this.ctx = BlackBoxBoundedContext.singleTenant()
                                          .with(repo);
     }
 
-    void addHistory(Timestamp when, List<NumberAdded> events) {
+    public void addHistory(Timestamp when, List<NumberAdded> events) {
         EventStore eventStore = ctx.eventBus()
                                    .eventStore();
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
@@ -79,23 +86,23 @@ class CounterCatchUp {
         }
     }
 
-    void dispatch(List<NumberAdded> events, int threads)
+    public void dispatch(List<NumberAdded> events, int threads)
             throws InterruptedException {
         post(asPostEventJobs(ctx, events), threads);
     }
 
-    List<Integer> counterValues() {
+    public List<Integer> counterValues() {
         return Arrays.stream(ids)
                      .map((id) -> findView(repo, id).state()
                                                     .getTotal())
                      .collect(toList());
     }
 
-    String[] targets() {
+    public String[] targets() {
         return ids.clone();
     }
 
-    List<NumberAdded> generateEvents(int howMany) {
+    public List<NumberAdded> generateEvents(int howMany) {
         Iterator<String> idIterator = Iterators.cycle(ids);
         List<NumberAdded> events = new ArrayList<>(howMany);
         for (int i = 0; i < howMany; i++) {
@@ -107,7 +114,7 @@ class CounterCatchUp {
         return events;
     }
 
-    void dispatchWithCatchUp(List<NumberAdded> events, int threads, WhatToCatchUp... whatToCatchUp)
+    public void dispatchWithCatchUp(List<NumberAdded> events, int threads, WhatToCatchUp... whatToCatchUp)
             throws InterruptedException {
         List<Callable<Object>> jobs = new ArrayList<>();
         jobs.addAll(asCallableJobs(whatToCatchUp));
@@ -115,7 +122,7 @@ class CounterCatchUp {
         post(jobs, threads);
     }
 
-    private ImmutableList<Callable<Object>>  asCallableJobs(WhatToCatchUp... whatToCatchUp) {
+    private ImmutableList<Callable<Object>> asCallableJobs(WhatToCatchUp... whatToCatchUp) {
         ImmutableList.Builder<Callable<Object>> jobs = ImmutableList.builder();
         for (WhatToCatchUp task : whatToCatchUp) {
             Callable<Object> callable = () -> {
@@ -127,7 +134,7 @@ class CounterCatchUp {
         return jobs.build();
     }
 
-    void catchUp(WhatToCatchUp task) {
+    public void catchUp(WhatToCatchUp task) {
         if (task.shouldCatchUpAll()) {
             repo.catchUpAll(task.sinceWhen());
         } else {
@@ -141,5 +148,38 @@ class CounterCatchUp {
         return events.stream()
                      .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
                      .collect(toList());
+    }
+
+    public static void addOngoingCatchUpRecord(WhatToCatchUp target) {
+        addOngoingCatchUpRecord(target, CatchUpStatus.STARTED);
+    }
+
+    public static void addOngoingCatchUpRecord(WhatToCatchUp target, CatchUpStatus status) {
+        InMemoryCatchUpStorage storage = new InMemoryCatchUpStorage(false);
+        CatchUpId catchUpId = CatchUpId.newBuilder()
+                                       .setUuid(Identifier.newUuid())
+                                       .setProjectionType(CounterView.projectionType()
+                                                                     .value())
+                                       .build();
+        CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder()
+                                                                .setSinceWhen(target.sinceWhen());
+        if (!target.shouldCatchUpAll()) {
+            String identifier = checkNotNull(target.id());
+            requestBuilder.addTarget(Identifier.pack(identifier));
+        }
+        CatchUp.Request allTargetsMinuteAgo = requestBuilder.build();
+
+        CatchUp existingState = CatchUp.newBuilder()
+                                       .setId(catchUpId)
+                                       .setStatus(status)
+                                       .setRequest(allTargetsMinuteAgo)
+                                       .vBuild();
+        storage.write(existingState);
+        Delivery delivery = Delivery.newBuilder()
+                                    .setCatchUpStorage(storage)
+                                    .build();
+        delivery.subscribe(new LocalDispatchingObserver());
+        ServerEnvironment.instance()
+                         .configureDelivery(delivery);
     }
 }

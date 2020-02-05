@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery;
+package io.spine.server.delivery.given;
 
 import com.google.protobuf.Timestamp;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A description of what target to catch-up in tests and since when.
  */
-final class WhatToCatchUp {
+public final class WhatToCatchUp {
 
     private final @Nullable String id;
     private final Timestamp sinceWhen;
@@ -38,12 +38,12 @@ final class WhatToCatchUp {
         this.sinceWhen = sinceWhen;
     }
 
-    static WhatToCatchUp catchUpOf(String id, Timestamp sinceWhen) {
+    public static WhatToCatchUp catchUpOf(String id, Timestamp sinceWhen) {
         checkNotNull(id);
         return new WhatToCatchUp(id, sinceWhen);
     }
 
-    static WhatToCatchUp catchUpAll(Timestamp sinceWhen) {
+    public static WhatToCatchUp catchUpAll(Timestamp sinceWhen) {
         return new WhatToCatchUp(null, sinceWhen);
     }
 
@@ -51,11 +51,11 @@ final class WhatToCatchUp {
         return id;
     }
 
-    boolean shouldCatchUpAll() {
+    public boolean shouldCatchUpAll() {
         return null == id;
     }
 
-    Timestamp sinceWhen() {
+    public Timestamp sinceWhen() {
         return sinceWhen;
     }
 }
