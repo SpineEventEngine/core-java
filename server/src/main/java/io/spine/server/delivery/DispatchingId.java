@@ -23,7 +23,7 @@ package io.spine.server.delivery;
 import java.util.Objects;
 
 /**
- * @author Alex Tymchenko
+ * An identifier of the signal-to-target dispatched as {@code InboxMessage}.
  */
 final class DispatchingId {
 
@@ -51,5 +51,13 @@ final class DispatchingId {
     @Override
     public int hashCode() {
         return Objects.hash(signal, inbox);
+    }
+
+    @Override
+    public String toString() {
+        return "DispatchingId{" +
+                "signal=" + signal +
+                ", inbox=" + inbox +
+                '}';
     }
 }
