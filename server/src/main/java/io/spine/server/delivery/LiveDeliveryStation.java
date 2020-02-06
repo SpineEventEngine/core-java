@@ -37,10 +37,10 @@ import java.util.Set;
  */
 final class LiveDeliveryStation extends Station {
 
-    private final GroupByTargetAndDeliver action;
+    private final DeliveryAction action;
     private final @Nullable Duration idempotenceWindow;
 
-    LiveDeliveryStation(GroupByTargetAndDeliver action, Duration idempotenceWindow) {
+    LiveDeliveryStation(DeliveryAction action, Duration idempotenceWindow) {
         super();
         this.action = action;
         this.idempotenceWindow = !idempotenceWindow.equals(Duration.getDefaultInstance())

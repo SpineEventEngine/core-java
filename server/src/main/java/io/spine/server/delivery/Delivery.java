@@ -326,7 +326,7 @@ public final class Delivery implements Logging {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
-                GroupByTargetAndDeliver action = new GroupByTargetAndDeliver(deliveries);
+                DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
                 Conveyor conveyor = new Conveyor(messages, deliveredMessages);
                 Iterable<CatchUp> catchUpJobs = catchUpStorage.readAll();
                 List<Station> stations = conveyorStationsFor(catchUpJobs, action);
@@ -370,7 +370,7 @@ public final class Delivery implements Logging {
     }
 
     private ImmutableList<Station> conveyorStationsFor(Iterable<CatchUp> catchUpJobs,
-                                                       GroupByTargetAndDeliver action) {
+                                                       DeliveryAction action) {
         return ImmutableList.of(
                     new CatchUpStation(action, catchUpJobs),
                     new LiveDeliveryStation(action, idempotenceWindow),

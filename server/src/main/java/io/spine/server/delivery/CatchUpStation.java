@@ -49,10 +49,10 @@ final class CatchUpStation extends Station {
     private static final Duration HOW_LONG_TO_KEEP = Durations.fromMillis(1000);
     private static final Comparator<InboxMessage> COMPARATOR = new CatchUpMessageComparator();
 
-    private final GroupByTargetAndDeliver action;
+    private final DeliveryAction action;
     private final Iterable<CatchUp> jobs;
 
-    CatchUpStation(GroupByTargetAndDeliver action, Iterable<CatchUp> jobs) {
+    CatchUpStation(DeliveryAction action, Iterable<CatchUp> jobs) {
         super();
         this.action = action;
         this.jobs = jobs;

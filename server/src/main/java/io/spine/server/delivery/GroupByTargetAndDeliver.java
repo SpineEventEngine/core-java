@@ -32,7 +32,7 @@ import static java.util.stream.Collectors.groupingBy;
  * A method object performing the delivery of the messages grouping them by the type of their
  * targets.
  */
-final class GroupByTargetAndDeliver {
+final class GroupByTargetAndDeliver implements DeliveryAction {
 
     private final InboxDeliveries inboxDeliveries;
 
@@ -56,7 +56,8 @@ final class GroupByTargetAndDeliver {
      *
      * @return errors occurred during the delivery
      */
-    DeliveryErrors executeFor(Collection<InboxMessage> messages) {
+    @Override
+    public DeliveryErrors executeFor(Collection<InboxMessage> messages) {
         Map<String, List<InboxMessage>> messagesByType = groupByTargetType(messages);
 
         DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
