@@ -92,7 +92,7 @@ final class LiveDeliveryStation extends Station {
      */
     private static
     List<InboxMessage> deduplicateAndSort(Collection<InboxMessage> messages, Conveyor conveyor) {
-        Set<DispatchingId> previouslyDelivered = conveyor.previouslyDelivered();
+        Set<DispatchingId> previouslyDelivered = conveyor.idsOfDelivered();
         List<InboxMessage> result = new ArrayList<>();
         for (InboxMessage message : messages) {
             DispatchingId id = new DispatchingId(message);

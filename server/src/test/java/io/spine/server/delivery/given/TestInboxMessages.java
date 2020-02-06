@@ -66,6 +66,15 @@ public final class TestInboxMessages {
     }
 
     /**
+     * Copies the original {@code InboxMessage} but sets the specified status to the copy.
+     */
+    public static InboxMessage copyWithStatus(InboxMessage original, InboxMessageStatus newStatus) {
+        return original.toBuilder()
+                       .setStatus(newStatus)
+                       .vBuild();
+    }
+
+    /**
      * Generates a new {@code InboxMessage} in
      * {@link io.spine.server.delivery.InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status.
      *

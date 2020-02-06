@@ -51,6 +51,15 @@ final class Conveyor implements Iterable<InboxMessage> {
     private final Set<InboxMessage> removals = new HashSet<>();
     private final Set<InboxMessage> duplicates = new HashSet<>();
 
+    /**
+     * Creates an instance of conveyor with the messages to process and the cache of the previously
+     * delivered messages.
+     *
+     * @param messages
+     *         messages to process
+     * @param deliveredMessages
+     *         cache of the previously delivered messages
+     */
     Conveyor(Collection<InboxMessage> messages, DeliveredMessages deliveredMessages) {
         this.deliveredMessages = deliveredMessages;
         for (InboxMessage message : messages) {
@@ -97,17 +106,34 @@ final class Conveyor implements Iterable<InboxMessage> {
         dirtyMessages.add(message.getId());
     }
 
-    Set<DispatchingId> previouslyDelivered() {
+    /**
+     * Returns the read-only view on the set of the {@code DispatchingId}s
+     * of the {@link InboxMessage}s which are known to be already delivered.
+     *
+     * <p>This includes both the IDs of messages delivered within the lifetime of this conveyor
+     * instance and of the messages delivered
+     * {@linkplain Conveyor#Conveyor(Collection, DeliveredMessages) before it}.
+     */
+    Set<DispatchingId> idsOfDelivered() {
         Set<DispatchingId> recentlyDelivered =
-                messages.values()
-                        .stream()
-                        .filter(m -> m.getStatus() ==
-                                InboxMessageStatus.DELIVERED)
+                delivered()
                         .map(DispatchingId::new)
                         .collect(Collectors.toSet());
         Sets.SetView<DispatchingId> result = Sets.union(recentlyDelivered,
                                                         deliveredMessages.allDelivered());
         return result;
+    }
+
+    /**
+     * Returns the stream of the {@link InboxMessage}s which are known to be delivered.
+     *
+     * <p>This includes all the messages on this conveyor with the {@code DELIVERED} status.
+     */
+    Stream<InboxMessage> delivered() {
+        return messages.values()
+                       .stream()
+                       .filter(m -> m.getStatus() ==
+                               InboxMessageStatus.DELIVERED);
     }
 
     /**

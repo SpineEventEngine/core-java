@@ -35,10 +35,15 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
+import static io.spine.server.delivery.given.TestInboxMessages.catchingUp;
 import static io.spine.server.delivery.given.TestInboxMessages.copyWithNewId;
+import static io.spine.server.delivery.given.TestInboxMessages.copyWithStatus;
 import static io.spine.server.delivery.given.TestInboxMessages.toDeliver;
+import static java.util.stream.Collectors.toSet;
 
 @DisplayName("`CatchUpStation` should")
 class CatchUpStationTest {
@@ -96,9 +101,61 @@ class CatchUpStationTest {
 
     @Test
     @DisplayName("deliver the messages in `CATCH_UP` status " +
-            "which correspond to a started `CatchUpJob`")
+            "which correspond to a started `CatchUpJob` and remove duplicates")
     void matchAndRunDeliveryAction() {
+        TypeUrl targetType = TypeUrl.of(DCounter.class);
+        String targetId = "target";
+        String anotherTarget = "another-target";
+        InboxMessage toCatchUp = catchingUp(targetId, targetType);
+        InboxMessage duplicateCopy = copyWithNewId(toCatchUp);
+        InboxMessage anotherToCatchUp = catchingUp(targetId, targetType);
+        InboxMessage alreadyDelivered = TestInboxMessages.delivered(targetId, targetType);
+        InboxMessage differentTarget = TestInboxMessages.catchingUp(anotherTarget, targetType);
 
+        ImmutableList<InboxMessage> initialContents =
+                ImmutableList.of(toCatchUp, anotherToCatchUp, duplicateCopy,
+                                 alreadyDelivered, differentTarget);
+        Conveyor conveyor = new Conveyor(
+                initialContents,
+                new DeliveredMessages()
+        );
+
+        MemoizingDeliveryAction action = new MemoizingDeliveryAction();
+        CatchUp job = TestCatchUpJobs
+                .catchUpJob(targetType, CatchUpStatus.STARTED,
+                            Time.currentTime(), ImmutableList.of(targetId)
+                );
+        CatchUpStation station = new CatchUpStation(action, ImmutableList.of(job));
+        Station.Result result = station.process(conveyor);
+
+        assertThat(result.deliveredCount()).isEqualTo(2);
+        assertThat(result.errors()
+                         .hasErrors()).isFalse();
+
+        Set<InboxMessage> deliveredMessages = conveyor.delivered()
+                                                      .collect(toSet());
+        assertThat(deliveredMessages)
+                .containsExactlyElementsIn(
+                        ImmutableSet.of(
+                                copyWithStatus(toCatchUp, DELIVERED),
+                                copyWithStatus(anotherToCatchUp, DELIVERED),
+                                alreadyDelivered
+                        )
+                );
+
+        ImmutableSet<InboxMessage> removals = ImmutableSet.copyOf(conveyor.removals());
+        assertThat(removals).containsExactlyElementsIn(ImmutableSet.of(duplicateCopy));
+
+        Iterator<InboxMessage> remainders = conveyor.iterator();
+        assertThat(ImmutableSet.copyOf(remainders))
+                .containsExactlyElementsIn(
+                        ImmutableSet.of(
+                                copyWithStatus(toCatchUp, DELIVERED),
+                                copyWithStatus(anotherToCatchUp, DELIVERED),
+                                alreadyDelivered,
+                                differentTarget
+                        )
+                );
     }
 
     @Test

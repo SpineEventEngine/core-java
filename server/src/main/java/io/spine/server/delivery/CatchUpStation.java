@@ -82,7 +82,11 @@ final class CatchUpStation extends Station {
                     DispatchingId dispatchingId = new DispatchingId(message);
                     if (jobStatus == STARTED) {
                         if (message.getStatus() == TO_CATCH_UP) {
-                            dispatchToCatchUp.put(dispatchingId, message);
+                            if(dispatchToCatchUp.containsKey(dispatchingId)) {
+                                conveyor.remove(message);
+                            } else {
+                                dispatchToCatchUp.put(dispatchingId, message);
+                            }
                         } else if (message.getStatus() == TO_DELIVER) {
                             conveyor.remove(message);
                         }
