@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
@@ -118,7 +119,8 @@ final class CatchUpStation extends Station {
         return emptyResult();
     }
 
-    private static boolean matches(CatchUp job, InboxMessage message) {
+    @VisibleForTesting
+    static boolean matches(CatchUp job, InboxMessage message) {
         String expectedProjectionType = job.getId()
                                            .getProjectionType();
         InboxId targetInbox = message.getInboxId();

@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
@@ -109,6 +110,12 @@ final class Conveyor implements Iterable<InboxMessage> {
         return result;
     }
 
+    /**
+     * Marks the passed message as such to be kept in its {@code Inbox} for a certain amount of
+     * time starting from now.
+     *
+     * <p>Such an operation may be used to keep the message as a de-duplication source.
+     */
     void keepForLonger(InboxMessage message, Duration howLongTooKeep) {
         Timestamp keepUntil = Timestamps.add(Time.currentTime(), howLongTooKeep);
         InboxMessage modified = message.toBuilder()
@@ -118,10 +125,16 @@ final class Conveyor implements Iterable<InboxMessage> {
         dirtyMessages.add(message.getId());
     }
 
+    /**
+     * Returns the stream of the messages that are already detected as duplicates.
+     */
     Stream<InboxMessage> recentDuplicates() {
         return duplicates.stream();
     }
 
+    /**
+     * Writes all the pending changes to the passed {@code InboxStorage}.
+     */
     void flushTo(InboxStorage storage) {
         List<InboxMessage> dirtyMessages =
                 messages.values()
@@ -133,5 +146,13 @@ final class Conveyor implements Iterable<InboxMessage> {
         dirtyMessages.clear();
         removals.clear();
         duplicates.clear();
+    }
+
+    /**
+     * Returns the messages that are marked to be removed.
+     */
+    @VisibleForTesting
+    Iterator<InboxMessage> removals() {
+        return removals.iterator();
     }
 }

@@ -24,12 +24,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.CatchUp;
-import io.spine.server.delivery.CatchUpId;
 import io.spine.server.delivery.CatchUpStatus;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.LocalDispatchingObserver;
@@ -42,6 +40,7 @@ import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -156,25 +155,14 @@ public class CounterCatchUp {
 
     public static void addOngoingCatchUpRecord(WhatToCatchUp target, CatchUpStatus status) {
         InMemoryCatchUpStorage storage = new InMemoryCatchUpStorage(false);
-        CatchUpId catchUpId = CatchUpId.newBuilder()
-                                       .setUuid(Identifier.newUuid())
-                                       .setProjectionType(CounterView.projectionType()
-                                                                     .value())
-                                       .build();
-        CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder()
-                                                                .setSinceWhen(target.sinceWhen());
-        if (!target.shouldCatchUpAll()) {
+        Collection<Object> ids = null;
+        if(!target.shouldCatchUpAll()) {
             String identifier = checkNotNull(target.id());
-            requestBuilder.addTarget(Identifier.pack(identifier));
+            ids = ImmutableList.of(identifier);
         }
-        CatchUp.Request allTargetsMinuteAgo = requestBuilder.build();
-
-        CatchUp existingState = CatchUp.newBuilder()
-                                       .setId(catchUpId)
-                                       .setStatus(status)
-                                       .setRequest(allTargetsMinuteAgo)
-                                       .vBuild();
-        storage.write(existingState);
+        CatchUp record = TestCatchUpJobs
+                .catchUpJob(CounterView.projectionType(), status, target.sinceWhen(), ids);
+        storage.write(record);
         Delivery delivery = Delivery.newBuilder()
                                     .setCatchUpStorage(storage)
                                     .build();

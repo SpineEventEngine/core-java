@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -59,7 +60,21 @@ public abstract class DeliveryStrategy {
         return indexFor(entityId, entityStateType);
     }
 
-    static ShardIndex newIndex(int indexValue, int ofTotal) {
+    /**
+     * Creates a new {@code ShardIndex} according to the passed shard index
+     *
+     * <p>The passed shard index value must be less than the total number of shards specified.
+     *
+     * <p>Both passed values must not be negative.
+     *
+     * @param indexValue
+     *         the value of the shard index, zero-based
+     * @param ofTotal
+     *         the total number of shard
+     * @return a new instance of the {@code ShardIndex}
+     */
+    @Internal
+    public static ShardIndex newIndex(int indexValue, int ofTotal) {
         checkArgument(indexValue < ofTotal,
                       "The index of the shard `%s` must be less" +
                               " than the total number of shards `%s`.",
