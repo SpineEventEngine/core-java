@@ -63,4 +63,13 @@ abstract class Station {
             return errors;
         }
     }
+
+    /**
+     * Returns an empty result with no errors.
+     */
+    static Result emptyResult() {
+        DeliveryErrors noErrors = DeliveryErrors.newBuilder()
+                                                .build();
+        return new Result(0, noErrors);
+    }
 }

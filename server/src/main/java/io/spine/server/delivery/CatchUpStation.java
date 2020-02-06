@@ -106,13 +106,16 @@ final class CatchUpStation extends Station {
             }
         }
 
-        List<InboxMessage> messages = new ArrayList<>(dispatchToCatchUp.values());
-        messages.sort(COMPARATOR);
+        if(!dispatchToCatchUp.isEmpty()) {
+            List<InboxMessage> messages = new ArrayList<>(dispatchToCatchUp.values());
+            messages.sort(COMPARATOR);
 
-        DeliveryErrors errors = action.executeFor(messages);
-        conveyor.markDelivered(messages);
-        Result result = new Result(dispatchToCatchUp.size(), errors);
-        return result;
+            DeliveryErrors errors = action.executeFor(messages);
+            conveyor.markDelivered(messages);
+            Result result = new Result(dispatchToCatchUp.size(), errors);
+            return result;
+        }
+        return emptyResult();
     }
 
     private static boolean matches(CatchUp job, InboxMessage message) {

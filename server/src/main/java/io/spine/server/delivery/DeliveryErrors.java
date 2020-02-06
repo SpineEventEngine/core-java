@@ -59,12 +59,19 @@ final class DeliveryErrors {
      * the first one as {@link Throwable#addSuppressed suppressed}.
      */
     void throwIfAny() {
-        if (!errors.isEmpty()) {
+        if (hasErrors()) {
             DeliveryError first = errors.get(0);
             ImmutableList<DeliveryError> other = this.errors.subList(1, this.errors.size());
             other.forEach(first::addSuppressed);
             first.rethrow();
         }
+    }
+
+    /**
+     * Tells if any throwables were observed.
+     */
+    boolean hasErrors() {
+        return !errors.isEmpty();
     }
 
     /**
