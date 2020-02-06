@@ -22,11 +22,11 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
-import io.spine.base.EventContextField;
 import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.core.EventContext;
+import io.spine.core.EventContextField;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.ClProjectCreated;
 import org.junit.jupiter.api.DisplayName;

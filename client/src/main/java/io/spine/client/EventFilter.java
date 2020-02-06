@@ -20,9 +20,9 @@
 
 package io.spine.client;
 
-import io.spine.base.EventContextField;
 import io.spine.base.EventMessageField;
 import io.spine.core.Event;
+import io.spine.core.EventContextField;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator.EQUAL;

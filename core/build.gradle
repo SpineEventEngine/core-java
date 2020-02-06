@@ -26,5 +26,12 @@ dependencies {
     testImplementation "io.spine:spine-testutil-time:$spineTimeVersion"
 }
 
+modelCompiler {
+    fields {
+        generateFor "spine.core.Event", markAs("io.spine.base.EntityStateField")
+        generateFor "spine.core.EventContext", markAs("io.spine.core.EventContextField")
+    }
+}
+
 apply from: deps.scripts.testArtifacts
 apply from: deps.scripts.publishProto
