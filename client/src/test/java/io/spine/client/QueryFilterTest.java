@@ -47,7 +47,7 @@ class QueryFilterTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(EntityColumn.class, TestEntity.Columns.firstField())
+                .setDefault(EntityColumn.class, TestEntity.Column.firstField())
                 .testAllPublicStaticMethods(QueryFilter.class);
     }
 
@@ -87,7 +87,7 @@ class QueryFilterTest {
 
         private void checkCreates(BiFunction<EntityColumn, Object, QueryFilter> factoryMethod,
                                   Filter.Operator expectedOperator) {
-            EntityColumn column = TestEntity.Columns.thirdField();
+            EntityColumn column = TestEntity.Column.thirdField();
             int value = 42;
             QueryFilter queryFilter = factoryMethod.apply(column, value);
             Filter filter = queryFilter.filter();

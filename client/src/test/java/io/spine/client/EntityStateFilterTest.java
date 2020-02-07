@@ -47,7 +47,7 @@ class EntityStateFilterTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(EntityStateField.class, TestEntity.Fields.firstField())
+                .setDefault(EntityStateField.class, TestEntity.Field.firstField())
                 .testAllPublicStaticMethods(EntityStateFilter.class);
     }
 
@@ -88,7 +88,7 @@ class EntityStateFilterTest {
         private void
         checkCreates(BiFunction<EntityStateField, Object, EntityStateFilter> factoryMethod,
                      Filter.Operator expectedOperator) {
-            EntityStateField field = TestEntity.Fields.thirdField();
+            EntityStateField field = TestEntity.Field.thirdField();
             int value = 42;
             EntityStateFilter stateFilter = factoryMethod.apply(field, value);
             Filter filter = stateFilter.filter();

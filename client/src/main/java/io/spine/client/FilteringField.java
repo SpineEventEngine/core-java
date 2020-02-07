@@ -78,9 +78,9 @@ final class FilteringField {
     }
 
     private boolean refersToContext() {
-        String contextFieldName = Event.Fields.context()
-                                              .getField()
-                                              .toString();
+        String contextFieldName = Event.Field.context()
+                                             .getField()
+                                             .toString();
         String firstInPath = field.path().getFieldName(0);
         boolean result = contextFieldName.equals(firstInPath);
         return result;

@@ -51,8 +51,8 @@ class EventFilterTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(EventMessageField.class, ClProjectCreated.Fields.name())
-                .setDefault(EventContextField.class, EventContext.Fields.external())
+                .setDefault(EventMessageField.class, ClProjectCreated.Field.name())
+                .setDefault(EventContextField.class, EventContext.Field.external())
                 .testAllPublicStaticMethods(EventFilter.class);
     }
 
@@ -93,7 +93,7 @@ class EventFilterTest {
         private void
         checkCreates(BiFunction<EventMessageField, Object, EventFilter> factoryMethod,
                      Filter.Operator expectedOperator) {
-            EventMessageField field = ClProjectCreated.Fields.id();
+            EventMessageField field = ClProjectCreated.Field.id();
             String value = "some-ID";
             EventFilter eventFilter = factoryMethod.apply(field, value);
             Filter filter = eventFilter.filter();
@@ -151,8 +151,8 @@ class EventFilterTest {
         private void
         checkCreates(BiFunction<EventContextField, Object, EventFilter> factoryMethod,
                      Filter.Operator expectedOperator) {
-            EventContextField field = EventContext.Fields.commandId()
-                                                         .uuid();
+            EventContextField field = EventContext.Field.commandId()
+                                                        .uuid();
             String value = "some-UUID";
             EventFilter eventFilter = factoryMethod.apply(field, value);
             Filter filter = eventFilter.filter();

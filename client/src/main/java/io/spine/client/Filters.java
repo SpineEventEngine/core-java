@@ -261,10 +261,10 @@ public final class Filters {
     }
 
     static Filter createContextFilter(Field field, Object value, Operator operator) {
-        FieldPath fieldPath = Event.Fields.context()
-                                          .getField()
-                                          .nested(field)
-                                          .path();
+        FieldPath fieldPath = Event.Field.context()
+                                         .getField()
+                                         .nested(field)
+                                         .path();
         return createFilter(fieldPath, value, operator);
     }
 

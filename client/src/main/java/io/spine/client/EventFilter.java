@@ -252,9 +252,9 @@ public final class EventFilter extends TypedFilter<Event> {
     }
 
     private static boolean isContextFilter(Filter filter) {
-        String contextFieldName = Event.Fields.context()
-                                              .getField()
-                                              .toString();
+        String contextFieldName = Event.Field.context()
+                                             .getField()
+                                             .toString();
         String firstInPath = filter.getFieldPath()
                                    .getFieldName(0);
         boolean result = contextFieldName.equals(firstInPath);

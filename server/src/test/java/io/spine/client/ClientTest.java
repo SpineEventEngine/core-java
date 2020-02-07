@@ -104,19 +104,19 @@ class ClientTest extends AbstractClientTest {
             Subscription userLoggedIn =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedIn.class)
-                          .where(eq(UserLoggedIn.Fields.user(), currentUser))
+                          .where(eq(UserLoggedIn.Field.user(), currentUser))
                           .observe((e) -> {})
                           .post();
             Subscription userLoggedOut =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedOut.class)
-                          .where(eq(UserLoggedOut.Fields.user(), currentUser))
+                          .where(eq(UserLoggedOut.Field.user(), currentUser))
                           .observe((e) -> {})
                           .post();
             Subscription loginStatus =
                     client.onBehalfOf(currentUser)
                     .subscribeTo(LoginStatus.class)
-                    .where(EntityStateFilter.eq(LoginStatus.Fields.userId(),
+                    .where(EntityStateFilter.eq(LoginStatus.Field.userId(),
                                                 currentUser.getValue()))
                     .observe((s) -> {})
                     .post();
