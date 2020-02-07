@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.delivery.given.TestInboxMessages;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.DCounter;
 import io.spine.type.TypeUrl;
@@ -76,8 +75,8 @@ class CatchUpStationTest {
     void removeLiveMessagesIfCatchUpStarted() {
         InboxMessage toDeliver = toDeliver(targetOne, type);
         InboxMessage anotherToDeliver = copyWithNewId(toDeliver);
-        InboxMessage delivered = TestInboxMessages.delivered(targetOne, type);
-        InboxMessage differentTarget = TestInboxMessages.delivered(targetTwo, type);
+        InboxMessage delivered = delivered(targetOne, type);
+        InboxMessage differentTarget = delivered(targetTwo, type);
         Conveyor conveyor = new Conveyor(
                 ImmutableList.of(toDeliver, anotherToDeliver, delivered, differentTarget),
                 new DeliveredMessages()
@@ -105,7 +104,7 @@ class CatchUpStationTest {
         InboxMessage toCatchUp = catchingUp(targetOne, type);
         InboxMessage duplicateCopy = copyWithNewId(toCatchUp);
         InboxMessage anotherToCatchUp = catchingUp(targetOne, type);
-        InboxMessage alreadyDelivered = TestInboxMessages.delivered(targetOne, type);
+        InboxMessage alreadyDelivered = delivered(targetOne, type);
         InboxMessage differentTarget = catchingUp(targetTwo, type);
 
         ImmutableList<InboxMessage> initialContents =
@@ -141,8 +140,8 @@ class CatchUpStationTest {
     void markLiveMessagesCatchUpIfJobFinalizing() {
         InboxMessage toDeliver = toDeliver(targetOne, type);
         InboxMessage anotherToDeliver = copyWithNewId(toDeliver);
-        InboxMessage delivered = TestInboxMessages.delivered(targetOne, type);
-        InboxMessage differentTarget = TestInboxMessages.delivered(targetTwo, type);
+        InboxMessage delivered = delivered(targetOne, type);
+        InboxMessage differentTarget = delivered(targetTwo, type);
         Conveyor conveyor = new Conveyor(
                 ImmutableList.of(toDeliver, anotherToDeliver, delivered, differentTarget),
                 new DeliveredMessages()
