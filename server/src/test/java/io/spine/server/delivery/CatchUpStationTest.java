@@ -23,6 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.delivery.given.TestInboxMessages;
+import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.DCounter;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,6 +46,7 @@ import static io.spine.server.delivery.given.TestCatchUpJobs.catchUpJob;
 import static io.spine.server.delivery.given.TestInboxMessages.catchingUp;
 import static io.spine.server.delivery.given.TestInboxMessages.copyWithNewId;
 import static io.spine.server.delivery.given.TestInboxMessages.copyWithStatus;
+import static io.spine.server.delivery.given.TestInboxMessages.delivered;
 import static io.spine.server.delivery.given.TestInboxMessages.toDeliver;
 import static java.util.stream.Collectors.toSet;
 
@@ -54,6 +56,7 @@ class CatchUpStationTest {
     private static final String targetOne = "first-catching-up-target-ID";
     private static final String targetTwo = "catching-up-target-ID";
     private static final TypeUrl type = TypeUrl.of(DCounter.class);
+    private static final TypeUrl anotherType = TypeUrl.of(Calc.class);
 
     @Test
     @DisplayName("do nothing if an empty conveyor is passed")
@@ -103,7 +106,7 @@ class CatchUpStationTest {
         InboxMessage duplicateCopy = copyWithNewId(toCatchUp);
         InboxMessage anotherToCatchUp = catchingUp(targetOne, type);
         InboxMessage alreadyDelivered = TestInboxMessages.delivered(targetOne, type);
-        InboxMessage differentTarget = TestInboxMessages.catchingUp(targetTwo, type);
+        InboxMessage differentTarget = catchingUp(targetTwo, type);
 
         ImmutableList<InboxMessage> initialContents =
                 ImmutableList.of(toCatchUp, anotherToCatchUp, duplicateCopy,
@@ -163,7 +166,6 @@ class CatchUpStationTest {
             "if the respective `CatchUpJob` is completed, " +
             "keeping the `CATCH_UP` messages in their storage for a bit longer")
     void deduplicateAndDeliverWhenJobCompleted() {
-
     }
 
     @Test
@@ -180,14 +182,26 @@ class CatchUpStationTest {
         @Test
         @DisplayName("by a particular target ID of the `CatchUpJob`")
         void byId() {
-
+            ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
+            CatchUp job = catchUpJob(type, STARTED, currentTime(), ImmutableList.of(targetOne));
+            assertMatchesEvery(messages, job);
         }
 
         @Test
         @DisplayName("when the `CatchUpJob` matches all the targets of type " +
                 "to which `InboxMessage` is dispatched")
         void allByType() {
+            ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
+            CatchUp job = catchUpJob(type, STARTED, currentTime(), null);
+            assertMatchesEvery(messages, job);
+        }
 
+        private void assertMatchesEvery(ImmutableSet<InboxMessage> messages, CatchUp job) {
+            for (InboxMessage message : messages) {
+                assertThat(CatchUpStation.matches(job, message))
+                        .isTrue();
+
+            }
         }
     }
 
@@ -198,15 +212,33 @@ class CatchUpStationTest {
         @Test
         @DisplayName("when the target type of the `InboxMessage` and the `CatchUpJob` differs")
         void whenTargetTypeDiffers() {
-
+            ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(anotherType);
+            CatchUp job = catchUpJob(type, STARTED, currentTime(), null);
+            assertMatchesNone(messages, job);
         }
 
         @Test
         @DisplayName("when the target ID of the `InboxMessage` " +
                 "does not match the IDs enumerated in the `CatchUpJob`")
         void whenIdDoesNotMatch() {
-
+            ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
+            CatchUp job = catchUpJob(type, STARTED, currentTime(), ImmutableSet.of(targetTwo));
+            assertMatchesNone(messages, job);
         }
+
+        private void assertMatchesNone(ImmutableSet<InboxMessage> messages, CatchUp job) {
+            for (InboxMessage message : messages) {
+                assertThat(CatchUpStation.matches(job, message))
+                        .isFalse();
+
+            }
+        }
+    }
+
+    private static ImmutableSet<InboxMessage> messagesToTargetOneOf(TypeUrl targetType) {
+        return ImmutableSet.of(toDeliver(targetOne, targetType),
+                               delivered(targetOne, targetType),
+                               catchingUp(targetOne, targetType));
     }
 
     private static void assertContainsExactly(Iterator<InboxMessage> actual,
