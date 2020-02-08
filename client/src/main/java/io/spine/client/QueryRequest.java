@@ -41,10 +41,10 @@ import static io.spine.client.Filters.extractFilters;
  *          .select(Customer.class)
  *          .byId(westCoastCustomerIds())
  *          .withMask("name", "address", "email")
- *          .where(eq(Customer.Columns.type(), "permanent"),
- *                 eq(Customer.Columns.discountPercent(), 10),
- *                 eq(Customer.Columns.companySize(), Company.Size.SMALL))
- *          .orderBy(Customer.Columns.name(), ASCENDING)
+ *          .where(eq(Customer.Column.type(), "permanent"),
+ *                 eq(Customer.Column.discountPercent(), 10),
+ *                 eq(Customer.Column.companySize(), Company.Size.SMALL))
+ *          .orderBy(Customer.Column.name(), ASCENDING)
  *          .limit(20)
  *          .run();
  * }</pre>

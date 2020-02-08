@@ -37,7 +37,7 @@ import static io.spine.client.Filters.extractFilters;
  * values of the proto types of subscribed messages:
  * <pre>{@code
  * clientRequest.subscribeToEvent(MyEventMessage.class)
- *              .where(eq(MyEventMessage.Fields.myProtoField(), fieldValue))
+ *              .where(eq(MyEventMessage.Field.myProtoField(), fieldValue))
  *              .observe((event, context) -> {...})
  *              .post();
  * }</pre>
@@ -47,7 +47,7 @@ import static io.spine.client.Filters.extractFilters;
  * commands of the given user, please use the following code:
  * <pre>{@code
  * clientRequest.subscribeToEvent(MyEventMessage.class)
- *              .where(eq(EventContext.Fields.pastMessage().actorContext().actor(), userId))
+ *              .where(eq(EventContext.Field.pastMessage().actorContext().actor(), userId))
  *              .observe((event, context) -> {...})
  *              .post();
  * }</pre>
