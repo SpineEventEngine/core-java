@@ -140,7 +140,7 @@ FilteringRequest<M extends Message,
     /**
      * Configures the request to return results matching all the passed filters.
      *
-     * @deprecated Please use the overloads which reside in descendants and rely on strongly-typed
+     * @deprecated Please use the overloads from the descendants that rely on strongly-typed
      *             filters.
      */
     @Deprecated
@@ -152,7 +152,7 @@ FilteringRequest<M extends Message,
     /**
      * Configures the request to return results matching all the passed filters.
      *
-     * @deprecated Please use the overloads which reside in descendants and rely on strongly-typed
+     * @deprecated Please use the overloads from the descendants that rely on strongly-typed
      *             filters.
      */
     @Deprecated
