@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -99,11 +100,17 @@ final class Conveyor implements Iterable<InboxMessage> {
     }
 
     private void changeStatus(InboxMessage message, InboxMessageStatus status) {
-        InboxMessage modified = message.toBuilder()
-                                       .setStatus(status)
-                                       .build();
+        InboxMessage modified = findInConveyor(message).toBuilder()
+                                                       .setStatus(status)
+                                                       .build();
         messages.put(message.getId(), modified);
         dirtyMessages.add(message.getId());
+    }
+
+    private InboxMessage findInConveyor(InboxMessage message) {
+        InboxMessage existingMessage = messages.get(message.getId());
+        checkNotNull(existingMessage);
+        return existingMessage;
     }
 
     /**
@@ -144,9 +151,9 @@ final class Conveyor implements Iterable<InboxMessage> {
      */
     void keepForLonger(InboxMessage message, Duration howLongTooKeep) {
         Timestamp keepUntil = Timestamps.add(Time.currentTime(), howLongTooKeep);
-        InboxMessage modified = message.toBuilder()
-                                       .setKeepUntil(keepUntil)
-                                       .build();
+        InboxMessage modified = findInConveyor(message).toBuilder()
+                                                       .setKeepUntil(keepUntil)
+                                                       .build();
         messages.put(message.getId(), modified);
         dirtyMessages.add(message.getId());
     }

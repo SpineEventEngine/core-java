@@ -20,7 +20,7 @@
 
 package io.spine.server.delivery;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * A common contract for the actions performed by {@link Delivery} when it dispatches
@@ -31,5 +31,5 @@ interface DeliveryAction {
     /**
      * Performs the delivery action and returns errors, if any.
      */
-    DeliveryErrors executeFor(Collection<InboxMessage> messages);
+    DeliveryErrors executeFor(List<InboxMessage> messages);
 }

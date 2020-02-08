@@ -88,6 +88,15 @@ public final class TestInboxMessages {
         return newMessage(targetId, targetType, TO_CATCH_UP);
     }
 
+    public static InboxMessage catchingUp(Object targetId,
+                                          TypeUrl targetType,
+                                          Timestamp whenReceived) {
+        return newMessage(targetId, targetType, TO_CATCH_UP)
+                .toBuilder()
+                .setWhenReceived(whenReceived)
+                .vBuild();
+    }
+
     /**
      * Generates a new {@code InboxMessage} in
      * {@link io.spine.server.delivery.InboxMessageStatus#TO_DELIVER TO_DELIVER} status.

@@ -57,7 +57,7 @@ final class GroupByTargetAndDeliver implements DeliveryAction {
      * @return errors occurred during the delivery
      */
     @Override
-    public DeliveryErrors executeFor(Collection<InboxMessage> messages) {
+    public DeliveryErrors executeFor(List<InboxMessage> messages) {
         Map<String, List<InboxMessage>> messagesByType = groupByTargetType(messages);
 
         DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
