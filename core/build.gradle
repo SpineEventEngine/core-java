@@ -29,7 +29,7 @@ dependencies {
 modelCompiler {
     fields {
         // Enable the strongly-typed fields generation for `spine.core.Event` as currently it's
-        // a queryable entity state.
+        // a subscribable entity state.
         generateFor "spine.core.Event", markAs("io.spine.base.EntityStateField")
 
         // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
