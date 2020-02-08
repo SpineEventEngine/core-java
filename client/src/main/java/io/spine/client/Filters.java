@@ -268,7 +268,7 @@ public final class Filters {
         return createFilter(fieldPath, value, operator);
     }
 
-    static CompositeFilter composeFilters(Collection<Filter> filters, CompositeOperator operator) {
+    static CompositeFilter composeFilters(Iterable<Filter> filters, CompositeOperator operator) {
         CompositeFilter result = CompositeFilter
                 .newBuilder()
                 .addAllFilter(filters)
