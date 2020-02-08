@@ -23,26 +23,20 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
-import io.spine.test.delivery.Calc;
-import io.spine.test.delivery.DCounter;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Durations.fromSeconds;
-import static com.google.protobuf.util.Timestamps.compare;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
@@ -58,27 +52,13 @@ import static io.spine.server.delivery.given.TestInboxMessages.copyWithStatus;
 import static io.spine.server.delivery.given.TestInboxMessages.delivered;
 import static io.spine.server.delivery.given.TestInboxMessages.toDeliver;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 @DisplayName("`CatchUpStation` should")
-class CatchUpStationTest {
+class CatchUpStationTest extends AbstractStationTest {
 
-    private static final String targetOne = "first-catching-up-target-ID";
-    private static final String targetTwo = "catching-up-target-ID";
-    private static final TypeUrl type = TypeUrl.of(DCounter.class);
-    private static final TypeUrl anotherType = TypeUrl.of(Calc.class);
-
-    @Test
-    @DisplayName("do nothing if an empty conveyor is passed")
-    void doNothingIfNoJobMatches() {
-        MemoizingAction action = new MemoizingAction();
-        CatchUpStation station = new CatchUpStation(action, new ArrayList<>());
-        Conveyor emptyConveyor = new Conveyor(new ArrayList<>(), new DeliveredMessages());
-
-        Station.Result result = station.process(emptyConveyor);
-        assertDeliveredCount(result, 0);
-
-        assertThat(action.passedMessages()).isNull();
+    @Override
+    Station newStation(DeliveryAction action) {
+        return new CatchUpStation(action, new ArrayList<>());
     }
 
     @Test
@@ -176,7 +156,6 @@ class CatchUpStationTest {
             "if the respective `CatchUpJob` is completed, " +
             "keeping the `CATCH_UP` messages in their storage for a bit longer")
     void deduplicateAndDeliverWhenJobCompleted() {
-
         InboxMessage toCatchUp = catchingUp(targetOne, type);
         InboxMessage moreToCatchUp = catchingUp(targetOne, type);
         InboxMessage toDeliver = toDeliver(targetOne, type);
@@ -207,22 +186,13 @@ class CatchUpStationTest {
 
         assertKeptForLonger(toCatchUp.getId(), remaindersById);
         assertKeptForLonger(moreToCatchUp.getId(), remaindersById);
-        assertThat(remaindersById.containsKey(toDeliver.getId())).isTrue();
-    }
-
-    private static void assertKeptForLonger(InboxMessageId id,
-                                            Map<InboxMessageId, InboxMessage> remaindersById) {
-        InboxMessage modifiedToCatchUp = remaindersById.get(id);
-        assertThat(
-                compare(modifiedToCatchUp.getKeepUntil(), modifiedToCatchUp.getWhenReceived())
-        ).isGreaterThan(0);
+        assertNotKeptForLonger(toDeliver.getId(), remaindersById);
     }
 
     @Test
     @DisplayName("run the delivery action " +
             "for the messages in `CATCH_UP` status sorting them beforehand")
     void sortCatchUpMessagesBeforeCallingToAction() {
-
         Timestamp now = currentTime();
         Timestamp secondBefore = subtract(now, fromSeconds(1));
         Timestamp twoSecondsBefore = subtract(now, fromSeconds(2));
@@ -314,50 +284,4 @@ class CatchUpStationTest {
                                delivered(targetOne, targetType),
                                catchingUp(targetOne, targetType));
     }
-
-    private static void assertContainsExactly(Iterator<InboxMessage> actual,
-                                              InboxMessage... expected) {
-        assertThat(ImmutableSet.copyOf(actual))
-                .containsExactlyElementsIn(ImmutableSet.copyOf(expected));
-    }
-
-    private static void assertContainsExactly(Collection<InboxMessage> actual,
-                                              InboxMessage... expected) {
-        assertThat(ImmutableSet.copyOf(actual))
-                .containsExactlyElementsIn(ImmutableSet.copyOf(expected));
-    }
-
-    private static void assertContainsExactly(Stream<InboxMessage> actual,
-                                              InboxMessage... expected) {
-        assertThat(actual.collect(toSet()))
-                .containsExactlyElementsIn(ImmutableSet.copyOf(expected));
-    }
-
-    private static void assertDeliveredCount(Station.Result result, int howMany) {
-        assertThat(result.deliveredCount()).isEqualTo(howMany);
-        assertThat(result.errors()
-                         .hasErrors()).isFalse();
-    }
-
-    private static final class MemoizingAction implements DeliveryAction {
-
-        private @Nullable List<InboxMessage> passedMessages;
-
-        private static MemoizingAction empty() {
-            return new MemoizingAction();
-        }
-
-        @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")   // intentionally.
-        @Override
-        public DeliveryErrors executeFor(List<InboxMessage> messages) {
-            passedMessages = messages;
-            return DeliveryErrors.newBuilder()
-                                 .build();
-        }
-
-        private @Nullable List<InboxMessage> passedMessages() {
-            return passedMessages;
-        }
-    }
-
 }

@@ -88,6 +88,19 @@ public final class TestInboxMessages {
         return newMessage(targetId, targetType, TO_CATCH_UP);
     }
 
+    /**
+     * Generates a new {@code InboxMessage} in
+     * {@link io.spine.server.delivery.InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status
+     * and the receiving time specified.
+     *
+     * @param targetId
+     *         the ID of the target for the generated message
+     * @param targetType
+     *         the type URL of the target for the generated message
+     * @param whenReceived
+     *         the message receiving time to set
+     * @return an instance of the generated message
+     */
     public static InboxMessage catchingUp(Object targetId,
                                           TypeUrl targetType,
                                           Timestamp whenReceived) {
@@ -109,6 +122,28 @@ public final class TestInboxMessages {
      */
     public static InboxMessage toDeliver(Object targetId, TypeUrl targetType) {
         return newMessage(targetId, targetType, TO_DELIVER);
+    }
+
+    /**
+     * Generates a new {@code InboxMessage} in
+     * {@link io.spine.server.delivery.InboxMessageStatus#TO_DELIVER TO_DELIVER} status and
+     * the receiving time specified.
+     *
+     * @param targetId
+     *         the ID of the target for the generated message
+     * @param targetType
+     *         the type URL of the target for the generated message
+     * @param whenReceived
+     *         the message receiving time to set
+     * @return an instance of the generated message
+     */
+    public static InboxMessage toDeliver(Object targetId,
+                                         TypeUrl targetType,
+                                         Timestamp whenReceived) {
+        return newMessage(targetId, targetType, TO_DELIVER)
+                .toBuilder()
+                .setWhenReceived(whenReceived)
+                .vBuild();
     }
 
     /**

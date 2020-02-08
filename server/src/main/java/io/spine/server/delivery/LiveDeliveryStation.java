@@ -65,12 +65,16 @@ final class LiveDeliveryStation extends Station {
                 }
             }
         }
-        Collection<InboxMessage> toDeliver = seen.values();
-        List<InboxMessage> toDispatch = deduplicateAndSort(toDeliver, conveyor);
-        DeliveryErrors errors = action.executeFor(toDispatch);
-        conveyor.markDelivered(toDispatch);
-        Result result = new Result(seen.size(), errors);
-        return result;
+        if(!seen.isEmpty()) {
+            Collection<InboxMessage> toDeliver = seen.values();
+            List<InboxMessage> toDispatch = deduplicateAndSort(toDeliver, conveyor);
+            DeliveryErrors errors = action.executeFor(toDispatch);
+            conveyor.markDelivered(toDispatch);
+            Result result = new Result(toDispatch.size(), errors);
+            return result;
+        } else {
+            return emptyResult();
+        }
     }
 
     /**
