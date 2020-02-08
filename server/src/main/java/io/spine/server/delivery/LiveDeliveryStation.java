@@ -68,7 +68,7 @@ final class LiveDeliveryStation extends Station {
         Collection<InboxMessage> toDeliver = seen.values();
         List<InboxMessage> toDispatch = deduplicateAndSort(toDeliver, conveyor);
         DeliveryErrors errors = action.executeFor(toDispatch);
-        conveyor.markDelivered(toDeliver);
+        conveyor.markDelivered(toDispatch);
         Result result = new Result(seen.size(), errors);
         return result;
     }
