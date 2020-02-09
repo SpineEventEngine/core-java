@@ -71,7 +71,6 @@ final class CatchUpStation extends Station {
     @SuppressWarnings({"MethodWithMultipleLoops", "OverlyComplexMethod", "OverlyNestedMethod"})
     @Override
     public final Result process(Conveyor conveyor) {
-
         Map<DispatchingId, InboxMessage> dispatchToCatchUp = new HashMap<>();
 
         for (InboxMessage message : conveyor) {
@@ -111,6 +110,10 @@ final class CatchUpStation extends Station {
             }
         }
 
+        return dispatch(conveyor, dispatchToCatchUp);
+    }
+
+    private Result dispatch(Conveyor conveyor, Map<DispatchingId, InboxMessage> dispatchToCatchUp) {
         if(!dispatchToCatchUp.isEmpty()) {
             List<InboxMessage> messages = new ArrayList<>(dispatchToCatchUp.values());
             messages.sort(COMPARATOR);
