@@ -34,7 +34,6 @@ import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -394,10 +393,7 @@ public final class Delivery implements Logging {
                 .vBuild();
     }
 
-    private boolean monitorTellsToContinue(@Nullable DeliveryStage stage) {
-        if (stage == null) {
-            return true;
-        }
+    private boolean monitorTellsToContinue(DeliveryStage stage) {
         return monitor.shouldContinueAfter(stage);
     }
 
