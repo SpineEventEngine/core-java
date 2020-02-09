@@ -448,8 +448,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         EventEnvelope envelope = EventEnvelope.of(event);
         Set<I> catchUpTargets;
         if (envelope.message() instanceof CatchUpSignal) {
-            checkNotNull(restrictToIds);
-            catchUpTargets = restrictToIds;
+            catchUpTargets = restrictToIds == null
+                             ? ImmutableSet.copyOf(index())
+                             : restrictToIds;
         } else {
             Set<I> routedTargets = route(envelope);
             catchUpTargets = restrictToIds == null
