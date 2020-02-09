@@ -44,12 +44,6 @@ message LiveEventsPickedUp {
     CatchUpId id = 1;
 }
 
-// The catch-up process has been finalized.
-message CatchUpFinalized {
-
-    CatchUpId id = 1;
-}
-
 // The catch-up process has been completed.
 message CatchUpCompleted {
 
