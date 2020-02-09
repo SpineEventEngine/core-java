@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,9 +26,8 @@ import io.spine.core.EventId;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.SystemColumn;
-import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * An entity for storing an event.
@@ -39,7 +38,7 @@ final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
 
     static final String CREATED_COLUMN = "created";
     /** Cached value of the event message type name. */
-    private @Nullable TypeName typeName;
+    private @MonotonicNonNull TypeName typeName;
 
     /**
      * Creates a new entity stripping enrichments from the passed event.
@@ -79,8 +78,8 @@ final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
     @SystemColumn(name = "type")
     public String getType() {
         if (typeName == null) {
-            typeName = EventEnvelope.of(state())
-                                    .messageTypeName();
+            typeName = state().enclosedTypeUrl()
+                              .toTypeName();
         }
         return typeName.value();
     }

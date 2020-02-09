@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -38,8 +38,8 @@ import static io.spine.base.Time.currentTime;
  * An implementation base for {@link ShardedWorkRegistry ShardedWorkRegistries} based on a specific
  * persistence mechanism.
  *
- * @implNote This class is NOT thread safe. Synchronize the atomic persistence operations as well as
- *         the methods implemented in this class make an implementation thread safe.
+ * @implNote This class is NOT thread safe. Synchronize the atomic persistence operations
+ *         as well as the methods implemented in this class make an implementation thread safe.
  */
 @SPI
 public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
@@ -52,7 +52,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
         Optional<ShardSessionRecord> record = find(index);
         if (record.isPresent()) {
             ShardSessionRecord existingRecord = record.get();
-            if (existingRecord.hasPickedBy()) {
+            if (hasPickedBy(existingRecord)) {
                 return Optional.empty();
             } else {
                 ShardSessionRecord updatedRecord = updateNode(existingRecord, nodeId);
@@ -62,6 +62,10 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
             ShardSessionRecord newRecord = createRecord(index, nodeId);
             return Optional.of(asSession(newRecord));
         }
+    }
+
+    private static boolean hasPickedBy(ShardSessionRecord record) {
+        return !NodeId.getDefaultInstance().equals(record.getPickedBy());
     }
 
     private ShardSessionRecord createRecord(ShardIndex index, NodeId nodeId) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,10 +23,13 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
+import com.google.common.truth.Subject;
+import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
 import io.spine.client.TopicFactory;
+import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
@@ -39,6 +42,7 @@ import io.spine.server.event.EventEnricher;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.BlackBoxId;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
@@ -72,8 +76,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
 import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
@@ -352,6 +358,38 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         assertEvents.hasSize(4);
         assertEvents.withType(BbReportCreated.class).hasSize(1);
         assertEvents.withType(BbTaskAddedToReport.class).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("post an event with the default producer")
+    void defaultProducer() {
+        BbProjectId projectId = newProjectId();
+        context.receivesEvent(taskAdded(projectId));
+        ImmutableList<Event> events = context.allEvents();
+        assertThat(events).hasSize(1);
+        Message producer = unpack(getOnlyElement(events).getContext()
+                                                        .getProducerId());
+        Subject assertProducer = assertThat(producer);
+        assertProducer.isInstanceOf(BlackBoxId.class);
+        BlackBoxId expectedId = BlackBoxId
+                .newBuilder()
+                .setContextName(context.name())
+                .build();
+        assertProducer.isEqualTo(expectedId);
+    }
+
+    @Test
+    @DisplayName("post an event with a given producer")
+    void customProducer() {
+        BbProjectId projectId = newProjectId();
+        context.receivesEventsProducedBy(projectId, taskAdded(projectId));
+        ImmutableList<Event> events = context.allEvents();
+        assertThat(events).hasSize(1);
+        Message producer = unpack(getOnlyElement(events).getContext()
+                                                        .getProducerId());
+        Subject assertProducer = assertThat(producer);
+        assertProducer.isInstanceOf(BbProjectId.class);
+        assertProducer.isEqualTo(projectId);
     }
 
     @Nested

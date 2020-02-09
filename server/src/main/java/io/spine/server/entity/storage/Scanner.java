@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, TeamDev. All rights reserved.
+ * Copyright 2020, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,12 +27,13 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromEntity;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromState;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.code.proto.ColumnOption.columnsOf;
-import static io.spine.reflect.Methods.setAccessibleAndInvoke;
+import static io.spine.reflect.Methods.asHandle;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -57,8 +58,7 @@ final class Scanner {
 
     Scanner(EntityClass<?> entityClass) {
         this.entityClass = entityClass;
-        this.columnsInterfaceBased =
-                EntityWithColumns.class.isAssignableFrom(entityClass.value());
+        this.columnsInterfaceBased = EntityWithColumns.class.isAssignableFrom(entityClass.value());
     }
 
     /**
@@ -67,17 +67,25 @@ final class Scanner {
     ImmutableMap<ColumnName, SysColumn> systemColumns() {
         ImmutableMap.Builder<ColumnName, SysColumn> columns = ImmutableMap.builder();
         Class<?> entityClazz = entityClass.value();
-        Method[] methods = entityClazz.getMethods();
-        Arrays.stream(methods)
-              .filter(method -> method.isAnnotationPresent(SystemColumn.class))
-              .forEach(method -> addSystemColumn(method, columns));
+        addSystemColumns(entityClazz, columns);
         return columns.build();
+    }
+
+    private static void addSystemColumns(Class<?> entityClazz,
+                                         ImmutableMap.Builder<ColumnName, SysColumn> columns) {
+        Method[] methods = entityClazz.getMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(SystemColumn.class)) {
+                addSystemColumn(method, columns);
+            }
+        }
     }
 
     private static void addSystemColumn(Method method,
                                         ImmutableMap.Builder<ColumnName, SysColumn> columns) {
         ColumnData data = ColumnData.of(method);
-        SysColumn.Getter getter = entity -> setAccessibleAndInvoke(data.getter, entity);
+        MethodHandle handle = asHandle(method);
+        SysColumn.Getter getter = entity -> invoke(handle, entity);
         SysColumn column = new SysColumn(data.name, data.type, getter);
         columns.put(column.name(), column);
     }
@@ -93,15 +101,17 @@ final class Scanner {
             return ImmutableMap.of();
         }
         ImmutableMap.Builder<ColumnName, SimpleColumn> columns = ImmutableMap.builder();
-        columnsOf(entityClass.stateType())
-                .forEach(field -> addSimpleColumn(field, columns));
+        for (FieldDeclaration field : columnsOf(entityClass.stateType())) {
+            addSimpleColumn(field, columns);
+        }
         return columns.build();
     }
 
     private void addSimpleColumn(FieldDeclaration field,
                                  ImmutableMap.Builder<ColumnName, SimpleColumn> columns) {
         ColumnData data = ColumnData.of(field, entityClass);
-        SimpleColumn.Getter getter = state -> setAccessibleAndInvoke(data.getter, state);
+        MethodHandle handle = asHandle(data.getter);
+        SimpleColumn.Getter getter = state -> invoke(handle, state);
         SimpleColumn column = new SimpleColumn(data.name, data.type, getter, field);
         columns.put(column.name(), column);
     }
@@ -117,19 +127,23 @@ final class Scanner {
             return ImmutableMap.of();
         }
         ImmutableMap.Builder<ColumnName, InterfaceBasedColumn> columns = ImmutableMap.builder();
-        columnsOf(entityClass.stateType())
-                .forEach(field -> addImplementedColumn(field, columns));
+        for (FieldDeclaration field : columnsOf(entityClass.stateType())) {
+            addImplementedColumn(field, columns);
+        }
         return columns.build();
     }
 
     private void addImplementedColumn(FieldDeclaration field,
                                       ImmutableMap.Builder<ColumnName, InterfaceBasedColumn> columns) {
         ColumnData data = ColumnData.of(field, entityClass);
+
+        MethodHandle stateGetterHandle = asHandle(data.getter);
+        GetterFromState getterFromState = state -> invoke(stateGetterHandle, state);
+
         Method getter = getterOf(field, entityClass.value());
-        GetterFromState getterFromState =
-                state -> setAccessibleAndInvoke(data.getter, state);
-        GetterFromEntity getterFromEntity =
-                entity -> setAccessibleAndInvoke(getter, entity);
+        MethodHandle getterHandle = asHandle(getter);
+        GetterFromEntity getterFromEntity = entity -> invoke(getterHandle, entity);
+
         InterfaceBasedColumn column = new InterfaceBasedColumn(data.name,
                                                                data.type,
                                                                getterFromEntity,
@@ -157,6 +171,14 @@ final class Scanner {
                 "Expected to find a getter with name `%s` in class `%s` according to the " +
                         "declaration of column `%s`.",
                 getterName, clazz.getCanonicalName(), field.name());
+    }
+
+    private static Object invoke(MethodHandle method, Object receiver) {
+        try {
+            return method.invoke(receiver);
+        } catch (Throwable throwable) {
+            throw illegalStateWithCauseOf(throwable);
+        }
     }
 
     /**
