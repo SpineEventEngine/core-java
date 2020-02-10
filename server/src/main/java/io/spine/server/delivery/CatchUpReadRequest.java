@@ -23,13 +23,13 @@ package io.spine.server.delivery;
 import io.spine.server.storage.ReadRequest;
 
 /**
- * @author Alex Tymchenko
+ * A request to read the state of {@link CatchUp} from the storage.
  */
 public final class CatchUpReadRequest implements ReadRequest<CatchUpId> {
 
     private final CatchUpId id;
 
-    public CatchUpReadRequest(CatchUpId id) {
+    CatchUpReadRequest(CatchUpId id) {
         this.id = id;
     }
 
