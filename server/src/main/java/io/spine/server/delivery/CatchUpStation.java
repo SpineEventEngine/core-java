@@ -44,6 +44,59 @@ import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 
 /**
  * A station that performs the delivery of messages to the catching-up targets.
+ *
+ * <h1>Overview</h1>
+ *
+ * <p>Matches the messages on the passed {@link Conveyor} to the known {@link CatchUp} jobs basing
+ * on the target entity type and the identifier of the entity to which the message is sent.
+ *
+ * <p>Depending on the status of the job, the matched messages are processed accordingly. See
+ * more on that below.
+ *
+ * <b>1. Catch-up {@code STARTED}.</b>
+ *
+ * <p>The matched messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status are
+ * dispatched to their targets. All the matched live messages (i.e. in {@link
+ * InboxMessageStatus#TO_DELIVER TO_DELIVER} status) are ignored and removed from their inboxes.
+ *
+ * <b>2. Catch-up {@code FINALIZING}.</b>
+ *
+ * <p>When the catch-up job is being finalized, it means that the historical events may be dated
+ * close to the present time and, thus, to the live events headed to the same entities.
+ * Therefore, the matched messages in either status are NEITHER dispatched NOR removed from their
+ * inboxes. Instead, they are held until the catch-up job is completed to be  de-duplicated
+ * and delivered all at once.
+ *
+ * <p>To hold the live messages from being delivered down the conveyor pipeline, the live messages
+ * are marked as {@code TO_CATCH_UP}.
+ *
+ * <b>3. Catch-up {@code COMPLETED}.</b>
+ *
+ * <p>At this stage the event history is fully processed. The inboxes contain the messages in
+ * {@code TO_CATCH_UP} status, which are in fact the mix of the last portion of the replayed event
+ * history and potentially some "paused" live events. So, the station dispatched all the matching
+ * messages in {@code TO_CATCH_UP} status.
+ *
+ * <p>If the idempotence window is {@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) set in
+ * the system}, all the delivered messages are set to be kept in their storages for the duration,
+ * corresponding to the width of the window. In this way, they will become usable for the potential
+ * de-duplication.
+ *
+ * <h1>De-duplication and re-ordering</h1>
+ *
+ * <p>Prior to the dispatching, the messages are de-duplicated in scope of this conveyor.
+ * Please note, that the idempotence window is NOT taken into the account, as the historical events
+ * may all have been delivered to their entities somewhen in the past.
+ *
+ * <p>All the duplicates are marked as such in the conveyor and are removed from their storage
+ * later.
+ *
+ * <p>Another change made before the actual dispatching is re-ordering of the messages. The messages
+ * are sorted chronologically, putting the events of a framework-internal {@link CatchUpStarted}
+ * type first. It allows to guarantee that the targets will know of the started catch-up before
+ * any message in {@code TO_CATCH_UP} status is dispatched to them.
+ *
+ * <p>The ordering changes are not reflected on the message order in the conveyor.
  */
 final class CatchUpStation extends Station {
 
@@ -62,11 +115,10 @@ final class CatchUpStation extends Station {
     /**
      * Processes the messages on the conveyor, delivering those sent for catch-up.
      *
-     *  //TODO:2020-01-20:alex.tymchenko: describe in more details.
-     *
      * @param conveyor
      *         the conveyor on which the messages are travelling
-     * @return
+     * @return the result of the processing telling how many messages were dispatched and whether
+     *         there were any errors in that
      */
     @SuppressWarnings({"MethodWithMultipleLoops", "OverlyComplexMethod", "OverlyNestedMethod"})
     @Override
@@ -81,7 +133,7 @@ final class CatchUpStation extends Station {
                     DispatchingId dispatchingId = new DispatchingId(message);
                     if (jobStatus == STARTED) {
                         if (message.getStatus() == TO_CATCH_UP) {
-                            if(dispatchToCatchUp.containsKey(dispatchingId)) {
+                            if (dispatchToCatchUp.containsKey(dispatchingId)) {
                                 conveyor.remove(message);
                             } else {
                                 dispatchToCatchUp.put(dispatchingId, message);
@@ -114,7 +166,7 @@ final class CatchUpStation extends Station {
     }
 
     private Result dispatch(Conveyor conveyor, Map<DispatchingId, InboxMessage> dispatchToCatchUp) {
-        if(!dispatchToCatchUp.isEmpty()) {
+        if (!dispatchToCatchUp.isEmpty()) {
             List<InboxMessage> messages = new ArrayList<>(dispatchToCatchUp.values());
             messages.sort(COMPARATOR);
 
@@ -126,6 +178,25 @@ final class CatchUpStation extends Station {
         return emptyResult();
     }
 
+    /**
+     * Tells whether the job matched the passed {@code InboxMessage}.
+     *
+     * <p>To match, two conditions must be met:
+     *
+     * <ol>
+     *     <li>the target entity type of the job and the message must be the same;</li>
+     *
+     *     <li>the identifier of the message target must be included into the list of the
+     *     identifiers specified in the job OR the job matches all the targets of the entity type.
+     *     </li>
+     * </ol>
+     *
+     * @param job
+     *         the catch-up job
+     * @param message
+     *         the message to match to the job
+     * @return {@code true} if the message matches the job, {@code false} otherwise
+     */
     @VisibleForTesting
     static boolean matches(CatchUp job, InboxMessage message) {
         String expectedProjectionType = job.getId()
