@@ -32,6 +32,7 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.BatchDeliveryListener;
+import io.spine.server.delivery.CatchUpAlreadyStartedException;
 import io.spine.server.delivery.CatchUpProcess;
 import io.spine.server.delivery.CatchUpProcessBuilder;
 import io.spine.server.delivery.CatchUpSignal;
@@ -351,8 +352,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *         point in the past, since which the catch-up should be performed
      * @param ids
      *         identifiers of the entities to catch up
+     * @throws CatchUpAlreadyStartedException
+     *         if another catch-up for the same entity type and overlapping targets is already in
+     *         progress
      */
-    public void catchUp(Timestamp since, @Nullable Set<I> ids) {
+    public void catchUp(Timestamp since, @Nullable Set<I> ids) throws
+                                                               CatchUpAlreadyStartedException {
         checkCatchUpTargets(ids);
         checkCatchUpStartTime(since);
 
@@ -412,8 +417,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * @param since
      *         point in the past, since which the catch-up should be performed
+     * @throws CatchUpAlreadyStartedException
+     *         if another catch-up for the same entity type is already in progress
      */
-    public void catchUpAll(Timestamp since) {
+    public void catchUpAll(Timestamp since) throws CatchUpAlreadyStartedException {
         catchUp(since, null);
     }
 
