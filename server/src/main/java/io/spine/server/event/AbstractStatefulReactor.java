@@ -51,10 +51,16 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
 
     private B builder;
 
+    /**
+     * Returns the current state as a {@code ValidatingBuilder} for the respective message.
+     */
     protected B builder() {
         return builder;
     }
 
+    /**
+     * Creates a new instance of the reactor and initializes the {@link Inbox} for it.
+     */
     protected AbstractStatefulReactor(TypeUrl stateType) {
         super();
         Delivery delivery = ServerEnvironment.instance()
@@ -78,12 +84,31 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
         }
     }
 
+    /**
+     * Loads the state from the storage by ID.
+     *
+     * <p>Returns {@code Optional.empty()} if there is no such object found.
+     */
     protected abstract Optional<S> load(I id);
 
+    /**
+     * Stores the passed state in the storage.
+     */
     protected abstract void store(S updatedState);
 
+    /**
+     * Creates a new instance of the respective state {@link ValidatingBuilder} and sets the
+     * passed identifier to it.
+     */
     protected abstract B newStateBuilderWith(I id);
 
+    /**
+     * Immediately writes the changes made to the current {@linkplain #builder() builder} to the
+     * storage.
+     *
+     * <p>The builder state is validated prior to storing. Any validation exceptions are propagated
+     * as-is.
+     */
     protected final void flushState() {
         S newState = builder().vBuild();
         store(newState);
@@ -106,8 +131,15 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
             this.envelope = envelope;
         }
 
+        /**
+         * Loads the state of the builder, dispatches the wrapped event to the specified target
+         * and updates the storage with the changes made to the builder.
+         *
+         * @implNote Can only be executed by a single thread at a time to avoid any
+         *         concurrent modifications when running locally in a multi-threading mode
+         */
         @Override
-        public void dispatchTo(I targetId) {
+        public final void dispatchTo(I targetId) {
             synchronized (endpointLock) {
                 loadIntoBuilder(targetId);
                 AbstractStatefulReactor.super.dispatch(envelope);
@@ -115,13 +147,23 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
             }
         }
 
+        /**
+         * Does nothing, as the event reactors should not care about the duplicates due to their
+         * framework-internal essence.
+         */
         @Override
         public final void onDuplicate(I target, EventEnvelope envelope) {
             // do nothing.
         }
 
+        /**
+         * Always throws the {@link IllegalStateException}, as there can be no repository for the
+         * event reactors.
+         *
+         * @throws IllegalStateException always
+         */
         @Override
-        public Repository<I, ?> repository() {
+        public final Repository<I, ?> repository() throws IllegalStateException {
             throw newIllegalStateException("`%s` has no repository.", getClass());
         }
 
