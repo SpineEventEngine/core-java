@@ -16,7 +16,6 @@ import "google/protobuf/timestamp.proto";
 import "spine/core/event.proto";
 
 // A state of a catch-up process.
-//
 message CatchUp {
     option (is).java_type = "CatchUpMixin";
 
@@ -65,7 +64,6 @@ message CatchUp {
 }
 
 // An ID of a catch-up process.
-//
 message CatchUpId {
 
     string uuid = 1;
@@ -74,18 +72,18 @@ message CatchUpId {
     string projection_type = 2 [(required) = true];
 }
 
+// The status of a catch-up process.
 enum CatchUpStatus {
 
+    // Not started.
     CUS_UNDEFINED = 0;
 
+    // The process has been started and is in progress.
     STARTED = 1;
 
+    // The process is now processing the events that are close to the current time.
     FINALIZING = 2;
 
+    // The process is completed.
     COMPLETED = 3;
-}
-
-message CatchUpTargets {
-
-    repeated google.protobuf.Any id = 1;
 }

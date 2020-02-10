@@ -44,6 +44,7 @@ message HistoryFullyRecalled {
 
 // The catch-up process has detected the recently dispatched events and has sent them to the
 // respective entities.
+//
 message LiveEventsPickedUp {
 
     CatchUpId id = 1;
