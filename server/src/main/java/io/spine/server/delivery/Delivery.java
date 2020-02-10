@@ -57,23 +57,48 @@ import static java.util.Collections.synchronizedList;
  * {@link #newInbox(TypeUrl) Inbox}es of each target entity. The respective {@code Inbox} instances
  * should be created in each of {@code Entity} repositories.
  *
- * <b>Configuration</b>
+ * <h1>Configuration</h1>
+ *
+ * <h2>Delivery Strategy</h2>
  *
  * <p>By default, a shard is assigned according to the identifier of the target entity. The
  * messages heading to a single entity will always reside in a single shard. However,
  * the framework users may {@linkplain DeliveryBuilder#setStrategy(DeliveryStrategy) customize}
  * this behavior.
  *
+ * <p>The typical customization would be to specify the same shard index for the related targets.
+ * E.g. if there is an {@code OrderAggregate}, {@code OrderItemAggregate}
+ * and {@code OrderItemProjection}, they could share the same shard index. In this way the messages
+ * headed to these entities will be dispatched and processed together. In turn, that will reduce
+ * the eventual consistency lag between {@code C} side (i.e. aggregate state updates)
+ * and {@code Q} side (i.e. the respective updates in projections).
+ *
+ * <h2>Idempotence</h2>
+ *
+ * <p>As long as the underlying storage and transport mechanisms are restricted by the CAP theorem,
+ * there may be duplicates in the messages written, read or dispatched. The {@code Delivery}
+ * responds to it by storing some of the already delivered messages for longer and using them as
+ * a source for de-duplication.
+ *
  * <p>{@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) Provides} the time-based
  * de-duplication capabilities to eliminate the messages, which may have been already delivered
  * to their targets. The duplicates will be detected among the messages, which are not older, than
  * {@code now - [idempotence window]}.
+ *
+ * <h2>Customizing {@code InboxStorage}</h2>
  *
  * <p>{@code Delivery} is responsible for providing the {@link InboxStorage} for every inbox
  * registered. Framework users may {@linkplain DeliveryBuilder#setInboxStorage(InboxStorage)
  * configure} the storage, taking into account that it is typically multi-tenant. By default,
  * the {@code InboxStorage} for the delivery is provided by the environment-specific
  * {@linkplain ServerEnvironment#storageFactory() storage factory} and is multi-tenant.
+ *
+ * <h2>Catch-up</h2>
+ *
+ * //TODO:2020-02-10:alex.tymchenko: complete the description and refer the process itself
+ *
+ *
+ * <h2>Observers</h2>
  *
  * <p>Once a message is written to the {@code Inbox},
  * the {@linkplain Delivery#subscribe(ShardObserver) pre-configured shard observers} are
@@ -83,9 +108,17 @@ import static java.util.Collections.synchronizedList;
  * environment a message queue may be used to notify the node cluster of a shard that has some
  * messages pending for the delivery.
  *
+ * <h2>Work registry</h2>
+ *
+ * //TODO:2020-02-10:alex.tymchenko: descrbe the problem first
+ *
  * <p>Once an application node picks the shard to deliver the messages from it, it registers itself
  * in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard that only allows
  * to pick a shard to a single node at a time.
+ *
+ * <h2>Dispatching messages</h2>
+ *
+ * <h3>Delivery stages</h3>
  *
  * <p>The delivery process for each shard index is split into {@link DeliveryStage}s. In scope of
  * each stage, a certain number of messages is read from the respective shard of the {@code Inbox}.
@@ -96,8 +129,26 @@ import static java.util.Collections.synchronizedList;
  * <p>After each {@code DeliveryStage} it is possible to stop the delivery by
  * {@link DeliveryBuilder#setMonitor(DeliveryMonitor) supplying} a custom delivery monitor.
  * Please refer to the {@link DeliveryMonitor documentation} for the details.
+
  *
- * <b>Local environment</b>
+ * <h3>Conveyor and stations</h3>
+ *
+ * //TODO:2020-02-10:alex.tymchenko: describe the problem
+ *
+ * <b>1. Catch-up station</b>
+ * //TODO:2020-02-10:alex.tymchenko: add a brief overview and provide the link to the respective class.
+ *
+ * <b>2. Live delivery station</b>
+ * //TODO:2020-02-10:alex.tymchenko: add a brief overview and provide the link to the respective class.
+ *
+ * <b>3. Cleanup station</b>
+ * //TODO:2020-02-10:alex.tymchenko: add a brief overview and provide the link to the respective class.
+ *
+ * <b>De-duplication</b>
+ *
+ * //TODO:2020-02-10:alex.tymchenko: Desribe the cache.
+ *
+ * <h2>Local environment</h2>
  *
  * <p>By default, the delivery is configured to {@linkplain Delivery#local() run locally}. It
  * uses {@linkplain LocalDispatchingObserver see-and-dispatch observer}, which delivers the
