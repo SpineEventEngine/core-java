@@ -30,6 +30,12 @@ import java.util.Comparator;
 
 /**
  * A comparator which compares events by their timestamp in chronological order.
+ *
+ * <p>In case the timestamp is the same, the {@linkplain EventContext#getVersion() event versions}
+ * are compared.
+ *
+ * <p>If the versions are the same, the values of the {@linkplain Event#getId() event identifiers}
+ * are compared lexicographically.
  */
 @Internal
 public final class EventComparator implements Comparator<Event>, Serializable {
