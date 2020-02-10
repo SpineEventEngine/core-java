@@ -53,10 +53,18 @@ public final class CatchUpAlreadyStartedException extends IllegalStateException 
         return message;
     }
 
+    /**
+     * Returns the type URL of the projection for which the catch-up was requested.
+     */
     public TypeUrl projectionStateType() {
         return projectionStateType;
     }
 
+    /**
+     * Returns the IDs of the targets which were asked to catch up.
+     *
+     * <p>If all the projection entities were specified as a target, returns an empty {@code Set}.
+     */
     public ImmutableSet<Object> requestedIds() {
         return requestedIds == null? ImmutableSet.of() : requestedIds;
     }
