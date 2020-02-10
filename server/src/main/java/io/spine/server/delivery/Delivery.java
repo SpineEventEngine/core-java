@@ -146,7 +146,7 @@ import static java.util.Collections.synchronizedList;
  *
  * <b>De-duplication</b>
  *
- * //TODO:2020-02-10:alex.tymchenko: Desribe the cache.
+ * //TODO:2020-02-10:alex.tymchenko: Describe the cache.
  *
  * <h2>Local environment</h2>
  *
@@ -160,6 +160,10 @@ import static java.util.Collections.synchronizedList;
  * an {@linkplain InMemoryShardedWorkRegistry} is used. It operates on top of the
  * {@code synchronized} in-memory data structures and prevents several threads from picking up the
  * same shard.
+ *
+ * <h2>Shard maintenance</h2>
+ *
+ * //TODO:2020-02-10:alex.tymchenko: describe.
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // It's fine for a centerpiece.
 public final class Delivery implements Logging {
