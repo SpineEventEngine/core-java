@@ -90,20 +90,20 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p><b>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</b>
  *
- * <p>The process is moved to this status upon receiving {@code CatchUpRequested} event. The actions
- * include:
+ * <p>The process is created in to this status upon receiving {@code CatchUpRequested} event.
+ * The further actions include:
  *
  * <ul>
- *     <li>The catch-up process in moved to the {@link CatchUpStatus#STARTED STARTED} status.
- *
  *     <li>A {@link CatchUpStarted} event is emitted. The target projection repository listens to
  *     this event and kills the state of the matching entities.
+ *
+ *     <li>The catch-up process in moved to the {@link CatchUpStatus#STARTED STARTED} status.
  * </ul>
  *
  * <p><b>{@link CatchUpStatus#STARTED STARTED}</b>
  *
- * <p>The reading the event history and populating the {@code Inbox}es of the corresponding
- * projections is in progress.
+ * <p>When the process is in this status, the event history is read and the matching events are sent
+ * to the {@code Inbox}es of the corresponding projections
  *
  * <p>The catch-up maintains this status until the history is read till the point in time,
  * which is very close to the {@link Time#currentTime() Time.currentTime()}.

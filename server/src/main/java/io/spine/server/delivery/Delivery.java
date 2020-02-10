@@ -102,7 +102,7 @@ import static java.util.Collections.synchronizedList;
  *
  * <p>To control how many historical events are read and put into shards, the end-users may
  * configure the {@linkplain DeliveryBuilder#setCatchUpPageSize(int) maximum number of messages}
- * read from the history per at a time. This is helpful to balance the per-shard throughput, so
+ * read from the history at a time. This is helpful to balance the per-shard throughput, so
  * that the live messages are still dispatched through the same shards in a reasonable time.
  *
  * <p>The statuses of the ongoing catch-up processes are stored in a dedicated
@@ -207,7 +207,6 @@ import static java.util.Collections.synchronizedList;
  * {@link ShardMaintenanceProcess} is registered as an event dispatcher in a passed
  * {@code BoundedContext}. Such a registration is performed automatically when the context is
  * {@linkplain  io.spine.server.BoundedContextBuilder#build() built}.
- *
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // It's fine for a centerpiece.
 public final class Delivery implements Logging {
