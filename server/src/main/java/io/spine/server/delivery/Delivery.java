@@ -95,8 +95,20 @@ import static java.util.Collections.synchronizedList;
  *
  * <h2>Catch-up</h2>
  *
- * //TODO:2020-02-10:alex.tymchenko: complete the description and refer the process itself
+ * <p>In addition to delivering the messages sent in a real-time, {@code Delivery} dispatches
+ * the historical events sent to the catching-up projections. These events are dispatched through
+ * the same shards as the live messages. A special {@link CatchUpStation} is responsible for
+ * handling this use-case. See more on that in the respective section.
  *
+ * <p>To control how many historical events are read and put into shards, the end-users may
+ * configure the {@linkplain DeliveryBuilder#setCatchUpPageSize(int) maximum number of messages}
+ * read from the history per at a time. This is helpful to balance the per-shard throughput, so
+ * that the live messages are still dispatched through the same shards in a reasonable time.
+ *
+ * <p>The statuses of the ongoing catch-up processes are stored in a dedicated
+ * {@link CatchUpStorage}. The {@code DeliveryBuilder} {@linkplain
+ * DeliveryBuilder#setCatchUpStorage(CatchUpStorage)} exposes an API for the customization of this
+ * storage.
  *
  * <h2>Observers</h2>
  *
