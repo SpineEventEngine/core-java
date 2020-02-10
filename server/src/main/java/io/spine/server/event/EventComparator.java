@@ -46,7 +46,6 @@ public final class EventComparator implements Comparator<Event>, Serializable {
         if (timeComparison != 0) {
             return timeComparison;
         }
-        //TODO:2019-12-20:alex.tymchenko: do we need to consider the version at all here?
         EventContext ctx1 = e1.context();
         EventContext ctx2 = e2.context();
         int v1 = ctx1.getVersion()
