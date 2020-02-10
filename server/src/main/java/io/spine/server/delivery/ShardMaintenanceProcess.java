@@ -33,6 +33,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The framework-internal process performing the maintenance of delivery shards.
+ *
+ * <p>Has its own {@link Inbox}, so the messages arriving to it are dispatched
+ * by the {@link Delivery}.
  */
 class ShardMaintenanceProcess extends AbstractEventReactor {
 
@@ -40,6 +43,10 @@ class ShardMaintenanceProcess extends AbstractEventReactor {
 
     private final Inbox<ShardIndex> inbox;
 
+    /**
+     * Creates a new instance of the process, creating the own {@code Inbox} using the passed
+     * {@code Delivery}.
+     */
     ShardMaintenanceProcess(Delivery delivery) {
         super();
         Inbox.Builder<ShardIndex> builder = delivery.newInbox(TYPE);
@@ -47,6 +54,11 @@ class ShardMaintenanceProcess extends AbstractEventReactor {
         this.inbox = builder.build();
     }
 
+    /**
+     * By handling this event, guarantees that the messages in the
+     * {@linkplain ShardProcessingRequested#getId() specified shard} have been processed
+     * by the {@link Delivery}.
+     */
     @React
     Nothing on(ShardProcessingRequested event) {
         return nothing();

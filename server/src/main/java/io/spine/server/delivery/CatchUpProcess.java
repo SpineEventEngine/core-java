@@ -83,6 +83,9 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Starts the catch-up process by emitting the {@link CatchUpRequested} event.
  *
+ * <p>Has its own {@link Inbox}, so the messages arriving to it are dispatched by the
+ * {@link Delivery}.
+ *
  * <p>In its lifecycle, moves through the several statuses.
  *
  * <p><b>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</b>
@@ -458,6 +461,13 @@ public final class CatchUpProcess<I>
         return builder.vBuild();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Tells if the passed envelope can be dispatched to this instance of the process
+     * by verifying that the projection type URL passed with the event matches the one of the
+     * projection repository configured for this instance.
+     */
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
         EventMessage raw = envelope.message();
