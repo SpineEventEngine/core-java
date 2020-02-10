@@ -29,5 +29,8 @@ import io.spine.base.EventMessage;
 @Immutable
 public interface CatchUpSignal extends EventMessage {
 
+    /**
+     * Obtains the identifier of the {@link CatchUp} to which this signal relates.
+     */
     CatchUpId getId();
 }
