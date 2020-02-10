@@ -122,11 +122,10 @@ import static java.util.Collections.synchronizedList;
  *
  * <h2>Work registry</h2>
  *
- * //TODO:2020-02-10:alex.tymchenko: descrbe the problem first
- *
  * <p>Once an application node picks the shard to deliver the messages from it, it registers itself
  * in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard that only allows
- * to pick a shard to a single node at a time.
+ * to pick a shard to a single node at a time. The framework users may configure the implementation
+ * of the registry by calling {@link DeliveryBuilder#setWorkRegistry(ShardedWorkRegistry)}.
  *
  * <h2>Dispatching messages</h2>
  *
@@ -141,24 +140,52 @@ import static java.util.Collections.synchronizedList;
  * <p>After each {@code DeliveryStage} it is possible to stop the delivery by
  * {@link DeliveryBuilder#setMonitor(DeliveryMonitor) supplying} a custom delivery monitor.
  * Please refer to the {@link DeliveryMonitor documentation} for the details.
-
  *
  * <h3>Conveyor and stations</h3>
  *
- * //TODO:2020-02-10:alex.tymchenko: describe the problem
+ * <p>In a scope of {@code DeliveryStage} the page of the {@code InboxMessage}s is placed
+ * to the {@link Conveyor} responsible for tracking the status of each message.
+ * The conveyor is run through the pipeline of stations, each modifying the state of the messages.
+ * At the end of the pipeline, the changed made to the messages are committed to the underlying
+ * {@code InboxStorage} in a bulk. Such an approach allows to minimize the number of the requests
+ * sent to the storage.
+ *
+ * <p>As long as the new {@code DeliveryStage} is started, the new instance of the {@code Conveyor}
+ * is created.
+ *
+ * <p>Below is the list of the conveyor stations in the pipeline.
  *
  * <b>1. Catch-up station</b>
- * //TODO:2020-02-10:alex.tymchenko: add a brief overview and provide the link to the respective class.
+ *
+ * <p>This station is responsible for dispatching the historical events in
+ * {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status to the respective targets. Also,
+ * while the target entity is under a catch-up, all the live messages headed to it are ignored.
+ * Once the catch-up is completed, this station handles the transition period, in which the last
+ * batch of the historical events and live messages are dispatched together.
+ * See {@link CatchUpStation} for more details.
  *
  * <b>2. Live delivery station</b>
- * //TODO:2020-02-10:alex.tymchenko: add a brief overview and provide the link to the respective class.
+ *
+ * <p>This station is responsible for dispatching the messages sent in a real-time. It ignores
+ * the messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status. Another responsibility
+ * of this station is to set for how long the delivered messages should be kept according to the
+ * {@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) idempotence window} settings.
+ * See {@link LiveDeliveryStation} for more details.
  *
  * <b>3. Cleanup station</b>
- * //TODO:2020-02-10:alex.tymchenko: add a brief overview and provide the link to the respective class.
+ *
+ * <p>This station removes the messages which are already delivered and are no longer needed for the
+ * de-duplication. See {@link CleanupStation} for the description.
  *
  * <b>De-duplication</b>
  *
- * //TODO:2020-02-10:alex.tymchenko: Describe the cache.
+ * <p>During the dispatching, {@code Conveyor} keeps track of the delivered messages. The stations
+ * performing the actual message dispatching rely onto this knowledge and de-duplicate
+ * the messages prior to calling the target's endpoint.
+ *
+ * <p>Additionally, the {@code Delivery} provides a {@linkplain DeliveredMessages cache of recently
+ * delivered messages}. Each instance of the {@code Conveyor} has an access to it and uses it
+ * in de-duplication procedures.
  *
  * <h2>Local environment</h2>
  *
