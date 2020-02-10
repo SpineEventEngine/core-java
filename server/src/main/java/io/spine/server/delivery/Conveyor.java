@@ -42,7 +42,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
 
 /**
- * @author Alex Tymchenko
+ * A mutable wrapper for the {@link InboxMessage}s to be dispatched in scope of a
+ * {@link DeliveryStage}.
+ *
+ * <p>Collects the state updates of the messages and allows to flush the pending changes to the
+ * respective {@link InboxStorage} in a bulk.
+ *
+ * <p>By accessing the {@linkplain DeliveredMessages cache}, knowns which messages were marked
+ * delivered by the instances of {@code Conveyor} in the previous {@code DeliveryStage}s.
  */
 final class Conveyor implements Iterable<InboxMessage> {
 
@@ -68,6 +75,9 @@ final class Conveyor implements Iterable<InboxMessage> {
         }
     }
 
+    /**
+     * Creates a new iterator over the contents.
+     */
     @Override
     public Iterator<InboxMessage> iterator() {
         return new ArrayList<>(messages.values()).iterator();
@@ -78,23 +88,46 @@ final class Conveyor implements Iterable<InboxMessage> {
         deliveredMessages.recordDelivered(message);
     }
 
+    /**
+     * Marks all the passed messages as {@link InboxMessageStatus#DELIVERED DELIVERED}.
+     *
+     * <p>Produced the bulk change to the storage, pending until the next
+     * {@link #flushTo(InboxStorage) flushTo(InboxStorage)} invocation.
+     */
     void markDelivered(Collection<InboxMessage> messages) {
         for (InboxMessage message : messages) {
             markDelivered(message);
         }
     }
 
+    /**
+     * Removes the passed message from the conveyor and marks it for removal from the storage once
+     * {@link #flushTo(InboxStorage) flushTo(InboxStorage)} is called.
+     */
     void remove(InboxMessage message) {
         messages.remove(message.getId());
         removals.add(message);
         dirtyMessages.remove(message.getId());
     }
 
+    /**
+     * Marks the passed message as a duplicate and removes it from the conveyor.
+     *
+     * <p>The message is going to be removed from the storage once {@link #flushTo(InboxStorage)
+     * flushTo(InboxStorage)} is called.
+     */
     void markDuplicateAndRemove(InboxMessage message) {
         duplicates.add(message);
         remove(message);
     }
 
+    /**
+     * Changes the status of the passed message to {@link InboxMessageStatus#TO_CATCH_UP
+     * TO_CATCH_UP}.
+     *
+     * <p>Produced the change to the storage, pending until the next {@link #flushTo(InboxStorage)
+     * flushTo(InboxStorage)} call.
+     */
     void markCatchUp(InboxMessage message) {
         changeStatus(message, InboxMessageStatus.TO_CATCH_UP);
     }
