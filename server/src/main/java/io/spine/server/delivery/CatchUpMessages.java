@@ -31,38 +31,62 @@ import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+/**
+ * A utility class producing the messages related to the {@code CatchUp} process.
+ */
 final class CatchUpMessages {
 
     private CatchUpMessages() {
     }
 
+    /**
+     * Creates a {@code CatchUpStarted} event messages with the specified ID.
+     */
     static CatchUpStarted started(CatchUpId id) {
+        checkNotNull(id);
         return CatchUpStarted.newBuilder()
                              .setId(id)
                              .vBuild();
     }
 
+    /**
+     * Creates a limit to be used in quering the {@link io.spine.server.event.EventStore
+     * EventStore}.
+     */
     static EventStreamQuery.Limit limitOf(int value) {
         return EventStreamQuery.Limit.newBuilder()
                                      .setValue(value)
                                      .vBuild();
     }
 
+    /**
+     * Creates a {@code HistoryEventsRecalled} event messages with the specified ID.
+     */
     static HistoryEventsRecalled recalled(CatchUpId id) {
+        checkNotNull(id);
         return HistoryEventsRecalled.newBuilder()
                                     .setId(id)
                                     .vBuild();
     }
 
+    /**
+     * Creates a {@code HistoryFullyRecalled} event messages with the specified ID.
+     */
     static HistoryFullyRecalled fullyRecalled(CatchUpId id) {
+        checkNotNull(id);
         return HistoryFullyRecalled.newBuilder()
                                    .setId(id)
                                    .vBuild();
     }
 
+    /**
+     * Wraps the passed list of {@code String}s into a list of {@code EventFilter}s.
+     */
     static ImmutableList<EventFilter> toFilters(ProtocolStringList rawEventTypes) {
+        checkNotNull(rawEventTypes);
         return rawEventTypes.stream()
                             .map(type -> EventFilter
                                     .newBuilder()
@@ -71,19 +95,31 @@ final class CatchUpMessages {
                             .collect(toImmutableList());
     }
 
+    /**
+     * Creates a {@code LiveEventsPickedUp} event messages with the specified ID.
+     */
     static LiveEventsPickedUp liveEventsPickedUp(CatchUpId id) {
+        checkNotNull(id);
         return LiveEventsPickedUp.newBuilder()
                                  .setId(id)
                                  .vBuild();
     }
 
+    /**
+     * Creates a {@code CatchUpCompleted} event messages with the specified ID.
+     */
     static CatchUpCompleted catchUpCompleted(CatchUpId id) {
+        checkNotNull(id);
         return CatchUpCompleted.newBuilder()
                                .setId(id)
                                .vBuild();
     }
 
+    /**
+     * Creates a {@code ShardProcessingRequested} event messages with the specified index.
+     */
     static ShardProcessingRequested shardProcessingRequested(ShardIndex shardIndex) {
+        checkNotNull(shardIndex);
         return ShardProcessingRequested
                 .newBuilder()
                 .setId(shardIndex)
