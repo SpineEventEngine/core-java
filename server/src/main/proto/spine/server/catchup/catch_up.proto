@@ -42,11 +42,13 @@ message CatchUp {
         repeated string event_type = 3;
     }
 
+    // The original request.
     Request request = 2 [(required) = true, (validate) = true];
 
     // During the catch-up, this field holds the timestamp of the last event already processed.
     google.protobuf.Timestamp when_last_read = 3;
 
+    // The current status of the catch-up process.
     CatchUpStatus status = 4 [(required) = true];
 
     // The index of the current catch-up round.
@@ -58,8 +60,12 @@ message CatchUp {
     //
     int32 current_round = 5;
 
+    // The total number of shards in the environment
+    // at the moment of the last dispatching of the historical messages.
+    //
     int32 total_shards = 6;
 
+    // The indexes of the shards through which the historical messages were dispatched.
     repeated int32 affected_shard = 7;
 }
 
