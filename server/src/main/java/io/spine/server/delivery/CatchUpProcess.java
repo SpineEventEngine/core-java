@@ -81,9 +81,90 @@ import static java.util.stream.Collectors.toSet;
 /**
  * A process that performs a projection catch-up.
  *
- * <p>Technically, the instances of this class are not
- * {@linkplain io.spine.server.procman.ProcessManager process managers}, since it is impossible
- * to register the process managers with the same state in a multi-bounded-context application.
+ * <p>Starts the catch-up process by emitting the {@link CatchUpRequested} event.
+ *
+ * <p>In its lifecycle, moves through the several statuses.
+ *
+ * <p><b>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</b>
+ *
+ * <p>The process is moved to this status upon receiving {@code CatchUpRequested} event. The actions
+ * include:
+ *
+ * <ul>
+ *     <li>The catch-up process in moved to the {@link CatchUpStatus#STARTED STARTED} status.
+ *
+ *     <li>A {@link CatchUpStarted} event is emitted. The target projection repository listens to
+ *     this event and kills the state of the matching entities.
+ * </ul>
+ *
+ * <p><b>{@link CatchUpStatus#STARTED STARTED}</b>
+ *
+ * <p>The reading the event history and populating the {@code Inbox}es of the corresponding
+ * projections is in progress.
+ *
+ * <p>The catch-up maintains this status until the history is read till the point in time,
+ * which is very close to the {@link Time#currentTime() Time.currentTime()}.
+ *
+ * <p>At this stage the actions are as follows.
+ *
+ * <ul>
+ *      <li>The historical event messages are read from the {@link EventStore} respecting
+ *      the time range requested and the time of the last read operation performed by this process.
+ *      The maximum number of the events read is determined by
+ *      {@linkplain DeliveryBuilder#setCatchUpPageSize(int) one of the Delivery settings}.
+ *
+ *      <li>Depending on the targets requested for the catch-up, the events are posted to the
+ *      corresponding entities.
+ *
+ *      <li>Unless the timestamps of the events are getting close to the current time, an
+ *      {@link HistoryEventsRecalled} is emitted, leaving the process in the {@code STARTED} status
+ *      and triggering the next round similar to this one.
+ *
+ *      <p>If the timestamps of the events read on this step are as close to the current time as
+ *      {@linkplain CatchUpProcessBuilder#withTurbulencePeriod(Duration) the "turbulence" period},
+ *      the {@link HistoryFullyRecalled} is emitted.
+ * </ul>
+ *
+ * <p><b>{@link CatchUpStatus#FINALIZING FINALIZING}</b>
+ *
+ * <p>The process moves to this status when the event history has been fully recalled and the
+ * corresponding {@code HistoryFullyRecalled} is received. At this stage the {@code Delivery} stops
+ * the propagation of the events to the catch-up messages, waiting for this process to populate
+ * the inboxes with the messages arriving to be dispatched during the "turbulence" period.
+ * Potentially, the inboxes will contain the duplicates produced by both the live users and this
+ * process. To deal with it, a de-duplication is peformed by the {@code Delivery}.
+ * See {@link CatchUpStation} for more details.
+ *
+ * <p>The actions are as follows.
+ *
+ * <ul>
+ *      <li>All the remaining messages of the matching event types are read {@link EventStore}.
+ *      In this operation the read limits set by the {@code Delivery} are NOT used, since
+ *      the goal is to read the remainder of the events.
+ *
+ *      <li>If there were no events read, the {@link CatchUpCompleted} is emitted and the process
+ *      is moved to the {@link CatchUpStatus#COMPLETED COMPLETED} status.
+ *
+ *      <li>If there were some events read, the {@link LiveEventsPickedUp} event is emitted.
+ *      This allows some time for the posted events to become visible to the {@code Delivery}.
+ *      The reacting handler of the {@code LiveEventsPickedUp} completes the process.
+ * </ul>
+ *
+ * <p>{@link CatchUpStatus#COMPLETED COMPLETED}</p>
+ *
+ * <p>Once the process moves to the {@code COMPLETED} status, the corresponding {@code Delivery}
+ * routines de-duplicate, re-order and dispatch the "paused" events. Then the normal live delivery
+ * flow is resumed.
+ *
+ * <p>To ensure that all the shards in which the "paused" historical events reside are processed,
+ * this process additionally emits the "maintenance" {@link ShardProcessingRequested} events for
+ * each shard involved. By dispatching them, the system guarantees that the {@code Delivery}
+ * observes the {@code COMPLETED} status of this process and delivers the remainer of the messages.
+ *
+ * @implNote Technically, the instances of this class are not
+ *         {@linkplain io.spine.server.procman.ProcessManager process managers}, since it is
+ *         impossible to register the process managers with the same state in
+ *         a multi-{@code BoundedContext} application.
  */
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
@@ -256,6 +337,7 @@ public final class CatchUpProcess<I>
         return completeProcess(event.getId());
     }
 
+    @SuppressWarnings("unused") // We just need the fact of dispatching.
     @React
     List<ShardProcessingRequested> on(CatchUpCompleted ignored) {
         int shardCount = builder().getTotalShards();

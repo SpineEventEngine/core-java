@@ -62,10 +62,10 @@ import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
  * <b>2. Catch-up {@code FINALIZING}.</b>
  *
  * <p>When the catch-up job is being finalized, it means that the historical events may be dated
- * close to the present time and, thus, to the live events headed to the same entities.
- * Therefore, the matched messages in either status are NEITHER dispatched NOR removed from their
- * inboxes. Instead, they are held until the catch-up job is completed to be  de-duplicated
- * and delivered all at once.
+ * close to the present time and, thus, interfere with the live events headed to the same entities.
+ * Therefore, the matched messages in either status are "paused" meaning they are NEITHER dispatched
+ * NOR removed from their inboxes. Instead, they are held until the catch-up job is completed to be
+ * de-duplicated and delivered all at once.
  *
  * <p>To hold the live messages from being delivered down the conveyor pipeline, the live messages
  * are marked as {@code TO_CATCH_UP}.
