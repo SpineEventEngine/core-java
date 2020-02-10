@@ -30,6 +30,9 @@ final class DispatchingId {
     private final InboxSignalId signal;
     private final InboxId inbox;
 
+    /**
+     * Creates the dispatching identifier for the passed message.
+     */
     DispatchingId(InboxMessage message) {
         this.signal = message.getSignalId();
         this.inbox = message.getInboxId();
