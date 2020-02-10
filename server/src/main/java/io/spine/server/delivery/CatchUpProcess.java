@@ -166,6 +166,7 @@ import static java.util.stream.Collectors.toSet;
  *         impossible to register the process managers with the same state in
  *         a multi-{@code BoundedContext} application.
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})    // It does a lot.
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
@@ -423,7 +424,6 @@ public final class CatchUpProcess<I>
                                  @Nullable Limit limit) {
         if (readBefore != null
                 && Timestamps.compare(readBefore, builder().getWhenLastRead()) <= 0) {
-            //TODO:2019-12-13:alex.tymchenko: looks an `IllegalStateException` though.
             return ImmutableList.of();
         }
         EventStreamQuery query = toEventQuery(request, readBefore, limit);
