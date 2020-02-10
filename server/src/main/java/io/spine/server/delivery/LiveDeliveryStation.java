@@ -33,13 +33,45 @@ import java.util.Set;
 /**
  * A station that delivers those messages which are incoming in a live mode.
  *
+ * <p>This station dispatches all the messages in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER}
+ * status that are present in the passed conveyor. After the messages are dispatched, they are
+ * marked as {@link InboxMessageStatus#DELIVERED DELIVERED}.
+ *
+ * <p>If the idempotence window is {@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) set
+ * in
+ * the system}, all the delivered messages are set to be kept in their storages for the duration,
+ * corresponding to the width of the window. In this way, they will become usable for the potential
+ * de-duplication.
+ *
+ * <p>Before the dispatching, the messages are de-duplicated, taking into account {@linkplain
+ * Conveyor#recentlyDelivered()}
+ * all known delivered messages. In this process, the messages delivered previously and kept for
+ * longer are taken into account as well. The detected duplicates are marked as such
+ * in the conveyor and are removed from the storage later.
+ *
+ * <p>The dispatched messages are re-ordered chronologically. However, the changes in ordering
+ * are not propagated to the conveyor.
+ *
  * @see CatchUpStation for the station performing the catch-up
  */
 final class LiveDeliveryStation extends Station {
 
+    /**
+     * The action to use for the delivery of the messages to their targets.
+     */
     private final DeliveryAction action;
+
+    /**
+     * The current setting of the idempotence window.
+     *
+     * <p>Is {@code null}, if not set.
+     */
     private final @Nullable Duration idempotenceWindow;
 
+    /**
+     * Creates a new instance of {@code LiveDeliveryStation} with the action to use for the delivery
+     * and the idempotence window.
+     */
     LiveDeliveryStation(DeliveryAction action, Duration idempotenceWindow) {
         super();
         this.action = action;
@@ -48,6 +80,14 @@ final class LiveDeliveryStation extends Station {
                                  : null;
     }
 
+    /**
+     * Dispatches the messages from the conveyor.
+     *
+     * @param conveyor
+     *         the conveyor on which the messages are travelling
+     * @return how many messages were delivered and whether there were any errors during the
+     *         dispatching
+     */
     @Override
     public final Result process(Conveyor conveyor) {
         Map<DispatchingId, InboxMessage> seen = new HashMap<>();
@@ -65,7 +105,7 @@ final class LiveDeliveryStation extends Station {
                 }
             }
         }
-        if(!seen.isEmpty()) {
+        if (!seen.isEmpty()) {
             Collection<InboxMessage> toDeliver = seen.values();
             List<InboxMessage> toDispatch = deduplicateAndSort(toDeliver, conveyor);
             DeliveryErrors errors = action.executeFor(toDispatch);
@@ -94,9 +134,9 @@ final class LiveDeliveryStation extends Station {
      *         current conveyor
      * @return de-duplicated and sorted messages
      */
-    private static
-    List<InboxMessage> deduplicateAndSort(Collection<InboxMessage> messages, Conveyor conveyor) {
-        Set<DispatchingId> previouslyDelivered = conveyor.idsOfDelivered();
+    private static List<InboxMessage> deduplicateAndSort(Collection<InboxMessage> messages,
+                                                         Conveyor conveyor) {
+        Set<DispatchingId> previouslyDelivered = conveyor.allDelivered();
         List<InboxMessage> result = new ArrayList<>();
         for (InboxMessage message : messages) {
             DispatchingId id = new DispatchingId(message);

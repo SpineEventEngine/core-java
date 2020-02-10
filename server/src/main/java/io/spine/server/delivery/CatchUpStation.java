@@ -84,7 +84,7 @@ import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
  *
  * <h1>De-duplication and re-ordering</h1>
  *
- * <p>Prior to the dispatching, the messages are de-duplicated in scope of this conveyor.
+ * <p>Prior to the dispatching, the messages are de-duplicated in scope of this message batch.
  * Please note, that the idempotence window is NOT taken into the account, as the historical events
  * may all have been delivered to their entities somewhen in the past.
  *

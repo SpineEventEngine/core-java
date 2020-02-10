@@ -121,9 +121,9 @@ final class Conveyor implements Iterable<InboxMessage> {
      * instance and of the messages delivered
      * {@linkplain Conveyor#Conveyor(Collection, DeliveredMessages) before it}.
      */
-    Set<DispatchingId> idsOfDelivered() {
+    Set<DispatchingId> allDelivered() {
         Set<DispatchingId> recentlyDelivered =
-                delivered()
+                recentlyDelivered()
                         .map(DispatchingId::new)
                         .collect(Collectors.toSet());
         Sets.SetView<DispatchingId> result = Sets.union(recentlyDelivered,
@@ -132,11 +132,10 @@ final class Conveyor implements Iterable<InboxMessage> {
     }
 
     /**
-     * Returns the stream of the {@link InboxMessage}s which are known to be delivered.
-     *
-     * <p>This includes all the messages on this conveyor with the {@code DELIVERED} status.
+     * Returns the stream of the {@link InboxMessage}s which were delivered in scope of lifetime of
+     * this conveyor.
      */
-    Stream<InboxMessage> delivered() {
+    Stream<InboxMessage> recentlyDelivered() {
         return messages.values()
                        .stream()
                        .filter(m -> m.getStatus() ==

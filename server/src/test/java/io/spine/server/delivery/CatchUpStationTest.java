@@ -109,7 +109,7 @@ class CatchUpStationTest extends AbstractStationTest {
 
         assertDeliveredCount(result, 2);
 
-        assertContainsExactly(conveyor.delivered(),
+        assertContainsExactly(conveyor.recentlyDelivered(),
                               // expected:
                               copyWithStatus(toCatchUp, DELIVERED),
                               copyWithStatus(anotherToCatchUp, DELIVERED),
