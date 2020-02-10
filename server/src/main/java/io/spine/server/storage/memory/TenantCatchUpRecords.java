@@ -32,7 +32,7 @@ import java.util.Optional;
 import static java.util.Collections.synchronizedMap;
 
 /**
- * @author Alex Tymchenko
+ * The catch-up processes for for a tenant.
  */
 public class TenantCatchUpRecords implements TenantStorage<CatchUpId, CatchUp> {
 
