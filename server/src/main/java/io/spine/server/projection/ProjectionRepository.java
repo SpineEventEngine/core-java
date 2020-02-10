@@ -121,7 +121,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     private void initCatchUp(BoundedContext context, Delivery delivery) {
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
-        catchUpProcess = builder.withDispatchOp(this::sendToCatchUp)
+        catchUpProcess = builder.withDispatchOp(this::sendToCatchingUp)
                                 .build();
         context.registerEventDispatcher(catchUpProcess);
     }
@@ -451,7 +451,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @return the set of the entity identifiers, which actually received the dispatched event
      * @see CatchUpEndpoint
      */
-    private Set<I> sendToCatchUp(Event event, @Nullable Set<I> restrictToIds) {
+    private Set<I> sendToCatchingUp(Event event, @Nullable Set<I> restrictToIds) {
         EventEnvelope envelope = EventEnvelope.of(event);
         Set<I> catchUpTargets;
         if (envelope.message() instanceof CatchUpSignal) {
@@ -462,7 +462,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             Set<I> routedTargets = route(envelope);
             catchUpTargets = restrictToIds == null
                              ? routedTargets
-                             : intersection(routedTargets,restrictToIds).immutableCopy();
+                             : intersection(routedTargets, restrictToIds).immutableCopy();
         }
         Inbox<I> inbox = inbox();
         for (I target : catchUpTargets) {
