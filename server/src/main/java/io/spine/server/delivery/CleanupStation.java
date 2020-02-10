@@ -34,6 +34,13 @@ final class CleanupStation extends Station {
                                                                   .build();
     private static final Result NOTHING_DELIVERED = new Result(0, NO_ERRORS);
 
+    /**
+     * Looks up through the passed conveyor in order to find the messages which may already be
+     * removed.
+     *
+     * <p>Always reports that no messages were delivered and, therefore, no delivery errors were
+     * observed.
+     */
     @Override
     public final Result process(Conveyor conveyor) {
         for (InboxMessage message : conveyor) {
