@@ -54,6 +54,9 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Checks whether the catch-up is already started for the requested IDs before emitting
  * {@linkplain CatchUpRequested an event} telling that the catch-up has been requested.
+ *
+ * @param <I>
+ *         the type of the identifiers of the catching-up entities
  */
 final class CatchUpStarter<I> {
 
@@ -69,6 +72,17 @@ final class CatchUpStarter<I> {
         this.eventClasses = builder.eventClasses;
     }
 
+    /**
+     * Creates a new builder for the {@code CatchUpStarter}.
+     *
+     * @param repo
+     *         the repository of the projection to catch up.
+     * @param storage
+     *         the storage of the catch-up processes
+     * @param <I>
+     *         the type of the identifiers of the catching-up entities
+     * @return the new instance of the builder
+     */
     static <I> Builder<I> newBuilder(ProjectionRepository<I, ?, ?> repo, CatchUpStorage storage) {
         return new Builder<>(repo.entityStateType(), repo.messageClasses(), storage);
     }
@@ -184,6 +198,12 @@ final class CatchUpStarter<I> {
         return false;
     }
 
+    /**
+     * A builder for the {@link CatchUpStarter} instances.
+     *
+     * @param <I>
+     *         the type of the identifiers of the catching-up entities
+     */
     static final class Builder<I> {
 
         private final TypeUrl projectionStateType;
@@ -200,6 +220,10 @@ final class CatchUpStarter<I> {
             this.eventClasses = consumedEvents;
         }
 
+        /**
+         * Sets the <b>initialized</b> {@code BoundedContext}, in scope of which the catch-up is
+         * performed.
+         */
         Builder<I> withContext(BoundedContext context) {
             this.context = checkNotNull(context);
             return this;
