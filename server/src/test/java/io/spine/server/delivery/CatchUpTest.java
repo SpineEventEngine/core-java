@@ -264,7 +264,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
                                                                 .with(projectionRepo)
                                                                 .with(pmRepo);
         List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
-        post(jobs, 20);
+        post(jobs, 1);
 
         int positiveExpected = totalCommands / ids.length;
         List<Integer> positiveValues =
