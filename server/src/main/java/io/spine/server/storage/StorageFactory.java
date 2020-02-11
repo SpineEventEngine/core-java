@@ -94,6 +94,16 @@ public interface StorageFactory extends AutoCloseable {
      */
     InboxStorage createInboxStorage(boolean multitenant);
 
+    /**
+     * Creates a new {@link CatchUpStorage}.
+     *
+     * <p>Similar to {@link InboxStorage}, this type of storage is also used in the {@link
+     * io.spine.server.delivery.Delivery Delivery} routines. So by default there is a single
+     * instance of {@code CatchUpStorage} per {@link io.spine.server.ServerEnvironment
+     * ServerEnvironment}.
+     *
+     * @param multitenant whether the created storage should be multi-tenant
+     */
     CatchUpStorage createCatchUpStorage(boolean multitenant);
 
     /**
