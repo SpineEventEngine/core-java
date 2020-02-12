@@ -32,8 +32,31 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * The cache of {@code Entity} states for a certain {@code Repository} and
+ * The cache of {@code Entity} objects for a certain {@code Repository} and
  * {@linkplain #startCaching(Object) selected} identifiers.
+ *
+ * <p>Reduces the number of both read and write storage operations in cases if more than one
+ * message is dispatched to the target entity. The typical scenario looks like this:
+ *
+ * <ol>
+ *     <li>Several messages are being dispatched to the entity. The framework calls {@link
+ *     #startCaching(Object) startCaching(entityId)} method.
+ *
+ *     <li>Before dispatching the first message, the repository loads the entity via the cache;
+ *     the cache executes the read operation, remembers the result and returns the entity.
+ *
+ *     <li>The first message is dispatched to the entity. {@link #store(Entity) store(Entity)}
+ *     method is called. Instead of executing the write operation right away, the cache stores
+ *     the updated entity in its memory.
+ *
+ *     <li>More messages are dispatched to the same entity. Each read operation is served by the
+ *     cache instead of executing the reads from the underlying storage. Upon entity updates,
+ *     the changed entity is stored into the cache memory.
+ *
+ *     <li>The dispatching of the message batch is completed. The framework calls {@link
+ *     #stopCaching(Object) stopCaching(entityId)} method. Then the cache pushes the updated entity
+ *     to the underlying storage by executing the write operation.
+ * </ol>
  *
  * <p>The users of this class should keep the number of the simultaneously cached entities
  * reasonable due to a potentially huge significant memory footprint.
@@ -53,12 +76,26 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
     private final Load<I, E> loadFn;
     private final Store<E> storeFn;
 
+    /**
+     * Creates the instance of the cache considering the multi-tenancy setting,
+     * the function to load entities and the function to store the entity .
+     */
     public RepositoryCache(boolean multitenant, Load<I, E> loadFn, Store<E> storeFn) {
         this.multitenant = multitenant;
         this.loadFn = loadFn;
         this.storeFn = storeFn;
     }
 
+    /**
+     * Loads the entity by its identifier.
+     *
+     * <p>If the target entity was previously {@linkplain #startCaching(Object) asked to be cached},
+     * the entity is additionally stored into the cache internal memory.
+     *
+     * @param id
+     *         the identifier of the entity to load
+     * @return loaded entity
+     */
     public synchronized E load(I id) {
         IdInTenant<I> idInTenant = idInTenant(id);
         if (!idsToCache.contains(idInTenant)) {
@@ -77,6 +114,9 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
      * Starts caching the {@code load} and {@code store} operation results in memory
      * for the given {@code Entity} identifier.
      *
+     * <p>Call {@linkplain #stopCaching(Object) stopCaching(entityId)} to flush the accumulated
+     * entity update to the underlying storage via the pre-configured store function.
+     *
      * @param id
      *         an identifier of the entity to cache
      */
@@ -88,7 +128,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
      * Stops caching the {@code load} and {@code store} operations for the
      * {@code Entity} with the passed identifier.
      *
-     * <p>Stores the cached entity state to the entity repository via
+     * <p>Stores the cached entity to the entity repository via
      * {@linkplain RepositoryCache#RepositoryCache(boolean, Load, Store) pre-configured}
      * {@code Store} function.
      *
@@ -115,6 +155,20 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
         return IdInTenant.of(id, multitenant);
     }
 
+    /**
+     * Stores the entity.
+     *
+     * <p>If the caching of this entity was previously {@linkplain #startCaching(Object) started},
+     * the entity is cached in the memory only. Otherwise, a supplied direct store operation is
+     * executed.
+     *
+     * <p>If the entity is being cached, the changes will travel from the in-memory cache to the
+     * underlying storage when {@linkplain #stopCaching(Object) stopCaching(entityId)} method is
+     * called.
+     *
+     * @param entity
+     *         the entity to store
+     */
     public synchronized void store(E entity) {
         I id = entity.id();
         IdInTenant<I> idInTenant = idInTenant(id);
@@ -126,7 +180,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
     }
 
     /**
-     * A function which loads an {@code Entity} state by ID from its real repository.
+     * A function which loads an {@code Entity} by ID from its real repository.
      *
      * @param <I>
      *         the type of {@code Entity} identifiers
@@ -139,7 +193,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
     }
 
     /**
-     * A function which stores the {@code Entity} state to its real repository.
+     * A function which stores the {@code Entity} to its real repository.
      *
      * @param <E>
      *         the type of entity
