@@ -98,7 +98,7 @@ final class CatchUpStarter<I> {
      * @throws CatchUpAlreadyStartedException
      *         if the catch-up is already in progress for at least one of the requested entities
      */
-    public void start(@Nullable Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
+    void start(@Nullable Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
         checkNotActive(ids);
 
         CatchUp.Request request = buildRequest(ids, since);
