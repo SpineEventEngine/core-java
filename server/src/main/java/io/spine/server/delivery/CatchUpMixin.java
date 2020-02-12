@@ -20,9 +20,47 @@
 
 package io.spine.server.delivery;
 
-/**
- * A mixin for the state of the {@linkplain CatchUpProcess catch-up processes}.
- */
-public interface CatchUpMixin {
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 
+import java.util.List;
+
+/**
+ * A mixin for the state of the {@linkplain CatchUpProcess catch-up process job}.
+ */
+public interface CatchUpMixin extends CatchUpOrBuilder {
+
+    /**
+     * Tells whether the passed {@code InboxMessage} matches this catch-up job.
+     *
+     * <p>To match, two conditions must be met:
+     *
+     * <ol>
+     *     <li>the target entity type of the job and the message must be the same;
+     *
+     *     <li>the identifier of the message target must be included into the list of the
+     *     identifiers specified in the job OR the job matches all the targets of the entity type.
+     * </ol>
+     *
+     * @param message
+     *         the message to match to the job
+     * @return {@code true} if the message matches the job, {@code false} otherwise
+     */
+    @VisibleForTesting
+    default boolean matches(InboxMessage message) {
+        String expectedProjectionType = getId().getProjectionType();
+        InboxId targetInbox = message.getInboxId();
+        String actualTargetType = targetInbox.getTypeUrl();
+        if (!expectedProjectionType.equals(actualTargetType)) {
+            return false;
+        }
+        List<Any> targets = getRequest().getTargetList();
+        if (targets.isEmpty()) {
+            return true;
+        }
+        Any rawEntityId = targetInbox.getEntityId()
+                                     .getId();
+        return targets.stream()
+                      .anyMatch((t) -> t.equals(rawEntityId));
+    }
 }

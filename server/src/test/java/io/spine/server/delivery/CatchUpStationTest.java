@@ -242,7 +242,7 @@ class CatchUpStationTest extends AbstractStationTest {
 
         private void assertMatchesEvery(ImmutableSet<InboxMessage> messages, CatchUp job) {
             for (InboxMessage message : messages) {
-                assertThat(CatchUpStation.matches(job, message))
+                assertThat(job.matches(message))
                         .isTrue();
 
             }
@@ -272,7 +272,7 @@ class CatchUpStationTest extends AbstractStationTest {
 
         private void assertMatchesNone(ImmutableSet<InboxMessage> messages, CatchUp job) {
             for (InboxMessage message : messages) {
-                assertThat(CatchUpStation.matches(job, message))
+                assertThat(job.matches(message))
                         .isFalse();
 
             }

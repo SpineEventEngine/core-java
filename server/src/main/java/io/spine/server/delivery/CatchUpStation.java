@@ -20,8 +20,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.core.Event;
@@ -129,7 +127,7 @@ final class CatchUpStation extends Station {
             for (CatchUp job : jobs) {
                 CatchUpStatus jobStatus = job.getStatus();
 
-                if (matches(job, message)) {
+                if (job.matches(message)) {
                     DispatchingId dispatchingId = new DispatchingId(message);
                     if (jobStatus == STARTED) {
                         if (message.getStatus() == TO_CATCH_UP) {
@@ -176,44 +174,6 @@ final class CatchUpStation extends Station {
             return result;
         }
         return emptyResult();
-    }
-
-    /**
-     * Tells whether the job matched the passed {@code InboxMessage}.
-     *
-     * <p>To match, two conditions must be met:
-     *
-     * <ol>
-     *     <li>the target entity type of the job and the message must be the same;
-     *
-     *     <li>the identifier of the message target must be included into the list of the
-     *     identifiers specified in the job OR the job matches all the targets of the entity type.
-     * </ol>
-     *
-     * @param job
-     *         the catch-up job
-     * @param message
-     *         the message to match to the job
-     * @return {@code true} if the message matches the job, {@code false} otherwise
-     */
-    @VisibleForTesting
-    static boolean matches(CatchUp job, InboxMessage message) {
-        String expectedProjectionType = job.getId()
-                                           .getProjectionType();
-        InboxId targetInbox = message.getInboxId();
-        String actualTargetType = targetInbox.getTypeUrl();
-        if (!expectedProjectionType.equals(actualTargetType)) {
-            return false;
-        }
-        List<Any> targets = job.getRequest()
-                               .getTargetList();
-        if (targets.isEmpty()) {
-            return true;
-        }
-        Any rawEntityId = targetInbox.getEntityId()
-                                     .getId();
-        return targets.stream()
-                      .anyMatch((t) -> t.equals(rawEntityId));
     }
 
     /**
