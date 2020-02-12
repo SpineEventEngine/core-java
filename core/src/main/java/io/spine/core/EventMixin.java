@@ -104,8 +104,8 @@ interface EventMixin
      *
      * <p>A result won't contain:
      * <ul>
-     *     <li>the enrichment from the event context;</li>
-     *     <li>the enrichment from the first-level origin.</li>
+     *     <li>the enrichment from the event context;
+     *     <li>the enrichment from the first-level origin.
      * </ul>
      *
      * <p>This method does not remove enrichments from second-level and deeper origins to avoid a
@@ -129,9 +129,9 @@ interface EventMixin
      *
      * <p>A result won't contain:
      * <ul>
-     *     <li>the enrichment from the event context;</li>
-     *     <li>the enrichment from the first-level origin;</li>
-     *     <li>the enrichment from the second-level and deeper origins.</li>
+     *     <li>the enrichment from the event context;
+     *     <li>the enrichment from the first-level origin;
+     *     <li>the enrichment from the second-level and deeper origins.
      * </ul>
      *
      * <p>This method is performance-heavy.

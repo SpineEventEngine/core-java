@@ -184,11 +184,10 @@ final class CatchUpStation extends Station {
      * <p>To match, two conditions must be met:
      *
      * <ol>
-     *     <li>the target entity type of the job and the message must be the same;</li>
+     *     <li>the target entity type of the job and the message must be the same;
      *
      *     <li>the identifier of the message target must be included into the list of the
      *     identifiers specified in the job OR the job matches all the targets of the entity type.
-     *     </li>
      * </ol>
      *
      * @param job
