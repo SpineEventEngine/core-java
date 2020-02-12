@@ -24,17 +24,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
-import io.spine.client.ActorRequestFactory;
-import io.spine.core.ActorContext;
 import io.spine.core.Event;
-import io.spine.core.TenantId;
-import io.spine.core.UserId;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.event.CatchUpRequested;
-import io.spine.server.event.EventFactory;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.tenant.TenantFunction;
 import io.spine.server.type.EventClass;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
@@ -45,7 +38,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -111,21 +103,11 @@ final class CatchUpStarter<I> {
                 .setId(id)
                 .setRequest(request)
                 .vBuild();
-        EventFactory eventFactory = newEventFactory(projectionStateType, context.isMultitenant());
-        Event event = eventFactory.createEvent(eventMessage, null);
+        CatchUpEventFactory eventFactory =
+                new CatchUpEventFactory(projectionStateType, context.isMultitenant());
+        Event event = eventFactory.createEvent(eventMessage);
         context.eventBus()
                .post(event);
-    }
-
-    private static EventFactory newEventFactory(TypeUrl stateType, boolean multitenant) {
-        String userIdValue = format("`CatchUpStarter` for `%s`", stateType.value());
-        UserId onBehalfOf = UserId.newBuilder()
-                                  .setValue(userIdValue)
-                                  .build();
-        ActorRequestFactory requestFactory = requestFactory(onBehalfOf, multitenant);
-        Any producerId = AnyPacker.pack(onBehalfOf);
-        ActorContext actorContext = requestFactory.newActorContext();
-        return EventFactory.forImport(actorContext, producerId);
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
@@ -155,20 +137,6 @@ final class CatchUpStarter<I> {
         if (alreadyCatchingUp) {
             throw new CatchUpAlreadyStartedException(projectionStateType, ids);
         }
-    }
-
-    private static ActorRequestFactory requestFactory(UserId actor, boolean multitenant) {
-        TenantFunction<ActorRequestFactory> function =
-                new TenantFunction<ActorRequestFactory>(multitenant) {
-                    @Override
-                    public ActorRequestFactory apply(TenantId id) {
-                        return ActorRequestFactory.newBuilder()
-                                                  .setActor(actor)
-                                                  .setTenantId(id)
-                                                  .build();
-                    }
-                };
-        return function.execute();
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
