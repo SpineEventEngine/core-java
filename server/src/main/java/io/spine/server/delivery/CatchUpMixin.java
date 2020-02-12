@@ -21,7 +21,7 @@
 package io.spine.server.delivery;
 
 /**
- * A mixin for the state of the {@linkplain CatchUp catch-up} {@linkplain CatchUpProcess processes}.
+ * A mixin for the state of the {@linkplain CatchUpProcess catch-up processes}.
  */
 public interface CatchUpMixin {
 
