@@ -149,7 +149,7 @@ import static java.util.stream.Collectors.toSet;
  * the propagation of the events to the catch-up messages, waiting for this process to populate
  * the inboxes with the messages arriving to be dispatched during the "turbulence" period.
  * Potentially, the inboxes will contain the duplicates produced by both the live users and this
- * process. To deal with it, a de-duplication is peformed by the {@code Delivery}.
+ * process. To deal with it, a de-duplication is performed by the {@code Delivery}.
  * See {@link CatchUpStation} for more details.
  *
  * <p>The actions are as follows.
