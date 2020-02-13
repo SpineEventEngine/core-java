@@ -20,8 +20,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.util.Durations;
 import io.spine.server.delivery.CatchUpProcess.DispatchCatchingUp;
 import io.spine.server.projection.ProjectionRepository;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -34,12 +32,9 @@ import static io.spine.util.Preconditions2.checkPositive;
  */
 public final class CatchUpProcessBuilder<I> {
 
-    private static final Duration DEFAULT_TURBULENCE_PERIOD = Durations.fromMillis(500);
-
     private final ProjectionRepository<I, ?, ?> repository;
     private @MonotonicNonNull CatchUpStorage storage;
     private @MonotonicNonNull DispatchCatchingUp<I> dispatchOp;
-    private @MonotonicNonNull Duration turbulencePeriod;
     private int pageSize;
 
     CatchUpProcessBuilder(ProjectionRepository<I, ?, ?> repository) {
@@ -69,10 +64,6 @@ public final class CatchUpProcessBuilder<I> {
         return pageSize;
     }
 
-    Duration turbulencePeriod() {
-        return checkNotNull(turbulencePeriod);
-    }
-
     public CatchUpProcessBuilder<I> withDispatchOp(DispatchCatchingUp<I> operation) {
         this.dispatchOp = checkNotNull(operation);
         return this;
@@ -87,9 +78,6 @@ public final class CatchUpProcessBuilder<I> {
         checkNotNull(dispatchOp);
         checkPositive(pageSize);
 
-        if(turbulencePeriod == null) {
-            turbulencePeriod = DEFAULT_TURBULENCE_PERIOD;
-        }
         return new CatchUpProcess<>(this);
     }
 }

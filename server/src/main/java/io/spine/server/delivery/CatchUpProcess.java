@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
@@ -97,7 +98,10 @@ import static java.util.stream.Collectors.toSet;
  * by {@code Delivery} it tells to perform a transition from dispatching {@code TO_CATCH_UP} events
  * back to delivering those {@code TO_DELIVER}. See more on that below.
  *
- * <p>In its lifecycle, moves through the several statuses.
+ * <p>By default, the "turbulence" period equals 500 ms, meaning that the catch-up starts its
+ * finalization when the event history is read up until {@code now - 500 ms}.
+ *
+ * <p>In its lifecycle, the process moves through the several statuses.
  *
  * <p><b>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</b>
  *
@@ -138,8 +142,7 @@ import static java.util.stream.Collectors.toSet;
  *      and triggering the next round similar to this one.
  *
  *      <p>If the timestamps of the events read on this step are as close to the current time as
- *      {@linkplain CatchUpProcessBuilder#withTurbulencePeriod(Duration) the "turbulence" period},
- *      the {@link HistoryFullyRecalled} is emitted.
+ *      the "turbulence" period, the {@link HistoryFullyRecalled} is emitted.
  * </ul>
  *
  * <p><b>{@link CatchUpStatus#FINALIZING FINALIZING}</b>
@@ -188,13 +191,13 @@ public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
+    private static final Duration TURBULENCE_PERIOD = Durations.fromMillis(500);
 
     private final ProjectionRepository<I, ?, ?> repository;
     private final DispatchCatchingUp<I> dispatchOperation;
     private final CatchUpStorage storage;
     private final CatchUpStarter.Builder<I> starterTemplate;
     private final Limit queryLimit;
-    private final Duration turbulencePeriod;
 
     private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
     private @MonotonicNonNull Supplier<EventStore> eventStore;
@@ -205,7 +208,6 @@ public final class CatchUpProcess<I>
         this.dispatchOperation = builder.dispatchOp();
         this.storage = builder.storage();
         this.queryLimit = limitOf(builder.pageSize());
-        this.turbulencePeriod = builder.turbulencePeriod();
         this.starterTemplate = CatchUpStarter.newBuilder(this.repository, this.storage);
     }
 
@@ -275,8 +277,8 @@ public final class CatchUpProcess<I>
         return ids;
     }
 
-    private Timestamp turbulenceStart() {
-        return subtract(Time.currentTime(), turbulencePeriod);
+    private static Timestamp turbulenceStart() {
+        return subtract(Time.currentTime(), TURBULENCE_PERIOD);
     }
 
     @React
