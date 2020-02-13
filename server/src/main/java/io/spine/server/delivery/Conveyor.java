@@ -50,7 +50,7 @@ import static java.util.stream.Collectors.toList;
  * <p>Collects the state updates of the messages and allows to flush the pending changes to the
  * respective {@link InboxStorage} in a bulk.
  *
- * <p>By accessing the {@linkplain DeliveredMessages cache}, knowns which messages were marked
+ * <p>By accessing the {@linkplain DeliveredMessages cache}, knows which messages were marked
  * delivered by the instances of {@code Conveyor} in the previous {@code DeliveryStage}s.
  */
 final class Conveyor implements Iterable<InboxMessage> {
