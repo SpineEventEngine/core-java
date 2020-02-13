@@ -53,6 +53,7 @@ public abstract class DeliveryStrategy {
      */
     protected abstract int shardCount();
 
+    @SuppressWarnings("WeakerAccess")   // A part of the public API.
     public final ShardIndex determineIndex(Object entityId, TypeUrl entityStateType) {
         if (entityStateType.equals(ShardMaintenanceProcess.TYPE)) {
             return (ShardIndex) entityId;
