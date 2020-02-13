@@ -31,7 +31,7 @@ import io.spine.type.TypeName;
  * <p>Handles the special {@link CatchUpStarted} event by deleting the state of the target
  * projection instance.
  */
-public final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
+final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
         extends ProjectionEndpoint<I, P> {
 
     private static final TypeName CATCH_UP_STARTED = TypeName.from(CatchUpStarted.getDescriptor());
