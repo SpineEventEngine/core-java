@@ -42,8 +42,8 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
     @Override
     protected String extractUuidFrom(EventEnvelope envelope) {
-        return  envelope.id()
-                        .getValue();
+        return envelope.id()
+                       .getValue();
     }
 
     @Override
@@ -51,10 +51,9 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
         return EventEnvelope.of(message.getEvent());
     }
 
-
     @Override
     protected InboxMessageStatus determineStatus(EventEnvelope message, InboxLabel label) {
-        if(label == InboxLabel.CATCH_UP) {
+        if (label == InboxLabel.CATCH_UP) {
             return InboxMessageStatus.TO_CATCH_UP;
         }
         return super.determineStatus(message, label);
