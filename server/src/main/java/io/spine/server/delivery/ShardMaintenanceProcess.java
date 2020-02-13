@@ -21,11 +21,10 @@
 package io.spine.server.delivery;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.core.Subscribe;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.AbstractEventReactor;
-import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
@@ -37,7 +36,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>Has its own {@link Inbox}, so the messages arriving to it are dispatched
  * by the {@link Delivery}.
  */
-class ShardMaintenanceProcess extends AbstractEventReactor {
+class ShardMaintenanceProcess extends AbstractEventSubscriber {
 
     static final TypeUrl TYPE = TypeUrl.of(ShardMaintenance.getDefaultInstance());
 
@@ -50,7 +49,7 @@ class ShardMaintenanceProcess extends AbstractEventReactor {
     ShardMaintenanceProcess(Delivery delivery) {
         super();
         Inbox.Builder<ShardIndex> builder = delivery.newInbox(TYPE);
-        builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new);
+        builder.addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER, EventEndpoint::new);
         this.inbox = builder.build();
     }
 
@@ -59,17 +58,18 @@ class ShardMaintenanceProcess extends AbstractEventReactor {
      * {@linkplain ShardProcessingRequested#getId() specified shard} have been processed
      * by the {@link Delivery}.
      */
-    @React
-    Nothing on(ShardProcessingRequested event) {
-        return nothing();
+    @SuppressWarnings("unused")     // see the Javadoc.
+    @Subscribe
+    void on(ShardProcessingRequested event) {
+        // do nothing.
     }
 
     @CanIgnoreReturnValue
     @Override
-    public void dispatch(EventEnvelope event) {
+    public void handle(EventEnvelope event) {
         ShardEvent message = (ShardEvent) event.message();
         inbox.send(event)
-             .toReactor(message.getId());
+             .toSubscriber(message.getId());
     }
 
     private class EventEndpoint implements MessageEndpoint<ShardIndex, EventEnvelope> {
