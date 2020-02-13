@@ -32,7 +32,7 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/server/event/event_filter.proto";
 
-// A query for events in an EventStore.
+// A query for events in an `EventStore`.
 //
 // If the query is empty, all the events are loaded.
 //
@@ -65,7 +65,7 @@ message EventStreamQuery {
 
     // Definition of the query `LIMIT`.
     //
-    // Sets the maximum number of events to return from an EventStore.
+    // Sets the maximum number of events to return from an `EventStore`.
     //
     message Limit {
 
