@@ -348,6 +348,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * <p>At the beginning of the process the state of each of the entities is set to the default.
      *
+     * <p>The subscriptions to the entity state updates (i.e.
+     * {@link io.spine.system.server.event.EntityStateChanged EntityStateChanged}) events are not
+     * supported in the catch-up.
+     *
      * @param since
      *         point in the past, since which the catch-up should be performed
      * @param ids
@@ -414,6 +418,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * <p>The events are dispatched according to the actual event routing schema. So a historical
      * event may be dispatched to a different set of targets, comparing to those to which it was
      * dispatched once emitted originally.
+     *
+     * <p>The subscriptions to the entity state updates (i.e.
+     * {@link io.spine.system.server.event.EntityStateChanged EntityStateChanged}) events are not
+     * supported in the catch-up.
      *
      * @param since
      *         point in the past, since which the catch-up should be performed
