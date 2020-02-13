@@ -26,8 +26,6 @@ import io.spine.server.delivery.CatchUpProcess.DispatchCatchingUp;
 import io.spine.server.projection.ProjectionRepository;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Preconditions2.checkPositive;
 
@@ -52,10 +50,6 @@ public final class CatchUpProcessBuilder<I> {
         return repository;
     }
 
-    Optional<CatchUpStorage> getStorage() {
-        return Optional.ofNullable(storage);
-    }
-
     CatchUpStorage storage() {
         return checkNotNull(storage);
     }
@@ -71,16 +65,11 @@ public final class CatchUpProcessBuilder<I> {
         return this;
     }
 
-    public int pageSize() {
+    int pageSize() {
         return pageSize;
     }
 
-    CatchUpProcessBuilder<I> withTurbulencePeriod(Duration period) {
-        this.turbulencePeriod = checkNotNull(period);
-        return this;
-    }
-
-    public Duration turbulencePeriod() {
+    Duration turbulencePeriod() {
         return checkNotNull(turbulencePeriod);
     }
 
@@ -89,11 +78,7 @@ public final class CatchUpProcessBuilder<I> {
         return this;
     }
 
-    public Optional<DispatchCatchingUp<I>> getDispatchOp() {
-        return Optional.ofNullable(dispatchOp);
-    }
-
-    public DispatchCatchingUp<I> dispatchOp() {
+    DispatchCatchingUp<I> dispatchOp() {
         return checkNotNull(dispatchOp);
     }
 
