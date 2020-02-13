@@ -29,9 +29,10 @@ import io.spine.test.delivery.NegativeNumberEmitted;
 import io.spine.test.delivery.PositiveNumberEmitted;
 
 /**
- * @author Alex Tymchenko
+ * A process manager that emits the consecutive positive and negative numbers upon
+ * each next {@code EmitNextNumber} command.
  */
-public class ConsecutiveNumberProcess
+public final class ConsecutiveNumberProcess
         extends ProcessManager<String, ConsecutiveNumber, ConsecutiveNumber.Builder> {
 
     @Assign
