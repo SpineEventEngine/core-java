@@ -20,17 +20,17 @@
 
 package io.spine.server.delivery.given;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.test.delivery.DCounter;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.type.TypeUrl;
+
+import static io.spine.server.route.EventRoute.withId;
 
 /**
  * Counts the incoming events.
@@ -65,8 +65,8 @@ public final class CounterView extends Projection<String, DCounter, DCounter.Bui
         @Override
         protected void setupEventRouting(EventRouting<String> routing) {
             super.setupEventRouting(routing);
-            routing.route(NumberAdded.class, (EventRoute<String, NumberAdded>) (message, context) ->
-                    ImmutableSet.of(message.getCalculatorId()));
+            routing.route(NumberAdded.class,
+                          (message, context) -> withId(message.getCalculatorId()));
         }
     }
 }
