@@ -204,10 +204,10 @@ public final class CatchUpProcess<I>
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
         super(TYPE);
-        this.repository = builder.repository();
-        this.dispatchOperation = builder.dispatchOp();
-        this.storage = builder.storage();
-        this.queryLimit = limitOf(builder.pageSize());
+        this.repository = builder.getRepository();
+        this.dispatchOperation = builder.getDispatchOp();
+        this.storage = builder.getStorage();
+        this.queryLimit = limitOf(builder.getPageSize());
         this.starterTemplate = CatchUpStarter.newBuilder(this.repository, this.storage);
     }
 

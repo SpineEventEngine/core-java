@@ -121,7 +121,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     private void initCatchUp(BoundedContext context, Delivery delivery) {
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
-        catchUpProcess = builder.withDispatchOp(this::sendToCatchingUp)
+        catchUpProcess = builder.setDispatchOp(this::sendToCatchingUp)
                                 .build();
         context.registerEventDispatcher(catchUpProcess);
     }

@@ -539,7 +539,8 @@ public final class Delivery implements Logging {
      */
     public <I> CatchUpProcessBuilder<I> newCatchUpProcess(ProjectionRepository<I, ?, ?> repo) {
         CatchUpProcessBuilder<I> builder = CatchUpProcess.newBuilder(repo);
-        return builder.withStorage(catchUpStorage).withPageSize(catchUpPageSize);
+        return builder.setStorage(catchUpStorage)
+                      .setPageSize(catchUpPageSize);
     }
 
     /**
