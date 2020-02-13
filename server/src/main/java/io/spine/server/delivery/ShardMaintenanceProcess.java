@@ -20,7 +20,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Subscribe;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.entity.Repository;
@@ -64,7 +63,6 @@ class ShardMaintenanceProcess extends AbstractEventSubscriber {
         // do nothing.
     }
 
-    @CanIgnoreReturnValue
     @Override
     public void handle(EventEnvelope event) {
         ShardEvent message = (ShardEvent) event.message();
