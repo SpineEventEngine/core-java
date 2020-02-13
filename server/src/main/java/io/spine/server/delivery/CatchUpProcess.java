@@ -86,6 +86,17 @@ import static java.util.stream.Collectors.toSet;
  * <p>Has its own {@link Inbox}, so the messages arriving to it are dispatched by the
  * {@link Delivery}.
  *
+ * <p>While recalling the event history, the process relies on the work of {@code Delivery},
+ * which follows the status of the process and delivers messages in {@code TO_CATCH_UP} status
+ * instead of live {@code TO_DELIVER} messages to the catching-up targets.
+ *
+ * <p>The tricky part is so called "turbulence" period, i.e. the time when the catch-up comes
+ * close to the current time in the event history. In this phase the task is to understand when to
+ * stop reading the history and switch back to delivering the live events dispatched to the
+ * catching-up projections. To do so, a special {@code FINALIZING} status is introduced. Observed
+ * by {@code Delivery} it tells to perform a transition from dispatching {@code TO_CATCH_UP} events
+ * back to delivering those {@code TO_DELIVER}. See more on that below.
+ *
  * <p>In its lifecycle, moves through the several statuses.
  *
  * <p><b>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</b>
@@ -106,7 +117,10 @@ import static java.util.stream.Collectors.toSet;
  * to the {@code Inbox}es of the corresponding projections
  *
  * <p>The catch-up maintains this status until the history is read till the point in time,
- * which is very close to the {@link Time#currentTime() Time.currentTime()}.
+ * which is very close to the {@link Time#currentTime() Time.currentTime()}. When this time comes,
+ * the events arriving to the {@code EventStore} are very likely to be just-emitted in a live mode.
+ * Therefore, the process needs to decide whether to decide that the history is fully read, or
+ * to continue the traversal through the history.
  *
  * <p>At this stage the actions are as follows.
  *
