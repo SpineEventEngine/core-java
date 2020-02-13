@@ -273,7 +273,6 @@ class CatchUpStationTest extends AbstractStationTest {
             for (InboxMessage message : messages) {
                 assertThat(job.matches(message))
                         .isFalse();
-
             }
         }
     }
