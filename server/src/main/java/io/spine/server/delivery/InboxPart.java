@@ -135,7 +135,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
     }
 
     /**
-     * Determines how to perform the call to the endpoint.
+     * Passes the message to the endpoint.
      *
      * @param <I>
      *         the type of identifiers of the entity, served by the endpoint
