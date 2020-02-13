@@ -107,7 +107,7 @@ import static java.util.Collections.synchronizedList;
  *
  * <p>The statuses of the ongoing catch-up processes are stored in a dedicated
  * {@link CatchUpStorage}. The {@code DeliveryBuilder} {@linkplain
- * DeliveryBuilder#setCatchUpStorage(CatchUpStorage)} exposes an API for the customization of this
+ * DeliveryBuilder#setCatchUpStorage(CatchUpStorage) exposes an API} for the customization of this
  * storage.
  *
  * <h2>Observers</h2>
