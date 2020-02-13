@@ -81,7 +81,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
      * Uses the default wall clock provider, which now emulates the nanoseconds by default.
      */
     @Nested
-    @DisplayName(", given the time is provided with nanosecond resolution,")
+    @DisplayName("given the time is provided with nanosecond resolution")
     class WithNanosResolution {
 
         @Test
@@ -92,7 +92,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
         @Test
         @DisplayName("catch up all of projection instances" +
-                ", respecting the order of the delivered events")
+                "and respect the order of the delivered events")
         void allInOrder() throws InterruptedException {
             testCatchUpAll();
         }
@@ -106,7 +106,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
      * applications. They did not have the emulated nanosecond resolution.
      */
     @Nested
-    @DisplayName(", given the time is provided with ms resolution,")
+    @DisplayName("given the time is provided with ms resolution")
     class WithMsResolution {
 
         @Test
@@ -117,8 +117,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
         }
 
         @Test
-        @DisplayName("catch up all of the projection instances, " +
-                "preserving the order of the delivered events")
+        @DisplayName("catch up all of the projection instances " +
+                "and preserve the order of the delivered events")
         void allInOrder() throws InterruptedException {
             setupMillis();
             testCatchUpAll();
