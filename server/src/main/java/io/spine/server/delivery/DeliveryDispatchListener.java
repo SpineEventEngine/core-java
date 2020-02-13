@@ -40,7 +40,7 @@ import static java.util.Collections.synchronizedSet;
  * observers of a new {@code InboxMessage} only when it has been dispatched to all of
  * its multicast targets.
  */
-class DeliveryDispatchListener implements MulticastDispatchListener {
+final class DeliveryDispatchListener implements MulticastDispatchListener {
 
     private final Multimap<SignalId, InboxMessage> pending =
             synchronizedListMultimap(MultimapBuilder.hashKeys()
