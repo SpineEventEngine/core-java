@@ -39,6 +39,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
+import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -84,7 +86,7 @@ final class Conveyor implements Iterable<InboxMessage> {
     }
 
     private void markDelivered(InboxMessage message) {
-        changeStatus(message, InboxMessageStatus.DELIVERED);
+        changeStatus(message, DELIVERED);
         deliveredMessages.recordDelivered(message);
     }
 
@@ -129,7 +131,7 @@ final class Conveyor implements Iterable<InboxMessage> {
      * flushTo(InboxStorage)} call.
      */
     void markCatchUp(InboxMessage message) {
-        changeStatus(message, InboxMessageStatus.TO_CATCH_UP);
+        changeStatus(message, TO_CATCH_UP);
     }
 
     private void changeStatus(InboxMessage message, InboxMessageStatus status) {
@@ -172,7 +174,7 @@ final class Conveyor implements Iterable<InboxMessage> {
         return messages.values()
                        .stream()
                        .filter(m -> m.getStatus() ==
-                               InboxMessageStatus.DELIVERED);
+                               DELIVERED);
     }
 
     /**
