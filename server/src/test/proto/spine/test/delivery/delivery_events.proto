@@ -51,12 +51,12 @@ message PositiveNumberEmitted {
 
     string id = 1;
 
-    int32 value = 2 [(min) = {value: "0" exclusive: true}];
+    int32 value = 2 [(min).value = "1"];
 }
 
 message NegativeNumberEmitted {
 
     string id = 1;
 
-    int32 value = 2 [(max) = {value: "0" exclusive: true}];
+    int32 value = 2 [(max).value = "-1"];
 }
