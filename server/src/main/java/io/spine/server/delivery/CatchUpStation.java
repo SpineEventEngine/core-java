@@ -63,7 +63,7 @@ import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
  * close to the present time and, thus, interfere with the live events headed to the same entities.
  * Therefore, the matched messages in either status are "paused" meaning they are NEITHER dispatched
  * NOR removed from their inboxes. Instead, they are held until the catch-up job is completed to be
- * de-duplicated and delivered all at once.
+ * deduplicated and delivered all at once.
  *
  * <p>To hold the live messages from being delivered down the conveyor pipeline, the live messages
  * are marked as {@code TO_CATCH_UP}.
@@ -75,21 +75,21 @@ import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
  * history and potentially some "paused" live events. So, the station dispatched all the matching
  * messages in {@code TO_CATCH_UP} status.
  *
- * <p>If the idempotence window is {@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) set in
- * the system}, all the delivered messages are set to be kept in their storages for the duration,
- * corresponding to the width of the window. In this way, they will become usable for the potential
- * de-duplication.
+ * <p>If the deduplication window is {@linkplain DeliveryBuilder#setDeduplicationWindow(Duration)
+ * set in the system}, all the delivered messages are set to be kept in their storages
+ * for the duration, corresponding to the width of the window. In this way, they will become usable
+ * for the potential deduplication.
  *
- * <h1>De-duplication and re-ordering</h1>
+ * <h1>Deduplication and reordering</h1>
  *
- * <p>Prior to the dispatching, the messages are de-duplicated in scope of this message batch.
- * Please note, that the idempotence window is NOT taken into the account, as the historical events
- * may all have been delivered to their entities somewhen in the past.
+ * <p>Prior to the dispatching, the messages are deduplicated in scope of this message batch.
+ * Please note, that the deduplication window is NOT taken into the account, as the historical
+ * events may all have been delivered to their entities somewhen in the past.
  *
  * <p>All the duplicates are marked as such in the conveyor and are removed from their storage
  * later.
  *
- * <p>Another change made before the actual dispatching is re-ordering of the messages. The messages
+ * <p>Another change made before the actual dispatching is reordering of the messages. The messages
  * are sorted chronologically, putting the events of a framework-internal {@link CatchUpStarted}
  * type first. It allows to guarantee that the targets will know of the started catch-up before
  * any message in {@code TO_CATCH_UP} status is dispatched to them.

@@ -191,7 +191,7 @@ final class Conveyor implements Iterable<InboxMessage> {
      * Marks the passed message as such to be kept in its {@code Inbox} for a certain amount of
      * time starting from now.
      *
-     * <p>Such an operation may be used to keep the message as a de-duplication source.
+     * <p>Such an operation may be used to keep the message as a deduplication source.
      */
     void keepForLonger(InboxMessage message, Duration howLongTooKeep) {
         Timestamp keepUntil = Timestamps.add(Time.currentTime(), howLongTooKeep);

@@ -156,8 +156,8 @@ class LiveDeliveryStationTest extends AbstractStationTest {
     }
 
     @Test
-    @DisplayName("modify the messages and keep them for longer if the idempotence window is set")
-    void keepMessagesForLongerIfIdempotenceWindowSet() {
+    @DisplayName("modify the messages and keep them for longer if the deduplication window is set")
+    void keepMessagesForLongerIfDeduplicationWindowSet() {
         InboxMessage toDeliver = toDeliver(targetOne, type);
         InboxMessage differentTarget = toDeliver(targetTwo, type);
         InboxMessage alreadyDelivered = delivered(targetOne, type);

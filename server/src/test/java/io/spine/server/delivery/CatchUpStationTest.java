@@ -152,7 +152,7 @@ class CatchUpStationTest extends AbstractStationTest {
     }
 
     @Test
-    @DisplayName("de-duplicate and deliver all matching `CATCH_UP` messages " +
+    @DisplayName("deduplicate and deliver all matching `CATCH_UP` messages " +
             "if the respective `CatchUpJob` is completed, " +
             "keeping the `CATCH_UP` messages in their storage for a bit longer")
     void deduplicateAndDeliverWhenJobCompleted() {

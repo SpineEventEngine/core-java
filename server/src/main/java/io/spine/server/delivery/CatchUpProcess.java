@@ -152,7 +152,7 @@ import static java.util.stream.Collectors.toSet;
  * the propagation of the events to the catch-up messages, waiting for this process to populate
  * the inboxes with the messages arriving to be dispatched during the "turbulence" period.
  * Potentially, the inboxes will contain the duplicates produced by both the live users and this
- * process. To deal with it, a de-duplication is performed by the {@code Delivery}.
+ * process. To deal with it, a deduplication is performed by the {@code Delivery}.
  * See {@link CatchUpStation} for more details.
  *
  * <p>The actions are as follows.
@@ -173,7 +173,7 @@ import static java.util.stream.Collectors.toSet;
  * <p>{@link CatchUpStatus#COMPLETED COMPLETED}</p>
  *
  * <p>Once the process moves to the {@code COMPLETED} status, the corresponding {@code Delivery}
- * routines de-duplicate, re-order and dispatch the "paused" events. Then the normal live delivery
+ * routines deduplicate, reorder and dispatch the "paused" events. Then the normal live delivery
  * flow is resumed.
  *
  * <p>To ensure that all the shards in which the "paused" historical events reside are processed,

@@ -52,7 +52,7 @@ public final class DeliveryBuilder {
     private @MonotonicNonNull CatchUpStorage catchUpStorage;
     private @MonotonicNonNull DeliveryStrategy strategy;
     private @MonotonicNonNull ShardedWorkRegistry workRegistry;
-    private @MonotonicNonNull Duration idempotenceWindow;
+    private @MonotonicNonNull Duration deduplicationWindow;
     private @MonotonicNonNull DeliveryMonitor deliveryMonitor;
     private @MonotonicNonNull Integer pageSize;
     private @MonotonicNonNull Integer catchUpPageSize;
@@ -124,18 +124,18 @@ public final class DeliveryBuilder {
     }
 
     /**
-     * Returns the value of the configured idempotence window or {@code Optional.empty()}
+     * Returns the value of the configured deduplication window or {@code Optional.empty()}
      * if no such value was configured.
      */
-    public Optional<Duration> idempotenceWindow() {
-        return Optional.ofNullable(idempotenceWindow);
+    public Optional<Duration> deduplicationWindow() {
+        return Optional.ofNullable(deduplicationWindow);
     }
 
     /**
-     * Returns the non-{@code null} value of the configured idempotence window.
+     * Returns the non-{@code null} value of the configured deduplication window.
      */
-    Duration getIdempotenceWindow() {
-        return checkNotNull(idempotenceWindow);
+    Duration getDeduplicationWindow() {
+        return checkNotNull(deduplicationWindow);
     }
 
     /**
@@ -199,8 +199,8 @@ public final class DeliveryBuilder {
      * <p>If none set, zero duration is used.
      */
     @CanIgnoreReturnValue
-    public DeliveryBuilder setIdempotenceWindow(Duration idempotenceWindow) {
-        this.idempotenceWindow = checkNotNull(idempotenceWindow);
+    public DeliveryBuilder setDeduplicationWindow(Duration deduplicationWindow) {
+        this.deduplicationWindow = checkNotNull(deduplicationWindow);
         return this;
     }
 
@@ -270,8 +270,8 @@ public final class DeliveryBuilder {
             strategy = UniformAcrossAllShards.singleShard();
         }
 
-        if (idempotenceWindow == null) {
-            idempotenceWindow = Duration.getDefaultInstance();
+        if (deduplicationWindow == null) {
+            deduplicationWindow = Duration.getDefaultInstance();
         }
 
         StorageFactory factory = ServerEnvironment.instance()

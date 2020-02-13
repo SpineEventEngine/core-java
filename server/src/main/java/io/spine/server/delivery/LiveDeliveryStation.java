@@ -37,19 +37,18 @@ import java.util.Set;
  * status that are present in the passed conveyor. After the messages are dispatched, they are
  * marked as {@link InboxMessageStatus#DELIVERED DELIVERED}.
  *
- * <p>If the idempotence window is {@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) set
- * in
- * the system}, all the delivered messages are set to be kept in their storages for the duration,
- * corresponding to the width of the window. In this way, they will become usable for the potential
- * de-duplication.
+ * <p>If the deduplication window is {@linkplain DeliveryBuilder#setDeduplicationWindow(Duration)
+ * set in the system}, all the delivered messages are set to be kept in their storages for
+ * the duration, corresponding to the width of the window. In this way, they will become usable for
+ * the potential deduplication.
  *
- * <p>Before the dispatching, the messages are de-duplicated, taking into account {@linkplain
+ * <p>Before the dispatching, the messages are deduplicated, taking into account {@linkplain
  * Conveyor#recentlyDelivered()}
  * all known delivered messages. In this process, the messages delivered previously and kept for
  * longer are taken into account as well. The detected duplicates are marked as such
  * in the conveyor and are removed from the storage later.
  *
- * <p>The dispatched messages are re-ordered chronologically. However, the changes in ordering
+ * <p>The dispatched messages are reordered chronologically. However, the changes in ordering
  * are not propagated to the conveyor.
  *
  * @see CatchUpStation for the station performing the catch-up
@@ -62,22 +61,22 @@ final class LiveDeliveryStation extends Station {
     private final DeliveryAction action;
 
     /**
-     * The current setting of the idempotence window.
+     * The current setting of the deduplication window.
      *
      * <p>Is {@code null}, if not set.
      */
-    private final @Nullable Duration idempotenceWindow;
+    private final @Nullable Duration deduplicationWindow;
 
     /**
      * Creates a new instance of {@code LiveDeliveryStation} with the action to use for the delivery
-     * and the idempotence window.
+     * and the deduplication window.
      */
-    LiveDeliveryStation(DeliveryAction action, Duration idempotenceWindow) {
+    LiveDeliveryStation(DeliveryAction action, Duration deduplicationWindow) {
         super();
         this.action = action;
-        this.idempotenceWindow = !idempotenceWindow.equals(Duration.getDefaultInstance())
-                                 ? idempotenceWindow
-                                 : null;
+        this.deduplicationWindow = !deduplicationWindow.equals(Duration.getDefaultInstance())
+                                   ? deduplicationWindow
+                                   : null;
     }
 
     /**
@@ -99,8 +98,8 @@ final class LiveDeliveryStation extends Station {
                     conveyor.markDuplicateAndRemove(message);
                 } else {
                     seen.put(dispatchingId, message);
-                    if (idempotenceWindow != null) {
-                        conveyor.keepForLonger(message, idempotenceWindow);
+                    if (deduplicationWindow != null) {
+                        conveyor.keepForLonger(message, deduplicationWindow);
                     }
                 }
             }
@@ -118,10 +117,10 @@ final class LiveDeliveryStation extends Station {
     }
 
     /**
-     * De-duplicates and sorts the messages.
+     * Deduplicates and sorts the messages.
      *
      * <p>The passed conveyor is used to understand which messages were previously delivered
-     * and should be used as a de-duplication source.
+     * and should be used as a deduplication source.
      *
      * <p>Duplicated messages are {@linkplain Conveyor#recentDuplicates() remembered by the
      * conveyor} and marked for removal.
@@ -129,10 +128,10 @@ final class LiveDeliveryStation extends Station {
      * <p>Messages are sorted {@linkplain InboxMessageComparator#chronologically chronologically}.
      *
      * @param messages
-     *         message to de-duplicate and sort
+     *         message to deduplicate and sort
      * @param conveyor
      *         current conveyor
-     * @return de-duplicated and sorted messages
+     * @return deduplicated and sorted messages
      */
     private static List<InboxMessage> deduplicateAndSort(Collection<InboxMessage> messages,
                                                          Conveyor conveyor) {

@@ -57,7 +57,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
@@ -301,7 +300,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         int pageSize = 20;
         Delivery delivery = Delivery.newBuilder()
                                     .setStrategy(strategy)
-                                    .setIdempotenceWindow(Durations.ZERO)
+                                    .setDeduplicationWindow(Durations.ZERO)
                                     .setMonitor(monitor)
                                     .setPageSize(pageSize)
                                     .build();

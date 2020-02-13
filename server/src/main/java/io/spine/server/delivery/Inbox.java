@@ -39,7 +39,7 @@ import static io.spine.server.delivery.InboxLabel.UPDATE_SUBSCRIBER;
  * A container for the messages dispatched to a certain consumer, such as an event subscriber
  * or a command handler.
  *
- * <p>Serves as a pre-stage allowing to filter, de-duplicate and reorder messages before they
+ * <p>Serves as a pre-stage allowing to filter, deduplicate and reorder messages before they
  * are dispatched to their destination.
  *
  * @param <I>

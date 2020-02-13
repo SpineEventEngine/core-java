@@ -32,7 +32,7 @@ import java.util.Set;
  *
  * <p>The cache is limited in size, aiming to hunt down the only the duplicates of the recently
  * delivered messages. The idea behind it is that the messages were read locally anyway,
- * so as well their identifiers may be re-used for de-duplication instead of just wasting
+ * so as well their identifiers may be reused for deduplication instead of just wasting
  * the effort and feeding the garbage collector.
  */
 final class DeliveredMessages {

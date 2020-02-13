@@ -73,17 +73,17 @@ import static java.util.Collections.synchronizedList;
  * the eventual consistency lag between {@code C} side (i.e. aggregate state updates)
  * and {@code Q} side (i.e. the respective updates in projections).
  *
- * <h2>Idempotence</h2>
+ * <h2>Deduplication</h2>
  *
  * <p>As long as the underlying storage and transport mechanisms are restricted by the CAP theorem,
  * there may be duplicates in the messages written, read or dispatched. The {@code Delivery}
  * responds to it by storing some of the already delivered messages for longer and using them as
- * a source for de-duplication.
+ * a source for deduplication.
  *
- * <p>{@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) Provides} the time-based
- * de-duplication capabilities to eliminate the messages, which may have been already delivered
+ * <p>{@linkplain DeliveryBuilder#setDeduplicationWindow(Duration) Provides} the time-based
+ * deduplication capabilities to eliminate the messages, which may have been already delivered
  * to their targets. The duplicates will be detected among the messages, which are not older, than
- * {@code now - [idempotence window]}.
+ * {@code now - [deduplication window]}.
  *
  * <h2>Customizing {@code InboxStorage}</h2>
  *
@@ -169,23 +169,23 @@ import static java.util.Collections.synchronizedList;
  * <p>This station is responsible for dispatching the messages sent in a real-time. It ignores
  * the messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status. Another responsibility
  * of this station is to set for how long the delivered messages should be kept according to the
- * {@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) idempotence window} settings.
+ * {@linkplain DeliveryBuilder#setDeduplicationWindow(Duration) deduplication window} settings.
  * See {@link LiveDeliveryStation} for more details.
  *
  * <b>3. Cleanup station</b>
  *
  * <p>This station removes the messages which are already delivered and are no longer needed for the
- * de-duplication. See {@link CleanupStation} for the description.
+ * deduplication. See {@link CleanupStation} for the description.
  *
- * <b>De-duplication</b>
+ * <b>Deduplication</b>
  *
  * <p>During the dispatching, {@code Conveyor} keeps track of the delivered messages. The stations
- * performing the actual message dispatching rely onto this knowledge and de-duplicate
+ * performing the actual message dispatching rely onto this knowledge and deduplicate
  * the messages prior to calling the target's endpoint.
  *
  * <p>Additionally, the {@code Delivery} provides a {@linkplain DeliveredMessages cache of recently
  * delivered messages}. Each instance of the {@code Conveyor} has an access to it and uses it
- * in de-duplication procedures.
+ * in deduplication procedures.
  *
  * <h2>Local environment</h2>
  *
@@ -212,11 +212,11 @@ import static java.util.Collections.synchronizedList;
 public final class Delivery implements Logging {
 
     /**
-     * The width of the idempotence window in a local environment.
+     * The width of the deduplication window in a local environment.
      *
      * <p>Selected to be pretty big to avoid dispatching duplicates to any entities.
      */
-    private static final Duration LOCAL_IDEMPOTENCE_WINDOW = Durations.fromSeconds(30);
+    private static final Duration LOCAL_DEDUPLICATION_WINDOW = Durations.fromSeconds(30);
 
     /**
      * The strategy of assigning a shard index for a message that is delivered to a particular
@@ -228,7 +228,7 @@ public final class Delivery implements Logging {
      * For how long we keep the previously delivered message per-target to ensure the new messages
      * aren't duplicates.
      */
-    private final Duration idempotenceWindow;
+    private final Duration deduplicationWindow;
 
     /**
      * The delivery strategies to use for the postponed message dispatching.
@@ -295,7 +295,7 @@ public final class Delivery implements Logging {
     Delivery(DeliveryBuilder builder) {
         this.strategy = builder.getStrategy();
         this.workRegistry = builder.getWorkRegistry();
-        this.idempotenceWindow = builder.getIdempotenceWindow();
+        this.deduplicationWindow = builder.getDeduplicationWindow();
         this.inboxStorage = builder.getInboxStorage();
         this.catchUpStorage = builder.getCatchUpStorage();
         this.catchUpPageSize = builder.getCatchUpPageSize();
@@ -319,7 +319,7 @@ public final class Delivery implements Logging {
      * <p>Uses a {@linkplain UniformAcrossAllShards#singleShard() single-shard} splitting.
      */
     public static Delivery local() {
-        return localWithShardsAndWindow(1, LOCAL_IDEMPOTENCE_WINDOW);
+        return localWithShardsAndWindow(1, LOCAL_DEDUPLICATION_WINDOW);
     }
 
     /**
@@ -327,19 +327,19 @@ public final class Delivery implements Logging {
      * with the given number of shards.
      */
     @VisibleForTesting
-    static Delivery localWithShardsAndWindow(int shardCount, Duration idempotenceWindow) {
+    static Delivery localWithShardsAndWindow(int shardCount, Duration deduplicationWindow) {
         checkArgument(shardCount > 0, "Shard count must be positive");
-        checkNotNull(idempotenceWindow);
+        checkNotNull(deduplicationWindow);
 
         DeliveryStrategy strategy = UniformAcrossAllShards.forNumber(shardCount);
-        return localWithStrategyAndWindow(strategy, idempotenceWindow);
+        return localWithStrategyAndWindow(strategy, deduplicationWindow);
     }
 
     @VisibleForTesting
     static Delivery localWithStrategyAndWindow(DeliveryStrategy strategy,
-                                               Duration idempotenceWindow) {
+                                               Duration deduplicationWindow) {
         Delivery delivery =
-                newBuilder().setIdempotenceWindow(idempotenceWindow)
+                newBuilder().setDeduplicationWindow(deduplicationWindow)
                             .setStrategy(strategy)
                             .build();
         delivery.subscribe(new LocalDispatchingObserver());
@@ -470,7 +470,7 @@ public final class Delivery implements Logging {
                                                        DeliveryAction action) {
         return ImmutableList.of(
                     new CatchUpStation(action, catchUpJobs),
-                    new LiveDeliveryStation(action, idempotenceWindow),
+                    new LiveDeliveryStation(action, deduplicationWindow),
                     new CleanupStation()
         );
     }

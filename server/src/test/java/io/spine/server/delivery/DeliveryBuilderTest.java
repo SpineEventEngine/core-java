@@ -73,10 +73,10 @@ class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("idempotence window")
-        void idempotenceWindow() {
+        @DisplayName("deduplication window")
+        void deduplicationWindow() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setIdempotenceWindow(nullRef()));
+                         () -> builder().setDeduplicationWindow(nullRef()));
         }
 
         @Test
@@ -147,11 +147,11 @@ class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("idempotence window")
-        void idempotenceWindow() {
+        @DisplayName("deduplication window")
+        void deduplicationWindow() {
             Duration duration = Durations2.fromMinutes(123);
-            assertEquals(duration, builder().setIdempotenceWindow(duration)
-                                            .idempotenceWindow()
+            assertEquals(duration, builder().setDeduplicationWindow(duration)
+                                            .deduplicationWindow()
                                             .get());
         }
 
@@ -212,9 +212,9 @@ class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("idempotence window")
-        void idempotenceWindow() {
-            assertThrows(NullPointerException.class, () -> builder().getIdempotenceWindow());
+        @DisplayName("deduplication window")
+        void deduplicationWindow() {
+            assertThrows(NullPointerException.class, () -> builder().getDeduplicationWindow());
         }
 
         @Test
