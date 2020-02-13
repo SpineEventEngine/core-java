@@ -135,17 +135,27 @@ final class Conveyor implements Iterable<InboxMessage> {
     }
 
     private void changeStatus(InboxMessage message, InboxMessageStatus status) {
-        InboxMessage modified = findInConveyor(message).toBuilder()
-                                                       .setStatus(status)
-                                                       .build();
+        InboxMessage modified = mutableMessage(message.getId())
+                .setStatus(status)
+                .build();
         messages.put(message.getId(), modified);
         dirtyMessages.add(message.getId());
     }
 
-    private InboxMessage findInConveyor(InboxMessage message) {
-        InboxMessage existingMessage = messages.get(message.getId());
+    /**
+     * Finds the message in this conveyor by its identifier and returns it as a {@code Builder}
+     * for further modification.
+     *
+     * <p>If there is no such message in this conveyor, throws a {@link NullPointerException}.
+     *
+     * @param id
+     *         the message to look for
+     * @return the builder for the message
+     */
+    private InboxMessage.Builder mutableMessage(InboxMessageId id) {
+        InboxMessage existingMessage = messages.get(id);
         checkNotNull(existingMessage);
-        return existingMessage;
+        return existingMessage.toBuilder();
     }
 
     /**
@@ -185,9 +195,9 @@ final class Conveyor implements Iterable<InboxMessage> {
      */
     void keepForLonger(InboxMessage message, Duration howLongTooKeep) {
         Timestamp keepUntil = Timestamps.add(Time.currentTime(), howLongTooKeep);
-        InboxMessage modified = findInConveyor(message).toBuilder()
-                                                       .setKeepUntil(keepUntil)
-                                                       .build();
+        InboxMessage modified = mutableMessage(message.getId())
+                .setKeepUntil(keepUntil)
+                .build();
         messages.put(message.getId(), modified);
         dirtyMessages.add(message.getId());
     }
