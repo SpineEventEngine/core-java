@@ -160,7 +160,8 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
          * Always throws the {@link IllegalStateException}, as there can be no repository for the
          * event reactors.
          *
-         * @throws IllegalStateException always
+         * @throws IllegalStateException
+         *         always
          */
         @Override
         public final Repository<I, ?> repository() throws IllegalStateException {
@@ -170,12 +171,11 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
         @SuppressWarnings("unchecked")
         private void loadIntoBuilder(I id) {
             Optional<S> existingState = load(id);
-            if (existingState.isPresent()) {
-                AbstractStatefulReactor.this.builder = (B) existingState.get()
-                                                                        .toBuilder();
-            } else {
-                AbstractStatefulReactor.this.builder = newStateBuilderWith(id);
-            }
+            AbstractStatefulReactor.this.builder =
+                    existingState.isPresent()
+                    ? (B) existingState.get()
+                                       .toBuilder()
+                    : newStateBuilderWith(id);
         }
     }
 }
