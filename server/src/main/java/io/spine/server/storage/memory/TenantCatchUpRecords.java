@@ -34,7 +34,7 @@ import static java.util.Collections.synchronizedMap;
 /**
  * The catch-up processes for for a tenant.
  */
-public class TenantCatchUpRecords implements TenantStorage<CatchUpId, CatchUp> {
+final class TenantCatchUpRecords implements TenantStorage<CatchUpId, CatchUp> {
 
     private final Map<CatchUpId, CatchUp> records = synchronizedMap(new HashMap<>());
 
