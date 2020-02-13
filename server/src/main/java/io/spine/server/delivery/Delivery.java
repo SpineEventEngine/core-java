@@ -203,7 +203,7 @@ import static java.util.Collections.synchronizedList;
  * <h2>Shard maintenance</h2>
  *
  * <p>To perform the maintenance procedures, the {@code Delivery} requires all the {@code
- * BoundedContext}s to register themselves it it. Upon this registration, a special
+ * BoundedContext}s to register themselves in it. Upon this registration, a special
  * {@link ShardMaintenanceProcess} is registered as an event dispatcher in a passed
  * {@code BoundedContext}. Such a registration is performed automatically when the context is
  * {@linkplain  io.spine.server.BoundedContextBuilder#build() built}.
