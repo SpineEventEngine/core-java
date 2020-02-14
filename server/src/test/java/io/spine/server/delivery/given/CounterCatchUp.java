@@ -113,8 +113,9 @@ public class CounterCatchUp {
         return events;
     }
 
-    public void dispatchWithCatchUp(List<NumberAdded> events, int threads, WhatToCatchUp... whatToCatchUp)
-            throws InterruptedException {
+    public void dispatchWithCatchUp(List<NumberAdded> events,
+                                    int threads,
+                                    WhatToCatchUp... whatToCatchUp) throws InterruptedException {
         List<Callable<Object>> jobs = new ArrayList<>();
         jobs.addAll(asCallableJobs(whatToCatchUp));
         jobs.addAll(asPostEventJobs(ctx, events));
