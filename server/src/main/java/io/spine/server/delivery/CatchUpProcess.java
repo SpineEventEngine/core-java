@@ -247,6 +247,35 @@ public final class CatchUpProcess<I>
         catchUpStarter.start(ids, since);
     }
 
+    /*
+     * Handlers acting when process is {@code Not Started}
+     ************************/
+
+    /**
+     * Moves the process from {@code Not Started} to {@code STARTED} state.
+     *
+     * <p>There are several key actions performed at this stage.
+     * <ul>
+     *      <li>The reading timestamp of the process is set to the one specified in the request.
+     *      However, people are used to say "I want to catch-up since 1 PM" meaning "counting
+     *      the events happened at 1 PM sharp". Therefore process always subtracts a single
+     *      nanosecond from the specified catch-up start time and then treats this interval as
+     *      exclusive.
+     *
+     *      <li>The identifiers of the catch-up targets are defined. They are either specified
+     *      in the original request, or, if all projections are to be caught-up, they are the
+     *      {@linkplain io.spine.server.entity.Repository#index() ID index} of the selected
+     *      repository.
+     *      It is important to know the target IDs, since their state has to be reset to default
+     *      before the dispatching of the first historical event.
+     *
+     *      <li>{@link CatchUpStarted} event is dispatched directly to the inboxes of the catching-up
+     *      targets.
+     *
+     *      <li>The same {@code CatchUpStarted} event is returned to be dispatched to this very
+     *      process via its inbox and move it to the next phase.
+     * </ul>
+     */
     @React
     CatchUpStarted handle(CatchUpRequested e, EventContext ctx) {
         CatchUpId id = e.getId();
@@ -268,6 +297,20 @@ public final class CatchUpProcess<I>
         return started;
     }
 
+    /*
+     * Handlers acting when process is {@code STARTED}
+     ************************/
+
+    @React
+    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
+        return recallMoreEvents(event.getId());
+    }
+
+    @React
+    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
+        return recallMoreEvents(event.getId());
+    }
+
     private Set<I> targetsForCatchUpSignals(CatchUp.Request request) {
         Set<I> ids;
         List<Any> rawTargets = request.getTargetList();
@@ -281,21 +324,11 @@ public final class CatchUpProcess<I>
         return subtract(Time.currentTime(), TURBULENCE_PERIOD);
     }
 
-    @React
-    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
-        return recallMoreEvents(event.getId());
-    }
-
     private Event wrapAsEvent(CatchUpSignal event, EventContext context) {
         Event firstEvent;
         EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
         firstEvent = factory.createEvent(event, null);
         return firstEvent;
-    }
-
-    @React
-    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
-        return recallMoreEvents(event.getId());
     }
 
     private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> recallMoreEvents(CatchUpId id) {
