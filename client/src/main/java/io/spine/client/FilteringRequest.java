@@ -140,7 +140,8 @@ FilteringRequest<M extends Message,
     /**
      * Configures the request to return results matching all the passed filters.
      *
-     * @deprecated Please use the type-specific overloads which rely on strongly-typed filters.
+     * @deprecated Please use the overloads from the descendants that rely on strongly-typed
+     *             filters.
      */
     @Deprecated
     public B where(Filter... filter) {
@@ -151,7 +152,8 @@ FilteringRequest<M extends Message,
     /**
      * Configures the request to return results matching all the passed filters.
      *
-     * @deprecated Please use the type-specific overloads which rely on strongly-typed filters.
+     * @deprecated Please use the overloads from the descendants that rely on strongly-typed
+     *             filters.
      */
     @Deprecated
     public B where(CompositeFilter... filter) {

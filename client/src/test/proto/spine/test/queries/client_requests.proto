@@ -68,8 +68,8 @@ message TestEntityName {
     string value = 1 [(column) = true];
 }
 
+// A message-typed field of the `TestEntity` which is used to test operations on nested fields.
 message TestEntityOwner {
-
     spine.core.UserId id = 1;
 
     google.protobuf.Timestamp when_last_visited = 2;
