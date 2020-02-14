@@ -20,21 +20,25 @@
 
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
-import io.spine.core.Version;
+import io.spine.code.proto.FieldName;
 import io.spine.core.Event;
+import io.spine.core.Version;
 
 import java.util.Collection;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
@@ -45,6 +49,7 @@ import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static java.util.Arrays.stream;
 
 /**
  * A factory of {@link Filter} instances.
@@ -73,6 +78,9 @@ import static io.spine.protobuf.TypeConverter.toAny;
  * </ul>
  *
  * @see QueryBuilder for the application
+ * @see QueryFilter
+ * @see EntityStateFilter
+ * @see EventFilter
  */
 public final class Filters {
 
@@ -81,7 +89,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new equality {@link Filter}.
+     * Creates a new equality {@link Filter}.
      *
      * @param fieldPath
      *         the field path or the entity column name for entity filters
@@ -96,7 +104,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new "greater than" {@link Filter}.
+     * Creates a new "greater than" {@link Filter}.
      *
      * <p>For the supported types description see <a href="#types">Comparison types section</a>.
      *
@@ -114,7 +122,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new "less than" {@link Filter}.
+     * Creates a new "less than" {@link Filter}.
      *
      * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
@@ -132,7 +140,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new "greater or equal" {@link Filter}.
+     * Creates a new "greater or equal" {@link Filter}.
      *
      * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
@@ -150,7 +158,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new "less or equal" {@link Filter}.
+     * Creates a new "less or equal" {@link Filter}.
      *
      * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
@@ -168,7 +176,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new conjunction composite filter.
+     * Creates a new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of the
      * aggregated filters.
@@ -188,7 +196,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new disjunction composite filter.
+     * Creates a new disjunction composite filter.
      *
      * <p>A record is considered matching this filter if it matches at least one of the aggregated
      * filters.
@@ -206,7 +214,7 @@ public final class Filters {
     }
 
     /**
-     * Creates new conjunction composite filter.
+     * Creates a new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of
      * the aggregated filters.
@@ -226,8 +234,22 @@ public final class Filters {
         return composeFilters(filters, ALL);
     }
 
-    private static Filter createFilter(String fieldPath, Object value, Operator operator) {
-        FieldPath path = Field.parse(fieldPath).path();
+    static Filter createFilter(String fieldPath, Object value, Operator operator) {
+        Field field = Field.parse(fieldPath);
+        return createFilter(field, value, operator);
+    }
+
+    static Filter createFilter(FieldName fieldName, Object value, Operator operator) {
+        FieldPath fieldPath = fieldName.asPath();
+        return createFilter(fieldPath, value, operator);
+    }
+
+    static Filter createFilter(Field field, Object value, Operator operator) {
+        FieldPath fieldPath = field.path();
+        return createFilter(fieldPath, value, operator);
+    }
+
+    static Filter createFilter(FieldPath path, Object value, Operator operator) {
         Any wrappedValue = toAny(value);
         Filter filter = Filter
                 .newBuilder()
@@ -238,8 +260,15 @@ public final class Filters {
         return filter;
     }
 
-    private static CompositeFilter composeFilters(Collection<Filter> filters,
-                                                  CompositeOperator operator) {
+    static Filter createContextFilter(Field field, Object value, Operator operator) {
+        FieldPath fieldPath = Event.Field.context()
+                                         .getField()
+                                         .nested(field)
+                                         .path();
+        return createFilter(fieldPath, value, operator);
+    }
+
+    static CompositeFilter composeFilters(Iterable<Filter> filters, CompositeOperator operator) {
         CompositeFilter result = CompositeFilter
                 .newBuilder()
                 .addAllFilter(filters)
@@ -248,7 +277,26 @@ public final class Filters {
         return result;
     }
 
-    private static void checkSupportedOrderingComparisonType(Class<?> cls) {
+    static Filter[] extractFilters(TypedFilter<?>[] filters) {
+        return stream(filters)
+                .map(TypedFilter::filter)
+                .toArray(Filter[]::new);
+    }
+
+    static <M extends Message> ImmutableList<Filter>
+    extractFilters(Collection<? extends TypedFilter<M>> filters) {
+        return filters.stream()
+                      .map(TypedFilter::filter)
+                      .collect(toImmutableList());
+    }
+
+    static CompositeFilter[] extractFilters(TypedCompositeFilter<?>[] filters) {
+        return stream(filters)
+                .map(TypedCompositeFilter::filter)
+                .toArray(CompositeFilter[]::new);
+    }
+
+    static void checkSupportedOrderingComparisonType(Class<?> cls) {
         Class<?> dataType = Primitives.wrap(cls);
         boolean supported = isSupportedNumber(dataType)
                 || Timestamp.class.isAssignableFrom(dataType)
@@ -269,7 +317,8 @@ public final class Filters {
      * Creates a filter of events which can apply conditions from the passed
      * {@code CompositeFilter} to both event message and its context.
      *
-     * <p>Please use the {@code "context."} prefix for referencing a field of the event context.
+     * <p>The filter is deemed addressing the event context if the field path specified in it
+     * starts with the {@code "context."} prefix.
      */
     @Internal
     public static Predicate<Event> toEventFilter(CompositeFilter filterData) {

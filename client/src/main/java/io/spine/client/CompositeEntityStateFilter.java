@@ -20,8 +20,8 @@
 
 package io.spine.client;
 
+import io.spine.base.EntityState;
 import io.spine.client.CompositeFilter.CompositeOperator;
-import io.spine.core.Event;
 
 import java.util.Collection;
 
@@ -31,31 +31,28 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 
 /**
- * A composite subscription filter which can aggregate both event message and event context
- * filters.
+ * A subscription filter which aggregates one or more {@link EntityState} filters.
  */
-public final class CompositeEventFilter extends TypedCompositeFilter<Event> {
+public final class CompositeEntityStateFilter extends TypedCompositeFilter<EntityState> {
 
     private static final long serialVersionUID = 0L;
 
-    private CompositeEventFilter(Collection<EventFilter> filters, CompositeOperator operator) {
+    private CompositeEntityStateFilter(Collection<EntityStateFilter> filters,
+                                       CompositeOperator operator) {
         super(filters, operator);
-    }
-
-    CompositeEventFilter(CompositeFilter filter) {
-        super(checkNotNull(filter), EventFilter::new);
     }
 
     /**
      * Creates a new conjunction composite filter.
      *
-     * <p>A record is considered matching this filter if and only if it matches all of the passed
-     * filters.
+     * <p>A record is considered matching this filter if and only if it matches all of the
+     * passed filters.
      */
-    public static CompositeEventFilter all(EventFilter first, EventFilter... rest) {
+    public static CompositeEntityStateFilter
+    all(EntityStateFilter first, EntityStateFilter... rest) {
         checkNotNull(first);
         checkNotNull(rest);
-        return new CompositeEventFilter(asList(first, rest), ALL);
+        return new CompositeEntityStateFilter(asList(first, rest), ALL);
     }
 
     /**
@@ -64,9 +61,11 @@ public final class CompositeEventFilter extends TypedCompositeFilter<Event> {
      * <p>A record is considered matching this filter if it matches at least one of the passed
      * filters.
      */
-    public static CompositeEventFilter either(EventFilter first, EventFilter... rest) {
+    public static CompositeEntityStateFilter
+    either(EntityStateFilter first, EntityStateFilter... rest) {
         checkNotNull(first);
         checkNotNull(rest);
-        return new CompositeEventFilter(asList(first, rest), EITHER);
+        return new CompositeEntityStateFilter(asList(first, rest), EITHER);
     }
+
 }

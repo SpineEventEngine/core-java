@@ -19,7 +19,7 @@
  */
 
 /**
- * This package contains of high-level {@link io.spine.client.Client} API. For the tests of
+ * This package contains tests of high-level {@link io.spine.client.Client} API. For the tests of
  * low-level client API based on {@link io.spine.client.ActorRequestFactory} please see the same
  * package in the {@link ":client"} module.
  *

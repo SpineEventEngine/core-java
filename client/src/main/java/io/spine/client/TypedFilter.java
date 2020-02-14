@@ -18,22 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.client;
+
+import com.google.protobuf.Message;
+import io.spine.value.ValueHolder;
+
 /**
- * The versions of the libraries used.
+ * A typed wrapper around the {@link Filter} instance.
  *
- * This file is used in both module `build.gradle` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
+ * @param <M>
+ *         the type of a filtered message
  */
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
+// Prevent instantiation of this abstract filter in favor of concrete descendants.
+abstract class TypedFilter<M extends Message>
+        extends ValueHolder<Filter>
+        implements MessageFilter<M> {
 
-final def spineVersion = '1.4.5'
+    private static final long serialVersionUID = 0L;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
+    TypedFilter(Filter value) {
+        super(value);
+    }
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = spineVersion
+    Filter filter() {
+        return value();
+    }
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.4.1'
+    @Override
+    public boolean test(M m) {
+        return filter().test(m);
+    }
 }

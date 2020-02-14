@@ -23,8 +23,10 @@ package io.spine.client;
 import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
+import io.spine.base.Field;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -75,11 +77,16 @@ final class EventsAfterCommand implements Logging {
     }
 
     /**
-     * Creates subscription topics for the subscribed events which has the passed command
+     * Creates subscription topics for the subscribed events which have the passed command
      * as the origin.
      */
     private ImmutableSet<Topic> eventsOf(Command c) {
-        String fieldName = EventContextField.pastMessage();
+        Field pastMessage = EventContext.Field.pastMessage()
+                                              .getField();
+        String fieldName = Event.Field.context()
+                                      .getField()
+                                      .nested(pastMessage)
+                                      .toString();
         ImmutableSet<Class<? extends EventMessage>> eventTypes = consumers.eventTypes();
         TopicFactory topic = client.requestOf(user)
                                    .topic();

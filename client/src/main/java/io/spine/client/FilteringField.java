@@ -27,6 +27,7 @@ import io.spine.base.EntityState;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.code.proto.FieldDeclaration;
+import io.spine.core.Event;
 import io.spine.core.EventContext;
 
 import java.util.Optional;
@@ -77,9 +78,12 @@ final class FilteringField {
     }
 
     private boolean refersToContext() {
-        String firstInPath = field.path()
-                                  .getFieldName(0);
-        return firstInPath.equals(EventContextField.name());
+        String contextFieldName = Event.Field.context()
+                                             .getField()
+                                             .toString();
+        String firstInPath = field.path().getFieldName(0);
+        boolean result = contextFieldName.equals(firstInPath);
+        return result;
     }
 
     private void checkPresentInEventContext() {

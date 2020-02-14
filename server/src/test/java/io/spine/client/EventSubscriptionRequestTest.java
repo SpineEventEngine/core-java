@@ -38,8 +38,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.client.Filters.all;
-import static io.spine.client.Filters.eq;
+import static io.spine.client.CompositeEventFilter.all;
+import static io.spine.client.EventFilter.eq;
 
 @DisplayName("`EventSubscriptionRequest` should")
 class EventSubscriptionRequestTest extends AbstractClientTest {
@@ -101,8 +101,10 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
                                 .user();
             client().asGuest()
                     .subscribeToEvent(UserLoggedIn.class)
-                    .where(all(eq("user", userId),
-                               eq("context.past_message.actor_context.actor", guestUser)))
+                    .where(all(eq(UserLoggedIn.Field.user(), userId),
+                               eq(EventContext.Field.pastMessage()
+                                                    .actorContext()
+                                                    .actor(), guestUser)))
                     .observe((e, c) -> {
                         rememberedMessage = e;
                         rememberedContext = c;

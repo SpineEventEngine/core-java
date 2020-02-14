@@ -28,6 +28,8 @@ import io.spine.core.EventContext;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static io.spine.client.Filters.extractFilters;
+
 /**
  * Allows to subscribe to events using filtering conditions.
  *
@@ -35,18 +37,17 @@ import java.util.function.Function;
  * values of the proto types of subscribed messages:
  * <pre>{@code
  * clientRequest.subscribeToEvent(MyEventMessage.class)
- *              .where(eq("my_proto_field"), fieldValue)
+ *              .where(eq(MyEventMessage.Field.myProtoField(), fieldValue))
  *              .observe((event, context) -> {...})
  *              .post();
  * }</pre>
  *
  * <p>In addition to regular filtering conditions, event subscription requests may also reference
- * fields of {@code "spine.core.EventContext"} using {@code "context."} notation. For example,
- * in order to filter events originate from commands of the given user, please use the following
- * code:
+ * fields of {@code spine.core.EventContext}. For example, in order to filter events originate from
+ * commands of the given user, please use the following code:
  * <pre>{@code
  * clientRequest.subscribeToEvent(MyEventMessage.class)
- *              .where(eq("context.past_message.actor_context.actor"), userId)
+ *              .where(eq(EventContext.Field.pastMessage().actorContext().actor(), userId))
  *              .observe((event, context) -> {...})
  *              .post();
  * }</pre>
@@ -62,6 +63,28 @@ public final class EventSubscriptionRequest<E extends EventMessage>
     EventSubscriptionRequest(ClientRequest parent, Class<E> type) {
         super(parent, type);
         this.consumers = EventConsumers.newBuilder();
+    }
+
+    /**
+     * Configures the request to return results matching all the passed filters.
+     *
+     * <p>Please note that the {@link EventFilter} instances may target both event message and
+     * event context fields. See {@link EventFilter} for details.
+     */
+    public EventSubscriptionRequest<E> where(EventFilter... filter) {
+        builder().where(extractFilters(filter));
+        return self();
+    }
+
+    /**
+     * Configures the request to return results matching all the passed filters.
+     *
+     * <p>Please note that the {@link CompositeEventFilter} instances may target both event message
+     * and event context fields. See {@link CompositeEventFilter} for details.
+     */
+    public EventSubscriptionRequest<E> where(CompositeEventFilter... filter) {
+        builder().where(extractFilters(filter));
+        return self();
     }
 
     @Override

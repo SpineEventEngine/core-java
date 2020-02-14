@@ -22,12 +22,14 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.DoubleValue;
-import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Field;
+import io.spine.base.FieldPath;
 import io.spine.client.Filter.Operator;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.test.client.TestEntityOwner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -53,20 +55,21 @@ import static io.spine.client.Filters.lt;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.test.client.TestEntityOwner.Role.ADMIN;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static java.lang.String.join;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Filters utility should")
+@DisplayName("`Filters` utility should")
 class FiltersTest {
 
-    private static final String FIELD_PATH = "some.field.path";
+    private static final String FIELD = "owner.when_last_visited";
     private static final Timestamp REQUESTED_VALUE = currentTime();
-    private static final String ENUM_FIELD_PATH = "enum.field";
-    private static final Operator ENUM_VALUE = EQUAL;
+
+    private static final String ENUM_FIELD = "owner.role";
+    private static final TestEntityOwner.Role ENUM_VALUE = ADMIN;
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
@@ -78,7 +81,6 @@ class FiltersTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
                 .setDefault(Filter.class, Filter.getDefaultInstance())
                 .testAllPublicStaticMethods(Filters.class);
     }
@@ -90,48 +92,50 @@ class FiltersTest {
         @Test
         @DisplayName("`equals`")
         void equals() {
-            checkCreatesInstance(eq(FIELD_PATH, REQUESTED_VALUE), EQUAL);
+            checkCreatesInstance(eq(FIELD, REQUESTED_VALUE), EQUAL);
         }
 
         @Test
         @DisplayName("`greater than`")
         void greaterThan() {
-            checkCreatesInstance(gt(FIELD_PATH, REQUESTED_VALUE), GREATER_THAN);
+            checkCreatesInstance(gt(FIELD, REQUESTED_VALUE), GREATER_THAN);
         }
 
         @Test
         @DisplayName("`greater than or equals`")
         void greaterOrEqual() {
-            checkCreatesInstance(ge(FIELD_PATH, REQUESTED_VALUE), GREATER_OR_EQUAL);
+            checkCreatesInstance(ge(FIELD, REQUESTED_VALUE), GREATER_OR_EQUAL);
         }
 
         @Test
         @DisplayName("`less than`")
         void lessThan() {
-            checkCreatesInstance(lt(FIELD_PATH, REQUESTED_VALUE), LESS_THAN);
+            checkCreatesInstance(lt(FIELD, REQUESTED_VALUE), LESS_THAN);
         }
 
         @Test
         @DisplayName("`less than or equals`")
         void lessOrEqual() {
-            checkCreatesInstance(le(FIELD_PATH, REQUESTED_VALUE), LESS_OR_EQUAL);
+            checkCreatesInstance(le(FIELD, REQUESTED_VALUE), LESS_OR_EQUAL);
         }
 
         @Test
         @DisplayName("`equals` for enumerated types")
         void equalsForEnum() {
-            Filter filter = eq(ENUM_FIELD_PATH, ENUM_VALUE);
-            ProtocolStringList pathElements = filter.getFieldPath()
-                                                    .getFieldNameList();
-            assertEquals(ENUM_FIELD_PATH, join(".", pathElements));
+            Filter filter = eq(ENUM_FIELD, ENUM_VALUE);
+
+            FieldPath fieldPath = filter.getFieldPath();
+            String actual = Field.withPath(fieldPath)
+                                 .toString();
+            assertEquals(ENUM_FIELD, actual);
             assertEquals(toAny(ENUM_VALUE), filter.getValue());
             assertEquals(EQUAL, filter.getOperator());
         }
 
         private void checkCreatesInstance(Filter filter, Operator operator) {
-            ProtocolStringList pathElements = filter.getFieldPath()
-                                                    .getFieldNameList();
-            assertEquals(FIELD_PATH, join(".", pathElements));
+            String actual = Field.withPath(filter.getFieldPath())
+                                 .toString();
+            assertEquals(FIELD, actual);
             assertEquals(pack(REQUESTED_VALUE), filter.getValue());
             assertEquals(operator, filter.getOperator());
         }
@@ -145,8 +149,8 @@ class FiltersTest {
         @DisplayName("`all`")
         void all() {
             Filter[] filters = {
-                    le(FIELD_PATH, REQUESTED_VALUE),
-                    ge(FIELD_PATH, REQUESTED_VALUE)
+                    le(FIELD, REQUESTED_VALUE),
+                    ge(FIELD, REQUESTED_VALUE)
             };
             checkCreatesInstance(Filters.all(filters[0], filters[1]), ALL, filters);
         }
@@ -155,8 +159,8 @@ class FiltersTest {
         @DisplayName("`either`")
         void either() {
             Filter[] filters = {
-                    lt(FIELD_PATH, REQUESTED_VALUE),
-                    gt(FIELD_PATH, REQUESTED_VALUE)
+                    lt(FIELD, REQUESTED_VALUE),
+                    gt(FIELD, REQUESTED_VALUE)
             };
             checkCreatesInstance(Filters.either(filters[0], filters[1]), EITHER, filters);
         }
@@ -165,7 +169,8 @@ class FiltersTest {
                                           CompositeOperator operator,
                                           Filter[] groupedFilters) {
             assertEquals(operator, filter.getOperator());
-            assertThat(filter.getFilterList()).containsAtLeastElementsIn(groupedFilters);
+            assertThat(filter.getFilterList())
+                    .containsExactlyElementsIn(groupedFilters);
         }
     }
 
@@ -177,8 +182,7 @@ class FiltersTest {
         @DisplayName("for numbers")
         void forNumbers() {
             double number = 3.14;
-            Filter filter = le("double_field", number);
-            assertThat(filter).isNotNull();
+            Filter filter = le("third_field", number);
             assertThat(filter.getOperator()).isEqualTo(LESS_OR_EQUAL);
 
             DoubleValue value = unpack(filter.getValue(), DoubleValue.class);
@@ -189,8 +193,7 @@ class FiltersTest {
         @DisplayName("for strings")
         void forStrings() {
             String theString = "abc";
-            Filter filter = gt("string_field", theString);
-            assertThat(filter).isNotNull();
+            Filter filter = gt("first_field", theString);
             assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
 
             StringValue value = unpack(filter.getValue(), StringValue.class);
@@ -201,8 +204,8 @@ class FiltersTest {
         @DisplayName("for timestamps")
         void forTimestamps() {
             Timestamp timestamp = currentTime();
-            Filter filter = gt("timestamp_field", timestamp);
-            assertThat(filter).isNotNull();
+            Filter filter = gt(FIELD, timestamp);
+
             assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
             Timestamp value = unpack(filter.getValue(), Timestamp.class);
             assertThat(value).isEqualTo(timestamp);
@@ -212,7 +215,8 @@ class FiltersTest {
         @DisplayName("for versions")
         void forVersions() {
             Version version = Versions.zero();
-            Filter filter = ge("version_field", version);
+            Filter filter = ge("some_version_field", version);
+
             assertThat(filter).isNotNull();
             assertThat(filter.getOperator()).isEqualTo(GREATER_OR_EQUAL);
             Version value = unpack(filter.getValue(), Version.class);
@@ -228,7 +232,7 @@ class FiltersTest {
         @DisplayName("for enumerated types")
         void forEnums() {
             assertThrows(IllegalArgumentException.class,
-                         () -> ge(ENUM_FIELD_PATH, ENUM_VALUE));
+                         () -> ge(ENUM_FIELD, ENUM_VALUE));
         }
 
         @Test

@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.client.Filters.eq;
+import static io.spine.client.EventFilter.eq;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -100,24 +100,24 @@ class ClientTest extends AbstractClientTest {
         void createSubscriptions() {
             subscriptions = new ArrayList<>();
             UserId currentUser = GivenUserId.generated();
-            String userField = "user";
             Client client = client();
             Subscription userLoggedIn =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedIn.class)
-                          .where(eq(userField, currentUser))
+                          .where(eq(UserLoggedIn.Field.user(), currentUser))
                           .observe((e) -> {})
                           .post();
             Subscription userLoggedOut =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedOut.class)
-                          .where(eq(userField, currentUser))
+                          .where(eq(UserLoggedOut.Field.user(), currentUser))
                           .observe((e) -> {})
                           .post();
             Subscription loginStatus =
                     client.onBehalfOf(currentUser)
                     .subscribeTo(LoginStatus.class)
-                    .where(eq("user_id", currentUser.getValue()))
+                    .where(EntityStateFilter.eq(LoginStatus.Field.userId(),
+                                                currentUser.getValue()))
                     .observe((s) -> {})
                     .post();
 
