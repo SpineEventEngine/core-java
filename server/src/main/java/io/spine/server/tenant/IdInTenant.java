@@ -20,9 +20,9 @@
 
 package io.spine.server.tenant;
 
+import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
-import io.spine.string.Stringifiers;
 
 import java.util.Objects;
 
@@ -101,9 +101,9 @@ public final class IdInTenant<I> {
 
     @Override
     public String toString() {
-        return "IdInTenant{" +
-                "id=" + Stringifiers.toString(id) +
-                ", tenantId=" + tenantId +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                          .add("id", id)
+                          .add("tenantId", tenantId)
+                          .toString();
     }
 }

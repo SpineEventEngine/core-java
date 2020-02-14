@@ -20,6 +20,8 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.base.MoreObjects;
+
 import java.util.Objects;
 
 /**
@@ -58,9 +60,9 @@ final class DispatchingId {
 
     @Override
     public String toString() {
-        return "DispatchingId{" +
-                "signal=" + signal +
-                ", inbox=" + inbox +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                          .add("signal", signal)
+                          .add("inbox", inbox)
+                          .toString();
     }
 }
