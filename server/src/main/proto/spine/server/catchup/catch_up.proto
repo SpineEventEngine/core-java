@@ -51,22 +51,13 @@ message CatchUp {
     // The current status of the catch-up process.
     CatchUpStatus status = 4 [(required) = true];
 
-    // The index of the current catch-up round.
-    //
-    // In each round the batch of the events is read from the Event Store and posted
-    // to the respective `Inbox`es.
-    //
-    // The index of the first round is 0.
-    //
-    int32 current_round = 5;
-
     // The total number of shards in the environment
     // at the moment of the last dispatching of the historical messages.
     //
-    int32 total_shards = 6;
+    int32 total_shards = 5;
 
     // The indexes of the shards through which the historical messages were dispatched.
-    repeated int32 affected_shard = 7;
+    repeated int32 affected_shard = 6;
 }
 
 // An ID of a catch-up process.

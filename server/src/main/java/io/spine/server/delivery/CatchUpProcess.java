@@ -341,9 +341,6 @@ public final class CatchUpProcess<I>
         CatchUpId id = builder().getId();
         CatchUp.Request request = builder().getRequest();
 
-        int nextRound = builder().getCurrentRound() + 1;
-        builder().setCurrentRound(nextRound);
-
         List<Event> readInThisRound = readMore(request, turbulenceStart(), queryLimit);
         if (!readInThisRound.isEmpty()) {
             List<Event> stripped = stripLastTimestamp(readInThisRound);
