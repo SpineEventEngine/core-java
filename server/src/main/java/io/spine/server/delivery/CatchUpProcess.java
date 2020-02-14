@@ -191,7 +191,16 @@ import static java.util.stream.Collectors.toSet;
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
+    /**
+     * The type URL of the process state.
+     *
+     * <p>Used for the message routing.
+     */
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
+
+    /**
+     * The duration of the "turbulence" period, counting back from the current time.
+     */
     private static final Duration TURBULENCE_PERIOD = Durations.fromMillis(500);
 
     private final ProjectionRepository<I, ?, ?> repository;
@@ -306,15 +315,135 @@ public final class CatchUpProcess<I>
     /**
      * Performs the first read from the event history and dispatches the results to the inboxes
      * of respective projections.
+     *
+     * <p>If the history has been read fully (i.e. until the start of the turbulence period), emits
+     * {@code HistoryFullyRecalled} event. Otherwise, emits {@code HistoryEventsRecalled} by which
+     * triggers the next round of history reading.
      */
     @React
     EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
         return recallMoreEvents();
     }
 
+    /**
+     * Performs the second and all the following reads from the event history and dispatches the
+     * historical events to the inboxes of the catching-up projections.
+     *
+     * <p>If the history has been read fully (i.e. until the start of the turbulence period), emits
+     * {@code HistoryFullyRecalled} event. Otherwise, emits {@code HistoryEventsRecalled} by which
+     * triggers the next round of history reading.
+     */
     @React
     EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
         return recallMoreEvents();
+    }
+
+    /**
+     * Reads the event history starting from the last event read and dispatches the events to the
+     * inboxes of the target projections.
+     *
+     * <p>Each read operation is bounded by the {@linkplain CatchUp#getWhenLastRead()
+     * timestamp of last recalled event} and the start of the turbulence period.
+     *
+     * <p>Read operations are also supplied with a query limit configured for this process. Thus,
+     * several events stamped with the same time value may be caught in-between query pages. As
+     * long as their order is not defined, some of them could have gone lost. To deal with this
+     * issue, this method strips the events with the most recent time from the query result and
+     * aims to read all of them in the next read round.
+     *
+     * <p>After reading, the time of the last event is recorded to the process state and is used
+     * as a starting point for the next read round.
+     *
+     * <p>If there were no events read, the history is considered fully recalled. The process
+     * will still have to deal with the event potentially emitted during the turbulence.
+     */
+    private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> recallMoreEvents() {
+        CatchUpId id = builder().getId();
+        CatchUp.Request request = builder().getRequest();
+
+        List<Event> readInThisRound = readMore(request, turbulenceStart(), queryLimit);
+        if (!readInThisRound.isEmpty()) {
+            List<Event> stripped = stripLastTimestamp(readInThisRound);
+
+            Event lastEvent = stripped.get(stripped.size() - 1);
+            Timestamp lastEventTimestamp = lastEvent.getContext()
+                                                    .getTimestamp();
+            builder().setWhenLastRead(lastEventTimestamp);
+            dispatchAll(stripped);
+        } else {
+            return EitherOf2.withB(fullyRecalled(id));
+        }
+        return EitherOf2.withA(recalled(id));
+    }
+
+    /*
+     * Handlers acting in the process finalization
+     ************************/
+
+    /**
+     * Sets the process status to {@link CatchUpStatus#FINALIZING FINALIZING} and reads all
+     * the remaining events, then dispatching those to the projection inboxes.
+     *
+     * <p>If there were no events read, sets the process status to {@link CatchUpStatus#COMPLETED
+     * COMPLETED}. Otherwise, emits {@code LiveEventsPickedUp} event, which is dispatched to this
+     * process in the next round.
+     */
+    @React
+    EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled event) {
+        CatchUpId id = event.getId();
+        builder().setStatus(CatchUpStatus.FINALIZING);
+        flushState();
+
+        CatchUp.Request request = builder().getRequest();
+        List<Event> events = readMore(request, null, null);
+
+        if (events.isEmpty()) {
+            return EitherOf2.withB(completeProcess(id));
+        }
+        dispatchAll(events);
+        return EitherOf2.withA(liveEventsPickedUp(id));
+    }
+
+
+    /*
+     * Handlers dealing with the process completion
+     ************************/
+
+    /**
+     * Completes the process once all the events, including live events emitted during
+     * the "turbulence" are dispatched to the target inboxes.
+     */
+    @React
+    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
+        return completeProcess(event.getId());
+    }
+
+    /**
+     * Upon the catch-up completion, requests an additional processing of the messages in those
+     * shards, which were involved into the dispatching during the catch-up.
+     *
+     * <p>In this way, the process ensures that any events, which delivery may have been potentially
+     * paused during the process finalization, are propagated from their shards to the target
+     * projection instances.
+     */
+    @SuppressWarnings("unused") // We just need the fact of dispatching.
+    @React
+    List<ShardProcessingRequested> on(CatchUpCompleted ignored) {
+        int shardCount = builder().getTotalShards();
+        List<Integer> affectedShards = builder().getAffectedShardList();
+        List<ShardProcessingRequested> events = toShardEvents(shardCount, affectedShards);
+        return events;
+    }
+
+    /*
+     * Utilities and re-usable actions
+     ************************/
+
+    private CatchUpCompleted completeProcess(CatchUpId id) {
+        builder().setStatus(CatchUpStatus.COMPLETED);
+        flushState();
+        CatchUpCompleted completed = catchUpCompleted(id);
+        return completed;
     }
 
     private Set<I> targetsForCatchUpSignals(CatchUp.Request request) {
@@ -337,25 +466,6 @@ public final class CatchUpProcess<I>
         return firstEvent;
     }
 
-    private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> recallMoreEvents() {
-        CatchUpId id = builder().getId();
-        CatchUp.Request request = builder().getRequest();
-
-        List<Event> readInThisRound = readMore(request, turbulenceStart(), queryLimit);
-        if (!readInThisRound.isEmpty()) {
-            List<Event> stripped = stripLastTimestamp(readInThisRound);
-
-            Event lastEvent = stripped.get(stripped.size() - 1);
-            Timestamp lastEventTimestamp = lastEvent.getContext()
-                                                    .getTimestamp();
-            builder().setWhenLastRead(lastEventTimestamp);
-            dispatchAll(stripped);
-        } else {
-            return EitherOf2.withB(fullyRecalled(id));
-        }
-        return EitherOf2.withA(recalled(id));
-    }
-
     private static List<Event> stripLastTimestamp(List<Event> events) {
         int lastIndex = events.size() - 1;
         Event lastEvent = events.get(lastIndex);
@@ -373,36 +483,6 @@ public final class CatchUpProcess<I>
         return events;
     }
 
-    @React
-    EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled event) {
-        CatchUpId id = event.getId();
-        builder().setStatus(CatchUpStatus.FINALIZING);
-        flushState();
-
-        CatchUp.Request request = builder().getRequest();
-        List<Event> events = readMore(request, null, null);
-
-        if (events.isEmpty()) {
-            return EitherOf2.withB(completeProcess(id));
-        }
-        dispatchAll(events);
-        return EitherOf2.withA(liveEventsPickedUp(id));
-    }
-
-    @React
-    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
-        return completeProcess(event.getId());
-    }
-
-    @SuppressWarnings("unused") // We just need the fact of dispatching.
-    @React
-    List<ShardProcessingRequested> on(CatchUpCompleted ignored) {
-        int shardCount = builder().getTotalShards();
-        List<Integer> affectedShards = builder().getAffectedShardList();
-        List<ShardProcessingRequested> events = toShardEvents(shardCount, affectedShards);
-        return events;
-    }
-
     private static List<ShardProcessingRequested> toShardEvents(int totalShards,
                                                                 List<Integer> indexes) {
         return indexes
@@ -413,13 +493,6 @@ public final class CatchUpProcess<I>
                     return event;
                 })
                 .collect(toList());
-    }
-
-    private CatchUpCompleted completeProcess(CatchUpId id) {
-        builder().setStatus(CatchUpStatus.COMPLETED);
-        flushState();
-        CatchUpCompleted completed = catchUpCompleted(id);
-        return completed;
     }
 
     private void recordAffectedShards(Set<I> actualTargets) {
@@ -513,6 +586,10 @@ public final class CatchUpProcess<I>
         }
         return builder.vBuild();
     }
+
+    /*
+     * Event reactor lifecycle
+     ************************/
 
     /**
      * {@inheritDoc}
