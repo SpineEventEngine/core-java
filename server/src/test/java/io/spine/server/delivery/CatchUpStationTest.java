@@ -41,7 +41,7 @@ import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
 import static io.spine.server.delivery.CatchUpStatus.FINALIZING;
-import static io.spine.server.delivery.CatchUpStatus.STARTED;
+import static io.spine.server.delivery.CatchUpStatus.IN_PROGRESS;
 import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
 import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
@@ -73,7 +73,7 @@ class CatchUpStationTest extends AbstractStationTest {
                 new DeliveredMessages()
         );
 
-        CatchUp job = catchUpJob(type, STARTED, currentTime(), ImmutableList.of(targetOne));
+        CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
         CatchUpStation station = new CatchUpStation(MemoizingAction.empty(), ImmutableList.of(job));
         Station.Result result = station.process(conveyor);
 
@@ -103,7 +103,7 @@ class CatchUpStationTest extends AbstractStationTest {
                                  alreadyDelivered, differentTarget);
         Conveyor conveyor = new Conveyor(initialContents, new DeliveredMessages());
 
-        CatchUp job = catchUpJob(type, STARTED, currentTime(), ImmutableList.of(targetOne));
+        CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
         CatchUpStation station = new CatchUpStation(MemoizingAction.empty(), ImmutableList.of(job));
         Station.Result result = station.process(conveyor);
 
@@ -207,7 +207,7 @@ class CatchUpStationTest extends AbstractStationTest {
                 new DeliveredMessages()
         );
 
-        CatchUp job = catchUpJob(type, STARTED, currentTime(), ImmutableList.of(targetOne));
+        CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
         MemoizingAction action = MemoizingAction.empty();
         CatchUpStation station = new CatchUpStation(action, ImmutableList.of(job));
         Station.Result result = station.process(conveyor);
@@ -227,7 +227,7 @@ class CatchUpStationTest extends AbstractStationTest {
         @DisplayName("by a particular target ID of the `CatchUpJob`")
         void byId() {
             ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
-            CatchUp job = catchUpJob(type, STARTED, currentTime(), ImmutableList.of(targetOne));
+            CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
             assertMatchesEvery(messages, job);
         }
 
@@ -236,7 +236,7 @@ class CatchUpStationTest extends AbstractStationTest {
                 "to which `InboxMessage` is dispatched")
         void allByType() {
             ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
-            CatchUp job = catchUpJob(type, STARTED, currentTime(), null);
+            CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), null);
             assertMatchesEvery(messages, job);
         }
 
@@ -256,7 +256,7 @@ class CatchUpStationTest extends AbstractStationTest {
         @DisplayName("when the target type of the `InboxMessage` and the `CatchUpJob` differs")
         void whenTargetTypeDiffers() {
             ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(anotherType);
-            CatchUp job = catchUpJob(type, STARTED, currentTime(), null);
+            CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), null);
             assertMatchesNone(messages, job);
         }
 
@@ -265,7 +265,7 @@ class CatchUpStationTest extends AbstractStationTest {
                 "does not match the IDs enumerated in the `CatchUpJob`")
         void whenIdDoesNotMatch() {
             ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
-            CatchUp job = catchUpJob(type, STARTED, currentTime(), ImmutableSet.of(targetTwo));
+            CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableSet.of(targetTwo));
             assertMatchesNone(messages, job);
         }
 

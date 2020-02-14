@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
 import static io.spine.server.delivery.CatchUpStatus.FINALIZING;
-import static io.spine.server.delivery.CatchUpStatus.STARTED;
+import static io.spine.server.delivery.CatchUpStatus.IN_PROGRESS;
 import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 
@@ -51,7 +51,7 @@ import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
  * <p>Depending on the status of the job, the matched messages are processed accordingly. See
  * more on that below.
  *
- * <b>1. Catch-up {@code STARTED}.</b>
+ * <b>1. Catch-up {@code IN_PROGRESS}.</b>
  *
  * <p>The matched messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status are
  * dispatched to their targets. All the matched live messages (i.e. in {@link
@@ -129,7 +129,7 @@ final class CatchUpStation extends Station {
 
                 if (job.matches(message)) {
                     DispatchingId dispatchingId = new DispatchingId(message);
-                    if (jobStatus == STARTED) {
+                    if (jobStatus == IN_PROGRESS) {
                         if (message.getStatus() == TO_CATCH_UP) {
                             if (dispatchToCatchUp.containsKey(dispatchingId)) {
                                 conveyor.remove(message);

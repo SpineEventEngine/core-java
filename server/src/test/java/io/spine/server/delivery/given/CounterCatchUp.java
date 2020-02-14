@@ -150,7 +150,7 @@ public class CounterCatchUp {
     }
 
     public static void addOngoingCatchUpRecord(WhatToCatchUp target) {
-        addOngoingCatchUpRecord(target, CatchUpStatus.STARTED);
+        addOngoingCatchUpRecord(target, CatchUpStatus.IN_PROGRESS);
     }
 
     public static void addOngoingCatchUpRecord(WhatToCatchUp target, CatchUpStatus status) {

@@ -85,7 +85,7 @@ enum CatchUpStatus {
     CUS_UNDEFINED = 0;
 
     // The process has been started and is in progress.
-    STARTED = 1;
+    IN_PROGRESS = 1;
 
     // The process is now processing the events that are close to the current time.
     FINALIZING = 2;

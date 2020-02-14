@@ -112,10 +112,11 @@ import static java.util.stream.Collectors.toSet;
  *     <li>A {@link CatchUpStarted} event is emitted. The target projection repository listens to
  *     this event and kills the state of the matching entities.
  *
- *     <li>The catch-up process in moved to the {@link CatchUpStatus#STARTED STARTED} status.
+ *     <li>The status if the catch-up process is set to {@link CatchUpStatus#IN_PROGRESS
+ *     IN_PROGRESS}.
  * </ul>
  *
- * <p><b>{@link CatchUpStatus#STARTED STARTED}</b>
+ * <p><b>{@link CatchUpStatus#IN_PROGRESS IN_PROGRESS}</b>
  *
  * <p>When the process is in this status, the event history is read and the matching events are sent
  * to the {@code Inbox}es of the corresponding projections
@@ -138,8 +139,8 @@ import static java.util.stream.Collectors.toSet;
  *      corresponding entities.
  *
  *      <li>Unless the timestamps of the events are getting close to the current time, an
- *      {@link HistoryEventsRecalled} is emitted, leaving the process in the {@code STARTED} status
- *      and triggering the next round similar to this one.
+ *      {@link HistoryEventsRecalled} is emitted, leaving the process in the {@code IN_PROGRESS}
+ *      status and triggering the next round similar to this one.
  *
  *      <p>If the timestamps of the events read on this step are as close to the current time as
  *      the "turbulence" period, the {@link HistoryFullyRecalled} is emitted.
@@ -252,7 +253,7 @@ public final class CatchUpProcess<I>
      ************************/
 
     /**
-     * Moves the process from {@code Not Started} to {@code STARTED} state.
+     * Moves the process from {@code Not Started} to {@code IN_PROGRESS} state.
      *
      * <p>There are several key actions performed at this stage.
      * <ul>
@@ -287,7 +288,7 @@ public final class CatchUpProcess<I>
         builder().setWhenLastRead(withWindow)
                  .setRequest(request);
         CatchUpStarted started = started(id);
-        builder().setStatus(CatchUpStatus.STARTED);
+        builder().setStatus(CatchUpStatus.IN_PROGRESS);
         flushState();
 
         Event event = wrapAsEvent(started, ctx);
@@ -298,7 +299,7 @@ public final class CatchUpProcess<I>
     }
 
     /*
-     * Handlers acting when process is {@code STARTED}
+     * Handlers acting when process is {@code IN_PROGRESS}
      ************************/
 
     @React
