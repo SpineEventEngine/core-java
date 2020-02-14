@@ -27,7 +27,6 @@ import io.spine.server.entity.EntityVisibility;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeName;
-import io.spine.type.TypeUrl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -108,12 +107,6 @@ final class VisibilityGuard {
         return repositoryAccess.get();
     }
 
-    Optional<Repository> repositoryFor(TypeUrl stateType) {
-        checkNotNull(stateType);
-        RepositoryAccess repositoryAccess = findOrThrow(stateType);
-        return repositoryAccess.get();
-    }
-
     private RepositoryAccess findOrThrow(Class<? extends EntityState> stateClass) {
         RepositoryAccess repository = repositories.get(stateClass);
         if (repository == null) {
@@ -123,22 +116,6 @@ final class VisibilityGuard {
             );
         }
         return repository;
-    }
-
-    private RepositoryAccess findOrThrow(TypeUrl stateType) {
-        Optional<RepositoryAccess> result =
-                repositories.values()
-                            .stream()
-                            .filter((r) -> r.repository.entityStateType()
-                                                       .equals(stateType))
-                            .findFirst();
-        if (!result.isPresent()) {
-            throw newIllegalStateException(
-                    "A repository for the state type `%s` is not registered.",
-                    stateType
-            );
-        }
-        return result.get();
     }
 
     /**
