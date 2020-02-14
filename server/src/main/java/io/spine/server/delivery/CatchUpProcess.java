@@ -256,6 +256,7 @@ public final class CatchUpProcess<I>
      * Moves the process from {@code Not Started} to {@code IN_PROGRESS} state.
      *
      * <p>There are several key actions performed at this stage.
+     *
      * <ul>
      *      <li>The reading timestamp of the process is set to the one specified in the request.
      *      However, people are used to say "I want to catch-up since 1 PM" meaning "counting
@@ -302,14 +303,18 @@ public final class CatchUpProcess<I>
      * Handlers acting when process is {@code IN_PROGRESS}
      ************************/
 
+    /**
+     * Performs the first read from the event history and dispatches the results to the inboxes
+     * of respective projections.
+     */
     @React
     EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
-        return recallMoreEvents(event.getId());
+        return recallMoreEvents();
     }
 
     @React
     EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
-        return recallMoreEvents(event.getId());
+        return recallMoreEvents();
     }
 
     private Set<I> targetsForCatchUpSignals(CatchUp.Request request) {
@@ -332,7 +337,8 @@ public final class CatchUpProcess<I>
         return firstEvent;
     }
 
-    private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> recallMoreEvents(CatchUpId id) {
+    private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> recallMoreEvents() {
+        CatchUpId id = builder().getId();
         CatchUp.Request request = builder().getRequest();
 
         int nextRound = builder().getCurrentRound() + 1;
