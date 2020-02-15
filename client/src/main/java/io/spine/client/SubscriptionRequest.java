@@ -26,6 +26,8 @@ import io.spine.core.EmptyContext;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static io.spine.client.Filters.extractFilters;
+
 /**
  * Allows to subscribe to updates of entity states using filtering conditions.
  *
@@ -40,6 +42,22 @@ public final class SubscriptionRequest<S extends EntityState>
     SubscriptionRequest(ClientRequest parent, Class<S> type) {
         super(parent, type);
         this.consumers = StateConsumers.newBuilder();
+    }
+
+    /**
+     * Configures the request to return results matching all the passed filters.
+     */
+    public SubscriptionRequest<S> where(EntityStateFilter... filter) {
+        builder().where(extractFilters(filter));
+        return self();
+    }
+
+    /**
+     * Configures the request to return results matching all the passed filters.
+     */
+    public SubscriptionRequest<S> where(CompositeEntityStateFilter... filter) {
+        builder().where(extractFilters(filter));
+        return self();
     }
 
     @Override

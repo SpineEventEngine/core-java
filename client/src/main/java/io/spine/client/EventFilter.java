@@ -20,49 +20,244 @@
 
 package io.spine.client;
 
+import io.spine.base.EventMessageField;
 import io.spine.core.Event;
+import io.spine.core.EventContextField;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.Filter.Operator.EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_THAN;
+import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.Filter.Operator.LESS_THAN;
+import static io.spine.client.Filters.checkSupportedOrderingComparisonType;
+import static io.spine.client.Filters.createContextFilter;
+import static io.spine.client.Filters.createFilter;
 
 /**
- * Filters events by conditions on both message and context.
+ * A subscription filter which targets an {@link Event}.
+ *
+ * <p>Can filter events by conditions on both message and context. See factory methods of the
+ * class for details.
  */
-final class EventFilter implements MessageFilter<Event> {
+public final class EventFilter extends TypedFilter<Event> {
 
-    private final Filter filter;
+    private static final long serialVersionUID = 0L;
 
+    private final boolean byContext;
+
+    private EventFilter(Filter filter, boolean byContext) {
+        super(filter);
+        this.byContext = byContext;
+    }
+
+    private EventFilter(EventMessageField field, Object expected, Filter.Operator operator) {
+        this(createFilter(field.getField(), expected, operator), false);
+    }
+
+    private EventFilter(EventContextField field, Object expected, Filter.Operator operator) {
+        this(createContextFilter(field.getField(), expected, operator), true);
+    }
+
+    /**
+     * Creates an instance from the passed {@code Filter} message.
+     *
+     * <p>The filter is considered targeting event context if the field path in the filter starts
+     * with {@code "context."}.
+     */
     EventFilter(Filter filter) {
-        this.filter = checkNotNull(filter);
+        this(filter, isContextFilter(filter));
+    }
+
+    /**
+     * Creates a new equality filter which targets a field in the event message.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter eq(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return new EventFilter(field, value, EQUAL);
+    }
+
+    /**
+     * Creates a new equality filter which targets a field in the event context.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter eq(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return new EventFilter(field, value, EQUAL);
+    }
+
+    /**
+     * Creates a new "greater than" filter which targets a field in the event message.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter gt(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_THAN);
+    }
+
+    /**
+     * Creates a new "greater than" filter which targets a field in the event context.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter gt(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_THAN);
+    }
+
+    /**
+     * Creates a new "less than" filter which targets a field in the event message.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter lt(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_THAN);
+    }
+
+    /**
+     * Creates a new "less than" filter which targets a field in the event context.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter lt(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_THAN);
+    }
+
+    /**
+     * Creates a new "greater than or equals" filter which targets a field in the event message.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter ge(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "greater than or equals" filter which targets a field in the event context.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter ge(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, GREATER_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "less than or equals" filter which targets a field in the event message.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the message field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter le(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "less than or equals" filter which targets a field in the event context.
+     *
+     * <p>NOTE: not all value types are supported for ordering comparison. See {@link Filters} for
+     * details.
+     *
+     * @param field
+     *         the context field from which the actual value is taken
+     * @param value
+     *         the expected value
+     */
+    public static EventFilter le(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return new EventFilter(field, value, LESS_OR_EQUAL);
     }
 
     @Override
     public boolean test(Event event) {
-        boolean byContext =
-                filter.getFieldPath()
-                      .getFieldName(0)
-                      .equals(EventContextField.name());
         if (byContext) {
             // Since we reference the context field with `context` prefix, we need to pass
             // the whole `Event` instance.
-            return filter.test(event);
+            return filter().test(event);
         }
-        return filter.test(event.enclosedMessage());
+        return filter().test(event.enclosedMessage());
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        EventFilter other = (EventFilter) o;
-        return filter.equals(other.filter);
-    }
-
-    @Override
-    public int hashCode() {
-        return filter.hashCode();
+    private static boolean isContextFilter(Filter filter) {
+        String contextFieldName = Event.Field.context()
+                                             .getField()
+                                             .toString();
+        String firstInPath = filter.getFieldPath()
+                                   .getFieldName(0);
+        boolean result = contextFieldName.equals(firstInPath);
+        return result;
     }
 }
