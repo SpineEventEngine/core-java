@@ -43,10 +43,9 @@ import java.util.Set;
  * the potential deduplication.
  *
  * <p>Before the dispatching, the messages are deduplicated, taking into account {@linkplain
- * Conveyor#recentlyDelivered()}
- * all known delivered messages. In this process, the messages delivered previously and kept for
- * longer are taken into account as well. The detected duplicates are marked as such
- * in the conveyor and are removed from the storage later.
+ * Conveyor#recentlyDelivered() all known delivered messages}. In this process, the messages
+ * delivered previously and kept for longer are taken into account as well. The detected duplicates
+ * are marked as such in the conveyor and are removed from the storage later.
  *
  * <p>The dispatched messages are reordered chronologically. However, the changes in ordering
  * are not propagated to the conveyor.
