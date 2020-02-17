@@ -28,6 +28,12 @@ package io.spine.server.delivery;
 abstract class Station {
 
     /**
+     * A result telling there were no messages delivered and no errors observed.
+     */
+    private static final Result EMPTY_RESULT = new Result(0, DeliveryErrors.newBuilder()
+                                                                           .build());
+
+    /**
      * Processes the conveyor messages.
      *
      * @param conveyor
@@ -68,8 +74,6 @@ abstract class Station {
      * Returns an empty result with no errors.
      */
     static Result emptyResult() {
-        DeliveryErrors noErrors = DeliveryErrors.newBuilder()
-                                                .build();
-        return new Result(0, noErrors);
+        return EMPTY_RESULT;
     }
 }
