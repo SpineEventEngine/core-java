@@ -64,26 +64,15 @@ public abstract class EventComparator implements Comparator<Event>, Serializable
 
         @Override
         public int compare(Event e1, Event e2) {
-            int timeComparison = Timestamps.compare(e1.time(), e2.time());
-            if (timeComparison != 0) {
-                return timeComparison;
-            }
-            EventContext ctx1 = e1.context();
-            EventContext ctx2 = e2.context();
-            int v1 = ctx1.getVersion()
-                         .getNumber();
-            int v2 = ctx2.getVersion()
-                         .getNumber();
-            int versionComparison = Integer.compare(v1, v2);
-            if (versionComparison != 0) {
-                return versionComparison;
-            }
-            String id1 = e1.getId()
-                           .getValue();
-            String id2 = e2.getId()
-                           .getValue();
-            return id1.compareTo(id2);
-
+            int result = Comparator
+                    .comparing(Event::time, Timestamps.comparator())
+                    .thenComparing((e) -> e.getContext()
+                                           .getVersion()
+                                           .getNumber())
+                    .thenComparing((e) -> e.getId()
+                                           .getValue())
+                    .compare(e1, e2);
+            return result;
         }
     }
 }

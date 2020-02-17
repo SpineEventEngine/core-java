@@ -47,17 +47,12 @@ public final class InboxMessageComparator implements Comparator<InboxMessage>, S
 
     @Override
     public int compare(InboxMessage m1, InboxMessage m2) {
-        int timeComparison = Timestamps.compare(m1.getWhenReceived(), m2.getWhenReceived());
-        if (timeComparison != 0) {
-            return timeComparison;
-        }
-        int versionComparison = Integer.compare(m1.getVersion(), m2.getVersion());
-        if (versionComparison != 0) {
-            return versionComparison;
-        }
-        return m1.getId()
-                 .getUuid()
-                 .compareTo(m2.getId()
-                              .getUuid());
+        int result = Comparator
+                .comparing(InboxMessage::getWhenReceived, Timestamps.comparator())
+                .thenComparing(InboxMessage::getVersion)
+                .thenComparing((m) -> m.getId()
+                                       .getUuid())
+                .compare(m1, m2);
+        return result;
     }
 }
