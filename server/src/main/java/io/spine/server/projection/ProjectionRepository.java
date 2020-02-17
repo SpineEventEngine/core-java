@@ -52,7 +52,6 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.string.Stringifiers;
 import io.spine.time.TimestampTemporal;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -68,6 +67,7 @@ import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.server.tenant.TenantAwareRunner.withCurrentTenant;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -371,11 +371,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     private static void checkCatchUpStartTime(Timestamp since) {
-        TimestampTemporal asTemporal = TimestampTemporal.from(since);
-        boolean startingInPast = asTemporal.isInPast();
-        checkArgument(startingInPast, "The catch-up must be started from the moment in the past, " +
-                              "but asked to start at `%s`, when now is `%s`.",
-                      lazyArg(since), lazyArg(Time.currentTime()));
+        TimestampTemporal whenStarts = TimestampTemporal.from(since);
+        if (!whenStarts.isInPast()) {
+            throw newIllegalArgumentException(
+                    "The catch-up must be started from the moment in the past, " +
+                            "but asked to start at `%s`, while now is `%s`.",
+                    since, Time.currentTime());
+        }
     }
 
     private void checkCatchUpTargets(@Nullable Set<I> ids) {
@@ -385,28 +387,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                   "You may also pass `null` to catch up all of the instances.",
                           entityStateType());
         }
-    }
-
-    /**
-     * Creates the lazily-evaluated argument for the message-formatting API in Guava's
-     * {@link com.google.common.base.Preconditions Preconditions}, such as
-     * {@link com.google.common.base.Preconditions#checkArgument(boolean, String, Object)
-     * Preconditions.checkArgument(boolean, String, Object)}.
-     *
-     * <p>Allows to postpone the resource-heavy stringification of the argument until that is
-     * really required.
-     *
-     * @param value
-     *         the value to be used as an argument
-     * @return the object to use as an argument in the message-formatting API
-     */
-    private static Object lazyArg(Object value) {
-        return new Object() {
-            @Override
-            public String toString() {
-                return Stringifiers.toString(value);
-            }
-        };
     }
 
     /**
