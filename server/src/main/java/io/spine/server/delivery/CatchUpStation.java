@@ -29,72 +29,18 @@ import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
-import static io.spine.server.delivery.CatchUpStatus.FINALIZING;
-import static io.spine.server.delivery.CatchUpStatus.IN_PROGRESS;
 import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A station that performs the delivery of messages to the catching-up targets.
- *
- * <h1>Overview</h1>
- *
- * <p>Matches the messages on the passed {@link Conveyor} to the known {@link CatchUp} jobs basing
- * on the target entity type and the identifier of the entity to which the message is sent.
- *
- * <p>Depending on the status of the job, the matched messages are processed accordingly. See
- * more on that below.
- *
- * <b>1. Catch-up {@code IN_PROGRESS}.</b>
- *
- * <p>The matched messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status are
- * dispatched to their targets. All the matched live messages (i.e. in {@link
- * InboxMessageStatus#TO_DELIVER TO_DELIVER} status) are ignored and removed from their inboxes.
- *
- * <b>2. Catch-up {@code FINALIZING}.</b>
- *
- * <p>When the catch-up job is being finalized, it means that the historical events may be dated
- * close to the present time and, thus, interfere with the live events headed to the same entities.
- * Therefore, the matched messages in either status are "paused" meaning they are NEITHER dispatched
- * NOR removed from their inboxes. Instead, they are held until the catch-up job is completed to be
- * deduplicated and delivered all at once.
- *
- * <p>To hold the live messages from being delivered down the conveyor pipeline, the live messages
- * are marked as {@code TO_CATCH_UP}.
- *
- * <b>3. Catch-up {@code COMPLETED}.</b>
- *
- * <p>At this stage the event history is fully processed. The inboxes contain the messages in
- * {@code TO_CATCH_UP} status, which are in fact the mix of the last portion of the replayed event
- * history and potentially some "paused" live events. So, the station dispatched all the matching
- * messages in {@code TO_CATCH_UP} status.
- *
- * <p>If the deduplication window is {@linkplain DeliveryBuilder#setDeduplicationWindow(Duration)
- * set in the system}, all the delivered messages are set to be kept in their storages
- * for the duration, corresponding to the width of the window. In this way, they will become usable
- * for the potential deduplication.
- *
- * <h1>Deduplication and reordering</h1>
- *
- * <p>Prior to the dispatching, the messages are deduplicated in scope of this message batch.
- * Please note, that the deduplication window is NOT taken into the account, as the historical
- * events may all have been delivered to their entities somewhen in the past.
- *
- * <p>All the duplicates are marked as such in the conveyor and are removed from their storage
- * later.
- *
- * <p>Another change made before the actual dispatching is reordering of the messages. The messages
- * are sorted chronologically, putting the events of a framework-internal {@link CatchUpStarted}
- * type first. It allows to guarantee that the targets will know of the started catch-up before
- * any message in {@code TO_CATCH_UP} status is dispatched to them.
- *
- * <p>The ordering changes are not reflected on the message order in the conveyor.
  */
 final class CatchUpStation extends Station {
 
@@ -104,6 +50,14 @@ final class CatchUpStation extends Station {
     private final DeliveryAction action;
     private final Iterable<CatchUp> jobs;
 
+    /**
+     * Creates a new instance of this station.
+     *
+     * @param action
+     *         the action on how to deliver the messages to their targets
+     * @param jobs
+     *         current list of {@code CatchUp} jobs
+     */
     CatchUpStation(DeliveryAction action, Iterable<CatchUp> jobs) {
         super();
         this.action = action;
@@ -111,69 +65,214 @@ final class CatchUpStation extends Station {
     }
 
     /**
-     * Processes the messages on the conveyor, delivering those sent for catch-up.
+     * Delivers the messages sent for catch-up from the passed conveyor
+     *
+     * <p>Prior to the dispatching, the messages are deduplicated and put into the chronological
+     * order in scope of the processed message batch.
+     *
+     * <p>The ordering changes are not reflected on the message order in the conveyor.
      *
      * @param conveyor
      *         the conveyor on which the messages are travelling
      * @return the result of the processing telling how many messages were dispatched and whether
      *         there were any errors in that
+     * @see JobFilter for the processing details
      */
-    @SuppressWarnings({"MethodWithMultipleLoops", "OverlyComplexMethod", "OverlyNestedMethod"})
     @Override
     public final Result process(Conveyor conveyor) {
-        Map<DispatchingId, InboxMessage> dispatchToCatchUp = new HashMap<>();
+        JobFilter jobFilter = new JobFilter(jobs, conveyor);
+        Collection<InboxMessage> toDispatch = jobFilter.messagesToDispatch();
+        return dispatch(toDispatch, conveyor);
+    }
 
-        for (InboxMessage message : conveyor) {
-            for (CatchUp job : jobs) {
-                CatchUpStatus jobStatus = job.getStatus();
+    /**
+     * Dispatches the passed messages to their targets and marks them as {@code DELIVERED} in
+     * the passed conveyor.
+     *
+     * <p>Prior to dispatching, the passed messages are sorted chronologically, putting the events
+     * of a framework-internal {@link CatchUpStarted} type first. Such an order guarantees that
+     * the targets entities will know of the started catch-up before any message
+     * in {@code TO_CATCH_UP} status is dispatched to them.
+     *
+     * @param messages
+     *         messages to dispatch
+     * @param conveyor
+     *         the conveyor to use for marking the messages as {@code DELIVERED}
+     * @return the result of dispatching
+     */
+    private Result dispatch(Collection<InboxMessage> messages, Conveyor conveyor) {
+        if (messages.isEmpty()) {
+            return emptyResult();
+        }
 
-                if (job.matches(message)) {
-                    DispatchingId dispatchingId = new DispatchingId(message);
-                    if (jobStatus == IN_PROGRESS) {
-                        if (message.getStatus() == TO_CATCH_UP) {
-                            if (dispatchToCatchUp.containsKey(dispatchingId)) {
-                                conveyor.remove(message);
-                            } else {
-                                dispatchToCatchUp.put(dispatchingId, message);
-                            }
-                        } else if (message.getStatus() == TO_DELIVER) {
-                            conveyor.remove(message);
-                        }
-                    } else if (jobStatus == FINALIZING) {
-                        if (message.getStatus() == TO_DELIVER) {
-                            conveyor.markCatchUp(message);
-                        }
-                    } else if (jobStatus == COMPLETED) {
-                        if (message.getStatus() == TO_CATCH_UP) {
-                            if (!dispatchToCatchUp.containsKey(dispatchingId)) {
-                                dispatchToCatchUp.put(dispatchingId, message);
-                                conveyor.keepForLonger(message, HOW_LONG_TO_KEEP);
-                            } else {
-                                conveyor.remove(message);
-                            }
-                        } else if (message.getStatus() == TO_DELIVER
-                                && dispatchToCatchUp.containsKey(dispatchingId)) {
-                            conveyor.remove(message);
-                        }
-                    }
+        List<InboxMessage> ordered = new ArrayList<>(messages);
+        ordered.sort(COMPARATOR);
+
+        DeliveryErrors errors = action.executeFor(ordered);
+        conveyor.markDelivered(ordered);
+        Result result = new Result(ordered.size(), errors);
+        return result;
+    }
+
+    /**
+     * Filters the messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status,
+     * by matching them to the ongoing {@code CatchUp} jobs.
+     *
+     * <p>Depending on the {@linkplain CatchUp#getStatus() status of each job and the status
+     * of the message, the latter may be accepted for dispatching.
+     *
+     * <p>Duplicated messages are removed from the passed conveyor.
+     *
+     * <p>The messages which have passed through the filter are considered to be ready
+     * for dispatching.
+     */
+    private static class JobFilter {
+
+        private final Map<DispatchingId, InboxMessage> dispatchToCatchUp = new HashMap<>();
+        private final Iterable<CatchUp> jobs;
+        private final Conveyor conveyor;
+
+        /**
+         * Creates a new filter.
+         *
+         * @param jobs
+         *         the ongoing {@code CatchUp} jobs
+         * @param conveyor
+         *         the conveyor containing the messages to filer
+         */
+        private JobFilter(Iterable<CatchUp> jobs, Conveyor conveyor) {
+            this.jobs = jobs;
+            this.conveyor = conveyor;
+        }
+
+        /**
+         * Runs each of the messages through the conveyor and returns those which have passed
+         * all the stages and are ready for the dispatching.
+         */
+        private Collection<InboxMessage> messagesToDispatch() {
+            for (InboxMessage message : conveyor) {
+                accept(message);
+            }
+            return dispatchToCatchUp.values();
+        }
+
+        /**
+         * Processes the message if the matching job is in {@link CatchUpStatus#IN_PROGRESS
+         * IN_PROGRESS} status.
+         *
+         * <p>The matched messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status are
+         * passed to be later dispatched to their targets. All the matched live messages
+         * (i.e. in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER} status) are ignored
+         * and removed from the conveyor.
+         *
+         * @param message
+         *         the message to process
+         */
+        private void inProgress(InboxMessage message) {
+            DispatchingId dispatchingId = new DispatchingId(message);
+            if (message.getStatus() == TO_CATCH_UP) {
+                if (dispatchToCatchUp.containsKey(dispatchingId)) {
+                    conveyor.remove(message);
+                } else {
+                    dispatchToCatchUp.put(dispatchingId, message);
                 }
+            } else if (message.getStatus() == TO_DELIVER) {
+                conveyor.remove(message);
             }
         }
 
-        return dispatch(conveyor, dispatchToCatchUp);
-    }
-
-    private Result dispatch(Conveyor conveyor, Map<DispatchingId, InboxMessage> dispatchToCatchUp) {
-        if (!dispatchToCatchUp.isEmpty()) {
-            List<InboxMessage> messages = new ArrayList<>(dispatchToCatchUp.values());
-            messages.sort(COMPARATOR);
-
-            DeliveryErrors errors = action.executeFor(messages);
-            conveyor.markDelivered(messages);
-            Result result = new Result(dispatchToCatchUp.size(), errors);
-            return result;
+        /**
+         * Processes the message if the matching job is in {@link CatchUpStatus#FINALIZING
+         * FINALIZING} status.
+         *
+         * <p>When the catch-up job is being finalized, it means that the historical events may be
+         * dated close to the present time and, thus, interfere with the live events headed to the
+         * same entities.
+         *
+         * <p>Therefore, the matched messages in either status are "paused" meaning they are
+         * neither dispatched nor removed from their inboxes. Instead, they are held until
+         * the catch-up job is completed to be deduplicated and delivered all at once.
+         *
+         * <p>To hold the live messages from being delivered down the conveyor pipeline,
+         * the live messages are marked as {@code TO_CATCH_UP}.
+         *
+         * @param message
+         *         the message to process
+         */
+        private void finalizingWith(InboxMessage message) {
+            if (message.getStatus() == TO_DELIVER) {
+                conveyor.markCatchUp(message);
+            }
         }
-        return emptyResult();
+
+        /**
+         * Processes the message if the matching job is in {@link CatchUpStatus#COMPLETED COMPLETED}
+         * status.
+         *
+         * <p>At this stage the event history is fully processed. The inboxes contain the messages
+         * in {@code TO_CATCH_UP} status, which are in fact the mix of the last portion of the
+         * replayed event history and potentially some "paused" live events. So, all the matching
+         * messages in {@code TO_CATCH_UP} status are accepted to be dispatched to their targets.
+         *
+         * <p>If the deduplication window is
+         * {@linkplain DeliveryBuilder#setDeduplicationWindow(Duration) set in the system},
+         * the messages accepted for delivery are
+         * {@linkplain Conveyor#keepForLonger(InboxMessage, Duration) set to be kept} in their
+         * inboxes for the duration, corresponding to the width of the window. In this way, they
+         * will not be removed after get delivered and will be available as a source
+         * for the deduplication.
+         *
+         * @param message
+         *         the message to process
+         */
+        private void completedWith(InboxMessage message) {
+            DispatchingId dispatchingId = new DispatchingId(message);
+            if (message.getStatus() == TO_CATCH_UP) {
+                if (!dispatchToCatchUp.containsKey(dispatchingId)) {
+                    dispatchToCatchUp.put(dispatchingId, message);
+                    conveyor.keepForLonger(message, HOW_LONG_TO_KEEP);
+                } else {
+                    conveyor.remove(message);
+                }
+            } else if (message.getStatus() == TO_DELIVER
+                    && dispatchToCatchUp.containsKey(dispatchingId)) {
+                conveyor.remove(message);
+            }
+        }
+
+        /**
+         * Filters the message according to the status of each matching job.
+         *
+         * @param message
+         *         the message to run through the filter
+         */
+        private void accept(InboxMessage message) {
+            for (CatchUp job : jobs) {
+                if (!job.matches(message)) {
+                    continue;
+                }
+                CatchUpStatus jobStatus = job.getStatus();
+
+                switch (jobStatus) {
+                    case IN_PROGRESS:
+                        inProgress(message); break;
+
+                    case FINALIZING:
+                        finalizingWith(message); break;
+
+                    case COMPLETED:
+                        completedWith(message); break;
+
+                    case CUS_UNDEFINED:
+                    case UNRECOGNIZED:
+                        throw newIllegalStateException(
+                                "The catch-up job must have a definite status: `%s`.", job
+                        );
+                    default:
+                        // Skip the message.
+                }
+            }
+        }
     }
 
     /**
