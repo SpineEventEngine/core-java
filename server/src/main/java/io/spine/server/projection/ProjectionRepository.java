@@ -101,6 +101,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * If one of the states of entities cannot be routed during the created schema,
      * {@code IllegalStateException} will be thrown.
      *
+     * <p>Initializes the {@link Inbox}es for the instances of this repository and creates
+     * a {@link RepositoryCache} to optimize the delivery of the event batches.
+     *
+     * <p>Creates an instance of the {@link CatchUpProcess} enabling this repository {@linkplain
+     * #catchUp(Timestamp, Set) to catch-up} its instances.
+     *
      * @param context
      *         the {@code BoundedContext} of this repository
      * @throws IllegalStateException
@@ -119,6 +125,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         initCatchUp(context, delivery);
     }
 
+    /**
+     * Initializes the catch-up process for the instances of this repository and registers it
+     * as an event dispatcher in the same Bounded Context as the repository itself.
+     */
     private void initCatchUp(BoundedContext context, Delivery delivery) {
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
         catchUpProcess = builder.setDispatchOp(this::sendToCatchingUp)
