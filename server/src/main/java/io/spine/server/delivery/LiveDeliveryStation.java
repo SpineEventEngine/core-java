@@ -33,15 +33,6 @@ import java.util.Set;
 /**
  * A station that delivers those messages which are incoming in a live mode.
  *
- * <p>This station dispatches all the messages in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER}
- * status that are present in the passed conveyor. After the messages are dispatched, they are
- * marked as {@link InboxMessageStatus#DELIVERED DELIVERED}.
- *
- * <p>If the deduplication window is {@linkplain DeliveryBuilder#setDeduplicationWindow(Duration)
- * set in the system}, all the delivered messages are set to be kept in their storages for
- * the duration, corresponding to the width of the window. In this way, they will become usable for
- * the potential deduplication.
- *
  * <p>Before the dispatching, the messages are deduplicated, taking into account {@linkplain
  * Conveyor#recentlyDelivered() all known delivered messages}. In this process, the messages
  * delivered previously and kept for longer are taken into account as well. The detected duplicates
@@ -79,17 +70,80 @@ final class LiveDeliveryStation extends Station {
     }
 
     /**
-     * Dispatches the messages from the conveyor.
+     * Filters the messages in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER} from the conveyor
+     * and dispatches them to their targets.
+     *
+     * <p>Before the dispatching, the messages are deduplicated, taking into account {@linkplain
+     * Conveyor#recentlyDelivered() all known delivered messages}. In this process, the messages
+     * delivered previously and kept for longer are taken into account as well. The detected
+     * duplicates are marked as such in the conveyor and are removed from the storage later.
+     *
+     * <p>The dispatched messages are reordered chronologically. The changes in ordering are
+     * not propagated to the conveyor.
+     *
+     * <p>After the messages are dispatched, they are marked {@link InboxMessageStatus#DELIVERED
+     * DELIVERED}.
      *
      * @param conveyor
      *         the conveyor on which the messages are travelling
-     * @return how many messages were delivered and whether there were any errors during the
-     *         dispatching
+     * @return how many messages were delivered and whether there were any errors during
+     *         the dispatching
      */
     @Override
     public final Result process(Conveyor conveyor) {
-        Map<DispatchingId, InboxMessage> seen = new HashMap<>();
-        for (InboxMessage message : conveyor) {
+        FilterToDeliver filter = new FilterToDeliver(conveyor);
+        Collection<InboxMessage> filtered = filter.messagesToDispatch();
+        if (filtered.isEmpty()) {
+            return emptyResult();
+        }
+        List<InboxMessage> toDispatch = deduplicateAndSort(filtered, conveyor);
+        DeliveryErrors errors = action.executeFor(toDispatch);
+        conveyor.markDelivered(toDispatch);
+        Result result = new Result(toDispatch.size(), errors);
+        return result;
+    }
+
+    /**
+     * Runs through the conveyor and processes the messages in {@link InboxMessageStatus#TO_DELIVER
+     * TO_DELIVER} status.
+     */
+    private class FilterToDeliver {
+
+        private final Map<DispatchingId, InboxMessage> seen = new HashMap<>();
+        private final Conveyor conveyor;
+
+        private FilterToDeliver(Conveyor conveyor) {
+            this.conveyor = conveyor;
+        }
+
+        /**
+         * Returns the messages considered to ready for further dispatching.
+         */
+        private Collection<InboxMessage> messagesToDispatch() {
+            for (InboxMessage message : conveyor) {
+                accept(message);
+            }
+            return seen.values();
+        }
+
+        /**
+         * Processes the passed message matching it to the filter requirements.
+         *
+         * <p>The messages in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER} are accepted for
+         * futher dispatching.
+         *
+         * <p>If this message has already been passed to this filter, it is removed as a duplicate.
+         *
+         * <p>If the deduplication window is
+         * {@linkplain DeliveryBuilder#setDeduplicationWindow(Duration) set in the system} and
+         * the message is not a duplicate, it is additionally
+         * {@linkplain Conveyor#keepForLonger(InboxMessage, Duration) set to be kept} in their
+         * inboxes for the duration, corresponding to the width of the window.
+         *
+         * @param message
+         *         the message to run through the filter
+         */
+        private void accept(InboxMessage message) {
             InboxMessageStatus status = message.getStatus();
             if (status == InboxMessageStatus.TO_DELIVER) {
                 DispatchingId dispatchingId = new DispatchingId(message);
@@ -102,16 +156,6 @@ final class LiveDeliveryStation extends Station {
                     }
                 }
             }
-        }
-        if (!seen.isEmpty()) {
-            Collection<InboxMessage> toDeliver = seen.values();
-            List<InboxMessage> toDispatch = deduplicateAndSort(toDeliver, conveyor);
-            DeliveryErrors errors = action.executeFor(toDispatch);
-            conveyor.markDelivered(toDispatch);
-            Result result = new Result(toDispatch.size(), errors);
-            return result;
-        } else {
-            return emptyResult();
         }
     }
 
