@@ -23,9 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
@@ -65,6 +63,7 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Durations.fromMillis;
 import static com.google.protobuf.util.Durations.fromNanos;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.server.delivery.CatchUpMessages.catchUpCompleted;
@@ -98,8 +97,9 @@ import static java.util.stream.Collectors.toSet;
  * by {@code Delivery} it tells to perform a transition from dispatching {@code TO_CATCH_UP} events
  * back to delivering those {@code TO_DELIVER}. See more on that below.
  *
- * <p>By default, the "turbulence" period equals 500 ms, meaning that the catch-up starts its
- * finalization when the event history is read up until {@code now - 500 ms}.
+ * <p>In this version of the process implementation, the turbulence period always equals 500 ms
+ * meaning that the catch-up starts its finalization when the event history is read
+ * up until {@code now - 500 ms}.
  *
  * <p>In its lifecycle, the process moves through the several statuses.
  *
@@ -143,7 +143,7 @@ import static java.util.stream.Collectors.toSet;
  *      status and triggering the next round similar to this one.
  *
  *      <p>If the timestamps of the events read on this step are as close to the current time as
- *      the "turbulence" period, the {@link HistoryFullyRecalled} is emitted.
+ *      the turbulence period, the {@link HistoryFullyRecalled} is emitted.
  * </ul>
  *
  * <p><b>{@link CatchUpStatus#FINALIZING FINALIZING}</b>
@@ -151,9 +151,9 @@ import static java.util.stream.Collectors.toSet;
  * <p>The process moves to this status when the event history has been fully recalled and the
  * corresponding {@code HistoryFullyRecalled} is received. At this stage the {@code Delivery} stops
  * the propagation of the events to the catch-up messages, waiting for this process to populate
- * the inboxes with the messages arriving to be dispatched during the "turbulence" period.
- * Potentially, the inboxes will contain the duplicates produced by both the live users and this
- * process. To deal with it, a deduplication is performed by the {@code Delivery}.
+ * the inboxes with the messages arriving to be dispatched during the turbulence period.
+ * Potentially, the inboxes will contain the duplicates produced by both the live users
+ * and this process. To deal with it, a deduplication is performed by the {@code Delivery}.
  * See {@link CatchUpStation} for more details.
  *
  * <p>The actions are as follows.
@@ -171,7 +171,7 @@ import static java.util.stream.Collectors.toSet;
  *      The reacting handler of the {@code LiveEventsPickedUp} completes the process.
  * </ul>
  *
- * <p>{@link CatchUpStatus#COMPLETED COMPLETED}</p>
+ * <p><b>{@link CatchUpStatus#COMPLETED COMPLETED}</b>
  *
  * <p>Once the process moves to the {@code COMPLETED} status, the corresponding {@code Delivery}
  * routines deduplicate, reorder and dispatch the "paused" events. Then the normal live delivery
@@ -187,7 +187,7 @@ import static java.util.stream.Collectors.toSet;
  *         impossible to register the process managers with the same state in
  *         a multi-{@code BoundedContext} application.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})    // It does a lot.
+@SuppressWarnings("OverlyCoupledClass")    // It does a lot.
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
@@ -199,9 +199,9 @@ public final class CatchUpProcess<I>
     private static final TypeUrl TYPE = TypeUrl.from(CatchUp.getDescriptor());
 
     /**
-     * The duration of the "turbulence" period, counting back from the current time.
+     * The duration of the turbulence period, counting back from the current time.
      */
-    private static final Duration TURBULENCE_PERIOD = Durations.fromMillis(500);
+    private static final Turbulence TURBULENCE = Turbulence.of(fromMillis(500));
 
     private final ProjectionRepository<I, ?, ?> repository;
     private final DispatchCatchingUp<I> dispatchOperation;
@@ -308,9 +308,9 @@ public final class CatchUpProcess<I>
      * Performs the first read from the event history and dispatches the results to the inboxes
      * of respective projections.
      *
-     * <p>If the history has been read fully (i.e. until the start of the turbulence period), emits
-     * {@code HistoryFullyRecalled} event. Otherwise, emits {@code HistoryEventsRecalled} by which
-     * triggers the next round of history reading.
+     * <p>If the history has been read fully (i.e. until the start of the {@linkplain Turbulence
+     * turbulence period}), emits {@code HistoryFullyRecalled} event. Otherwise, emits
+     * {@code HistoryEventsRecalled} by which it triggers the next round of history reading.
      */
     @React
     EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
@@ -321,9 +321,9 @@ public final class CatchUpProcess<I>
      * Performs the second and all the following reads from the event history and dispatches the
      * historical events to the inboxes of the catching-up projections.
      *
-     * <p>If the history has been read fully (i.e. until the start of the turbulence period), emits
-     * {@code HistoryFullyRecalled} event. Otherwise, emits {@code HistoryEventsRecalled} by which
-     * triggers the next round of history reading.
+     * <p>If the history has been read fully (i.e. until the start of the {@linkplain Turbulence
+     * turbulence period}), emits {@code HistoryFullyRecalled} event. Otherwise,
+     * emits {@code HistoryEventsRecalled} by which triggers the next round of history reading.
      */
     @React
     EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(HistoryEventsRecalled event) {
@@ -335,7 +335,8 @@ public final class CatchUpProcess<I>
      * inboxes of the target projections.
      *
      * <p>Each read operation is bounded by the {@linkplain CatchUp#getWhenLastRead()
-     * timestamp of last recalled event} and the start of the turbulence period.
+     * timestamp of last recalled event} and the start of the {@linkplain Turbulence
+     * turbulence period}.
      *
      * <p>Read operations are also supplied with a query limit configured for this process. Thus,
      * several events stamped with the same time value may be caught in-between query pages. As
@@ -353,7 +354,7 @@ public final class CatchUpProcess<I>
         CatchUpId id = builder().getId();
         CatchUp.Request request = builder().getRequest();
 
-        List<Event> readInThisRound = readMore(request, turbulenceStart(), queryLimit);
+        List<Event> readInThisRound = readMore(request, TURBULENCE.whenStarts(), queryLimit);
         if (!readInThisRound.isEmpty()) {
             List<Event> stripped = stripLastTimestamp(readInThisRound);
 
@@ -394,7 +395,7 @@ public final class CatchUpProcess<I>
 
     /**
      * Completes the process once all the events, including live events emitted during
-     * the "turbulence" are dispatched to the target inboxes.
+     * the {@linkplain Turbulence turbulence} are dispatched to the target inboxes.
      */
     @React
     CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
@@ -432,10 +433,6 @@ public final class CatchUpProcess<I>
               ? ImmutableSet.copyOf(repository.index())
               : unpack(rawTargets);
         return ids;
-    }
-
-    private static Timestamp turbulenceStart() {
-        return subtract(Time.currentTime(), TURBULENCE_PERIOD);
     }
 
     private Event wrapAsEvent(CatchUpSignal event, EventContext context) {
