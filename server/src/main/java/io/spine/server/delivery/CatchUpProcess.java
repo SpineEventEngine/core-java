@@ -257,10 +257,6 @@ public final class CatchUpProcess<I>
         catchUpStarter.start(ids, since);
     }
 
-    /*
-     * Handlers acting when process is {@code Not Started}
-     ************************/
-
     /**
      * Moves the process from {@code Not Started} to {@code IN_PROGRESS} state.
      *
@@ -307,10 +303,6 @@ public final class CatchUpProcess<I>
 
         return started;
     }
-
-    /*
-     * Handlers acting when process is {@code IN_PROGRESS}
-     ************************/
 
     /**
      * Performs the first read from the event history and dispatches the results to the inboxes
@@ -376,10 +368,6 @@ public final class CatchUpProcess<I>
         return EitherOf2.withA(recalled(id));
     }
 
-    /*
-     * Handlers acting in the process finalization
-     ************************/
-
     /**
      * Sets the process status to {@link CatchUpStatus#FINALIZING FINALIZING} and reads all
      * the remaining events, then dispatching those to the projection inboxes.
@@ -403,11 +391,6 @@ public final class CatchUpProcess<I>
         dispatchAll(events);
         return EitherOf2.withA(liveEventsPickedUp(id));
     }
-
-
-    /*
-     * Handlers dealing with the process completion
-     ************************/
 
     /**
      * Completes the process once all the events, including live events emitted during
@@ -434,10 +417,6 @@ public final class CatchUpProcess<I>
         List<ShardProcessingRequested> events = toShardEvents(shardCount, affectedShards);
         return events;
     }
-
-    /*
-     * Utilities and re-usable actions
-     ************************/
 
     private CatchUpCompleted completeProcess(CatchUpId id) {
         builder().setStatus(CatchUpStatus.COMPLETED);
