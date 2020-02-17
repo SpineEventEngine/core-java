@@ -52,9 +52,12 @@ public final class InboxMessageComparator implements Comparator<InboxMessage>, S
             return timeComparison;
         }
         int versionComparison = Integer.compare(m1.getVersion(), m2.getVersion());
-        if(versionComparison != 0) {
+        if (versionComparison != 0) {
             return versionComparison;
         }
-        return m1.getId().getUuid().compareTo(m2.getId().getUuid());
+        return m1.getId()
+                 .getUuid()
+                 .compareTo(m2.getId()
+                              .getUuid());
     }
 }
