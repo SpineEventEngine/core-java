@@ -33,6 +33,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.CatchUpAlreadyStartedException;
+import io.spine.server.delivery.CatchUpId;
 import io.spine.server.delivery.CatchUpProcess;
 import io.spine.server.delivery.CatchUpProcessBuilder;
 import io.spine.server.delivery.CatchUpSignal;
@@ -72,6 +73,32 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
+ *
+ * <p>{@linkplain #catchUp(Timestamp, Set) Provides an API} for the entity catch-up. During this
+ * process, the framework re-builds the states of all or the selected projection instances
+ * by replaying the historical events from the {@code EventStore} of its Bounded Context.
+ * The catch-up process is fully automated and may be scaled across instances.
+ *
+ * <p>To start the catch-up, one should call a corresponding method (see below).
+ *
+ * <pre>
+ *     TaskViewRepository repository = new TaskViewRepository();
+ *
+ *     BoundedContextBuilder builder = BoundedContext.singleTenant("Tasks")
+ *                                                   .add(repository)
+ *                                                   .build();
+ *     // ...
+ *
+ *     //Start the catch-up when needed:
+ *     Timestamp replayHistorySince = ...
+ *     repository.catchUp(replayHistorySince, ImmutableSet.of(outdatedTaskId, anotherOne));
+ * </pre>
+ *
+ * <p>All the live events dispatched to the entities-under-catch-up are not lost.
+ * They are preserved and dispatched to the projections in a proper historical order.
+ *
+ * <p>After the catch-up is completed, the framework automatically switches back to the propagation
+ * of the live events.
  *
  * @param <I>
  *         the type of IDs of projections
@@ -358,6 +385,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * <p>At the beginning of the process the state of each of the entities is set to the default.
      *
+     * <p>During this process, the entities receive continuous updates to their state. After the
+     * catch-up is completed, the framework automatically resumes the dispatching of ongoing live
+     * events. When the catch-up is completed, a
+     * {@link io.spine.server.delivery.event.CatchUpCompleted CatchUpCompleted} event is emitted.
+     * One may use the identifier of the catch-up process and subscribe to the events of this type
+     * to understand whether the operation is done.
+     *
      * <p>The subscriptions to the entity state updates (i.e.
      * {@link io.spine.system.server.event.EntityStateChanged EntityStateChanged}) events are not
      * supported in the catch-up.
@@ -365,19 +399,23 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @param since
      *         point in the past, since which the catch-up should be performed
      * @param ids
-     *         identifiers of the entities to catch up
+     *         identifiers of the entities to catch up, {@code null} means that all entities should
+     *         be caught up
+     * @return identifier of the catch-up operation
      * @throws CatchUpAlreadyStartedException
      *         if another catch-up for the same entity type and overlapping targets is already in
      *         progress
+     * @see #catchUpAll(Timestamp) on a shortcut method which starts the catch-up for all
+     *         entities in this repository
      */
-    public void catchUp(Timestamp since, @Nullable Set<I> ids) throws
-                                                               CatchUpAlreadyStartedException {
+    public CatchUpId catchUp(Timestamp since, @Nullable Set<I> ids)
+            throws CatchUpAlreadyStartedException {
         checkCatchUpTargets(ids);
         checkCatchUpStartTime(since);
 
-        withCurrentTenant(context().isMultitenant()).run(
-                () -> catchUpProcess.startCatchUp(since, ids)
-        );
+        CatchUpId catchUpId = withCurrentTenant(context().isMultitenant())
+                .evaluate(() -> catchUpProcess.startCatchUp(since, ids));
+        return catchUpId;
     }
 
     private static void checkCatchUpStartTime(Timestamp since) {
@@ -400,26 +438,19 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * Repeats the dispatching of the events from the event log to the all the entities managed
-     * by this repository. The events are read from the specified point in time.
+     * Starts the catch-up of all entities in this repository.
      *
-     * <p>At the beginning of the process the state of all of the entities is set to the default.
-     *
-     * <p>The events are dispatched according to the actual event routing schema. So a historical
-     * event may be dispatched to a different set of targets, comparing to those to which it was
-     * dispatched once emitted originally.
-     *
-     * <p>The subscriptions to the entity state updates (i.e.
-     * {@link io.spine.system.server.event.EntityStateChanged EntityStateChanged}) events are not
-     * supported in the catch-up.
+     * <p>This is a shortcut method for {@link #catchUp(Timestamp, Set) catchUp(since, null)}.
      *
      * @param since
      *         point in the past, since which the catch-up should be performed
+     * @return identifier of the catch-up operation
      * @throws CatchUpAlreadyStartedException
      *         if another catch-up for the same entity type is already in progress
+     * @see #catchUp(Timestamp, Set)
      */
-    public void catchUpAll(Timestamp since) throws CatchUpAlreadyStartedException {
-        catchUp(since, null);
+    public CatchUpId catchUpAll(Timestamp since) throws CatchUpAlreadyStartedException {
+        return catchUp(since, null);
     }
 
     /**

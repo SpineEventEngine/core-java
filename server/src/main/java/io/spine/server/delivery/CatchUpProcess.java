@@ -250,11 +250,12 @@ public final class CatchUpProcess<I>
      *         instances should be caught up
      * @throws CatchUpAlreadyStartedException
      *         if at least one of the selected instances is already catching up at the moment
+     * @return identifier of the catch-up operation
      */
     @Internal
-    public void startCatchUp(Timestamp since, @Nullable Set<I> ids)
+    public CatchUpId startCatchUp(Timestamp since, @Nullable Set<I> ids)
             throws CatchUpAlreadyStartedException {
-        catchUpStarter.start(ids, since);
+        return catchUpStarter.start(ids, since);
     }
 
     /**

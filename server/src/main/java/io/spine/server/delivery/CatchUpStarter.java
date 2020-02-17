@@ -89,8 +89,9 @@ final class CatchUpStarter<I> {
      *         since when the catch-up is going to read the events
      * @throws CatchUpAlreadyStartedException
      *         if the catch-up is already in progress for at least one of the requested entities
+     * @return identifier of the catch-up operation
      */
-    void start(@Nullable Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
+    CatchUpId start(@Nullable Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
         checkNotActive(ids);
 
         CatchUp.Request request = buildRequest(ids, since);
@@ -108,6 +109,7 @@ final class CatchUpStarter<I> {
         Event event = eventFactory.createEvent(eventMessage);
         context.eventBus()
                .post(event);
+        return id;
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
