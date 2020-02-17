@@ -20,9 +20,9 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.annotation.Internal;
 
 import java.util.List;
 
@@ -30,6 +30,7 @@ import java.util.List;
  * A mixin for the state of the {@linkplain CatchUpProcess catch-up process job}.
  */
 @GeneratedMixin
+@Internal
 interface CatchUpMixin extends CatchUpOrBuilder {
 
     /**
@@ -48,7 +49,6 @@ interface CatchUpMixin extends CatchUpOrBuilder {
      *         the message to match to the job
      * @return {@code true} if the message matches the job, {@code false} otherwise
      */
-    @VisibleForTesting
     default boolean matches(InboxMessage message) {
         String expectedProjectionType = getId().getProjectionType();
         InboxId targetInbox = message.getInboxId();
