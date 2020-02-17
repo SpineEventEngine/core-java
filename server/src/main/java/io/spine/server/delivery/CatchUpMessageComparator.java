@@ -54,7 +54,7 @@ final class CatchUpMessageComparator
             if (typeOfSecond.equals(CATCH_UP_STARTED.toString())) {
                 return 1;
             }
-            return EventComparator.chronologically.compare(e1, e2);
+            return EventComparator.chronological().compare(e1, e2);
         } else {
             return InboxMessageComparator.chronologically.compare(m1, m2);
         }

@@ -29,44 +29,61 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * A comparator which compares events by their timestamp in chronological order.
- *
- * <p>In case the timestamp is the same, the {@linkplain EventContext#getVersion() event versions}
- * are compared.
- *
- * <p>If the versions are the same, the values of the {@linkplain Event#getId() event identifiers}
- * are compared lexicographically.
+ * An abstract base for the comparators working with {@link Event}s.
  */
 @Internal
-public final class EventComparator implements Comparator<Event>, Serializable {
+public abstract class EventComparator implements Comparator<Event>, Serializable {
 
     private static final long serialVersionUID = 0L;
-    public static final EventComparator chronologically = new EventComparator();
+    private static final EventComparator chronologically = new Chronological();
 
     private EventComparator() {
     }
 
-    @Override
-    public int compare(Event e1, Event e2) {
-        int timeComparison = Timestamps.compare(e1.time(), e2.time());
-        if (timeComparison != 0) {
-            return timeComparison;
-        }
-        EventContext ctx1 = e1.context();
-        EventContext ctx2 = e2.context();
-        int v1 = ctx1.getVersion()
-                     .getNumber();
-        int v2 = ctx2.getVersion()
-                     .getNumber();
-        int versionComparison = Integer.compare(v1, v2);
-        if (versionComparison != 0) {
-            return versionComparison;
-        }
-        String id1 = e1.getId()
-                       .getValue();
-        String id2 = e2.getId()
-                       .getValue();
-        return id1.compareTo(id2);
+    /**
+     * Returns a comparator which compares events by their timestamp in chronological order.
+     *
+     * <p>In case the timestamps are the same, the {@linkplain EventContext#getVersion()
+     * event versions} are compared.
+     *
+     * <p>If the versions are the same, the values of the {@linkplain Event#getId()
+     * event identifiers} are compared lexicographically.
+     */
+    public static EventComparator chronological() {
+        return chronologically;
+    }
 
+    /**
+     * A comparator which compares events by their timestamp in chronological order.
+     *
+     * @see #chronological() for a public API
+     */
+    private static final class Chronological extends EventComparator {
+
+        private static final long serialVersionUID = 0L;
+
+        @Override
+        public int compare(Event e1, Event e2) {
+            int timeComparison = Timestamps.compare(e1.time(), e2.time());
+            if (timeComparison != 0) {
+                return timeComparison;
+            }
+            EventContext ctx1 = e1.context();
+            EventContext ctx2 = e2.context();
+            int v1 = ctx1.getVersion()
+                         .getNumber();
+            int v2 = ctx2.getVersion()
+                         .getNumber();
+            int versionComparison = Integer.compare(v1, v2);
+            if (versionComparison != 0) {
+                return versionComparison;
+            }
+            String id1 = e1.getId()
+                           .getValue();
+            String id2 = e2.getId()
+                           .getValue();
+            return id1.compareTo(id2);
+
+        }
     }
 }

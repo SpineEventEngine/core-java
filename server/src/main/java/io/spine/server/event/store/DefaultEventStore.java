@@ -48,7 +48,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.flogger.LazyArgs.lazy;
-import static io.spine.server.event.EventComparator.chronologically;
+import static io.spine.server.event.EventComparator.chronological;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -166,7 +166,7 @@ public final class DefaultEventStore
                 .stream()
                 .map(EEntity::state)
                 .filter(predicate)
-                .sorted(chronologically)
+                .sorted(chronological())
                 .iterator();
         return result;
     }
