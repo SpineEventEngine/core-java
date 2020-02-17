@@ -22,13 +22,15 @@ package io.spine.server.delivery;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
+import io.spine.annotation.GeneratedMixin;
 
 import java.util.List;
 
 /**
  * A mixin for the state of the {@linkplain CatchUpProcess catch-up process job}.
  */
-public interface CatchUpMixin extends CatchUpOrBuilder {
+@GeneratedMixin
+interface CatchUpMixin extends CatchUpOrBuilder {
 
     /**
      * Tells whether the passed {@code InboxMessage} matches this catch-up job.
