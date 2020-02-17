@@ -35,7 +35,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>Has its own {@link Inbox}, so the messages arriving to it are dispatched
  * by the {@link Delivery}.
  */
-class ShardMaintenanceProcess extends AbstractEventSubscriber {
+final class ShardMaintenanceProcess extends AbstractEventSubscriber {
 
     static final TypeUrl TYPE = TypeUrl.of(ShardMaintenance.getDefaultInstance());
 
@@ -70,7 +70,10 @@ class ShardMaintenanceProcess extends AbstractEventSubscriber {
              .toSubscriber(message.getId());
     }
 
-    private class EventEndpoint implements MessageEndpoint<ShardIndex, EventEnvelope> {
+    /**
+     * An endpoint dispatching the events to the parent instance of {@code ShardMaintenanceProcess}.
+     */
+    private final class EventEndpoint implements MessageEndpoint<ShardIndex, EventEnvelope> {
 
         private final EventEnvelope envelope;
 
