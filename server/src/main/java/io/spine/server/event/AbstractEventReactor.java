@@ -21,7 +21,6 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import io.spine.base.Error;
@@ -92,7 +91,6 @@ public abstract class AbstractEventReactor
         return thisClass.events();
     }
 
-    @CanIgnoreReturnValue
     @Override
     public void dispatch(EventEnvelope event) {
         TenantAwareRunner.with(event.tenantId())

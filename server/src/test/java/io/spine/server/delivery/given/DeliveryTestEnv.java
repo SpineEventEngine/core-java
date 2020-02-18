@@ -72,14 +72,6 @@ public class DeliveryTestEnv {
                 .vBuild();
     }
 
-    public static ShardIndex newShardIndex(int index, int ofTotal) {
-        return ShardIndex
-                .newBuilder()
-                .setIndex(index)
-                .setOfTotal(ofTotal)
-                .vBuild();
-    }
-
     public static class CalculatorRepository extends AggregateRepository<String, CalcAggregate> {
 
         /** How many calls there were to {@link #doStore(CalcAggregate)} method, grouped by ID. */

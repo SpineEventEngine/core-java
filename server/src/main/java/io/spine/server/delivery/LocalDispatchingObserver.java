@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.ServerEnvironment;
 
 /**
@@ -28,7 +29,8 @@ import io.spine.server.ServerEnvironment;
  *
  * <p>Suitable for the local and development environment.
  */
-final class LocalDispatchingObserver implements ShardObserver {
+@VisibleForTesting
+public final class LocalDispatchingObserver implements ShardObserver {
 
     @Override
     public void onMessage(InboxMessage update) {

@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package spine.server.catchup;
+
+import "spine/options.proto";
+import "spine/time_options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.delivery";
+option java_outer_classname = "CatchUpProto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+
+import "spine/core/event.proto";
+
+// A state of a catch-up process.
+message CatchUp {
+    option (is).java_type = "CatchUpMixin";
+
+    CatchUpId id = 1;
+
+    // A description of a catch-up requested.
+    message Request {
+
+        // IDs of the projections under catch-up, packed as `Any`.
+        //
+        // If no particular targets are set, the catch-up is requested for all entities
+        // of the respective kind.
+        //
+        repeated google.protobuf.Any target = 1;
+
+        // Since which point in time the catch-up has been originally requested.
+        //
+        // This value is inclusive as for the timestamp of events to which this catch-up should
+        // be applicable.
+        //
+        google.protobuf.Timestamp since_when = 2 [(required) = true, (when).in = PAST];
+
+        // The type URLs of events to read from the Event Store.
+        repeated string event_type = 3;
+    }
+
+    // The original request.
+    Request request = 2 [(required) = true, (validate) = true];
+
+    // During the catch-up, this field holds the timestamp of the last event already processed.
+    google.protobuf.Timestamp when_last_read = 3;
+
+    // The current status of the catch-up process.
+    CatchUpStatus status = 4 [(required) = true];
+
+    // The total number of shards in the environment
+    // at the moment of the last dispatching of the historical messages.
+    //
+    int32 total_shards = 5;
+
+    // The indexes of the shards through which the historical messages were dispatched.
+    repeated int32 affected_shard = 6;
+}
+
+// An ID of a catch-up process.
+message CatchUpId {
+
+    string uuid = 1;
+
+    // A type URL of the projection under catch-up.
+    string projection_type = 2 [(required) = true];
+}
+
+// The status of a catch-up process.
+enum CatchUpStatus {
+
+    // Not started.
+    CUS_UNDEFINED = 0;
+
+    // The process has been started and is in progress.
+    IN_PROGRESS = 1;
+
+    // The process is now processing the events that are close to the current time.
+    FINALIZING = 2;
+
+    // The process is completed.
+    COMPLETED = 3;
+}

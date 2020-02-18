@@ -20,7 +20,10 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
 import io.spine.type.TypeUrl;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Determines the {@linkplain ShardIndex index of a shard} for the given identifier of an entity.
@@ -29,7 +32,7 @@ import io.spine.type.TypeUrl;
  * on several app nodes. Therefore an entity is put into a shard, which in turn is designed to
  * process all the shard-incoming messages on a single application node at a time.
  */
-public interface DeliveryStrategy {
+public abstract class DeliveryStrategy {
 
     /**
      * Determines the shard index for the messages heading to the entity with the specified target
@@ -41,12 +44,47 @@ public interface DeliveryStrategy {
      *         the type URL of the entity, to which the messages are dispatched
      * @return the shard index
      */
-    ShardIndex indexFor(Object entityId, TypeUrl entityStateType);
+    protected abstract ShardIndex indexFor(Object entityId, TypeUrl entityStateType);
 
     /**
      * Tells how many shards there are according to this strategy.
      *
      * @return total count of shards
      */
-    int shardCount();
+    protected abstract int shardCount();
+
+    @SuppressWarnings("WeakerAccess")   // A part of the public API.
+    public final ShardIndex determineIndex(Object entityId, TypeUrl entityStateType) {
+        if (entityStateType.equals(ShardMaintenanceProcess.TYPE)) {
+            return (ShardIndex) entityId;
+        }
+        return indexFor(entityId, entityStateType);
+    }
+
+    /**
+     * Creates a new {@code ShardIndex} according to the passed shard index
+     *
+     * <p>The passed shard index value must be less than the total number of shards specified.
+     *
+     * <p>Both passed values must not be negative.
+     *
+     * @param indexValue
+     *         the value of the shard index, zero-based
+     * @param ofTotal
+     *         the total number of shard
+     * @return a new instance of the {@code ShardIndex}
+     */
+    @Internal
+    public static ShardIndex newIndex(int indexValue, int ofTotal) {
+        checkArgument(indexValue < ofTotal,
+                      "The index of the shard `%s` must be less" +
+                              " than the total number of shards `%s`.",
+                      indexValue, ofTotal);
+        ShardIndex result = ShardIndex
+                .newBuilder()
+                .setIndex(indexValue)
+                .setOfTotal(ofTotal)
+                .vBuild();
+        return result;
+    }
 }

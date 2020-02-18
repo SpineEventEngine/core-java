@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
@@ -45,6 +46,7 @@ public final class MemoizingStorageFactory implements StorageFactory {
 
     private final List<Class<?>> requestedStorages = new ArrayList<>();
     private boolean requestedInbox = false;
+    private boolean requestedCatchUp = false;
     private boolean requestedEventStore = false;
     private boolean closed = false;
 
@@ -78,6 +80,12 @@ public final class MemoizingStorageFactory implements StorageFactory {
     }
 
     @Override
+    public CatchUpStorage createCatchUpStorage(boolean multitenant) {
+        requestedCatchUp = true;
+        return nullRef();
+    }
+
+    @Override
     public EventStore createEventStore(ContextSpec context) {
         requestedEventStore = true;
         return nullRef();
@@ -94,6 +102,10 @@ public final class MemoizingStorageFactory implements StorageFactory {
 
     public boolean requestedInbox() {
         return requestedInbox;
+    }
+
+    public boolean requestedCatchUp() {
+        return requestedCatchUp;
     }
 
     public boolean requestedEventStore() {

@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -34,6 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A builder for {@code Delivery} instances.
  */
+@SuppressWarnings("ClassWithTooManyMethods")    // That's expected for the centerpiece configurator.
 public final class DeliveryBuilder {
 
     /**
@@ -41,12 +43,19 @@ public final class DeliveryBuilder {
      */
     private static final int DEFAULT_PAGE_SIZE = 500;
 
+    /**
+     * The default number of the events to recall per single read operation during the catch-up.
+     */
+    private static final int DEFAULT_CATCH_UP_PAGE_SIZE = 500;
+
     private @MonotonicNonNull InboxStorage inboxStorage;
+    private @MonotonicNonNull CatchUpStorage catchUpStorage;
     private @MonotonicNonNull DeliveryStrategy strategy;
     private @MonotonicNonNull ShardedWorkRegistry workRegistry;
-    private @MonotonicNonNull Duration idempotenceWindow;
+    private @MonotonicNonNull Duration deduplicationWindow;
     private @MonotonicNonNull DeliveryMonitor deliveryMonitor;
     private @MonotonicNonNull Integer pageSize;
+    private @MonotonicNonNull Integer catchUpPageSize;
 
     /**
      * Prevents a direct instantiation of this class.
@@ -67,6 +76,21 @@ public final class DeliveryBuilder {
      */
     InboxStorage getInboxStorage() {
         return checkNotNull(inboxStorage);
+    }
+
+    /**
+     * Returns the value of the configured {@code CatchUpStorage} or {@code Optional.empty()} if no
+     * such value was configured.
+     */
+    public Optional<CatchUpStorage> catchUpStorage() {
+        return Optional.ofNullable(catchUpStorage);
+    }
+
+    /**
+     * Returns the non-{@code null} value of the configured {@code CatchUpStorage}.
+     */
+    CatchUpStorage getCatchUpStorage() {
+        return checkNotNull(catchUpStorage);
     }
 
     /**
@@ -100,18 +124,18 @@ public final class DeliveryBuilder {
     }
 
     /**
-     * Returns the value of the configured idempotence window or {@code Optional.empty()}
+     * Returns the value of the configured deduplication window or {@code Optional.empty()}
      * if no such value was configured.
      */
-    public Optional<Duration> idempotenceWindow() {
-        return Optional.ofNullable(idempotenceWindow);
+    public Optional<Duration> deduplicationWindow() {
+        return Optional.ofNullable(deduplicationWindow);
     }
 
     /**
-     * Returns the non-{@code null} value of the configured idempotence window.
+     * Returns the non-{@code null} value of the configured deduplication window.
      */
-    Duration getIdempotenceWindow() {
-        return checkNotNull(idempotenceWindow);
+    Duration getDeduplicationWindow() {
+        return checkNotNull(deduplicationWindow);
     }
 
     /**
@@ -136,6 +160,18 @@ public final class DeliveryBuilder {
 
     Integer getPageSize() {
         return checkNotNull(pageSize);
+    }
+
+    /**
+     * Returns the value of the configured catch-up page size or {@code Optional.empty()}
+     * if no such value was configured.
+     */
+    public Optional<Integer> catchUpPageSize() {
+        return Optional.ofNullable(catchUpPageSize);
+    }
+
+    Integer getCatchUpPageSize() {
+        return checkNotNull(catchUpPageSize);
     }
 
     @CanIgnoreReturnValue
@@ -163,8 +199,8 @@ public final class DeliveryBuilder {
      * <p>If none set, zero duration is used.
      */
     @CanIgnoreReturnValue
-    public DeliveryBuilder setIdempotenceWindow(Duration idempotenceWindow) {
-        this.idempotenceWindow = checkNotNull(idempotenceWindow);
+    public DeliveryBuilder setDeduplicationWindow(Duration deduplicationWindow) {
+        this.deduplicationWindow = checkNotNull(deduplicationWindow);
         return this;
     }
 
@@ -181,6 +217,18 @@ public final class DeliveryBuilder {
     }
 
     /**
+     * Sets the custom {@code CatchUpStorage}.
+     *
+     * <p>If none set, the storage is initialized by the {@code StorageFactory} specific for
+     * this {@code ServerEnvironment}.
+     */
+    @CanIgnoreReturnValue
+    public DeliveryBuilder setCatchUpStorage(CatchUpStorage catchUpStorage) {
+        this.catchUpStorage = checkNotNull(catchUpStorage);
+        return this;
+    }
+
+    /**
      * Sets the custom {@code DeliveryMonitor}.
      *
      * <p>If none set, {@link DeliveryMonitor#alwaysContinue()}  is used.
@@ -192,7 +240,7 @@ public final class DeliveryBuilder {
     }
 
     /**
-     * Sets the  maximum amount of messages to deliver within a {@link DeliveryStage}.
+     * Sets the maximum amount of messages to deliver within a {@link DeliveryStage}.
      *
      * <p>If none set, {@linkplain #DEFAULT_PAGE_SIZE} is used.
      */
@@ -203,19 +251,37 @@ public final class DeliveryBuilder {
         return this;
     }
 
+    /**
+     * Sets the maximum number of events to read from an event store per single read operation
+     * during the catch-up.
+     *
+     * <p>If none set, {@linkplain #DEFAULT_CATCH_UP_PAGE_SIZE} is used.
+     */
+    @CanIgnoreReturnValue
+    public DeliveryBuilder setCatchUpPageSize(int catchUpPageSize) {
+        checkArgument(catchUpPageSize > 0);
+        this.catchUpPageSize = catchUpPageSize;
+        return this;
+    }
+
+    @SuppressWarnings("PMD.NPathComplexity")    // The readability of this method is fine.
     public Delivery build() {
         if (strategy == null) {
             strategy = UniformAcrossAllShards.singleShard();
         }
 
-        if (idempotenceWindow == null) {
-            idempotenceWindow = Duration.getDefaultInstance();
+        if (deduplicationWindow == null) {
+            deduplicationWindow = Duration.getDefaultInstance();
         }
 
+        StorageFactory factory = ServerEnvironment.instance()
+                                                  .storageFactory();
         if (this.inboxStorage == null) {
-            this.inboxStorage = ServerEnvironment.instance()
-                                                 .storageFactory()
-                                                 .createInboxStorage(true);
+            this.inboxStorage = factory.createInboxStorage(true);
+        }
+
+        if (this.catchUpStorage == null) {
+            this.catchUpStorage = factory.createCatchUpStorage(true);
         }
 
         if (workRegistry == null) {
@@ -228,6 +294,10 @@ public final class DeliveryBuilder {
 
         if (pageSize == null) {
             pageSize = DEFAULT_PAGE_SIZE;
+        }
+
+        if (catchUpPageSize == null) {
+            catchUpPageSize = DEFAULT_CATCH_UP_PAGE_SIZE;
         }
 
         Delivery delivery = new Delivery(this);

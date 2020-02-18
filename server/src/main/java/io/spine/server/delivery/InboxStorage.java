@@ -22,14 +22,8 @@ package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
 import io.spine.server.storage.Storage;
-import io.spine.validate.Validated;
 
-import java.util.List;
 import java.util.Optional;
-
-import static com.google.common.collect.Streams.stream;
-import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A contract for storages of {@link Inbox} messages.
@@ -60,7 +54,7 @@ public interface InboxStorage
     Page<InboxMessage> readAll(ShardIndex index, int pageSize);
 
     /**
-     * Finds the oldest message {@linkplain InboxMessageStatus#TO_DELIVER to deliver}
+     * Finds the newest message {@linkplain InboxMessageStatus#TO_DELIVER to deliver}
      * in the given shard.
      *
      * @param index
@@ -68,7 +62,7 @@ public interface InboxStorage
      * @return the message found or {@code Optional.empty()} if there are no messages to deliver
      *         in the specified shard
      */
-    Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index);
+    Optional<InboxMessage> newestMessageToDeliver(ShardIndex index);
 
     /**
      * Writes a message to the storage.
@@ -95,22 +89,4 @@ public interface InboxStorage
      *         the messages to remove
      */
     void removeAll(Iterable<InboxMessage> messages);
-
-    /**
-     * Marks the messages as {@linkplain InboxMessageStatus#DELIVERED delivered} and writes
-     * the updated messages.
-     *
-     * @param messages
-     *         the messages to mark as delivered
-     * @implNote The messages aren't additionally validated after marking as delivered to
-     *         improve the performance.
-     */
-    default void markDelivered(Iterable<InboxMessage> messages) {
-        List<@Validated InboxMessage> updated =
-                stream(messages).map((m) -> m.toBuilder()
-                                             .setStatus(DELIVERED)
-                                             .build())
-                                .collect(toList());
-        writeAll(updated);
-    }
 }

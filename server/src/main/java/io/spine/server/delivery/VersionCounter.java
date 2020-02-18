@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import javax.annotation.concurrent.ThreadSafe;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A counter providing the version for the incoming {@code InboxMessage}s.
@@ -38,10 +37,12 @@ final class VersionCounter {
     private static final int MAX_VERSION = 10_000;
     private static final VersionCounter instance = new VersionCounter();
 
-    private final AtomicInteger counter = new AtomicInteger();
+    private int counter;
 
     private synchronized int getNextValue() {
-        return counter.updateAndGet(n -> (n >= MAX_VERSION) ? 1 : n + 1);
+        counter++;
+        counter = counter % MAX_VERSION;
+        return counter;
     }
 
     /**

@@ -23,6 +23,7 @@ package io.spine.server.delivery;
 import com.google.protobuf.Duration;
 import io.spine.protobuf.Durations2;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.storage.memory.InMemoryCatchUpStorage;
 import io.spine.server.storage.memory.InMemoryInboxStorage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -58,6 +59,13 @@ class DeliveryBuilderTest {
         }
 
         @Test
+        @DisplayName("Catch-up storage")
+        void catchUpStorage() {
+            assertThrows(NullPointerException.class,
+                         () -> builder().setCatchUpStorage(nullRef()));
+        }
+
+        @Test
         @DisplayName("work registry")
         void workRegistry() {
             assertThrows(NullPointerException.class,
@@ -65,10 +73,10 @@ class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("idempotence window")
-        void idempotenceWindow() {
+        @DisplayName("deduplication window")
+        void deduplicationWindow() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setIdempotenceWindow(nullRef()));
+                         () -> builder().setDeduplicationWindow(nullRef()));
         }
 
         @Test
@@ -88,6 +96,15 @@ class DeliveryBuilderTest {
                      () -> builder().setPageSize(-3));
     }
 
+    @Test
+    @DisplayName("accept only positive catch-up page size")
+    void acceptOnlyPositiveCatchUpPageSize() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> builder().setCatchUpPageSize(0));
+        assertThrows(IllegalArgumentException.class,
+                     () -> builder().setCatchUpPageSize(-3));
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")    // testing `Builder` getters.
     @Nested
     @DisplayName("return set")
@@ -105,9 +122,18 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("Inbox storage")
         void inboxStorage() {
-            InMemoryInboxStorage storage = new InMemoryInboxStorage(false);
+            InboxStorage storage = new InMemoryInboxStorage(false);
             assertEquals(storage, builder().setInboxStorage(storage)
                                            .inboxStorage()
+                                           .get());
+        }
+
+        @Test
+        @DisplayName("Catch-up storage")
+        void catchUpStorage() {
+            CatchUpStorage storage = new InMemoryCatchUpStorage(false);
+            assertEquals(storage, builder().setCatchUpStorage(storage)
+                                           .catchUpStorage()
                                            .get());
         }
 
@@ -121,11 +147,11 @@ class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("idempotence window")
-        void idempotenceWindow() {
+        @DisplayName("deduplication window")
+        void deduplicationWindow() {
             Duration duration = Durations2.fromMinutes(123);
-            assertEquals(duration, builder().setIdempotenceWindow(duration)
-                                            .idempotenceWindow()
+            assertEquals(duration, builder().setDeduplicationWindow(duration)
+                                            .deduplicationWindow()
                                             .get());
         }
 
@@ -146,6 +172,15 @@ class DeliveryBuilderTest {
                                             .pageSize()
                                             .get());
         }
+
+        @Test
+        @DisplayName("catch-up page size")
+        void catchUpPageSize() {
+            int catchUpPageSize = 499;
+            assertEquals(catchUpPageSize, builder().setCatchUpPageSize(catchUpPageSize)
+                                                   .catchUpPageSize()
+                                                   .get());
+        }
     }
 
     @Nested
@@ -165,15 +200,21 @@ class DeliveryBuilderTest {
         }
 
         @Test
+        @DisplayName("Catch-up storage")
+        void catchUpStorage() {
+            assertThrows(NullPointerException.class, () -> builder().getCatchUpStorage());
+        }
+
+        @Test
         @DisplayName("work registry")
         void workRegistry() {
             assertThrows(NullPointerException.class, () -> builder().getWorkRegistry());
         }
 
         @Test
-        @DisplayName("idempotence window")
-        void idempotenceWindow() {
-            assertThrows(NullPointerException.class, () -> builder().getIdempotenceWindow());
+        @DisplayName("deduplication window")
+        void deduplicationWindow() {
+            assertThrows(NullPointerException.class, () -> builder().getDeduplicationWindow());
         }
 
         @Test

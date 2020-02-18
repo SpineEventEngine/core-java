@@ -20,6 +20,7 @@
 
 package io.spine.server.tenant;
 
+import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 
@@ -88,13 +89,21 @@ public final class IdInTenant<I> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        IdInTenant<?> tenant = (IdInTenant<?>) o;
-        return Objects.equals(id, tenant.id) &&
-                Objects.equals(tenantId, tenant.tenantId);
+        IdInTenant<?> another = (IdInTenant<?>) o;
+        return Objects.equals(id, another.id) &&
+                Objects.equals(tenantId, another.tenantId);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, tenantId);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("id", id)
+                          .add("tenantId", tenantId)
+                          .toString();
     }
 }

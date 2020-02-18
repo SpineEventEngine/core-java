@@ -36,6 +36,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
 
+    static final String CREATED_COLUMN = "created";
     /** Cached value of the event message type name. */
     private @MonotonicNonNull TypeName typeName;
 
@@ -60,7 +61,7 @@ final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
      * @return the time when the underlying event was fired
      * @see ColumnName#created
      */
-    @SystemColumn(name = "created")
+    @SystemColumn(name = CREATED_COLUMN)
     public Timestamp getCreated() {
         return state().context()
                       .getTimestamp();

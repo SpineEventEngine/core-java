@@ -27,19 +27,23 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.BatchDeliveryListener;
+import io.spine.server.delivery.CatchUpAlreadyStartedException;
+import io.spine.server.delivery.CatchUpId;
+import io.spine.server.delivery.CatchUpProcess;
+import io.spine.server.delivery.CatchUpProcessBuilder;
+import io.spine.server.delivery.CatchUpSignal;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
-import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
@@ -49,31 +53,66 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.TypeName;
+import io.spine.time.TimestampTemporal;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Sets.intersection;
 import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.server.tenant.TenantAwareRunner.withCurrentTenant;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
  *
- * @param <I> the type of IDs of projections
- * @param <P> the type of projections
- * @param <S> the type of projection state messages
+ * <p>{@linkplain #catchUp(Timestamp, Set) Provides an API} for the entity catch-up. During this
+ * process, the framework re-builds the states of all or the selected projection instances
+ * by replaying the historical events from the {@code EventStore} of its Bounded Context.
+ * The catch-up process is fully automated and may be scaled across instances.
+ *
+ * <p>To start the catch-up, one should call a corresponding method (see below).
+ *
+ * <pre>
+ *     TaskViewRepository repository = new TaskViewRepository();
+ *
+ *     BoundedContextBuilder builder = BoundedContext.singleTenant("Tasks")
+ *                                                   .add(repository)
+ *                                                   .build();
+ *     // ...
+ *
+ *     //Start the catch-up when needed:
+ *     Timestamp replayHistorySince = ...
+ *     repository.catchUp(replayHistorySince, ImmutableSet.of(outdatedTaskId, anotherOne));
+ * </pre>
+ *
+ * <p>All the live events dispatched to the entities-under-catch-up are not lost.
+ * They are preserved and dispatched to the projections in a proper historical order.
+ *
+ * <p>After the catch-up is completed, the framework automatically switches back to the propagation
+ * of the live events.
+ *
+ * @param <I>
+ *         the type of IDs of projections
+ * @param <P>
+ *         the type of projections
+ * @param <S>
+ *         the type of projection state messages
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState>
         extends EventDispatchingRepository<I, P, S> {
 
     private @MonotonicNonNull Inbox<I> inbox;
+
+    private @MonotonicNonNull CatchUpProcess<I> catchUpProcess;
 
     private @MonotonicNonNull RepositoryCache<I, P> cache;
 
@@ -89,6 +128,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * If one of the states of entities cannot be routed during the created schema,
      * {@code IllegalStateException} will be thrown.
      *
+     * <p>Initializes the {@link Inbox}es for the instances of this repository and creates
+     * a {@link RepositoryCache} to optimize the delivery of the event batches.
+     *
+     * <p>Creates an instance of the {@link CatchUpProcess} enabling this repository {@linkplain
+     * #catchUp(Timestamp, Set) to catch-up} its instances.
+     *
      * @param context
      *         the {@code BoundedContext} of this repository
      * @throws IllegalStateException
@@ -101,7 +146,21 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         super.registerWith(context);
         ensureDispatchesEvents();
         initCache(context.isMultitenant());
-        initInbox();
+        Delivery delivery = ServerEnvironment.instance()
+                                             .delivery();
+        initInbox(delivery);
+        initCatchUp(context, delivery);
+    }
+
+    /**
+     * Initializes the catch-up process for the instances of this repository and registers it
+     * as an event dispatcher in the same Bounded Context as the repository itself.
+     */
+    private void initCatchUp(BoundedContext context, Delivery delivery) {
+        CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
+        catchUpProcess = builder.setDispatchOp(this::sendToCatchingUp)
+                                .build();
+        context.registerEventDispatcher(catchUpProcess);
     }
 
     private void initCache(boolean multitenant) {
@@ -110,10 +169,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /**
      * Initializes the {@code Inbox}.
+     *
+     * @param delivery
+     *         the delivery of the current server environment
      */
-    private void initInbox() {
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
+    private void initInbox(Delivery delivery) {
         inbox = delivery
                 .<I>newInbox(entityStateType())
                 .withBatchListener(new BatchDeliveryListener<I>() {
@@ -129,6 +189,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 })
                 .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
                                   e -> ProjectionEndpoint.of(this, e))
+                .addEventEndpoint(InboxLabel.CATCH_UP,
+                                  e -> CatchUpEndpoint.of(this, e))
                 .build();
     }
 
@@ -162,7 +224,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * which projections of this repository are subscribed.
      *
      * @throws IllegalStateException
-     *          if one of the subscribed state classes cannot be served by the created state routing
+     *         if one of the subscribed state classes cannot be served by the created state routing
      */
     private StateUpdateRouting<I> createStateRouting() {
         StateUpdateRouting<I> routing = StateUpdateRouting.newInstance(idClass());
@@ -237,22 +299,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * Obtains event filters for event classes handled by projections of this repository.
-     */
-    private Set<EventFilter> createEventFilters() {
-        ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
-        Set<EventClass> eventClasses = messageClasses();
-        for (EventClass eventClass : eventClasses) {
-            String typeName = TypeName.of(eventClass.value())
-                                      .value();
-            builder.add(EventFilter.newBuilder()
-                                   .setEventType(typeName)
-                                   .build());
-        }
-        return builder.build();
-    }
-
-    /**
      * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
      */
     protected final Stand stand() {
@@ -263,7 +309,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Ensures that the repository has the storage.
      *
      * @return storage instance
-     * @throws IllegalStateException if the storage is null
+     * @throws IllegalStateException
+     *         if the storage is null
      */
     @Override
     protected final RecordStorage<I> recordStorage() {
@@ -304,18 +351,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         super.store(entity);
     }
 
-    /**
-     * Ensures that the repository has the storage.
-     *
-     * @return storage instance
-     * @throws IllegalStateException if the storage is null
-     */
-    protected ProjectionStorage<I> projectionStorage() {
-        @SuppressWarnings("unchecked") /* OK as we control the creation in createStorage(). */
-        ProjectionStorage<I> storage = (ProjectionStorage<I>) storage();
-        return storage;
-    }
-
     @Override
     public final ImmutableSet<EventClass> messageClasses() {
         return projectionClass().events();
@@ -338,40 +373,132 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return subscriber.isPresent();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Sends a system command to dispatch the given event to a subscriber.
-     */
     @Override
     protected final void dispatchTo(I id, Event event) {
         inbox().send(EventEnvelope.of(event))
                .toSubscriber(id);
     }
 
-    @Internal
-    public void writeLastHandledEventTime(Timestamp timestamp) {
-        checkNotNull(timestamp);
-        projectionStorage().writeLastHandledEventTime(timestamp);
+    /**
+     * Repeats the dispatching of the events from the event log to the requested entities
+     * since the specified time.
+     *
+     * <p>At the beginning of the process the state of each of the entities is set to the default.
+     *
+     * <p>During this process, the entities receive continuous updates to their state. After the
+     * catch-up is completed, the framework automatically resumes the dispatching of ongoing live
+     * events. When the catch-up is completed, a
+     * {@link io.spine.server.delivery.event.CatchUpCompleted CatchUpCompleted} event is emitted.
+     * One may use the identifier of the catch-up process and subscribe to the events of this type
+     * to understand whether the operation is done.
+     *
+     * <p>The subscriptions to the entity state updates (i.e.
+     * {@link io.spine.system.server.event.EntityStateChanged EntityStateChanged}) events are not
+     * supported in the catch-up.
+     *
+     * @param since
+     *         point in the past, since which the catch-up should be performed
+     * @param ids
+     *         identifiers of the entities to catch up, {@code null} means that all entities should
+     *         be caught up
+     * @return identifier of the catch-up operation
+     * @throws CatchUpAlreadyStartedException
+     *         if another catch-up for the same entity type and overlapping targets is already in
+     *         progress
+     * @see #catchUpAll(Timestamp) on a shortcut method which starts the catch-up for all
+     *         entities in this repository
+     */
+    public CatchUpId catchUp(Timestamp since, @Nullable Set<I> ids)
+            throws CatchUpAlreadyStartedException {
+        checkCatchUpTargets(ids);
+        checkCatchUpStartTime(since);
+
+        CatchUpId catchUpId = withCurrentTenant(context().isMultitenant())
+                .evaluate(() -> catchUpProcess.startCatchUp(since, ids));
+        return catchUpId;
     }
 
-    @Internal
-    public Timestamp readLastHandledEventTime() {
-        Timestamp timestamp = projectionStorage().readLastHandledEventTime();
-        return nullToDefault(timestamp);
+    private static void checkCatchUpStartTime(Timestamp since) {
+        TimestampTemporal whenStarts = TimestampTemporal.from(since);
+        if (!whenStarts.isInPast()) {
+            throw newIllegalArgumentException(
+                    "The catch-up must be started from the moment in the past, " +
+                            "but asked to start at `%s`, while now is `%s`.",
+                    since, Time.currentTime());
+        }
     }
 
-    @VisibleForTesting
-    final EventStreamQuery createStreamQuery() {
-        Set<EventFilter> eventFilters = createEventFilters();
+    private void checkCatchUpTargets(@Nullable Set<I> ids) {
+        if (ids != null) {
+            checkArgument(!ids.isEmpty(),
+                          "At least one ID is required to catch up the projection of type `%s`. " +
+                                  "You may also pass `null` to catch up all of the instances.",
+                          entityStateType());
+        }
+    }
 
-        // Gets the timestamp of the last event. This also ensures we have the storage.
-        Timestamp timestamp = readLastHandledEventTime();
-        EventStreamQuery.Builder builder = EventStreamQuery
-                .newBuilder()
-                .setAfter(timestamp)
-                .addAllFilter(eventFilters);
-        return builder.build();
+    /**
+     * Starts the catch-up of all entities in this repository.
+     *
+     * <p>This is a shortcut method for {@link #catchUp(Timestamp, Set) catchUp(since, null)}.
+     *
+     * @param since
+     *         point in the past, since which the catch-up should be performed
+     * @return identifier of the catch-up operation
+     * @throws CatchUpAlreadyStartedException
+     *         if another catch-up for the same entity type is already in progress
+     * @see #catchUp(Timestamp, Set)
+     */
+    public CatchUpId catchUpAll(Timestamp since) throws CatchUpAlreadyStartedException {
+        return catchUp(since, null);
+    }
+
+    /**
+     * Sends the event to the inboxes of the catching-up projection instances.
+     *
+     * <p>Allows to restrict the target entities by identifiers. In this case, the event is
+     * routed as per the repository routing schema, and the obtained set of the identifiers
+     * is narrowed down to the restricted targets.
+     *
+     * <p>Such a setting allows to catch up only the selected targets.
+     *
+     * <p>This API method also supports sending the special {@link CatchUpSignal}s
+     * to the projection. They regulate the lifecycle of the catch-up and are handled by
+     * the {@link CatchUpEndpoint} exposed by this repository.
+     *
+     * <p>Please note that the {@code CatchUpSignal}s are dispatched to the selected targets
+     * only and cannot be dispatched to all of the repository instances. The reason is that
+     * handling of {@code CatchUpSignal}s may affect the lifecycle state of the projection
+     * instances. E.g. the callee must know to what targets he is sending the "delete state" signal.
+     *
+     * @param event
+     *         the event to dispatch
+     * @param restrictToIds
+     *         optional set of the target identifiers to which the dispatching must be restricted;
+     *         if {@code null}, no restriction are applied and the event should be dispatched as per
+     *         the routing schema
+     * @return the set of the entity identifiers, which actually received the dispatched event
+     * @see CatchUpEndpoint
+     */
+    private Set<I> sendToCatchingUp(Event event, @Nullable Set<I> restrictToIds) {
+        EventEnvelope envelope = EventEnvelope.of(event);
+        Set<I> catchUpTargets;
+        if (envelope.message() instanceof CatchUpSignal) {
+            catchUpTargets = restrictToIds == null
+                             ? ImmutableSet.copyOf(index())
+                             : restrictToIds;
+        } else {
+            Set<I> routedTargets = route(envelope);
+            catchUpTargets = restrictToIds == null
+                             ? routedTargets
+                             : intersection(routedTargets, restrictToIds).immutableCopy();
+        }
+        Inbox<I> inbox = inbox();
+        for (I target : catchUpTargets) {
+            inbox.send(envelope)
+                 .toCatchUp(target);
+        }
+        return catchUpTargets;
     }
 
     @OverridingMethodsMustInvokeSuper

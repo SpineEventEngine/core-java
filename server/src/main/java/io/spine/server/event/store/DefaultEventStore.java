@@ -24,8 +24,8 @@ import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LoggerConfig;
 import com.google.protobuf.TextFormat;
-import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
+import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
@@ -38,7 +38,6 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
@@ -49,6 +48,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.flogger.LazyArgs.lazy;
+import static io.spine.server.event.EventComparator.chronological;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -159,14 +159,15 @@ public final class DefaultEventStore
      */
     private Iterator<Event> iterator(EventStreamQuery query) {
         checkNotNull(query);
-        Iterator<EEntity> entities = find(query);
+        Iterator<EEntity> iterator = find(query);
+        ImmutableList<EEntity> entities = ImmutableList.copyOf(iterator);
         Predicate<Event> predicate = new MatchesStreamQuery(query);
-        Iterator<Event> result =
-                Streams.stream(entities)
-                       .map(EEntity::state)
-                       .filter(predicate)
-                       .sorted(chronologically())
-                       .iterator();
+        Iterator<Event> result = entities
+                .stream()
+                .map(EEntity::state)
+                .filter(predicate)
+                .sorted(chronological())
+                .iterator();
         return result;
     }
 
@@ -176,24 +177,31 @@ public final class DefaultEventStore
     }
 
     /**
-     * Returns comparator which compares events by their timestamp in chronological order.
-     */
-    @SuppressWarnings("UnnecessaryLambda") // For an expressive API.
-    private static Comparator<Event> chronologically() {
-        return (e1, e2) -> Timestamps.compare(e1.time(), e2.time());
-    }
-
-    /**
      * Obtains iteration over entities matching the passed query.
      */
     private Iterator<EEntity> find(EventStreamQuery query) {
-        ResponseFormat format = ResponseFormat.getDefaultInstance();
+        ResponseFormat format = formatFrom(query);
         if (query.includeAll()) {
             return loadAll(format);
         } else {
             TargetFilters filters = QueryToFilters.convert(query);
             return find(filters, format);
         }
+    }
+
+    private static ResponseFormat formatFrom(EventStreamQuery query) {
+        ResponseFormat.Builder formatBuilder = ResponseFormat.newBuilder();
+        OrderBy ascendingByCreated = OrderBy
+                .newBuilder()
+                .setColumn(EEntity.CREATED_COLUMN)
+                .setDirection(OrderBy.Direction.ASCENDING)
+                .vBuild();
+        if (query.hasLimit()) {
+            formatBuilder.setOrderBy(ascendingByCreated)
+                         .setLimit(query.getLimit()
+                                        .getValue());
+        }
+        return formatBuilder.build();
     }
 
     private void store(Event event) {

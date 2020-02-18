@@ -20,10 +20,12 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxMessage;
+import io.spine.server.delivery.InboxMessageComparator;
 import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
@@ -38,7 +40,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.protobuf.util.Timestamps.compare;
 import static java.util.stream.Collectors.groupingBy;
 
 /**
@@ -54,6 +55,7 @@ public final class InMemoryInboxStorage
 
     private final MultitenantStorage<TenantInboxRecords> multitenantStorage;
 
+    @VisibleForTesting
     public InMemoryInboxStorage(boolean multitenant) {
         super(multitenant);
         this.multitenantStorage = new MultitenantStorage<TenantInboxRecords>(multitenant) {
@@ -73,7 +75,7 @@ public final class InMemoryInboxStorage
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()))
-                       .sorted(InMemoryInboxStorage::compareMessages)
+                       .sorted(InboxMessageComparator.chronologically)
                        .collect(groupingBy(m -> counter.getAndIncrement() / pageSize,
                                            toImmutableList()));
 
@@ -82,30 +84,18 @@ public final class InMemoryInboxStorage
     }
 
     @Override
-    public Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index) {
+    public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
         Optional<InboxMessage> result =
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()) && isToDeliver(r))
-                       .min(InMemoryInboxStorage::compareMessages);
+                       .min(InboxMessageComparator.chronologically);
         return result;
     }
 
     private static boolean isToDeliver(InboxMessage r) {
         return r.getStatus() == InboxMessageStatus.TO_DELIVER;
-    }
-
-    private static int compareMessages(InboxMessage m1, InboxMessage m2) {
-        int timeComparison = compare(m1.getWhenReceived(), m2.getWhenReceived());
-        if (timeComparison != 0) {
-            return timeComparison;
-        }
-        int versionComparison = Integer.compare(m1.getVersion(), m2.getVersion());
-        if(versionComparison == 0) {
-            throw new IllegalStateException("Versions must not be equal.");
-        }
-        return versionComparison;
     }
 
     @Override

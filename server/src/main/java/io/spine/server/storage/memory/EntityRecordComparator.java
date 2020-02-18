@@ -20,6 +20,8 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.client.OrderBy;
 import io.spine.client.OrderBy.Direction;
 import io.spine.server.entity.storage.ColumnName;
@@ -82,6 +84,7 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
         return ascending(columnName).reversed();
     }
 
+    @SuppressWarnings("ChainOfInstanceofChecks")    // Different special cases are covered.
     @Override
     public int compare(EntityRecordWithColumns a, EntityRecordWithColumns b) {
         checkNotNull(a);
@@ -98,6 +101,12 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
         if (aValue instanceof Comparable) {
             @SuppressWarnings({"unchecked", "rawtypes"}) // For convenience.
                     int result = ((Comparable) aValue).compareTo(bValue);
+            return result;
+        }
+
+        if (aValue instanceof Timestamp) {
+            @SuppressWarnings({"rawtypes"}) // For convenience.
+                    int result = Timestamps.compare((Timestamp) aValue, (Timestamp) bValue);
             return result;
         }
         throw newIllegalStateException("The entity record value is not a Comparable.");

@@ -22,9 +22,6 @@ package io.spine.server.delivery;
 
 import io.spine.server.type.CommandEnvelope;
 
-import java.util.Collection;
-import java.util.function.Predicate;
-
 /**
  * The part of {@link Inbox} responsible for processing incoming
  * {@link io.spine.server.type.CommandEnvelope commands}.
@@ -55,31 +52,11 @@ final class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     }
 
     @Override
-    protected Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource) {
-        return new CommandDispatcher(deduplicationSource);
-    }
-
-    @Override
-    protected InboxMessageStatus determineStatus(CommandEnvelope message) {
+    protected InboxMessageStatus determineStatus(CommandEnvelope message,
+                                                 InboxLabel label) {
         if(message.context().hasSchedule()) {
             return InboxMessageStatus.SCHEDULED;
         }
-        return super.determineStatus(message);
-    }
-
-    /**
-     * A strategy of command delivery from this {@code Inbox} to the command target.
-     */
-    class CommandDispatcher extends Dispatcher {
-
-        private CommandDispatcher(Collection<InboxMessage> deduplicationSource) {
-            super(deduplicationSource);
-        }
-
-        @Override
-        protected Predicate<? super InboxMessage> filterByType() {
-            return (Predicate<InboxMessage>) InboxMessage::hasCommand;
-        }
-
+        return super.determineStatus(message, label);
     }
 }

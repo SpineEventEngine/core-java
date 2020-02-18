@@ -28,6 +28,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
@@ -132,6 +133,16 @@ class SystemAwareStorageFactoryTest {
         InboxStorage storage = systemAware.createInboxStorage(CONTEXT.isMultitenant());
         assertThat(storage).isNull();
         assertTrue(factory.requestedInbox());
+    }
+
+    @Test
+    @DisplayName("delegate catch-up storage creation to given factory")
+    void delegateCatchUpStorage() {
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
+        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
+        CatchUpStorage storage = systemAware.createCatchUpStorage(CONTEXT.isMultitenant());
+        assertThat(storage).isNull();
+        assertTrue(factory.requestedCatchUp());
     }
 
     @Test

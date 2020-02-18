@@ -34,8 +34,8 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
+import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 import static io.spine.server.delivery.given.DeliveryTestEnv.generateNodeId;
-import static io.spine.server.delivery.given.DeliveryTestEnv.newShardIndex;
 import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofSeconds;
 import static java.util.stream.IntStream.range;
@@ -56,16 +56,16 @@ public abstract class ShardedWorkRegistryTest {
     void testPickUp() {
         ShardedWorkRegistry registry = registry();
 
-        ShardIndex index = newShardIndex(1, 42);
+        ShardIndex index = newIndex(1, 42);
         NodeId node = generateNodeId();
 
         Optional<ShardProcessingSession> session = registry.pickUp(index, node);
         ShardProcessingSession actualSession = assertSession(session, index);
 
         assertThat(registry.pickUp(index, node))
-              .isEmpty();
+                .isEmpty();
         assertThat(registry.pickUp(index, generateNodeId()))
-              .isEmpty();
+                .isEmpty();
 
         actualSession.complete();
         Optional<ShardProcessingSession> newSession = registry.pickUp(index, generateNodeId());
@@ -121,7 +121,7 @@ public abstract class ShardedWorkRegistryTest {
         ImmutableSet<ShardIndex> indexes = range(1, howMany)
                 .mapToObj(i -> {
                     NodeId newNode = generateNodeId();
-                    ShardIndex newIndex = newShardIndex(i, outOfTotal);
+                    ShardIndex newIndex = newIndex(i, outOfTotal);
 
                     Optional<ShardProcessingSession> session = registry.pickUp(newIndex, newNode);
                     assertSession(session, newIndex);
@@ -136,7 +136,7 @@ public abstract class ShardedWorkRegistryTest {
     private static ShardProcessingSession
     assertSession(Optional<ShardProcessingSession> session, ShardIndex index) {
         assertThat(session)
-              .isPresent();
+                .isPresent();
         ShardProcessingSession actualSession = session.get();
         assertThat(actualSession.shardIndex()).isEqualTo(index);
         return actualSession;

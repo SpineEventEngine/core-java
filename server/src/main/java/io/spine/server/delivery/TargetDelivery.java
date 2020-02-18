@@ -32,28 +32,53 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Takes the messages, which were previously sent to their targets via this inbox, and
- * delivers them, performing their de-duplication.
+ * Takes the messages, which were previously sent to their targets via their inbox, and
+ * delivers them.
  *
- * <p>Source messages for the de-duplication are supplied separately.
+ * <p>Groups messages sent to the same target, but preserving the original order
+ * throughout all the batches. Each of the resulting batches is delivered with a prior notification
+ * of the supplied {@linkplain BatchDeliveryListener listener}. Underlying listener implementations
+ * may then optimize loading of their targets, e.g. use a single read and single write operation
+ * per batch.
  */
 final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
     private final InboxOfCommands<I> inboxOfCmds;
     private final InboxOfEvents<I> inboxOfEvents;
-    private final @Nullable BatchDeliveryListener<I> batchDispatcher;
+    private final @Nullable BatchDeliveryListener<I> batchListener;
 
     TargetDelivery(InboxOfCommands<I> inboxOfCmds,
                    InboxOfEvents<I> inboxOfEvents,
-                   @Nullable BatchDeliveryListener<I> batchDispatcher) {
+                   @Nullable BatchDeliveryListener<I> batchListener) {
         this.inboxOfCmds = inboxOfCmds;
         this.inboxOfEvents = inboxOfEvents;
-        this.batchDispatcher = batchDispatcher;
+        this.batchListener = batchListener;
     }
 
-    private static void doDeliver(InboxPart.Dispatcher cmdDispatcher,
-                                  InboxPart.Dispatcher eventDispatcher,
-                                  InboxMessage incomingMessage) {
+    @Override
+    public void deliver(List<InboxMessage> incoming) {
+
+        if (batchListener == null) {
+            for (InboxMessage incomingMessage : incoming) {
+                doDeliver(inboxOfCmds, inboxOfEvents, incomingMessage);
+            }
+        } else {
+            deliverInBatch(incoming, batchListener);
+        }
+    }
+
+    @Override
+    public void onDuplicate(InboxMessage message) {
+        if(message.hasCommand()) {
+            inboxOfCmds.notifyOfDuplicated(message);
+        } else {
+            inboxOfEvents.notifyOfDuplicated(message);
+        }
+    }
+
+    private static <I> void doDeliver(InboxOfCommands<I>  cmdDispatcher,
+                                      InboxOfEvents<I> eventDispatcher,
+                                      InboxMessage incomingMessage) {
         if (incomingMessage.hasCommand()) {
             cmdDispatcher.deliver(incomingMessage);
         } else {
@@ -61,29 +86,12 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         }
     }
 
-    @Override
-    public void deliver(List<InboxMessage> incoming,
-                        List<InboxMessage> deduplicationSource) {
-        InboxPart.Dispatcher cmdDispatcher = inboxOfCmds.dispatcherWith(deduplicationSource);
-        InboxPart.Dispatcher eventDispatcher = inboxOfEvents.dispatcherWith(deduplicationSource);
-
-        if (batchDispatcher == null) {
-            for (InboxMessage incomingMessage : incoming) {
-                doDeliver(cmdDispatcher, eventDispatcher, incomingMessage);
-            }
-        } else {
-            deliverInBatch(incoming, batchDispatcher, cmdDispatcher, eventDispatcher);
-        }
-    }
-
     private void deliverInBatch(List<InboxMessage> incoming,
-                                BatchDeliveryListener<I> batchDispatcher,
-                                InboxPart.Dispatcher cmdDispatcher,
-                                InboxPart.Dispatcher eventDispatcher) {
+                                BatchDeliveryListener<I> batchDispatcher) {
         List<Batch<I>> batches = Batch.byInboxId(incoming, this::asEnvelope);
 
         for (Batch<I> batch : batches) {
-            batch.deliverVia(batchDispatcher, cmdDispatcher, eventDispatcher);
+            batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents);
         }
     }
 
@@ -151,8 +159,8 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         }
 
         private void deliverVia(BatchDeliveryListener<I> dispatcher,
-                                InboxPart.Dispatcher cmdDispatcher,
-                                InboxPart.Dispatcher eventDispatcher) {
+                                InboxOfCommands<I> cmdDispatcher,
+                                InboxOfEvents<I> eventDispatcher) {
             if (messages.size() > 1) {
                 Any packedId = inboxId.value()
                                       .getEntityId()

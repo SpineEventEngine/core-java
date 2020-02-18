@@ -135,17 +135,53 @@ public class DefaultEventStoreTest {
         }
 
         @Test
+        @DisplayName("time bounds and limit")
+        void timeBoundsAndLimit() {
+            Duration delta = seconds(222);
+            Timestamp present = currentTime();
+            Timestamp past = subtract(present, delta);
+            Timestamp longPast = subtract(past, delta);
+            Timestamp future = add(present, delta);
+
+            Event eventInPast = projectCreated(past);
+            Event eventInPresent = projectCreated(present);
+            Event eventInFuture = projectCreated(future);
+
+            eventStore.append(eventInPast);
+            eventStore.append(eventInPresent);
+            eventStore.append(eventInFuture);
+
+            int expectedSize = 1;
+            EventStreamQuery query = EventStreamQuery
+                    .newBuilder()
+                    .setAfter(longPast)
+                    .setBefore(future)
+                    .setLimit(limitOf(expectedSize))
+                    .build();
+            AtomicBoolean done = new AtomicBoolean(false);
+            ResponseObserver observer = new ResponseObserver(done);
+            eventStore.read(query, observer);
+            Collection<Event> resultEvents = observer.getEvents();
+
+            assertDone(done);
+            assertThat(resultEvents).hasSize(expectedSize);
+            Event actualEvent = resultEvents.iterator()
+                                            .next();
+            assertEquals(eventInPast, actualEvent);
+        }
+
+        @Test
         @DisplayName("type")
         void type() {
             Timestamp now = currentTime();
 
             Event taskAdded1 = taskAdded(now);
             Event projectCreated = projectCreated(now);
-            Event teasAdded2 = taskAdded(now);
+            Event taskAdded2 = taskAdded(now);
 
             eventStore.append(taskAdded1);
             eventStore.append(projectCreated);
-            eventStore.append(teasAdded2);
+            eventStore.append(taskAdded2);
 
             EventFilter taskAddedType = EventFilter
                     .newBuilder()
@@ -163,7 +199,42 @@ public class DefaultEventStoreTest {
 
             IterableSubject assertResultEvents = assertThat(observer.getEvents());
             assertResultEvents.hasSize(2);
-            assertResultEvents.containsExactly(taskAdded1, teasAdded2);
+            assertResultEvents.containsExactly(taskAdded1, taskAdded2);
+        }
+
+        @Test
+        @DisplayName("type and limit")
+        void typeAndLimit() {
+            Timestamp now = currentTime();
+            Timestamp future = add(now, seconds(1));
+
+            Event taskAdded1 = taskAdded(now);
+            Event projectCreated = projectCreated(now);
+            Event taskAdded2 = taskAdded(future);
+
+            eventStore.append(taskAdded1);
+            eventStore.append(projectCreated);
+            eventStore.append(taskAdded2);
+
+            EventFilter taskAddedType = EventFilter
+                    .newBuilder()
+                    .setEventType(TypeName.of(TaskAdded.class)
+                                          .value())
+                    .build();
+            int expectedSize = 1;
+            EventStreamQuery query = EventStreamQuery
+                    .newBuilder()
+                    .addFilter(taskAddedType)
+                    .setLimit(limitOf(expectedSize))
+                    .build();
+            AtomicBoolean done = new AtomicBoolean(false);
+            ResponseObserver observer = new ResponseObserver(done);
+            eventStore.read(query, observer);
+            assertDone(done);
+
+            IterableSubject assertResultEvents = assertThat(observer.getEvents());
+            assertResultEvents.hasSize(1);
+            assertResultEvents.containsExactly(taskAdded1);
         }
 
         @Test
@@ -200,6 +271,53 @@ public class DefaultEventStoreTest {
             IterableSubject assertResultEvents = assertThat(observer.getEvents());
             assertResultEvents.hasSize(1);
             assertResultEvents.containsExactly(eventInFuture);
+        }
+
+        @Test
+        @DisplayName("time bounds, type and limit")
+        void timeBoundsTypeAndFuture() {
+            Duration delta = seconds(111);
+            Timestamp present = currentTime();
+            Timestamp past = subtract(present, delta);
+            Timestamp future = add(present, delta);
+            Timestamp distantFuture = add(future, delta);
+
+            Event eventInPast = taskAdded(past);
+            Event eventInPresent = projectCreated(present);
+            Event eventInFuture = taskAdded(future);
+            Event eventInDistantFuture = taskAdded(distantFuture);
+
+            eventStore.append(eventInPast);
+            eventStore.append(eventInPresent);
+            eventStore.append(eventInFuture);
+            eventStore.append(eventInDistantFuture);
+
+            EventFilter taskAddedType = EventFilter
+                    .newBuilder()
+                    .setEventType(TypeName.of(TaskAdded.class)
+                                          .value())
+                    .build();
+            EventStreamQuery query = EventStreamQuery
+                    .newBuilder()
+                    .setAfter(past)
+                    .addFilter(taskAddedType)
+                    .setLimit(limitOf(1))
+                    .build();
+            AtomicBoolean done = new AtomicBoolean(false);
+            ResponseObserver observer = new ResponseObserver(done);
+            eventStore.read(query, observer);
+            assertDone(done);
+
+            IterableSubject assertResultEvents = assertThat(observer.getEvents());
+            assertResultEvents.hasSize(1);
+            assertResultEvents.containsExactly(eventInFuture);
+        }
+
+        private EventStreamQuery.Limit limitOf(int value) {
+            return EventStreamQuery.Limit
+                    .newBuilder()
+                    .setValue(value)
+                    .vBuild();
         }
     }
 

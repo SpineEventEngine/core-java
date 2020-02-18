@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterators;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
@@ -32,12 +31,8 @@ import io.spine.core.UserId;
 import io.spine.protobuf.Messages;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.delivery.given.CalcAggregate;
-import io.spine.server.delivery.given.CalculatorSignal;
-import io.spine.server.delivery.given.DeliveryTestEnv.CalculatorRepository;
 import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
-import io.spine.server.delivery.given.DeliveryTestEnv.SignalMemoizer;
 import io.spine.server.delivery.given.FixedShardStrategy;
 import io.spine.server.delivery.given.MemoizingDeliveryMonitor;
 import io.spine.server.delivery.given.TaskAggregate;
@@ -45,50 +40,31 @@ import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.tenant.TenantAwareRunner;
-import io.spine.test.delivery.AddNumber;
-import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
-import io.spine.test.delivery.NumberImported;
-import io.spine.test.delivery.NumberReacted;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-import static com.google.common.collect.Streams.concat;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
-import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests on message delivery that use different settings of sharding configuration and
@@ -100,28 +76,14 @@ import static org.junit.Assert.assertTrue;
 @SlowTest
 @DisplayName("Delivery of messages to entities should deliver those via")
 @SuppressWarnings("WeakerAccess")   // Exposed for libraries, wishing to run these tests.
-public class DeliveryTest {
-
-    private Delivery originalDelivery;
-
-    @BeforeEach
-    public void setUp() {
-        this.originalDelivery = ServerEnvironment.instance()
-                                                 .delivery();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        ServerEnvironment.instance()
-                         .configureDelivery(originalDelivery);
-    }
+public class DeliveryTest extends AbstractDeliveryTest {
 
     @Test
     @DisplayName("a single shard to a single target in a multi-threaded env")
     public void singleTarget_singleShard_manyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
-        new ThreadSimulator(42).runWith(aTarget);
+        new NastyClient(42).runWith(aTarget);
     }
 
     @Test
@@ -129,7 +91,7 @@ public class DeliveryTest {
     public void manyTargets_singleShard_manyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(7);
-        new ThreadSimulator(10).runWith(targets);
+        new NastyClient(10).runWith(targets);
     }
 
     @Test
@@ -137,7 +99,7 @@ public class DeliveryTest {
     public void singleTarget_manyShards_manyThreads() {
         changeShardCountTo(1986);
         ImmutableSet<String> targets = singleTarget();
-        new ThreadSimulator(15).runWith(targets);
+        new NastyClient(15).runWith(targets);
     }
 
     @Test
@@ -145,7 +107,7 @@ public class DeliveryTest {
     public void manyTargets_manyShards_manyThreads() {
         changeShardCountTo(2004);
         ImmutableSet<String> targets = manyTargets(13);
-        new ThreadSimulator(19).runWith(targets);
+        new NastyClient(19).runWith(targets);
     }
 
     @Test
@@ -153,7 +115,7 @@ public class DeliveryTest {
     public void singleTarget_manyShards_singleThread() {
         changeShardCountTo(12);
         ImmutableSet<String> aTarget = singleTarget();
-        new ThreadSimulator(1).runWith(aTarget);
+        new NastyClient(1).runWith(aTarget);
     }
 
     @Test
@@ -161,7 +123,7 @@ public class DeliveryTest {
     public void singleTarget_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
-        new ThreadSimulator(1).runWith(aTarget);
+        new NastyClient(1).runWith(aTarget);
     }
 
     @Test
@@ -169,7 +131,7 @@ public class DeliveryTest {
     public void manyTargets_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(11);
-        new ThreadSimulator(1).runWith(targets);
+        new NastyClient(1).runWith(targets);
     }
 
     @Test
@@ -177,7 +139,7 @@ public class DeliveryTest {
     public void manyTargets_manyShards_singleThread() {
         changeShardCountTo(2019);
         ImmutableSet<String> targets = manyTargets(13);
-        new ThreadSimulator(1).runWith(targets);
+        new NastyClient(1).runWith(targets);
     }
 
     @Test
@@ -192,7 +154,7 @@ public class DeliveryTest {
                          .configureDelivery(newDelivery);
 
         ImmutableSet<String> targets = manyTargets(7);
-        new ThreadSimulator(5, false).runWith(targets);
+        new NastyClient(5, false).runWith(targets);
 
         ImmutableSet<ShardIndex> shards = memoizer.shards();
         assertThat(shards.size()).isEqualTo(1);
@@ -220,7 +182,7 @@ public class DeliveryTest {
         delivery.subscribe(rawMessageMemoizer);
 
         ImmutableSet<String> targets = manyTargets(7);
-        new ThreadSimulator(1).runWith(targets);
+        new NastyClient(1).runWith(targets);
         int totalMsgsInStats = deliveryStats.stream()
                                             .mapToInt(DeliveryStats::deliveredCount)
                                             .sum();
@@ -233,27 +195,26 @@ public class DeliveryTest {
             "and `Optional.empty()` if shard was already picked")
     public void returnOptionalEmptyIfPicked() {
         int shardCount = 11;
-        ShardedWorkRegistry workRegistry = new InMemoryShardedWorkRegistry();
+        ShardedWorkRegistry registry = new InMemoryShardedWorkRegistry();
         FixedShardStrategy strategy = new FixedShardStrategy(shardCount);
         Delivery delivery = Delivery.newBuilder()
                                     .setStrategy(strategy)
-                                    .setWorkRegistry(workRegistry)
+                                    .setWorkRegistry(registry)
                                     .build();
-        ServerEnvironment serverEnvironment = ServerEnvironment.instance();
-        serverEnvironment.configureDelivery(delivery);
+        ServerEnvironment env = ServerEnvironment.instance();
+        env.configureDelivery(delivery);
 
         ShardIndex index = strategy.nonEmptyShard();
         TenantId tenantId = GivenTenantId.generate();
         TenantAwareRunner.with(tenantId)
-                         .run(() -> checkPresentStats(delivery, index));
+                         .run(() -> assertStatsMatch(delivery, index));
 
-        Optional<ShardProcessingSession> session =
-                workRegistry.pickUp(index, serverEnvironment.nodeId());
+        Optional<ShardProcessingSession> session = registry.pickUp(index, env.nodeId());
         Truth8.assertThat(session)
               .isPresent();
 
         TenantAwareRunner.with(tenantId)
-                         .run(() -> checkStatsEmpty(delivery, index));
+                         .run(() -> assertStatsEmpty(delivery, index));
     }
 
     @Test
@@ -275,7 +236,7 @@ public class DeliveryTest {
 
         ImmutableSet<String> aTarget = singleTarget();
         assertThat(monitor.stats()).isEmpty();
-        new ThreadSimulator(1).runWith(aTarget);
+        new NastyClient(1).runWith(aTarget);
 
         for (DeliveryStats singleRunStats : monitor.stats()) {
             assertThat(singleRunStats.shardIndex()).isEqualTo(theOnlyIndex);
@@ -290,18 +251,10 @@ public class DeliveryTest {
         assertThat(totalFromStats).isEqualTo(observedMsgCount);
     }
 
-    private static void checkStatsEmpty(Delivery delivery, ShardIndex index) {
+    private static void assertStatsEmpty(Delivery delivery, ShardIndex index) {
         Optional<DeliveryStats> emptyStats = delivery.deliverMessagesFrom(index);
         Truth8.assertThat(emptyStats)
               .isEmpty();
-    }
-
-    private static void checkPresentStats(Delivery delivery, ShardIndex index) {
-        Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
-        Truth8.assertThat(stats)
-              .isPresent();
-        assertThat(stats.get()
-                        .shardIndex()).isEqualTo(index);
     }
 
     @Test
@@ -322,7 +275,7 @@ public class DeliveryTest {
                          .configureDelivery(newDelivery);
 
         ImmutableSet<String> targets = manyTargets(6);
-        new ThreadSimulator(3, false).runWith(targets);
+        new NastyClient(3, false).runWith(targets);
 
         // Check that each message was in `TO_DELIVER` status upon writing to the storage.
         ImmutableList<InboxMessage> rawMessages = memoizer.messages();
@@ -330,7 +283,7 @@ public class DeliveryTest {
             assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.TO_DELIVER);
         }
 
-        ImmutableMap<ShardIndex, Page<InboxMessage>> contents = inboxContents();
+        ImmutableMap<ShardIndex, Page<InboxMessage>> contents = InboxContents.get();
         for (Page<InboxMessage> page : contents.values()) {
             ImmutableList<InboxMessage> messages = page.contents();
             for (InboxMessage message : messages) {
@@ -347,7 +300,7 @@ public class DeliveryTest {
         int pageSize = 20;
         Delivery delivery = Delivery.newBuilder()
                                     .setStrategy(strategy)
-                                    .setIdempotenceWindow(Durations.ZERO)
+                                    .setDeduplicationWindow(Durations.ZERO)
                                     .setMonitor(monitor)
                                     .setPageSize(pageSize)
                                     .build();
@@ -356,7 +309,7 @@ public class DeliveryTest {
         ServerEnvironment.instance()
                          .configureDelivery(delivery);
         ImmutableSet<String> targets = singleTarget();
-        ThreadSimulator simulator = new ThreadSimulator(7, false);
+        NastyClient simulator = new NastyClient(7, false);
         simulator.runWith(targets);
 
         String theTarget = targets.iterator()
@@ -377,7 +330,8 @@ public class DeliveryTest {
 
         SingleTenantBlackBoxContext context =
                 BlackBoxBoundedContext.singleTenant()
-                                      .with(DefaultRepository.of(TaskAggregate.class))
+                                      .with(DefaultRepository.of(
+                                              TaskAggregate.class))
                                       .with(new TaskAssignment.Repository())
                                       .with(new TaskView.Repository());
         List<DCreateTask> commands = generateCommands(200);
@@ -400,6 +354,25 @@ public class DeliveryTest {
             assertThat(state.getId()).isEqualTo(taskId);
             assertThat(Messages.isDefault(actualAssignee)).isFalse();
         }
+    }
+
+    /*
+     * Test environment.
+     *
+     * <p>Accesses the {@linkplain Delivery Delivery API} which has been made
+     * package-private and marked as visible for testing. Therefore the test environment routines
+     * aren't moved to a separate {@code ...TestEnv} class. Otherwise the test-only API
+     * of {@code Delivery} must have been made {@code public}, which wouldn't be
+     * a good API design move.
+     ******************************************************************************/
+
+
+    private static void assertStatsMatch(Delivery delivery, ShardIndex index) {
+        Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
+        Truth8.assertThat(stats)
+              .isPresent();
+        assertThat(stats.get()
+                        .shardIndex()).isEqualTo(index);
     }
 
     private static List<DCreateTask> generateCommands(int howMany) {
@@ -434,256 +407,6 @@ public class DeliveryTest {
                 delivery.deliverMessagesFrom(update.getShardIndex());
             }
         });
-    }
-
-    private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContents() {
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
-        InboxStorage storage = delivery.storage();
-        int shardCount = delivery.shardCount();
-        ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
-                ImmutableMap.builder();
-        for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
-            ShardIndex index =
-                    ShardIndex.newBuilder()
-                              .setIndex(shardIndex)
-                              .setOfTotal(shardCount)
-                              .vBuild();
-            Page<InboxMessage> page = with(TenantId.getDefaultInstance())
-                    .evaluate(() -> storage.readAll(index, Integer.MAX_VALUE));
-
-            builder.put(index, page);
-        }
-
-        return builder.build();
-    }
-
-    /*
-     * Test environment.
-     *
-     * <p>Accesses the {@linkplain Delivery Delivery API} which has been made
-     * package-private and marked as visible for testing. Therefore the test environment routines
-     * aren't moved to a separate {@code ...TestEnv} class. Otherwise the test-only API
-     * of {@code Delivery} must have been made {@code public}, which wouldn't be
-     * a good API design move.
-     ******************************************************************************/
-
-    /**
-     * Posts addendum commands to instances of {@link CalcAggregate} in a selected number of threads
-     * and verifies that each of the targets calculated a proper sum.
-     */
-    private static class ThreadSimulator {
-
-        private final int threadCount;
-        private final boolean shouldInboxBeEmpty;
-        private final CalculatorRepository repository;
-
-        // Which signals are expected to be delivered to which targets.
-        private @Nullable Map<String, List<CalculatorSignal>> signalsPerTarget;
-
-        private ThreadSimulator(int threadCount) {
-            this(threadCount, true);
-        }
-
-        private ThreadSimulator(int threadCount, boolean shouldInboxBeEmpty) {
-            this.threadCount = threadCount;
-            this.shouldInboxBeEmpty = shouldInboxBeEmpty;
-            this.repository = new CalculatorRepository();
-        }
-
-        /**
-         * Generates some number of commands and events and delivers them to the specified
-         * {@linkplain CalcAggregate target entities} via the selected number of threads.
-         *
-         * @param targets
-         *         the identifiers of target entities
-         */
-        private void runWith(Set<String> targets) {
-            BlackBoxBoundedContext<?> context =
-                    BlackBoxBoundedContext.singleTenant()
-                                          .with(repository);
-
-            SignalMemoizer memoizer = subscribeToDelivered();
-
-            int streamSize = targets.size() * 30;
-
-            Iterator<String> targetsIterator = Iterators.cycle(targets);
-            List<AddNumber> commands = commands(streamSize, targetsIterator);
-            List<NumberImported> importEvents = eventsToImport(streamSize, targetsIterator);
-            List<NumberReacted> reactEvents = eventsToReact(streamSize, targetsIterator);
-
-            postAsync(context, commands, importEvents, reactEvents);
-
-            Stream<CalculatorSignal> signals = concat(commands.stream(),
-                                                      importEvents.stream(),
-                                                      reactEvents.stream());
-
-            signalsPerTarget = signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
-
-            for (String calcId : signalsPerTarget.keySet()) {
-
-                ImmutableSet<CalculatorSignal> receivedMessages = memoizer.messagesBy(calcId);
-                Set<CalculatorSignal> targetSignals =
-                        ImmutableSet.copyOf(signalsPerTarget.get(calcId));
-                assertEquals(targetSignals, receivedMessages);
-
-                Integer sumForTarget = targetSignals.stream()
-                                                    .map(CalculatorSignal::getValue)
-                                                    .reduce(0, Integer::sum);
-                Calc expectedState = Calc.newBuilder()
-                                         .setId(calcId)
-                                         .setSum(sumForTarget)
-                                         .build();
-                context.assertEntity(CalcAggregate.class, calcId)
-                       .hasStateThat()
-                       .comparingExpectedFieldsOnly()
-                       .isEqualTo(expectedState);
-
-            }
-            ensureInboxesEmpty();
-        }
-
-        private int callsToRepoStore(String id) {
-            return repository.storeCallsCount(id);
-        }
-
-        private int callsToRepoLoadOrCreate(String id) {
-            return repository.loadOrCreateCallsCount(id);
-        }
-
-        private ImmutableMap<String, List<CalculatorSignal>> signalsPerTarget() {
-            if (signalsPerTarget == null) {
-                return ImmutableMap.of();
-            }
-            return ImmutableMap.copyOf(signalsPerTarget);
-        }
-
-        private static List<NumberReacted> eventsToReact(int streamSize,
-                                                         Iterator<String> targetsIterator) {
-            IntStream ints = IntStream.range(0, streamSize);
-            return ints.mapToObj((value) ->
-                                         NumberReacted.newBuilder()
-                                                      .setCalculatorId(targetsIterator.next())
-                                                      .setValue(value)
-                                                      .vBuild())
-                       .collect(toList());
-        }
-
-        private static List<NumberImported> eventsToImport(int streamSize,
-                                                           Iterator<String> targetsIterator) {
-            IntStream ints = IntStream.range(streamSize, streamSize * 2);
-            return ints.mapToObj((value) ->
-                                         NumberImported.newBuilder()
-                                                       .setCalculatorId(targetsIterator.next())
-                                                       .setValue(value)
-                                                       .vBuild())
-                       .collect(toList());
-        }
-
-        private static List<AddNumber> commands(int streamSize, Iterator<String> targetsIterator) {
-            IntStream ints = IntStream.range(streamSize * 2, streamSize * 3);
-            return ints.mapToObj((value) ->
-                                         AddNumber.newBuilder()
-                                                  .setCalculatorId(targetsIterator.next())
-                                                  .setValue(value)
-                                                  .vBuild())
-                       .collect(toList());
-        }
-
-        private static SignalMemoizer subscribeToDelivered() {
-            SignalMemoizer observer = new SignalMemoizer();
-            ServerEnvironment.instance()
-                             .delivery()
-                             .subscribe(observer);
-            return observer;
-        }
-
-        private void ensureInboxesEmpty() {
-            if (shouldInboxBeEmpty) {
-                ImmutableMap<ShardIndex, Page<InboxMessage>> shardedItems = inboxContents();
-
-                for (ShardIndex index : shardedItems.keySet()) {
-                    Page<InboxMessage> page = shardedItems.get(index);
-                    assertTrue(page.contents()
-                                   .isEmpty());
-                    assertFalse(page.next()
-                                    .isPresent());
-                }
-            }
-        }
-
-        private void postAsync(BlackBoxBoundedContext<?> context,
-                               List<AddNumber> commands,
-                               List<NumberImported> eventsToImport,
-                               List<NumberReacted> eventsToReact) {
-
-            Stream<Callable<Object>> signalStream =
-                    concat(
-                            commandCallables(context, commands),
-                            importEventCallables(context, eventsToImport),
-                            reactEventsCallables(context, eventsToReact)
-                    );
-            Collection<Callable<Object>> signals = signalStream.collect(toList());
-            if (1 == threadCount) {
-                runSync(signals);
-            } else {
-                runAsync(signals);
-            }
-        }
-
-        private void runAsync(Collection<Callable<Object>> signals) {
-            ExecutorService executorService = newFixedThreadPool(threadCount);
-            try {
-                executorService.invokeAll(signals);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } finally {
-                executorService.shutdownNow();
-            }
-        }
-
-        private static void runSync(Collection<Callable<Object>> signals) {
-            for (Callable<Object> signal : signals) {
-                try {
-                    signal.call();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        private static Stream<Callable<Object>>
-        commandCallables(BlackBoxBoundedContext<?> context, List<AddNumber> commands) {
-            return commands.stream()
-                           .map((c) -> () -> {
-                               context.receivesCommand(c);
-                               return new Object();
-                           });
-        }
-
-        private static Stream<Callable<Object>>
-        importEventCallables(BlackBoxBoundedContext<?> context, List<NumberImported> events) {
-            return events.stream()
-                         .map((e) -> () -> {
-                             context.importsEvent(e);
-                             return new Object();
-                         });
-        }
-
-        private static Stream<Callable<Object>>
-        reactEventsCallables(BlackBoxBoundedContext<?> context, List<NumberReacted> events) {
-            return events.stream()
-                         .map((e) -> () -> {
-                             context.receivesEvent(e);
-                             return new Object();
-                         });
-        }
-    }
-
-    private static void changeShardCountTo(int shards) {
-        Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
-        ServerEnvironment.instance()
-                         .configureDelivery(newDelivery);
     }
 
     private static final class MonitorUnderTest extends DeliveryMonitor {

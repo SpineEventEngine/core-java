@@ -21,10 +21,8 @@
 package io.spine.server.projection;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.core.EventContext;
 import io.spine.server.delivery.EventEndpoint;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycleMonitor;
@@ -104,11 +102,6 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     protected void onModified(P projection) {
         ProjectionRepository<I, P, ?> repository = repository();
         repository.store(projection);
-
-        EventContext eventContext = envelope().context();
-        Timestamp eventTime = eventContext.getTimestamp();
-        repository.projectionStorage()
-                  .writeLastHandledEventTime(eventTime);
     }
 
     /**

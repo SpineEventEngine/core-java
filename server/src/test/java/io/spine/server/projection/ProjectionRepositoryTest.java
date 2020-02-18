@@ -503,32 +503,6 @@ class ProjectionRepositoryTest
         assertFalse(items.hasNext());
     }
 
-    /**
-     * Ensures that {@link ProjectionRepository#readLastHandledEventTime()} and
-     * {@link ProjectionRepository#writeLastHandledEventTime(Timestamp)} which are used by
-     * Beam-based catch-up are exposed.
-     */
-    @Test
-    @DisplayName("expose read and write methods for the timestamp of the last handled event")
-    void getSetLastHandled() {
-        TestProjectionRepository repository = repository();
-        assertThat(repository.readLastHandledEventTime()).isNotNull();
-        Timestamp time = currentTime();
-        repository.writeLastHandledEventTime(time);
-        assertThat(repository.readLastHandledEventTime()).isEqualTo(time);
-    }
-
-    /**
-     * Ensures that {@link ProjectionRepository#createStreamQuery()}, which is used by the catch-up
-     * procedures is exposed.
-     */
-    @Test
-    @DisplayName("create stream query")
-    void createStreamQuery() {
-        ProjectionRepository<?, ?, ?> repository = repository();
-        assertNotNull(repository.createStreamQuery());
-    }
-
     @Nested
     @DisplayName("provide package-private access to")
     class ExposeToPackage {

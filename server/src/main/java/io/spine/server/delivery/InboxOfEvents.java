@@ -22,9 +22,6 @@ package io.spine.server.delivery;
 
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Collection;
-import java.util.function.Predicate;
-
 /**
  * The part of {@link Inbox} responsible for processing incoming
  * {@link io.spine.server.type.EventEnvelope events}.
@@ -45,8 +42,8 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
     @Override
     protected String extractUuidFrom(EventEnvelope envelope) {
-        return  envelope.id()
-                        .getValue();
+        return envelope.id()
+                       .getValue();
     }
 
     @Override
@@ -55,22 +52,10 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     }
 
     @Override
-    protected Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource) {
-        return new EventDispatcher(deduplicationSource);
-    }
-
-    /**
-     * A strategy of event delivery from this {@code Inbox} to the event targets.
-     */
-    class EventDispatcher extends Dispatcher {
-
-        private EventDispatcher(Collection<InboxMessage> deduplicationSource) {
-            super(deduplicationSource);
+    protected InboxMessageStatus determineStatus(EventEnvelope message, InboxLabel label) {
+        if (label == InboxLabel.CATCH_UP) {
+            return InboxMessageStatus.TO_CATCH_UP;
         }
-
-        @Override
-        protected Predicate<? super InboxMessage> filterByType() {
-            return (Predicate<InboxMessage>) InboxMessage::hasEvent;
-        }
+        return super.determineStatus(message, label);
     }
 }

@@ -26,13 +26,6 @@ import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.type.TypeUrl;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
 /**
  * An abstract base of {@link Inbox inbox} part.
  *
@@ -79,14 +72,10 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
     /**
      * Determines the status of the message.
      */
-    protected InboxMessageStatus determineStatus(M message) {
+    protected InboxMessageStatus determineStatus(M message,
+                                                 InboxLabel label) {
         return InboxMessageStatus.TO_DELIVER;
     }
-
-    /**
-     * Creates an instance of dispatcher along with the de-duplication source messages.
-     */
-    protected abstract Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource);
 
     void store(M envelope, I entityId, InboxLabel label) {
         InboxId inboxId = InboxIds.wrap(entityId, entityStateType);
@@ -100,7 +89,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setInboxId(inboxId)
                 .setShardIndex(shardIndex)
                 .setLabel(label)
-                .setStatus(determineStatus(envelope))
+                .setStatus(determineStatus(envelope, label))
                 .setWhenReceived(Time.currentTime())
                 .setVersion(VersionCounter.next());
         setRecordPayload(envelope, builder);
@@ -117,70 +106,49 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
     }
 
     /**
-     * An abstract base for routines which dispatch {@code InboxMessage}s to their endpoints.
-     *
-     *
-     * <p>Takes care of de-duplication of the messages, using the prepared collection of previously
-     * dispatched messages to look for duplicate amongst.
-     *
-     * <p>In case a duplication is found, the respective endpoint is
-     * {@linkplain MessageEndpoint#onDuplicate(Object, SignalEnvelope) notified}.
+     * Delivers the message to its message endpoint.
      */
-    abstract class Dispatcher {
+    void deliver(InboxMessage message) {
+        callEndpoint(message, (endpoint, targetId, envelope) -> endpoint.dispatchTo(targetId));
+    }
+
+    /**
+     * Notifies the message endpoint of the duplicate.
+     */
+    void notifyOfDuplicated(InboxMessage message) {
+        callEndpoint(message, MessageEndpoint::onDuplicate);
+    }
+
+    private void callEndpoint(InboxMessage message, EndpointCall<I, M> call) {
+        M envelope = asEnvelope(message);
+        InboxLabel label = message.getLabel();
+        InboxId inboxId = message.getInboxId();
+        MessageEndpoint<I, M> endpoint =
+                endpoints.get(label, envelope)
+                         .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
+
+        @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
+                I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
+        TenantAwareRunner
+                .with(envelope.tenantId())
+                .run(() -> call.invoke(endpoint, unpackedId, envelope));
+    }
+
+    /**
+     * Passes the message to the endpoint.
+     *
+     * @param <I>
+     *         the type of identifiers of the entity, served by the endpoint
+     * @param <M>
+     *         the type of envelopes which the endpoint takes
+     */
+    @FunctionalInterface
+    private interface EndpointCall<I, M extends SignalEnvelope<?, ?, ?>> {
 
         /**
-         * A set of IDs of previously dispatched messages, stored as {@code String} values.
+         * Invokes the method of the endpoint taking the ID of the target and the envelope as args
+         * if needed.
          */
-        private final Set<String> rawIds;
-
-        @SuppressWarnings({ /* To avoid extra filtering in descendants and improve performance. */
-                "AbstractMethodCallInConstructor",
-                "OverridableMethodCallDuringObjectConstruction",
-                "OverriddenMethodCallDuringObjectConstruction"})
-        Dispatcher(Collection<InboxMessage> deduplicationSource) {
-            this.rawIds =
-                    deduplicationSource
-                            .stream()
-                            .filter(filterByType())
-                            .map(InboxMessage::getSignalId)
-                            .map(InboxSignalId::getValue)
-                            .collect(Collectors.toCollection((Supplier<Set<String>>) HashSet::new));
-        }
-
-        protected abstract Predicate<? super InboxMessage> filterByType();
-
-        void deliver(InboxMessage message) {
-            M envelope = asEnvelope(message);
-            InboxLabel label = message.getLabel();
-            InboxId inboxId = message.getInboxId();
-            MessageEndpoint<I, M> endpoint =
-                    endpoints.get(label, envelope)
-                             .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
-
-            @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
-            I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
-            TenantAwareRunner
-                    .with(envelope.tenantId())
-                    .run(() -> {
-                        if (duplicate(message)) {
-                            endpoint.onDuplicate(unpackedId, envelope);
-                        } else {
-                            endpoint.dispatchTo(unpackedId);
-                        }
-                    });
-        }
-
-        /**
-         * Checks whether the message has already been stored in the inbox.
-         *
-         * <p>In case of duplication returns an {@code Optional} containing the duplication
-         * exception wrapped into a inbox-specific runtime exception for further handling.
-         */
-        private boolean duplicate(InboxMessage message) {
-            String currentId = message.getSignalId()
-                                      .getValue();
-            boolean hasDuplicate = rawIds.contains(currentId);
-            return hasDuplicate;
-        }
+        void invoke(MessageEndpoint<I, M> endpoint, I targetId, M envelope);
     }
 }

@@ -30,13 +30,16 @@ interface EventStreamQueryMixin extends Message, EventStreamQueryOrBuilder {
     /**
      * Checks if the query should retrieve all the events in the store.
      *
-     * <p>If the query specifies no filters and no time bounds, it is aimed for all the events.
+     * <p>If the query specifies no filters, no time bounds and no limit,
+     * it is aimed for all the events.
      *
      * @return {@code true} if this is a default instance, {@code false} otherwise
      */
+    @SuppressWarnings("OverlyComplexBooleanExpression")
     default boolean includeAll() {
         return getFilterCount() == 0
-           && !hasBefore()
-           && !hasAfter();
+                && !hasBefore()
+                && !hasAfter()
+                && !hasLimit();
     }
 }

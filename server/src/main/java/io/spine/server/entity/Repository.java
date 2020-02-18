@@ -139,6 +139,13 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
+     * Returns an iterator over the identifiers of all the entities managed by this repository.
+     */
+    public Iterator<I> index() {
+        return storage().index();
+    }
+
+    /**
      * Obtains model class for the entities managed by this repository.
      */
     @Internal

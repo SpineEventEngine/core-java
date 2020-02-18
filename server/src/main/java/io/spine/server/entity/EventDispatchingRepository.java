@@ -125,7 +125,7 @@ public abstract class EventDispatchingRepository<I,
      * @param event the event to find targets for
      * @return a set of IDs of projections to dispatch the given event to
      */
-    private Set<I> route(EventEnvelope event) {
+    protected Set<I> route(EventEnvelope event) {
         return route(eventRouting(), event)
                 .orElse(ImmutableSet.of());
     }
