@@ -29,6 +29,7 @@ import io.spine.time.InstantConverter;
 import io.spine.validate.FieldAwareMessage;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -87,6 +88,39 @@ interface EventContextMixin extends EnrichableMessageContext,
             }
         }
         return actorContext;
+    }
+
+    /**
+     * Obtains the ID of the first signal in a chain.
+     *
+     * <p>The root message is typically a {@code Command}. It can be an {@code Event} if the event
+     * was emitted by an actor directly, i.e. it was imported into the system.
+     *
+     * <p>If the associated message itself is the root of its chain, the ID cannot be assembled and
+     * thus an {@code Optional.empty()} is returned.
+     *
+     * @see Event#rootMessage()
+     */
+    @SuppressWarnings("deprecation") // For backward compatibility.
+    default Optional<MessageId> rootMessage() {
+        EventContext.OriginCase origin = getOriginCase();
+        switch (origin) {
+            case PAST_MESSAGE:
+                return Optional.of(getPastMessage().root());
+            case IMPORT_CONTEXT:
+                return Optional.empty();
+            case EVENT_CONTEXT:
+            case COMMAND_CONTEXT:
+            case ORIGIN_NOT_SET:
+            default:
+                @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence.
+                MessageId id = MessageId
+                        .newBuilder()
+                        .setId(Identifier.pack(getCommandId()))
+                        .setTypeUrl("Unknown")
+                        .vBuild();
+                return Optional.of(id);
+        }
     }
 
     /**

@@ -715,10 +715,7 @@ public class AggregateTest {
 
         private ProtoSubject assertNextCommandId() {
             Event event = history.next();
-            Optional<CommandId> commandId = event.rootCommand();
-            assertThat(commandId)
-                    .isPresent();
-            return assertThat(commandId.get());
+            return assertThat(event.rootMessage().asCommandId());
         }
 
         @Test

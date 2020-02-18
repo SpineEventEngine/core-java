@@ -31,7 +31,7 @@ import io.spine.validate.FieldAwareMessage;
 
 import java.util.Optional;
 
-import static io.spine.core.EventContext.OriginCase.PAST_MESSAGE;
+import static io.spine.core.EventContext.OriginCase.IMPORT_CONTEXT;
 import static io.spine.protobuf.Messages.isDefault;
 
 /**
@@ -59,10 +59,11 @@ interface EventMixin
 
     @Override
     default MessageId rootMessage() {
-        EventContext.OriginCase origin = context().getOriginCase();
-        return origin == PAST_MESSAGE
-               ? context().getPastMessage().root()
-               : messageId();
+        return isImported()
+               ? messageId()
+               : context()
+                       .rootMessage()
+                       .orElseThrow(IllegalStateException::new);
     }
 
     @Override
@@ -82,32 +83,13 @@ interface EventMixin
      *
      * @return the root command ID
      * @deprecated If an event is imported, it does not have a command ID and this method fails.
-     *             Use {@link #rootCommand()}.
+     *             Use {@link #rootMessage()}.
      */
     @Deprecated
     default CommandId rootCommandId() {
         return context().getPastMessage()
                         .root()
                         .asCommandId();
-    }
-
-    /**
-     * Obtains the ID of the root command, which lead to this event.
-     *
-     * <p>In case the {@code Event} is a reaction to another {@code Event}, the identifier of
-     * the very first command in this chain is returned.
-     *
-     * <p>If the root signal is an {@code Event} imported into the system, there can be no root
-     * {@code Command} and the method returns {@code empty}.
-     *
-     * @return the root command ID or {@code Optional.empty()} if the root message is
-     * not a {@code Command}
-     */
-    default Optional<CommandId> rootCommand() {
-        MessageId root = rootMessage();
-        return root.isCommand()
-               ? Optional.of(root.asCommandId())
-               : Optional.empty();
     }
 
     /**
@@ -119,6 +101,18 @@ interface EventMixin
         EventContext context = context();
         boolean result = context.hasRejection() || !isDefault(context.getRejection());
         return result;
+    }
+
+    /**
+     * Checks if this event is imported.
+     *
+     * <p>An event can be imported into a system, for example, from a third-party system. In such
+     * case, the event does not have an "origin" signal.
+     *
+     * @return {@code true} if the given event is imported, {@code false} otherwise
+     */
+    default boolean isImported() {
+        return context().getOriginCase() == IMPORT_CONTEXT;
     }
 
     /**
