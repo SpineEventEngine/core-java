@@ -23,7 +23,10 @@ package io.spine.server.event;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.core.MessageId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -31,10 +34,12 @@ import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRep
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +51,7 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
@@ -57,6 +63,7 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMe
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static io.spine.server.tenant.TenantAwareRunner.with;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Event root CommandId should")
 public class EventRootCommandIdTest {
@@ -204,6 +211,32 @@ public class EventRootCommandIdTest {
             assertThat(reaction.rootMessage())
                     .isEqualTo(command.messageId());
 
+        }
+    }
+
+    @Nested
+    @DisplayName("if the old format of `Event` is used")
+    class OldFormat {
+
+        @SuppressWarnings("deprecation") // Backward compatibility test.
+        @Test
+        @DisplayName("match an ID from `root_command_id`")
+        void fromRootCommandId() {
+            Event.Builder eventBuilder = GivenEvent.arbitrary()
+                                                   .toBuilder();
+            CommandId commandId = CommandId.generate();
+            eventBuilder.getContextBuilder()
+                        .clearOrigin()
+                        .setRootCommandId(commandId)
+                        .setCommandContext(CommandContext.getDefaultInstance());
+            Event event = eventBuilder.buildPartial();
+            MessageId rootMessage = event.rootMessage();
+            assertThat(unpack(rootMessage.getId()))
+                    .isEqualTo(commandId);
+            String typeUrl = rootMessage.getTypeUrl();
+            assertThat(typeUrl)
+                    .isNotEmpty();
+            assertThrows(IllegalArgumentException.class, () -> TypeUrl.parse(typeUrl));
         }
     }
 
