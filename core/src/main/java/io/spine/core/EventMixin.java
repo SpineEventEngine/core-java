@@ -61,7 +61,8 @@ interface EventMixin
     default MessageId rootMessage() {
         EventContext.OriginCase origin = context().getOriginCase();
         return origin == PAST_MESSAGE
-               ? context().getPastMessage().root()
+               ? context().getPastMessage()
+                          .root()
                : messageId();
     }
 
@@ -75,15 +76,39 @@ interface EventMixin
     /**
      * Obtains the ID of the root command, which lead to this event.
      *
-     * <p> In case the {@code Event} is a reaction to another {@code Event},
+     * <p>In case the {@code Event} is a reaction to another {@code Event},
      * the identifier of the very first command in this chain is returned.
      *
+     * <p>Throws an {@code IllegalStateException} if the root signal is not a command.
+     *
      * @return the root command ID
+     * @deprecated If an event is imported, it does not have a command ID and this method fails.
+     *             Use {@link #rootCommand()}.
      */
+    @Deprecated
     default CommandId rootCommandId() {
         return context().getPastMessage()
                         .root()
                         .asCommandId();
+    }
+
+    /**
+     * Obtains the ID of the root command, which lead to this event.
+     *
+     * <p>In case the {@code Event} is a reaction to another {@code Event}, the identifier of
+     * the very first command in this chain is returned.
+     *
+     * <p>If the root signal is an {@code Event} imported into the system, there can be no root
+     * {@code Command} and the method returns {@code empty}.
+     *
+     * @return the root command ID or {@code Optional.empty()} if the root message is
+     * not a {@code Command}
+     */
+    default Optional<CommandId> rootCommand() {
+        MessageId root = rootMessage();
+        return root.isCommand()
+               ? Optional.of(root.asCommandId())
+               : Optional.empty();
     }
 
     /**

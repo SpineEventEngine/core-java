@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.type.given.EventsTestEnv.commandContext;
 import static io.spine.server.type.given.EventsTestEnv.event;
@@ -127,8 +128,8 @@ public class EventTest extends UtilityClassTest<Events> {
             CommandEnvelope command = generate();
             Event event = newEvent(command);
 
-            assertThat(event.rootCommandId())
-                    .isEqualTo(command.id());
+            assertThat(event.rootCommand())
+                    .hasValue(command.id());
         }
 
         @Test

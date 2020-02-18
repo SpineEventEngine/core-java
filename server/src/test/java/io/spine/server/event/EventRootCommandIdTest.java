@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
@@ -140,8 +141,8 @@ public class EventRootCommandIdTest {
          * Asserts that the ID of the passed command is the root command ID of the passed event.
          */
         private void assertIsRootCommand(Command command, Event event) {
-            assertThat(event.rootCommandId())
-                    .isEqualTo(command.getId());
+            assertThat(event.rootCommand())
+                    .hasValue(command.getId());
         }
     }
 
@@ -173,8 +174,8 @@ public class EventRootCommandIdTest {
             assertThat(events).hasSize(2);
 
             Event reaction = events.get(1);
-            assertThat(reaction.rootCommandId())
-                    .isEqualTo(command.id());
+            assertThat(reaction.rootCommand())
+                    .hasValue(command.id());
         }
 
         /**
@@ -201,8 +202,8 @@ public class EventRootCommandIdTest {
             assertThat(events).hasSize(2);
 
             Event reaction = events.get(1);
-            assertThat(reaction.rootCommandId())
-                    .isEqualTo(command.id());
+            assertThat(reaction.rootCommand())
+                    .hasValue(command.id());
 
         }
     }
