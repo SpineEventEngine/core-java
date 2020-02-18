@@ -61,8 +61,7 @@ interface EventMixin
     default MessageId rootMessage() {
         EventContext.OriginCase origin = context().getOriginCase();
         return origin == PAST_MESSAGE
-               ? context().getPastMessage()
-                          .root()
+               ? context().getPastMessage().root()
                : messageId();
     }
 
