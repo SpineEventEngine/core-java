@@ -117,13 +117,18 @@ interface EventContextMixin extends EnrichableMessageContext,
             case COMMAND_CONTEXT:
             case ORIGIN_NOT_SET:
             default:
-                @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence.
-                MessageId id = MessageId
-                        .newBuilder()
-                        .setId(Identifier.pack(getRootCommandId()))
-                        .setTypeUrl("Unknown")
-                        .vBuild();
-                return Optional.of(id);
+                if (hasRootCommandId()) {
+                    @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence.
+                            MessageId id = MessageId
+                            .newBuilder()
+                            .setId(Identifier.pack(getRootCommandId()))
+                            .setTypeUrl("Unknown")
+                            .vBuild();
+                    return Optional.of(id);
+                } else {
+                    _warn().log("Cannot determine root message ID.");
+                    return Optional.empty();
+                }
         }
     }
 
