@@ -57,6 +57,12 @@ interface EventMixin
         return context().getTimestamp();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Attempts to obtain the ID from the {@code EventContext}. If not successful, assumes that
+     * this {@code Event} is the root message.
+     */
     @Override
     default MessageId rootMessage() {
         return context()

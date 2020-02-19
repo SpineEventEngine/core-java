@@ -119,7 +119,7 @@ interface EventContextMixin extends EnrichableMessageContext,
             default:
                 if (hasRootCommandId()) {
                     @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence.
-                            MessageId id = MessageId
+                    MessageId id = MessageId
                             .newBuilder()
                             .setId(Identifier.pack(getRootCommandId()))
                             .setTypeUrl("Unknown")
