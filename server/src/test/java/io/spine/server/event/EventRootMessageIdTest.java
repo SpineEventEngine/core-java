@@ -29,6 +29,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.core.Events;
 import io.spine.core.MessageId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
@@ -118,6 +119,17 @@ public class EventRootMessageIdTest {
                 .isEqualTo(event.messageId());
         assertThat(event.context().rootMessage())
                 .isEmpty();
+    }
+
+    @Test
+    @DisplayName("be equal to the event's own ID by default")
+    void empty() {
+        Event invalidEvent = Event
+                .newBuilder()
+                .setId(Events.generateId())
+                .buildPartial();
+        assertThat(invalidEvent.rootMessage())
+                .isEqualTo(invalidEvent.messageId());
     }
 
     @Nested
