@@ -21,12 +21,16 @@
 package io.spine.server.event;
 
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.core.Ack;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
+import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -39,6 +43,7 @@ import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.time.ZoneIds;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,9 +54,11 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.event.EventFactory.forImport;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
@@ -65,8 +72,8 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Event root CommandId should")
-public class EventRootCommandIdTest {
+@DisplayName("Event root message should")
+public class EventRootMessageIdTest {
 
     private BoundedContext boundedContext;
 
@@ -89,6 +96,28 @@ public class EventRootCommandIdTest {
     @AfterEach
     void tearDown() throws Exception {
         boundedContext.close();
+    }
+
+    @Test
+    @DisplayName("be equal to the event's own ID if event was imported")
+    void noRoots() {
+        UserId actorId = UserId
+                .newBuilder()
+                .setValue(EventRootMessageIdTest.class.getSimpleName())
+                .build();
+        ActorContext actor = ActorContext
+                .newBuilder()
+                .setTimestamp(Time.currentTime())
+                .setActor(actorId)
+                .setZoneId(ZoneIds.systemDefault())
+                .build();
+        EventFactory events = forImport(actor, Identifier.pack("test"));
+        Event event = events.createEvent(GivenEvent.message(), null);
+
+        assertThat(event.rootMessage())
+                .isEqualTo(event.messageId());
+        assertThat(event.context().rootMessage())
+                .isEmpty();
     }
 
     @Nested

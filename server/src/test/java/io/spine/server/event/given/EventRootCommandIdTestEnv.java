@@ -33,7 +33,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventRootCommandIdTest;
+import io.spine.server.event.EventRootMessageIdTest;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
@@ -74,7 +74,7 @@ public class EventRootCommandIdTestEnv {
     public static final TenantId TENANT_ID = tenantId();
 
     private static final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(EventRootCommandIdTest.class, TENANT_ID);
+            new TestActorRequestFactory(EventRootMessageIdTest.class, TENANT_ID);
 
     /** Prevents instantiation of this utility class. */
     private EventRootCommandIdTestEnv() {
@@ -180,7 +180,7 @@ public class EventRootCommandIdTestEnv {
     /**
      * Routes the {@link ProjectCreated} event to the {@link TeamAggregate} the project belongs to.
      * This is done for the purposes of the
-     * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#aggregate()} test.
+     * {@linkplain EventRootMessageIdTest.MatchExternalEventHandledBy#aggregate()} test.
      */
     public static class TeamAggregateRepository
             extends AggregateRepository<EvTeamId, TeamAggregate> {
@@ -205,7 +205,7 @@ public class EventRootCommandIdTestEnv {
     /**
      * Routes the {@link EvInvitationAccepted} event to the {@link TeamCreationProcessManager} which
      * created the invitation. This is done for the purposes of the
-     * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#processManager()} test.
+     * {@linkplain EventRootMessageIdTest.MatchExternalEventHandledBy#processManager()} test.
      */
     public static final class TeamCreationRepository
             extends ProcessManagerRepository<EvTeamId, TeamCreationProcessManager, EvTeamCreation> {
