@@ -31,7 +31,6 @@ import io.spine.validate.FieldAwareMessage;
 
 import java.util.Optional;
 
-import static io.spine.core.EventContext.OriginCase.IMPORT_CONTEXT;
 import static io.spine.protobuf.Messages.isDefault;
 
 /**
@@ -105,18 +104,6 @@ interface EventMixin
         EventContext context = context();
         boolean result = context.hasRejection() || !isDefault(context.getRejection());
         return result;
-    }
-
-    /**
-     * Checks if this event is imported.
-     *
-     * <p>An event can be imported into a system, for example, from a third-party system. In such
-     * case, the event does not have an "origin" signal.
-     *
-     * @return {@code true} if the given event is imported, {@code false} otherwise
-     */
-    default boolean isImported() {
-        return context().getOriginCase() == IMPORT_CONTEXT;
     }
 
     /**
