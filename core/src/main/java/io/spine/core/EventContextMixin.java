@@ -25,6 +25,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.logging.Logging;
 import io.spine.time.InstantConverter;
 import io.spine.validate.FieldAwareMessage;
 
@@ -39,7 +40,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @Immutable
 interface EventContextMixin extends EnrichableMessageContext,
                                     EventContextOrBuilder,
-                                    FieldAwareMessage {
+                                    FieldAwareMessage,
+                                    Logging {
 
     /**
      * Obtains an actor context for the event context.
@@ -93,11 +95,13 @@ interface EventContextMixin extends EnrichableMessageContext,
     /**
      * Obtains the ID of the first signal in a chain.
      *
-     * <p>The root message is typically a {@code Command}. It can be an {@code Event} if the event
-     * was emitted by an actor directly, i.e. it was imported into the system.
+     * <p>The root message is either a {@code Command} or an {@code Event} which was produced by
+     * an actor directly and caused the associated {@code Event} to be emitted.
      *
-     * <p>If the associated message itself is the root of its chain, the ID cannot be assembled and
-     * thus an {@code Optional.empty()} is returned.
+     * <p>If the associated {@code Event} itself is the root of its chain, i.e. it was imported into
+     * the system, the ID cannot be assembled and thus an {@code Optional.empty()} is returned.
+     *
+     * <p>If the origin cannot be determined, an {@code IllegalStateException} is thrown.
      *
      * @see Event#rootMessage()
      */
