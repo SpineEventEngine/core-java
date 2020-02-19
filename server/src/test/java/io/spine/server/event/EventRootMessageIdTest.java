@@ -58,6 +58,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.event.EventFactory.forImport;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
@@ -127,6 +128,7 @@ public class EventRootMessageIdTest {
         Event invalidEvent = Event
                 .newBuilder()
                 .setId(Events.generateId())
+                .setMessage(pack(GivenEvent.message()))
                 .buildPartial();
         assertThat(invalidEvent.rootMessage())
                 .isEqualTo(invalidEvent.messageId());
