@@ -59,11 +59,9 @@ interface EventMixin
 
     @Override
     default MessageId rootMessage() {
-        return isImported()
-               ? messageId()
-               : context()
-                       .rootMessage()
-                       .orElseThrow(IllegalStateException::new);
+        return context()
+                .rootMessage()
+                .orElseGet(this::messageId);
     }
 
     @Override
