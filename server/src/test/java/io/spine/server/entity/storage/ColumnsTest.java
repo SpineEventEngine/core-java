@@ -22,9 +22,11 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.server.storage.LifecycleFlagField;
+import io.spine.test.entity.TaskView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -118,14 +120,10 @@ class ColumnsTest {
                 ColumnName.of("archived"), projection.isArchived(),
                 ColumnName.of("deleted"), projection.isDeleted(),
                 ColumnName.of("version"), projection.version(),
-                ColumnName.of("name"), projection.state()
-                                                 .getName(),
-                ColumnName.of("estimate_in_days"), projection.state()
-                                                             .getEstimateInDays(),
-                ColumnName.of("status"), projection.state()
-                                                   .getStatus(),
-                ColumnName.of("due_date"), projection.state()
-                                                     .getDueDate()
+                ColumnName.of("name"), "some-name",
+                ColumnName.of("estimate_in_days"), 42,
+                ColumnName.of("status"), TaskView.Status.CREATED,
+                ColumnName.of("due_date"), Timestamp.getDefaultInstance()
         );
     }
 

@@ -49,6 +49,6 @@ public final class TaskViewProjection
 
     @Override
     public Timestamp getDueDate() {
-        return Timestamp.getDefaultInstance();
+        return state().getDueDate();
     }
 }

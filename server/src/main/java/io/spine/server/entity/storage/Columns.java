@@ -122,8 +122,9 @@ public final class Columns {
      * Extracts column values from the entity.
      *
      * <p>The {@linkplain ColumnDeclaredInProto proto-based} columns are extracted from the entity
-     * state while the system columns are obtained from the entity itself via the corresponding
-     * getters.
+     * in case the entity implements the {@link io.spine.base.EntityWithColumns EntityWithColumns}
+     * interface or from the entity state if not. The system columns are always obtained from
+     * the entity itself via the corresponding getters.
      */
     public Map<ColumnName, @Nullable Object> valuesIn(Entity<?, ?> source) {
         checkNotNull(source);
@@ -135,7 +136,7 @@ public final class Columns {
                 (name, column) -> result.put(name, column.valueIn(source.state()))
         );
         interfaceBasedColumns.forEach(
-                (name, column) -> result.put(name, column.valueIn(source.state()))
+                (name, column) -> result.put(name, column.valueIn(source))
         );
         return result;
     }
