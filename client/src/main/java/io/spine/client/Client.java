@@ -27,6 +27,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.EntityState;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
 import io.spine.client.grpc.QueryServiceGrpc;
@@ -37,7 +38,6 @@ import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceStub;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -45,7 +45,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
@@ -272,14 +271,10 @@ public class Client implements AutoCloseable {
     /**
      * Queries the read-side with the specified query.
      */
-    ImmutableList<Message> read(Query query) {
-        ImmutableList<Message> result = queryService
+    <S extends EntityState> ImmutableList<S> read(Query query, Class<S> stateType) {
+        ImmutableList<S> result = queryService
                 .read(query)
-                .getMessageList()
-                .stream()
-                .map(EntityStateWithVersion::getState)
-                .map(AnyPacker::unpack)
-                .collect(toImmutableList());
+                .states(stateType);
         return result;
     }
 

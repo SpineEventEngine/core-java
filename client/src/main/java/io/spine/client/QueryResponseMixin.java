@@ -31,6 +31,7 @@ import java.util.List;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.AnyPacker.unpackFunc;
 
 /**
  * Extends {@link QueryResponse} with useful methods.
@@ -77,7 +78,7 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
         ImmutableList<S> result = getMessageList()
                 .stream()
                 .map(EntityStateWithVersion::getState)
-                .map(any -> unpack(any, type))
+                .map(unpackFunc(type))
                 .collect(toImmutableList());
         return result;
     }
