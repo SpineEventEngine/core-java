@@ -127,7 +127,7 @@ public class EventTest extends UtilityClassTest<Events> {
             CommandEnvelope command = generate();
             Event event = newEvent(command);
 
-            assertThat(event.rootCommandId())
+            assertThat(event.rootMessage().asCommandId())
                     .isEqualTo(command.id());
         }
 

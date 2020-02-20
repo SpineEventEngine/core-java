@@ -21,9 +21,17 @@
 package io.spine.server.event;
 
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.core.Ack;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.core.Events;
+import io.spine.core.MessageId;
+import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -31,10 +39,13 @@ import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRep
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.time.ZoneIds;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,8 +55,12 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.event.EventFactory.forImport;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.addTasks;
@@ -57,9 +72,10 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMe
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static io.spine.server.tenant.TenantAwareRunner.with;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Event root CommandId should")
-public class EventRootCommandIdTest {
+@DisplayName("Event root message should")
+public class EventRootMessageIdTest {
 
     private BoundedContext boundedContext;
 
@@ -82,6 +98,40 @@ public class EventRootCommandIdTest {
     @AfterEach
     void tearDown() throws Exception {
         boundedContext.close();
+    }
+
+    @Test
+    @DisplayName("be equal to the event's own ID if event was imported")
+    void noRoots() {
+        UserId actorId = UserId
+                .newBuilder()
+                .setValue(EventRootMessageIdTest.class.getSimpleName())
+                .build();
+        ActorContext actor = ActorContext
+                .newBuilder()
+                .setTimestamp(Time.currentTime())
+                .setActor(actorId)
+                .setZoneId(ZoneIds.systemDefault())
+                .build();
+        EventFactory events = forImport(actor, Identifier.pack("test"));
+        Event event = events.createEvent(GivenEvent.message(), null);
+
+        assertThat(event.rootMessage())
+                .isEqualTo(event.messageId());
+        assertThat(event.context().rootMessage())
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("be equal to the event's own ID by default")
+    void empty() {
+        Event invalidEvent = Event
+                .newBuilder()
+                .setId(Events.generateId())
+                .setMessage(pack(GivenEvent.message()))
+                .buildPartial();
+        assertThat(invalidEvent.rootMessage())
+                .isEqualTo(invalidEvent.messageId());
     }
 
     @Nested
@@ -140,8 +190,8 @@ public class EventRootCommandIdTest {
          * Asserts that the ID of the passed command is the root command ID of the passed event.
          */
         private void assertIsRootCommand(Command command, Event event) {
-            assertThat(event.rootCommandId())
-                    .isEqualTo(command.getId());
+            assertThat(event.rootMessage())
+                    .isEqualTo(command.messageId());
         }
     }
 
@@ -173,8 +223,8 @@ public class EventRootCommandIdTest {
             assertThat(events).hasSize(2);
 
             Event reaction = events.get(1);
-            assertThat(reaction.rootCommandId())
-                    .isEqualTo(command.id());
+            assertThat(reaction.rootMessage())
+                    .isEqualTo(command.messageId());
         }
 
         /**
@@ -201,9 +251,35 @@ public class EventRootCommandIdTest {
             assertThat(events).hasSize(2);
 
             Event reaction = events.get(1);
-            assertThat(reaction.rootCommandId())
-                    .isEqualTo(command.id());
+            assertThat(reaction.rootMessage())
+                    .isEqualTo(command.messageId());
 
+        }
+    }
+
+    @Nested
+    @DisplayName("if the old format of `Event` is used")
+    class OldFormat {
+
+        @SuppressWarnings("deprecation") // Backward compatibility test.
+        @Test
+        @DisplayName("match an ID from `root_command_id`")
+        void fromRootCommandId() {
+            Event.Builder eventBuilder = GivenEvent.arbitrary()
+                                                   .toBuilder();
+            CommandId commandId = CommandId.generate();
+            eventBuilder.getContextBuilder()
+                        .clearOrigin()
+                        .setRootCommandId(commandId)
+                        .setCommandContext(CommandContext.getDefaultInstance());
+            Event event = eventBuilder.buildPartial();
+            MessageId rootMessage = event.rootMessage();
+            assertThat(unpack(rootMessage.getId()))
+                    .isEqualTo(commandId);
+            String typeUrl = rootMessage.getTypeUrl();
+            assertThat(typeUrl)
+                    .isNotEmpty();
+            assertThrows(IllegalArgumentException.class, () -> TypeUrl.parse(typeUrl));
         }
     }
 

@@ -31,7 +31,6 @@ import io.spine.validate.FieldAwareMessage;
 
 import java.util.Optional;
 
-import static io.spine.core.EventContext.OriginCase.PAST_MESSAGE;
 import static io.spine.protobuf.Messages.isDefault;
 
 /**
@@ -57,12 +56,17 @@ interface EventMixin
         return context().getTimestamp();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Attempts to obtain the ID from the {@code EventContext}. If not successful, assumes that
+     * this {@code Event} is the root message.
+     */
     @Override
     default MessageId rootMessage() {
-        EventContext.OriginCase origin = context().getOriginCase();
-        return origin == PAST_MESSAGE
-               ? context().getPastMessage().root()
-               : messageId();
+        return context()
+                .rootMessage()
+                .orElseGet(this::messageId);
     }
 
     @Override
@@ -75,12 +79,17 @@ interface EventMixin
     /**
      * Obtains the ID of the root command, which lead to this event.
      *
-     * <p> In case the {@code Event} is a reaction to another {@code Event},
+     * <p>In case the {@code Event} is a reaction to another {@code Event},
      * the identifier of the very first command in this chain is returned.
      *
      * @return the root command ID
+     * @throws IllegalStateException
+     *         if the root signal is not a command
+     * @deprecated If an event is imported, it does not have a command ID and this method fails.
+     *         Use {@link #rootMessage()}.
      */
-    default CommandId rootCommandId() {
+    @Deprecated
+    default CommandId rootCommandId() throws IllegalStateException {
         return context().getPastMessage()
                         .root()
                         .asCommandId();

@@ -25,10 +25,12 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.logging.Logging;
 import io.spine.time.InstantConverter;
 import io.spine.validate.FieldAwareMessage;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -38,7 +40,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @Immutable
 interface EventContextMixin extends EnrichableMessageContext,
                                     EventContextOrBuilder,
-                                    FieldAwareMessage {
+                                    FieldAwareMessage,
+                                    Logging {
 
     /**
      * Obtains an actor context for the event context.
@@ -87,6 +90,46 @@ interface EventContextMixin extends EnrichableMessageContext,
             }
         }
         return actorContext;
+    }
+
+    /**
+     * Obtains the ID of the first signal in a chain.
+     *
+     * <p>The root message is either a {@code Command} or an {@code Event} which was produced by
+     * an actor directly and caused the associated {@code Event} to be emitted.
+     *
+     * <p>If the associated {@code Event} itself is the root of its chain, i.e. it was imported into
+     * the system, the ID cannot be assembled and thus an {@code Optional.empty()} is returned.
+     *
+     * <p>If the origin cannot be determined, an {@code Optional.empty()} is returned.
+     *
+     * @see Event#rootMessage()
+     */
+    @SuppressWarnings("deprecation") // For backward compatibility.
+    default Optional<MessageId> rootMessage() {
+        EventContext.OriginCase origin = getOriginCase();
+        switch (origin) {
+            case PAST_MESSAGE:
+                return Optional.of(getPastMessage().root());
+            case IMPORT_CONTEXT:
+                return Optional.empty();
+            case EVENT_CONTEXT:
+            case COMMAND_CONTEXT:
+            case ORIGIN_NOT_SET:
+            default:
+                if (hasRootCommandId()) {
+                    @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence.
+                    MessageId id = MessageId
+                            .newBuilder()
+                            .setId(Identifier.pack(getRootCommandId()))
+                            .setTypeUrl("Unknown")
+                            .vBuild();
+                    return Optional.of(id);
+                } else {
+                    _warn().log("Cannot determine root message ID.");
+                    return Optional.empty();
+                }
+        }
     }
 
     /**

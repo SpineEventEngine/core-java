@@ -58,6 +58,7 @@ public final class RejectionEnvelope
      * <p>Represented by a packed {@link com.google.protobuf.StringValue StringValue} of
      * {@code "Unknown"}.
      */
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence
     private static final Any DEFAULT_EVENT_PRODUCER = Identifier.pack("Unknown");
 
     private final EventEnvelope event;
