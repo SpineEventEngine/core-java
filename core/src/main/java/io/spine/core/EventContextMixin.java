@@ -101,7 +101,7 @@ interface EventContextMixin extends EnrichableMessageContext,
      * <p>If the associated {@code Event} itself is the root of its chain, i.e. it was imported into
      * the system, the ID cannot be assembled and thus an {@code Optional.empty()} is returned.
      *
-     * <p>If the origin cannot be determined, an {@code IllegalStateException} is thrown.
+     * <p>If the origin cannot be determined, an {@code Optional.empty()} is returned.
      *
      * @see Event#rootMessage()
      */
