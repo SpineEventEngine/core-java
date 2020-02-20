@@ -82,14 +82,14 @@ interface EventMixin
      * <p>In case the {@code Event} is a reaction to another {@code Event},
      * the identifier of the very first command in this chain is returned.
      *
-     * <p>Throws an {@code IllegalStateException} if the root signal is not a command.
-     *
      * @return the root command ID
+     * @throws IllegalStateException
+     *         if the root signal is not a command
      * @deprecated If an event is imported, it does not have a command ID and this method fails.
-     *             Use {@link #rootMessage()}.
+     *         Use {@link #rootMessage()}.
      */
     @Deprecated
-    default CommandId rootCommandId() {
+    default CommandId rootCommandId() throws IllegalStateException {
         return context().getPastMessage()
                         .root()
                         .asCommandId();
