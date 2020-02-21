@@ -83,7 +83,7 @@ class ClientTest extends AbstractClientTest {
         UserId expected = GivenUserId.generated();
         ClientRequest request = client().onBehalfOf(expected);
         assertThat(request.user())
-             .isEqualTo(expected);
+                .isEqualTo(expected);
     }
 
     @Test
@@ -91,7 +91,7 @@ class ClientTest extends AbstractClientTest {
     void guestRequest() {
         ClientRequest request = client().asGuest();
         assertThat(request.user())
-             .isEqualTo(Client.DEFAULT_GUEST_ID);
+                .isEqualTo(Client.DEFAULT_GUEST_ID);
     }
 
     @Nested
@@ -119,11 +119,11 @@ class ClientTest extends AbstractClientTest {
                           .post();
             Subscription loginStatus =
                     client.onBehalfOf(currentUser)
-                    .subscribeTo(LoginStatus.class)
-                    .where(EntityStateFilter.eq(LoginStatus.Field.userId(),
-                                                currentUser.getValue()))
-                    .observe((s) -> {})
-                    .post();
+                          .subscribeTo(LoginStatus.class)
+                          .where(EntityStateFilter.eq(LoginStatus.Field.userId(),
+                                                      currentUser.getValue()))
+                          .observe((s) -> {})
+                          .post();
 
             subscriptions.add(userLoggedIn);
             subscriptions.add(userLoggedOut);
