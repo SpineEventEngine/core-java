@@ -21,8 +21,6 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.truth.Truth;
-import com.google.common.util.concurrent.Uninterruptibles;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ActiveUsers;
@@ -38,7 +36,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,7 +82,7 @@ class ClientTest extends AbstractClientTest {
     void onBehalf() {
         UserId expected = GivenUserId.generated();
         ClientRequest request = client().onBehalfOf(expected);
-        Truth.assertThat(request.user())
+        assertThat(request.user())
              .isEqualTo(expected);
     }
 
@@ -93,7 +90,7 @@ class ClientTest extends AbstractClientTest {
     @DisplayName("create requests for a guest user")
     void guestRequest() {
         ClientRequest request = client().asGuest();
-        Truth.assertThat(request.user())
+        assertThat(request.user())
              .isEqualTo(Client.DEFAULT_GUEST_ID);
     }
 
