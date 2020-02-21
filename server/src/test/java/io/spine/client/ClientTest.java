@@ -23,8 +23,10 @@ package io.spine.client;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.test.client.ActiveUsers;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.LoginStatus;
+import io.spine.test.client.command.LogInUser;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.event.UserLoggedOut;
 import io.spine.testing.core.given.GivenUserId;
@@ -38,7 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.client.EventFilter.eq;
+import static io.spine.test.client.ActiveUsersProjection.THE_ID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -115,11 +119,11 @@ class ClientTest extends AbstractClientTest {
                           .post();
             Subscription loginStatus =
                     client.onBehalfOf(currentUser)
-                    .subscribeTo(LoginStatus.class)
-                    .where(EntityStateFilter.eq(LoginStatus.Field.userId(),
-                                                currentUser.getValue()))
-                    .observe((s) -> {})
-                    .post();
+                          .subscribeTo(LoginStatus.class)
+                          .where(EntityStateFilter.eq(LoginStatus.Field.userId(),
+                                                      currentUser.getValue()))
+                          .observe((s) -> {})
+                          .post();
 
             subscriptions.add(userLoggedIn);
             subscriptions.add(userLoggedOut);
@@ -155,6 +159,35 @@ class ClientTest extends AbstractClientTest {
 
             assertThat(subscriptions.isEmpty())
                     .isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("query")
+    class Queries {
+
+        @Test
+        @DisplayName("entities by ID")
+        void byId() {
+            Client client = client();
+            UserId user = GivenUserId.generated();
+
+            LogInUser command = LogInUser.newBuilder()
+                                         .setUser(user)
+                                         .build();
+            client.asGuest()
+                  .command(command)
+                  .post();
+            ImmutableList<ActiveUsers> users =
+                    client.onBehalfOf(user)
+                          .select(ActiveUsers.class)
+                          .byId(THE_ID)
+                          .run();
+            assertThat(users)
+                    .comparingExpectedFieldsOnly()
+                    .containsExactly(ActiveUsers.newBuilder()
+                                                .setCount(1)
+                                                .build());
         }
     }
 }

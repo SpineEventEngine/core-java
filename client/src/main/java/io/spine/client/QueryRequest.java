@@ -26,7 +26,6 @@ import io.spine.base.EntityState;
 
 import java.util.function.Function;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.client.Filters.extractFilters;
 
 /**
@@ -125,14 +124,9 @@ public final class QueryRequest<S extends EntityState>
     /**
      * Obtains results of the query.
      */
-    @SuppressWarnings("unchecked") // The type is ensured when building the query.
     public ImmutableList<S> run() {
         Query query = builder().build();
-        ImmutableList<S> result =
-                client().read(query)
-                        .stream()
-                        .map(m -> (S) m)
-                        .collect(toImmutableList());
+        ImmutableList<S> result = client().read(query, messageType());
         return result;
     }
 
