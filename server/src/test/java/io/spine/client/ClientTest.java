@@ -21,10 +21,14 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.Truth;
+import com.google.common.util.concurrent.Uninterruptibles;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.test.client.ActiveUsers;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.LoginStatus;
+import io.spine.test.client.command.LogInUser;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.event.UserLoggedOut;
 import io.spine.testing.core.given.GivenUserId;
@@ -34,11 +38,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.client.EventFilter.eq;
+import static io.spine.test.client.ActiveUsersProjection.THE_ID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -78,16 +85,16 @@ class ClientTest extends AbstractClientTest {
     void onBehalf() {
         UserId expected = GivenUserId.generated();
         ClientRequest request = client().onBehalfOf(expected);
-        assertThat(request.user())
-                .isEqualTo(expected);
+        Truth.assertThat(request.user())
+             .isEqualTo(expected);
     }
 
     @Test
     @DisplayName("create requests for a guest user")
     void guestRequest() {
         ClientRequest request = client().asGuest();
-        assertThat(request.user())
-                .isEqualTo(Client.DEFAULT_GUEST_ID);
+        Truth.assertThat(request.user())
+             .isEqualTo(Client.DEFAULT_GUEST_ID);
     }
 
     @Nested
@@ -155,6 +162,35 @@ class ClientTest extends AbstractClientTest {
 
             assertThat(subscriptions.isEmpty())
                     .isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("query")
+    class Queries {
+
+        @Test
+        @DisplayName("entities by ID")
+        void byId() {
+            Client client = client();
+            UserId user = GivenUserId.generated();
+
+            LogInUser command = LogInUser.newBuilder()
+                                         .setUser(user)
+                                         .build();
+            client.asGuest()
+                  .command(command)
+                  .post();
+            ImmutableList<ActiveUsers> users =
+                    client.onBehalfOf(user)
+                          .select(ActiveUsers.class)
+                          .byId(THE_ID)
+                          .run();
+            assertThat(users)
+                    .comparingExpectedFieldsOnly()
+                    .containsExactly(ActiveUsers.newBuilder()
+                                                .setCount(1)
+                                                .build());
         }
     }
 }

@@ -36,6 +36,7 @@ public final class ClientTestContext {
 
     public static BoundedContextBuilder builder() {
         return BoundedContext.singleTenant(NAME)
-                             .add(LoginProcess.class);
+                             .add(LoginProcess.class)
+                             .add(new ActiveUsersProjection.Repository());
     }
 }
