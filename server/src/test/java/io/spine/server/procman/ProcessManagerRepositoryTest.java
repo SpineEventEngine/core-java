@@ -635,7 +635,6 @@ class ProcessManagerRepositoryTest
         }
     }
 
-
     @Test
     @DisplayName("update columns via migration operation")
     void updateColumns() {
