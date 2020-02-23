@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import io.spine.annotation.Internal;
+import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.EventContext;
 import io.spine.core.Origin;
@@ -93,9 +94,11 @@ public final class EventOrigin {
     EventContext.Builder contextBuilder() {
         EventContext.Builder builder = EventContext.newBuilder();
         if (otherMessage != null) {
-            builder.setPastMessage(otherMessage);
+            builder.setPastMessage(otherMessage)
+                   .setTimestamp(Time.currentTime());
         } else if (importOrigin != null) {
-            builder.setImportContext(importOrigin);
+            builder.setImportContext(importOrigin)
+                   .setTimestamp(importOrigin.getTimestamp());
         } else {
             throw new IllegalStateException("Event origin is undefined.");
         }

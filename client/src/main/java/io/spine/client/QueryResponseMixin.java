@@ -25,19 +25,19 @@ import io.spine.annotation.GeneratedMixin;
 import io.spine.base.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.type.UnexpectedTypeException;
 
 import java.util.List;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.AnyPacker.unpackFunc;
 
 /**
  * Extends {@link QueryResponse} with useful methods.
  */
 @GeneratedMixin
-interface QueryResponseMixin {
-
-    @SuppressWarnings("override") // in generated code
-    List<EntityStateWithVersion> getMessageList();
+interface QueryResponseMixin extends QueryResponseOrBuilder {
 
     /**
      * Obtains the size of the response.
@@ -58,12 +58,27 @@ interface QueryResponseMixin {
     /**
      * Obtains immutable list of entity states returned in this query response.
      */
-    default List<? extends EntityState> states() {
+    default ImmutableList<? extends EntityState> states() {
         ImmutableList<EntityState> result = getMessageList()
                 .stream()
                 .map(EntityStateWithVersion::getState)
                 .map(AnyPacker::unpack)
                 .map(EntityState.class::cast)
+                .collect(toImmutableList());
+        return result;
+    }
+
+    /**
+     * Obtains immutable list of the queried entity states of the given type.
+     *
+     * @throws UnexpectedTypeException if the {@code type} does not match the actual result type
+     */
+    default <S extends EntityState> ImmutableList<S> states(Class<S> type)
+            throws UnexpectedTypeException {
+        ImmutableList<S> result = getMessageList()
+                .stream()
+                .map(EntityStateWithVersion::getState)
+                .map(unpackFunc(type))
                 .collect(toImmutableList());
         return result;
     }
@@ -76,7 +91,7 @@ interface QueryResponseMixin {
      */
     default EntityState state(int index) {
         EntityStateWithVersion stateWithVersion = getMessageList().get(index);
-        EntityState result = (EntityState) AnyPacker.unpack(stateWithVersion.getState());
+        EntityState result = (EntityState) unpack(stateWithVersion.getState());
         return result;
     }
 
