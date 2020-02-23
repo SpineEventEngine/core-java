@@ -31,12 +31,12 @@ import io.spine.server.entity.TransactionBasedMigration;
  * <p>The operation relies on the fact that column values are calculated and propagated to the
  * entity state on a transaction {@linkplain Transaction#commit() commit}.
  *
- * @apiNote The entity columns update is considered a purely technical procedure and not a valid
+ * @apiNote The entity columns update is considered a purely technical procedure and is not a valid
  *        <strong>domain</strong> reason for an entity to change. Thus, it does not advance an
  *        entity version and does not invoke any standard routines that are invoked on entity
  *        change (distribution of system events, delivery of subscription updates, etc.).
  *
- * @see io.spine.server.entity.storage.InterfaceBasedColumn the interface-based column definition
+ * @see io.spine.server.entity.storage.InterfaceBasedColumn
  */
 public final class ProjectionColumnsUpdate<I,
         P extends Projection<I, S, B>,

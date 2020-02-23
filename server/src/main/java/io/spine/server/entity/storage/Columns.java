@@ -128,9 +128,9 @@ public final class Columns {
      *
      * @implNote This method assumes that the {@linkplain InterfaceBasedColumn interface-based}
      *         column values are already propagated to the entity state as they are finalized by
-     *         the moment of transaction {@linkplain Transaction#commit() commit}. It thus extracts
-     *         values from the entity state directly, avoiding any recalculation to prevent
-     *         possible inconsistencies in the model as well as performance drops.
+     *         the moment of transaction {@linkplain Transaction#commit() commit}. The values are
+     *         thus extracted from the entity state directly, avoiding any recalculation to prevent
+     *         possible inconsistencies in the stored data as well as performance drops.
      */
     public Map<ColumnName, @Nullable Object> valuesIn(Entity<?, ?> source) {
         checkNotNull(source);

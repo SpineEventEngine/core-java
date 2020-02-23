@@ -125,12 +125,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     public abstract Optional<E> find(I id);
 
     /**
-     * Applies a given {@link Migration} operation to the entity with the given ID.
+     * Applies a given {@link Migration} operation to an entity with the given ID.
      *
      * <p>The operation is performed in three steps:
      * <ol>
      *     <li>Load an entity by the given ID.
-     *     <li>Apply the migration operation to it in place.
+     *     <li>Transform it through the migration operation.
      *     <li>Store the entity back to the repository.
      * </ol>
      *
