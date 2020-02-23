@@ -20,11 +20,20 @@
 
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.Correspondence;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityColumn;
 import io.spine.base.EventMessage;
+import io.spine.client.CompositeFilter;
+import io.spine.client.CompositeQueryFilter;
+import io.spine.client.QueryFilter;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
@@ -80,6 +89,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -623,5 +633,105 @@ class ProcessManagerRepositoryTest
             repository.create(ID);
             assertTrue(repository.configureCalled());
         }
+    }
+
+
+    @Test
+    @DisplayName("update columns via migration operation")
+    void updateColumns() {
+        // Store a new process manager instance in the repository.
+        ProjectId id = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        TestProcessManagerRepository repository = repository();
+        TestProcessManager pm = new TestProcessManager(id);
+        repository.store(pm);
+
+        // Init filters by the `id_string` column.
+        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+
+        // Check nothing is found as column now should be empty.
+        Iterator<TestProcessManager> found =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the columns update.
+        repository.applyMigration(id, new ProcessManagerColumnsUpdate<>());
+
+        // Check the entity is now found by the provided filters.
+        Iterator<TestProcessManager> afterMigration =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(afterMigration.hasNext()).isTrue();
+
+        // Check the column value is propagated to the entity state.
+        TestProcessManager entityWithColumns = afterMigration.next();
+        assertThat(entityWithColumns.state().getIdString()).isEqualTo(id.toString());
+    }
+
+    @Test
+    @DisplayName("update columns for multiple entities")
+    void updateColumnsForMultiple() {
+        // Store three entities to the repository.
+        ProjectId id1 = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        ProjectId id2 = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        ProjectId id3 = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        TestProcessManagerRepository repository = repository();
+        TestProcessManager pm1 = new TestProcessManager(id1);
+        TestProcessManager pm2 = new TestProcessManager(id2);
+        TestProcessManager pm3 = new TestProcessManager(id3);
+        repository.store(pm1);
+        repository.store(pm2);
+        repository.store(pm3);
+
+        // Apply the column update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new ProcessManagerColumnsUpdate<>());
+
+        // Check that entities to which migration has been applied now have column values updated.
+        QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
+        QueryFilter filter2 = QueryFilter.eq(Project.Column.idString(), id2.toString());
+        QueryFilter filter3 = QueryFilter.eq(Project.Column.idString(), id3.toString());
+
+        TargetFilters filters = targetFilters(filter1, filter2, filter3);
+
+        Iterator<TestProcessManager> found =
+                repository.find(filters, ResponseFormat.getDefaultInstance());
+
+        ImmutableList<TestProcessManager> results = ImmutableList.copyOf(found);
+        assertThat(results).hasSize(2);
+        assertThat(results)
+                .comparingElementsUsing(idCorrespondence())
+                .containsExactly(id1, id2);
+    }
+
+    private static TargetFilters targetFilters(EntityColumn column, String value) {
+        QueryFilter filter = QueryFilter.eq(column, value);
+        return targetFilters(filter);
+    }
+
+    private static TargetFilters targetFilters(QueryFilter first, QueryFilter... rest) {
+        CompositeQueryFilter composite = CompositeQueryFilter.either(first, rest);
+        CompositeFilter filterValue = composite.value();
+        return TargetFilters
+                .newBuilder()
+                .addFilter(filterValue)
+                .build();
+    }
+
+    private static Correspondence<TestProcessManager, ProjectId> idCorrespondence() {
+        return Correspondence.from(ProcessManagerRepositoryTest::hasId, "has ID");
+    }
+
+    private static boolean hasId(TestProcessManager projection, ProjectId id) {
+        return projection.id().equals(id);
     }
 }
