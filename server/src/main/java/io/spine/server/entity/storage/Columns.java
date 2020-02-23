@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.Transaction;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.LifecycleFlagField;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -122,9 +123,14 @@ public final class Columns {
      * Extracts column values from the entity.
      *
      * <p>The {@linkplain ColumnDeclaredInProto proto-based} columns are extracted from the entity
-     * in case the entity implements the {@link io.spine.base.EntityWithColumns EntityWithColumns}
-     * interface or from the entity state if not. The system columns are always obtained from
-     * the entity itself via the corresponding getters.
+     * state while the system columns are obtained from the entity itself via the corresponding
+     * getters.
+     *
+     * @implNote This method assumes that the {@linkplain InterfaceBasedColumn interface-based}
+     *         column values are already propagated to the entity state as they are finalized by
+     *         the moment of transaction {@linkplain Transaction#commit() commit}. It thus extracts
+     *         values from the entity state directly, avoiding any recalculation to prevent
+     *         possible inconsistencies in the model as well as performance drops.
      */
     public Map<ColumnName, @Nullable Object> valuesIn(Entity<?, ?> source) {
         checkNotNull(source);
@@ -136,7 +142,7 @@ public final class Columns {
                 (name, column) -> result.put(name, column.valueIn(source.state()))
         );
         interfaceBasedColumns.forEach(
-                (name, column) -> result.put(name, column.valueIn(source))
+                (name, column) -> result.put(name, column.valueIn(source.state()))
         );
         return result;
     }
