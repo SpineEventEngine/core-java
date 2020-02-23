@@ -19,7 +19,10 @@
  */
 package io.spine.server.projection;
 
+import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Message;
+import com.google.protobuf.ProtocolMessageEnum;
+import io.spine.code.proto.FieldDeclaration;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -35,10 +38,12 @@ import io.spine.server.entity.given.tx.TxProjection;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.type.MessageType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.given.tx.ProjectionState.ProjectionType.VERY_USEFUL;
@@ -177,5 +182,37 @@ class ProjectionTransactionTest
         ProjectionType type = entity.state()
                                     .getType();
         assertThat(type).isEqualTo(entity.getType());
+    }
+
+    @Test
+    @DisplayName("propagate `null` column values as default values for the field")
+    void propagateNullColumnValues() {
+        Id id = Id.newBuilder()
+                  .setId(newUuid())
+                  .build();
+        TxProjection entity = new TxProjection(id, true);
+
+        String name = newUuid();
+        TxCreated txCreated = TxCreated
+                .newBuilder()
+                .setId(id())
+                .setName(name)
+                .build();
+        Event event = GivenEvent.withMessage(txCreated);
+        Projection.playOn(entity, singleton(event));
+
+        ProjectionState state = entity.state();
+        MessageType messageType = new MessageType(state.getDescriptorForType());
+        FieldDeclaration field = messageType.field("type");
+        ProjectionType actualType = state.getType();
+
+        EnumValueDescriptor actualTypeDescriptor =
+                ((ProtocolMessageEnum) actualType).getValueDescriptor();
+        Object defaultTypeDescriptor = field.descriptor()
+                                            .getDefaultValue();
+        assertThat(actualTypeDescriptor).isEqualTo(defaultTypeDescriptor);
+
+        // Make sure the transaction wasn't rolled back.
+        assertThat(entity.version().getNumber()).isEqualTo(1);
     }
 }
