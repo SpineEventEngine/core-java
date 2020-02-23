@@ -125,6 +125,33 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     public abstract Optional<E> find(I id);
 
     /**
+     * Applies a given {@link Migration} operation to the entity with the given ID.
+     *
+     * <p>The operation is performed in three steps:
+     * <ol>
+     *     <li>Load an entity by the given ID.
+     *     <li>Apply the migration operation to it in place.
+     *     <li>Store the entity back to the repository.
+     * </ol>
+     *
+     * @throws IllegalArgumentException
+     *         if the entity with a given ID is not found in the repository
+     *
+     * @see Migration
+     */
+    public final void applyMigration(I id, Migration<E> migration) {
+        checkNotNull(id);
+        checkNotNull(migration);
+
+        Optional<E> found = find(id);
+        checkArgument(found.isPresent(),
+                      "An entity with ID `%s` is not found in the repository.", id);
+        E entity = found.get();
+        migration.apply(entity);
+        store(entity);
+    }
+
+    /**
      * Returns an iterator over the entities managed by the repository that match the passed filter.
      *
      * <p>The returned iterator does not support removal.
