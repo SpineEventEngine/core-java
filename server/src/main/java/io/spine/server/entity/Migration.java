@@ -30,11 +30,6 @@ import java.util.function.Consumer;
  *
  * @param <E>
  *         the entity type
- *
- * @apiNote An entity migration is considered a purely technical procedure and is not a valid
- *        <strong>domain</strong> reason for an entity to change. Thus, it does not advance an
- *        entity version and is not supposed to invoke any standard routines that are invoked on
- *        entity change (distribution of system events, delivery of subscription updates, etc.).
  */
 public interface Migration<E extends Entity<?, ?>> extends Consumer<E> {
 
