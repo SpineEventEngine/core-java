@@ -50,6 +50,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.IntStream;
 
@@ -66,8 +67,24 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * Tests on {@linkplain io.spine.server.projection.ProjectionRepository#catchUp(Timestamp, Set)
+ * projection catch-up} functionality.
+ *
+ * <p>The test routines are designed to check both small and big use-cases, including
+ * the full catch-up. To deal with the different wall-clock providers, some of the tests
+ * configure the {@linkplain Time#currentTime() time provider} to return the values with
+ * millisecond precision. It is required to test the catch-up in the scenarios close to the legacy
+ * applications, as at that time there were no emulation of the nanosecond time resolution.
+ *
+ * <p>As the downstream libraries, such as Spine Google Cloud library would want to run the same
+ * tests under their specific conditions, the big and slow catch-up tests are made {@code public}.
+ * In this way such tests may be overridden and disabled, if needed.
+ */
+
 @SlowTest
 @DisplayName("Catch-up of projection instances should")
+@SuppressWarnings("WeakerAccess")   // see the class-level documentation.
 public class CatchUpTest extends AbstractDeliveryTest {
 
     @Override
@@ -77,56 +94,35 @@ public class CatchUpTest extends AbstractDeliveryTest {
         Time.resetProvider();
     }
 
-    /**
-     * Uses the default wall clock provider, which now emulates the nanoseconds by default.
-     */
-    @Nested
-    @DisplayName("given the time is provided with nanosecond resolution")
-    class WithNanosResolution {
-
-        @Test
-        @DisplayName("catch up only particular instances by their IDs")
-        void byIds() throws InterruptedException {
-            testCatchUpByIds();
-        }
-
-        @Test
-        @DisplayName("catch up all of projection instances" +
-                "and respect the order of the delivered events")
-        void allInOrder() throws InterruptedException {
-            testCatchUpAll();
-        }
+    @Test
+    @DisplayName("given the time is provided with nanosecond resolution, catch up " +
+            "only particular instances by their IDs")
+    public void withNanosByIds() throws InterruptedException {
+        testCatchUpByIds();
     }
 
-    /**
-     * Uses the custom wall clock provider, which only provides the time values with the millisecond
-     * resolution.
-     *
-     * <p>This is required in order to the test the catch-up in the scenarios close to the legacy
-     * applications. They did not have the emulated nanosecond resolution.
-     */
-    @Nested
-    @DisplayName("given the time is provided with ms resolution")
-    class WithMsResolution {
+    @Test
+    @DisplayName("given the time is provided with nanosecond resolution, " +
+            "catch up all of projection instances" +
+            "and respect the order of the delivered events")
+    public void withNanosAllInOrder() throws InterruptedException {
+        testCatchUpAll();
+    }
 
-        @Test
-        @DisplayName("catch up only the particular instances by their IDs")
-        void byId() throws InterruptedException {
-            setupMillis();
-            testCatchUpByIds();
-        }
+    @Test
+    @DisplayName("given the time is provided with millisecond resolution, " +
+            "catch up only particular instances by their IDs")
+    public void withMillisByIds() throws InterruptedException {
+        setupMillis();
+        testCatchUpByIds();
+    }
 
-        @Test
-        @DisplayName("catch up all of the projection instances " +
-                "and preserve the order of the delivered events")
-        void allInOrder() throws InterruptedException {
-            setupMillis();
-            testCatchUpAll();
-        }
-
-        private void setupMillis() {
-            Time.setProvider(new WithMillisOnlyResolution());
-        }
+    @Test
+    @DisplayName("given the time is provided with millisecond resolution, catch up all " +
+            "of projection instances and respect the order of the delivered events")
+    public void withMillisAllInOrder() throws InterruptedException {
+        setupMillis();
+        testCatchUpAll();
     }
 
     @Nested
@@ -333,6 +329,10 @@ public class CatchUpTest extends AbstractDeliveryTest {
         return commands.stream()
                        .map(cmd -> (Callable<Object>) () -> ctx.receivesCommand(cmd))
                        .collect(toList());
+    }
+
+    private static void setupMillis() {
+        Time.setProvider(new WithMillisOnlyResolution());
     }
 
     /**
