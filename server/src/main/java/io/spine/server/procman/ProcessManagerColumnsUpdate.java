@@ -22,18 +22,23 @@ package io.spine.server.procman;
 
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionBasedMigration;
 
 /**
  * A migration operation that does the update of interface-based columns of a process manager.
  *
+ * <p>When {@linkplain io.spine.server.entity.Repository#applyMigration(I, Migration) applied} to
+ * an entity, this operation will trigger the recalculation of entity storage fields according to
+ * the current implementation of {@link io.spine.base.EntityWithColumns}-derived methods.
+ *
  * <p>The operation relies on the fact that column values are calculated and propagated to the
  * entity state on a transaction {@linkplain Transaction#commit() commit}.
  *
  * @apiNote An entity columns update is considered a purely technical procedure and is not a valid
  *        <strong>domain</strong> reason for an entity to change. Thus, it does not advance an
- *        entity version and does not invoke any standard routines that are invoked on entity
+ *        entity version and does not trigger any standard routines that are invoked on entity
  *        change (distribution of system events, delivery of subscription updates, etc.).
  *
  * @see io.spine.server.entity.storage.InterfaceBasedColumn
