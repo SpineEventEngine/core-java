@@ -131,6 +131,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #applyMigration(I, Migration)
      */
     public final void applyMigration(Set<I> ids, Migration<E> migration) {
+        checkNotNull(ids);
+        checkNotNull(migration);
+
         TargetFilters filters = Targets.someOf(entityModelClass().stateClass(), ids)
                                        .getFilters();
         Iterator<E> entities = find(filters, ResponseFormat.getDefaultInstance());
