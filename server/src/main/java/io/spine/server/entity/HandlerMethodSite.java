@@ -24,6 +24,7 @@ import com.google.common.base.Objects;
 import com.google.common.flogger.LogSite;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.code.java.ClassName;
+import io.spine.server.model.HandlerMethod;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
@@ -39,7 +40,12 @@ final class HandlerMethodSite extends LogSite {
     private final ClassName name;
     private final String methodName;
 
-    HandlerMethodSite(Method method) {
+    HandlerMethodSite(HandlerMethod<?, ?, ?, ?> method) {
+        this(method.rawMethod());
+    }
+
+    private HandlerMethodSite(Method method) {
+        super();
         checkNotNull(method);
         this.name = ClassName.of(method.getDeclaringClass());
         this.fileName = name.topLevelClass().value();

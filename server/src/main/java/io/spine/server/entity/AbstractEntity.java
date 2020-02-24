@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.flogger.LogSite;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -34,13 +35,16 @@ import io.spine.core.Versions;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
+import io.spine.server.model.HandlerMethod;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -61,7 +65,7 @@ import static io.spine.validate.Validate.checkValid;
             fields. See Effective Java 2nd Ed. Item #71. */,
         "AbstractClassWithoutAbstractMethods",
         "ClassWithTooManyMethods"})
-public abstract class AbstractEntity<I, S extends EntityState> implements Entity<I, S> {
+public abstract class AbstractEntity<I, S extends EntityState> implements Entity<I, S>, LoggingEntity {
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -107,6 +111,8 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
      * {@linkplain io.spine.server.entity.Repository#store(io.spine.server.entity.Entity) storing}.
      */
     private volatile boolean lifecycleFlagsChanged;
+
+    private @Nullable LogSite logSite;
 
     /**
      * Creates a new instance with the zero version and cleared lifecycle flags.
@@ -506,6 +512,22 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
      */
     public Timestamp whenModified() {
         return version.getTimestamp();
+    }
+
+    @Override
+    public void resetLog() {
+        this.logSite = null;
+    }
+
+    @Override
+    public Optional<LogSite> handlerSite() {
+        return Optional.ofNullable(logSite);
+    }
+
+    @Override
+    public void enter(HandlerMethod<?, ?, ?, ?> method) {
+        checkNotNull(method);
+        this.logSite = new HandlerMethodSite(method);
     }
 
     @Override
