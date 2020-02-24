@@ -25,8 +25,11 @@ import java.util.function.Consumer;
 /**
  * A stored {@link Entity} transformation done to account for the domain model changes.
  *
- * <p>Being a {@link Consumer}, the migration is expected to be performed in place, on a given
+ * <p>Being a {@link Consumer}, the migration is expected to occur in place, on a given
  * {@link Entity} instance.
+ *
+ * <p>A performed migration is always preceded by an {@link Entity} load by ID and is finalized by
+ * {@linkplain Repository#store(Entity) saving} the transformed entity back into the storage.
  *
  * @param <E>
  *         the entity type
