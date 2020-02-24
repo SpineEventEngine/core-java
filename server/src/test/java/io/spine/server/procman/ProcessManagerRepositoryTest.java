@@ -695,7 +695,7 @@ class ProcessManagerRepositoryTest
         // Apply the column update to two of the three entities.
         repository.applyMigration(ImmutableSet.of(id1, id2), new ProcessManagerColumnsUpdate<>());
 
-        // Check that entities to which migration has been applied now have column values updated.
+        // Check that entities to which the migration has been applied now have columns updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
         QueryFilter filter2 = QueryFilter.eq(Project.Column.idString(), id2.toString());
         QueryFilter filter3 = QueryFilter.eq(Project.Column.idString(), id3.toString());
