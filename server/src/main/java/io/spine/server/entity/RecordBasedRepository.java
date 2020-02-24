@@ -126,7 +126,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Applies a {@link Migration} operation to entities with the given IDs.
+     * Applies a {@link Migration} operation to multiple entities in batch.
      *
      * @see #applyMigration(I, Migration)
      */
