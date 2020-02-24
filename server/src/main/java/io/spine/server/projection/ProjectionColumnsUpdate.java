@@ -39,9 +39,9 @@ import io.spine.server.entity.TransactionBasedMigration;
  * @see io.spine.server.entity.storage.InterfaceBasedColumn
  */
 public final class ProjectionColumnsUpdate<I,
-        P extends Projection<I, S, B>,
-        S extends EntityState,
-        B extends ValidatingBuilder<S>>
+                                           P extends Projection<I, S, B>,
+                                           S extends EntityState,
+                                           B extends ValidatingBuilder<S>>
         extends TransactionBasedMigration<I, P, S, B> {
 
     @SuppressWarnings("unchecked") // Logically correct.
