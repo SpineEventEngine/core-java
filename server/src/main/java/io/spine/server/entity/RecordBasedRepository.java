@@ -52,6 +52,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -123,6 +124,33 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         Iterator<E> allEntities = loadAll(ResponseFormat.getDefaultInstance());
         Iterator<E> result = Iterators.filter(allEntities, filter::test);
         return result;
+    }
+
+    /**
+     * Applies a given {@link Migration} operation to an entity with the given ID.
+     *
+     * <p>The operation is performed in three steps:
+     * <ol>
+     *     <li>Load an entity by the given ID.
+     *     <li>Transform it through the migration operation.
+     *     <li>Store the entity back to the repository.
+     * </ol>
+     *
+     * @throws IllegalArgumentException
+     *         if the entity with a given ID is not found in the repository
+     *
+     * @see Migration
+     */
+    public final void applyMigration(I id, Migration<E> migration) {
+        checkNotNull(id);
+        checkNotNull(migration);
+
+        Optional<E> found = find(id);
+        checkArgument(found.isPresent(),
+                      "An entity with ID `%s` is not found in the repository.", id);
+        E entity = found.get();
+        migration.apply(entity);
+        store(entity);
     }
 
     /**
