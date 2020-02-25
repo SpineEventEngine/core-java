@@ -20,6 +20,8 @@
 
 package io.spine.server.entity;
 
+import io.spine.annotation.Experimental;
+
 import java.util.function.Consumer;
 
 /**
@@ -34,6 +36,7 @@ import java.util.function.Consumer;
  * @param <E>
  *         the entity type
  */
+@Experimental
 public interface Migration<E extends Entity<?, ?>> extends Consumer<E> {
 
     /**

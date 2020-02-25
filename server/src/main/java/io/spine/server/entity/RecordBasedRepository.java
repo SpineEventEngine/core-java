@@ -26,6 +26,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.client.EntityId;
@@ -141,6 +142,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @see Migration
      */
+    @Experimental
     public final void applyMigration(I id, Migration<E> migration) {
         checkNotNull(id);
         checkNotNull(migration);
@@ -158,6 +160,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @see #applyMigration(I, Migration)
      */
+    @Experimental
     public final void applyMigration(Set<I> ids, Migration<E> migration) {
         checkNotNull(ids);
         checkNotNull(migration);
