@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.server.delivery.given.TestInboxMessages.toDeliver;
 
 @DisplayName("`DispatchingId` should")
 class DispatchingIdTest {
@@ -50,40 +51,17 @@ class DispatchingIdTest {
         Command commandA = command("Target A");
         Command commandB = command("Target B");
 
-        DispatchingId messageOne = new DispatchingId(newMessage(commandA, now));
-        DispatchingId anotherMessageOne = new DispatchingId(newMessage(commandA, now));
-        DispatchingId messageOneFromPast = new DispatchingId(newMessage(commandA, inPast));
 
-        DispatchingId messageTwo = new DispatchingId(newMessage(commandB, now));
-        DispatchingId messageTwoFromPast = new DispatchingId(newMessage(commandB, inPast));
+        DispatchingId messageOne = new DispatchingId(toDeliver(commandA, now));
+        DispatchingId anotherMessageOne = new DispatchingId(toDeliver(commandA, now));
+        DispatchingId messageOneFromPast = new DispatchingId(toDeliver(commandA, inPast));
+
+        DispatchingId messageTwo = new DispatchingId(toDeliver(commandB, now));
+        DispatchingId messageTwoFromPast = new DispatchingId(toDeliver(commandB, inPast));
 
         new EqualsTester().addEqualityGroup(messageOne, anotherMessageOne, messageOneFromPast)
                           .addEqualityGroup(messageTwo, messageTwoFromPast)
                           .testEquals();
-    }
-
-    private static InboxMessage newMessage(Command cmd, Timestamp whenReceived) {
-        InboxId inboxId = InboxId.newBuilder()
-                                 .setEntityId(EntityId.newBuilder()
-                                                      .setId(Identifier.pack("some-target"))
-                                                      .vBuild())
-                                 .setTypeUrl(TypeUrl.of(DTask.class)
-                                                    .value())
-                                 .vBuild();
-        InboxMessage message = InboxMessage
-                .newBuilder()
-                .setStatus(InboxMessageStatus.TO_DELIVER)
-                .setCommand(cmd)
-                .setInboxId(inboxId)
-                .setId(InboxMessageId.generate())
-                .setSignalId(InboxSignalId.newBuilder()
-                                          .setValue(cmd.getId()
-                                                       .value()))
-                .setShardIndex(DeliveryStrategy.newIndex(0, 1))
-                .setLabel(InboxLabel.HANDLE_COMMAND)
-                .setWhenReceived(whenReceived)
-                .vBuild();
-        return message;
     }
 
     private Command command(String taskId) {

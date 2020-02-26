@@ -82,12 +82,12 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         ShardIndex shardIndex = delivery.whichShardFor(entityId, entityStateType);
+        InboxMessageId id = InboxMessageMixin.generateIdWith(shardIndex);
         InboxMessage.Builder builder = InboxMessage
                 .newBuilder()
-                .setId(InboxMessageId.generate())
+                .setId(id)
                 .setSignalId(signalIdFrom(envelope, entityId))
                 .setInboxId(inboxId)
-                .setShardIndex(shardIndex)
                 .setLabel(label)
                 .setStatus(determineStatus(envelope, label))
                 .setWhenReceived(Time.currentTime())
