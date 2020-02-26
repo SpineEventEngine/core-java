@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
@@ -65,9 +66,11 @@ import io.spine.system.server.event.EntityUnarchived;
 import io.spine.system.server.event.EventDispatchedToReactor;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.event.EventImported;
+import io.spine.system.server.event.MigrationApplied;
 import io.spine.system.server.event.TargetAssignedToCommand;
 import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;
+import sun.reflect.CallerSensitive;
 
 import java.util.Collection;
 import java.util.List;
@@ -272,6 +275,15 @@ public class EntityLifecycle {
         Origin systemEventOrigin = EventEnvelope.of(event)
                                                 .asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
+    }
+
+    public final void onMigrationApplied() {
+        MigrationApplied systemEvent = MigrationApplied
+                .newBuilder()
+                .setEntity(entityId)
+                .setWhen(currentTime())
+                .build();
+        postEvent(systemEvent);
     }
 
     /**

@@ -18,39 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.projection;
 
+import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.EntityLifecycleMonitor;
+import io.spine.server.entity.Migration;
+import io.spine.server.entity.Transaction;
+import io.spine.server.entity.TransactionalEntity;
 
-/**
- * A migration operation that is tied to an entity {@link Transaction}.
- *
- * <p>The operation always ends with a transaction {@linkplain Transaction#commit() commit}.
- *
- * @param <I>
- *         the type of entity identifiers
- * @param <E>
- *         the type of entity
- * @param <S>
- *         the type of entity state objects
- * @param <B>
- *         the type of a {@code ValidatingBuilder} for the entity state
- */
-public abstract class TransactionBasedMigration<I,
-                                                E extends TransactionalEntity<I, S, B>,
-                                                S extends EntityState,
-                                                B extends ValidatingBuilder<S>>
-        implements Migration<E> {
+@Experimental
+public abstract class ProjectionMigration<I,
+                                          S extends EntityState,
+                                          B extends ValidatingBuilder<S>,
+                                          P extends Projection<I, S, B>>
+        extends Migration<I, S, P> {
 
+    @SuppressWarnings("unchecked") // Logically correct.
     @Override
-    public void accept(E entity) {
-        Transaction<I, E, S, B> tx = startTransaction(entity);
-        tx.commit();
+    protected Transaction<I, P, S, ?> startTransaction(P entity) {
+        Transaction<I, P, S, ?> tx = (Transaction<I, P, S, ?>) ProjectionTransaction.start(entity);
+        return tx;
     }
-
-    /**
-     * Opens a new {@code Transaction} on the entity.
-     */
-    protected abstract Transaction<I, E, S, B> startTransaction(E entity);
 }

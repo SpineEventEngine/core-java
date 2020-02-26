@@ -74,7 +74,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      * @param repository
      *         the repository of the entity under transaction
      */
-    public static <I> TransactionListener<I> newInstance(Repository<I, ?> repository, I id) {
+    public static <I> EntityLifecycleMonitor<I> newInstance(Repository<I, ?> repository, I id) {
         checkNotNull(repository);
         checkNotNull(id);
         return new EntityLifecycleMonitor<>(repository, id);
@@ -148,6 +148,10 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     @Override
     public void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord) {
         // NOP.
+    }
+
+    void setLastMessage(Signal<?, ?, ?> lastMessage) {
+        this.lastMessage = lastMessage;
     }
 
     /**

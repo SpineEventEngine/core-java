@@ -236,3 +236,13 @@ message EntityRestored {
     // The version received by the entity upon restoration.
     core.Version version = 4;
 }
+
+message MigrationApplied {
+    option (is).java_type = "EntityLifecycleEvent";
+
+    // The ID of the entity.
+    core.MessageId entity = 1 [(required) = true];
+
+    // The instant when the migration was applied.
+    google.protobuf.Timestamp when = 2;
+}

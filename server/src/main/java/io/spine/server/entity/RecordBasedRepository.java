@@ -29,11 +29,14 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
+import io.spine.core.Event;
+import io.spine.core.Origin;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -55,6 +58,7 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
@@ -127,54 +131,30 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
-    /**
-     * Applies a given {@link Migration} operation to an entity with the given ID.
-     *
-     * <p>The operation is performed in three steps:
-     * <ol>
-     *     <li>Load an entity by the given ID.
-     *     <li>Transform it through the migration operation.
-     *     <li>Store the entity back to the repository.
-     * </ol>
-     *
-     * @throws IllegalArgumentException
-     *         if the entity with a given ID is not found in the repository
-     *
-     * @see Migration
-     */
+    @SuppressWarnings("unchecked") // Checked at runtime.
     @Experimental
-    public final void applyMigration(I id, Migration<E> migration) {
+    public final <T extends TransactionalEntity<I, S, ?>>
+    void applyMigration(I id, Migration<I, S, T> migration) {
         checkNotNull(id);
         checkNotNull(migration);
+        checkEntityIsTransactional();
 
         Optional<E> found = find(id);
         checkArgument(found.isPresent(),
                       "An entity with ID `%s` is not found in the repository.", id);
         E entity = found.get();
-        migration.apply(entity);
-        store(entity);
-    }
+        migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
 
-    /**
-     * Applies a {@link Migration} operation to multiple entities in batch.
-     *
-     * @see #applyMigration(I, Migration)
-     */
-    @Experimental
-    public final void applyMigration(Set<I> ids, Migration<E> migration) {
-        checkNotNull(ids);
-        checkNotNull(migration);
-
-        TargetFilters filters = Targets.someOf(entityModelClass().stateClass(), ids)
-                                       .getFilters();
-        Iterator<E> entities = find(filters, ResponseFormat.getDefaultInstance());
-        Deque<E> toStore = newLinkedList();
-        while (entities.hasNext()) {
-            E entity = entities.next();
-            migration.apply(entity);
-            toStore.add(entity);
+        if (migration.physicallyRemoveRecord()) {
+            // TODO:2020-02-26:dmytro.kuzmin:WIP: Check that after record deletion the
+            //  subscriptions are notified and all other necessary routines are invoked.
+            boolean deleted = recordStorage().delete(id);
+            if (!deleted) {
+                _warn().log(
+                        "Could not delete an entity of type `%s` with ID `%s` during migration.",
+                        entityStateType(), id);
+            }
         }
-        store(toStore);
     }
 
     @Override
@@ -404,6 +384,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                                      .convert(record);
         checkNotNull(result);
         return result;
+    }
+
+    private void checkEntityIsTransactional() {
+        checkState(TransactionalEntity.class.isAssignableFrom(entityClass()),
+                   "`%s` is not a transactional entity type. The requested operation is only " +
+                           "supported for transactional entity types.");
     }
 
     /**

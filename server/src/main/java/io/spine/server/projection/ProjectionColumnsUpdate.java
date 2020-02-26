@@ -24,14 +24,14 @@ import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
-import io.spine.server.entity.TransactionBasedMigration;
 
 /**
  * A migration operation that does the update of interface-based columns of a projection.
  *
- * <p>When {@linkplain io.spine.server.entity.Repository#applyMigration(I, Migration) applied} to
- * an entity, this operation will trigger the recalculation of entity storage fields according to
- * the current implementation of {@link io.spine.base.EntityWithColumns}-derived methods.
+ * <p>When {@linkplain io.spine.server.entity.RecordBasedRepository#applyMigration(I, Migration)
+ * applied} to an entity, this operation will trigger the recalculation of entity storage fields
+ * according to the current implementation of {@link io.spine.base.EntityWithColumns}-derived
+ * methods.
  *
  * <p>The operation relies on the fact that column values are calculated and propagated to the
  * entity state on a transaction {@linkplain Transaction#commit() commit}.
@@ -47,11 +47,10 @@ public final class ProjectionColumnsUpdate<I,
                                            P extends Projection<I, S, B>,
                                            S extends EntityState,
                                            B extends ValidatingBuilder<S>>
-        extends TransactionBasedMigration<I, P, S, B> {
+        extends ProjectionMigration<I, S, B, P> {
 
-    @SuppressWarnings("unchecked") // Logically correct.
     @Override
-    protected Transaction<I, P, S, B> startTransaction(P entity) {
-        return (Transaction<I, P, S, B>) ProjectionTransaction.start(entity);
+    public S apply(S s) {
+        return s;
     }
 }
