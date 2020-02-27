@@ -33,6 +33,7 @@ import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
+import io.spine.client.Targets;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -43,16 +44,19 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterators.transform;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -136,9 +140,35 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
         if (migration.physicallyRemoveRecord()) {
             delete(id);
+            migration.clearRemovalFlag();
         } else {
             store(entity);
         }
+    }
+
+    @SuppressWarnings("unchecked") // Checked at runtime.
+    @Experimental
+    public final <T extends TransactionalEntity<I, S, ?>>
+    void applyMigration(Set<I> ids, Migration<I, S, T> migration) {
+        checkNotNull(ids);
+        checkNotNull(migration);
+        checkEntityIsTransactional();
+
+        TargetFilters filters = Targets.someOf(entityModelClass().stateClass(), ids)
+                                       .getFilters();
+        Iterator<E> entities = find(filters, ResponseFormat.getDefaultInstance());
+        Deque<E> toStore = newLinkedList();
+        while (entities.hasNext()) {
+            E entity = entities.next();
+            migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
+            if (migration.physicallyRemoveRecord()) {
+                delete(entity.id());
+                migration.clearRemovalFlag();
+            } else {
+                toStore.add(entity);
+            }
+        }
+        store(toStore);
     }
 
     @Override

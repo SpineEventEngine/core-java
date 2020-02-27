@@ -57,6 +57,8 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
         updateState(newState);
         updateLifecycle();
         tx.commit();
+
+        clearLifecycleFlags();
     }
 
     private void updateState(S newState) {
@@ -108,6 +110,15 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
 
     final boolean physicallyRemoveRecord() {
         return physicallyRemoveRecord;
+    }
+
+    void clearRemovalFlag() {
+        physicallyRemoveRecord = false;
+    }
+
+    private void clearLifecycleFlags() {
+        archive = false;
+        delete = false;
     }
 
     private Transaction<I, E, S, ?> txWithLifecycleMonitor() {
