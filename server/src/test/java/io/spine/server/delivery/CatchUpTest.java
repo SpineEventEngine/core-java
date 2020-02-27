@@ -77,7 +77,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * millisecond precision. It is required to test the catch-up in the scenarios close to the legacy
  * applications, as at that time there were no emulation of the nanosecond time resolution.
  *
- * <p>As the downstream libraries, such as Spine Google Cloud library would want to run the same
+ * <p>As the downstream libraries, such as Spine Google Cloud library, would want to run the same
  * tests under their specific conditions, the big and slow catch-up tests are made {@code public}.
  * In this way such tests may be overridden and disabled, if needed.
  */
