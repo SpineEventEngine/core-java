@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
@@ -275,15 +276,6 @@ public class EntityLifecycle {
         postEvent(systemEvent, systemEventOrigin);
     }
 
-    public final void onMigrationApplied() {
-        MigrationApplied systemEvent = MigrationApplied
-                .newBuilder()
-                .setEntity(entityId)
-                .setWhen(currentTime())
-                .build();
-        postEvent(systemEvent);
-    }
-
     /**
      * Posts the {@link EventDispatchedToReactor} system event.
      *
@@ -324,6 +316,15 @@ public class EntityLifecycle {
         postIfDeleted(change, messageIds);
         postIfExtracted(change, messageIds);
         postIfRestored(change, messageIds);
+    }
+
+    public final Optional<Event> onMigrationApplied() {
+        MigrationApplied systemEvent = MigrationApplied
+                .newBuilder()
+                .setEntity(entityId)
+                .setWhen(currentTime())
+                .build();
+        return postEvent(systemEvent);
     }
 
     /**
@@ -578,14 +579,19 @@ public class EntityLifecycle {
         postEvent(systemEvent);
     }
 
-    protected void postEvent(EventMessage event, Origin explicitOrigin) {
+    @CanIgnoreReturnValue
+    protected Optional<Event> postEvent(EventMessage event, Origin explicitOrigin) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        filtered.ifPresent(systemEvent -> systemWriteSide.postEvent(systemEvent, explicitOrigin));
+        Optional<Event> result =
+                filtered.map(systemEvent -> systemWriteSide.postEvent(systemEvent, explicitOrigin));
+        return result;
     }
 
-    protected void postEvent(EventMessage event) {
+    @CanIgnoreReturnValue
+    protected Optional<Event> postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        filtered.ifPresent(systemWriteSide::postEvent);
+        Optional<Event> result = filtered.map(systemWriteSide::postEvent);
+        return result;
     }
 
     /**

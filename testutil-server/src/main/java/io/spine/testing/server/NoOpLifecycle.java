@@ -22,6 +22,7 @@ package io.spine.testing.server;
 
 import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
@@ -29,6 +30,8 @@ import io.spine.server.entity.EventFilter;
 import io.spine.system.server.EntityTypeName;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 /**
  * A test implementation of {@link EntityLifecycle} which performs no action on any method call.
@@ -54,12 +57,12 @@ public final class NoOpLifecycle extends EntityLifecycle {
     }
 
     @Override
-    protected void postEvent(EventMessage event, Origin explicitOrigin) {
-        // NoOp.
+    protected Optional<Event> postEvent(EventMessage event, Origin explicitOrigin) {
+        return Optional.empty();
     }
 
     @Override
-    protected void postEvent(EventMessage event) {
-        // NoOp.
+    protected Optional<Event> postEvent(EventMessage event) {
+        return Optional.empty();
     }
 }

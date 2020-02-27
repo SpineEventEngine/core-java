@@ -23,21 +23,23 @@ package io.spine.server.entity;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.base.Identifier;
-import io.spine.core.MessageId;
+import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.logging.Logging;
 import io.spine.system.server.event.MigrationApplied;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
+import static io.spine.protobuf.Messages.isDefault;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 @Experimental
 public abstract class Migration<I, S extends EntityState, E extends TransactionalEntity<I, S, ?>>
-        implements Function<S, S> {
+        implements Function<S, S>, Logging {
 
     private boolean archive;
     private boolean delete;
@@ -51,28 +53,14 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
 
         Transaction<I, E, S, ?> tx = startTransaction(entity);
         I id = entity.id();
-        EntityLifecycleMonitor<I> monitor =
-                EntityLifecycleMonitor.newInstance(repository, id);
-        MessageId entityId = MessageId
-                .newBuilder()
-                .setId(Identifier.pack(entity.id()))
-                .setTypeUrl(repository.entityStateType().value())
-                .vBuild();
-        MigrationApplied migrationApplied = MigrationApplied
-                .newBuilder()
-                .setEntity(entityId)
-                .setWhen(currentTime())
-                .build();
+        EntityLifecycleMonitor<I> monitor = configureLifecycleMonitor(id, repository);
 
-        repository.lifecycleOf(id)
-                  .onMigrationApplied();
-
-//        monitor.setLastMessage(migrationApplied);
         tx.setListener(monitor);
 
         S oldState = entity.state();
         S newState = apply(oldState);
         if (physicallyRemoveRecord) {
+            // Will be deleted later by the repository.
             tx.commit();
             return;
         }
@@ -86,6 +74,18 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
             entity.setDeleted(true);
         }
         tx.commit();
+    }
+
+    public final void markArchived() {
+        archive = true;
+    }
+
+    public final void markDeleted() {
+        delete = true;
+    }
+
+    public final void removeFromStorage() {
+        physicallyRemoveRecord = true;
     }
 
     protected final I id() {
@@ -108,23 +108,41 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
         return entity.isDeleted();
     }
 
-    public final void markArchived() {
-        archive = true;
-    }
-
-    public final void markDeleted() {
-        delete = true;
-    }
-
-    public final void removeFromStorage() {
-        physicallyRemoveRecord = true;
-    }
-
     final boolean physicallyRemoveRecord() {
         return physicallyRemoveRecord;
     }
 
     protected abstract Transaction<I, E, S, ?> startTransaction(E entity);
+
+    /**
+     * Will post lifecycle events as usual, assigning a {@link MigrationApplied} instance as last
+     * handled message.
+     */
+    private EntityLifecycleMonitor<I>
+    configureLifecycleMonitor(I id, RecordBasedRepository<I, E, S> repository) {
+        EntityLifecycleMonitor<I> monitor =
+                EntityLifecycleMonitor.newInstance(repository, id);
+
+        Optional<Event> posted = repository.lifecycleOf(id)
+                                          .onMigrationApplied();
+        if (!posted.isPresent()) {
+            throw newIllegalStateException(
+                    "The event filter of repository of type `%s` prevents system from posting " +
+                            "the `%s` event. Re-configure an event filter by overriding the " +
+                            "`Repository#eventFilter()` method if you want to apply the migration.",
+                    repository.getClass().getCanonicalName(),
+                    MigrationApplied.class.getCanonicalName()
+            );
+        }
+        Event migrationApplied = posted.get();
+        if (!isDefault(migrationApplied)) {
+            monitor.setLastMessage(migrationApplied);
+        } else {
+            _warn().log("The system context uses a NO-OP system write side. " +
+                                "No system events will be posted during the migration.");
+        }
+        return monitor;
+    }
 
     private void checkAmidstApplyingToEntity() {
         checkNotNull(entity,

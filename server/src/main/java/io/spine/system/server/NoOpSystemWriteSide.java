@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.core.Origin;
 
 /**
@@ -36,7 +37,7 @@ public enum NoOpSystemWriteSide implements SystemWriteSide {
     INSTANCE;
 
     @Override
-    public void postEvent(EventMessage systemEvent, Origin origin) {
-        // NOP.
+    public Event postEvent(EventMessage systemEvent, Origin origin) {
+        return Event.getDefaultInstance();
     }
 }
