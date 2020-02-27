@@ -142,7 +142,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             boolean deleted = recordStorage().delete(id);
             if (!deleted) {
                 _warn().log(
-                        "Could not physically delete an entity record of type `%s` with " +
+                        "Could not delete an entity record of type `%s` with " +
                                 "ID `%s` during migration.", entityStateType(), id);
             }
         } else {
