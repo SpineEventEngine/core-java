@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
@@ -72,9 +73,10 @@ public final class MemoizingWriteSide implements SystemWriteSide {
      * @see #lastSeenEvent()
      */
     @Override
-    public void postEvent(EventMessage systemEvent, Origin origin) {
+    public Event postEvent(EventMessage systemEvent, Origin origin) {
         TenantId tenantId = currentTenant();
         lastSeenEvent = new MemoizedSystemMessage(systemEvent, tenantId);
+        return Event.getDefaultInstance();
     }
 
     /** Obtains the ID of the current tenant. */
