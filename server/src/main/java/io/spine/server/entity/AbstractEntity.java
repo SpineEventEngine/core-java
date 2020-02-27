@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.flogger.LogSite;
+import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -32,9 +32,13 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.logging.Logging;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
+import io.spine.server.log.HandlerLog;
+import io.spine.server.log.HandlerMethodSite;
+import io.spine.server.log.LogAwareMessageHandler;
 import io.spine.server.model.HandlerMethod;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
@@ -44,11 +48,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.logging.Logging.loggerFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkValid;
 
@@ -63,9 +67,8 @@ import static io.spine.validate.Validate.checkValid;
 @SuppressWarnings({
         "SynchronizeOnThis" /* This class uses double-check idiom for lazy init of some
             fields. See Effective Java 2nd Ed. Item #71. */,
-        "AbstractClassWithoutAbstractMethods",
         "ClassWithTooManyMethods"})
-public abstract class AbstractEntity<I, S extends EntityState> implements Entity<I, S>, LoggingEntity {
+public abstract class AbstractEntity<I, S extends EntityState> implements Entity<I, S>, LogAwareMessageHandler {
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -112,7 +115,7 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
      */
     private volatile boolean lifecycleFlagsChanged;
 
-    private @Nullable LogSite logSite;
+    private @Nullable HandlerLog handlerLog;
 
     /**
      * Creates a new instance with the zero version and cleared lifecycle flags.
@@ -515,19 +518,28 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
     }
 
     @Override
-    public void resetLog() {
-        this.logSite = null;
-    }
-
-    @Override
-    public Optional<LogSite> handlerSite() {
-        return Optional.ofNullable(logSite);
-    }
-
-    @Override
-    public void enter(HandlerMethod<?, ?, ?, ?> method) {
+    @Internal
+    public final void enter(HandlerMethod<?, ?, ?, ?> method) {
         checkNotNull(method);
-        this.logSite = new HandlerMethodSite(method);
+        FluentLogger logger = loggerFor(getClass());
+        HandlerMethodSite site = new HandlerMethodSite(method);
+        this.handlerLog = new HandlerLog(logger, site);
+    }
+
+    @Internal
+    @Override
+    public void resetLog() {
+        this.handlerLog = null;
+    }
+
+    protected final HandlerLog log() {
+        checkState(handlerLog != null,
+                   "Unable to get a handler log for `%s`." +
+                           "A handler log is available only in message handler methods. " +
+                           "Use `%s` instead.",
+                   getClass().getSimpleName(),
+                   Logging.class.getName());
+        return handlerLog;
     }
 
     @Override

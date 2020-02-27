@@ -29,7 +29,7 @@ import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
-import io.spine.server.entity.LoggingEntity;
+import io.spine.server.log.LogAwareMessageHandler;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -251,10 +251,15 @@ public abstract class AbstractHandlerMethod<T,
         checkNotNull(envelope);
         checkAttributesMatch(envelope);
         MessageId signal = envelope.outerObject().messageId();
-        configureLog(target);
         DispatchOutcome.Builder outcome = DispatchOutcome
                 .newBuilder()
                 .setPropagatedSignal(signal);
+        LogAwareMessageHandler asLogAware = target instanceof LogAwareMessageHandler
+                                            ? (LogAwareMessageHandler) target
+                                            : null;
+        if (asLogAware != null) {
+            asLogAware.enter(this);
+        }
         try {
             Success success = doInvoke(target, envelope);
             outcome.setSuccess(success);
@@ -274,7 +279,9 @@ public abstract class AbstractHandlerMethod<T,
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw illegalStateWithCauseOf(e);
         } finally {
-            resetLog(target);
+            if (asLogAware != null) {
+                asLogAware.resetLog();
+            }
         }
         return outcome.build();
     }
@@ -290,20 +297,6 @@ public abstract class AbstractHandlerMethod<T,
         ThrowableMessage throwable = (ThrowableMessage) cause;
         Optional<Success> maybeSuccess = handleRejection(throwable, target, envelope);
         return maybeSuccess.orElseThrow(this::cannotThrowRejections);
-    }
-
-    private void configureLog(T target) {
-        if (target instanceof LoggingEntity) {
-            LoggingEntity logging = (LoggingEntity) target;
-            logging.enter(this);
-        }
-    }
-
-    private void resetLog(T target) {
-        if (target instanceof LoggingEntity) {
-            LoggingEntity logging = (LoggingEntity) target;
-            logging.resetLog();
-        }
     }
 
     private RuntimeException cannotThrowRejections() {

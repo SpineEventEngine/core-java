@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.log;
 
 import com.google.common.base.Objects;
 import com.google.common.flogger.LogSite;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.Internal;
 import io.spine.code.java.ClassName;
+import io.spine.code.java.SimpleClassName;
 import io.spine.server.model.HandlerMethod;
 
 import java.lang.reflect.Method;
@@ -33,35 +35,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
+@Internal
 @Immutable
-final class HandlerMethodSite extends LogSite {
+public final class HandlerMethodSite extends LogSite {
 
-    private final String fileName;
-    private final ClassName name;
-    private final String methodName;
+    @SuppressWarnings("Immutable")
+    private final Method method;
 
-    HandlerMethodSite(HandlerMethod<?, ?, ?, ?> method) {
-        this(method.rawMethod());
-    }
-
-    private HandlerMethodSite(Method method) {
+    public HandlerMethodSite(HandlerMethod<?, ?, ?, ?> method) {
         super();
         checkNotNull(method);
-        this.name = ClassName.of(method.getDeclaringClass());
-        this.fileName = name.topLevelClass().value();
-        String params = Stream.of(method.getParameterTypes())
-                              .map(Class::getSimpleName)
-                              .collect(joining(", "));
-        this.methodName = format("%s(%s)", method.getName(), params);
+        this.method = method.rawMethod();
     }
 
     @Override
     public String getClassName() {
-        return name.canonicalName();
+        return method.getDeclaringClass()
+                     .getName();
     }
 
     @Override
     public String getMethodName() {
+        String params = Stream.of(method.getParameterTypes())
+                              .map(Class::getSimpleName)
+                              .collect(joining(", "));
+        String methodName = format("%s(%s)", method.getName(), params);
         return methodName;
     }
 
@@ -72,7 +70,9 @@ final class HandlerMethodSite extends LogSite {
 
     @Override
     public String getFileName() {
-        return fileName;
+        SimpleClassName className = ClassName.of(method.getDeclaringClass())
+                                        .topLevelClass();
+        return className.value() + ".java";
     }
 
     @Override
@@ -84,13 +84,11 @@ final class HandlerMethodSite extends LogSite {
             return false;
         }
         HandlerMethodSite site = (HandlerMethodSite) o;
-        return Objects.equal(getFileName(), site.getFileName()) &&
-                Objects.equal(name, site.name) &&
-                Objects.equal(getMethodName(), site.getMethodName());
+        return Objects.equal(method, site.method);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getFileName(), name, getMethodName());
+        return Objects.hashCode(method);
     }
 }
