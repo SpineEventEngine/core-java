@@ -50,12 +50,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkValid;
 
@@ -132,19 +132,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(migration);
         checkEntityIsTransactional();
 
-        Optional<E> found = find(id);
-        checkArgument(found.isPresent(),
-                      "An entity with ID `%s` is not found in the repository.", id);
-        E entity = found.get();
+        E entity = findOrThrow(id);
         migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
-
         if (migration.physicallyRemoveRecord()) {
-            boolean deleted = recordStorage().delete(id);
-            if (!deleted) {
-                _warn().log(
-                        "Could not delete an entity record of type `%s` with " +
-                                "ID `%s` during migration.", entityStateType(), id);
-            }
+            delete(id);
         } else {
             store(entity);
         }
@@ -354,6 +345,20 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         EntityQuery<I> entityQuery = EntityQueries.from(filters, storage);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
+    }
+
+    private E findOrThrow(I id) {
+        return find(id).orElseThrow(() -> newIllegalArgumentException(
+                "An entity with ID `%s` is not found in the repository.", id
+        ));
+    }
+
+    private void delete(I id) {
+        boolean deleted = recordStorage().delete(id);
+        if (!deleted) {
+            _warn().log("Could not delete an entity record of type `%s` with ID `%s`.",
+                        entityStateType(), id);
+        }
     }
 
     /**
