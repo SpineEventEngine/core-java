@@ -71,7 +71,6 @@ import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -82,8 +81,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.Streams.stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
@@ -544,7 +541,6 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @Disabled
     @DisplayName("update columns through migration operation")
     void updateColumns() {
         // Store a new projection instance in the repository.
@@ -565,7 +561,7 @@ class ProjectionRepositoryTest
         assertThat(found.hasNext()).isFalse();
 
         // Apply the columns update.
-        // TODO:2020-02-26:dmytro.kuzmin:WIP: Implement.
+        repository.applyMigration(id, new ProjectionColumnsUpdate<>());
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProjection> afterMigration =
@@ -578,7 +574,6 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @Disabled
     @DisplayName("update columns for multiple entities")
     void updateColumnsForMultiple() {
         // Store three projections to the repository.
@@ -603,7 +598,7 @@ class ProjectionRepositoryTest
         repository.store(projection3);
 
         // Apply the column update to two of the three entities.
-        // TODO:2020-02-26:dmytro.kuzmin:WIP: Implement.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new ProjectionColumnsUpdate<>());
 
         // Check that entities to which migration has been applied now have column values updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());

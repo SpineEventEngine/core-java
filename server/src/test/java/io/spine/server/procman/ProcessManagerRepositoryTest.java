@@ -85,7 +85,6 @@ import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -637,7 +636,6 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @Disabled
     @DisplayName("update columns via migration operation")
     void updateColumns() {
         // Store a new process manager instance in the repository.
@@ -658,7 +656,7 @@ class ProcessManagerRepositoryTest
         assertThat(found.hasNext()).isFalse();
 
         // Apply the columns update.
-        // TODO:2020-02-26:dmytro.kuzmin:WIP: Implement.
+        repository.applyMigration(id, new ProcessManagerColumnsUpdate<>());
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProcessManager> afterMigration =
@@ -671,7 +669,6 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @Disabled
     @DisplayName("update columns for multiple entities")
     void updateColumnsForMultiple() {
         // Store three entities to the repository.
@@ -696,7 +693,7 @@ class ProcessManagerRepositoryTest
         repository.store(pm3);
 
         // Apply the column update to two of the three entities.
-        // TODO:2020-02-26:dmytro.kuzmin:WIP: Implement.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new ProcessManagerColumnsUpdate<>());
 
         // Check that entities to which the migration has been applied now have columns updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
