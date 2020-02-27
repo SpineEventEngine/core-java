@@ -20,11 +20,13 @@
 
 package io.spine.server.procman;
 
+import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
 
+@Experimental
 public abstract class ProcessManagerMigration<I,
                                               S extends EntityState,
                                               B extends ValidatingBuilder<S>,

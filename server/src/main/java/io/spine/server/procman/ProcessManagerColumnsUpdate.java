@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
@@ -44,6 +45,7 @@ import io.spine.server.entity.Transaction;
  *
  * @see io.spine.server.entity.storage.InterfaceBasedColumn
  */
+@Experimental
 public final class ProcessManagerColumnsUpdate<I,
                                                P extends ProcessManager<I, S, B>,
                                                S extends EntityState,
