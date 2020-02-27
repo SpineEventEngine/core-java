@@ -81,7 +81,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * tests under their specific conditions, the big and slow catch-up tests are made {@code public}.
  * In this way such tests may be overridden and disabled, if needed.
  */
-
 @SlowTest
 @DisplayName("Catch-up of projection instances should")
 @SuppressWarnings("WeakerAccess")   // see the class-level documentation.
