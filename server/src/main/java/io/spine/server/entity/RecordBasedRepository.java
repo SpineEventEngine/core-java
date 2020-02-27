@@ -139,14 +139,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
 
         if (migration.physicallyRemoveRecord()) {
-            // TODO:2020-02-26:dmytro.kuzmin:WIP: Check that after record deletion the
-            //  subscriptions are notified and all other necessary routines are invoked.
             boolean deleted = recordStorage().delete(id);
             if (!deleted) {
                 _warn().log(
-                        "Could not delete an entity of type `%s` with ID `%s` during migration.",
-                        entityStateType(), id);
+                        "Could not physically delete an entity record of type `%s` with " +
+                                "ID `%s` during migration.", entityStateType(), id);
             }
+        } else {
+            store(entity);
         }
     }
 
