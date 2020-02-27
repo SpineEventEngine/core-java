@@ -46,29 +46,34 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
     private boolean physicallyRemoveRecord;
 
     private @MonotonicNonNull E entity;
+    private @MonotonicNonNull RecordBasedRepository<I, E, S> repository;
 
     @Internal
     final void applyTo(E entity, RecordBasedRepository<I, E, S> repository) {
         this.entity = entity;
+        this.repository = repository;
 
-        Transaction<I, E, S, ?> tx = startTransaction(entity);
-        I id = entity.id();
-        EntityLifecycleMonitor<I> monitor = configureLifecycleMonitor(id, repository);
-
-        tx.setListener(monitor);
-
+        Transaction<I, E, S, ?> tx = txWithLifecycleMonitor();
         S oldState = entity.state();
         S newState = apply(oldState);
-        if (!oldState.equals(newState)) {
+        updateState(newState);
+        updateLifecycle();
+        tx.commit();
+    }
+
+    private void updateState(S newState) {
+        if (!entity.state().equals(newState)) {
             entity.updateState(newState, increment(version()));
         }
+    }
+
+    private void updateLifecycle() {
         if (archive) {
             entity.setArchived(true);
         }
         if (delete) {
             entity.setDeleted(true);
         }
-        tx.commit();
     }
 
     public final void markArchived() {
@@ -107,40 +112,52 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
         return physicallyRemoveRecord;
     }
 
-    protected abstract Transaction<I, E, S, ?> startTransaction(E entity);
+    private Transaction<I, E, S, ?> txWithLifecycleMonitor() {
+        I id = entity.id();
+        Transaction<I, E, S, ?> tx = startTransaction(entity);
+        EntityLifecycleMonitor<I> monitor = configureLifecycleMonitor(id);
+        tx.setListener(monitor);
+        return tx;
+    }
 
     /**
      * Will post lifecycle events as usual, assigning a {@link MigrationApplied} instance as last
      * handled message.
      */
-    private EntityLifecycleMonitor<I>
-    configureLifecycleMonitor(I id, RecordBasedRepository<I, E, S> repository) {
+    private EntityLifecycleMonitor<I> configureLifecycleMonitor(I id) {
         EntityLifecycleMonitor<I> monitor =
                 EntityLifecycleMonitor.newInstance(repository, id);
 
         Optional<Event> posted = repository.lifecycleOf(id)
-                                          .onMigrationApplied();
-        if (!posted.isPresent()) {
-            throw newIllegalStateException(
-                    "The event filter of repository of type `%s` prevents system from posting " +
-                            "the `%s` event. Re-configure an event filter by overriding the " +
-                            "`Repository#eventFilter()` method if you want to apply the migration.",
-                    repository.getClass().getCanonicalName(),
-                    MigrationApplied.class.getCanonicalName()
-            );
-        }
-        Event migrationApplied = posted.get();
+                                           .onMigrationApplied();
+        Event migrationApplied = posted.orElseThrow(this::throwOnBlockingFilter);
         if (!isDefault(migrationApplied)) {
             monitor.setLastMessage(migrationApplied);
         } else {
-            _warn().log("The system context uses a NO-OP system write side. " +
-                                "No system events will be posted during the migration.");
+            warnOnNoSystemEventsPosted();
         }
         return monitor;
     }
 
+    protected abstract Transaction<I, E, S, ?> startTransaction(E entity);
+
     private void checkAmidstApplyingToEntity() {
         checkNotNull(entity,
-                     "This method should only be invoked from `apply(S)` method.");
+                     "This method should only be invoked from within `apply(S)` method.");
+    }
+
+    private IllegalStateException throwOnBlockingFilter() {
+        throw newIllegalStateException(
+                "The event filter of repository of type `%s` prevents system from posting " +
+                        "the `%s` event. Re-configure an event filter by overriding the " +
+                        "`Repository#eventFilter()` method if you want to apply the migration.",
+                repository.getClass().getCanonicalName(),
+                MigrationApplied.class.getCanonicalName()
+        );
+    }
+
+    private void warnOnNoSystemEventsPosted() {
+        _warn().log("The system context uses a NO-OP system write side. " +
+                            "No system events will be posted during the migration.");
     }
 }
