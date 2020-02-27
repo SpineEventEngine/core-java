@@ -28,7 +28,8 @@ import io.spine.server.entity.Transaction;
 /**
  * A migration operation that does the update of interface-based columns of a process manager.
  *
- * <p>When {@linkplain io.spine.server.entity.RecordBasedRepository#applyMigration(I, Migration)
+ * <p>When
+ * {@linkplain io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  * applied} to an entity, this operation will trigger the recalculation of entity storage fields
  * according to the current implementation of {@link io.spine.base.EntityWithColumns}-derived
  * methods.
