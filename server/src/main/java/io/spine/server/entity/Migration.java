@@ -125,18 +125,15 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
      * handled message.
      */
     private EntityLifecycleMonitor<I> configureLifecycleMonitor(I id) {
-        EntityLifecycleMonitor<I> monitor =
-                EntityLifecycleMonitor.newInstance(repository, id);
-
         Optional<Event> posted = repository.lifecycleOf(id)
                                            .onMigrationApplied();
         Event migrationApplied = posted.orElseThrow(this::throwOnBlockingFilter);
+
         if (!isDefault(migrationApplied)) {
-            monitor.setLastMessage(migrationApplied);
-        } else {
             warnOnNoSystemEventsPosted();
+            return EntityLifecycleMonitor.newInstance(repository, id);
         }
-        return monitor;
+        return EntityLifecycleMonitor.withAcknowledgedMessage(repository, id, migrationApplied);
     }
 
     protected abstract Transaction<I, E, S, ?> startTransaction(E entity);

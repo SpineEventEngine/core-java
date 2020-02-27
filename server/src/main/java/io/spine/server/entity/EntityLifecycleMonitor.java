@@ -80,6 +80,14 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
         return new EntityLifecycleMonitor<>(repository, id);
     }
 
+    static <I> EntityLifecycleMonitor<I>
+    withAcknowledgedMessage(Repository<I, ?> repository, I id, Signal<?, ?, ?> message) {
+        EntityLifecycleMonitor<I> monitor = newInstance(repository, id);
+        monitor.lastMessage = message;
+        monitor.acknowledgedMessages.add(message.messageId());
+        return monitor;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -148,10 +156,6 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     @Override
     public void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord) {
         // NOP.
-    }
-
-    void setLastMessage(Signal<?, ?, ?> lastMessage) {
-        this.lastMessage = lastMessage;
     }
 
     /**
