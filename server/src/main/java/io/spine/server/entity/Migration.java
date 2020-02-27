@@ -129,7 +129,7 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
                                            .onMigrationApplied();
         Event migrationApplied = posted.orElseThrow(this::throwOnBlockingFilter);
 
-        if (!isDefault(migrationApplied)) {
+        if (isDefault(migrationApplied)) {
             warnOnNoSystemEventsPosted();
             return EntityLifecycleMonitor.newInstance(repository, id);
         }
@@ -154,7 +154,7 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
     }
 
     private void warnOnNoSystemEventsPosted() {
-        _warn().log("The system context uses a NO-OP system write side. " +
+        _warn().log("The context uses a NO-OP system write side. " +
                             "No system events will be posted during the migration.");
     }
 }
