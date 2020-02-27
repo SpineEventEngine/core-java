@@ -68,7 +68,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Tests on {@linkplain io.spine.server.projection.ProjectionRepository#catchUp(Timestamp, Set)
+ * Tests for the {@linkplain io.spine.server.projection.ProjectionRepository#catchUp(Timestamp, Set)
  * projection catch-up} functionality.
  *
  * <p>The test routines are designed to check both small and big use-cases, including
