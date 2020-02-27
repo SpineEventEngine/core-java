@@ -59,11 +59,6 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
 
         S oldState = entity.state();
         S newState = apply(oldState);
-        if (physicallyRemoveRecord) {
-            // Will be deleted later by the repository.
-            tx.commit();
-            return;
-        }
         if (!oldState.equals(newState)) {
             entity.updateState(newState, increment(version()));
         }
