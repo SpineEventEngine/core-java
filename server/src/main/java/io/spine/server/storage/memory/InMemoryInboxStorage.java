@@ -74,7 +74,7 @@ public final class InMemoryInboxStorage
         Map<Integer, ImmutableList<InboxMessage>> pages =
                 storage.readAll()
                        .stream()
-                       .filter((r) -> index.equals(r.getShardIndex()))
+                       .filter((r) -> index.equals(r.shardIndex()))
                        .sorted(InboxMessageComparator.chronologically)
                        .collect(groupingBy(m -> counter.getAndIncrement() / pageSize,
                                            toImmutableList()));
@@ -89,7 +89,7 @@ public final class InMemoryInboxStorage
         Optional<InboxMessage> result =
                 storage.readAll()
                        .stream()
-                       .filter((r) -> index.equals(r.getShardIndex()) && isToDeliver(r))
+                       .filter((r) -> index.equals(r.shardIndex()) && isToDeliver(r))
                        .min(InboxMessageComparator.chronologically);
         return result;
     }

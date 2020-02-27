@@ -20,29 +20,31 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 
+import static io.spine.base.Identifier.newUuid;
+
 /**
- * A Protobuf {@link com.google.protobuf.Message Message} used for storage in a sharded environment.
+ * A mixin for {@link InboxMessage}.
  */
 @GeneratedMixin
 @Internal
-public interface ShardedRecord extends Message {
+public interface InboxMessageMixin extends ShardedRecord, InboxMessageOrBuilder {
+
+    @Override
+    default ShardIndex shardIndex() {
+        return getId().getIndex();
+    }
 
     /**
-     * Returns the index of the shard in which this record resides.
+     * Generates a new {@code InboxMessageId} with a auto-generated UUID and the given shard
+     * index as parts.
      */
-    ShardIndex shardIndex();
-
-    /**
-     * Returns the moment of time, when the message was originally received to be sharded.
-     *
-     * <p>This is not the time of storing the record, but the time of the message originating in
-     * the subsystem, which stores data splitting it into shards.
-     */
-    @SuppressWarnings("override")   // Implemented in the Protobuf-generated code.
-    Timestamp getWhenReceived();
+    static InboxMessageId generateIdWith(ShardIndex index) {
+        return InboxMessageId.newBuilder()
+                             .setUuid(newUuid())
+                             .setIndex(index)
+                             .vBuild();
+    }
 }
