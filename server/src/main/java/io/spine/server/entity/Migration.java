@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Experimental;
-import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
@@ -48,7 +47,6 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
     private @MonotonicNonNull E entity;
     private @MonotonicNonNull RecordBasedRepository<I, E, S> repository;
 
-    @Internal
     final void applyTo(E entity, RecordBasedRepository<I, E, S> repository) {
         this.entity = entity;
         this.repository = repository;
