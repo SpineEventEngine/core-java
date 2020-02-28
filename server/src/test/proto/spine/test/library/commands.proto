@@ -12,7 +12,8 @@ option java_multiple_files = true;
 import "spine/test/library/card.proto";
 
 message BorrowBooks {
-    repeated Isbn book_id = 1 [(required) = true, (validate) = true];
+    LibraryCardId card = 1 [(required) = true, (validate) = true];
+    repeated Isbn book_id = 2 [(required) = true, (validate) = true];
 }
 
 message ReturnBook {
