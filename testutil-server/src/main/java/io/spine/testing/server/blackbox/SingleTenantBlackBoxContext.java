@@ -22,6 +22,7 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.event.EventEnricher;
@@ -33,9 +34,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 @VisibleForTesting
 public final class SingleTenantBlackBoxContext
         extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
-
-    private final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(SingleTenantBlackBoxContext.class);
 
     SingleTenantBlackBoxContext(String name, EventEnricher enricher) {
         super(false, enricher, name);
@@ -53,6 +51,10 @@ public final class SingleTenantBlackBoxContext
 
     @Override
     protected TestActorRequestFactory requestFactory() {
-        return requestFactory;
+        ActorContext context = context();
+        return new TestActorRequestFactory(null,
+                                           context.getActor(),
+                                           context.getZoneOffset(),
+                                           context.getZoneId());
     }
 }

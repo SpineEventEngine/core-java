@@ -22,6 +22,7 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
@@ -66,7 +67,11 @@ public final class MultitenantBlackBoxContext
 
     @Override
     protected TestActorRequestFactory requestFactory() {
-        return new TestActorRequestFactory(MultitenantBlackBoxContext.class, tenantId());
+        ActorContext context = context();
+        return new TestActorRequestFactory(tenantId(),
+                                           context.getActor(),
+                                           context.getZoneOffset(),
+                                           context.getZoneId());
     }
 
     @Override

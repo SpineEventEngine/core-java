@@ -37,9 +37,11 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
 import io.spine.core.Ack;
+import io.spine.core.ActorContext;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
@@ -90,6 +92,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
+import static io.spine.testing.server.blackbox.Actor.defaultActor;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
@@ -119,6 +122,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>>
         extends AbstractEventSubscriber
         implements Logging {
+
+    private static final UserId DEFAULT_ACTOR = UserId
+            .newBuilder()
+            .setValue(BlackBoxBoundedContext.class.getName())
+            .build();
 
     private final BoundedContext context;
 
@@ -162,6 +170,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
 
     private final Map<Class<? extends EntityState>, Repository<?, ?>> repositories;
 
+    private Actor actor;
+
     @SuppressWarnings("ThisEscapedInObjectConstruction") // to inject self as event dispatcher.
     protected BlackBoxBoundedContext(boolean multitenant,
                                      EventEnricher enricher,
@@ -185,6 +195,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         this.repositories = newHashMap();
         this.context.registerEventDispatcher(this);
         this.context.registerEventDispatcher(DiagnosticLog.instance());
+        this.actor = defaultActor();
     }
 
     /**
@@ -321,6 +332,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /** Obtains the name of this bounded context. */
     public BoundedContextName name() {
         return context.name();
+    }
+
+    public final T withActor(UserId user) {
+        this.actor = Actor.from(user);
+        return thisRef();
+    }
+
+    public final T withActor(ActorContext context) {
+        this.actor = Actor.with(context);
+        return thisRef();
+    }
+
+    protected final ActorContext context() {
+        return actor.context();
     }
 
     /**
