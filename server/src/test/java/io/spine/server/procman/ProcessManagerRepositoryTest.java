@@ -52,6 +52,7 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
+import io.spine.server.procman.given.repo.Migrations;
 import io.spine.server.procman.given.repo.ProjectCompletion;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
@@ -91,6 +92,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -639,10 +641,7 @@ class ProcessManagerRepositoryTest
     @DisplayName("update columns via migration operation")
     void updateColumns() {
         // Store a new process manager instance in the repository.
-        ProjectId id = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
+        ProjectId id = createId(42);
         TestProcessManagerRepository repository = repository();
         TestProcessManager pm = new TestProcessManager(id);
         repository.store(pm);
@@ -672,18 +671,9 @@ class ProcessManagerRepositoryTest
     @DisplayName("update columns for multiple entities")
     void updateColumnsForMultiple() {
         // Store three entities to the repository.
-        ProjectId id1 = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
-        ProjectId id2 = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
-        ProjectId id3 = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
+        ProjectId id1 = createId(1);
+        ProjectId id2 = createId(2);
+        ProjectId id3 = createId(3);
         TestProcessManagerRepository repository = repository();
         TestProcessManager pm1 = new TestProcessManager(id1);
         TestProcessManager pm2 = new TestProcessManager(id2);
@@ -710,6 +700,49 @@ class ProcessManagerRepositoryTest
         assertThat(results)
                 .comparingElementsUsing(idCorrespondence())
                 .containsExactly(id1, id2);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked with `assertThat`.
+    @Test
+    @DisplayName("archive entity via migration")
+    void archiveEntityViaMigration() {
+        ProjectId id = createId(42);
+        TestProcessManager entity = createEntity(id);
+        repository().store(entity);
+
+        repository().applyMigration(id, new Migrations.MarkArchived<>());
+
+        Optional<TestProcessManager> found = repository().find(id);
+        assertThat(found.isPresent()).isTrue();
+        assertThat(found.get().isArchived()).isTrue();
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked with `assertThat`.
+    @Test
+    @DisplayName("delete entity via migration")
+    void deleteEntityViaMigration() {
+        ProjectId id = createId(42);
+        TestProcessManager entity = createEntity(id);
+        repository().store(entity);
+
+        repository().applyMigration(id, new Migrations.MarkDeleted<>());
+
+        Optional<TestProcessManager> found = repository().find(id);
+        assertThat(found.isPresent()).isTrue();
+        assertThat(found.get().isDeleted()).isTrue();
+    }
+
+    @Test
+    @DisplayName("remove entity record via migration")
+    void removeRecordViaMigration() {
+        ProjectId id = createId(42);
+        TestProcessManager entity = createEntity(id);
+        repository().store(entity);
+
+        repository().applyMigration(id, new Migrations.RemoveFromStorage<>());
+
+        Optional<TestProcessManager> found = repository().find(id);
+        assertThat(found.isPresent()).isFalse();
     }
 
     private static TargetFilters targetFilters(EntityColumn column, String value) {
