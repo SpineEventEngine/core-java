@@ -69,16 +69,7 @@ class HandlerLogTest {
     @DisplayName("log handler method name and parameters")
     void includeSignalName() {
         UserId user = GivenUserId.generated();
-        LibraryCardId id = LibraryCardId
-                .newBuilder()
-                .setReader(user)
-                .build();
-        BorrowBooks command = BorrowBooks
-                .newBuilder()
-                .setCard(id)
-                .addBookId(Books.BIG_RED_BOOK)
-                .addBookId(Books.BIG_BLUE_BOOK)
-                .vBuild();
+        BorrowBooks command = borrowBooks(user);
         BlackBoxBoundedContext
                 .singleTenant()
                 .withActor(user)
@@ -89,20 +80,54 @@ class HandlerLogTest {
         assertThat(records)
                 .hasSize(2);
 
-        LogRecordSubject firstLog = assertThat(records.get(0));
-        firstLog.hasLevelThat()
+        LogRecordSubject assertFirstLog = assertThat(records.get(0));
+        assertFirstLog.hasLevelThat()
                 .isEqualTo(FINE);
-        firstLog.hasMessageThat()
+        assertFirstLog.hasMessageThat()
                 .contains(Books.implementingDdd().getTitle());
-        firstLog.hasMethodNameThat()
+        assertFirstLog.hasMethodNameThat()
                 .contains(command.getClass().getSimpleName());
 
-        LogRecordSubject secondLog = assertThat(records.get(1));
-        secondLog.hasLevelThat()
+        LogRecordSubject assertSecondLog = assertThat(records.get(1));
+        assertSecondLog.hasLevelThat()
                  .isEqualTo(FINE);
-        secondLog.hasMessageThat()
+        assertSecondLog.hasMessageThat()
                  .contains(Books.domainDrivenDesign().getTitle());
-        secondLog.hasMethodNameThat()
+        assertSecondLog.hasMethodNameThat()
                  .contains(command.getClass().getSimpleName());
+    }
+
+    @Test
+    @DisplayName("log handler class name")
+    void includeClassName() {
+        UserId user = GivenUserId.generated();
+        BorrowBooks command = borrowBooks(user);
+        BlackBoxBoundedContext
+                .singleTenant()
+                .withActor(user)
+                .with(new CardRepository())
+                .receivesCommand(command);
+        ImmutableList<LogRecord> records = handler.records();
+
+        assertThat(records)
+                .hasSize(2);
+        for (LogRecord record : records) {
+            assertThat(record).hasClassNameThat()
+                              .isEqualTo(CardAggregate.class.getName());
+        }
+    }
+
+    private static BorrowBooks borrowBooks(UserId reader) {
+        LibraryCardId id = LibraryCardId
+                .newBuilder()
+                .setReader(reader)
+                .build();
+        BorrowBooks command = BorrowBooks
+                .newBuilder()
+                .setCard(id)
+                .addBookId(Books.BIG_RED_BOOK)
+                .addBookId(Books.BIG_BLUE_BOOK)
+                .vBuild();
+        return command;
     }
 }
