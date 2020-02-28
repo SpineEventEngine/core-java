@@ -131,7 +131,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @SuppressWarnings("unchecked") // Checked at runtime.
     @Experimental
     public final <T extends TransactionalEntity<I, S, ?>>
-    void applyMigration(I id, Migration<I, S, T> migration) {
+    void applyMigration(I id, Migration<I, T, S> migration) {
         checkNotNull(id);
         checkNotNull(migration);
         checkEntityIsTransactional();
@@ -149,7 +149,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @SuppressWarnings("unchecked") // Checked at runtime.
     @Experimental
     public final <T extends TransactionalEntity<I, S, ?>>
-    void applyMigration(Set<I> ids, Migration<I, S, T> migration) {
+    void applyMigration(Set<I> ids, Migration<I, T, S> migration) {
         checkNotNull(ids);
         checkNotNull(migration);
         checkEntityIsTransactional();
