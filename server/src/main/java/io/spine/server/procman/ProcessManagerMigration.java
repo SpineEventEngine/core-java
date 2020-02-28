@@ -28,10 +28,10 @@ import io.spine.server.entity.Transaction;
 
 @Experimental
 public abstract class ProcessManagerMigration<I,
+                                              P extends ProcessManager<I, S, B>,
                                               S extends EntityState,
-                                              B extends ValidatingBuilder<S>,
-                                              P extends ProcessManager<I, S, B>>
-        extends Migration<I, S, P> {
+                                              B extends ValidatingBuilder<S>>
+        extends Migration<I, P, S> {
 
     @SuppressWarnings("unchecked") // Logically correct.
     @Override

@@ -28,10 +28,10 @@ import io.spine.server.entity.Transaction;
 
 @Experimental
 public abstract class ProjectionMigration<I,
+                                          P extends Projection<I, S, B>,
                                           S extends EntityState,
-                                          B extends ValidatingBuilder<S>,
-                                          P extends Projection<I, S, B>>
-        extends Migration<I, S, P> {
+                                          B extends ValidatingBuilder<S>>
+        extends Migration<I, P, S> {
 
     @SuppressWarnings("unchecked") // Logically correct.
     @Override

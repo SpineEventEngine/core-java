@@ -50,7 +50,7 @@ public final class ProjectionColumnsUpdate<I,
                                            P extends Projection<I, S, B>,
                                            S extends EntityState,
                                            B extends ValidatingBuilder<S>>
-        extends ProjectionMigration<I, S, B, P> {
+        extends ProjectionMigration<I, P, S, B> {
 
     @Override
     public S apply(S s) {

@@ -34,7 +34,7 @@ public final class Migrations {
                                            P extends ProcessManager<I, S, B>,
                                            S extends EntityState,
                                            B extends ValidatingBuilder<S>>
-            extends ProcessManagerMigration<I, S, B, P> {
+            extends ProcessManagerMigration<I, P, S, B> {
 
         @Override
         public S apply(S s) {
@@ -47,7 +47,7 @@ public final class Migrations {
                                           P extends ProcessManager<I, S, B>,
                                           S extends EntityState,
                                           B extends ValidatingBuilder<S>>
-            extends ProcessManagerMigration<I, S, B, P> {
+            extends ProcessManagerMigration<I, P, S, B> {
 
         @Override
         public S apply(S s) {
@@ -60,7 +60,7 @@ public final class Migrations {
                                                 P extends ProcessManager<I, S, B>,
                                                 S extends EntityState,
                                                 B extends ValidatingBuilder<S>>
-            extends ProcessManagerMigration<I, S, B, P> {
+            extends ProcessManagerMigration<I, P, S, B> {
 
         @Override
         public S apply(S s) {

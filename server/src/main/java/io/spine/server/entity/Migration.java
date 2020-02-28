@@ -37,7 +37,7 @@ import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 @Experimental
-public abstract class Migration<I, S extends EntityState, E extends TransactionalEntity<I, S, ?>>
+public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S extends EntityState>
         implements Function<S, S>, Logging {
 
     /**
