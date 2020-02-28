@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.logging.Logging;
 import io.spine.system.server.event.MigrationApplied;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -40,88 +40,68 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class Migration<I, S extends EntityState, E extends TransactionalEntity<I, S, ?>>
         implements Function<S, S>, Logging {
 
-    private boolean archive;
-    private boolean delete;
-    private boolean physicallyRemoveRecord;
-
-    private @MonotonicNonNull E entity;
-    private @MonotonicNonNull RecordBasedRepository<I, E, S> repository;
+    /**
+     * The currently done migration operation.
+     */
+    private @Nullable Operation<I, S, E> currentOperation;
 
     final void applyTo(E entity, RecordBasedRepository<I, E, S> repository) {
-        this.entity = entity;
-        this.repository = repository;
+        currentOperation = new Operation<>(entity, repository);
 
         Transaction<I, E, S, ?> tx = txWithLifecycleMonitor();
         S oldState = entity.state();
         S newState = apply(oldState);
-        updateState(newState);
-        updateLifecycle();
+        currentOperation().updateState(newState);
+        currentOperation().updateLifecycle();
         tx.commit();
-
-        clearLifecycleFlags();
     }
 
-    private void updateState(S newState) {
-        if (!entity.state().equals(newState)) {
-            entity.updateState(newState, increment(version()));
-        }
+    protected final void markArchived() {
+        currentOperation().markArchived();
     }
 
-    private void updateLifecycle() {
-        if (archive) {
-            entity.setArchived(true);
-        }
-        if (delete) {
-            entity.setDeleted(true);
-        }
+    protected final void markDeleted() {
+        currentOperation().markDeleted();
     }
 
-    public final void markArchived() {
-        archive = true;
-    }
-
-    public final void markDeleted() {
-        delete = true;
-    }
-
-    public final void removeFromStorage() {
-        physicallyRemoveRecord = true;
+    protected final void removeFromStorage() {
+        currentOperation().removeFromStorage();
     }
 
     protected final I id() {
-        checkAmidstApplyingToEntity();
-        return entity.id();
+        return currentOperation().id();
     }
 
     protected final Version version() {
-        checkAmidstApplyingToEntity();
-        return entity.version();
+        return currentOperation().version();
     }
 
     protected final boolean isArchived() {
-        checkAmidstApplyingToEntity();
-        return entity.isArchived();
+        return currentOperation().isArchived();
     }
 
     protected final boolean isDeleted() {
-        checkAmidstApplyingToEntity();
-        return entity.isDeleted();
+        return currentOperation().isDeleted();
     }
 
+    /**
+     * ...
+     *
+     * <p>This info is used by the repository to determine whether the modified entity should be
+     * stored back to the repo or deleted.
+     *
+     * <p>Record modification happens anyway...
+     */
     final boolean physicallyRemoveRecord() {
-        return physicallyRemoveRecord;
+        return currentOperation().physicallyRemoveRecord();
     }
 
-    void clearRemovalFlag() {
-        physicallyRemoveRecord = false;
-    }
-
-    private void clearLifecycleFlags() {
-        archive = false;
-        delete = false;
+    final void finishCurrentOperation() {
+        currentOperation = null;
     }
 
     private Transaction<I, E, S, ?> txWithLifecycleMonitor() {
+        E entity = currentOperation().entity;
         I id = entity.id();
         Transaction<I, E, S, ?> tx = startTransaction(entity);
         EntityLifecycleMonitor<I> monitor = configureLifecycleMonitor(id);
@@ -134,6 +114,7 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
      * handled message.
      */
     private EntityLifecycleMonitor<I> configureLifecycleMonitor(I id) {
+        RecordBasedRepository<I, E, S> repository = currentOperation().repository;
         Optional<Event> posted = repository.lifecycleOf(id)
                                            .onMigrationApplied();
         Event migrationApplied = posted.orElseThrow(this::throwOnBlockingFilter);
@@ -147,17 +128,12 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
 
     protected abstract Transaction<I, E, S, ?> startTransaction(E entity);
 
-    private void checkAmidstApplyingToEntity() {
-        checkNotNull(entity,
-                     "This method should only be invoked from within `apply(S)` method.");
-    }
-
     private IllegalStateException throwOnBlockingFilter() {
         throw newIllegalStateException(
                 "The event filter of repository of type `%s` prevents system from posting " +
                         "the `%s` event. Re-configure an event filter by overriding the " +
                         "`Repository#eventFilter()` method if you want to apply the migration.",
-                repository.getClass().getCanonicalName(),
+                currentOperation().repository.getClass().getCanonicalName(),
                 MigrationApplied.class.getCanonicalName()
         );
     }
@@ -165,5 +141,78 @@ public abstract class Migration<I, S extends EntityState, E extends Transactiona
     private void warnOnNoSystemEventsPosted() {
         _warn().log("The context uses a NO-OP system write side. " +
                             "No system events will be posted during the migration.");
+    }
+
+    private Operation<I, S, E> currentOperation() {
+        return checkNotNull(currentOperation,
+                            "Getter and mutator methods of migration should only be invoked " +
+                                    "from within `apply(S)` metho`d.");
+    }
+
+    /**
+     * A migration operation on an entity instance.
+     */
+    private static class Operation<I,
+                                   S extends EntityState,
+                                   E extends TransactionalEntity<I, S, ?>> {
+
+        private boolean archive;
+        private boolean delete;
+        private boolean physicallyRemoveRecord;
+
+        private final E entity;
+        private final RecordBasedRepository<I, E, S> repository;
+
+        private Operation(E entity, RecordBasedRepository<I, E, S> repository) {
+            this.entity = entity;
+            this.repository = repository;
+        }
+
+        private void updateState(S newState) {
+            if (!entity.state().equals(newState)) {
+                entity.updateState(newState, increment(entity.version()));
+            }
+        }
+
+        private void updateLifecycle() {
+            if (archive) {
+                entity.setArchived(true);
+            }
+            if (delete) {
+                entity.setDeleted(true);
+            }
+        }
+
+        private void markArchived() {
+            archive = true;
+        }
+
+        private void markDeleted() {
+            delete = true;
+        }
+
+        private void removeFromStorage() {
+            physicallyRemoveRecord = true;
+        }
+
+        private I id() {
+            return entity.id();
+        }
+
+        private Version version() {
+            return entity.version();
+        }
+
+        private boolean isArchived() {
+            return archive;
+        }
+
+        private boolean isDeleted() {
+            return delete;
+        }
+
+        private boolean physicallyRemoveRecord() {
+            return physicallyRemoveRecord;
+        }
     }
 }
