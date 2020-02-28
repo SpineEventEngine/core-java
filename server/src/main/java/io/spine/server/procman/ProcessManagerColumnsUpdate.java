@@ -27,23 +27,19 @@ import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
 
 /**
- * A migration operation that does the update of interface-based columns of a process manager.
+ * A migration operation that does the update of interface-based columns of a
+ * {@link ProcessManager}.
  *
- * <p>When
- * {@linkplain io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
- * applied} to an entity, this operation will trigger the recalculation of entity storage fields
- * according to the current implementation of {@link io.spine.base.EntityWithColumns}-derived
+ * <p>When applied to an entity, this operation will trigger the recalculation of entity storage
+ * fields according to the current implementation of {@link io.spine.base.EntityWithColumns}-derived
  * methods.
  *
  * <p>The operation relies on the fact that column values are calculated and propagated to the
- * entity state on a transaction {@linkplain Transaction#commit() commit}.
- *
- * @apiNote An entity columns update is considered a purely technical procedure and is not a valid
- *        <strong>domain</strong> reason for an entity to change. Thus, it does not advance an
- *        entity version and does not trigger any standard routines that are invoked on entity
- *        change (distribution of system events, delivery of subscription updates, etc.).
+ * entity state on a transaction {@linkplain Transaction#commit() commit} and thus does not change
+ * the entity state itself in {@link #apply(EntityState)}.
  *
  * @see io.spine.server.entity.storage.InterfaceBasedColumn
+ * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental
 public final class ProcessManagerColumnsUpdate<I,

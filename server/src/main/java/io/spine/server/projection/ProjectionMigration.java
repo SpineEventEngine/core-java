@@ -25,7 +25,11 @@ import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
+import io.spine.server.procman.ProcessManager;
 
+/**
+ * A {@link Migration} applied to a {@link ProcessManager} instance.
+ */
 @Experimental
 public abstract class ProjectionMigration<I,
                                           P extends Projection<I, S, B>,

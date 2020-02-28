@@ -26,6 +26,9 @@ import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
 
+/**
+ * A {@link Migration} applied to a {@link ProcessManager} instance.
+ */
 @Experimental
 public abstract class ProcessManagerMigration<I,
                                               P extends ProcessManager<I, S, B>,
