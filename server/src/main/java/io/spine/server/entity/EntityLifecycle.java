@@ -318,6 +318,12 @@ public class EntityLifecycle {
         postIfRestored(change, messageIds);
     }
 
+    /**
+     * Posts the {@link MigrationApplied} event.
+     *
+     * @return the event or an empty {@code Optional} if posting was blocked by the
+     *         {@link #eventFilter}
+     */
     public final Optional<Event> onMigrationApplied() {
         MigrationApplied systemEvent = MigrationApplied
                 .newBuilder()

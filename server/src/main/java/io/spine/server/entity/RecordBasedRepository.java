@@ -128,6 +128,27 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
+    /**
+     * Applies a given {@link Migration} to an entity with the given ID.
+     *
+     * <p>The operation is performed in three steps:
+     * <ol>
+     *     <li>Load an entity by the given ID.
+     *     <li>Transform it through the migration operation.
+     *     <li>Store the entity back to the repository or delete it depending on the migration
+     *         configuration.
+     * </ol>
+     *
+     * <p>This operation is only supported for entities that are {@linkplain TransactionalEntity
+     * transactional}.
+     *
+     * @throws IllegalArgumentException
+     *         if the entity with the given ID is not found in the repository
+     * @throws IllegalStateException
+     *         if the repository manages a non-transactional entity type
+     *
+     * @see Migration
+     */
     @SuppressWarnings("unchecked") // Checked at runtime.
     @Experimental
     public final <T extends TransactionalEntity<I, S, ?>>
@@ -146,6 +167,25 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         }
     }
 
+    /**
+     * Applies a {@link Migration} to several entities in batch.
+     *
+     * <p>The operation is performed in three steps:
+     * <ol>
+     *     <li>Load entities by the given IDs.
+     *     <li>Transform each entity through the migration operation.
+     *     <li>Store the entities which are not configured to be deleted by the {@link Migration}
+     *         back to the repository.
+     * </ol>
+     *
+     * <p>This operation is only supported for entities that are {@linkplain TransactionalEntity
+     * transactional}.
+     *
+     * @throws IllegalStateException
+     *         if the repository manages a non-transactional entity type
+     *
+     * @see Migration
+     */
     @SuppressWarnings("unchecked") // Checked at runtime.
     @Experimental
     public final <T extends TransactionalEntity<I, S, ?>>
@@ -157,6 +197,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         TargetFilters filters = Targets.someOf(entityModelClass().stateClass(), ids)
                                        .getFilters();
         Iterator<E> entities = find(filters, ResponseFormat.getDefaultInstance());
+
         Deque<E> toStore = newLinkedList();
         while (entities.hasNext()) {
             E entity = entities.next();

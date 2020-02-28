@@ -36,15 +36,47 @@ import static io.spine.core.Versions.increment;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
+/**
+ * A stored {@link Entity} transformation done to account for the domain model changes.
+ *
+ * <p>At its core the {@code Migration} is a mapping of {@link EntityState entity state}, from old
+ * to new. It is also capable of performing basic entity modifications like
+ * {@linkplain #markArchived() archiving} or {@linkplain #markDeleted() deleting} it.
+ *
+ * <p>The process of applying the migration operation is always preceded by an {@link Entity} load
+ * by ID and may be finalized by either {@linkplain Repository#store(Entity) saving} the
+ * transformed entity back into the storage or by {@linkplain #removeFromStorage() deleting} the
+ * entity record if the migration is configured to do so.
+ *
+ * <p>All entity modifications are applied under the opened entity {@link Transaction}. The
+ * last step of a migration operation is a transaction {@linkplain Transaction#commit() commit}. As
+ * a consequence, all events related to the entity lifecycle occur as normal, having the
+ * {@link MigrationApplied} event as the producing message.
+ *
+ * <p>To create a user-defined {@code Migration} in real life scenarios, consider inheriting from
+ * {@link io.spine.server.projection.ProjectionMigration} or
+ * {@link io.spine.server.procman.ProcessManagerMigration} type.
+ *
+ * @param <I>
+ *         the entity ID type
+ * @param <E>
+ *         the entity type
+ * @param <S>
+ *         the entity state type
+ */
 @Experimental
 public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S extends EntityState>
         implements Function<S, S>, Logging {
 
     /**
-     * The currently done migration operation.
+     * The currently performed migration operation.
      */
     private @Nullable Operation<I, S, E> currentOperation;
 
+    /**
+     * Applies the migration to a given entity, starting a new migration
+     * {@linkplain Operation operation}.
+     */
     final void applyTo(E entity, RecordBasedRepository<I, E, S> repository) {
         currentOperation = new Operation<>(entity, repository);
 
@@ -56,42 +88,60 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         tx.commit();
     }
 
+    /**
+     * Marks the entity under migration as {@linkplain Entity#isArchived() archived}.
+     */
     protected final void markArchived() {
         currentOperation().markArchived();
     }
 
+    /**
+     * Marks the entity under migration as {@linkplain Entity#isDeleted() deleted}.
+     */
     protected final void markDeleted() {
         currentOperation().markDeleted();
     }
 
+    /**
+     * Configures the migration to delete the entity record from the storage.
+     *
+     * <p>The entity modifications are still applied, if any, allowing to trigger
+     * {@linkplain EntityLifecycle entity lifecycle} events before the actual record deletion.
+     */
     protected final void removeFromStorage() {
         currentOperation().removeFromStorage();
     }
 
+    /**
+     * Returns the ID of an entity under migration.
+     */
     protected final I id() {
         return currentOperation().id();
     }
 
+    /**
+     * Returns the version of entity under migration.
+     */
     protected final Version version() {
         return currentOperation().version();
     }
 
+    /**
+     * Returns {@code true} if the entity under migration is
+     * {@linkplain Entity#isArchived() archived}.
+     */
     protected final boolean isArchived() {
         return currentOperation().isArchived();
     }
 
+    /**
+     * Returns {@code true} if the entity under migration is
+     * {@linkplain Entity#isDeleted() deleted}.
+     */
     protected final boolean isDeleted() {
         return currentOperation().isDeleted();
     }
 
-    /**
-     * ...
-     *
-     * <p>This info is used by the repository to determine whether the modified entity should be
-     * stored back to the repo or deleted.
-     *
-     * <p>Record modification happens anyway...
-     */
     final boolean physicallyRemoveRecord() {
         return currentOperation().physicallyRemoveRecord();
     }
@@ -100,6 +150,17 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         currentOperation = null;
     }
 
+    /**
+     * Opens a transaction on an entity.
+     */
+    protected abstract Transaction<I, E, S, ?> startTransaction(E entity);
+
+    /**
+     * Opens a transaction with an {@link EntityLifecycleMonitor} as a {@link TransactionListener}.
+     *
+     * <p>The monitor is be configured to have a {@link MigrationApplied} instance as the last
+     * handled message.
+     */
     private Transaction<I, E, S, ?> txWithLifecycleMonitor() {
         E entity = currentOperation().entity;
         I id = entity.id();
@@ -110,8 +171,8 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     }
 
     /**
-     * Will post lifecycle events as usual, assigning a {@link MigrationApplied} instance as last
-     * handled message.
+     * Creates an entity lifecycle monitor which will post lifecycle events as usual, assigning
+     * a {@link MigrationApplied} instance as the event-producing message.
      */
     private EntityLifecycleMonitor<I> configureLifecycleMonitor(I id) {
         RecordBasedRepository<I, E, S> repository = currentOperation().repository;
@@ -125,8 +186,6 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         }
         return EntityLifecycleMonitor.withAcknowledgedMessage(repository, id, migrationApplied);
     }
-
-    protected abstract Transaction<I, E, S, ?> startTransaction(E entity);
 
     private IllegalStateException throwOnBlockingFilter() {
         throw newIllegalStateException(
