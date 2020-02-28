@@ -237,6 +237,7 @@ message EntityRestored {
     core.Version version = 4;
 }
 
+// A migration operation was applied to an entity.
 message MigrationApplied {
     option (is).java_type = "EntityLifecycleEvent";
 
