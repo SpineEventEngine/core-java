@@ -54,8 +54,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * {@link MigrationApplied} event as the producing message.
  *
  * <p>To create a user-defined {@code Migration} in real life scenarios, consider inheriting from
- * {@link io.spine.server.projection.ProjectionMigration} or
- * {@link io.spine.server.procman.ProcessManagerMigration} type.
+ * {@link io.spine.server.projection.ProjectionMigration} and
+ * {@link io.spine.server.procman.ProcessManagerMigration} types.
  *
  * @param <I>
  *         the entity ID type
