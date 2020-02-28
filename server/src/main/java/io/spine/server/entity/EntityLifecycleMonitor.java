@@ -83,8 +83,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     }
 
     /**
-     * Creates a new instance with an artificially injected {@linkplain #acknowledgedMessages
-     * acknowledged} message.
+     * Creates a new instance with a single {@linkplain #acknowledgedMessages acknowledged} message.
      *
      * @param repository
      *         the repository of the entity under transaction

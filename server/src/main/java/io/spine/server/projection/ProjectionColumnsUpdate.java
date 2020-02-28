@@ -33,9 +33,9 @@ import io.spine.server.entity.Transaction;
  * fields according to the current implementation of {@link io.spine.base.EntityWithColumns}-derived
  * methods.
  *
- * <p>The operation relies on the fact that column values are calculated and propagated to the
- * entity state on a transaction {@linkplain Transaction#commit() commit} and thus does not change
- * the entity state itself in {@link #apply(EntityState)}.
+ * @implNote The operation relies on the fact that column values are automatically calculated and
+ *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}
+ *         and thus does not change the entity state itself in {@link #apply(EntityState)}.
  *
  * @see io.spine.server.entity.storage.InterfaceBasedColumn
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)

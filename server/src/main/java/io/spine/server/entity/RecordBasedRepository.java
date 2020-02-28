@@ -139,8 +139,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         configuration.
      * </ol>
      *
-     * <p>This operation is only supported for entities that are {@linkplain TransactionalEntity
-     * transactional}.
+     * <p>This operation is only supported for entities that are
+     * {@linkplain TransactionalEntity transactional}.
      *
      * @throws IllegalArgumentException
      *         if the entity with the given ID is not found in the repository
@@ -178,8 +178,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         back to the repository.
      * </ol>
      *
-     * <p>This operation is only supported for entities that are {@linkplain TransactionalEntity
-     * transactional}.
+     * <p>This operation is only supported for entities that are
+     * {@linkplain TransactionalEntity transactional}.
      *
      * @throws IllegalStateException
      *         if the repository manages a non-transactional entity type

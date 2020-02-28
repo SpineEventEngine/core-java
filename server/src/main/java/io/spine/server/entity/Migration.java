@@ -45,12 +45,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>The process of applying the migration operation is always preceded by an {@link Entity} load
  * by ID and may be finalized by either {@linkplain Repository#store(Entity) saving} the
- * transformed entity back into the storage or by {@linkplain #removeFromStorage() deleting} the
+ * transformed entity back to the repository or by {@linkplain #removeFromStorage() deleting} the
  * entity record if the migration is configured to do so.
  *
  * <p>All entity modifications are applied under the opened entity {@link Transaction}. The
  * last step of a migration operation is a transaction {@linkplain Transaction#commit() commit}. As
- * a consequence, all events related to the entity lifecycle occur as normal, having the
+ * a consequence, all entity lifecycle events occur as expected, having the
  * {@link MigrationApplied} event as the producing message.
  *
  * <p>To create a user-defined {@code Migration} in real life scenarios, consider inheriting from
@@ -105,7 +105,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     /**
      * Configures the migration to delete the entity record from the storage.
      *
-     * <p>The entity modifications are still applied, if any, allowing to trigger
+     * <p>The entity modifications are still applied, allowing to trigger
      * {@linkplain EntityLifecycle entity lifecycle} events before the actual record deletion.
      */
     protected final void removeFromStorage() {
@@ -158,8 +158,8 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     /**
      * Opens a transaction with an {@link EntityLifecycleMonitor} as a {@link TransactionListener}.
      *
-     * <p>The monitor is be configured to have a {@link MigrationApplied} instance as the last
-     * handled message.
+     * <p>The monitor is configured to have a {@link MigrationApplied} instance as the last handled
+     * message.
      */
     private Transaction<I, E, S, ?> txWithLifecycleMonitor() {
         E entity = currentOperation().entity;
@@ -205,7 +205,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     private Operation<I, S, E> currentOperation() {
         return checkNotNull(currentOperation,
                             "Getter and mutator methods of migration should only be invoked " +
-                                    "from within `apply(S)` metho`d.");
+                                    "from within `apply(S)` method.");
     }
 
     /**
