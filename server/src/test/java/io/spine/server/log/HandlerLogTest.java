@@ -25,14 +25,15 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LoggerConfig;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
+import io.spine.server.DefaultRepository;
 import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
-import io.spine.server.log.given.CardRepository;
 import io.spine.server.log.given.TestLogHandler;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,11 +89,7 @@ class HandlerLogTest {
     void includeSignalName() {
         UserId user = GivenUserId.generated();
         BorrowBooks command = borrowBooks(user);
-        BlackBoxBoundedContext
-                .singleTenant()
-                .withActor(user)
-                .with(new CardRepository())
-                .receivesCommand(command);
+        context().receivesCommand(command);
         ImmutableList<LogRecord> records = handler.records();
 
         assertThat(records)
@@ -124,11 +121,7 @@ class HandlerLogTest {
     void includeClassName() {
         UserId user = GivenUserId.generated();
         BorrowBooks command = borrowBooks(user);
-        BlackBoxBoundedContext
-                .singleTenant()
-                .withActor(user)
-                .with(new CardRepository())
-                .receivesCommand(command);
+        context().receivesCommand(command);
         ImmutableList<LogRecord> records = handler.records();
 
         assertThat(records)
@@ -148,11 +141,7 @@ class HandlerLogTest {
                 .setCard(cardId(user))
                 .setBook(THE_HOBBIT)
                 .vBuild();
-        BlackBoxBoundedContext
-                .singleTenant()
-                .withActor(user)
-                .with(new CardRepository())
-                .receivesCommand(command);
+        context().receivesCommand(command);
         ImmutableList<LogRecord> records = handler.records();
         assertThat(records)
                 .hasSize(1);
@@ -161,6 +150,12 @@ class HandlerLogTest {
         assertRecord.isError();
         assertRecord.hasThrowableThat()
                     .isInstanceOf(UnknownBook.class);
+    }
+
+    private static SingleTenantBlackBoxContext context() {
+        return BlackBoxBoundedContext
+                .singleTenant()
+                .with(DefaultRepository.of(CardAggregate.class));
     }
 
     private static BorrowBooks borrowBooks(UserId reader) {
