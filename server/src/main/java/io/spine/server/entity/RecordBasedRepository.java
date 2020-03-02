@@ -161,10 +161,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
         if (migration.physicallyRemoveRecord()) {
             delete(id);
-            migration.finishCurrentOperation();
         } else {
             store(entity);
         }
+        migration.finishCurrentOperation();
     }
 
     /**
@@ -204,10 +204,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
             if (migration.physicallyRemoveRecord()) {
                 delete(entity.id());
-                migration.finishCurrentOperation();
             } else {
                 toStore.add(entity);
             }
+            migration.finishCurrentOperation();
         }
         store(toStore);
     }

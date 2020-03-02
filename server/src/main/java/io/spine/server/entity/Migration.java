@@ -154,6 +154,10 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
 
     /**
      * Releases the {@linkplain #currentOperation currently performed operation}.
+     *
+     * <p>This method is used by Spine routines to reset the {@code Migration} instance passed to
+     * {@link RecordBasedRepository#applyMigration(Object, Migration)} and shouldn't be invoked by
+     * the user code directly.
      */
     @Internal
     final void finishCurrentOperation() {
