@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
-import com.google.common.truth.Truth;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
@@ -376,10 +375,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         BbProjectId projectId = newProjectId();
         context.receivesEvent(taskAdded(projectId));
         ImmutableList<Event> events = context.allEvents();
-        Truth.assertThat(events).hasSize(1);
+        assertThat(events).hasSize(1);
         Message producer = unpack(getOnlyElement(events).getContext()
                                                         .getProducerId());
-        Subject assertProducer = Truth.assertThat(producer);
+        Subject assertProducer = assertThat(producer);
         assertProducer.isInstanceOf(BlackBoxId.class);
         BlackBoxId expectedId = BlackBoxId
                 .newBuilder()
@@ -394,10 +393,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         BbProjectId projectId = newProjectId();
         context.receivesEventsProducedBy(projectId, taskAdded(projectId));
         ImmutableList<Event> events = context.allEvents();
-        Truth.assertThat(events).hasSize(1);
+        assertThat(events).hasSize(1);
         Message producer = unpack(getOnlyElement(events).getContext()
                                                         .getProducerId());
-        Subject assertProducer = Truth.assertThat(producer);
+        Subject assertProducer = assertThat(producer);
         assertProducer.isInstanceOf(BbProjectId.class);
         assertProducer.isEqualTo(projectId);
     }
@@ -698,7 +697,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         @Test
         @DisplayName("event messages")
         void eventMessages() {
-            IterableSubject assertEventMessages = Truth.assertThat(context.eventMessages());
+            IterableSubject assertEventMessages = assertThat(context.eventMessages());
             assertEventMessages.isNotEmpty();
             assertEventMessages.hasSize(context.events()
                                                .size());
@@ -707,7 +706,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         @Test
         @DisplayName("command messages")
         void commandMessages() {
-            IterableSubject assertCommandMessages = Truth.assertThat(context.commandMessages());
+            IterableSubject assertCommandMessages = assertThat(context.commandMessages());
             assertCommandMessages.isNotEmpty();
             assertCommandMessages.hasSize(context.commands()
                                                  .size());
