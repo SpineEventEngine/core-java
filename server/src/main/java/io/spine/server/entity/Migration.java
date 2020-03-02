@@ -104,10 +104,13 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     }
 
     /**
-     * Configures the migration to delete the entity record from the storage.
+     * Configures the migration operation to delete the entity record from the storage.
      *
-     * <p>The entity modifications are still applied, allowing to trigger
+     * <p>All other configured entity modifications are still applied, allowing to trigger
      * {@linkplain EntityLifecycle entity lifecycle} events before the actual record deletion.
+     *
+     * <p>Depending on the actual storage implementation, this operation may be irreversible, so it
+     * should be used in the caller code with care.
      */
     protected final void removeFromStorage() {
         currentOperation().removeFromStorage();

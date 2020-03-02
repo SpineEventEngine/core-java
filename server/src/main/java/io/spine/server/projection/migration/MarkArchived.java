@@ -18,37 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.projection;
+package io.spine.server.projection.migration;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Migration;
-import io.spine.server.entity.Transaction;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionMigration;
 
 /**
- * A migration operation that does the update of interface-based columns of a {@link Projection}.
+ * A migration operation that marks a {@link Projection} as {@link Entity#isArchived() archived}.
  *
- * <p>When applied to an entity, this operation will trigger the recalculation of entity storage
- * fields according to the current implementation of {@link io.spine.base.EntityWithColumns}-derived
- * methods.
+ * <p>When applied to an entity, it will modify the {@code archived} flag of a corresponding
+ * storage record to be {@code true}.
  *
- * @implNote The operation relies on the fact that column values are automatically calculated and
- *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}
- *         and thus does not change the entity state itself in {@link #apply(EntityState)}.
- *
- * @see io.spine.server.entity.storage.InterfaceBasedColumn
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental
-public final class ProjectionColumnsUpdate<I,
-                                           P extends Projection<I, S, B>,
-                                           S extends EntityState,
-                                           B extends ValidatingBuilder<S>>
+public final class MarkArchived<I,
+                                P extends Projection<I, S, B>,
+                                S extends EntityState,
+                                B extends ValidatingBuilder<S>>
         extends ProjectionMigration<I, P, S, B> {
 
     @Override
     public S apply(S s) {
+        markArchived();
         return s;
     }
 }

@@ -18,38 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman;
+package io.spine.server.projection.migration;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
-import io.spine.server.entity.Transaction;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionMigration;
 
 /**
- * A migration operation that does the update of interface-based columns of a
- * {@link ProcessManager}.
+ * A migration operation that physically deletes the entity record from the
+ * {@linkplain io.spine.server.storage.RecordStorage storage}.
  *
- * <p>When applied to an entity, this operation will trigger the recalculation of entity storage
- * fields according to the current implementation of {@link io.spine.base.EntityWithColumns}-derived
- * methods.
+ * <p>Depending on the actual storage implementation, this operation may be irreversible, so it
+ * should be used in the client code with care.
  *
- * @implNote The operation relies on the fact that column values are automatically calculated and
- *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}
- *         and thus does not change the entity state itself in {@link #apply(EntityState)}.
- *
- * @see io.spine.server.entity.storage.InterfaceBasedColumn
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental
-public final class ProcessManagerColumnsUpdate<I,
-                                               P extends ProcessManager<I, S, B>,
-                                               S extends EntityState,
-                                               B extends ValidatingBuilder<S>>
-        extends ProcessManagerMigration<I, P, S, B> {
+public final class RemoveFromStorage<I,
+                                     P extends Projection<I, S, B>,
+                                     S extends EntityState,
+                                     B extends ValidatingBuilder<S>>
+        extends ProjectionMigration<I, P, S, B> {
 
     @Override
     public S apply(S s) {
+        removeFromStorage();
         return s;
     }
 }

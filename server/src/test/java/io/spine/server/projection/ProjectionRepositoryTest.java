@@ -44,14 +44,15 @@ import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
 import io.spine.server.projection.given.EntitySubscriberProjection;
-import io.spine.server.projection.given.Migrations.MarkArchived;
-import io.spine.server.projection.given.Migrations.MarkDeleted;
-import io.spine.server.projection.given.Migrations.RemoveFromStorage;
+import io.spine.server.projection.migration.MarkArchived;
+import io.spine.server.projection.migration.MarkDeleted;
+import io.spine.server.projection.migration.RemoveFromStorage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.projection.given.TestProjection;
+import io.spine.server.projection.migration.UpdateColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -560,7 +561,7 @@ class ProjectionRepositoryTest
         assertThat(found.hasNext()).isFalse();
 
         // Apply the columns update.
-        repository.applyMigration(id, new ProjectionColumnsUpdate<>());
+        repository.applyMigration(id, new UpdateColumns<>());
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProjection> afterMigration =
@@ -588,7 +589,7 @@ class ProjectionRepositoryTest
         repository.store(projection3);
 
         // Apply the column update to two of the three entities.
-        repository.applyMigration(ImmutableSet.of(id1, id2), new ProjectionColumnsUpdate<>());
+        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateColumns<>());
 
         // Check that entities to which migration has been applied now have column values updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());

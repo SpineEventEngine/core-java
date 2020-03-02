@@ -148,6 +148,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         if the repository manages a non-transactional entity type
      *
      * @see Migration
+     * @see #applyMigration(Set, Migration) the batch version of the method
      */
     @SuppressWarnings("unchecked") // Checked at runtime.
     @Experimental
