@@ -20,27 +20,43 @@
 
 package io.spine.testing.server.blackbox;
 
-import io.spine.core.ActorContext;
+import com.google.common.annotations.VisibleForTesting;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
-
-import java.util.function.Supplier;
+import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.time.ZoneId;
+import io.spine.time.ZoneOffset;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.currentTime;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.checkValid;
 
+/**
+ * A factory of test actor request factories.
+ */
+@VisibleForTesting
 final class Actor {
 
     private static final Actor defaultActor = from(BlackBoxBoundedContext.class.getName());
 
-    private final Supplier<ActorContext> context;
+    private final UserId id;
+    private final ZoneId zoneId;
+    private final ZoneOffset zoneOffset;
 
-    private Actor(Supplier<ActorContext> context) {
-        this.context = context;
+    private Actor(UserId id, ZoneId zoneId, ZoneOffset zoneOffset) {
+        this.id = id;
+        this.zoneId = zoneId;
+        this.zoneOffset = zoneOffset;
     }
 
-    public static Actor from(String userId) {
+    /**
+     * Obtains the default actor.
+     */
+    static Actor defaultActor() {
+        return defaultActor;
+    }
+
+    private static Actor from(String userId) {
         checkNotEmptyOrBlank(userId);
         UserId id = UserId
                 .newBuilder()
@@ -49,26 +65,49 @@ final class Actor {
         return from(id);
     }
 
-    public static Actor from(UserId userId) {
+    /**
+     * Creates a new actor with the given actor ID and the default time zone.
+     */
+    static Actor from(UserId userId) {
         checkNotNull(userId);
-        return new Actor(() -> ActorContext
-                .newBuilder()
-                .setActor(userId)
-                .setTimestamp(currentTime())
-                .vBuild());
+        checkValid(userId);
+        return new Actor(userId,
+                         ZoneId.getDefaultInstance(),
+                         ZoneOffset.getDefaultInstance());
     }
 
-    public static Actor with(ActorContext context) {
-        checkNotNull(context);
-        checkValid(context);
-        return new Actor(() -> context);
+    /**
+     * Creates a new actor with the given time zone and the default actor ID.
+     */
+    static Actor from(ZoneId zoneId, ZoneOffset zoneOffset) {
+        checkNotNull(zoneId);
+        checkNotNull(zoneOffset);
+        return new Actor(defaultActor.id, zoneId, zoneOffset);
     }
 
-    public static Actor defaultActor() {
-        return defaultActor;
+    /**
+     * Creates a new actor with the given actor ID and time zone.
+     */
+    static Actor from(UserId userId, ZoneId zoneId, ZoneOffset zoneOffset) {
+        checkNotNull(userId);
+        checkNotNull(zoneId);
+        checkNotNull(zoneOffset);
+        return new Actor(userId, zoneId, zoneOffset);
     }
 
-    public ActorContext context() {
-        return context.get();
+    /**
+     * Creates a new factory for requests of the single tenant.
+     */
+    TestActorRequestFactory requests() {
+        return new TestActorRequestFactory(null, id, zoneOffset, zoneId);
+    }
+
+    /**
+     * Creates a new factory for requests of the given tenant.
+     */
+    TestActorRequestFactory requestsFor(TenantId tenant) {
+        checkNotNull(tenant);
+        checkValid(tenant);
+        return new TestActorRequestFactory(tenant, id, zoneOffset, zoneId);
     }
 }

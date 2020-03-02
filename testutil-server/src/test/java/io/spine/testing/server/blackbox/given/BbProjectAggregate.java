@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox.given;
 
+import io.spine.core.CommandContext;
 import io.spine.core.UserId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
@@ -30,6 +31,7 @@ import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbTask;
 import io.spine.testing.server.blackbox.command.BbAddTask;
 import io.spine.testing.server.blackbox.command.BbAssignProject;
+import io.spine.testing.server.blackbox.command.BbAssignSelf;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
@@ -98,6 +100,16 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
                 .newBuilder()
                 .setId(id())
                 .setUserId(command.getUserId())
+                .build();
+    }
+
+    @Assign
+    BbAssigneeAdded handle(BbAssignSelf command, CommandContext context) {
+        UserId assignee = context.getActorContext().getActor();
+        return BbAssigneeAdded
+                .newBuilder()
+                .setId(id())
+                .setUserId(assignee)
                 .build();
     }
 

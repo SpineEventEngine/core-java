@@ -24,6 +24,9 @@ import io.spine.people.PersonName;
 import io.spine.server.log.Book;
 import io.spine.server.log.Isbn;
 
+/**
+ * A test factory for instances of {@code Book} and {@code Isbn}.
+ */
 public final class Books {
 
     public static final Isbn BIG_BLUE_BOOK = isbn("978-0321125217");

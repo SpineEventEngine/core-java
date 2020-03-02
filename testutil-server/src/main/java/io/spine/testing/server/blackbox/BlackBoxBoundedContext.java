@@ -37,7 +37,6 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
 import io.spine.core.Ack;
-import io.spine.core.ActorContext;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -73,6 +72,8 @@ import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.testing.server.blackbox.verify.subscription.ToProtoSubjects;
 import io.spine.testing.server.entity.EntitySubject;
+import io.spine.time.ZoneId;
+import io.spine.time.ZoneOffset;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -329,18 +330,36 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         return context.name();
     }
 
+    /**
+     * Sets the given {@link UserId} as the actor ID for the requests produced by this context.
+     */
     public final T withActor(UserId user) {
         this.actor = Actor.from(user);
         return thisRef();
     }
 
-    public final T withActor(ActorContext context) {
-        this.actor = Actor.with(context);
+    /**
+     * Sets the given time zone parameters for the actor requests produced by this context.
+     */
+    public final T in(ZoneId zoneId, ZoneOffset zoneOffset) {
+        this.actor = Actor.from(zoneId, zoneOffset);
         return thisRef();
     }
 
-    protected final ActorContext context() {
-        return actor.context();
+    /**
+     * Sets the given actor ID and time zone parameters for the actor requests produced by this
+     * context.
+     */
+    public final T withActorIn(UserId userId, ZoneId zoneId, ZoneOffset zoneOffset) {
+        this.actor = Actor.from(userId, zoneId, zoneOffset);
+        return thisRef();
+    }
+
+    /**
+     * Obtains the current {@link Actor}.
+     */
+    protected final Actor actor() {
+        return this.actor;
     }
 
     /**
