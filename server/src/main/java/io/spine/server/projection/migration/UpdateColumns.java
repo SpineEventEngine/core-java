@@ -32,8 +32,8 @@ import io.spine.server.projection.ProjectionMigration;
  * A migration operation that does the update of interface-based columns of a {@link Projection}.
  *
  * <p>When applied to an entity, this operation will trigger the recalculation of entity storage
- * fields according to the current implementation of {@link io.spine.base.EntityWithColumns}-derived
- * methods.
+ * fields according to the current implementation of
+ * {@link io.spine.base.EntityWithColumns EntityWithColumns}-derived methods.
  *
  * @implNote The operation relies on the fact that column values are automatically calculated and
  *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}

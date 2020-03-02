@@ -54,8 +54,8 @@ import static io.spine.protobuf.Messages.isDefault;
  * {@link MigrationApplied} event as the producing message.
  *
  * <p>To create a user-defined {@code Migration} in real life scenarios, consider inheriting from
- * {@link io.spine.server.projection.ProjectionMigration} and
- * {@link io.spine.server.procman.ProcessManagerMigration} types.
+ * {@link io.spine.server.projection.ProjectionMigration ProjectionMigration} and
+ * {@link io.spine.server.procman.ProcessManagerMigration ProjectionMigration} types.
  *
  * @param <I>
  *         the entity ID type
@@ -158,8 +158,8 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      * Releases the {@linkplain #currentOperation currently performed operation}.
      *
      * <p>This method is used by Spine routines to reset the {@code Migration} instance passed to
-     * {@link RecordBasedRepository#applyMigration(Object, Migration)}. It shouldn't be invoked by
-     * the user code directly.
+     * {@link RecordBasedRepository#applyMigration(Object, Migration)
+     * repository.applyMigration(I, Migration)}. It shouldn't be invoked by the user code directly.
      */
     @Internal
     final void finishCurrentOperation() {
