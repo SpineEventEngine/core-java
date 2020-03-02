@@ -23,7 +23,6 @@ package io.spine.server.log;
 import com.google.common.base.Objects;
 import com.google.common.flogger.LogSite;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.Internal;
 import io.spine.code.java.ClassName;
 import io.spine.code.java.SimpleClassName;
 import io.spine.server.model.HandlerMethod;
@@ -35,9 +34,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-@Internal
+/**
+ * A {@link LogSite} of a signal handler method.
+ *
+ * <p>The site provides the name of the class and the name of the method with its parameter types.
+ * The site never provides a line number or a file name.
+ */
 @Immutable
-public final class HandlerMethodSite extends LogSite {
+final class HandlerMethodSite extends LogSite {
 
     @SuppressWarnings("Immutable")
     private final Method method;
