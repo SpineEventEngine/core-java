@@ -18,6 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Contains utilities which work with server-side logs.
+ */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.log;

@@ -24,7 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.server.model.HandlerMethod;
 
 /**
- * A message handler which, depending on the handled message, alters its own log output.
+ * A message handler which, depending on the message, alters its own log output.
  */
 @Internal
 public interface LogAwareMessageHandler {
@@ -32,7 +32,7 @@ public interface LogAwareMessageHandler {
     /**
      * Enters the handler method invocation.
      *
-     * <p>After calling this method, the message handler should start including the handler method
+     * <p>After this method is called, the message handler should start including the handler method
      * info into the log.
      */
     @Internal
@@ -41,8 +41,8 @@ public interface LogAwareMessageHandler {
     /**
      * Exists the current handler method invocation.
      *
-     * <p>After calling this method, the message handler should not include any handler method info
-     * into the log.
+     * <p>After this method is called, the message handler should not include any handler method
+     * info into the log.
      */
     @Internal
     void resetLog();
