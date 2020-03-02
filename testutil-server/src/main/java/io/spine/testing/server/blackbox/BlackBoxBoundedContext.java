@@ -123,11 +123,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         extends AbstractEventSubscriber
         implements Logging {
 
-    private static final UserId DEFAULT_ACTOR = UserId
-            .newBuilder()
-            .setValue(BlackBoxBoundedContext.class.getName())
-            .build();
-
     private final BoundedContext context;
 
     /**
