@@ -20,15 +20,14 @@
 
 package io.spine.server.log;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LoggerConfig;
+import com.google.common.testing.TestLogHandler;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
 import io.spine.server.DefaultRepository;
 import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
-import io.spine.server.log.given.TestLogHandler;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.MuteLogging;
@@ -40,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -90,7 +90,7 @@ class HandlerLogTest {
         UserId user = GivenUserId.generated();
         BorrowBooks command = borrowBooks(user);
         context().receivesCommand(command);
-        ImmutableList<LogRecord> records = handler.records();
+        List<LogRecord> records = handler.getStoredLogRecords();
 
         assertThat(records)
                 .hasSize(2);
@@ -122,7 +122,7 @@ class HandlerLogTest {
         UserId user = GivenUserId.generated();
         BorrowBooks command = borrowBooks(user);
         context().receivesCommand(command);
-        ImmutableList<LogRecord> records = handler.records();
+        List<LogRecord> records = handler.getStoredLogRecords();
 
         assertThat(records)
                 .hasSize(2);
@@ -142,7 +142,7 @@ class HandlerLogTest {
                 .setBook(THE_HOBBIT)
                 .vBuild();
         context().receivesCommand(command);
-        ImmutableList<LogRecord> records = handler.records();
+        List<LogRecord> records = handler.getStoredLogRecords();
         assertThat(records)
                 .hasSize(1);
         LogRecord record = records.get(0);
