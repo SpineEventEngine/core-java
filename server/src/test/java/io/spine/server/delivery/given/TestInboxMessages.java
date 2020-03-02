@@ -30,8 +30,10 @@ import io.spine.server.delivery.InboxId;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
+import io.spine.server.delivery.InboxMessageMixin;
 import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxSignalId;
+import io.spine.server.delivery.ShardIndex;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.DTask;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -61,7 +63,7 @@ public final class TestInboxMessages {
      */
     public static InboxMessage copyWithNewId(InboxMessage original) {
         return original.toBuilder()
-                       .setId(InboxMessageId.generate())
+                       .setId(InboxMessageMixin.generateIdWith(original.shardIndex()))
                        .vBuild();
     }
 
@@ -182,19 +184,22 @@ public final class TestInboxMessages {
                                                   InboxMessageStatus status,
                                                   InboxId inboxId,
                                                   Timestamp whenReceived) {
-        return InboxMessage
+        ShardIndex index = DeliveryStrategy.newIndex(0, 1);
+        InboxMessageId id = InboxMessageMixin.generateIdWith(index);
+        InboxSignalId.Builder signalId = InboxSignalId.newBuilder()
+                                                      .setValue(command.getId()
+                                                                       .value());
+        InboxMessage result = InboxMessage
                 .newBuilder()
+                .setId(id)
                 .setStatus(status)
                 .setCommand(command)
                 .setInboxId(inboxId)
-                .setId(InboxMessageId.generate())
-                .setSignalId(InboxSignalId.newBuilder()
-                                          .setValue(command.getId()
-                                                           .value()))
-                .setShardIndex(DeliveryStrategy.newIndex(0, 1))
+                .setSignalId(signalId)
                 .setLabel(InboxLabel.HANDLE_COMMAND)
                 .setWhenReceived(whenReceived)
                 .vBuild();
+        return result;
     }
 
     private static InboxId newInboxId(Object targetId, TypeUrl targetType) {

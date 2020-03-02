@@ -187,7 +187,7 @@ public class DeliveryTestEnv {
 
         @Override
         public void onMessage(InboxMessage update) {
-            observedShards.add(update.getShardIndex());
+            observedShards.add(update.shardIndex());
         }
 
         public ImmutableSet<ShardIndex> shards() {

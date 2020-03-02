@@ -174,7 +174,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                          .configureDelivery(delivery);
         List<DeliveryStats> deliveryStats = synchronizedList(new ArrayList<>());
         delivery.subscribe(msg -> {
-            Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(msg.getShardIndex());
+            Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(msg.shardIndex());
             stats.ifPresent(deliveryStats::add);
         });
 
@@ -404,7 +404,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                 sleepUninterruptibly(Duration.ofMillis(10));
                 latch.countDown();
             } else {
-                delivery.deliverMessagesFrom(update.getShardIndex());
+                delivery.deliverMessagesFrom(update.shardIndex());
             }
         });
     }

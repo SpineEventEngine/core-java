@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.core.ActorContext;
@@ -40,7 +39,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.event.EventOrigin.fromAnotherMessage;
 import static io.spine.validate.Validate.checkValid;
@@ -203,10 +201,8 @@ public class EventFactory {
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     private EventContext.Builder newContext(@Nullable Version version) {
-        Timestamp timestamp = currentTime();
         EventContext.Builder builder = origin
                 .contextBuilder()
-                .setTimestamp(timestamp)
                 .setProducerId(producerId);
         if (version != null) {
             builder.setVersion(version);

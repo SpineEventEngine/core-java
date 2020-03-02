@@ -45,6 +45,7 @@ import java.util.stream.IntStream;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
+import static io.spine.server.delivery.InboxIds.newSignalId;
 
 /**
  * An abstract base for tests of {@link InboxStorage} implementations.
@@ -172,14 +173,14 @@ public abstract class InboxStorageTest {
                                                          .vBuild());
         InboxId inboxId = InboxIds.wrap(targetId, TypeUrl.of(Calc.class));
 
-        InboxSignalId signalId = InboxIds.newSignalId(targetId, command.getId()
-                                                                       .value());
+        InboxSignalId signalId = newSignalId(targetId, command.getId()
+                                                              .value());
+        InboxMessageId id = InboxMessageMixin.generateIdWith(index);
         return InboxMessage
                 .newBuilder()
-                .setId(InboxMessageId.generate())
+                .setId(id)
                 .setSignalId(signalId)
                 .setInboxId(inboxId)
-                .setShardIndex(index)
                 .setLabel(InboxLabel.HANDLE_COMMAND)
                 .setStatus(InboxMessageStatus.TO_DELIVER)
                 .setCommand(command)

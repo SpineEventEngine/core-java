@@ -35,5 +35,5 @@ ext {
     spineBaseVersion = '1.4.9'
 
     // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.4.1'
+    spineTimeVersion = '1.4.7'
 }
