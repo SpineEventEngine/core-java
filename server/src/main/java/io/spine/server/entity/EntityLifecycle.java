@@ -585,6 +585,16 @@ public class EntityLifecycle {
         postEvent(systemEvent);
     }
 
+    /**
+     * Posts a system event with the specified origin.
+     *
+     * @param event
+     *         an event to post
+     * @param explicitOrigin
+     *         the event origin
+     * @return an instance of posted {@code Event} if it was actually posted and an empty
+     *         {@code Optional} if the event was intercepted by the {@link #eventFilter}
+     */
     @CanIgnoreReturnValue
     protected Optional<Event> postEvent(EventMessage event, Origin explicitOrigin) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
@@ -593,6 +603,14 @@ public class EntityLifecycle {
         return result;
     }
 
+    /**
+     * Posts an event to a system write side.
+     *
+     * @param event
+     *         an event to post
+     * @return an instance of posted {@code Event} if it was actually posted and an empty
+     *         {@code Optional} if the event was intercepted by the {@link #eventFilter}
+     */
     @CanIgnoreReturnValue
     protected Optional<Event> postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
