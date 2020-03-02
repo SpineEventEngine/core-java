@@ -12,7 +12,7 @@ all modules and does not describe the project structure per-subproject.
 
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>1.4.8</version>
+<version>1.4.10</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -76,7 +76,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.7</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -136,7 +136,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testutil-time</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.7</version>
     <scope>test</scope>
   </dependency>
   <dependency>
