@@ -68,7 +68,8 @@ import static io.spine.validate.Validate.checkValid;
         "SynchronizeOnThis" /* This class uses double-check idiom for lazy init of some
             fields. See Effective Java 2nd Ed. Item #71. */,
         "ClassWithTooManyMethods"})
-public abstract class AbstractEntity<I, S extends EntityState> implements Entity<I, S>, LogAwareMessageHandler {
+public abstract class AbstractEntity<I, S extends EntityState>
+        implements Entity<I, S>, LogAwareMessageHandler {
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -517,8 +518,8 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
         return version.getTimestamp();
     }
 
-    @Override
     @Internal
+    @Override
     public final void enter(HandlerMethod<?, ?, ?, ?> method) {
         checkNotNull(method);
         FluentLogger logger = loggerFor(getClass());
