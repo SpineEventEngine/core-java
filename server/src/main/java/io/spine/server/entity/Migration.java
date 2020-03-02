@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Experimental;
+import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
@@ -142,10 +143,19 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         return currentOperation().isDeleted();
     }
 
+    /**
+     * Returns {@code true} if the migration operation is configured to physically remove entity
+     * record from the storage.
+     */
+    @Internal
     final boolean physicallyRemoveRecord() {
         return currentOperation().physicallyRemoveRecord();
     }
 
+    /**
+     * Releases the {@linkplain #currentOperation currently performed operation}.
+     */
+    @Internal
     final void finishCurrentOperation() {
         currentOperation = null;
     }
