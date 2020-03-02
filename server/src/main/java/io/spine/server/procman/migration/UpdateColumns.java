@@ -36,9 +36,12 @@ import io.spine.server.procman.ProcessManagerMigration;
  * fields according to the current implementation of
  * {@link io.spine.base.EntityWithColumns EntityWithColumns}-derived methods.
  *
+ * <p>Such operation may be useful when the logic behind manually calculated columns changes as
+ * well as when adding the new columns to an entity.
+ *
  * @implNote The operation relies on the fact that column values are automatically calculated and
- *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}
- *         and thus does not change the entity state itself in {@link #apply(EntityState)}.
+ *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}.
+ *         It thus does not change the entity state itself in {@link #apply(EntityState)}.
  *
  * @see io.spine.server.entity.storage.InterfaceBasedColumn
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
