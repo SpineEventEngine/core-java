@@ -35,7 +35,6 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Versions.increment;
 import static io.spine.protobuf.Messages.isDefault;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A stored {@link Entity} transformation done to account for the domain model changes.
@@ -193,30 +192,18 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      */
     private EntityLifecycleMonitor<I> configureLifecycleMonitor(I id) {
         RecordBasedRepository<I, E, S> repository = currentOperation().repository;
-        Optional<Event> posted = repository.lifecycleOf(id)
-                                           .onMigrationApplied();
-        Event migrationApplied = posted.orElseThrow(this::throwOnBlockingFilter);
-
-        if (isDefault(migrationApplied)) {
+        Optional<Event> event = repository.lifecycleOf(id)
+                                          .onMigrationApplied();
+        if (!event.isPresent() || isDefault(event.get())) {
             warnOnNoSystemEventsPosted();
             return EntityLifecycleMonitor.newInstance(repository, id);
         }
-        return EntityLifecycleMonitor.withAcknowledgedMessage(repository, id, migrationApplied);
-    }
-
-    private IllegalStateException throwOnBlockingFilter() {
-        throw newIllegalStateException(
-                "The event filter of repository of type `%s` prevents system from posting " +
-                        "the `%s` event. Re-configure an event filter by overriding the " +
-                        "`Repository#eventFilter()` method if you want to apply the migration.",
-                currentOperation().repository.getClass().getCanonicalName(),
-                MigrationApplied.class.getCanonicalName()
-        );
+        return EntityLifecycleMonitor.withAcknowledgedMessage(repository, id, event.get());
     }
 
     private void warnOnNoSystemEventsPosted() {
-        _warn().log("The context uses a NO-OP system write side. " +
-                            "No system events will be posted during the migration.");
+        _warn().log("Couldn't post an instance of `%s` event. No system events will occur " +
+                            "during the migration.", MigrationApplied.class.getCanonicalName());
     }
 
     private Operation<I, S, E> currentOperation() {
