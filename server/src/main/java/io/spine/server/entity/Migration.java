@@ -169,6 +169,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     /**
      * Opens a transaction on an entity.
      */
+    @Internal
     protected abstract Transaction<I, E, S, ?> startTransaction(E entity);
 
     /**
