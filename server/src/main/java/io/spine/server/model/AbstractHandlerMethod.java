@@ -29,7 +29,7 @@ import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
-import io.spine.server.log.LogAwareMessageHandler;
+import io.spine.server.log.HandlerLifecycle;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -254,11 +254,11 @@ public abstract class AbstractHandlerMethod<T,
         DispatchOutcome.Builder outcome = DispatchOutcome
                 .newBuilder()
                 .setPropagatedSignal(signal);
-        LogAwareMessageHandler asLogAware = target instanceof LogAwareMessageHandler
-                                            ? (LogAwareMessageHandler) target
+        HandlerLifecycle lifecycle = target instanceof HandlerLifecycle
+                                            ? (HandlerLifecycle) target
                                             : null;
-        if (asLogAware != null) {
-            asLogAware.enter(this);
+        if (lifecycle != null) {
+            lifecycle.beforeInvoke(this);
         }
         try {
             Success success = doInvoke(target, envelope);
@@ -279,8 +279,8 @@ public abstract class AbstractHandlerMethod<T,
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw illegalStateWithCauseOf(e);
         } finally {
-            if (asLogAware != null) {
-                asLogAware.resetLog();
+            if (lifecycle != null) {
+                lifecycle.afterInvoke(this);
             }
         }
         return outcome.build();

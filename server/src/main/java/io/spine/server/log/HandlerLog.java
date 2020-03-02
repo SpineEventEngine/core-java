@@ -22,7 +22,6 @@ package io.spine.server.log;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LogSite;
-import io.spine.annotation.Internal;
 import io.spine.server.model.HandlerMethod;
 
 import java.util.logging.Level;
@@ -40,7 +39,6 @@ public final class HandlerLog {
     private final FluentLogger logger;
     private final LogSite logSite;
 
-    @Internal
     public HandlerLog(FluentLogger logger, HandlerMethod<?, ?, ?, ?> method) {
         this.logger = checkNotNull(logger);
         checkNotNull(method);

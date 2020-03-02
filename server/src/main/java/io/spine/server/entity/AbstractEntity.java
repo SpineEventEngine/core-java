@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -36,8 +37,8 @@ import io.spine.logging.Logging;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
+import io.spine.server.log.HandlerLifecycle;
 import io.spine.server.log.HandlerLog;
-import io.spine.server.log.LogAwareMessageHandler;
 import io.spine.server.model.HandlerMethod;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
@@ -68,7 +69,7 @@ import static io.spine.validate.Validate.checkValid;
             fields. See Effective Java 2nd Ed. Item #71. */,
         "ClassWithTooManyMethods"})
 public abstract class AbstractEntity<I, S extends EntityState>
-        implements Entity<I, S>, LogAwareMessageHandler {
+        implements Entity<I, S>, HandlerLifecycle {
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -517,17 +518,17 @@ public abstract class AbstractEntity<I, S extends EntityState>
         return version.getTimestamp();
     }
 
-    @Internal
+    @OverridingMethodsMustInvokeSuper
     @Override
-    public final void enter(HandlerMethod<?, ?, ?, ?> method) {
+    public void beforeInvoke(HandlerMethod<?, ?, ?, ?> method) {
         checkNotNull(method);
         FluentLogger logger = loggerFor(getClass());
         this.handlerLog = new HandlerLog(logger, method);
     }
 
-    @Internal
+    @OverridingMethodsMustInvokeSuper
     @Override
-    public void resetLog() {
+    public void afterInvoke(HandlerMethod<?, ?, ?, ?> method) {
         this.handlerLog = null;
     }
 
