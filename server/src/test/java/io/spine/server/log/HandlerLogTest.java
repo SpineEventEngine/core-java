@@ -31,38 +31,56 @@ import io.spine.server.log.given.CardRepository;
 import io.spine.server.log.given.TestLogHandler;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.LogRecordSubject;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.log.given.Books.THE_HOBBIT;
 import static io.spine.testing.logging.LogTruth.assertThat;
 import static java.util.logging.Level.ALL;
 import static java.util.logging.Level.FINE;
 
+@MuteLogging
 @DisplayName("`HandlerLog` should")
 class HandlerLogTest {
 
     private FluentLogger logger;
     private TestLogHandler handler;
+    private Handler[] defaultHandlers;
+    private @Nullable Level defaultLevel;
 
     @BeforeEach
     void setUpLog() {
         logger = Logging.loggerFor(CardAggregate.class);
         handler = new TestLogHandler();
         LoggerConfig config = LoggerConfig.of(logger);
+        defaultHandlers = config.getHandlers();
+        for (Handler defaultHandler : defaultHandlers) {
+            config.removeHandler(defaultHandler);
+        }
         config.addHandler(handler);
+        defaultLevel = config.getLevel();
         config.setLevel(ALL);
     }
 
     @AfterEach
     void resetLog() {
-        LoggerConfig.of(logger).removeHandler(handler);
+        LoggerConfig config = LoggerConfig.of(logger);
+        config.removeHandler(handler);
         handler.close();
+        for (Handler defaultHandler : defaultHandlers) {
+            config.addHandler(defaultHandler);
+        }
+        config.setLevel(defaultLevel);
     }
 
     @Test
@@ -82,19 +100,23 @@ class HandlerLogTest {
 
         LogRecordSubject assertFirstLog = assertThat(records.get(0));
         assertFirstLog.hasLevelThat()
-                .isEqualTo(FINE);
+                      .isEqualTo(FINE);
         assertFirstLog.hasMessageThat()
-                .contains(Books.implementingDdd().getTitle());
+                      .contains(Books.implementingDdd()
+                                     .getTitle());
         assertFirstLog.hasMethodNameThat()
-                .contains(command.getClass().getSimpleName());
+                      .contains(command.getClass()
+                                       .getSimpleName());
 
         LogRecordSubject assertSecondLog = assertThat(records.get(1));
         assertSecondLog.hasLevelThat()
-                 .isEqualTo(FINE);
+                       .isEqualTo(FINE);
         assertSecondLog.hasMessageThat()
-                 .contains(Books.domainDrivenDesign().getTitle());
+                       .contains(Books.domainDrivenDesign()
+                                      .getTitle());
         assertSecondLog.hasMethodNameThat()
-                 .contains(command.getClass().getSimpleName());
+                       .contains(command.getClass()
+                                        .getSimpleName());
     }
 
     @Test
@@ -117,11 +139,32 @@ class HandlerLogTest {
         }
     }
 
-    private static BorrowBooks borrowBooks(UserId reader) {
-        LibraryCardId id = LibraryCardId
+    @Test
+    @DisplayName("pass the throwable unchanged")
+    void withCause() {
+        UserId user = GivenUserId.generated();
+        ReturnBook command = ReturnBook
                 .newBuilder()
-                .setReader(reader)
-                .build();
+                .setCard(cardId(user))
+                .setBook(THE_HOBBIT)
+                .vBuild();
+        BlackBoxBoundedContext
+                .singleTenant()
+                .withActor(user)
+                .with(new CardRepository())
+                .receivesCommand(command);
+        ImmutableList<LogRecord> records = handler.records();
+        assertThat(records)
+                .hasSize(1);
+        LogRecord record = records.get(0);
+        LogRecordSubject assertRecord = assertThat(record);
+        assertRecord.isError();
+        assertRecord.hasThrowableThat()
+                    .isInstanceOf(UnknownBook.class);
+    }
+
+    private static BorrowBooks borrowBooks(UserId reader) {
+        LibraryCardId id = cardId(reader);
         BorrowBooks command = BorrowBooks
                 .newBuilder()
                 .setCard(id)
@@ -129,5 +172,12 @@ class HandlerLogTest {
                 .addBookId(Books.BIG_BLUE_BOOK)
                 .vBuild();
         return command;
+    }
+
+    private static LibraryCardId cardId(UserId reader) {
+        return LibraryCardId
+                    .newBuilder()
+                    .setReader(reader)
+                    .build();
     }
 }

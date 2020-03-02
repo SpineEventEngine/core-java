@@ -22,25 +22,39 @@ package io.spine.server.log;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LogSite;
+import io.spine.annotation.Internal;
+import io.spine.server.model.HandlerMethod;
 
 import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.flogger.StackSize.SMALL;
 
+/**
+ * A log for handler methods.
+ *
+ * <p>The log is set up with a {@link HandlerMethod} from which it should be accessed. By default,
+ * the log will include the given method as the logging {@linkplain LogSite site}.
+ */
 public final class HandlerLog {
 
     private final FluentLogger logger;
     private final LogSite logSite;
 
-    public HandlerLog(FluentLogger logger, LogSite logSite) {
+    @Internal
+    public HandlerLog(FluentLogger logger, HandlerMethod<?, ?, ?, ?> method) {
         this.logger = checkNotNull(logger);
-        this.logSite = checkNotNull(logSite);
+        checkNotNull(method);
+        this.logSite = new HandlerMethodSite(method);
     }
 
+    /**
+     * Returns a fluent logging API appropriate for the specified log level.
+     *
+     * <p>By default, the log produced by this API will include the name of the handler method, as
+     * well as its parameter types.
+     */
     public FluentLogger.Api at(Level level) {
         return logger.at(level)
-                     .withStackTrace(SMALL)
                      .withInjectedLogSite(logSite);
     }
 }

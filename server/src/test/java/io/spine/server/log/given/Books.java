@@ -30,6 +30,8 @@ public final class Books {
     public static final Isbn BIG_RED_BOOK = isbn("978-0321834577");
     public static final Isbn SMALL_GREEN_BOOK = isbn("978-0134434421");
 
+    public static final Isbn THE_HOBBIT = isbn("978-0547928241");
+
     private static final String PUBLISHER = "A-W";
 
     /**

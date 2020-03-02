@@ -93,7 +93,7 @@ public final class CardAggregate
     BookReturned handle(ReturnBook command) throws UnknownBook {
         Isbn isbn = command.getBook();
         Book book = knownBooks.get(isbn);
-        if (book != null) {
+        if (book == null) {
             UnknownBook rejection = UnknownBook
                     .newBuilder()
                     .addAllBook(ImmutableList.of(isbn))

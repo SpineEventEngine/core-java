@@ -42,7 +42,7 @@ public final class HandlerMethodSite extends LogSite {
     @SuppressWarnings("Immutable")
     private final Method method;
 
-    public HandlerMethodSite(HandlerMethod<?, ?, ?, ?> method) {
+    HandlerMethodSite(HandlerMethod<?, ?, ?, ?> method) {
         super();
         checkNotNull(method);
         this.method = method.rawMethod();

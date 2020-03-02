@@ -37,7 +37,6 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.server.log.HandlerLog;
-import io.spine.server.log.HandlerMethodSite;
 import io.spine.server.log.LogAwareMessageHandler;
 import io.spine.server.model.HandlerMethod;
 import io.spine.string.Stringifiers;
@@ -523,8 +522,7 @@ public abstract class AbstractEntity<I, S extends EntityState>
     public final void enter(HandlerMethod<?, ?, ?, ?> method) {
         checkNotNull(method);
         FluentLogger logger = loggerFor(getClass());
-        HandlerMethodSite site = new HandlerMethodSite(method);
-        this.handlerLog = new HandlerLog(logger, site);
+        this.handlerLog = new HandlerLog(logger, method);
     }
 
     @Internal
