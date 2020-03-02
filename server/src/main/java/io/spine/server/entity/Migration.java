@@ -42,7 +42,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>At its core the {@code Migration} is a mapping of {@link EntityState entity state}, from old
  * to new. It is also capable of performing basic entity modifications like
- * {@linkplain #markArchived() archiving} or {@linkplain #markDeleted() deleting} it.
+ * {@linkplain #markArchived() archiving} and {@linkplain #markDeleted() deleting} it.
  *
  * <p>The process of applying the migration operation is always preceded by an {@link Entity} load
  * by ID and may be finalized by either {@linkplain Repository#store(Entity) saving} the
@@ -109,8 +109,8 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      * <p>All other configured entity modifications are still applied, allowing to trigger
      * {@linkplain EntityLifecycle entity lifecycle} events before the actual record deletion.
      *
-     * <p>Depending on the actual storage implementation, this operation may be irreversible, so it
-     * should be used in the caller code with care.
+     * <p>Depending on the storage implementation, this operation may be irreversible, so it should
+     * be used in the caller code with care.
      */
     protected final void removeFromStorage() {
         currentOperation().removeFromStorage();
@@ -159,7 +159,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      * Releases the {@linkplain #currentOperation currently performed operation}.
      *
      * <p>This method is used by Spine routines to reset the {@code Migration} instance passed to
-     * {@link RecordBasedRepository#applyMigration(Object, Migration)} and shouldn't be invoked by
+     * {@link RecordBasedRepository#applyMigration(Object, Migration)}. It shouldn't be invoked by
      * the user code directly.
      */
     @Internal

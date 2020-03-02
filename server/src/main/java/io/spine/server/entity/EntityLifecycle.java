@@ -321,7 +321,7 @@ public class EntityLifecycle {
     /**
      * Posts the {@link MigrationApplied} event.
      *
-     * @return the event or an empty {@code Optional} if posting was blocked by the
+     * @return the event or an empty {@code Optional} if the posting was blocked by the
      *         {@link #eventFilter}
      */
     public final Optional<Event> onMigrationApplied() {
