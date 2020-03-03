@@ -22,7 +22,6 @@
  * Contains a small test domain and utilities for testing entity logs.
  */
 
-
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.log.given;
