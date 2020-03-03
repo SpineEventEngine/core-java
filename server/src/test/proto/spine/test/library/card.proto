@@ -14,7 +14,7 @@ import "spine/time/time.proto";
 import "spine/core/user_id.proto";
 
 message Isbn {
-    string value = 1;
+    string value = 1 [(required) = true];
 }
 
 message Book {
@@ -28,7 +28,7 @@ message Book {
 
 message LibraryCardId {
 
-    core.UserId reader = 1;
+    core.UserId reader = 1 [(required) = true];
 }
 
 message LibraryCard {
