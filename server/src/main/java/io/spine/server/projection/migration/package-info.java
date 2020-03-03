@@ -21,11 +21,16 @@
 /**
  * This package contains standard Spine {@linkplain io.spine.server.entity.Migration migrations}
  * available for projections.
+ *
+ * @see io.spine.server.entity.migration the public API which exposes these migrations to the
+ *                                       client code
  */
+@Internal
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.projection.migration;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

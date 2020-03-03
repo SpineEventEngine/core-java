@@ -18,18 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.projection.migration;
+package io.spine.server.entity.migration;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.DelegatingMigration;
 import io.spine.server.entity.Migration;
-import io.spine.server.entity.Transaction;
+import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.migration.UpdatePmColumns;
 import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionMigration;
+import io.spine.server.projection.migration.UpdateProjectionColumns;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.migration.UnsupportedEntityType.unsupportedEntityType;
 
 /**
- * A migration operation that does the update of interface-based columns of a {@link Projection}.
+ * A migration operation that does the update of interface-based columns of an
+ * {@link io.spine.server.entity.Entity Entity}.
  *
  * <p>When applied to an entity, this operation will trigger the recalculation of entity storage
  * fields according to the current implementation of
@@ -39,7 +46,8 @@ import io.spine.server.projection.ProjectionMigration;
  * well as when adding the new columns to an entity.
  *
  * @implNote The operation relies on the fact that column values are automatically calculated and
- *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}.
+ *         propagated to the entity state on a transaction
+ *         {@linkplain io.spine.server.entity.Transaction#commit() commit}.
  *         It thus does not change the entity state itself in {@link #apply(EntityState)}.
  *
  * @see io.spine.server.entity.storage.InterfaceBasedColumn
@@ -47,13 +55,30 @@ import io.spine.server.projection.ProjectionMigration;
  */
 @Experimental
 public final class UpdateColumns<I,
-                                 P extends Projection<I, S, B>,
-                                 S extends EntityState,
-                                 B extends ValidatingBuilder<S>>
-        extends ProjectionMigration<I, P, S, B> {
+                                 E extends TransactionalEntity<I, S, ?>,
+                                 S extends EntityState>
+        extends DelegatingMigration<I, E, S> {
 
-    @Override
-    public S apply(S s) {
-        return s;
+    private UpdateColumns(Migration<I, E, S> migration) {
+        super(migration);
+    }
+
+    /**
+     * Creates a new instance of the migration for the passed entity class.
+     */
+    @SuppressWarnings("unchecked") // Checked at runtime.
+    public static <I,
+                   E extends TransactionalEntity<I, S, B>,
+                   S extends EntityState,
+                   B extends ValidatingBuilder<S>>
+    UpdateColumns<I, E, S> of(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        if (Projection.class.isAssignableFrom(entityClass)) {
+            return new UpdateColumns<>((Migration<I, E, S>) new UpdateProjectionColumns<>());
+        }
+        if (ProcessManager.class.isAssignableFrom(entityClass)) {
+            return new UpdateColumns<>((Migration<I, E, S>) new UpdatePmColumns<>());
+        }
+        throw unsupportedEntityType(entityClass);
     }
 }

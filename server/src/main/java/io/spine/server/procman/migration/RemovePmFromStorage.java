@@ -20,41 +20,28 @@
 
 package io.spine.server.procman.migration;
 
-import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
-import io.spine.server.entity.Migration;
-import io.spine.server.entity.Transaction;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerMigration;
 
 /**
- * A migration operation that does the update of interface-based columns of a
- * {@link ProcessManager}.
+ * A migration operation that physically deletes the entity record from the
+ * {@linkplain io.spine.server.storage.RecordStorage storage}.
  *
- * <p>When applied to an entity, this operation will trigger the recalculation of entity storage
- * fields according to the current implementation of
- * {@link io.spine.base.EntityWithColumns EntityWithColumns}-derived methods.
- *
- * <p>Such operation may be useful when the logic behind manually calculated columns changes as
- * well as when adding the new columns to an entity.
- *
- * @implNote The operation relies on the fact that column values are automatically calculated and
- *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}.
- *         It thus does not change the entity state itself in {@link #apply(EntityState)}.
- *
- * @see io.spine.server.entity.storage.InterfaceBasedColumn
- * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
+ * <p>NOTE: this class is {@linkplain io.spine.annotation.Internal internal to Spine} and shouldn't
+ * be used directly. In the client code, please use the public API
+ * {@linkplain io.spine.server.entity.migration.RemoveFromStorage version}.
  */
-@Experimental
-public final class UpdateColumns<I,
-                                 P extends ProcessManager<I, S, B>,
-                                 S extends EntityState,
-                                 B extends ValidatingBuilder<S>>
+public final class RemovePmFromStorage<I,
+                                       P extends ProcessManager<I, S, B>,
+                                       S extends EntityState,
+                                       B extends ValidatingBuilder<S>>
         extends ProcessManagerMigration<I, P, S, B> {
 
     @Override
     public S apply(S s) {
+        removeFromStorage();
         return s;
     }
 }

@@ -20,32 +20,28 @@
 
 package io.spine.server.projection.migration;
 
-import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
-import io.spine.server.entity.Migration;
+import io.spine.server.entity.Entity;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionMigration;
 
 /**
- * A migration operation that physically deletes the entity record from the
- * {@linkplain io.spine.server.storage.RecordStorage storage}.
+ * A migration operation that marks a {@link Projection} as {@link Entity#isArchived() archived}.
  *
- * <p>Depending on the actual storage implementation, this operation may be irreversible, so it
- * should be used in the client code with care.
- *
- * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
+ * <p>NOTE: this class is {@linkplain io.spine.annotation.Internal internal to Spine} and shouldn't
+ * be used directly. In the client code, please use the public API
+ * {@linkplain io.spine.server.entity.migration.MarkArchived version}.
  */
-@Experimental
-public final class RemoveFromStorage<I,
-                                     P extends Projection<I, S, B>,
-                                     S extends EntityState,
-                                     B extends ValidatingBuilder<S>>
+public final class MarkProjectionArchived<I,
+                                          P extends Projection<I, S, B>,
+                                          S extends EntityState,
+                                          B extends ValidatingBuilder<S>>
         extends ProjectionMigration<I, P, S, B> {
 
     @Override
     public S apply(S s) {
-        removeFromStorage();
+        markArchived();
         return s;
     }
 }

@@ -18,30 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.projection.migration;
+package io.spine.server.procman.migration;
 
-import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.Migration;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionMigration;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerMigration;
 
 /**
- * A migration operation that marks a {@link Projection} as {@link Entity#isArchived() archived}.
+ * A migration operation that marks a {@link ProcessManager} as
+ * {@link Entity#isArchived() archived}.
  *
- * <p>When applied to an entity, it will modify the {@code archived} flag of a corresponding
- * storage record to be {@code true}.
- *
- * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
+ * <p>NOTE: this class is {@linkplain io.spine.annotation.Internal internal to Spine} and shouldn't
+ * be used directly. In the client code, please use the public API
+ * {@linkplain io.spine.server.entity.migration.MarkArchived version}.
  */
-@Experimental
-public final class MarkArchived<I,
-                                P extends Projection<I, S, B>,
-                                S extends EntityState,
-                                B extends ValidatingBuilder<S>>
-        extends ProjectionMigration<I, P, S, B> {
+public final class MarkPmArchived<I,
+                                  P extends ProcessManager<I, S, B>,
+                                  S extends EntityState,
+                                  B extends ValidatingBuilder<S>>
+        extends ProcessManagerMigration<I, P, S, B> {
 
     @Override
     public S apply(S s) {

@@ -43,16 +43,16 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.migration.MarkArchived;
+import io.spine.server.entity.migration.MarkDeleted;
+import io.spine.server.entity.migration.RemoveFromStorage;
+import io.spine.server.entity.migration.UpdateColumns;
 import io.spine.server.projection.given.EntitySubscriberProjection;
-import io.spine.server.projection.migration.MarkArchived;
-import io.spine.server.projection.migration.MarkDeleted;
-import io.spine.server.projection.migration.RemoveFromStorage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.projection.given.TestProjection;
-import io.spine.server.projection.migration.UpdateColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -561,7 +561,7 @@ class ProjectionRepositoryTest
         assertThat(found.hasNext()).isFalse();
 
         // Apply the columns update.
-        repository.applyMigration(id, new UpdateColumns<>());
+        repository.applyMigration(id, UpdateColumns.of(TestProjection.class));
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProjection> afterMigration =
@@ -589,7 +589,8 @@ class ProjectionRepositoryTest
         repository.store(projection3);
 
         // Apply the column update to two of the three entities.
-        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateColumns<>());
+        repository.applyMigration(ImmutableSet.of(id1, id2),
+                                  UpdateColumns.of(TestProjection.class));
 
         // Check that entities to which migration has been applied now have column values updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
@@ -616,7 +617,7 @@ class ProjectionRepositoryTest
         TestProjection projection = createEntity(id);
         repository().store(projection);
 
-        repository().applyMigration(id, new MarkArchived<>());
+        repository().applyMigration(id, MarkArchived.of(TestProjection.class));
 
         Optional<TestProjection> found = repository().find(id);
         assertThat(found.isPresent()).isTrue();
@@ -631,7 +632,7 @@ class ProjectionRepositoryTest
         TestProjection projection = createEntity(id);
         repository().store(projection);
 
-        repository().applyMigration(id, new MarkDeleted<>());
+        repository().applyMigration(id, MarkDeleted.of(TestProjection.class));
 
         Optional<TestProjection> found = repository().find(id);
         assertThat(found.isPresent()).isTrue();
@@ -645,7 +646,7 @@ class ProjectionRepositoryTest
         TestProjection projection = createEntity(id);
         repository().store(projection);
 
-        repository().applyMigration(id, new RemoveFromStorage<>());
+        repository().applyMigration(id, RemoveFromStorage.of(TestProjection.class));
 
         Optional<TestProjection> found = repository().find(id);
         assertThat(found.isPresent()).isFalse();

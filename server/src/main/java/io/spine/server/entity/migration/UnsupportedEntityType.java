@@ -18,34 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.projection.migration;
+package io.spine.server.entity.migration;
 
-import io.spine.annotation.Experimental;
-import io.spine.base.EntityState;
-import io.spine.protobuf.ValidatingBuilder;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.Migration;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionMigration;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A migration operation that marks a {@link Projection} as {@link Entity#isDeleted() deleted}.
- *
- * <p>When applied to an entity, it will modify the {@code deleted} flag of a corresponding
- * storage record to be {@code true}.
- *
- * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
+ * Provides a convenience method that throws an {@link IllegalArgumentException} on receiving an
+ * unsupported entity type for migration.
  */
-@Experimental
-public final class MarkDeleted<I,
-                               P extends Projection<I, S, B>,
-                               S extends EntityState,
-                               B extends ValidatingBuilder<S>>
-        extends ProjectionMigration<I, P, S, B> {
+final class UnsupportedEntityType {
 
-    @Override
-    public S apply(S s) {
-        markDeleted();
-        return s;
+    private static final String MESSAGE =
+            "Unexpected entity type `%s`. Currently, the migration is only supported for " +
+                    "entities of `Projection` and `ProcessManager` types.";
+
+    /** Prevents instantiation of this utility class. */
+    private UnsupportedEntityType() {
+    }
+
+    static IllegalArgumentException unsupportedEntityType(Class<?> entityClass) {
+        throw newIllegalArgumentException(MESSAGE, entityClass.getCanonicalName());
     }
 }

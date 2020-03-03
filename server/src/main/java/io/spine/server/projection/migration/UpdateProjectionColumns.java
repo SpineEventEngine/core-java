@@ -18,19 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.projection.migration;
+
+import io.spine.base.EntityState;
+import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionMigration;
+
 /**
- * This package contains standard Spine {@linkplain io.spine.server.entity.Migration migrations}
- * available for process managers.
+ * A migration operation that does the update of interface-based columns of a {@link Projection}.
  *
- * @see io.spine.server.entity.migration the public API which exposes these migrations to the
- *                                       client code
+ * <p>NOTE: this class is {@linkplain io.spine.annotation.Internal internal to Spine} and shouldn't
+ * be used directly. In the client code, please use the public API
+ * {@linkplain io.spine.server.entity.migration.UpdateColumns version}.
  */
-@Internal
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.procman.migration;
+public final class UpdateProjectionColumns<I,
+                                           P extends Projection<I, S, B>,
+                                           S extends EntityState,
+                                           B extends ValidatingBuilder<S>>
+        extends ProjectionMigration<I, P, S, B> {
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.annotation.Internal;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Override
+    public S apply(S s) {
+        return s;
+    }
+}

@@ -19,18 +19,13 @@
  */
 
 /**
- * This package contains standard Spine {@linkplain io.spine.server.entity.Migration migrations}
- * available for process managers.
- *
- * @see io.spine.server.entity.migration the public API which exposes these migrations to the
- *                                       client code
+ * This package contains standard entity {@linkplain io.spine.server.entity.Migration migrations}
+ * provided by Spine.
  */
-@Internal
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.procman.migration;
+package io.spine.server.entity.migration;
 
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.annotation.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

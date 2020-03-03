@@ -18,19 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains standard Spine {@linkplain io.spine.server.entity.Migration migrations}
- * available for process managers.
- *
- * @see io.spine.server.entity.migration the public API which exposes these migrations to the
- *                                       client code
- */
-@Internal
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.procman.migration;
+package io.spine.server.entity;
 
-import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+/**
+ * A migration which delegates the operation execution to some other {@link Migration} instance.
+ */
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
+// Prevent instantiation in favor of concrete subclasses.
+@Internal
+public abstract class DelegatingMigration<I,
+                                          E extends TransactionalEntity<I, S, ?>,
+                                          S extends EntityState>
+        extends Migration<I, E, S> {
+
+    private final Migration<I, E, S> delegate;
+
+    protected DelegatingMigration(Migration<I, E, S> delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public S apply(S s) {
+        return delegate.apply(s);
+    }
+
+    @Override
+    protected Transaction<I, E, S, ?> startTransaction(E entity) {
+        return delegate.startTransaction(entity);
+    }
+}
