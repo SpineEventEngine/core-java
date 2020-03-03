@@ -12,6 +12,7 @@ io.spine.server.event
 io.spine.server.event.storage
 io.spine.server.event.store
 io.spine.server.integration
+io.spine.server.log
 io.spine.server.procman
 io.spine.server.projection
 io.spine.server.route
