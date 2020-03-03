@@ -37,22 +37,31 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.log.given.Books.THE_HOBBIT;
 import static io.spine.testing.logging.LogTruth.assertThat;
 import static java.util.logging.Level.ALL;
+import static java.util.logging.Level.CONFIG;
 import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.FINER;
+import static java.util.logging.Level.FINEST;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
 
 @MuteLogging
-@DisplayName("`HandlerLog` should")
-class HandlerLogTest {
+@DisplayName("`LoggingEntity` should")
+class LoggingEntityTest {
 
     private FluentLogger logger;
     private TestLogHandler handler;
@@ -174,5 +183,91 @@ class HandlerLogTest {
                     .newBuilder()
                     .setReader(reader)
                     .build();
+    }
+
+    @Nested
+    @DisplayName("support method")
+    class Support {
+
+        private String message;
+
+        @BeforeEach
+        void randomizeMessage() {
+            message = newUuid();
+        }
+
+        @Test
+        @DisplayName("_severe")
+        void severe() {
+            testLevel(Logging::_severe, SEVERE);
+        }
+
+        @Test
+        @DisplayName("_warn")
+        void warn() {
+            testLevel(Logging::_warn, WARNING);
+        }
+
+        @Test
+        @DisplayName("_info")
+        void info() {
+            testLevel(Logging::_info, INFO);
+        }
+
+        @Test
+        @DisplayName("_config")
+        void config() {
+            testLevel(Logging::_config, CONFIG);
+        }
+
+        @Test
+        @DisplayName("_fine")
+        void fine() {
+            testLevel(Logging::_fine, FINE);
+        }
+
+        @Test
+        @DisplayName("_finer")
+        void finer() {
+            testLevel(Logging::_finer, FINER);
+        }
+
+        @Test
+        @DisplayName("_finest")
+        void finest() {
+            testLevel(Logging::_finest, FINEST);
+        }
+
+        @Test
+        @DisplayName("_error")
+        void error() {
+            testLevel(Logging::_error, Logging.errorLevel());
+        }
+
+        @Test
+        @DisplayName("_debug")
+        void debug() {
+            testLevel(Logging::_debug, Logging.debugLevel());
+        }
+
+        @Test
+        @DisplayName("_trace")
+        void trace() {
+            testLevel(Logging::_trace, FINEST);
+        }
+
+        private void testLevel(Function<Logging, FluentLogger.Api> underscoreFunc,
+                               Level expectedLevel) {
+            CardAggregate aggregate = new CardAggregate();
+            underscoreFunc.apply(aggregate).log(message);
+            List<LogRecord> records = handler.getStoredLogRecords();
+            assertThat(records)
+                    .hasSize(1);
+            LogRecordSubject assertLog = assertThat(records.get(0));
+            assertLog.hasLevelThat()
+                     .isEqualTo(expectedLevel);
+            assertLog.hasMessageThat()
+                     .isEqualTo(message);
+        }
     }
 }
