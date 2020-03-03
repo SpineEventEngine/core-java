@@ -33,7 +33,6 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.logging.Logging;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
@@ -49,6 +48,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -532,14 +532,26 @@ public abstract class AbstractEntity<I, S extends EntityState>
         this.handlerLog = null;
     }
 
-    protected final HandlerLog log() {
-        checkState(handlerLog != null,
-                   "Unable to get a handler log for `%s`." +
-                           "A handler log is available only in message handler methods. " +
-                           "Use `%s` instead.",
-                   getClass().getSimpleName(),
-                   Logging.class.getName());
-        return handlerLog;
+    /**
+     * Obtains a new fluent logging API at the given level.
+     *
+     * <p>If called from within a handler method, the resulting log will reference the handler
+     * method as the log site. Otherwise, equivalent to
+     * {@code Logging.loggerFor(getClass()).at(logLevel)}.
+     *
+     * @param logLevel
+     *         the log level
+     * @return new fluent logging API
+     * @apiNote This method mirrors the declaration of
+     *         {@link io.spine.server.log.LoggingEntity#at(Level)}. It is recommended to implement
+     *         the {@link io.spine.server.log.LoggingEntity} interface and use the underscore
+     *         logging methods instead of calling {@code at(..)} directly.
+     * @see io.spine.server.log.LoggingEntity
+     */
+    public final FluentLogger.Api at(Level logLevel) {
+        return handlerLog != null
+               ? handlerLog.at(logLevel)
+               : loggerFor(getClass()).at(logLevel);
     }
 
     @Override
