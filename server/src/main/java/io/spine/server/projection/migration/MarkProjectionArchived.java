@@ -20,19 +20,23 @@
 
 package io.spine.server.projection.migration;
 
+import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.Migration;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionMigration;
 
 /**
  * A migration operation that marks a {@link Projection} as {@link Entity#isArchived() archived}.
  *
- * <p>NOTE: this class is {@linkplain io.spine.annotation.Internal internal to Spine} and shouldn't
- * be used directly. In the client code, please use the public API
- * {@linkplain io.spine.server.entity.migration.MarkArchived version}.
+ * <p>When applied to an entity, it will modify the {@code archived} flag of a corresponding
+ * storage record to be {@code true}.
+ *
+ * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
+@Experimental
 public final class MarkProjectionArchived<I,
                                           P extends Projection<I, S, B>,
                                           S extends EntityState,

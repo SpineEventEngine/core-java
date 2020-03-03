@@ -48,10 +48,6 @@ import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
-import io.spine.server.entity.migration.MarkArchived;
-import io.spine.server.entity.migration.MarkDeleted;
-import io.spine.server.entity.migration.RemoveFromStorage;
-import io.spine.server.entity.migration.UpdateColumns;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.procman.given.delivery.GivenMessage;
@@ -61,6 +57,10 @@ import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.TestProcessManager;
 import io.spine.server.procman.given.repo.TestProcessManagerRepository;
+import io.spine.server.procman.migration.MarkPmArchived;
+import io.spine.server.procman.migration.MarkPmDeleted;
+import io.spine.server.procman.migration.RemovePmFromStorage;
+import io.spine.server.procman.migration.UpdatePmColumns;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -658,7 +658,7 @@ class ProcessManagerRepositoryTest
         assertThat(found.hasNext()).isFalse();
 
         // Apply the columns update.
-        repository.applyMigration(id, UpdateColumns.of(TestProcessManager.class));
+        repository.applyMigration(id, new UpdatePmColumns<>());
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProcessManager> afterMigration =
@@ -686,8 +686,7 @@ class ProcessManagerRepositoryTest
         repository.store(pm3);
 
         // Apply the column update to two of the three entities.
-        repository.applyMigration(ImmutableSet.of(id1, id2),
-                                  UpdateColumns.of(TestProcessManager.class));
+        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdatePmColumns<>());
 
         // Check that entities to which the migration has been applied now have columns updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
@@ -714,7 +713,7 @@ class ProcessManagerRepositoryTest
         TestProcessManager entity = createEntity(id);
         repository().store(entity);
 
-        repository().applyMigration(id, MarkArchived.of(TestProcessManager.class));
+        repository().applyMigration(id, new MarkPmArchived<>());
 
         Optional<TestProcessManager> found = repository().find(id);
         assertThat(found.isPresent()).isTrue();
@@ -729,7 +728,7 @@ class ProcessManagerRepositoryTest
         TestProcessManager entity = createEntity(id);
         repository().store(entity);
 
-        repository().applyMigration(id, MarkDeleted.of(TestProcessManager.class));
+        repository().applyMigration(id, new MarkPmDeleted<>());
 
         Optional<TestProcessManager> found = repository().find(id);
         assertThat(found.isPresent()).isTrue();
@@ -743,7 +742,7 @@ class ProcessManagerRepositoryTest
         TestProcessManager entity = createEntity(id);
         repository().store(entity);
 
-        repository().applyMigration(id, RemoveFromStorage.of(TestProcessManager.class));
+        repository().applyMigration(id, new RemovePmFromStorage<>());
 
         Optional<TestProcessManager> found = repository().find(id);
         assertThat(found.isPresent()).isFalse();

@@ -20,8 +20,10 @@
 
 package io.spine.server.procman.migration;
 
+import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.Migration;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerMigration;
 
@@ -29,10 +31,12 @@ import io.spine.server.procman.ProcessManagerMigration;
  * A migration operation that physically deletes the entity record from the
  * {@linkplain io.spine.server.storage.RecordStorage storage}.
  *
- * <p>NOTE: this class is {@linkplain io.spine.annotation.Internal internal to Spine} and shouldn't
- * be used directly. In the client code, please use the public API
- * {@linkplain io.spine.server.entity.migration.RemoveFromStorage version}.
+ * <p>Depending on the actual storage implementation, this operation may be irreversible, so it
+ * should be used in the client code with care.
+ *
+ * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
+@Experimental
 public final class RemovePmFromStorage<I,
                                        P extends ProcessManager<I, S, B>,
                                        S extends EntityState,
