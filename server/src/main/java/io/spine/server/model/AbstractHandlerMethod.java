@@ -29,6 +29,7 @@ import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
+import io.spine.server.log.HandlerLifecycle;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -253,10 +254,14 @@ public abstract class AbstractHandlerMethod<T,
         DispatchOutcome.Builder outcome = DispatchOutcome
                 .newBuilder()
                 .setPropagatedSignal(signal);
+        HandlerLifecycle lifecycle = target instanceof HandlerLifecycle
+                                            ? (HandlerLifecycle) target
+                                            : null;
+        if (lifecycle != null) {
+            lifecycle.beforeInvoke(this);
+        }
         try {
-            Object[] arguments = parameterSpec.extractArguments(envelope);
-            Object rawOutput = method.invoke(target, arguments);
-            Success success = toSuccessfulOutcome(rawOutput, target, envelope);
+            Success success = doInvoke(target, envelope);
             outcome.setSuccess(success);
         } catch (IllegalOutcomeException e) {
             Error error = fromThrowable(e);
@@ -265,9 +270,7 @@ public abstract class AbstractHandlerMethod<T,
             Throwable cause = e.getCause();
             checkNotNull(cause);
             if (cause instanceof ThrowableMessage) {
-                ThrowableMessage throwable = (ThrowableMessage) cause;
-                Optional<Success> maybeSuccess = handleRejection(throwable, target, envelope);
-                Success success = maybeSuccess.orElseThrow(this::cannotThrowRejections);
+                Success success = asRejection(target, envelope, cause);
                 outcome.setSuccess(success);
             } else {
                 Error error = causeOf(cause);
@@ -275,8 +278,25 @@ public abstract class AbstractHandlerMethod<T,
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw illegalStateWithCauseOf(e);
+        } finally {
+            if (lifecycle != null) {
+                lifecycle.afterInvoke(this);
+            }
         }
         return outcome.build();
+    }
+
+    private Success doInvoke(T target, E envelope)
+            throws IllegalAccessException, InvocationTargetException {
+        Object[] arguments = parameterSpec.extractArguments(envelope);
+        Object rawOutput = method.invoke(target, arguments);
+        return toSuccessfulOutcome(rawOutput, target, envelope);
+    }
+
+    private Success asRejection(T target, E envelope, Throwable cause) {
+        ThrowableMessage throwable = (ThrowableMessage) cause;
+        Optional<Success> maybeSuccess = handleRejection(throwable, target, envelope);
+        return maybeSuccess.orElseThrow(this::cannotThrowRejections);
     }
 
     private RuntimeException cannotThrowRejections() {

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package spine.test.server.log;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.log";
+option java_outer_classname = "LibraryCommandsProto";
+option java_multiple_files = true;
+
+import "spine/test/library/card.proto";
+
+message BorrowBooks {
+    LibraryCardId card = 1 [(required) = true, (validate) = true];
+    repeated Isbn book_id = 2 [(required) = true, (validate) = true];
+}
+
+message ReturnBook {
+    LibraryCardId card = 1 [(required) = true, (validate) = true];
+    Isbn book = 2 [(required) = true, (validate) = true];
+}

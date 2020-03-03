@@ -19,21 +19,13 @@
  */
 
 /**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
+ * Contains a small test domain and utilities for testing entity logs.
  */
 
-final def spineVersion = '1.4.10'
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.log.given;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.4.9'
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.4.7'
-}
+import javax.annotation.ParametersAreNonnullByDefault;

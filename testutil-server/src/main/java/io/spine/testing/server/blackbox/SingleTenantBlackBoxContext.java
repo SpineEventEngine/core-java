@@ -34,9 +34,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 public final class SingleTenantBlackBoxContext
         extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
 
-    private final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(SingleTenantBlackBoxContext.class);
-
     SingleTenantBlackBoxContext(String name, EventEnricher enricher) {
         super(false, enricher, name);
     }
@@ -53,6 +50,6 @@ public final class SingleTenantBlackBoxContext
 
     @Override
     protected TestActorRequestFactory requestFactory() {
-        return requestFactory;
+        return actor().requests();
     }
 }

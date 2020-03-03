@@ -20,7 +20,8 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.flogger.FluentLogger;
+import com.google.common.flogger.FluentLogger.Api;
+import com.google.common.flogger.StackSize;
 import com.google.errorprone.annotations.FormatMethod;
 import com.google.errorprone.annotations.FormatString;
 import io.spine.base.EventMessage;
@@ -128,7 +129,9 @@ final class DiagnosticLog
     @FormatMethod
     private void log(EventMessage event, @FormatString String errorMessage, Object... formatArgs) {
         String msg = format(errorMessage, formatArgs);
-        FluentLogger.Api severeLogger = logger().atSevere();
+        Api severeLogger = logger()
+                .atSevere()
+                .withStackTrace(StackSize.NONE);
         boolean loggingEnabled = severeLogger.isEnabled();
         if (loggingEnabled) {
             severeLogger.log(msg);

@@ -51,6 +51,10 @@ message BbAssignTeam {
     repeated spine.core.UserId member = 2 [(required) = true];
 }
 
+message BbAssignSelf {
+    BbProjectId project_id = 1;
+}
+
 message BbAssignScrumMaster {
     BbProjectId project_id = 1;
     spine.core.UserId scrum_master = 2 [(required) = true];
