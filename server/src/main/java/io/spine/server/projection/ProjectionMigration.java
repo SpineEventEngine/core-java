@@ -18,37 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.projection;
 
-import com.google.protobuf.Timestamp;
-import io.spine.server.projection.Projection;
-import io.spine.test.entity.TaskView;
-import io.spine.test.entity.TaskViewId;
-import io.spine.test.entity.TaskViewWithColumns;
+import io.spine.annotation.Experimental;
+import io.spine.base.EntityState;
+import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.Migration;
+import io.spine.server.entity.Transaction;
+import io.spine.server.procman.ProcessManager;
 
-import static io.spine.test.entity.TaskView.Status.CREATED;
+/**
+ * A {@link Migration} applied to a {@link ProcessManager} instance.
+ */
+@Experimental
+public abstract class ProjectionMigration<I,
+                                          P extends Projection<I, S, B>,
+                                          S extends EntityState,
+                                          B extends ValidatingBuilder<S>>
+        extends Migration<I, P, S> {
 
-public final class TaskViewProjection
-        extends Projection<TaskViewId, TaskView, TaskView.Builder>
-        implements TaskViewWithColumns {
-
+    @SuppressWarnings("unchecked") // Logically correct.
     @Override
-    public String getName() {
-        return "some-name";
-    }
-
-    @Override
-    public int getEstimateInDays() {
-        return 42;
-    }
-
-    @Override
-    public TaskView.Status getStatus() {
-        return CREATED;
-    }
-
-    @Override
-    public Timestamp getDueDate() {
-        return state().getDueDate();
+    protected Transaction<I, P, S, ?> startTransaction(P entity) {
+        Transaction<I, P, S, ?> tx = (Transaction<I, P, S, ?>) ProjectionTransaction.start(entity);
+        return tx;
     }
 }

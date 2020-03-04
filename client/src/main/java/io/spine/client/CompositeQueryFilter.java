@@ -20,6 +20,7 @@
 
 package io.spine.client;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.EntityState;
 import io.spine.client.CompositeFilter.CompositeOperator;
 
@@ -64,5 +65,11 @@ public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState
         checkNotNull(first);
         checkNotNull(rest);
         return new CompositeQueryFilter(asList(first, rest), EITHER);
+    }
+
+    @VisibleForTesting
+    @Override
+    public CompositeFilter value() {
+        return super.value();
     }
 }

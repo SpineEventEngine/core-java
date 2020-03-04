@@ -18,37 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+/**
+ * This package contains standard Spine {@linkplain io.spine.server.entity.Migration migrations}
+ * available for process managers.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.procman.migration;
 
-import com.google.protobuf.Timestamp;
-import io.spine.server.projection.Projection;
-import io.spine.test.entity.TaskView;
-import io.spine.test.entity.TaskViewId;
-import io.spine.test.entity.TaskViewWithColumns;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-import static io.spine.test.entity.TaskView.Status.CREATED;
-
-public final class TaskViewProjection
-        extends Projection<TaskViewId, TaskView, TaskView.Builder>
-        implements TaskViewWithColumns {
-
-    @Override
-    public String getName() {
-        return "some-name";
-    }
-
-    @Override
-    public int getEstimateInDays() {
-        return 42;
-    }
-
-    @Override
-    public TaskView.Status getStatus() {
-        return CREATED;
-    }
-
-    @Override
-    public Timestamp getDueDate() {
-        return state().getDueDate();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

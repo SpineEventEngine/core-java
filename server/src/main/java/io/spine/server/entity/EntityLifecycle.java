@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
@@ -65,6 +66,7 @@ import io.spine.system.server.event.EntityUnarchived;
 import io.spine.system.server.event.EventDispatchedToReactor;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.event.EventImported;
+import io.spine.system.server.event.MigrationApplied;
 import io.spine.system.server.event.TargetAssignedToCommand;
 import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;
@@ -317,6 +319,38 @@ public class EntityLifecycle {
     }
 
     /**
+     * Posts the {@link EntityDeleted} event signaling that the entity record was removed from the
+     * storage.
+     *
+     * @param signalIds
+     *         the IDs of handled messages that caused the deletion
+     */
+    public final void onRemovedFromStorage(Iterable<MessageId> signalIds) {
+        EntityDeleted event = EntityDeleted
+                .newBuilder()
+                .setEntity(entityId)
+                .addAllSignalId(ImmutableList.copyOf(signalIds))
+                .setRemovedFromStorage(true)
+                .vBuild();
+        postEvent(event);
+    }
+
+    /**
+     * Posts the {@link MigrationApplied} event.
+     *
+     * @return the event or an empty {@code Optional} if the posting was blocked by the
+     *         {@link #eventFilter}
+     */
+    public final Optional<Event> onMigrationApplied() {
+        MigrationApplied systemEvent = MigrationApplied
+                .newBuilder()
+                .setEntity(entityId)
+                .setWhen(currentTime())
+                .build();
+        return postEvent(systemEvent);
+    }
+
+    /**
      * Posts the {@link ConstraintViolated} system event.
      *
      * @param lastMessage
@@ -480,6 +514,7 @@ public class EntityLifecycle {
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
+                    .setMarkedAsDeleted(true)
                     .vBuild();
             postEvent(event);
         }
@@ -568,14 +603,37 @@ public class EntityLifecycle {
         postEvent(systemEvent);
     }
 
-    protected void postEvent(EventMessage event, Origin explicitOrigin) {
+    /**
+     * Posts a system event with the specified origin.
+     *
+     * @param event
+     *         an event to post
+     * @param explicitOrigin
+     *         the event origin
+     * @return an instance of posted {@code Event} if it was actually posted and an empty
+     *         {@code Optional} if the event was intercepted by the {@link #eventFilter}
+     */
+    @CanIgnoreReturnValue
+    protected Optional<Event> postEvent(EventMessage event, Origin explicitOrigin) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        filtered.ifPresent(systemEvent -> systemWriteSide.postEvent(systemEvent, explicitOrigin));
+        Optional<Event> result =
+                filtered.map(systemEvent -> systemWriteSide.postEvent(systemEvent, explicitOrigin));
+        return result;
     }
 
-    protected void postEvent(EventMessage event) {
+    /**
+     * Posts an event to a system write side.
+     *
+     * @param event
+     *         an event to post
+     * @return an instance of posted {@code Event} if it was actually posted and an empty
+     *         {@code Optional} if the event was intercepted by the {@link #eventFilter}
+     */
+    @CanIgnoreReturnValue
+    protected Optional<Event> postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        filtered.ifPresent(systemWriteSide::postEvent);
+        Optional<Event> result = filtered.map(systemWriteSide::postEvent);
+        return result;
     }
 
     /**

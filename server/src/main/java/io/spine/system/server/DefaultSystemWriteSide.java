@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.Origin;
@@ -48,13 +49,15 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         this.system = system;
     }
 
+    @CanIgnoreReturnValue
     @Override
-    public void postEvent(EventMessage systemEvent, Origin origin) {
+    public Event postEvent(EventMessage systemEvent, Origin origin) {
         checkNotNull(systemEvent);
         checkNotNull(origin);
         Event event = event(systemEvent, origin);
         system.eventBus()
               .post(event, noOpObserver());
+        return event;
     }
 
     private Event event(EventMessage message, Origin origin) {

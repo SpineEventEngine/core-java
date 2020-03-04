@@ -20,8 +20,10 @@
 
 package io.spine.system.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.server.tenant.TenantAwareOperation;
 
@@ -46,8 +48,10 @@ public interface SystemWriteSide {
      *         event to post
      * @param origin
      *         the origin of the event
+     * @return a posted {@code Event} instance
      */
-    void postEvent(EventMessage systemEvent, Origin origin);
+    @CanIgnoreReturnValue
+    Event postEvent(EventMessage systemEvent, Origin origin);
 
     /**
      * Posts a system event.
@@ -58,10 +62,13 @@ public interface SystemWriteSide {
      *
      * @param systemEvent
      *         event to post
+     * @return a posted {@code Event} instance
+     *
      * @see #postEvent(EventMessage, Origin)
      */
-    default void postEvent(EventMessage systemEvent) {
-        postEvent(systemEvent, Origin.getDefaultInstance());
+    @CanIgnoreReturnValue
+    default Event postEvent(EventMessage systemEvent) {
+        return postEvent(systemEvent, Origin.getDefaultInstance());
     }
 
     /**

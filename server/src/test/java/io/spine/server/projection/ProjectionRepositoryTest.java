@@ -20,11 +20,19 @@
 
 package io.spine.server.projection;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.truth.Correspondence;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EntityColumn;
 import io.spine.base.EventMessage;
+import io.spine.client.CompositeFilter;
+import io.spine.client.CompositeQueryFilter;
+import io.spine.client.QueryFilter;
 import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
@@ -36,11 +44,15 @@ import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
 import io.spine.server.projection.given.EntitySubscriberProjection;
+import io.spine.server.projection.migration.MarkProjectionArchived;
+import io.spine.server.projection.migration.MarkProjectionDeleted;
+import io.spine.server.projection.migration.RemoveProjectionFromStorage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.projection.given.TestProjection;
+import io.spine.server.projection.migration.UpdateProjectionColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -529,5 +541,135 @@ class ProjectionRepositoryTest
 
         assertThrows(IllegalStateException.class, () ->
                 repo.registerWith(context));
+    }
+
+    @Test
+    @DisplayName("update columns through migration operation")
+    void updateColumns() {
+        // Store a new projection instance in the repository.
+        ProjectId id = createId(42);
+        TestProjectionRepository repository = repository();
+        TestProjection projection = new TestProjection(id);
+        repository.store(projection);
+
+        // Init filters by the `id_string` column.
+        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+
+        // Check nothing is found as column now should be empty.
+        Iterator<TestProjection> found =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the columns update.
+        repository.applyMigration(id, new UpdateProjectionColumns<>());
+
+        // Check the entity is now found by the provided filters.
+        Iterator<TestProjection> afterMigration =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(afterMigration.hasNext()).isTrue();
+
+        // Check the column value is propagated to the entity state.
+        TestProjection entityWithColumns = afterMigration.next();
+        assertThat(entityWithColumns.state().getIdString()).isEqualTo(id.toString());
+    }
+
+    @Test
+    @DisplayName("update columns for multiple entities")
+    void updateColumnsForMultiple() {
+        // Store three projections to the repository.
+        ProjectId id1 = createId(1);
+        ProjectId id2 = createId(2);
+        ProjectId id3 = createId(3);
+        TestProjectionRepository repository = repository();
+        TestProjection projection1 = new TestProjection(id1);
+        TestProjection projection2 = new TestProjection(id2);
+        TestProjection projection3 = new TestProjection(id3);
+        repository.store(projection1);
+        repository.store(projection2);
+        repository.store(projection3);
+
+        // Apply the column update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateProjectionColumns<>());
+
+        // Check that entities to which migration has been applied now have column values updated.
+        QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
+        QueryFilter filter2 = QueryFilter.eq(Project.Column.idString(), id2.toString());
+        QueryFilter filter3 = QueryFilter.eq(Project.Column.idString(), id3.toString());
+
+        TargetFilters filters = targetFilters(filter1, filter2, filter3);
+
+        Iterator<TestProjection> found =
+                repository.find(filters, ResponseFormat.getDefaultInstance());
+
+        ImmutableList<TestProjection> results = ImmutableList.copyOf(found);
+        assertThat(results).hasSize(2);
+        assertThat(results)
+                .comparingElementsUsing(idCorrespondence())
+                .containsExactly(id1, id2);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked with `assertThat`.
+    @Test
+    @DisplayName("archive entity via migration")
+    void archiveEntityViaMigration() {
+        ProjectId id = createId(42);
+        TestProjection projection = createEntity(id);
+        repository().store(projection);
+
+        repository().applyMigration(id, new MarkProjectionArchived<>());
+
+        Optional<TestProjection> found = repository().find(id);
+        assertThat(found.isPresent()).isTrue();
+        assertThat(found.get().isArchived()).isTrue();
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked with `assertThat`.
+    @Test
+    @DisplayName("delete entity via migration")
+    void deleteEntityViaMigration() {
+        ProjectId id = createId(42);
+        TestProjection projection = createEntity(id);
+        repository().store(projection);
+
+        repository().applyMigration(id, new MarkProjectionDeleted<>());
+
+        Optional<TestProjection> found = repository().find(id);
+        assertThat(found.isPresent()).isTrue();
+        assertThat(found.get().isDeleted()).isTrue();
+    }
+
+    @Test
+    @DisplayName("remove entity record via migration")
+    void removeRecordViaMigration() {
+        ProjectId id = createId(42);
+        TestProjection projection = createEntity(id);
+        repository().store(projection);
+
+        repository().applyMigration(id, new RemoveProjectionFromStorage<>());
+
+        Optional<TestProjection> found = repository().find(id);
+        assertThat(found.isPresent()).isFalse();
+    }
+
+    private static TargetFilters targetFilters(EntityColumn column, String value) {
+        QueryFilter filter = QueryFilter.eq(column, value);
+        return targetFilters(filter);
+    }
+
+    private static TargetFilters targetFilters(QueryFilter first, QueryFilter... rest) {
+        CompositeQueryFilter composite = CompositeQueryFilter.either(first, rest);
+        CompositeFilter filterValue = composite.value();
+        return TargetFilters
+                .newBuilder()
+                .addFilter(filterValue)
+                .build();
+    }
+
+    private static Correspondence<TestProjection, ProjectId> idCorrespondence() {
+        return Correspondence.from(ProjectionRepositoryTest::hasId, "has ID");
+    }
+
+    private static boolean hasId(TestProjection projection, ProjectId id) {
+        return projection.id().equals(id);
     }
 }

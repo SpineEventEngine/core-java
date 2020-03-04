@@ -20,7 +20,9 @@
 
 package io.spine.system.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -61,8 +63,10 @@ final class TenantAwareSystemWriteSide implements SystemWriteSide {
      *
      * <p>Posts the given system event under the context of the specified tenant.
      */
+    @CanIgnoreReturnValue
     @Override
-    public void postEvent(EventMessage systemEvent, Origin origin) {
-        runner.run(() -> delegate.postEvent(systemEvent, origin));
+    public Event postEvent(EventMessage systemEvent, Origin origin) {
+        Event event = runner.evaluate(() -> delegate.postEvent(systemEvent, origin));
+        return event;
     }
 }

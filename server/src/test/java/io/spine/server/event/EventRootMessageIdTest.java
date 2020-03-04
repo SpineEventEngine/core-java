@@ -44,6 +44,7 @@ import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.time.ZoneIds;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -123,6 +124,7 @@ public class EventRootMessageIdTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("be equal to the event's own ID by default")
     void empty() {
         Event invalidEvent = Event

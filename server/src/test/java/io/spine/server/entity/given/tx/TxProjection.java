@@ -28,6 +28,7 @@ import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
 import io.spine.server.projection.Projection;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -43,8 +44,15 @@ public final class TxProjection
 
     private final List<Message> receivedEvents = newLinkedList();
 
-    public TxProjection(Id id) {
+    private final boolean isNullType;
+
+    public TxProjection(Id id, boolean isNullType) {
         super(id);
+        this.isNullType = isNullType;
+    }
+
+    public TxProjection(Id id) {
+        this(id, false);
     }
 
     @Subscribe
@@ -83,7 +91,10 @@ public final class TxProjection
     }
 
     @Override
-    public ProjectionType getType() {
+    public @Nullable ProjectionType getType() {
+        if (isNullType) {
+            return null;
+        }
         return VERY_USEFUL;
     }
 }

@@ -73,11 +73,31 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      *
      * @param repository
      *         the repository of the entity under transaction
+     * @param id
+     *         the entity ID
      */
-    public static <I> TransactionListener<I> newInstance(Repository<I, ?> repository, I id) {
+    public static <I> EntityLifecycleMonitor<I> newInstance(Repository<I, ?> repository, I id) {
         checkNotNull(repository);
         checkNotNull(id);
         return new EntityLifecycleMonitor<>(repository, id);
+    }
+
+    /**
+     * Creates a new instance with a single {@linkplain #acknowledgedMessages acknowledged} message.
+     *
+     * @param repository
+     *         the repository of the entity under transaction
+     * @param id
+     *         the entity ID
+     * @param message
+     *         the artificially injected acknowledged message
+     */
+    static <I> EntityLifecycleMonitor<I>
+    withAcknowledgedMessage(Repository<I, ?> repository, I id, Signal<?, ?, ?> message) {
+        EntityLifecycleMonitor<I> monitor = newInstance(repository, id);
+        monitor.lastMessage = message;
+        monitor.acknowledgedMessages.add(message.messageId());
+        return monitor;
     }
 
     /**

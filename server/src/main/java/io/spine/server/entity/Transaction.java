@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.annotation.Internal;
@@ -479,16 +479,21 @@ public abstract class Transaction<I,
      * getter to the entity state.
      *
      * <p>The enum-typed columns require an additional conversion as the
-     * {@link Message.Builder#setField(Descriptors.FieldDescriptor, Object)} method should receive
+     * {@link Message.Builder#setField(FieldDescriptor, Object)} method should receive
      * a {@link com.google.protobuf.Descriptors.EnumValueDescriptor EnumValueDescriptor} instance
      * by the Protobuf rules.
      */
     private void propagateValue(InterfaceBasedColumn column, Message.Builder entityState) {
         Object value = column.valueIn(entity);
+        FieldDescriptor fieldDescriptor = column.protoField()
+                                                .descriptor();
+        if (value == null) {
+            value = fieldDescriptor.getDefaultValue();
+        }
         if (value instanceof ProtocolMessageEnum) {
             value = ((ProtocolMessageEnum) value).getValueDescriptor();
         }
-        entityState.setField(column.protoField().descriptor(), value);
+        entityState.setField(fieldDescriptor, value);
     }
 
     /**

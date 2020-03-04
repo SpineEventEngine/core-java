@@ -21,17 +21,22 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
+import io.spine.client.Targets;
+import io.spine.core.Event;
+import io.spine.core.Signal;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -42,17 +47,22 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterators.transform;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkValid;
 
@@ -69,6 +79,7 @@ import static io.spine.validate.Validate.checkValid;
  * @param <S>
  *         the type of entity state messages
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends EntityState>
         extends Repository<I, E> {
 
@@ -119,6 +130,92 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         Iterator<E> allEntities = loadAll(ResponseFormat.getDefaultInstance());
         Iterator<E> result = Iterators.filter(allEntities, filter::test);
         return result;
+    }
+
+    /**
+     * Applies a given {@link Migration} to an entity with the given ID.
+     *
+     * <p>The operation is performed in three steps:
+     * <ol>
+     *     <li>Load an entity by the given ID.
+     *     <li>Transform it through the migration operation.
+     *     <li>Store the entity back to the repository or delete it depending on the migration
+     *         configuration.
+     * </ol>
+     *
+     * <p>This operation is only supported for entities that are
+     * {@linkplain TransactionalEntity transactional}.
+     *
+     * @throws IllegalArgumentException
+     *         if the entity with the given ID is not found in the repository
+     * @throws IllegalStateException
+     *         if the repository manages a non-transactional entity type
+     *
+     * @see Migration
+     * @see #applyMigration(Set, Migration) the batch version of the method
+     */
+    @SuppressWarnings("unchecked") // Checked at runtime.
+    @Experimental
+    public final <T extends TransactionalEntity<I, S, ?>>
+    void applyMigration(I id, Migration<I, T, S> migration) {
+        checkNotNull(id);
+        checkNotNull(migration);
+        checkEntityIsTransactional();
+
+        E entity = findOrThrow(id);
+        migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
+        if (migration.physicallyRemoveRecord()) {
+            delete(id, migration);
+        } else {
+            store(entity);
+        }
+        migration.finishCurrentOperation();
+    }
+
+    /**
+     * Applies a {@link Migration} to several entities in batch.
+     *
+     * <p>The operation is performed in three steps:
+     * <ol>
+     *     <li>Load entities by the given IDs.
+     *     <li>Transform each entity through the migration operation.
+     *     <li>Store the entities which are not configured to be deleted by the {@link Migration}
+     *         back to the repository.
+     * </ol>
+     *
+     * <p>This operation is only supported for entities that are
+     * {@linkplain TransactionalEntity transactional}.
+     *
+     * @throws IllegalStateException
+     *         if the repository manages a non-transactional entity type
+     *
+     * @see Migration
+     */
+    @SuppressWarnings("unchecked") // Checked at runtime.
+    @Experimental
+    public final <T extends TransactionalEntity<I, S, ?>>
+    void applyMigration(Set<I> ids, Migration<I, T, S> migration) {
+        checkNotNull(ids);
+        checkNotNull(migration);
+        checkEntityIsTransactional();
+
+        TargetFilters filters = Targets.someOf(entityModelClass().stateClass(), ids)
+                                       .getFilters();
+        Iterator<E> entities = find(filters, ResponseFormat.getDefaultInstance());
+
+        Deque<E> toStore = newLinkedList();
+        while (entities.hasNext()) {
+            E entity = entities.next();
+            migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
+            if (migration.physicallyRemoveRecord()) {
+                I id = entity.id();
+                delete(id, migration);
+            } else {
+                toStore.add(entity);
+            }
+            migration.finishCurrentOperation();
+        }
+        store(toStore);
     }
 
     @Override
@@ -327,6 +424,49 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return records;
     }
 
+    private E findOrThrow(I id) {
+        return find(id).orElseThrow(() -> newIllegalArgumentException(
+                "An entity with ID `%s` is not found in the repository.", id
+        ));
+    }
+
+    /**
+     * Removes an entity record with a passed ID from the storage.
+     */
+    private boolean delete(I id) {
+        boolean deleted = recordStorage().delete(id);
+        return deleted;
+    }
+
+    /**
+     * Removes an entity record from the storage and posts a corresponding system event.
+     *
+     * @param id
+     *         the entity ID
+     * @param deletionCause
+     *         the {@code Signal} which caused the deletion
+     */
+    private boolean deleteAndPostEvent(I id, Signal<?, ?, ?> deletionCause) {
+        boolean deleted = delete(id);
+        if (deleted) {
+            lifecycleOf(id).onRemovedFromStorage(ImmutableList.of(deletionCause.messageId()));
+        }
+        return deleted;
+    }
+
+    /**
+     * Deletes an entity record as a result of the {@link Migration} operation.
+     */
+    private void delete(I id, Migration<I, ?, S> migration) {
+        Optional<Event> event = migration.systemEvent();
+        boolean deleted = event.map(value -> deleteAndPostEvent(id, value))
+                               .orElseGet(() -> delete(id));
+        if (!deleted) {
+            _warn().log("Could not delete an entity record of type `%s` with ID `%s`.",
+                        entityStateType(), id);
+        }
+    }
+
     /**
      * Converts the passed entity into the record.
      */
@@ -348,6 +488,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                                      .convert(record);
         checkNotNull(result);
         return result;
+    }
+
+    private void checkEntityIsTransactional() {
+        checkState(TransactionalEntity.class.isAssignableFrom(entityClass()),
+                   "`%s` is not a transactional entity type. The requested operation is only " +
+                           "supported for transactional entity types.");
     }
 
     /**
@@ -372,7 +518,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             Any idAsAny = input.getId();
 
             TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-            Class messageClass = typeUrl.toJavaClass();
+            Class<?> messageClass = typeUrl.toJavaClass();
             checkIdClass(messageClass);
 
             Message idAsMessage = unpack(idAsAny);
@@ -383,7 +529,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return id;
         }
 
-        private void checkIdClass(Class messageClass) {
+        private void checkIdClass(Class<?> messageClass) {
             boolean classIsSame = expectedIdClass.equals(messageClass);
             if (!classIsSame) {
                 throw newIllegalStateException(

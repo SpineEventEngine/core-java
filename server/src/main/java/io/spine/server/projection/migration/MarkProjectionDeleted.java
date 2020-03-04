@@ -18,37 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.projection.migration;
 
-import com.google.protobuf.Timestamp;
+import io.spine.annotation.Experimental;
+import io.spine.base.EntityState;
+import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.Migration;
 import io.spine.server.projection.Projection;
-import io.spine.test.entity.TaskView;
-import io.spine.test.entity.TaskViewId;
-import io.spine.test.entity.TaskViewWithColumns;
+import io.spine.server.projection.ProjectionMigration;
 
-import static io.spine.test.entity.TaskView.Status.CREATED;
-
-public final class TaskViewProjection
-        extends Projection<TaskViewId, TaskView, TaskView.Builder>
-        implements TaskViewWithColumns {
-
-    @Override
-    public String getName() {
-        return "some-name";
-    }
-
-    @Override
-    public int getEstimateInDays() {
-        return 42;
-    }
+/**
+ * A migration operation that marks a {@link Projection} as {@link Entity#isDeleted() deleted}.
+ *
+ * <p>When applied to an entity, it will modify the {@code deleted} flag of a corresponding
+ * storage record to be {@code true}.
+ *
+ * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
+ */
+@Experimental
+public final class MarkProjectionDeleted<I,
+                                         P extends Projection<I, S, B>,
+                                         S extends EntityState,
+                                         B extends ValidatingBuilder<S>>
+        extends ProjectionMigration<I, P, S, B> {
 
     @Override
-    public TaskView.Status getStatus() {
-        return CREATED;
-    }
-
-    @Override
-    public Timestamp getDueDate() {
-        return state().getDueDate();
+    public S apply(S s) {
+        markDeleted();
+        return s;
     }
 }

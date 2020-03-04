@@ -43,12 +43,14 @@ import io.spine.type.TypeUrl;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.entity.FieldMasks.applyMask;
+import static io.spine.system.server.event.EntityDeleted.DeletionCase.MARKED_AS_DELETED;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -93,6 +95,8 @@ public final class MirrorProjection
 
     @Subscribe
     void on(EntityDeleted event) {
+        checkState(event.getDeletionCase() == MARKED_AS_DELETED,
+                   "The aggregate records shouldn't be physically deleted from the storage.");
         Mirror.Builder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()

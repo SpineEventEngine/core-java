@@ -18,26 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.server.procman.migration;
 
-import io.spine.base.EventMessage;
-import io.spine.core.Event;
-import io.spine.core.Origin;
+import io.spine.annotation.Experimental;
+import io.spine.base.EntityState;
+import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.Migration;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerMigration;
 
 /**
- * An implementation of {@link SystemWriteSide} which never performs an operation.
+ * A migration operation that marks a {@link ProcessManager} as {@link Entity#isDeleted() deleted}.
  *
- * <p>All the methods inherited from {@link SystemWriteSide} exit without any action or exception.
+ * <p>When applied to an entity, it will modify the {@code deleted} flag of a corresponding
+ * storage record to be {@code true}.
  *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
+ * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
-public enum NoOpSystemWriteSide implements SystemWriteSide {
-
-    INSTANCE;
+@Experimental
+public final class MarkPmDeleted<I,
+                                 P extends ProcessManager<I, S, B>,
+                                 S extends EntityState,
+                                 B extends ValidatingBuilder<S>>
+        extends ProcessManagerMigration<I, P, S, B> {
 
     @Override
-    public Event postEvent(EventMessage systemEvent, Origin origin) {
-        return Event.getDefaultInstance();
+    public S apply(S s) {
+        markDeleted();
+        return s;
     }
 }
