@@ -27,6 +27,7 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.logging.Logging;
 import io.spine.system.server.event.MigrationApplied;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -155,6 +156,16 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     }
 
     /**
+     * Returns the {@link MigrationApplied} event instance associated with this migration.
+     *
+     * <p>If system events posting is disabled, returns an empty {@code Optional}.
+     */
+    @Internal
+    final Optional<Event> systemEvent() {
+        return Optional.ofNullable(currentOperation().systemEvent());
+    }
+
+    /**
      * Releases the {@linkplain #currentOperation currently performed operation}.
      *
      * <p>This method is used by Spine routines to reset the {@code Migration} instance passed to
@@ -199,7 +210,9 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
             warnOnNoSystemEventsPosted();
             return EntityLifecycleMonitor.newInstance(repository, id);
         }
-        return EntityLifecycleMonitor.withAcknowledgedMessage(repository, id, event.get());
+        Event migrationApplied = event.get();
+        currentOperation().systemEvent = migrationApplied;
+        return EntityLifecycleMonitor.withAcknowledgedMessage(repository, id, migrationApplied);
     }
 
     private void warnOnNoSystemEventsPosted() {
@@ -226,6 +239,8 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
 
         private final E entity;
         private final RecordBasedRepository<I, E, S> repository;
+
+        private @MonotonicNonNull Event systemEvent;
 
         private Operation(E entity, RecordBasedRepository<I, E, S> repository) {
             this.entity = entity;
@@ -277,6 +292,10 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
 
         private boolean physicallyRemoveRecord() {
             return physicallyRemoveRecord;
+        }
+
+        private Event systemEvent() {
+            return systemEvent;
         }
     }
 }

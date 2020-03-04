@@ -149,6 +149,7 @@ public final class MirrorRepositoryTestEnv {
                 .setEntity(historyId)
                 .setWhen(currentTime())
                 .addSignalId(cause())
+                .setMarkedAsDeleted(true)
                 .vBuild();
         return event(deleted);
     }

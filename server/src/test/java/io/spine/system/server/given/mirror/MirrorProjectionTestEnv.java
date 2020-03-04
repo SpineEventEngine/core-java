@@ -94,6 +94,7 @@ public final class MirrorProjectionTestEnv {
                 .setWhen(currentTime())
                 .addSignalId(cause())
                 .setVersion(VERSION)
+                .setMarkedAsDeleted(true)
                 .build();
         return event;
     }

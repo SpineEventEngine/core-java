@@ -186,7 +186,7 @@ message EntityArchived {
     core.Version version = 4;
 }
 
-// An entity was marked as deleted.
+// An entity was either marked as deleted or had its record physically removed from the storage.
 message EntityDeleted {
     option (is).java_type = "EntityLifecycleEvent";
 
@@ -201,6 +201,15 @@ message EntityDeleted {
 
     // The version received by the entity upon deletion.
     core.Version version = 4;
+
+    oneof deletion {
+
+        // The entity was marked as deleted.
+        bool marked_as_deleted = 5;
+
+        // The entity record was physically removed from the storage.
+        bool removed_from_storage = 6;
+    }
 }
 
 // An entity was marked as NOT archived.

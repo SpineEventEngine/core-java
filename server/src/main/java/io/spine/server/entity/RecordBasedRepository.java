@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
@@ -34,6 +35,8 @@ import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
+import io.spine.core.Event;
+import io.spine.core.Signal;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -76,6 +79,7 @@ import static io.spine.validate.Validate.checkValid;
  * @param <S>
  *         the type of entity state messages
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends EntityState>
         extends Repository<I, E> {
 
@@ -161,7 +165,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         E entity = findOrThrow(id);
         migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
         if (migration.physicallyRemoveRecord()) {
-            delete(id);
+            delete(id, migration);
         } else {
             store(entity);
         }
@@ -204,7 +208,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             E entity = entities.next();
             migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
             if (migration.physicallyRemoveRecord()) {
-                delete(entity.id());
+                I id = entity.id();
+                delete(id, migration);
             } else {
                 toStore.add(entity);
             }
@@ -425,8 +430,37 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         ));
     }
 
-    private void delete(I id) {
+    /**
+     * Remove an entity record with a passed ID from the storage.
+     */
+    private boolean delete(I id) {
         boolean deleted = recordStorage().delete(id);
+        return deleted;
+    }
+
+    /**
+     * Removes an entity record from the storage and posts a corresponding system event.
+     *
+     * @param id
+     *         the entity ID
+     * @param deletionCause
+     *         the {@code Signal} which caused the deletion
+     */
+    private boolean deleteAndPostEvent(I id, Signal<?, ?, ?> deletionCause) {
+        boolean deleted = delete(id);
+        if (deleted) {
+            lifecycleOf(id).onRemovedFromStorage(ImmutableList.of(deletionCause.messageId()));
+        }
+        return deleted;
+    }
+
+    /**
+     * Deletes an entity record as a result of the {@link Migration} operation.
+     */
+    private void delete(I id, Migration<I, ?, S> migration) {
+        Optional<Event> event = migration.systemEvent();
+        boolean deleted = event.map(value -> deleteAndPostEvent(id, value))
+                               .orElseGet(() -> delete(id));
         if (!deleted) {
             _warn().log("Could not delete an entity record of type `%s` with ID `%s`.",
                         entityStateType(), id);
@@ -484,7 +518,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             Any idAsAny = input.getId();
 
             TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-            Class messageClass = typeUrl.toJavaClass();
+            Class<?> messageClass = typeUrl.toJavaClass();
             checkIdClass(messageClass);
 
             Message idAsMessage = unpack(idAsAny);
@@ -495,7 +529,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return id;
         }
 
-        private void checkIdClass(Class messageClass) {
+        private void checkIdClass(Class<?> messageClass) {
             boolean classIsSame = expectedIdClass.equals(messageClass);
             if (!classIsSame) {
                 throw newIllegalStateException(

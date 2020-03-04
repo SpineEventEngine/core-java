@@ -319,6 +319,23 @@ public class EntityLifecycle {
     }
 
     /**
+     * Posts the {@link EntityDeleted} event signaling that the entity record was removed from the
+     * storage.
+     *
+     * @param signalIds
+     *         the IDs of handled messages that caused the deletion
+     */
+    public final void onRemovedFromStorage(Iterable<MessageId> signalIds) {
+        EntityDeleted event = EntityDeleted
+                .newBuilder()
+                .setEntity(entityId)
+                .addAllSignalId(ImmutableList.copyOf(signalIds))
+                .setRemovedFromStorage(true)
+                .vBuild();
+        postEvent(event);
+    }
+
+    /**
      * Posts the {@link MigrationApplied} event.
      *
      * @return the event or an empty {@code Optional} if the posting was blocked by the
@@ -497,6 +514,7 @@ public class EntityLifecycle {
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
+                    .setMarkedAsDeleted(true)
                     .vBuild();
             postEvent(event);
         }
