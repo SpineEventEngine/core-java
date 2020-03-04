@@ -431,7 +431,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Remove an entity record with a passed ID from the storage.
+     * Removes an entity record with a passed ID from the storage.
      */
     private boolean delete(I id) {
         boolean deleted = recordStorage().delete(id);
