@@ -14,7 +14,9 @@ io.spine.server.event.store
 io.spine.server.integration
 io.spine.server.log
 io.spine.server.procman
+io.spine.server.procman.migration
 io.spine.server.projection
+io.spine.server.projection.migration
 io.spine.server.route
 io.spine.server.stand
 io.spine.server.storage
