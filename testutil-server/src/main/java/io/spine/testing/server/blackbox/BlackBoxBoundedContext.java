@@ -40,6 +40,7 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
@@ -71,6 +72,8 @@ import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.testing.server.blackbox.verify.subscription.ToProtoSubjects;
 import io.spine.testing.server.entity.EntitySubject;
+import io.spine.time.ZoneId;
+import io.spine.time.ZoneOffset;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -90,6 +93,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
+import static io.spine.testing.server.blackbox.Actor.defaultActor;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
@@ -162,6 +166,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
 
     private final Map<Class<? extends EntityState>, Repository<?, ?>> repositories;
 
+    private Actor actor;
+
     @SuppressWarnings("ThisEscapedInObjectConstruction") // to inject self as event dispatcher.
     protected BlackBoxBoundedContext(boolean multitenant,
                                      EventEnricher enricher,
@@ -185,6 +191,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         this.repositories = newHashMap();
         this.context.registerEventDispatcher(this);
         this.context.registerEventDispatcher(DiagnosticLog.instance());
+        this.actor = defaultActor();
     }
 
     /**
@@ -321,6 +328,38 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /** Obtains the name of this bounded context. */
     public BoundedContextName name() {
         return context.name();
+    }
+
+    /**
+     * Sets the given {@link UserId} as the actor ID for the requests produced by this context.
+     */
+    public final T withActor(UserId user) {
+        this.actor = Actor.from(user);
+        return thisRef();
+    }
+
+    /**
+     * Sets the given time zone parameters for the actor requests produced by this context.
+     */
+    public final T in(ZoneId zoneId, ZoneOffset zoneOffset) {
+        this.actor = Actor.from(zoneId, zoneOffset);
+        return thisRef();
+    }
+
+    /**
+     * Sets the given actor ID and time zone parameters for the actor requests produced by this
+     * context.
+     */
+    public final T withActorIn(UserId userId, ZoneId zoneId, ZoneOffset zoneOffset) {
+        this.actor = Actor.from(userId, zoneId, zoneOffset);
+        return thisRef();
+    }
+
+    /**
+     * Obtains the current {@link Actor}.
+     */
+    protected final Actor actor() {
+        return this.actor;
     }
 
     /**

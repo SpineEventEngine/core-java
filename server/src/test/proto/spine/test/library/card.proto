@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package spine.test.server.log;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.log";
+option java_outer_classname = "LibraryProto";
+option java_multiple_files = true;
+
+import "spine/people/person_name.proto";
+import "spine/time/time.proto";
+import "spine/core/user_id.proto";
+
+message Isbn {
+    string value = 1 [(required) = true];
+}
+
+message Book {
+
+    Isbn isbn = 1;
+    string title = 2;
+    repeated people.PersonName author = 3;
+    int32 year_when_published = 4;
+    string publisher = 5;
+}
+
+message LibraryCardId {
+
+    core.UserId reader = 1 [(required) = true];
+}
+
+message LibraryCard {
+    option (entity).kind = AGGREGATE;
+
+    LibraryCardId id = 1;
+
+    repeated Book book = 2;
+}

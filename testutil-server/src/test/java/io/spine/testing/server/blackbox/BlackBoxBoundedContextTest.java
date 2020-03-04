@@ -29,6 +29,7 @@ import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
 import io.spine.client.TopicFactory;
+import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
@@ -41,10 +42,12 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.BlackBoxId;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.VerifyingCounter;
+import io.spine.testing.server.blackbox.command.BbAssignSelf;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbFinalizeProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
@@ -67,6 +70,10 @@ import io.spine.testing.server.blackbox.given.BbTaskViewProjection;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
+import io.spine.time.ZoneId;
+import io.spine.time.ZoneIds;
+import io.spine.time.ZoneOffset;
+import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,10 +86,12 @@ import java.util.Set;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
 import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
+import static io.spine.testing.server.blackbox.given.Given.assignSelf;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
@@ -701,6 +710,86 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             assertCommandMessages.isNotEmpty();
             assertCommandMessages.hasSize(context.commands()
                                                  .size());
+        }
+    }
+
+    @Nested
+    @DisplayName("produce requests with the given actor")
+    class WithGivenActor {
+
+        @Test
+        @DisplayName("ID")
+        void id() {
+            UserId actor = GivenUserId.of("my-actor");
+            BbCreateProject createProject = createProject();
+            BbProjectId id = createProject.getProjectId();
+            BbAssignSelf assignSelf = assignSelf(id);
+            context.withActor(actor)
+                   .receivesCommands(createProject, assignSelf)
+                   .assertEntityWithState(BbProject.class, id)
+                   .hasStateThat()
+                   .comparingExpectedFieldsOnly()
+                   .isEqualTo(BbProject
+                                      .newBuilder()
+                                      .setId(id)
+                                      .addAssignee(actor)
+                                      .buildPartial());
+        }
+
+        @Test
+        @DisplayName("time zone")
+        void timeZone() {
+            UserId actor = GivenUserId.of("my-other-actor");
+            BbCreateProject createProject = createProject();
+            BbProjectId id = createProject.getProjectId();
+            ZoneId zoneId = ZoneIds.of("UTC+1");
+            ZoneOffset zoneOffset = ZoneOffsets.ofHours(1);
+            context.withActorIn(actor, zoneId, zoneOffset)
+                   .receivesCommand(createProject)
+                   .assertEntityWithState(BbProject.class, id)
+                   .exists();
+            EventSubject events = context.assertEvents()
+                                         .withType(BbProjectCreated.class);
+            events.hasSize(1);
+            ActorContext context = events.actual()
+                                         .get(0)
+                                         .context()
+                                         .actorContext();
+            assertThat(context)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(ActorContext
+                                       .newBuilder()
+                                       .setActor(actor)
+                                       .setZoneId(zoneId)
+                                       .setZoneOffset(zoneOffset)
+                                       .buildPartial());
+        }
+
+        @Test
+        @DisplayName("ID and time zone")
+        void idAndTimeZone() {
+            BbCreateProject createProject = createProject();
+            BbProjectId id = createProject.getProjectId();
+            ZoneId zoneId = ZoneIds.of("UTC-1");
+            ZoneOffset zoneOffset = ZoneOffsets.ofHours(-1);
+            context.in(zoneId, zoneOffset)
+                   .receivesCommand(createProject)
+                   .assertEntityWithState(BbProject.class, id)
+                   .exists();
+            EventSubject events = context.assertEvents()
+                                         .withType(BbProjectCreated.class);
+            events.hasSize(1);
+            ActorContext context = events.actual()
+                                         .get(0)
+                                         .context()
+                                         .actorContext();
+            assertThat(context)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(ActorContext
+                                       .newBuilder()
+                                       .setZoneId(zoneId)
+                                       .setZoneOffset(zoneOffset)
+                                       .buildPartial());
         }
     }
 }

@@ -66,7 +66,7 @@ public final class MultitenantBlackBoxContext
 
     @Override
     protected TestActorRequestFactory requestFactory() {
-        return new TestActorRequestFactory(MultitenantBlackBoxContext.class, tenantId());
+        return actor().requestsFor(tenantId());
     }
 
     @Override

@@ -22,6 +22,8 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -34,17 +36,23 @@ import io.spine.core.Versions;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
+import io.spine.server.log.HandlerLifecycle;
+import io.spine.server.log.HandlerLog;
+import io.spine.server.model.HandlerMethod;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.logging.Logging.loggerFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkValid;
 
@@ -59,9 +67,9 @@ import static io.spine.validate.Validate.checkValid;
 @SuppressWarnings({
         "SynchronizeOnThis" /* This class uses double-check idiom for lazy init of some
             fields. See Effective Java 2nd Ed. Item #71. */,
-        "AbstractClassWithoutAbstractMethods",
         "ClassWithTooManyMethods"})
-public abstract class AbstractEntity<I, S extends EntityState> implements Entity<I, S> {
+public abstract class AbstractEntity<I, S extends EntityState>
+        implements Entity<I, S>, HandlerLifecycle {
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -107,6 +115,8 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
      * {@linkplain io.spine.server.entity.Repository#store(io.spine.server.entity.Entity) storing}.
      */
     private volatile boolean lifecycleFlagsChanged;
+
+    private @Nullable HandlerLog handlerLog;
 
     /**
      * Creates a new instance with the zero version and cleared lifecycle flags.
@@ -506,6 +516,42 @@ public abstract class AbstractEntity<I, S extends EntityState> implements Entity
      */
     public Timestamp whenModified() {
         return version.getTimestamp();
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void beforeInvoke(HandlerMethod<?, ?, ?, ?> method) {
+        checkNotNull(method);
+        FluentLogger logger = loggerFor(getClass());
+        this.handlerLog = new HandlerLog(logger, method);
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void afterInvoke(HandlerMethod<?, ?, ?, ?> method) {
+        this.handlerLog = null;
+    }
+
+    /**
+     * Obtains a new fluent logging API at the given level.
+     *
+     * <p>If called from within a handler method, the resulting log will reference the handler
+     * method as the log site. Otherwise, equivalent to
+     * {@code Logging.loggerFor(getClass()).at(logLevel)}.
+     *
+     * @param logLevel
+     *         the log level
+     * @return new fluent logging API
+     * @apiNote This method mirrors the declaration of
+     *         {@link io.spine.server.log.LoggingEntity#at(Level)}. It is recommended to implement
+     *         the {@link io.spine.server.log.LoggingEntity} interface and use the underscore
+     *         logging methods instead of calling {@code at(..)} directly.
+     * @see io.spine.server.log.LoggingEntity
+     */
+    public final FluentLogger.Api at(Level logLevel) {
+        return handlerLog != null
+               ? handlerLog.at(logLevel)
+               : loggerFor(getClass()).at(logLevel);
     }
 
     @Override

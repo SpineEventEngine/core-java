@@ -18,38 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import io.spine.core.Command;
-import io.spine.core.Event;
-import io.spine.server.event.EventEnricher;
-import io.spine.testing.client.TestActorRequestFactory;
-
 /**
- * Test fixture for single-tenant Bounded Contexts.
+ * Contains utilities which work with server-side logs.
  */
-@VisibleForTesting
-public final class SingleTenantBlackBoxContext
-        extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
 
-    SingleTenantBlackBoxContext(String name, EventEnricher enricher) {
-        super(false, enricher, name);
-    }
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.log;
 
-    @Override
-    protected ImmutableList<Command> select(CommandCollector collector) {
-        return collector.all();
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Override
-    protected ImmutableList<Event> select(EventCollector collector) {
-        return collector.all();
-    }
-
-    @Override
-    protected TestActorRequestFactory requestFactory() {
-        return actor().requests();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

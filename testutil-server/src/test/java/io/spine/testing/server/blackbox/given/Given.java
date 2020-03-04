@@ -30,6 +30,7 @@ import io.spine.testing.server.blackbox.BbReportId;
 import io.spine.testing.server.blackbox.BbTask;
 import io.spine.testing.server.blackbox.command.BbAddTask;
 import io.spine.testing.server.blackbox.command.BbAssignProject;
+import io.spine.testing.server.blackbox.command.BbAssignSelf;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
 import io.spine.testing.server.blackbox.command.BbFinalizeProject;
@@ -124,6 +125,13 @@ public class Given {
 
     public static BbCreateProject createProject(BbProjectId id) {
         return BbCreateProject
+                .newBuilder()
+                .setProjectId(id)
+                .build();
+    }
+
+    public static BbAssignSelf assignSelf(BbProjectId id) {
+        return BbAssignSelf
                 .newBuilder()
                 .setProjectId(id)
                 .build();
