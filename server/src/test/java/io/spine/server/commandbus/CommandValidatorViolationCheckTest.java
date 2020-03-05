@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import com.google.common.truth.Correspondence;
+import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import io.spine.base.Time;
 import io.spine.core.Command;
@@ -45,6 +46,12 @@ import static io.spine.testing.core.given.GivenCommandContext.withRandomActor;
 
 @DisplayName("CommandValidator violation check should")
 class CommandValidatorViolationCheckTest {
+
+    private static final Correspondence<@NonNull ConstraintViolation, @NonNull String>
+            messageFormatContains = Correspondence.from(
+                    (actual, expected) -> actual.getMsgFormat().contains(expected),
+                    "has message format"
+            );
 
     @Test
     @DisplayName("validate command and return empty violations list if command is valid")
@@ -84,7 +91,8 @@ class CommandValidatorViolationCheckTest {
 
         List<ConstraintViolation> violations = inspectCommand(commandWithEmptyMessage);
 
-        assertThat(violations)
+        IterableSubject assertViolations = assertThat(violations);
+        assertViolations
                 .hasSize(2);
     }
 
@@ -99,7 +107,6 @@ class CommandValidatorViolationCheckTest {
                 .build();
 
         List<ConstraintViolation> violations = inspectCommand(commandWithoutContext);
-
         assertThat(violations)
                 .hasSize(1);
     }
@@ -110,12 +117,6 @@ class CommandValidatorViolationCheckTest {
         TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
         Command emptyCommand = factory.createCommand(CmdEmpty.getDefaultInstance());
         List<ConstraintViolation> violations = inspectCommand(emptyCommand);
-
-        Correspondence<@NonNull ConstraintViolation, @NonNull String> messageFormatContains =
-                Correspondence.from(
-                        (actual, expected) -> actual.getMsgFormat().contains(expected),
-                        "has message format"
-                );
         assertThat(violations)
                 .comparingElementsUsing(messageFormatContains)
                 .doesNotContain("command target ID");
