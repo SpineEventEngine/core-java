@@ -30,6 +30,7 @@ import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.command.CmdEmpty;
+import io.spine.test.commandbus.command.CmdBusCreateLabels;
 import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ConstraintViolation;
@@ -120,6 +121,22 @@ class CommandValidatorViolationCheckTest {
         assertThat(violations)
                 .comparingElementsUsing(messageFormatContains)
                 .doesNotContain("command target ID");
+    }
+
+    @Test
+    @DisplayName("allow messages without an ID as a first field")
+    void noId() {
+        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
+        CmdBusCreateLabels msg = CmdBusCreateLabels
+                .newBuilder()
+                .addLabel("red")
+                .addLabel("green")
+                .addLabel("blue")
+                .vBuild();
+        Command command = factory.createCommand(msg);
+        List<ConstraintViolation> violations = inspectCommand(command);
+        assertThat(violations)
+                .isEmpty();
     }
 
     private static List<ConstraintViolation> inspectCommand(Command command) {
