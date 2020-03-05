@@ -26,11 +26,15 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityColumn;
+import io.spine.base.EntityStateField;
+import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.code.proto.FieldName;
 import io.spine.core.Event;
+import io.spine.core.EventContextField;
 import io.spine.core.Version;
 
 import java.util.Collection;
@@ -82,6 +86,7 @@ import static java.util.Arrays.stream;
  * @see EntityStateFilter
  * @see EventFilter
  */
+@SuppressWarnings("ClassWithTooManyMethods") // A lot of method overloads for filter creation.
 public final class Filters {
 
     /** Prevents this utility class instantiation. */
@@ -95,7 +100,7 @@ public final class Filters {
      *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
-     * @return new instance of Filter
+     * @return a new instance of {@code Filter}
      */
     public static Filter eq(String fieldPath, Object value) {
         checkNotNull(fieldPath);
@@ -104,21 +109,155 @@ public final class Filters {
     }
 
     /**
+     * Creates a new equality {@link Filter}.
+     *
+     * @param column
+     *         the entity column to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter eq(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column.name(), value, EQUAL);
+    }
+
+    /**
+     * Creates a new equality {@link Filter}.
+     *
+     * @param field
+     *         the entity state field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter eq(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, EQUAL);
+    }
+
+    /**
+     * Creates a new equality {@link Filter}.
+     *
+     * @param field
+     *         the event message field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter eq(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, EQUAL);
+    }
+
+    /**
+     * Creates a new equality {@link Filter}.
+     *
+     * <p>The field path in the filter will be automatically prepended with {@code "context."} to
+     * enable filtering by {@linkplain io.spine.core.EventContext event context}.
+     *
+     * @param field
+     *         the event context field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter eq(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createContextFilter(field.getField(), value, EQUAL);
+    }
+
+    /**
      * Creates a new "greater than" {@link Filter}.
      *
-     * <p>For the supported types description see <a href="#types">Comparison types section</a>.
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
      *
      * @param fieldPath
      *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
-     * @return new instance of Filter
+     * @return a new instance of {@code Filter}
      */
     public static Filter gt(String fieldPath, Object value) {
         checkNotNull(fieldPath);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(fieldPath, value, GREATER_THAN);
+    }
+
+    /**
+     * Creates a new "greater than" {@link Filter}.
+     *
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
+     *
+     * @param column
+     *         the entity column to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter gt(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column.name(), value, GREATER_THAN);
+    }
+
+    /**
+     * Creates a new "greater than" {@link Filter}.
+     *
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
+     *
+     * @param field
+     *         the entity state field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter gt(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, GREATER_THAN);
+    }
+
+    /**
+     * Creates a new "greater than" {@link Filter}.
+     *
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
+     *
+     * @param field
+     *         the event message field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter gt(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, GREATER_THAN);
+    }
+
+    /**
+     * Creates a new "greater than" {@link Filter}.
+     *
+     * <p>The field path in the filter will be automatically prepended with {@code "context."} to
+     * enable filtering by {@linkplain io.spine.core.EventContext event context}.
+     *
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
+     *
+     * @param field
+     *         the event context field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter gt(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createContextFilter(field.getField(), value, GREATER_THAN);
     }
 
     /**
@@ -130,13 +269,84 @@ public final class Filters {
      *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
-     * @return new instance of Filter
+     * @return a new instance of {@code Filter}
      */
     public static Filter lt(String fieldPath, Object value) {
         checkNotNull(fieldPath);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(fieldPath, value, LESS_THAN);
+    }
+
+    /**
+     * Creates a new "less than" {@link Filter}.
+     *
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
+     *
+     * @param column
+     *         the entity column to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter lt(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column.name(), value, LESS_THAN);
+    }
+
+    /**
+     * Creates a new "less than" {@link Filter}.
+     *
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
+     *
+     * @param field
+     *         the entity state field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter lt(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, LESS_THAN);
+    }
+
+    /**
+     * Creates a new "less than" {@link Filter}.
+     *
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
+     *
+     * @param field
+     *         the event message field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter lt(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, LESS_THAN);
+    }
+
+    /**
+     * Creates a new "less than" {@link Filter}.
+     *
+     * <p>The field path in the filter will be automatically prepended with {@code "context."} to
+     * enable filtering by {@linkplain io.spine.core.EventContext event context}.
+     *
+     * <p>For the supported types description, see <a href="#types">Comparison types section</a>.
+     *
+     * @param field
+     *         the event context field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter lt(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createContextFilter(field.getField(), value, LESS_THAN);
     }
 
     /**
@@ -148,13 +358,84 @@ public final class Filters {
      *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
-     * @return new instance of Filter
+     * @return a new instance of {@code Filter}
      */
     public static Filter ge(String fieldPath, Object value) {
         checkNotNull(fieldPath);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(fieldPath, value, GREATER_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "greater or equal" {@link Filter}.
+     *
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
+     *
+     * @param column
+     *         the entity column to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter ge(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column.name(), value, GREATER_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "greater or equal" {@link Filter}.
+     *
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
+     *
+     * @param field
+     *         the entity state field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter ge(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, GREATER_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "greater or equal" {@link Filter}.
+     *
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
+     *
+     * @param field
+     *         the event message field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter ge(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, GREATER_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "greater or equal" {@link Filter}.
+     *
+     * <p>The field path in the filter will be automatically prepended with {@code "context."} to
+     * enable filtering by {@linkplain io.spine.core.EventContext event context}.
+     *
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
+     *
+     * @param field
+     *         the event context field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter ge(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createContextFilter(field.getField(), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -166,13 +447,84 @@ public final class Filters {
      *         the field path or the entity column name for entity filters
      * @param value
      *         the requested value
-     * @return new instance of Filter
+     * @return new instance of {@code Filter}
      */
     public static Filter le(String fieldPath, Object value) {
         checkNotNull(fieldPath);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(fieldPath, value, LESS_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "less or equal" {@link Filter}.
+     *
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
+     *
+     * @param column
+     *         the entity column to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter le(EntityColumn column, Object value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        return createFilter(column.name(), value, LESS_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "less or equal" {@link Filter}.
+     *
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
+     *
+     * @param field
+     *         the entity state field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter le(EntityStateField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, LESS_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "less or equal" {@link Filter}.
+     *
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
+     *
+     * @param field
+     *         the event message field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter le(EventMessageField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createFilter(field.getField(), value, LESS_OR_EQUAL);
+    }
+
+    /**
+     * Creates a new "less or equal" {@link Filter}.
+     *
+     * <p>The field path in the filter will be automatically prepended with {@code "context."} to
+     * enable filtering by {@linkplain io.spine.core.EventContext event context}.
+     *
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
+     *
+     * @param field
+     *         the event context field to filter by
+     * @param value
+     *         the requested value
+     * @return a new instance of {@code Filter}
+     */
+    public static Filter le(EventContextField field, Object value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        return createContextFilter(field.getField(), value, LESS_OR_EQUAL);
     }
 
     /**
@@ -317,8 +669,8 @@ public final class Filters {
      * Creates a filter of events which can apply conditions from the passed
      * {@code CompositeFilter} to both event message and its context.
      *
-     * <p>The filter is deemed addressing the event context if the field path specified in it
-     * starts with the {@code "context."} prefix.
+     * <p>The filter is deemed addressing the {@linkplain io.spine.core.EventContext event context}
+     * if the field path specified in it starts with the {@code "context."} prefix.
      */
     @Internal
     public static Predicate<Event> toEventFilter(CompositeFilter filterData) {

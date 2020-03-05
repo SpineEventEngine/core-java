@@ -21,14 +21,22 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EntityColumn;
+import io.spine.base.EntityStateField;
+import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.Filter.Operator;
+import io.spine.core.EventContext;
+import io.spine.core.EventContextField;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.test.client.ClProjectCreated;
+import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityOwner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -59,6 +67,7 @@ import static io.spine.test.client.TestEntityOwner.Role.ADMIN;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -82,6 +91,10 @@ class FiltersTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Filter.class, Filter.getDefaultInstance())
+                .setDefault(EntityColumn.class, TestEntity.Column.firstField())
+                .setDefault(EntityStateField.class, TestEntity.Field.owner())
+                .setDefault(EventMessageField.class, ClProjectCreated.Field.name())
+                .setDefault(EventContextField.class, EventContext.Field.pastMessage())
                 .testAllPublicStaticMethods(Filters.class);
     }
 
@@ -138,6 +151,66 @@ class FiltersTest {
             assertEquals(FIELD, actual);
             assertEquals(pack(REQUESTED_VALUE), filter.getValue());
             assertEquals(operator, filter.getOperator());
+        }
+    }
+
+    @Nested
+    @DisplayName("create filter based on a typed")
+    class CreateFilterByTyped {
+
+        @Test
+        @DisplayName("column")
+        void column() {
+            EntityColumn column = TestEntity.Column.firstField();
+            String value = "expected-filter-value";
+            String expectedPath = column.name()
+                                        .value();
+            checkCreates(eq(column, value), expectedPath, value, EQUAL);
+        }
+
+        @Test
+        @DisplayName("entity state field")
+        void entityStateField() {
+            EntityStateField field = TestEntity.Field.thirdField();
+            int value = 142;
+            String expectedPath = field.getField()
+                                       .toString();
+            checkCreates(gt(field, value), expectedPath, value, GREATER_THAN);
+        }
+
+        @Test
+        @DisplayName("event message field")
+        void eventMessageField() {
+            EventMessageField field = ClProjectCreated.Field.name().value();
+            String value = "expected-project-name";
+            String expectedPath = field.getField()
+                                       .toString();
+            checkCreates(eq(field, value), expectedPath, value, EQUAL);
+        }
+
+        @Test
+        @DisplayName("event context field")
+        void eventContextField() {
+            EventContextField field = EventContext.Field.external();
+            boolean value = true;
+            String expectedPath = format("context.%s", field.getField());
+            checkCreates(eq(field, value), expectedPath, value, EQUAL);
+        }
+
+        private void checkCreates(Filter filter,
+                                  String expectedPath,
+                                  Object expectedValue,
+                                  Operator expectedOperator) {
+            String fieldPath = Field.withPath(filter.getFieldPath())
+                                    .toString();
+            assertThat(fieldPath).isEqualTo(expectedPath);
+
+            Any value = filter.getValue();
+            Any packedExpectedValue = toAny(expectedValue);
+            assertThat(value).isEqualTo(packedExpectedValue);
+
+            Operator operator = filter.getOperator();
+            assertThat(operator).isEqualTo(expectedOperator);
         }
     }
 
