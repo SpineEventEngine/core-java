@@ -91,6 +91,10 @@ class FiltersTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Filter.class, Filter.getDefaultInstance())
+                .setDefault(EntityColumn.class, TestEntity.Column.firstField())
+                .setDefault(EntityStateField.class, TestEntity.Field.owner())
+                .setDefault(EventMessageField.class, ClProjectCreated.Field.name())
+                .setDefault(EventContextField.class, EventContext.Field.pastMessage())
                 .testAllPublicStaticMethods(Filters.class);
     }
 
