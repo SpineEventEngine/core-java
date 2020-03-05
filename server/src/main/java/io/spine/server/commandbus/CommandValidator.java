@@ -24,14 +24,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
-import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.MessageInvalid;
 import io.spine.core.TenantId;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.route.DefaultCommandRoute;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.Validate;
@@ -58,10 +55,6 @@ import static io.spine.server.commandbus.InvalidCommandException.onConstraintVio
  * </ol>
  */
 final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
-
-    /** Default route for validating command message fields. */
-    private static final DefaultCommandRoute<Object> defaultRoute =
-            DefaultCommandRoute.newInstance(Object.class);
 
     private final CommandBus commandBus;
 
@@ -156,7 +149,6 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             validateId();
             validateMessage();
             validateContext();
-            validateTargetId();
             return result.build();
         }
 
@@ -179,19 +171,6 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         private void validateContext() {
             if (isDefault(command.context())) {
                 addViolation("Non-default command context must be set.");
-            }
-        }
-
-        private void validateTargetId() {
-            CommandMessage message = command.message();
-            if (!DefaultCommandRoute.exists(message)) {
-                addViolation("The command message does not have a field with a command target ID.");
-                return;
-            }
-
-            Object target = defaultRoute.apply(message, CommandContext.getDefaultInstance());
-            if (Identifier.isEmpty(target)) {
-                addViolation("Command target ID cannot be empty.");
             }
         }
 

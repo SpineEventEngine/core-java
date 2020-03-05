@@ -77,3 +77,12 @@ message CmdBusSetTaskDescription {
     TaskId task_id = 1;
     string description = 3;
 }
+
+// A command to create multiple labels at once.
+//
+// The client does not know how this command is routed. When constructing a command message,
+// the client simply adds the label names. The server takes care of routing the command.
+//
+message CmdBusCreateLabels {
+    repeated string label = 1 [(required) = true];
+}
