@@ -120,7 +120,7 @@ public final class Filters {
     public static Filter eq(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return QueryFilter.eq(column, value).filter();
+        return createFilter(column.name(), value, EQUAL);
     }
 
     /**
@@ -135,7 +135,7 @@ public final class Filters {
     public static Filter eq(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EntityStateFilter.eq(field, value).filter();
+        return createFilter(field.getField(), value, EQUAL);
     }
 
     /**
@@ -150,7 +150,7 @@ public final class Filters {
     public static Filter eq(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.eq(field, value).filter();
+        return createFilter(field.getField(), value, EQUAL);
     }
 
     /**
@@ -168,7 +168,7 @@ public final class Filters {
     public static Filter eq(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.eq(field, value).filter();
+        return createContextFilter(field.getField(), value, EQUAL);
     }
 
     /**
@@ -203,7 +203,7 @@ public final class Filters {
     public static Filter gt(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return QueryFilter.gt(column, value).filter();
+        return createFilter(column.name(), value, GREATER_THAN);
     }
 
     /**
@@ -220,7 +220,7 @@ public final class Filters {
     public static Filter gt(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EntityStateFilter.gt(field, value).filter();
+        return createFilter(field.getField(), value, GREATER_THAN);
     }
 
     /**
@@ -237,7 +237,7 @@ public final class Filters {
     public static Filter gt(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.gt(field, value).filter();
+        return createFilter(field.getField(), value, GREATER_THAN);
     }
 
     /**
@@ -257,7 +257,7 @@ public final class Filters {
     public static Filter gt(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.gt(field, value).filter();
+        return createContextFilter(field.getField(), value, GREATER_THAN);
     }
 
     /**
@@ -292,7 +292,7 @@ public final class Filters {
     public static Filter lt(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return QueryFilter.lt(column, value).filter();
+        return createFilter(column.name(), value, LESS_THAN);
     }
 
     /**
@@ -309,7 +309,7 @@ public final class Filters {
     public static Filter lt(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EntityStateFilter.lt(field, value).filter();
+        return createFilter(field.getField(), value, LESS_THAN);
     }
 
     /**
@@ -326,7 +326,7 @@ public final class Filters {
     public static Filter lt(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.lt(field, value).filter();
+        return createFilter(field.getField(), value, LESS_THAN);
     }
 
     /**
@@ -346,7 +346,7 @@ public final class Filters {
     public static Filter lt(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.lt(field, value).filter();
+        return createContextFilter(field.getField(), value, LESS_THAN);
     }
 
     /**
@@ -381,7 +381,7 @@ public final class Filters {
     public static Filter ge(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return QueryFilter.ge(column, value).filter();
+        return createFilter(column.name(), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -398,7 +398,7 @@ public final class Filters {
     public static Filter ge(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EntityStateFilter.ge(field, value).filter();
+        return createFilter(field.getField(), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -415,7 +415,7 @@ public final class Filters {
     public static Filter ge(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.ge(field, value).filter();
+        return createFilter(field.getField(), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -435,7 +435,7 @@ public final class Filters {
     public static Filter ge(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.ge(field, value).filter();
+        return createContextFilter(field.getField(), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -470,7 +470,7 @@ public final class Filters {
     public static Filter le(EntityColumn column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return QueryFilter.le(column, value).filter();
+        return createFilter(column.name(), value, LESS_OR_EQUAL);
     }
 
     /**
@@ -487,7 +487,7 @@ public final class Filters {
     public static Filter le(EntityStateField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EntityStateFilter.le(field, value).filter();
+        return createFilter(field.getField(), value, LESS_OR_EQUAL);
     }
 
     /**
@@ -504,7 +504,7 @@ public final class Filters {
     public static Filter le(EventMessageField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.le(field, value).filter();
+        return createFilter(field.getField(), value, LESS_OR_EQUAL);
     }
 
     /**
@@ -524,7 +524,7 @@ public final class Filters {
     public static Filter le(EventContextField field, Object value) {
         checkNotNull(field);
         checkNotNull(value);
-        return EventFilter.le(field, value).filter();
+        return createContextFilter(field.getField(), value, LESS_OR_EQUAL);
     }
 
     /**
