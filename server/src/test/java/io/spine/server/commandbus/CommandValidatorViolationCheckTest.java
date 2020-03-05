@@ -20,6 +20,7 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.truth.Correspondence;
 import com.google.protobuf.Any;
 import io.spine.base.Time;
 import io.spine.core.Command;
@@ -31,6 +32,7 @@ import io.spine.test.command.CmdEmpty;
 import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ConstraintViolation;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -83,7 +85,7 @@ class CommandValidatorViolationCheckTest {
         List<ConstraintViolation> violations = inspectCommand(commandWithEmptyMessage);
 
         assertThat(violations)
-                .hasSize(3);
+                .hasSize(2);
     }
 
     @Test
@@ -103,18 +105,20 @@ class CommandValidatorViolationCheckTest {
     }
 
     @Test
-    @DisplayName("return violation for an empty command message")
+    @DisplayName("allow empty command messages")
     void emptyMessage() {
         TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
         Command emptyCommand = factory.createCommand(CmdEmpty.getDefaultInstance());
         List<ConstraintViolation> violations = inspectCommand(emptyCommand);
 
-        boolean hasViolationOnCommandTargetId = violations
-                .stream()
-                .anyMatch(violation -> violation.getMsgFormat().contains("command target ID"));
-
-        assertThat(hasViolationOnCommandTargetId)
-                .isTrue();
+        Correspondence<@NonNull ConstraintViolation, @NonNull String> messageFormatContains =
+                Correspondence.from(
+                        (actual, expected) -> actual.getMsgFormat().contains(expected),
+                        "has message format"
+                );
+        assertThat(violations)
+                .comparingElementsUsing(messageFormatContains)
+                .doesNotContain("command target ID");
     }
 
     private static List<ConstraintViolation> inspectCommand(Command command) {
