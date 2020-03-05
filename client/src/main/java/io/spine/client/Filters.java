@@ -669,8 +669,8 @@ public final class Filters {
      * Creates a filter of events which can apply conditions from the passed
      * {@code CompositeFilter} to both event message and its context.
      *
-     * <p>The filter is deemed addressing the event context if the field path specified in it
-     * starts with the {@code "context."} prefix.
+     * <p>The filter is deemed addressing the {@linkplain io.spine.core.EventContext event context}
+     * if the field path specified in it starts with the {@code "context."} prefix.
      */
     @Internal
     public static Predicate<Event> toEventFilter(CompositeFilter filterData) {
