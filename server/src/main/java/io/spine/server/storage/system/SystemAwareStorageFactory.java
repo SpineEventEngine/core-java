@@ -30,8 +30,6 @@ import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -89,13 +87,6 @@ public final class SystemAwareStorageFactory implements StorageFactory {
     public <I> RecordStorage<I>
     createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
         return delegate.createRecordStorage(context, entityClass);
-    }
-
-    @Override
-    public <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context,
-                            Class<? extends Projection<I, ?, ?>> projectionClass) {
-        return delegate.createProjectionStorage(context, projectionClass);
     }
 
     @Override

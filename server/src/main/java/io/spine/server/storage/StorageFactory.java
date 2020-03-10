@@ -28,8 +28,6 @@ import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.DefaultEventStore;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
 
 /**
  * A factory for creating storages used by repositories
@@ -65,21 +63,6 @@ public interface StorageFactory extends AutoCloseable {
      */
     <I> RecordStorage<I>
     createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass);
-
-    /**
-     * Creates a new {@link ProjectionStorage}.
-     *
-     * @param <I>
-     *         the type of stream projection IDs
-     * @param context
-     *         specification of the Bounded Context {@code ProjectionRepository} of which
-     *         requests the creation of the storage
-     * @param projectionClass
-     *         the class of {@code Projection}s to be stored
-     */
-    <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context,
-                            Class<? extends Projection<I, ?, ?>> projectionClass);
 
     /**
      * Creates a new {@link InboxStorage}.

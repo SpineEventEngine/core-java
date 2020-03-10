@@ -28,14 +28,11 @@ import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
 /**
  * A factory for in-memory storages.
@@ -67,17 +64,6 @@ public final class InMemoryStorageFactory implements StorageFactory {
         EntityClass<?> modelClass = asEntityClass(entityClass);
         StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
         return new InMemoryRecordStorage<>(storageSpec, entityClass, context.isMultitenant());
-    }
-
-    @Override
-    public <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context,
-                            Class<? extends Projection<I, ?, ?>> projectionClass) {
-        EntityClass<?> modelClass = asProjectionClass(projectionClass);
-        StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
-        InMemoryRecordStorage<I> recordStorage =
-                new InMemoryRecordStorage<>(storageSpec, projectionClass, context.isMultitenant());
-        return new InMemoryProjectionStorage<>(projectionClass, recordStorage);
     }
 
     @Override

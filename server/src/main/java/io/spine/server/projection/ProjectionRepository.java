@@ -50,7 +50,6 @@ import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.time.TimestampTemporal;
@@ -306,26 +305,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * Ensures that the repository has the storage.
+     * {@inheritDoc}
      *
-     * @return storage instance
-     * @throws IllegalStateException
-     *         if the storage is null
+     * <p>Overrides the parent method to expose it to this package.
      */
     @Override
     protected final RecordStorage<I> recordStorage() {
-        @SuppressWarnings("unchecked") // ensured by the type returned by `createdStorage()`.
-        RecordStorage<I> recordStorage = ((ProjectionStorage<I>) storage()).recordStorage();
-        return checkStorage(recordStorage);
-    }
-
-    @Override
-    protected final ProjectionStorage<I> createStorage() {
-        StorageFactory sf = defaultStorageFactory();
-        Class<P> projectionClass = entityClass();
-        ProjectionStorage<I> projectionStorage =
-                sf.createProjectionStorage(context().spec(), projectionClass);
-        return projectionStorage;
+        return super.recordStorage();
     }
 
     /**

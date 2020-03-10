@@ -28,8 +28,6 @@ import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -62,14 +60,6 @@ public final class MemoizingStorageFactory implements StorageFactory {
     public <I> RecordStorage<I>
     createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
         requestedStorages.add(entityClass);
-        return nullRef();
-    }
-
-    @Override
-    public <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context,
-                            Class<? extends Projection<I, ?, ?>> projectionClass) {
-        requestedStorages.add(projectionClass);
         return nullRef();
     }
 

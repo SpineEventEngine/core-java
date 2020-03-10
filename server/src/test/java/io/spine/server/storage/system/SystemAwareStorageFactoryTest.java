@@ -32,7 +32,6 @@ import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
-import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -100,18 +99,6 @@ class SystemAwareStorageFactoryTest {
                 systemAware.createAggregateStorage(CONTEXT, aggregateClass);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages()).containsExactly(aggregateClass);
-    }
-
-    @Test
-    @DisplayName("delegate projection storage creation to given factory")
-    void delegateProjectionStorage() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        Class<TestProjection> projectionClass = TestProjection.class;
-        ProjectionStorage<TaskId> storage =
-                systemAware.createProjectionStorage(CONTEXT, projectionClass);
-        assertThat(storage).isNull();
-        assertThat(factory.requestedStorages()).containsExactly(projectionClass);
     }
 
     @Test
