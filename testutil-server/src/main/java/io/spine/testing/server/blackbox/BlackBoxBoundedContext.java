@@ -30,9 +30,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
-import io.spine.base.RejectionMessage;
 import io.spine.client.Query;
-import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
@@ -61,15 +59,12 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.CommandErrored;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.client.blackbox.Acknowledgements;
-import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.SubscriptionActivator;
 import io.spine.testing.server.SubscriptionObserver;
 import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
-import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.testing.server.blackbox.verify.subscription.ToProtoSubjects;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.time.ZoneId;
@@ -104,10 +99,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>Such a test suite would send commands or events to the Bounded Context under the test,
  * and then verify consequences of handling a command or an event.
- *
- * <p>Handling a command or an event usually results in {@link VerifyEvents emitted events}) and
- * {@linkplain VerifyState updated state} of an entity. This class provides API for testing such
- * effects.
  *
  * @param <T>
  *         the type of a sub-class for return type covariance
@@ -151,8 +142,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      *
      * <p>These events are filtered out from those stored in the Bounded Context to
      * collect only the emitted events, which are used for assertions.
-     *
-     * @see #emittedEvents()
      */
     private final Set<Event> postedEvents;
 
@@ -640,104 +629,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         return thisRef();
     }
 
-    /**
-     * Asserts that an event of the passed class was emitted once.
-     *
-     * @param eventClass
-     *         the class of events to verify
-     * @return current instance
-     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertEmitted(Class<? extends EventMessage> eventClass) {
-        assertEvents()
-                .withType(eventClass)
-                .hasSize(1);
-        return thisRef();
-    }
-
-    /**
-     * Asserts that a rejection of the passed class was emitted once.
-     *
-     * @param rejectionClass
-     *         the class of the rejection to verify
-     * @return current instance
-     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
-        return assertEmitted(rejectionClass);
-    }
-
-    /**
-     * Verifies emitted events by the passed verifier.
-     *
-     * @param verifier
-     *         a verifier that checks the events emitted in this Bounded Context
-     * @return current instance
-     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyEvents verifier) {
-        EmittedEvents events = emittedEvents();
-        verifier.verify(events);
-        return thisRef();
-    }
-
-    /**
-     * Executes the provided verifier, which throws an assertion error in case of
-     * unexpected results.
-     *
-     * @param verifier
-     *         a verifier that checks the acknowledgements in this Bounded Context
-     * @return current instance
-     * @deprecated verify command outcome instead of acknowledgements; to be removed in future
-     *         versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyAcknowledgements verifier) {
-        Acknowledgements acks = commandAcknowledgements(observer);
-        verifier.verify(acks);
-        return thisRef();
-    }
-
-    /**
-     * Verifies emitted commands by the passed verifier.
-     *
-     * @param verifier
-     *         a verifier that checks the commands emitted in this Bounded Context
-     * @return current instance
-     * @deprecated use {@link #assertCommands()} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyCommands verifier) {
-        EmittedCommands commands = emittedCommands();
-        verifier.verify(commands);
-        return thisRef();
-    }
-
-    /**
-     * Asserts the state of an entity using the specified tenant ID.
-     *
-     * @param verifier
-     *         a verifier of entity states
-     * @return current instance
-     * @deprecated use {@link #assertEntity}, {@link #assertEntityWithState},
-     *         or {@link #assertQueryResult} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyState verifier) {
-        QueryFactory queryFactory = requestFactory().query();
-        verifier.verify(context, queryFactory);
-        return thisRef();
-    }
-
     private BlackBoxSetup setup() {
         return new BlackBoxSetup(context, requestFactory(), observer);
     }
@@ -766,14 +657,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      * Obtains the request factory to operate with.
      */
     protected abstract TestActorRequestFactory requestFactory();
-
-    /**
-     * Obtains commands emitted in the bounded context.
-     */
-    private EmittedCommands emittedCommands() {
-        List<Command> allWithoutPosted = commands();
-        return new EmittedCommands(allWithoutPosted);
-    }
 
     /**
      * Obtains immutable list of commands generated in this Bounded Context in response to posted
@@ -814,26 +697,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      * Selects commands that belong to the current tenant.
      */
     protected abstract ImmutableList<Command> select(CommandCollector collector);
-
-    /**
-     * Obtains acknowledgements of {@linkplain #emittedCommands()
-     * emitted commands}.
-     */
-    private static Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
-        List<Ack> acknowledgements = observer.responses();
-        return new Acknowledgements(acknowledgements);
-    }
-
-    /**
-     * Obtains events emitted in the Bounded Context.
-     *
-     * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
-     * calls.
-     */
-    private EmittedEvents emittedEvents() {
-        List<Event> allWithoutPosted = events();
-        return new EmittedEvents(allWithoutPosted);
-    }
 
     /**
      * Obtains immutable list of events generated in this Bounded Context in response to posted
