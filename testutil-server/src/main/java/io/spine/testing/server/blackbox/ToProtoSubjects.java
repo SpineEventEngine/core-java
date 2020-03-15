@@ -18,14 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.verify.subscription;
+package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
-import io.grpc.Internal;
 import io.spine.client.SubscriptionUpdate;
 
 import java.util.List;
@@ -37,9 +35,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Converts the given {@link SubscriptionUpdate} to the proto subjects on a per-item basis.
  */
-@VisibleForTesting
-@Internal
-public final class ToProtoSubjects
+final class ToProtoSubjects
         implements Function<SubscriptionUpdate, Iterable<ProtoSubject>> {
 
     @Override

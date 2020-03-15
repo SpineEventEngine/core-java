@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.verify.query;
+package io.spine.testing.server.query;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
@@ -28,11 +28,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.assertResponseStatus;
-import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.responseStatus;
-import static io.spine.testing.server.blackbox.verify.query.given.GivenResponseStatus.error;
-import static io.spine.testing.server.blackbox.verify.query.given.GivenResponseStatus.ok;
-import static io.spine.testing.server.blackbox.verify.query.given.GivenResponseStatus.rejection;
+import static io.spine.testing.server.query.GivenResponseStatus.error;
+import static io.spine.testing.server.query.GivenResponseStatus.ok;
+import static io.spine.testing.server.query.GivenResponseStatus.rejection;
+import static io.spine.testing.server.query.ResponseStatusSubject.assertResponseStatus;
+import static io.spine.testing.server.query.ResponseStatusSubject.responseStatus;
 
 @DisplayName("ResponseStatusSubject should")
 class ResponseStatusSubjectTest extends SubjectTest<ResponseStatusSubject, Status> {

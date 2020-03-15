@@ -18,12 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.verify.subscription;
+package io.spine.testing.server.blackbox;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.given.GivenSubscriptionUpdate;
 import org.junit.jupiter.api.BeforeEach;

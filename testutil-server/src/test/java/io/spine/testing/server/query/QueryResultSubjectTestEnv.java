@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.verify.query.given;
+package io.spine.testing.server.query;
 
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.QueryResponse;
@@ -30,9 +30,9 @@ import io.spine.testing.server.blackbox.BbTaskId;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.testing.server.blackbox.verify.query.given.GivenResponseStatus.ok;
+import static io.spine.testing.server.query.GivenResponseStatus.ok;
 
-public final class QueryResultSubjectTestEnv {
+final class QueryResultSubjectTestEnv {
 
     public static final String TASK_1_TITLE = "Clean dishes";
     public static final String TASK_1_DESCRIPTION = "Do clean all the dishes";

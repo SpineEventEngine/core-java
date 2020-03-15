@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.verify.query;
+package io.spine.testing.server.query;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
@@ -34,12 +34,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.assertQueryResult;
-import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.queryResult;
-import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.responseWithMultipleEntities;
-import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.responseWithSingleEntity;
-import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.state2;
-import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.version2;
+import static io.spine.testing.server.query.QueryResultSubject.assertQueryResult;
+import static io.spine.testing.server.query.QueryResultSubject.queryResult;
+import static io.spine.testing.server.query.QueryResultSubjectTestEnv.responseWithMultipleEntities;
+import static io.spine.testing.server.query.QueryResultSubjectTestEnv.responseWithSingleEntity;
+import static io.spine.testing.server.query.QueryResultSubjectTestEnv.state2;
+import static io.spine.testing.server.query.QueryResultSubjectTestEnv.version2;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**

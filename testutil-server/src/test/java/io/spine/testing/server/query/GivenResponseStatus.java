@@ -18,15 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Tools that assess the {@code BlackBoxBoundedContext} state through
- * {@link io.spine.server.SubscriptionService subscribing} to certain topics and checking the
- * results.
- */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox.verify.subscription;
+package io.spine.testing.server.query;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.protobuf.Empty;
+import io.spine.base.Error;
+import io.spine.core.Event;
+import io.spine.core.Status;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+final class GivenResponseStatus {
+
+    /** Prevents instantiation of this test env class. */
+    private GivenResponseStatus() {
+    }
+
+    public static Status ok() {
+        Status status = Status
+                .newBuilder()
+                .setOk(Empty.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
+
+    public static Status error() {
+        Status status = Status
+                .newBuilder()
+                .setError(Error.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
+
+    public static Status rejection() {
+        Status status = Status
+                .newBuilder()
+                .setRejection(Event.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
+}

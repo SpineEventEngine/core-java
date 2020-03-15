@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server;
+package io.spine.testing.server.blackbox;
 
 import io.grpc.stub.StreamObserver;
-import io.spine.annotation.Internal;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
@@ -37,8 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>Re-throws all incoming errors as {@link IllegalStateException}.
  */
-@Internal
-public final class SubscriptionActivator implements StreamObserver<Subscription> {
+final class SubscriptionActivator implements StreamObserver<Subscription> {
 
     private final SubscriptionService subscriptionService;
     private final StreamObserver<SubscriptionUpdate> updateObserver;

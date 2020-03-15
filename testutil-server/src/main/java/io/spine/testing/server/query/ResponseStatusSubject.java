@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.verify.query;
+package io.spine.testing.server.query;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.truth.FailureMetadata;

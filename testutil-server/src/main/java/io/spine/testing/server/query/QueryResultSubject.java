@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.verify.query;
+package io.spine.testing.server.query;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -39,8 +39,8 @@ import java.util.Collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
-import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.responseStatus;
 import static io.spine.testing.server.entity.IterableEntityVersionSubject.entityVersions;
+import static io.spine.testing.server.query.ResponseStatusSubject.responseStatus;
 
 /**
  * A set of assertions for a {@link io.spine.client.Query Query} execution result.
