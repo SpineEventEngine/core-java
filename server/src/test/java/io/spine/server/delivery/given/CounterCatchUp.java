@@ -31,7 +31,6 @@ import io.spine.server.delivery.CatchUp;
 import io.spine.server.delivery.CatchUpStatus;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.LocalDispatchingObserver;
-import io.spine.server.event.EventStore;
 import io.spine.server.storage.memory.InMemoryCatchUpStorage;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
@@ -69,8 +68,6 @@ public class CounterCatchUp {
     }
 
     public void addHistory(Timestamp when, List<NumberAdded> events) {
-        EventStore eventStore = ctx.eventBus()
-                                   .eventStore();
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
         for (NumberAdded message : events) {
             Event event = factory.createEvent(message, null);
@@ -81,7 +78,7 @@ public class CounterCatchUp {
             Event eventAtTime = event.toBuilder()
                                      .setContext(modifiedContext)
                                      .vBuild();
-            eventStore.append(eventAtTime);
+            ctx.append(eventAtTime);
         }
     }
 

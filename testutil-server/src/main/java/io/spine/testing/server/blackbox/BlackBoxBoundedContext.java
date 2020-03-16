@@ -54,6 +54,7 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.event.EventStore;
 import io.spine.server.integration.IntegrationBroker;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -356,12 +357,25 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /** Obtains {@code event bus} instance used by this bounded context. */
-    public EventBus eventBus() {
+    @VisibleForTesting
+    EventBus eventBus() {
         return context.eventBus();
     }
 
+    /**
+     * Appends the passed event to the history of the context under the test.
+     */
+    public T append(Event event) {
+        checkNotNull(event);
+        EventStore eventStore = context.eventBus()
+                                       .eventStore();
+        eventStore.append(event);
+        return thisRef();
+    }
+
     /** Obtains {@code command bus} instance used by this bounded context. */
-    public CommandBus commandBus() {
+    @VisibleForTesting
+    CommandBus commandBus() {
         return context.commandBus();
     }
 
