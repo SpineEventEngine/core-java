@@ -24,7 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.common.truth.extensions.proto.IterableOfProtosSubject;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
@@ -661,8 +663,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     @Test
-    @DisplayName("provide a method for `Subscription` updates verification")
-    void assertSubscriptionUpdates() {
+    @DisplayName("allow to test subscription updates for entity states")
+    void subscriptionFixture() {
         BbProjectId id = newProjectId();
         TopicFactory topicFactory = context.requestFactory()
                                            .topic();
@@ -672,14 +674,14 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 .newBuilder()
                 .setId(id)
                 .build();
-        VerifyingCounter updateCounter =
-                context.assertSubscriptionUpdates(
-                        topic,
-                        assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
-                                                                .isEqualTo(expected)
-                );
+
+        SubscriptionFixture fixture = context.subscribeTo(topic);
         context.receivesCommand(createProject(id));
-        updateCounter.verifyEquals(1);
+
+        IterableOfProtosSubject<EntityState> assertUpdates = fixture.assertEntityStates();
+        assertUpdates.hasSize(1);
+        assertUpdates.comparingExpectedFieldsOnly()
+                     .contains(expected);
     }
 
     @Nested

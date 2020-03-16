@@ -23,16 +23,13 @@ package io.spine.testing.server.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
-import io.spine.client.Subscription;
 import io.spine.client.Topic;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
@@ -45,7 +42,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.QueryService;
-import io.spine.server.SubscriptionService;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
@@ -830,43 +826,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /**
-     * Subscribes to the {@code topic} and verifies the incoming updates.
-     *
-     * <p>The verification happens on a per-item basis, where item is a single entity state or
-     * event update represented as {@link ProtoSubject}.
-     *
-     * <p>The returned value allows to check the number of updates received.
-     *
-     * <p>The method may be used as follows:
-     * <pre>
-     * VerifyingCounter updateCounter =
-     *         context.assertSubscriptionUpdates(
-     *                 topic,
-     *                 assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
-     *                                                         .isEqualTo(expected)
-     *         );
-     * context.receivesCommand(createProject); // Some command creating the `expected`.
-     * updateCounter.verifyEquals(1);
-     * </pre>
-     *
-     * <p>Please note that the return value may be ignored, but then receiving {@code 0} incoming
-     * updates will count as valid and won't fail the test.
+     * Subscribes and activates the subscription to the passed topic.
+     * @param topic
+     *          the topic of the subscription
+     * @return a fixture for testing subscription updates.
      */
-    @CanIgnoreReturnValue
-    public VerifyingCounter
-    assertSubscriptionUpdates(Topic topic, Consumer<ProtoSubject> assertEachReceived) {
-        SubscriptionService subscriptionService =
-                SubscriptionService.newBuilder()
-                                   .add(context)
-                                   .build();
-        SubscriptionObserver updateObserver = new SubscriptionObserver(
-                update -> new ToProtoSubjects().apply(update)
-                                               .forEach(assertEachReceived)
-        );
-        StreamObserver<Subscription> activator =
-                new SubscriptionActivator(subscriptionService, updateObserver);
-
-        subscriptionService.subscribe(topic, activator);
-        return updateObserver.counter();
+    public SubscriptionFixture subscribeTo(Topic topic) {
+        SubscriptionFixture result = new SubscriptionFixture(context, topic);
+        result.activate();
+        return result;
     }
 }
