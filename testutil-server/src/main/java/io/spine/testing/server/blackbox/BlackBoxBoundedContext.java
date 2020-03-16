@@ -652,7 +652,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Obtains the request factory to operate with.
      */
-    protected abstract TestActorRequestFactory requestFactory();
+    abstract TestActorRequestFactory requestFactory();
 
     /**
      * Obtains immutable list of commands generated in this Bounded Context in response to posted
@@ -692,7 +692,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Selects commands that belong to the current tenant.
      */
-    protected abstract ImmutableList<Command> select(CommandCollector collector);
+    abstract ImmutableList<Command> select(CommandCollector collector);
 
     /**
      * Obtains immutable list of events generated in this Bounded Context in response to posted
@@ -735,7 +735,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Selects events that belong to the current tenant.
      */
-    protected abstract ImmutableList<Event> select(EventCollector collector);
+    abstract ImmutableList<Event> select(EventCollector collector);
 
     private static EventEnricher emptyEnricher() {
         return EventEnricher.newBuilder()

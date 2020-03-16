@@ -39,17 +39,17 @@ public final class SingleTenantBlackBoxContext
     }
 
     @Override
-    protected ImmutableList<Command> select(CommandCollector collector) {
+    ImmutableList<Command> select(CommandCollector collector) {
         return collector.all();
     }
 
     @Override
-    protected ImmutableList<Event> select(EventCollector collector) {
+    ImmutableList<Event> select(EventCollector collector) {
         return collector.all();
     }
 
     @Override
-    protected TestActorRequestFactory requestFactory() {
+    TestActorRequestFactory requestFactory() {
         return actor().requests();
     }
 }
