@@ -61,8 +61,6 @@ import io.spine.system.server.event.CommandErrored;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.SubscriptionObserver;
-import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;

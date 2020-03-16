@@ -18,10 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server;
+package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.grpc.Internal;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.SubscriptionUpdate;
 
@@ -35,14 +33,12 @@ import static java.lang.Math.max;
  *
  * <p>Re-throws all incoming errors as {@link IllegalStateException}.
  */
-@VisibleForTesting
-@Internal
-public final class SubscriptionObserver implements StreamObserver<SubscriptionUpdate> {
+final class SubscriptionObserver implements StreamObserver<SubscriptionUpdate> {
 
     private final Consumer<SubscriptionUpdate> consumer;
     private final VerifyingCounter counter;
 
-    public SubscriptionObserver(Consumer<SubscriptionUpdate> consumer) {
+    SubscriptionObserver(Consumer<SubscriptionUpdate> consumer) {
         this.consumer = checkNotNull(consumer);
         this.counter = new VerifyingCounter();
     }
