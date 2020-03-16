@@ -65,8 +65,7 @@ public final class SubscriptionFixture {
                                    .add(context)
                                    .build();
         Observer updateObserver = new Observer(updates::add);
-        StreamObserver<Subscription> activator =
-                new Activator(service, updateObserver);
+        StreamObserver<Subscription> activator = new Activator(service, updateObserver);
         service.subscribe(topic, activator);
     }
 
