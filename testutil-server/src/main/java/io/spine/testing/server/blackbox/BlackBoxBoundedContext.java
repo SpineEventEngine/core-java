@@ -233,7 +233,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Creates a multitenant instance with the specified name and enricher.
      */
-    public static MultitenantBlackBoxContext multiTenant(String name, EventEnricher enricher) {
+    private static MultitenantBlackBoxContext multiTenant(String name, EventEnricher enricher) {
         return new MultitenantBlackBoxContext(name, enricher);
     }
 
