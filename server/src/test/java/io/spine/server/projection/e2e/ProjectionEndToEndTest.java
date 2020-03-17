@@ -84,15 +84,18 @@ class ProjectionEndToEndTest {
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
-        BlackBoxBoundedContext
-                .assumingTests()
-                .with(new EntitySubscriberProjection.Repository(),
-                      new TestProjection.Repository())
-                .receivesEventsProducedBy(producerId,
-                                          created,
-                                          firstTaskAdded,
-                                          secondTaskAdded)
-                .assertEntityWithState(ProjectTaskNames.class, producerId)
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(new EntitySubscriberProjection.Repository())
+                                     .add(new TestProjection.Repository())
+        );
+
+        context.receivesEventsProducedBy(producerId,
+                                         created,
+                                         firstTaskAdded,
+                                         secondTaskAdded);
+
+        context.assertEntityWithState(ProjectTaskNames.class, producerId)
                 .hasStateThat()
                 .isEqualTo(ProjectTaskNames
                                    .newBuilder()

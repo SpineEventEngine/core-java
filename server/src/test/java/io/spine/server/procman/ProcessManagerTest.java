@@ -316,8 +316,10 @@ class ProcessManagerTest {
 
         @BeforeEach
         void setUp() {
-            context = BlackBoxBoundedContext.assumingTests()
-                                            .with(new TestProcessManagerRepo());
+            context = BlackBoxBoundedContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(new TestProcessManagerRepo())
+            );
         }
 
         @AfterEach
@@ -353,9 +355,10 @@ class ProcessManagerTest {
 
         @BeforeEach
         void setUp() {
-            context = BlackBoxBoundedContext
-                    .assumingTests()
-                    .with(new TestProcessManagerRepo());
+            context = BlackBoxBoundedContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(new TestProcessManagerRepo())
+            );
         }
 
         @AfterEach
@@ -506,10 +509,11 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
-                    .assumingTests();
+            BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(new QuizProcmanRepository())
+            );
             EventSubject assertEvents = context
-                    .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertEvents();
             assertEvents.hasSize(2);

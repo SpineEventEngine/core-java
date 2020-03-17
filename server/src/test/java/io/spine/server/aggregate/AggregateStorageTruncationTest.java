@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.Iterators;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.fibonacci.FibonacciRepository;
 import io.spine.server.aggregate.given.fibonacci.SequenceId;
 import io.spine.server.aggregate.given.fibonacci.command.MoveSequence;
@@ -54,9 +55,10 @@ public abstract class AggregateStorageTruncationTest {
     @DisplayName("restore aggregate state properly")
     void restoreAggregateState() {
         FibonacciRepository repo = new FibonacciRepository();
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
-                .assumingTests()
-                .with(repo);
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repo)
+        );
 
         // Set the starting numbers.
         SetStartingNumbers setStartingNumbers = SetStartingNumbers

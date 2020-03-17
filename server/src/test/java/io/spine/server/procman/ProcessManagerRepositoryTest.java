@@ -606,12 +606,14 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        BlackBoxBoundedContext
-                .assumingTests()
-                .with(new EventDiscardingProcManRepository())
-                .receivesCommand(command)
-                .assertEvents()
-                .isEmpty();
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(new EventDiscardingProcManRepository())
+        );
+
+        context.receivesCommand(command)
+               .assertEvents()
+               .isEmpty();
     }
 
     @DisplayName("call `configure()` callback when a `ProcessManager` instance is created")

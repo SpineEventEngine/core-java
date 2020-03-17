@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableList;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.given.AbstractReactorTestEnv.AutoCharityDonor;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.ServicePerformanceTracker;
@@ -48,8 +49,12 @@ class AbstractEventReactorTest {
 
     @BeforeEach
     void setUp() {
-        restaurantContext = BlackBoxBoundedContext.assumingTests();
-        charityContext = BlackBoxBoundedContext.assumingTests();
+        restaurantContext = BlackBoxBoundedContext.from(
+                BoundedContext.singleTenant("Restaurant")
+        );
+        charityContext = BlackBoxBoundedContext.from(
+                BoundedContext.singleTenant("Charity")
+        );
 
         charityDonor = new AutoCharityDonor();
         charityContext.withEventDispatchers(charityDonor);

@@ -820,9 +820,10 @@ public class AggregateTest {
 
         @BeforeEach
         void prepareContext() {
-            context = BlackBoxBoundedContext
-                    .assumingTests()
-                    .with(new TaskAggregateRepository());
+            context = BlackBoxBoundedContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(new TaskAggregateRepository())
+            );
         }
 
         @AfterEach

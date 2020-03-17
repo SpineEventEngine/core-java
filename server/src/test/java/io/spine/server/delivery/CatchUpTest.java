@@ -26,6 +26,7 @@ import com.google.common.truth.Truth8;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.delivery.given.ConsecutiveNumberProcess;
 import io.spine.server.delivery.given.ConsecutiveProjection;
@@ -254,10 +255,11 @@ public class CatchUpTest extends AbstractDeliveryTest {
         ConsecutiveProjection.Repo projectionRepo = new ConsecutiveProjection.Repo();
         Repository<String, ConsecutiveNumberProcess> pmRepo =
                 DefaultRepository.of(ConsecutiveNumberProcess.class);
-        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext
-                .assumingTests()
-                .with(projectionRepo)
-                .with(pmRepo);
+        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(projectionRepo)
+                                     .add(pmRepo)
+        );
         List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
         post(jobs, 1);
 

@@ -23,6 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
 import io.spine.server.delivery.given.CalculatorSignal;
@@ -97,10 +98,10 @@ class NastyClient {
      *         the identifiers of target entities
      */
     void runWith(Set<String> targets) {
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
-                .assumingTests()
-                .with(repository);
-
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repository)
+        );
         DeliveryTestEnv.SignalMemoizer memoizer = subscribeToDelivered();
 
         int streamSize = targets.size() * 30;

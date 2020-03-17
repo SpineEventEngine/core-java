@@ -178,7 +178,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Creates a single-tenant instance with the default configuration.
      *
-     * @deprecated please use {@link #from(BoundedContextBuilder)} or {@link #assumingTests()}
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
     @Deprecated
     public static SingleTenantBlackBoxContext singleTenant() {
@@ -375,7 +375,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      * @param repositories
      *         repositories to register in the Bounded Context
      * @return current instance
+     * @deprecated please use {@link BoundedContextBuilder#add(Repository)} and
+     *         then {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
         registerAll(this::registerRepository, repositories);

@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.importado.DotSpace;
 import io.spine.server.aggregate.given.importado.ObjectId;
 import io.spine.server.aggregate.given.importado.event.Moved;
@@ -47,9 +48,10 @@ class ApplyAllowImportTest {
 
     @BeforeEach
     void setUp() {
-        context = BlackBoxBoundedContext
-                .assumingTests()
-                .with(new DotSpace());
+        context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(new DotSpace())
+        );
     }
 
     @AfterEach

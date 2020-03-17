@@ -603,9 +603,10 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
-                    .assumingTests()
-                    .with(new EventDiscardingAggregateRepository());
+            BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(new EventDiscardingAggregateRepository())
+            );
             context.receivesCommands(create, start)
                    .receivesEvent(archived);
             context.assertEvents()

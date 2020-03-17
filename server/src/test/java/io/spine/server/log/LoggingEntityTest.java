@@ -25,7 +25,7 @@ import com.google.common.flogger.LoggerConfig;
 import com.google.common.testing.TestLogHandler;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
 import io.spine.testing.core.given.GivenUserId;
@@ -161,9 +161,10 @@ class LoggingEntityTest {
     }
 
     private static BlackBoxBoundedContext<?> context() {
-        return BlackBoxBoundedContext
-                .assumingTests()
-                .with(DefaultRepository.of(CardAggregate.class));
+        return BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(CardAggregate.class)
+        );
     }
 
     private static BorrowBooks borrowBooks(UserId reader) {

@@ -29,7 +29,7 @@ import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.Messages;
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
@@ -327,11 +327,12 @@ public class DeliveryTest extends AbstractDeliveryTest {
     public void deliverMessagesInOrderOfEmission() throws InterruptedException {
         changeShardCountTo(20);
 
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
-                .assumingTests()
-                .with(DefaultRepository.of(TaskAggregate.class))
-                .with(new TaskAssignment.Repository())
-                .with(new TaskView.Repository());
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(TaskAggregate.class)
+                                     .add(new TaskAssignment.Repository())
+                                     .add(new TaskView.Repository())
+        );
         List<DCreateTask> commands = generateCommands(200);
         ExecutorService service = newFixedThreadPool(20);
         service.invokeAll(commands.stream()

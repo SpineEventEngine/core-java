@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.base.EventMessage;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.klasse.EngineAggregate;
 import io.spine.server.aggregate.given.klasse.EngineId;
 import io.spine.server.aggregate.given.klasse.EngineRepository;
@@ -53,9 +54,10 @@ class EventImportTest {
 
     void createRepository(boolean routeByFirstMessageField) {
         repository = new EngineRepository(routeByFirstMessageField);
-        context = BlackBoxBoundedContext
-                .assumingTests()
-                .with(repository);
+        context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repository)
+        );
     }
 
     @AfterEach

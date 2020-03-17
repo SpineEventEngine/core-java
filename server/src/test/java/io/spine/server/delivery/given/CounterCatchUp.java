@@ -26,6 +26,7 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.CatchUp;
 import io.spine.server.delivery.CatchUpStatus;
@@ -62,8 +63,10 @@ public class CounterCatchUp {
     public CounterCatchUp(String... ids) {
         this.ids = ids.clone();
         this.repo = new CounterView.Repository();
-        this.ctx = BlackBoxBoundedContext.assumingTests()
-                                         .with(repo);
+        this.ctx = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repo)
+        );
     }
 
     public void addHistory(Timestamp when, List<NumberAdded> events) {
