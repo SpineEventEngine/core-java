@@ -97,9 +97,9 @@ class NastyClient {
      *         the identifiers of target entities
      */
     void runWith(Set<String> targets) {
-        BlackBoxBoundedContext<?> context =
-                BlackBoxBoundedContext.assumingTests()
-                                      .with(repository);
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
+                .assumingTests()
+                .with(repository);
 
         DeliveryTestEnv.SignalMemoizer memoizer = subscribeToDelivered();
 
@@ -112,9 +112,8 @@ class NastyClient {
 
         postAsync(context, commands, importEvents, reactEvents);
 
-        Stream<CalculatorSignal> signals = concat(commands.stream(),
-                                                  importEvents.stream(),
-                                                  reactEvents.stream());
+        Stream<CalculatorSignal> signals =
+                concat(commands.stream(), importEvents.stream(), reactEvents.stream());
 
         signalsPerTarget = signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
@@ -125,13 +124,15 @@ class NastyClient {
                     ImmutableSet.copyOf(signalsPerTarget.get(calcId));
             assertEquals(targetSignals, receivedMessages);
 
-            Integer sumForTarget = targetSignals.stream()
-                                                .map(CalculatorSignal::getValue)
-                                                .reduce(0, Integer::sum);
-            Calc expectedState = Calc.newBuilder()
-                                     .setId(calcId)
-                                     .setSum(sumForTarget)
-                                     .build();
+            Integer sumForTarget =
+                    targetSignals.stream()
+                                 .map(CalculatorSignal::getValue)
+                                 .reduce(0, Integer::sum);
+            Calc expectedState = Calc
+                    .newBuilder()
+                    .setId(calcId)
+                    .setSum(sumForTarget)
+                    .build();
             context.assertEntity(CalcAggregate.class, calcId)
                    .hasStateThat()
                    .comparingExpectedFieldsOnly()
