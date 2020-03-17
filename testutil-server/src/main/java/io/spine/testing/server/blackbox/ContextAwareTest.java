@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
 import io.spine.server.BoundedContextBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,7 +58,8 @@ public abstract class ContextAwareTest {
     protected abstract BoundedContextBuilder contextBuilder();
 
     @BeforeEach
-    void createContext() {
+    @OverridingMethodsMustInvokeSuper
+    protected void createContext() {
         BoundedContextBuilder contextBuilder = contextBuilder();
         checkNotNull(contextBuilder,
                      "`contextBuilder()` must return a non-null `BoundedContextBuilder`.");
@@ -65,7 +67,8 @@ public abstract class ContextAwareTest {
     }
 
     @AfterEach
-    void closeContext() {
+    @OverridingMethodsMustInvokeSuper
+    protected void closeContext() {
         context().close();
         context = null;
     }
