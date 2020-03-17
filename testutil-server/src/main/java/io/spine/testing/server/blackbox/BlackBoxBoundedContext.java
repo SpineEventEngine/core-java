@@ -162,20 +162,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /**
-     * Creates a test-only single-tenant context.
-     */
-    public static BlackBoxBoundedContext<?> assumingTests() {
-        return singleTenant();
-    }
-
-    /**
-     * Creates a test-only multi-tenant context.
-     */
-    public static BlackBoxBoundedContext<?> assumingTestsMultiTenant() {
-        return internalMultiTenant(assumingTestsValue(), emptyEnricher());
-    }
-
-    /**
      * Creates a single-tenant instance with the default configuration.
      *
      * @deprecated please use {@link #from(BoundedContextBuilder)}
@@ -218,7 +204,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Creates a multitenant instance the default configuration.
      *
-     * @deprecated please use {@link #assumingTestsMultiTenant()}
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
     @Deprecated
     public static MultitenantBlackBoxContext multiTenant() {

@@ -26,7 +26,6 @@ import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.DefaultRepository;
 import io.spine.server.route.given.sur.ArtistMood;
 import io.spine.server.route.given.sur.ArtistMoodRepo;
 import io.spine.server.route.given.sur.ArtistName;
@@ -56,14 +55,16 @@ class StateRoutingTest {
         context = BlackBoxBoundedContext.from(
                 BoundedContextBuilder
                         .assumingTests()
-                        .add(MagazineAggregate.class));
+                        .add(MagazineAggregate.class)
+                        .add(new ArtistMoodRepo())
+                        .add(new Gallery())
+                        .add(WorksProjection.class)
+        );
     }
 
     @Test
     @DisplayName("support explicit routing")
     void explicit() {
-        context.with(new ArtistMoodRepo());
-
         context.receivesCommand(
                 PublishArticle.newBuilder()
                               .setMagazineName("Manifeste du surréalisme")
@@ -86,9 +87,6 @@ class StateRoutingTest {
     @Test
     @DisplayName("route state by the first field matching the ID type")
     void implicit() {
-        context.with(new Gallery(),
-                     DefaultRepository.of(WorksProjection.class));
-
         ArtistName artist = Surrealism.name("André Masson");
         Any automaticDrawing = AnyPacker.pack(StringValue.of("Automatic Drawing"));
         context.receivesEvent(

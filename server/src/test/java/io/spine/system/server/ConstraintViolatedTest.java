@@ -22,7 +22,7 @@ package io.spine.system.server;
 
 import io.spine.core.UserId;
 import io.spine.net.EmailAddress;
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.system.server.given.diagnostics.ValidatedAggregate;
 import io.spine.system.server.given.diagnostics.VerificationProcman;
 import io.spine.system.server.given.diagnostics.ViolationsWatch;
@@ -46,43 +46,49 @@ class ConstraintViolatedTest {
     @DisplayName("an entity state is set to an invalid value as a result of an event")
     void afterEvent() {
         String invalidText = "123-non numerical";
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
-                .assumingTests()
-                .with(DefaultRepository.of(ValidatedAggregate.class),
-                      new ViolationsWatch.Repository())
-                .receivesCommand(ValidateAndSet
-                                         .newBuilder()
-                                         .setId(ValidatedId.generate())
-                                         .setTextToValidate(invalidText)
-                                         .vBuild());
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                    .add(ValidatedAggregate.class)
+                    .add(new ViolationsWatch.Repository())
+        );
+        context.receivesCommand(
+                ValidateAndSet.newBuilder()
+                              .setId(ValidatedId.generate())
+                              .setTextToValidate(invalidText)
+                              .vBuild()
+        );
         context.assertEntity(ViolationsWatch.class, DEFAULT)
                .hasStateThat()
-               .isEqualTo(InvalidText
-                                  .newBuilder()
-                                  .setId(DEFAULT)
-                                  .setInvalidText(invalidText)
-                                  .buildPartial());
+               .isEqualTo(InvalidText.newBuilder()
+                                     .setId(DEFAULT)
+                                     .setInvalidText(invalidText)
+                                     .buildPartial()
+               );
     }
 
     @MuteLogging
     @Test
     @DisplayName("an entity state is set to an invalid value as a result of a command")
     void afterCommand() {
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
-                .assumingTests()
-                .with(DefaultRepository.of(VerificationProcman.class),
-                      new ViolationsWatch.Repository())
-                .receivesCommand(StartVerification
-                                         .newBuilder()
-                                         .setUserId(UserId.newBuilder().setValue(newUuid()))
-                                         .setAddress(EmailAddress.newBuilder().setValue("a@b.c"))
-                                         .vBuild());
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                .add(VerificationProcman.class)
+                .add(new ViolationsWatch.Repository())
+        );
+        context.receivesCommand(
+                StartVerification
+                        .newBuilder()
+                        .setUserId(UserId.newBuilder()
+                                         .setValue(newUuid()))
+                        .setAddress(EmailAddress.newBuilder()
+                                                .setValue("a@b.c"))
+                        .vBuild()
+        );
         context.assertEntity(ViolationsWatch.class, DEFAULT)
                .hasStateThat()
-               .isEqualTo(InvalidText
-                                  .newBuilder()
-                                  .setId(DEFAULT)
-                                  .setErrorMessage("A value must be set.")
-                                  .buildPartial());
+               .isEqualTo(InvalidText.newBuilder()
+                                     .setId(DEFAULT)
+                                     .setErrorMessage("A value must be set.")
+                                     .buildPartial());
     }
 }

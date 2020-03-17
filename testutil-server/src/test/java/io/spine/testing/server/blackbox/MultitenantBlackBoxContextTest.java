@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import org.junit.jupiter.api.DisplayName;
@@ -37,7 +38,8 @@ class MultitenantBlackBoxContextTest
 
     @Override
     MultitenantBlackBoxContext newInstance() {
-        return ((MultitenantBlackBoxContext) BlackBoxBoundedContext.assumingTestsMultiTenant())
+        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests(true);
+        return ((MultitenantBlackBoxContext) BlackBoxBoundedContext.from(contextBuilder))
                 .withTenant(generate());
     }
 
@@ -90,9 +92,8 @@ class MultitenantBlackBoxContextTest
     void requireTenantId() {
         assertThrows(
                 IllegalStateException.class,
-                () -> BlackBoxBoundedContext
-                        .assumingTestsMultiTenant()
-                        .assertEntityWithState(BbProject.class, "verify state")
+                () -> BlackBoxBoundedContext.from(BoundedContextBuilder.assumingTests(true))
+                                            .assertEntityWithState(BbProject.class, "verify state")
         );
     }
 }

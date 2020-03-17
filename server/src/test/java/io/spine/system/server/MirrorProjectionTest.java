@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.base.EventMessage;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -127,8 +128,9 @@ class MirrorProjectionTest {
     private static BlackBoxBoundedContext<?> context() {
         MirrorRepository mirrorRepository = new MirrorRepository();
         mirrorRepository.addMirroredType(AGGREGATE_TYPE_URL);
-        return BlackBoxBoundedContext
-                .assumingTests()
-                .with(mirrorRepository);
+        return BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(mirrorRepository)
+        );
     }
 }
