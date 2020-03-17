@@ -254,9 +254,10 @@ public class CatchUpTest extends AbstractDeliveryTest {
         ConsecutiveProjection.Repo projectionRepo = new ConsecutiveProjection.Repo();
         Repository<String, ConsecutiveNumberProcess> pmRepo =
                 DefaultRepository.of(ConsecutiveNumberProcess.class);
-        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext.assumingTests()
-                                                                .with(projectionRepo)
-                                                                .with(pmRepo);
+        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext
+                .assumingTests()
+                .with(projectionRepo)
+                .with(pmRepo);
         List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
         post(jobs, 1);
 
