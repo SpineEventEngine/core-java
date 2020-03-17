@@ -327,12 +327,11 @@ public class DeliveryTest extends AbstractDeliveryTest {
     public void deliverMessagesInOrderOfEmission() throws InterruptedException {
         changeShardCountTo(20);
 
-        BlackBoxBoundedContext<?> context =
-                BlackBoxBoundedContext.assumingTests()
-                                      .with(DefaultRepository.of(
-                                              TaskAggregate.class))
-                                      .with(new TaskAssignment.Repository())
-                                      .with(new TaskView.Repository());
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
+                .assumingTests()
+                .with(DefaultRepository.of(TaskAggregate.class))
+                .with(new TaskAssignment.Repository())
+                .with(new TaskView.Repository());
         List<DCreateTask> commands = generateCommands(200);
         ExecutorService service = newFixedThreadPool(20);
         service.invokeAll(commands.stream()
