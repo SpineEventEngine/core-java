@@ -28,9 +28,7 @@ class SingleTenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<SingleTenantBlackBoxContext> {
 
     @Override
-    SingleTenantBlackBoxContext newInstance() {
-        return (SingleTenantBlackBoxContext) BlackBoxBoundedContext.from(
-                BoundedContextBuilder.assumingTests()
-        );
+    BoundedContextBuilder newBuilder() {
+        return BoundedContextBuilder.assumingTests();
     }
 }

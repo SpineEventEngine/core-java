@@ -117,9 +117,13 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
     @BeforeEach
     void setUp() {
-        context = newInstance().with(new BbProjectRepository(),
-                                     DefaultRepository.of(BbProjectViewProjection.class),
-                                     DefaultRepository.of(BbInitProcess.class));
+        BoundedContextBuilder builder = newBuilder();
+        builder.add(new BbProjectRepository())
+               .add(BbProjectViewProjection.class)
+               .add(BbInitProcess.class);
+        @SuppressWarnings("unchecked") // see Javadoc for newBuilder().
+        T ctx = (T) BlackBoxBoundedContext.from(builder);
+        context = ctx;
     }
 
     @AfterEach
@@ -128,9 +132,12 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     /**
-     * Creates a new instance of a bounded context to be used in this test suite.
+     * Creates a new instance of the {@code BoundedContextBuilder}.
+     *
+     * <p>Implementations must ensure that multi-tenancy status of the created builder
+     * matches the type of the test.
      */
-    abstract BlackBoxBoundedContext<T> newInstance();
+    abstract BoundedContextBuilder newBuilder();
 
     final T context() {
         return context;
@@ -450,15 +457,18 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @Test
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
-        assertThrows(IllegalStateException.class, () ->
-                newInstance()
-                        .with(new RepositoryThrowingExceptionOnClose() {
-                            @Override
-                            protected void throwException() {
-                                throw new RuntimeException("Expected error");
-                            }
-                        })
-                        .close());
+        RepositoryThrowingExceptionOnClose throwingRepo = new RepositoryThrowingExceptionOnClose() {
+            @Override
+            protected void throwException() {
+                throw new RuntimeException("Expected error");
+            }
+        };
+
+        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext.from(
+                newBuilder().add(throwingRepo)
+        );
+
+        assertThrows(IllegalStateException.class, ctx::close);
     }
 
     @Nested

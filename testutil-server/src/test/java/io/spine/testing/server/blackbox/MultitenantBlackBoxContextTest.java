@@ -37,10 +37,8 @@ class MultitenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<MultitenantBlackBoxContext> {
 
     @Override
-    MultitenantBlackBoxContext newInstance() {
-        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests(true);
-        return ((MultitenantBlackBoxContext) BlackBoxBoundedContext.from(contextBuilder))
-                .withTenant(generate());
+    BoundedContextBuilder newBuilder() {
+        return BoundedContextBuilder.assumingTests(true);
     }
 
     @Test
