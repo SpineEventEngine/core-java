@@ -32,7 +32,7 @@ ext {
     versionToPublish = spineVersion
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = spineVersion
+    spineBaseVersion = '1.5.1'
 
     // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
     spineTimeVersion = '1.5.0'
