@@ -142,10 +142,10 @@ public final class SubscriptionFixture {
     }
 
     /**
-     * Activates the first received {@link Subscription}.
+     * Activates every {@link Subscription} it receives.
      *
-     * <p>Can be specified to the {@link SubscriptionService#subscribe(Topic, StreamObserver)}
-     * method to avoid any intermediate calls before subscription activation.
+     * <p>The purpose of this class is to be used as an argument for the call to
+     * {@link SubscriptionService#subscribe(Topic, StreamObserver)}.
      *
      * <p>Re-throws all incoming errors as {@link IllegalStateException}.
      */
