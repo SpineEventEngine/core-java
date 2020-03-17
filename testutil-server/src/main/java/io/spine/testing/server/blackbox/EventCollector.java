@@ -27,5 +27,5 @@ import io.spine.server.type.EventEnvelope;
 /**
  * Remembers events posted to an Event Bus.
  */
-public final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
+final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
 }

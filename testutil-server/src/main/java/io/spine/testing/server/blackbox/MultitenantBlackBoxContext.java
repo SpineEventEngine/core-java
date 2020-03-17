@@ -65,17 +65,17 @@ public final class MultitenantBlackBoxContext
     }
 
     @Override
-    protected TestActorRequestFactory requestFactory() {
+    TestActorRequestFactory requestFactory() {
         return actor().requestsFor(tenantId());
     }
 
     @Override
-    protected ImmutableList<Command> select(CommandCollector collector) {
+    ImmutableList<Command> select(CommandCollector collector) {
         return collector.ofTenant(tenantId());
     }
 
     @Override
-    protected ImmutableList<Event> select(EventCollector collector) {
+    ImmutableList<Event> select(EventCollector collector) {
         return collector.ofTenant(tenantId());
     }
 

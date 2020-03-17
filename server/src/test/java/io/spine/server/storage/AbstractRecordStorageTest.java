@@ -50,8 +50,8 @@ import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
+import static io.spine.server.entity.given.repository.GivenLifecycleFlags.archived;
 import static io.spine.testing.Tests.assertMatchesMask;
-import static io.spine.testing.server.entity.given.GivenLifecycleFlags.archived;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -133,8 +133,8 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 .newBuilder()
                 .setFieldMask(nonEmptyFieldMask)
                 .vBuild();
-        RecordStorage storage = storage();
-        Iterator empty = storage.readAll(format);
+        RecordStorage<?> storage = storage();
+        Iterator<?> empty = storage.readAll(format);
 
         assertNotNull(empty);
         assertFalse(empty.hasNext(), "Iterator is not empty!");
@@ -263,6 +263,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 storage.readMultiple(initial.keySet(), FieldMask.getDefaultInstance());
         Collection<@Nullable EntityRecord> actual = newArrayList(records);
 
+        @SuppressWarnings("ReturnOfNull") // is fine, since we collect @Nullable
         Collection<@Nullable EntityRecord> expected =
                 initial.values()
                        .stream()

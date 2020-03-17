@@ -46,7 +46,6 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.BlackBoxId;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.command.BbAssignSelf;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbFinalizeProject;
@@ -661,26 +660,51 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .containsExactly(expected);
     }
 
-    @Test
-    @DisplayName("provide a method for `Subscription` updates verification")
-    void assertSubscriptionUpdates() {
-        BbProjectId id = newProjectId();
-        TopicFactory topicFactory = context.requestFactory()
-                                           .topic();
-        Topic topic = topicFactory.allOf(BbProject.class);
 
-        BbProject expected = BbProject
-                .newBuilder()
-                .setId(id)
-                .build();
-        VerifyingCounter updateCounter =
-                context.assertSubscriptionUpdates(
-                        topic,
-                        assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
-                                                                .isEqualTo(expected)
-                );
-        context.receivesCommand(createProject(id));
-        updateCounter.verifyEquals(1);
+    @Nested
+    @DisplayName("allow to test subscription updates")
+    class AssertingSubscriptionUpdates {
+
+        private TopicFactory topic() {
+            return context.requestFactory()
+                          .topic();
+        }
+
+        @Test
+        @DisplayName("for entity states")
+        void forEntityStates() {
+            Topic topic = topic().allOf(BbProject.class);
+            SubscriptionFixture subscription = context.subscribeTo(topic);
+
+            BbProjectId id = newProjectId();
+            context.receivesCommand(createProject(id));
+
+            BbProject expected = BbProject
+                    .newBuilder()
+                    .setId(id)
+                    .build();
+            subscription.assertEntityStates()
+                        .comparingExpectedFieldsOnly()
+                        .containsExactly(expected);
+        }
+
+        @Test
+        @DisplayName("for event messages")
+        void forEventMessages() {
+            Topic topic = topic().allOf(BbProjectCreated.class);
+            SubscriptionFixture subscription = context.subscribeTo(topic);
+
+            BbProjectId id = newProjectId();
+            context.receivesCommand(createProject(id));
+
+            BbProjectCreated expected = BbProjectCreated
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            subscription.assertEventMessages()
+                        .comparingExpectedFieldsOnly()
+                        .containsExactly(expected);
+        }
     }
 
     @Nested

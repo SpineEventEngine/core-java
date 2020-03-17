@@ -18,22 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+package io.spine.testing.server.query;
 
-final def spineVersion = '1.5.1'
+import com.google.protobuf.Empty;
+import io.spine.base.Error;
+import io.spine.core.Event;
+import io.spine.core.Status;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
+final class GivenResponseStatus {
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = spineVersion
+    /** Prevents instantiation of this test env class. */
+    private GivenResponseStatus() {
+    }
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.5.0'
+    public static Status ok() {
+        Status status = Status
+                .newBuilder()
+                .setOk(Empty.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
+
+    public static Status error() {
+        Status status = Status
+                .newBuilder()
+                .setError(Error.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
+
+    public static Status rejection() {
+        Status status = Status
+                .newBuilder()
+                .setRejection(Event.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
 }

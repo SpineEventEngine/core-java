@@ -19,21 +19,13 @@
  */
 
 /**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
+ * Tools that assess the {@code BlackBoxBoundedContext} state through
+ * {@link io.spine.client.Query Query} execution.
  */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server.query;
 
-final def spineVersion = '1.5.1'
+import com.google.errorprone.annotations.CheckReturnValue;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = spineVersion
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.5.0'
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -18,22 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+package io.spine.server.entity.given.repository;
 
-final def spineVersion = '1.5.1'
+import io.spine.server.entity.LifecycleFlags;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
+public class GivenLifecycleFlags {
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = spineVersion
+    /** Prevent instantiation of this utility class. */
+    private GivenLifecycleFlags() {
+    }
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.5.0'
+    /**
+     * Creates an instance with archived flag set to {@code true}.
+     */
+    public static LifecycleFlags archived() {
+        return LifecycleFlags
+                .newBuilder()
+                .setArchived(true)
+                .build();
+    }
+
+    /**
+     * Creates an instance with deleted flag set to {@code true}.
+     */
+    public static LifecycleFlags deleted() {
+        return LifecycleFlags
+                .newBuilder()
+                .setDeleted(true)
+                .build();
+    }
 }

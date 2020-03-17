@@ -23,18 +23,13 @@ package io.spine.testing.server.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
-import io.spine.base.RejectionMessage;
 import io.spine.client.Query;
-import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
-import io.spine.client.Subscription;
 import io.spine.client.Topic;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
@@ -47,7 +42,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.QueryService;
-import io.spine.server.SubscriptionService;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
@@ -56,22 +50,16 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.event.EventStore;
 import io.spine.server.integration.IntegrationBroker;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.CommandErrored;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.client.blackbox.Acknowledgements;
-import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.SubscriptionActivator;
-import io.spine.testing.server.SubscriptionObserver;
-import io.spine.testing.server.VerifyingCounter;
-import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
-import io.spine.testing.server.blackbox.verify.state.VerifyState;
-import io.spine.testing.server.blackbox.verify.subscription.ToProtoSubjects;
 import io.spine.testing.server.entity.EntitySubject;
+import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
 import io.spine.type.TypeName;
@@ -104,10 +92,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>Such a test suite would send commands or events to the Bounded Context under the test,
  * and then verify consequences of handling a command or an event.
- *
- * <p>Handling a command or an event usually results in {@link VerifyEvents emitted events}) and
- * {@linkplain VerifyState updated state} of an entity. This class provides API for testing such
- * effects.
  *
  * @param <T>
  *         the type of a sub-class for return type covariance
@@ -151,8 +135,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      *
      * <p>These events are filtered out from those stored in the Bounded Context to
      * collect only the emitted events, which are used for assertions.
-     *
-     * @see #emittedEvents()
      */
     private final Set<Event> postedEvents;
 
@@ -371,12 +353,25 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /** Obtains {@code event bus} instance used by this bounded context. */
-    public EventBus eventBus() {
+    @VisibleForTesting
+    EventBus eventBus() {
         return context.eventBus();
     }
 
+    /**
+     * Appends the passed event to the history of the context under the test.
+     */
+    public T append(Event event) {
+        checkNotNull(event);
+        EventStore eventStore = context.eventBus()
+                                       .eventStore();
+        eventStore.append(event);
+        return thisRef();
+    }
+
     /** Obtains {@code command bus} instance used by this bounded context. */
-    public CommandBus commandBus() {
+    @VisibleForTesting
+    CommandBus commandBus() {
         return context.commandBus();
     }
 
@@ -640,104 +635,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         return thisRef();
     }
 
-    /**
-     * Asserts that an event of the passed class was emitted once.
-     *
-     * @param eventClass
-     *         the class of events to verify
-     * @return current instance
-     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertEmitted(Class<? extends EventMessage> eventClass) {
-        assertEvents()
-                .withType(eventClass)
-                .hasSize(1);
-        return thisRef();
-    }
-
-    /**
-     * Asserts that a rejection of the passed class was emitted once.
-     *
-     * @param rejectionClass
-     *         the class of the rejection to verify
-     * @return current instance
-     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
-        return assertEmitted(rejectionClass);
-    }
-
-    /**
-     * Verifies emitted events by the passed verifier.
-     *
-     * @param verifier
-     *         a verifier that checks the events emitted in this Bounded Context
-     * @return current instance
-     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyEvents verifier) {
-        EmittedEvents events = emittedEvents();
-        verifier.verify(events);
-        return thisRef();
-    }
-
-    /**
-     * Executes the provided verifier, which throws an assertion error in case of
-     * unexpected results.
-     *
-     * @param verifier
-     *         a verifier that checks the acknowledgements in this Bounded Context
-     * @return current instance
-     * @deprecated verify command outcome instead of acknowledgements; to be removed in future
-     *         versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyAcknowledgements verifier) {
-        Acknowledgements acks = commandAcknowledgements(observer);
-        verifier.verify(acks);
-        return thisRef();
-    }
-
-    /**
-     * Verifies emitted commands by the passed verifier.
-     *
-     * @param verifier
-     *         a verifier that checks the commands emitted in this Bounded Context
-     * @return current instance
-     * @deprecated use {@link #assertCommands()} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyCommands verifier) {
-        EmittedCommands commands = emittedCommands();
-        verifier.verify(commands);
-        return thisRef();
-    }
-
-    /**
-     * Asserts the state of an entity using the specified tenant ID.
-     *
-     * @param verifier
-     *         a verifier of entity states
-     * @return current instance
-     * @deprecated use {@link #assertEntity}, {@link #assertEntityWithState},
-     *         or {@link #assertQueryResult} instead; to be removed in future versions
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyState verifier) {
-        QueryFactory queryFactory = requestFactory().query();
-        verifier.verify(context, queryFactory);
-        return thisRef();
-    }
-
     private BlackBoxSetup setup() {
         return new BlackBoxSetup(context, requestFactory(), observer);
     }
@@ -765,15 +662,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Obtains the request factory to operate with.
      */
-    protected abstract TestActorRequestFactory requestFactory();
-
-    /**
-     * Obtains commands emitted in the bounded context.
-     */
-    private EmittedCommands emittedCommands() {
-        List<Command> allWithoutPosted = commands();
-        return new EmittedCommands(allWithoutPosted);
-    }
+    abstract TestActorRequestFactory requestFactory();
 
     /**
      * Obtains immutable list of commands generated in this Bounded Context in response to posted
@@ -813,27 +702,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Selects commands that belong to the current tenant.
      */
-    protected abstract ImmutableList<Command> select(CommandCollector collector);
-
-    /**
-     * Obtains acknowledgements of {@linkplain #emittedCommands()
-     * emitted commands}.
-     */
-    private static Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
-        List<Ack> acknowledgements = observer.responses();
-        return new Acknowledgements(acknowledgements);
-    }
-
-    /**
-     * Obtains events emitted in the Bounded Context.
-     *
-     * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
-     * calls.
-     */
-    private EmittedEvents emittedEvents() {
-        List<Event> allWithoutPosted = events();
-        return new EmittedEvents(allWithoutPosted);
-    }
+    abstract ImmutableList<Command> select(CommandCollector collector);
 
     /**
      * Obtains immutable list of events generated in this Bounded Context in response to posted
@@ -876,7 +745,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Selects events that belong to the current tenant.
      */
-    protected abstract ImmutableList<Event> select(EventCollector collector);
+    abstract ImmutableList<Event> select(EventCollector collector);
 
     private static EventEnricher emptyEnricher() {
         return EventEnricher.newBuilder()
@@ -957,43 +826,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /**
-     * Subscribes to the {@code topic} and verifies the incoming updates.
-     *
-     * <p>The verification happens on a per-item basis, where item is a single entity state or
-     * event update represented as {@link ProtoSubject}.
-     *
-     * <p>The returned value allows to check the number of updates received.
-     *
-     * <p>The method may be used as follows:
-     * <pre>
-     * VerifyingCounter updateCounter =
-     *         context.assertSubscriptionUpdates(
-     *                 topic,
-     *                 assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
-     *                                                         .isEqualTo(expected)
-     *         );
-     * context.receivesCommand(createProject); // Some command creating the `expected`.
-     * updateCounter.verifyEquals(1);
-     * </pre>
-     *
-     * <p>Please note that the return value may be ignored, but then receiving {@code 0} incoming
-     * updates will count as valid and won't fail the test.
+     * Subscribes and activates the subscription to the passed topic.
+     * @param topic
+     *          the topic of the subscription
+     * @return a fixture for testing subscription updates.
      */
-    @CanIgnoreReturnValue
-    public VerifyingCounter
-    assertSubscriptionUpdates(Topic topic, Consumer<ProtoSubject> assertEachReceived) {
-        SubscriptionService subscriptionService =
-                SubscriptionService.newBuilder()
-                                   .add(context)
-                                   .build();
-        SubscriptionObserver updateObserver = new SubscriptionObserver(
-                update -> new ToProtoSubjects().apply(update)
-                                               .forEach(assertEachReceived)
-        );
-        StreamObserver<Subscription> activator =
-                new SubscriptionActivator(subscriptionService, updateObserver);
-
-        subscriptionService.subscribe(topic, activator);
-        return updateObserver.counter();
+    public SubscriptionFixture subscribeTo(Topic topic) {
+        SubscriptionFixture result = new SubscriptionFixture(context, topic);
+        result.activate();
+        return result;
     }
 }
