@@ -21,8 +21,12 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.spine.base.Error;
 import io.spine.core.CommandValidationError;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.CommandErrored;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -33,10 +37,13 @@ import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * A guard that verifies that the commands posted to the {@link BlackBoxBoundedContext} are not the
+ * Verifies that the commands posted to the {@link BlackBoxBoundedContext} are not the
  * {@linkplain io.spine.server.bus.DeadMessageHandler "dead"} messages.
+ *
+ * <p>The guard subscribes to {@link CommandErrored} event.
+ * It does not subscribe to external events.
  */
-final class UnsupportedCommandGuard {
+final class UnsupportedCommandGuard extends AbstractEventSubscriber {
 
     private static final String COMMAND_VALIDATION_ERROR_TYPE =
             CommandValidationError.getDescriptor()
@@ -45,17 +52,38 @@ final class UnsupportedCommandGuard {
     /** The name of the guarded Bounded Context. */
     private final String context;
 
-    /** A command type for which the violation occurs in printable form. */
+    /**
+     * A name of the command type for which the violation occurs in printable form.
+     *
+     * @see #checkAndRemember(CommandErrored)
+     */
     private @Nullable String commandType;
 
     UnsupportedCommandGuard(String context) {
+        super();
         this.context = context;
+    }
+
+    @Override
+    public ImmutableSet<EventClass> messageClasses() {
+        return EventClass.setOf(CommandErrored.class);
+    }
+
+    /**
+     * Checks if the given {@link CommandErrored} message represents an unsupported command
+     * {@linkplain io.spine.server.commandbus.UnsupportedCommandException error}.
+     */
+    @Override
+    public boolean canDispatch(EventEnvelope eventEnvelope) {
+        CommandErrored event = (CommandErrored) eventEnvelope.message();
+        return checkAndRemember(event);
     }
 
     /**
      * Checks if the given {@link CommandErrored} event represents an "unsupported" error and,
      * if so, remembers its data.
      */
+    @VisibleForTesting
     boolean checkAndRemember(CommandErrored event) {
         Error error = event.getError();
         if (!isUnsupportedError(error)) {
@@ -67,13 +95,29 @@ final class UnsupportedCommandGuard {
         return true;
     }
 
+    private static boolean isUnsupportedError(Error error) {
+        return COMMAND_VALIDATION_ERROR_TYPE.equals(error.getType())
+                && error.getCode() == UNSUPPORTED_COMMAND_VALUE;
+    }
+
+    /**
+     * Throws an {@link AssertionError}.
+     *
+     * <p>Only reachable after unsupported command error
+     * {@linkplain #canDispatch(EventEnvelope) is detected}.
+     */
+    @Override
+    protected void handle(EventEnvelope event) {
+        failTest();
+    }
+
     /**
      * Throws an {@link AssertionError}.
      *
      * <p>The method is assumed to be called after a violation was found for some
      * {@link #commandType}.
      */
-    void failTest() {
+    private void failTest() {
         checkNotNull(commandType);
         String msg = format(
                 "The command type `%s` does not have a handler in the context `%s`.",
@@ -83,12 +127,27 @@ final class UnsupportedCommandGuard {
     }
 
     @VisibleForTesting
-    String commandType() {
+    @Nullable String commandType() {
         return commandType;
     }
 
-    private static boolean isUnsupportedError(Error error) {
-        return COMMAND_VALIDATION_ERROR_TYPE.equals(error.getType())
-                && error.getCode() == UNSUPPORTED_COMMAND_VALUE;
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code BlackBoxBoundedContext} only consumes domestic events.
+     */
+    @Override
+    public ImmutableSet<EventClass> domesticEventClasses() {
+        return eventClasses();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code BlackBoxBoundedContext} does not consume external events.
+     */
+    @Override
+    public ImmutableSet<EventClass> externalEventClasses() {
+        return ImmutableSet.of();
     }
 }

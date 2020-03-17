@@ -22,7 +22,6 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -46,15 +45,11 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStore;
 import io.spine.server.integration.IntegrationBroker;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.CommandErrored;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
@@ -105,7 +100,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "OverlyCoupledClass"})
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>>
-        extends AbstractEventSubscriber
         implements Logging {
 
     private final BoundedContext context;
@@ -140,20 +134,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
 
     private final MemoizingObserver<Ack> observer;
 
-    /**
-     * A guard that verifies that unsupported commands do not get posted to the
-     * {@code BlackBoxBoundedContext}.
-     */
-    private final UnsupportedCommandGuard unsupportedCommandGuard;
-
     private final Map<Class<? extends EntityState>, Repository<?, ?>> repositories;
 
     private Actor actor;
 
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // to inject self as event dispatcher.
-    protected BlackBoxBoundedContext(boolean multitenant,
-                                     EventEnricher enricher,
-                                     String name) {
+    protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher, String name) {
         super();
         this.commands = new CommandCollector();
         this.postedCommands = synchronizedSet(new HashSet<>());
@@ -169,9 +154,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
                 .enrichEventsUsing(enricher)
                 .build();
         this.observer = memoizingObserver();
-        this.unsupportedCommandGuard = new UnsupportedCommandGuard(name);
         this.repositories = newHashMap();
-        this.context.registerEventDispatcher(this);
+        this.context.registerEventDispatcher(new UnsupportedCommandGuard(name));
         this.context.registerEventDispatcher(DiagnosticLog.instance());
         this.actor = defaultActor();
     }
@@ -261,52 +245,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         return result;
     }
 
-    /**
-     * Throws an {@link AssertionError}.
-     *
-     * <p>Only reachable after {@code unsupportedGuard} has
-     * {@linkplain #canDispatch(EventEnvelope) detected} a violation.
-     */
-    @Override
-    protected void handle(EventEnvelope event) {
-        unsupportedCommandGuard.failTest();
-    }
-
-    /**
-     * Checks if the given {@link CommandErrored} message represents an unsupported command
-     * {@linkplain io.spine.server.commandbus.UnsupportedCommandException error}.
-     */
-    @Override
-    public boolean canDispatch(EventEnvelope eventEnvelope) {
-        CommandErrored event = (CommandErrored) eventEnvelope.message();
-        return unsupportedCommandGuard.checkAndRemember(event);
-    }
-
-    @Override
-    public ImmutableSet<EventClass> messageClasses() {
-        return EventClass.setOf(CommandErrored.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The {@code BlackBoxBoundedContext} only consumes domestic events.
-     */
-    @Override
-    public ImmutableSet<EventClass> domesticEventClasses() {
-        return eventClasses();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The {@code BlackBoxBoundedContext} does not consume external events.
-     */
-    @Override
-    public ImmutableSet<EventClass> externalEventClasses() {
-        return ImmutableSet.of();
-    }
-
     /** Obtains the name of this bounded context. */
     public BoundedContextName name() {
         return context.name();
@@ -361,6 +299,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Appends the passed event to the history of the context under the test.
      */
+    @CanIgnoreReturnValue
     public T append(Event event) {
         checkNotNull(event);
         EventStore eventStore = context.eventBus()
