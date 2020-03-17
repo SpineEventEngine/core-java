@@ -154,7 +154,7 @@ class NastyClient {
 
 
     /**
-     * Returns the number of calls to  {@link #doLoadOrCreate(String)} method there were.
+     * Returns the number of calls to {@link #doLoadOrCreate(String)} method there were.
      *
      * @param id
      *         identifier of the {@link CalcAggregate}, calls to which are counted
