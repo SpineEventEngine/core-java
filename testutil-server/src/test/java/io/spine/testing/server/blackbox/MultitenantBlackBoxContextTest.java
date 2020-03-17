@@ -49,7 +49,7 @@ class MultitenantBlackBoxContextTest
         TenantId newUser = generate();
         BbCreateProject createJohnProject = createProject();
         BbCreateProject createCarlProject = createProject();
-        MultitenantBlackBoxContext context = boundedContext()
+        MultitenantBlackBoxContext context = context()
                 // Create a project for John.
                 .withTenant(john)
                 .receivesCommand(createJohnProject)

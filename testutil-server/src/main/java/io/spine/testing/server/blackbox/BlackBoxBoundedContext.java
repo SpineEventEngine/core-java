@@ -329,6 +329,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /**
+     * Obtains repositories registered with the context.
+     */
+    @VisibleForTesting
+    Collection<Repository<?, ?>> repositories() {
+        return repositories.values();
+    }
+
+    /**
      * Obtains set of type names of entities known to this Bounded Context.
      */
     @VisibleForTesting

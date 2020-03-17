@@ -132,7 +132,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
      */
     abstract BlackBoxBoundedContext<T> newInstance();
 
-    T boundedContext() {
+    final T context() {
         return context;
     }
 
@@ -494,15 +494,34 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(false)
                     .enrichEventsUsing(enricher);
+            assertBlackBox(builder, SingleTenantBlackBoxContext.class);
+        }
+
+        @Test
+        void multiTenant() {
+            BoundedContextBuilder builder = BoundedContextBuilder
+                    .assumingTests(true)
+                    .enrichEventsUsing(enricher);
+            assertBlackBox(builder, MultitenantBlackBoxContext.class);
+        }
+
+        private void assertBlackBox(BoundedContextBuilder builder,
+                                    Class<? extends BlackBoxBoundedContext<?>> clazz) {
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);
             blackBox = BlackBoxBoundedContext.from(builder);
 
-            assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
+            assertThat(blackBox).isInstanceOf(clazz);
+            assertRepositories();
             assertEntityTypes();
             assertDispatchers();
             assertEnricher();
+        }
+
+        private void assertRepositories() {
+            assertThat(blackBox.repositories())
+                    .containsAnyIn(repositories);
         }
 
         private void assertEntityTypes() {
@@ -517,22 +536,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private void assertEnricher() {
             assertThat(blackBox.eventBus().enricher()).hasValue(enricher);
-        }
-
-        @Test
-        void multiTenant() {
-            BoundedContextBuilder builder = BoundedContextBuilder
-                    .assumingTests(true)
-                    .enrichEventsUsing(enricher);
-            repositories.forEach(builder::add);
-            builder.addCommandDispatcher(commandDispatcher);
-            builder.addEventDispatcher(eventDispatcher);
-            blackBox = BlackBoxBoundedContext.from(builder);
-
-            assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
-            assertEntityTypes();
-            assertDispatchers();
-            assertEnricher();
         }
 
         /**
