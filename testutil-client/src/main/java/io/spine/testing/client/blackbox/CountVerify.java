@@ -53,7 +53,6 @@ final class CountVerify extends VerifyAcknowledgements {
      * Compares two integers returning a string stating if the first value is less, more or
      * same number as the second.
      */
-    @SuppressWarnings("DuplicateStringLiteralInspection")
     private static String compare(int firstValue, int secondValue) {
         if (firstValue > secondValue) {
             return "more";
