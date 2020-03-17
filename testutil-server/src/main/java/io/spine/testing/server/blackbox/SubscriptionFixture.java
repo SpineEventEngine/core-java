@@ -41,6 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.client.SubscriptionUpdate.UpdateCase.ENTITY_UPDATES;
 import static io.spine.client.SubscriptionUpdate.UpdateCase.EVENT_UPDATES;
+import static java.util.Collections.synchronizedList;
 
 /**
  * Allows to assert updates received on a subscription.
@@ -49,7 +50,7 @@ public final class SubscriptionFixture {
 
     private final BoundedContext context;
     private final Topic topic;
-    private final List<SubscriptionUpdate> updates = new ArrayList<>();
+    private final List<SubscriptionUpdate> updates = synchronizedList(new ArrayList<>());
 
     SubscriptionFixture(BoundedContext context, Topic topic) {
         this.context = checkNotNull(context);
