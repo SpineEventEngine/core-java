@@ -63,13 +63,14 @@ class EventRoutingIntegrationTest {
                 .setUserConsentRequested(true)
                 .build();
 
-        BlackBoxBoundedContext.singleTenant()
-                              .with(DefaultRepository.of(UserAggregate.class))
-                              .with(new SessionRepository())
-                              .receivesEvent(event)
-                              .assertEntity(SessionProjection.class, sessionId)
-                              .hasStateThat()
-                              .comparingExpectedFieldsOnly()
-                              .isEqualTo(session);
+        BlackBoxBoundedContext
+                .assumingTests()
+                .with(DefaultRepository.of(UserAggregate.class))
+                .with(new SessionRepository())
+                .receivesEvent(event)
+                .assertEntity(SessionProjection.class, sessionId)
+                .hasStateThat()
+                .comparingExpectedFieldsOnly()
+                .isEqualTo(session);
     }
 }

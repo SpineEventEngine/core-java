@@ -32,7 +32,6 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -161,9 +160,9 @@ class LoggingEntityTest {
                     .isInstanceOf(UnknownBook.class);
     }
 
-    private static SingleTenantBlackBoxContext context() {
+    private static BlackBoxBoundedContext<?> context() {
         return BlackBoxBoundedContext
-                .singleTenant()
+                .assumingTests()
                 .with(DefaultRepository.of(CardAggregate.class));
     }
 

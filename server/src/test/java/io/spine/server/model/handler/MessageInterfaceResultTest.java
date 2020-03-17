@@ -46,8 +46,9 @@ class MessageInterfaceResultTest {
 
     @BeforeEach
     void createContext() {
-        context = BlackBoxBoundedContext.singleTenant()
-                                         .with(DefaultRepository.of(RoverBot.class));
+        context = BlackBoxBoundedContext
+                .assumingTests()
+                .with(DefaultRepository.of(RoverBot.class));
     }
 
     @AfterEach

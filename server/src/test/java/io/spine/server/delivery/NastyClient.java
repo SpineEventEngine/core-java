@@ -98,7 +98,7 @@ class NastyClient {
      */
     void runWith(Set<String> targets) {
         BlackBoxBoundedContext<?> context =
-                BlackBoxBoundedContext.singleTenant()
+                BlackBoxBoundedContext.assumingTests()
                                       .with(repository);
 
         DeliveryTestEnv.SignalMemoizer memoizer = subscribeToDelivered();
@@ -226,7 +226,7 @@ class NastyClient {
         }
     }
 
-    private void postAsync(BlackBoxBoundedContext context,
+    private void postAsync(BlackBoxBoundedContext<?> context,
                            List<AddNumber> commands,
                            List<NumberImported> eventsToImport,
                            List<NumberReacted> eventsToReact) {
@@ -266,8 +266,8 @@ class NastyClient {
         }
     }
 
-    private static Stream<Callable<Object>> commandCallables(BlackBoxBoundedContext context,
-                                                             List<AddNumber> commands) {
+    private static Stream<Callable<Object>>
+    commandCallables(BlackBoxBoundedContext<?> context, List<AddNumber> commands) {
         return commands.stream()
                        .map((c) -> () -> {
                            context.receivesCommand(c);
@@ -275,8 +275,8 @@ class NastyClient {
                        });
     }
 
-    private static Stream<Callable<Object>> importEventCallables(BlackBoxBoundedContext context,
-                                                                 List<NumberImported> events) {
+    private static Stream<Callable<Object>>
+    importEventCallables(BlackBoxBoundedContext<?> context, List<NumberImported> events) {
         return events.stream()
                      .map((e) -> () -> {
                          context.importsEvent(e);
@@ -284,8 +284,8 @@ class NastyClient {
                      });
     }
 
-    private static Stream<Callable<Object>> reactEventsCallables(BlackBoxBoundedContext context,
-                                                                 List<NumberReacted> events) {
+    private static Stream<Callable<Object>>
+    reactEventsCallables(BlackBoxBoundedContext<?> context, List<NumberReacted> events) {
         return events.stream()
                      .map((e) -> () -> {
                          context.receivesEvent(e);

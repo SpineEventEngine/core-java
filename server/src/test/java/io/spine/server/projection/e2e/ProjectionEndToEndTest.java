@@ -53,7 +53,6 @@ import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -86,7 +85,7 @@ class ProjectionEndToEndTest {
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
         BlackBoxBoundedContext
-                .singleTenant()
+                .assumingTests()
                 .with(new EntitySubscriberProjection.Repository(),
                       new TestProjection.Repository())
                 .receivesEventsProducedBy(producerId,
@@ -108,12 +107,16 @@ class ProjectionEndToEndTest {
     @DisplayName("receive entity state updates of entities of other context")
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
-        SingleTenantBlackBoxContext sender = BlackBoxBoundedContext
-                .singleTenant("Organizations")
-                .with(new OrganizationProjection.Repository());
-        SingleTenantBlackBoxContext receiver = BlackBoxBoundedContext
-                .singleTenant("Groups")
-                .with(new GroupNameProjection.Repository());
+
+        BlackBoxBoundedContext<?> sender = BlackBoxBoundedContext.from(
+                BoundedContext.singleTenant("Organizations")
+                              .add(new OrganizationProjection.Repository())
+        );
+        BlackBoxBoundedContext<?> receiver = BlackBoxBoundedContext.from(
+                BoundedContext.singleTenant("Groups")
+                .add(new GroupNameProjection.Repository())
+        );
+
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId, established);
         GroupId groupId = GroupId

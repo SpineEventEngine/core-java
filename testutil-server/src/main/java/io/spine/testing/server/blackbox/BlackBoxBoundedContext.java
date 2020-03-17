@@ -102,6 +102,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>>
         implements Logging {
 
+    /** The context under the test. */
     private final BoundedContext context;
 
     /**
@@ -161,58 +162,101 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /**
-     * Creates a single-tenant instance with the default configuration.
+     * Creates a test-only single-tenant context.
      */
+    public static BlackBoxBoundedContext<?> assumingTests() {
+        return singleTenant();
+    }
+
+    /**
+     * Creates a test-only multi-tenant context.
+     */
+    public static BlackBoxBoundedContext<?> assumingTestsMultiTenant() {
+        return internalMultiTenant(assumingTestsValue(), emptyEnricher());
+    }
+
+    /**
+     * Creates a single-tenant instance with the default configuration.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)} or {@link #assumingTests()}
+     */
+    @Deprecated
     public static SingleTenantBlackBoxContext singleTenant() {
         return singleTenant(emptyEnricher());
     }
 
     /**
      * Creates a single-tenant instance with the specified name.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static SingleTenantBlackBoxContext singleTenant(String name) {
         return singleTenant(name, emptyEnricher());
     }
 
     /**
      * Creates a single-tenant instance with the specified enricher.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static SingleTenantBlackBoxContext singleTenant(EventEnricher enricher) {
         return singleTenant(assumingTestsValue(), enricher);
     }
 
     /**
      * Creates a single-tenant instance with the specified name and enricher.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static SingleTenantBlackBoxContext singleTenant(String name, EventEnricher enricher) {
         return new SingleTenantBlackBoxContext(name, enricher);
     }
 
     /**
      * Creates a multitenant instance the default configuration.
+     *
+     * @deprecated please use {@link #assumingTestsMultiTenant()}
      */
+    @Deprecated
     public static MultitenantBlackBoxContext multiTenant() {
         return multiTenant(emptyEnricher());
     }
 
     /**
      * Creates a multitenant instance with the specified name.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static MultitenantBlackBoxContext multiTenant(String name) {
         return multiTenant(name, emptyEnricher());
     }
 
     /**
      * Creates a multitenant instance with the specified enricher.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static MultitenantBlackBoxContext multiTenant(EventEnricher enricher) {
         return multiTenant(assumingTestsValue(), enricher);
     }
 
     /**
      * Creates a multitenant instance with the specified name and enricher.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static MultitenantBlackBoxContext multiTenant(String name, EventEnricher enricher) {
+        return internalMultiTenant(name, enricher);
+    }
+
+    private static MultitenantBlackBoxContext
+    internalMultiTenant(String name, EventEnricher enricher) {
         return new MultitenantBlackBoxContext(name, enricher);
     }
 
@@ -230,10 +274,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         EventEnricher enricher =
                 builder.eventEnricher()
                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
+        String name = builder.name()
+                             .value();
         BlackBoxBoundedContext<?> result =
                 builder.isMultitenant()
-                ? multiTenant(enricher)
-                : singleTenant(enricher);
+                ? internalMultiTenant(name, enricher)
+                : singleTenant(name, enricher);
 
         builder.repositories()
                .forEach(result::with);
@@ -302,8 +348,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     @CanIgnoreReturnValue
     public T append(Event event) {
         checkNotNull(event);
-        EventStore eventStore = context.eventBus()
-                                       .eventStore();
+        EventStore eventStore =
+                context.eventBus()
+                       .eventStore();
         eventStore.append(event);
         return thisRef();
     }
@@ -333,8 +380,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     private void remember(Repository<?, ?> repository) {
-        Class<? extends EntityState> stateClass = repository.entityModelClass()
-                                                            .stateClass();
+        Class<? extends EntityState> stateClass =
+                repository.entityModelClass()
+                          .stateClass();
         repositories.put(stateClass, repository);
     }
 

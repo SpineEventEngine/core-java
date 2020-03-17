@@ -73,7 +73,6 @@ import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -313,24 +312,23 @@ class ProcessManagerTest {
     @DisplayName("rollback state on")
     class RollbackOn {
 
-        private SingleTenantBlackBoxContext boundedContext;
+        private BlackBoxBoundedContext<?> context;
 
         @BeforeEach
         void setUp() {
-            boundedContext = BlackBoxBoundedContext.singleTenant()
-                                                   .with(new TestProcessManagerRepo());
+            context = BlackBoxBoundedContext.assumingTests()
+                                            .with(new TestProcessManagerRepo());
         }
 
         @AfterEach
         void tearDown() {
-            boundedContext.close();
+            context.close();
         }
 
         @Test
         @DisplayName("rejection")
         void rejection() {
-            SingleTenantBlackBoxContext context =
-                    boundedContext.receivesCommand(throwEntityAlreadyArchived());
+            context.receivesCommand(throwEntityAlreadyArchived());
             context.assertEvents()
                    .withType(StandardRejections.EntityAlreadyArchived.class)
                    .hasSize(1);
@@ -341,8 +339,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("exception")
         void exception() {
-            SingleTenantBlackBoxContext context =
-                    boundedContext.receivesCommand(throwRuntimeException());
+            context.receivesCommand(throwRuntimeException());
             context.assertEntity(TestProcessManager.class, TestProcessManager.ID)
                    .doesNotExist();
         }
@@ -352,17 +349,18 @@ class ProcessManagerTest {
     @DisplayName("create command(s)")
     class CommandCreation {
 
-        private SingleTenantBlackBoxContext boundedContext;
+        private BlackBoxBoundedContext<?> context;
 
         @BeforeEach
         void setUp() {
-            boundedContext = BlackBoxBoundedContext.singleTenant()
-                                                   .with(new TestProcessManagerRepo());
+            context = BlackBoxBoundedContext
+                    .assumingTests()
+                    .with(new TestProcessManagerRepo());
         }
 
         @AfterEach
         void tearDown() {
-            boundedContext.close();
+            context.close();
         }
 
         @Nested
@@ -377,10 +375,10 @@ class ProcessManagerTest {
             @Test
             @DisplayName("by transform incoming command")
             void transformCommand() {
-                boundedContext.receivesCommand(startProject())
-                              .assertCommands()
-                              .withType(PmAddTask.class)
-                              .hasSize(1);
+                context.receivesCommand(startProject())
+                       .assertCommands()
+                       .withType(PmAddTask.class)
+                       .hasSize(1);
             }
 
             /**
@@ -391,19 +389,19 @@ class ProcessManagerTest {
             @Test
             @DisplayName("on incoming event")
             void commandOnEvent() {
-                boundedContext.receivesEvent(ownerChanged())
-                              .assertCommands()
-                              .withType(PmReviewBacklog.class)
-                              .hasSize(1);
+                context.receivesEvent(ownerChanged())
+                       .assertCommands()
+                       .withType(PmReviewBacklog.class)
+                       .hasSize(1);
             }
 
             @Test
             @DisplayName("on incoming external event")
             void commandOnExternalEvent() {
-                boundedContext.receivesExternalEvent(quizStarted())
-                              .assertCommands()
-                              .withType(PmCreateProject.class)
-                              .hasSize(1);
+                context.receivesExternalEvent(quizStarted())
+                       .assertCommands()
+                       .withType(PmCreateProject.class)
+                       .hasSize(1);
             }
         }
 
@@ -419,8 +417,8 @@ class ProcessManagerTest {
             @Test
             @DisplayName("when splitting incoming command")
             void splitCommand() {
-                CommandSubject assertCommands = boundedContext.receivesCommand(cancelIteration())
-                                                              .assertCommands();
+                CommandSubject assertCommands = context.receivesCommand(cancelIteration())
+                                                       .assertCommands();
                 assertCommands.withType(PmScheduleRetrospective.class)
                               .hasSize(1);
                 assertCommands.withType(PmPlanIteration.class)
@@ -435,18 +433,18 @@ class ProcessManagerTest {
             @Test
             @DisplayName("when command is generated")
             void commandGenerated() {
-                boundedContext.receivesEvent(iterationPlanned(true))
-                              .assertCommands()
-                              .withType(PmStartIteration.class)
-                              .hasSize(1);
+                context.receivesEvent(iterationPlanned(true))
+                       .assertCommands()
+                       .withType(PmStartIteration.class)
+                       .hasSize(1);
             }
 
             @Test
             @DisplayName("when command is NOT generated")
             void noCommand() {
-                boundedContext.receivesEvent(iterationPlanned(false))
-                              .assertCommands()
-                              .isEmpty();
+                context.receivesEvent(iterationPlanned(false))
+                       .assertCommands()
+                       .isEmpty();
             }
         }
     }
@@ -508,8 +506,8 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            SingleTenantBlackBoxContext context = BlackBoxBoundedContext
-                    .singleTenant();
+            BlackBoxBoundedContext<?> context = BlackBoxBoundedContext
+                    .assumingTests();
             EventSubject assertEvents = context
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)

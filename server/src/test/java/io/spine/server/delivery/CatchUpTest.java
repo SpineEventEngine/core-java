@@ -38,7 +38,6 @@ import io.spine.test.delivery.EmitNextNumber;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -255,7 +254,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         ConsecutiveProjection.Repo projectionRepo = new ConsecutiveProjection.Repo();
         Repository<String, ConsecutiveNumberProcess> pmRepo =
                 DefaultRepository.of(ConsecutiveNumberProcess.class);
-        SingleTenantBlackBoxContext ctx = BlackBoxBoundedContext.singleTenant()
+        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext.assumingTests()
                                                                 .with(projectionRepo)
                                                                 .with(pmRepo);
         List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
@@ -323,8 +322,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
         return commands;
     }
 
-    private static List<Callable<Object>> asPostCommandJobs(SingleTenantBlackBoxContext ctx,
-                                                            List<EmitNextNumber> commands) {
+    private static List<Callable<Object>>
+    asPostCommandJobs(BlackBoxBoundedContext<?> ctx, List<EmitNextNumber> commands) {
         return commands.stream()
                        .map(cmd -> (Callable<Object>) () -> ctx.receivesCommand(cmd))
                        .collect(toList());

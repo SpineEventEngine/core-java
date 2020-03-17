@@ -607,7 +607,7 @@ class ProcessManagerRepositoryTest
                 .setProjectId(projectId)
                 .build();
         BlackBoxBoundedContext
-                .singleTenant()
+                .assumingTests()
                 .with(new EventDiscardingProcManRepository())
                 .receivesCommand(command)
                 .assertEvents()
@@ -705,7 +705,6 @@ class ProcessManagerRepositoryTest
                 .containsExactly(id1, id2);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked with `assertThat`.
     @Test
     @DisplayName("archive entity via migration")
     void archiveEntityViaMigration() {
@@ -720,7 +719,6 @@ class ProcessManagerRepositoryTest
         assertThat(found.get().isArchived()).isTrue();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked with `assertThat`.
     @Test
     @DisplayName("delete entity via migration")
     void deleteEntityViaMigration() {

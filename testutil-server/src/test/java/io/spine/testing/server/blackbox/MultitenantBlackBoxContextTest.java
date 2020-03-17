@@ -26,7 +26,6 @@ import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
@@ -38,20 +37,8 @@ class MultitenantBlackBoxContextTest
 
     @Override
     MultitenantBlackBoxContext newInstance() {
-        return BlackBoxBoundedContext.multiTenant(getClass().getName())
-                                     .withTenant(generate());
-    }
-
-    @Test
-    @DisplayName("create builder instance with the context name")
-    void createByName() {
-        String name = getClass().getName();
-        MultitenantBlackBoxContext context =
-                BlackBoxBoundedContext.multiTenant(name);
-        assertThat(context)
-                .isNotNull();
-        assertThat(context.name().value())
-                .isEqualTo(name);
+        return ((MultitenantBlackBoxContext) BlackBoxBoundedContext.assumingTestsMultiTenant())
+                .withTenant(generate());
     }
 
     @Test
@@ -104,7 +91,7 @@ class MultitenantBlackBoxContextTest
         assertThrows(
                 IllegalStateException.class,
                 () -> BlackBoxBoundedContext
-                        .multiTenant()
+                        .assumingTestsMultiTenant()
                         .assertEntityWithState(BbProject.class, "verify state")
         );
     }

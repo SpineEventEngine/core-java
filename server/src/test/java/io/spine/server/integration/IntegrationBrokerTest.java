@@ -28,7 +28,6 @@ import io.spine.core.EventValidationError;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.given.BillingAggregate;
@@ -258,12 +257,15 @@ class IntegrationBrokerTest {
     @Test
     @DisplayName("send messages between two contexts regardless of registration order")
     void mutual() {
-        BlackBoxBoundedContext<?> photos = BlackBoxBoundedContext
-                .singleTenant("Photos-" + IntegrationBrokerTest.class.getSimpleName())
-                .with(DefaultRepository.of(PhotosProcMan.class));
-        BlackBoxBoundedContext<?> billing = BlackBoxBoundedContext
-                .singleTenant("Billing-" + IntegrationBrokerTest.class.getSimpleName())
-                .with(DefaultRepository.of(BillingAggregate.class));
+        String suffix = IntegrationBrokerTest.class.getSimpleName();
+        BlackBoxBoundedContext<?> photos = BlackBoxBoundedContext.from(
+                BoundedContext.singleTenant("Photos-" + suffix)
+                              .add(PhotosProcMan.class)
+        );
+        BlackBoxBoundedContext<?> billing = BlackBoxBoundedContext.from(
+                BoundedContext.singleTenant("Billing-" + suffix)
+                              .add(BillingAggregate.class)
+        );
         photos.receivesCommand(UploadPhotos.generate());
         assertReceived(photos, PhotosUploaded.class);
         assertReceived(billing, CreditsHeld.class);
