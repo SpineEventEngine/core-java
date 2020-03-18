@@ -38,8 +38,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Test fixture for multi-tenant Bounded Contexts.
  */
-final class MultiTenantContext
-        extends BlackBoxContext {
+final class MultiTenantContext extends BlackBoxContext {
 
     private @MonotonicNonNull TenantId tenantId;
 
@@ -79,7 +78,7 @@ final class MultiTenantContext
     }
 
     @Override
-    protected <D> @Nullable D readOperation(Supplier<D> supplier) {
+    protected <@Nullable D> D readOperation(Supplier<D> supplier) {
         TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId());
         D result = tenantAwareRunner.evaluate(() -> super.readOperation(supplier));
         return result;

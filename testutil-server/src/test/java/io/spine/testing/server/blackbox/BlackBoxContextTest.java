@@ -22,7 +22,6 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
@@ -639,36 +638,6 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             subscription.assertEventMessages()
                         .comparingExpectedFieldsOnly()
                         .containsExactly(expected);
-        }
-    }
-
-    @Nested
-    @DisplayName("Provide generated")
-    class Generated {
-
-        @BeforeEach
-        void postCommands() {
-            BbProjectId id = newProjectId();
-            context.receivesCommand(createProject(id))
-                   .receivesCommand(initProject(id, true)) ;
-        }
-
-        @Test
-        @DisplayName("event messages")
-        void eventMessages() {
-            IterableSubject assertEventMessages = assertThat(context.eventMessages());
-            assertEventMessages.isNotEmpty();
-            assertEventMessages.hasSize(context.events()
-                                               .size());
-        }
-
-        @Test
-        @DisplayName("command messages")
-        void commandMessages() {
-            IterableSubject assertCommandMessages = assertThat(context.commandMessages());
-            assertCommandMessages.isNotEmpty();
-            assertCommandMessages.hasSize(context.commands()
-                                                 .size());
         }
     }
 

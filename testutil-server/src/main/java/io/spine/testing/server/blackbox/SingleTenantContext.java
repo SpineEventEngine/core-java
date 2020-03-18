@@ -33,8 +33,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Test fixture for single-tenant Bounded Contexts.
  */
-final class SingleTenantContext
-        extends BlackBoxContext {
+final class SingleTenantContext extends BlackBoxContext {
 
     SingleTenantContext(String name, EventEnricher enricher) {
         super(name, false, enricher);

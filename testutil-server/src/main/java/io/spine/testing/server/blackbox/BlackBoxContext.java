@@ -37,7 +37,6 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.QueryService;
@@ -83,17 +82,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>Such a test suite would send commands or events to the Bounded Context under the test,
  * and then verify consequences of handling a command or an event.
- *
- * @apiNote It is expected that instances of classes derived from
- *         {@code BlackBoxBoundedContext} are obtained by factory
- *         methods provided by this class.
  */
 @SuppressWarnings({
         "ClassWithTooManyMethods",
         "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBoxContext
-        implements Logging {
+public abstract class BlackBoxContext implements Logging {
 
     /** The context under the test. */
     private final BoundedContext context;
@@ -157,7 +151,7 @@ public abstract class BlackBoxContext
                : new SingleTenantContext(name, enricher);
     }
 
-    protected BlackBoxContext(String name, boolean multitenant, EventEnricher enricher) {
+    BlackBoxContext(String name, boolean multitenant, EventEnricher enricher) {
         super();
         this.commands = new CommandCollector();
         this.postedCommands = synchronizedSet(new HashSet<>());
@@ -177,7 +171,7 @@ public abstract class BlackBoxContext
         this.actor = defaultActor();
     }
 
-    /** Obtains the name of this bounded context. */
+    /** Obtains the name of the context under the test. */
     public BoundedContextName name() {
         return context.name();
     }
@@ -218,7 +212,7 @@ public abstract class BlackBoxContext
     /**
      * Obtains the current {@link Actor}.
      */
-    protected final Actor actor() {
+    final Actor actor() {
         return this.actor;
     }
 
@@ -518,33 +512,14 @@ public abstract class BlackBoxContext
      *
      * <p>The returned list does <em>NOT</em> contain commands posted to this Bounded Context
      * during test setup.
-     *
-     * @see #commandMessages()
      */
-    public ImmutableList<Command> commands() {
+    private ImmutableList<Command> commands() {
         Predicate<Command> wasNotReceived =
                 ((Predicate<Command>) postedCommands::contains).negate();
         return select(this.commands)
                 .stream()
                 .filter(wasNotReceived)
                 .collect(toImmutableList());
-    }
-
-    /**
-     * Obtains immutable list of command messages generated in this Bounded Context in response
-     * to posted messages.
-     *
-     * <p>The returned list does <em>NOT</em> contain commands posted to this Bounded Context
-     * during test setup.
-     *
-     * @see #commands()
-     */
-    public ImmutableList<CommandMessage> commandMessages() {
-        return commands().stream()
-                         .map(Command::getMessage)
-                         .map(AnyPacker::unpack)
-                         .map(m -> (CommandMessage) m)
-                         .collect(toImmutableList());
     }
 
     /**
@@ -559,7 +534,7 @@ public abstract class BlackBoxContext
      * <p>The returned list does <em>NOT</em> contain events posted to this Bounded Context
      * during test setup.
      */
-    public ImmutableList<Event> events() {
+    private ImmutableList<Event> events() {
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         return select(this.events)
                 .stream()
@@ -573,21 +548,6 @@ public abstract class BlackBoxContext
     @VisibleForTesting
     ImmutableList<Event> allEvents() {
         return select(this.events);
-    }
-
-    /**
-     * Obtains immutable list of event messages generated in this Bounded Context in response
-     * to posted messages.
-     *
-     * <p>The returned list does <em>NOT</em> contain events posted to this Bounded Context
-     * during test setup.
-     *
-     * @see #events()
-     */
-    public List<EventMessage> eventMessages() {
-        return events().stream()
-                       .map(Event::enclosedMessage)
-                       .collect(toImmutableList());
     }
 
     /**
