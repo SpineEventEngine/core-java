@@ -268,11 +268,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
                 : singleTenant(name, enricher);
 
         builder.repositories()
-               .forEach(result::with);
+               .forEach(result::internalWith);
         builder.commandDispatchers()
-               .forEach(result::withHandlers);
+               .forEach(result::internalWithDispatchers);
         builder.eventDispatchers()
-               .forEach(result::withEventDispatchers);
+               .forEach(result::internalWithEventDispatchers);
 
         return result;
     }
@@ -367,6 +367,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     @Deprecated
     @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
+        return internalWith(repositories);
+    }
+
+    private T internalWith(Repository<?, ?>... repositories) {
         registerAll(this::registerRepository, repositories);
         return thisRef();
     }
@@ -395,6 +399,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     @Deprecated
     @CanIgnoreReturnValue
     public final T withHandlers(CommandDispatcher... dispatchers) {
+        return internalWithDispatchers(dispatchers);
+    }
+
+    private T internalWithDispatchers(CommandDispatcher... dispatchers) {
         registerAll(this::registerCommandDispatcher, dispatchers);
         return thisRef();
     }
@@ -419,6 +427,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     @Deprecated
     @CanIgnoreReturnValue
     public final T withEventDispatchers(EventDispatcher... dispatchers) {
+        return internalWithEventDispatchers(dispatchers);
+    }
+
+    private T internalWithEventDispatchers(EventDispatcher... dispatchers) {
         registerAll(this::registerEventDispatcher, dispatchers);
         return thisRef();
     }

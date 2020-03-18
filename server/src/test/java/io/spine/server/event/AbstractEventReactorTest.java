@@ -49,19 +49,19 @@ class AbstractEventReactorTest {
 
     @BeforeEach
     void setUp() {
+        performanceTracker = new ServicePerformanceTracker();
+        RestaurantNotifier notifier = new RestaurantNotifier();
         restaurantContext = BlackBoxBoundedContext.from(
                 BoundedContext.singleTenant("Restaurant")
-        );
-        charityContext = BlackBoxBoundedContext.from(
-                BoundedContext.singleTenant("Charity")
+                              .addEventDispatcher(performanceTracker)
+                              .addEventDispatcher(notifier)
         );
 
         charityDonor = new AutoCharityDonor();
-        charityContext.withEventDispatchers(charityDonor);
-
-        performanceTracker = new ServicePerformanceTracker();
-        RestaurantNotifier notifier = new RestaurantNotifier();
-        restaurantContext.withEventDispatchers(performanceTracker, notifier);
+        charityContext = BlackBoxBoundedContext.from(
+                BoundedContext.singleTenant("Charity")
+                              .addEventDispatcher(charityDonor)
+        );
     }
 
     @DisplayName("while dealing with domestic events")
