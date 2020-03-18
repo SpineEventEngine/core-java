@@ -179,10 +179,10 @@ public abstract class BlackBoxContext
                 .addCommandListener(commands)
                 .addEventListener(events)
                 .enrichEventsUsing(enricher)
+                .addEventDispatcher(new UnsupportedCommandGuard(name))
+                .addEventDispatcher(DiagnosticLog.instance())
                 .build();
         this.repositories = newHashMap();
-        this.context.registerEventDispatcher(new UnsupportedCommandGuard(name));
-        this.context.registerEventDispatcher(DiagnosticLog.instance());
         this.actor = defaultActor();
     }
 
@@ -664,6 +664,7 @@ public abstract class BlackBoxContext
         return readOperation(() -> (Entity<I, S>) repo.find(id).orElse(null));
     }
 
+    @VisibleForTesting
     private Repository<?, ?> repositoryOf(Class<? extends EntityState> stateClass) {
         Repository<?, ?> repository = repositories.get(stateClass);
         return repository;
@@ -688,10 +689,11 @@ public abstract class BlackBoxContext
      */
     public QueryResultSubject assertQueryResult(Query query) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
-        QueryService queryService = QueryService.newBuilder()
-                                                .add(context)
-                                                .build();
-        queryService.read(query, observer);
+        QueryService service = QueryService
+                .newBuilder()
+                .add(context)
+                .build();
+        service.read(query, observer);
         assertTrue(observer.isCompleted());
 
         QueryResponse response = observer.firstResponse();
