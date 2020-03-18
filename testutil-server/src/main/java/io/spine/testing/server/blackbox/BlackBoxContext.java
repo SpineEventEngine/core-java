@@ -83,9 +83,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>Such a test suite would send commands or events to the Bounded Context under the test,
  * and then verify consequences of handling a command or an event.
  */
-@SuppressWarnings({
-        "ClassWithTooManyMethods",
-        "OverlyCoupledClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
 public abstract class BlackBoxContext implements Logging {
 
