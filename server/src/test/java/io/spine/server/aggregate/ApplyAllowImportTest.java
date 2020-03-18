@@ -44,7 +44,7 @@ import static io.spine.server.aggregate.given.importado.MoveMessages.moved;
 @DisplayName("Aggregate which supports event import should")
 class ApplyAllowImportTest {
 
-    private BlackBoxContext<?> context;
+    private BlackBoxContext context;
 
     @BeforeEach
     void setUp() {

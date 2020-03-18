@@ -48,7 +48,7 @@ import static io.spine.server.route.given.sur.Surrealism.GOLL;
 @DisplayName("ProjectionRepository state routing should")
 class StateRoutingTest {
 
-    private BlackBoxContext<?> context;
+    private BlackBoxContext context;
 
     @BeforeEach
     void setupContext() {

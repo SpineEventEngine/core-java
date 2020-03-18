@@ -51,7 +51,7 @@ class DispatchingQueueSynchronisationTest {
     @DisplayName("Bus should not lock with its system counterpart")
     void deadlock() throws InterruptedException {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) newFixedThreadPool(10);
-        BlackBoxContext<?> context = BlackBoxContext.from(
+        BlackBoxContext context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(ShareAggregate.class)
                                      .add(new JowDonsIndex.Repository())

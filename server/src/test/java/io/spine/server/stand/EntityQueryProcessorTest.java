@@ -65,7 +65,7 @@ class EntityQueryProcessorTest {
             new TestActorRequestFactory(EntityQueryProcessorTest.class);
     private static final QueryFactory queries = factory.query();
 
-    private BlackBoxContext<?> context;
+    private BlackBoxContext context;
     private EntityQueryProcessor processor;
 
     @BeforeEach

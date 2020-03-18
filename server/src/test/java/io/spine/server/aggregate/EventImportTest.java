@@ -50,7 +50,7 @@ import static com.google.common.truth.Truth.assertThat;
 class EventImportTest {
 
     private EngineRepository repository;
-    private BlackBoxContext<?> context;
+    private BlackBoxContext context;
 
     void createRepository(boolean routeByFirstMessageField) {
         repository = new EngineRepository(routeByFirstMessageField);
@@ -76,7 +76,7 @@ class EventImportTest {
         return this.repository;
     }
 
-    protected final BlackBoxContext<?> context() {
+    protected final BlackBoxContext context() {
         return this.context;
     }
 

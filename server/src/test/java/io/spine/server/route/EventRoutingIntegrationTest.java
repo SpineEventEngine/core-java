@@ -63,7 +63,7 @@ class EventRoutingIntegrationTest {
                 .setUserConsentRequested(true)
                 .build();
 
-        BlackBoxContext<?> context = BlackBoxContext.from(
+        BlackBoxContext context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(UserAggregate.class)
                                      .add(new SessionRepository())

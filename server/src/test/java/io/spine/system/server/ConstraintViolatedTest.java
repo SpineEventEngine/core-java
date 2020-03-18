@@ -46,7 +46,7 @@ class ConstraintViolatedTest {
     @DisplayName("an entity state is set to an invalid value as a result of an event")
     void afterEvent() {
         String invalidText = "123-non numerical";
-        BlackBoxContext<?> context = BlackBoxContext.from(
+        BlackBoxContext context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                     .add(ValidatedAggregate.class)
                     .add(new ViolationsWatch.Repository())
@@ -70,7 +70,7 @@ class ConstraintViolatedTest {
     @Test
     @DisplayName("an entity state is set to an invalid value as a result of a command")
     void afterCommand() {
-        BlackBoxContext<?> context = BlackBoxContext.from(
+        BlackBoxContext context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                 .add(VerificationProcman.class)
                 .add(new ViolationsWatch.Repository())

@@ -513,7 +513,7 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
-        private BlackBoxContext<?> context;
+        private BlackBoxContext context;
 
         /**
          * Create a fresh instance of the repository since this nested class uses
@@ -603,7 +603,7 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxContext<?> context = BlackBoxContext.from(
+            BlackBoxContext context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new EventDiscardingAggregateRepository())
             );

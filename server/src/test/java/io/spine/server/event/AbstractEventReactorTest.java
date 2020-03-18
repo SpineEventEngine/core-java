@@ -41,8 +41,8 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServed
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
 
-    private BlackBoxContext<?> restaurantContext;
-    private BlackBoxContext<?> charityContext;
+    private BlackBoxContext restaurantContext;
+    private BlackBoxContext charityContext;
 
     private AutoCharityDonor charityDonor;
     private ServicePerformanceTracker performanceTracker;

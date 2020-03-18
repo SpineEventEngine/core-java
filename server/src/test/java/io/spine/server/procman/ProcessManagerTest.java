@@ -312,7 +312,7 @@ class ProcessManagerTest {
     @DisplayName("rollback state on")
     class RollbackOn {
 
-        private BlackBoxContext<?> context;
+        private BlackBoxContext context;
 
         @BeforeEach
         void setUp() {
@@ -351,7 +351,7 @@ class ProcessManagerTest {
     @DisplayName("create command(s)")
     class CommandCreation {
 
-        private BlackBoxContext<?> context;
+        private BlackBoxContext context;
 
         @BeforeEach
         void setUp() {
@@ -509,7 +509,7 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            BlackBoxContext<?> context = BlackBoxContext.from(
+            BlackBoxContext context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new QuizProcmanRepository())
             );

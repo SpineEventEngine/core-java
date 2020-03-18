@@ -57,7 +57,7 @@ import static java.util.stream.Collectors.toList;
 public class CounterCatchUp {
 
     private final CounterView.Repository repo;
-    private final BlackBoxContext<?> ctx;
+    private final BlackBoxContext ctx;
     private final String[] ids;
 
     public CounterCatchUp(String... ids) {
@@ -143,7 +143,7 @@ public class CounterCatchUp {
     }
 
     private static List<Callable<Object>>
-    asPostEventJobs(BlackBoxContext<?> ctx, List<NumberAdded> events) {
+    asPostEventJobs(BlackBoxContext ctx, List<NumberAdded> events) {
         return events.stream()
                      .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
                      .collect(toList());

@@ -50,7 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class ContextAwareTest {
 
-    private @Nullable BlackBoxContext<?> context;
+    private @Nullable BlackBoxContext context;
 
     /**
      * Creates a new builder for the Bounded Context under the test.
@@ -76,7 +76,7 @@ public abstract class ContextAwareTest {
     /**
      * Obtains test configuration and assertion API for the Bounded Context under the test.
      */
-    protected BlackBoxContext<?> context() {
+    protected BlackBoxContext context() {
         return checkNotNull(
                 context,
                 "The `BoundedContext` under the test is already destroyed or not yet created."

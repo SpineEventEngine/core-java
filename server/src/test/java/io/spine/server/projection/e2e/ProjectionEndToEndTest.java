@@ -84,7 +84,7 @@ class ProjectionEndToEndTest {
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
-        BlackBoxContext<?> context = BlackBoxContext.from(
+        BlackBoxContext context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(new EntitySubscriberProjection.Repository())
                                      .add(new TestProjection.Repository())
@@ -111,11 +111,11 @@ class ProjectionEndToEndTest {
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
 
-        BlackBoxContext<?> sender = BlackBoxContext.from(
+        BlackBoxContext sender = BlackBoxContext.from(
                 BoundedContext.singleTenant("Organizations")
                               .add(new OrganizationProjection.Repository())
         );
-        BlackBoxContext<?> receiver = BlackBoxContext.from(
+        BlackBoxContext receiver = BlackBoxContext.from(
                 BoundedContext.singleTenant("Groups")
                 .add(new GroupNameProjection.Repository())
         );

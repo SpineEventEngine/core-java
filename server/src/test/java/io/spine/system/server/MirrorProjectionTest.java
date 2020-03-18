@@ -125,7 +125,7 @@ class MirrorProjectionTest {
                     .isNotEqualToDefaultInstance();
     }
 
-    private static BlackBoxContext<?> context() {
+    private static BlackBoxContext context() {
         MirrorRepository mirrorRepository = new MirrorRepository();
         mirrorRepository.addMirroredType(AGGREGATE_TYPE_URL);
         return BlackBoxContext.from(

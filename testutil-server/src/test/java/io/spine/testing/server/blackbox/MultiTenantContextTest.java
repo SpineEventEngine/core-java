@@ -59,7 +59,7 @@ class MultiTenantContextTest
         TenantId newUser = generate();
         BbCreateProject createJohnProject = createProject();
         BbCreateProject createCarlProject = createProject();
-        MultiTenantContext context = context()
+        BlackBoxContext context = context()
                 // Create a project for John.
                 .withTenant(john)
                 .receivesCommand(createJohnProject)
@@ -76,7 +76,7 @@ class MultiTenantContextTest
                .hasStateThat()
                .isEqualTo(createdProjectState(createJohnProject));
         // Verify project was created for Carl.
-        MultiTenantContext contextForCarl = context.withTenant(carl);
+        BlackBoxContext contextForCarl = context.withTenant(carl);
         contextForCarl
                 .assertEvents()
                 .withType(BbProjectCreated.class)
@@ -86,7 +86,7 @@ class MultiTenantContextTest
                 .hasStateThat()
                 .isEqualTo(createdProjectState(createCarlProject));
         // Verify nothing happened for a new user.
-        MultiTenantContext newUserContext = context.withTenant(newUser);
+        BlackBoxContext newUserContext = context.withTenant(newUser);
         newUserContext
                 .assertCommands()
                 .isEmpty();

@@ -34,7 +34,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * Test fixture for single-tenant Bounded Contexts.
  */
 final class SingleTenantContext
-        extends BlackBoxContext<SingleTenantContext> {
+        extends BlackBoxContext {
 
     SingleTenantContext(String name, EventEnricher enricher) {
         super(name, false, enricher);
@@ -51,7 +51,7 @@ final class SingleTenantContext
     }
 
     @Override
-    public BlackBoxContext<?> withTenant(TenantId tenant) {
+    public BlackBoxContext withTenant(TenantId tenant) {
         throw newIllegalStateException(
                 "The context `%s` is single-tenant and" +
                         " cannot operate with the passed tenant ID `%s`.",

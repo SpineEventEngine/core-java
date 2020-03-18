@@ -258,11 +258,11 @@ class IntegrationBrokerTest {
     @DisplayName("send messages between two contexts regardless of registration order")
     void mutual() {
         String suffix = IntegrationBrokerTest.class.getSimpleName();
-        BlackBoxContext<?> photos = BlackBoxContext.from(
+        BlackBoxContext photos = BlackBoxContext.from(
                 BoundedContext.singleTenant("Photos-" + suffix)
                               .add(PhotosProcMan.class)
         );
-        BlackBoxContext<?> billing = BlackBoxContext.from(
+        BlackBoxContext billing = BlackBoxContext.from(
                 BoundedContext.singleTenant("Billing-" + suffix)
                               .add(BillingAggregate.class)
         );
@@ -275,7 +275,7 @@ class IntegrationBrokerTest {
         billing.close();
     }
 
-    private static void assertReceived(BlackBoxContext<?> context,
+    private static void assertReceived(BlackBoxContext context,
                                        Class<? extends EventMessage> eventClass) {
         context.assertEvents()
                .withType(eventClass)

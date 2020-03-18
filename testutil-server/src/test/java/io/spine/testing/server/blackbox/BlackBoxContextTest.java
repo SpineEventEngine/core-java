@@ -107,7 +107,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @param <T>
  *         the type of the {@code BlackBoxBoundedContext}
  */
-abstract class BlackBoxContextTest<T extends BlackBoxContext<T>> {
+abstract class BlackBoxContextTest<T extends BlackBoxContext> {
 
     private T context;
 
@@ -380,7 +380,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext<T>> {
             }
         };
 
-        BlackBoxContext<?> ctx = BlackBoxContext.from(
+        BlackBoxContext ctx = BlackBoxContext.from(
                 newBuilder().add(throwingRepo)
         );
 
@@ -403,7 +403,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext<T>> {
 
         private final Set<TypeName> types = toTypes(repositories);
 
-        private BlackBoxContext<?> blackBox;
+        private BlackBoxContext blackBox;
         private EventEnricher enricher;
 
         @BeforeEach
@@ -432,7 +432,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext<T>> {
         }
 
         private void assertBlackBox(BoundedContextBuilder builder,
-                                    Class<? extends BlackBoxContext<?>> clazz) {
+                                    Class<? extends BlackBoxContext> clazz) {
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);

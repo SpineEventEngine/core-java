@@ -160,7 +160,7 @@ class LoggingEntityTest {
                     .isInstanceOf(UnknownBook.class);
     }
 
-    private static BlackBoxContext<?> context() {
+    private static BlackBoxContext context() {
         return BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(CardAggregate.class)

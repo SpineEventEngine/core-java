@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("Enricher should")
 public class EventEnricherIntegrationTest {
 
-    private BlackBoxContext<?> context;
+    private BlackBoxContext context;
 
     @BeforeEach
     void setUp() {

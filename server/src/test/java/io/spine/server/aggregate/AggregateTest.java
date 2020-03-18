@@ -816,7 +816,7 @@ public class AggregateTest {
     @DisplayName("create a single event when emitting a pair without second value")
     class CreateSingleEventForPair {
 
-        private BlackBoxContext<?> context;
+        private BlackBoxContext context;
 
         @BeforeEach
         void prepareContext() {

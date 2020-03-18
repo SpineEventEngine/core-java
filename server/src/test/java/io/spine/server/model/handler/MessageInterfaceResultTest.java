@@ -42,7 +42,7 @@ import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 class MessageInterfaceResultTest {
 
     private final AggregateClass<?> aggregateClass = asAggregateClass(RoverBot.class);
-    private BlackBoxContext<?> context;
+    private BlackBoxContext context;
 
     @BeforeEach
     void createContext() {

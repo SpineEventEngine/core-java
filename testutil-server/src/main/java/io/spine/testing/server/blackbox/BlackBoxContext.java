@@ -86,8 +86,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>Such a test suite would send commands or events to the Bounded Context under the test,
  * and then verify consequences of handling a command or an event.
  *
- * @param <T>
- *         the type of a sub-class for return type covariance
  * @apiNote It is expected that instances of classes derived from
  *         {@code BlackBoxBoundedContext} are obtained by factory
  *         methods provided by this class.
@@ -96,7 +94,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "ClassWithTooManyMethods",
         "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
+public abstract class BlackBoxContext
         implements Logging {
 
     /** The context under the test. */
@@ -144,8 +142,8 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
     /**
      * Creates new instance obtaining configuration parameters from the passed builder.
      */
-    public static BlackBoxContext<?> from(BoundedContextBuilder builder) {
-        BlackBoxContext<?> result = create(builder);
+    public static BlackBoxContext from(BoundedContextBuilder builder) {
+        BlackBoxContext result = create(builder);
         builder.repositories()
                .forEach(result::registerRepository);
         builder.commandDispatchers()
@@ -156,7 +154,7 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
         return result;
     }
 
-    private static BlackBoxContext<?> create(BoundedContextBuilder builder) {
+    private static BlackBoxContext create(BoundedContextBuilder builder) {
         EventEnricher enricher =
                 builder.eventEnricher()
                        .orElseGet(BlackBoxContext::emptyEnricher);
@@ -199,31 +197,31 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * @throws IllegalStateException
      *         if the method is called for a single-tenant context
      */
-    public abstract BlackBoxContext<?> withTenant(TenantId tenant);
+    public abstract BlackBoxContext withTenant(TenantId tenant);
 
     /**
      * Sets the given {@link UserId} as the actor ID for the requests produced by this context.
      */
-    public final T withActor(UserId user) {
+    public final BlackBoxContext withActor(UserId user) {
         this.actor = Actor.from(user);
-        return thisRef();
+        return this;
     }
 
     /**
      * Sets the given time zone parameters for the actor requests produced by this context.
      */
-    public final T in(ZoneId zoneId, ZoneOffset zoneOffset) {
+    public final BlackBoxContext in(ZoneId zoneId, ZoneOffset zoneOffset) {
         this.actor = Actor.from(zoneId, zoneOffset);
-        return thisRef();
+        return this;
     }
 
     /**
      * Sets the given actor ID and time zone parameters for the actor requests produced by this
      * context.
      */
-    public final T withActorIn(UserId userId, ZoneId zoneId, ZoneOffset zoneOffset) {
+    public final BlackBoxContext withActorIn(UserId userId, ZoneId zoneId, ZoneOffset zoneOffset) {
         this.actor = Actor.from(userId, zoneId, zoneOffset);
-        return thisRef();
+        return this;
     }
 
     /**
@@ -259,13 +257,13 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * Appends the passed event to the history of the context under the test.
      */
     @CanIgnoreReturnValue
-    public T append(Event event) {
+    public BlackBoxContext append(Event event) {
         checkNotNull(event);
         EventStore eventStore =
                 context.eventBus()
                        .eventStore();
         eventStore.append(event);
-        return thisRef();
+        return this;
     }
 
     /** Obtains {@code command bus} instance used by this bounded context. */
@@ -314,7 +312,7 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public T receivesCommand(CommandMessage domainCommand) {
+    public BlackBoxContext receivesCommand(CommandMessage domainCommand) {
         return receivesCommands(singletonList(domainCommand));
     }
 
@@ -331,7 +329,8 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public T receivesCommands(CommandMessage first, CommandMessage second, CommandMessage... rest) {
+    public BlackBoxContext
+    receivesCommands(CommandMessage first, CommandMessage second, CommandMessage... rest) {
         return receivesCommands(asList(first, second, rest));
     }
 
@@ -342,10 +341,10 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      *         a list of domain commands to be dispatched to the Bounded Context
      * @return current instance
      */
-    private T receivesCommands(Collection<CommandMessage> domainCommands) {
+    private BlackBoxContext receivesCommands(Collection<CommandMessage> domainCommands) {
         List<Command> posted = setup().postCommands(domainCommands);
         postedCommands.addAll(posted);
-        return thisRef();
+        return this;
     }
 
     /**
@@ -360,7 +359,7 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public T receivesEvent(EventMessage messageOrEvent) {
+    public BlackBoxContext receivesEvent(EventMessage messageOrEvent) {
         return receivesEvents(singletonList(messageOrEvent));
     }
 
@@ -373,16 +372,17 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * message and posted to the bus.
      *
      * @param first
-     *         a domain event to be dispatched to the Bounded Context first
+     *         a domain event to be dispatched first
      * @param second
-     *         a domain event to be dispatched to the Bounded Context second
+     *         a domain event to be dispatched second
      * @param rest
-     *         optional domain events to be dispatched to the Bounded Context in supplied order
+     *         optional domain events to be dispatched in the supplied order
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public T receivesEvents(EventMessage first, EventMessage second, EventMessage... rest) {
+    public BlackBoxContext
+    receivesEvents(EventMessage first, EventMessage second, EventMessage... rest) {
         return receivesEvents(asList(first, second, rest));
     }
 
@@ -398,9 +398,9 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public T receivesExternalEvent(Message messageOrEvent) {
+    public BlackBoxContext receivesExternalEvent(Message messageOrEvent) {
         setup().postExternalEvent(messageOrEvent);
-        return thisRef();
+        return this;
     }
 
     /**
@@ -413,19 +413,19 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * message and posted to the bus.
      *
      * @param firstEvent
-     *         an external event to be dispatched to the Bounded Context first
+     *         an external event to be dispatched first
      * @param secondEvent
-     *         an external event to be dispatched to the Bounded Context second
+     *         an external event to be dispatched second
      * @param otherEvents
-     *         optional external events to be dispatched to the Bounded Context
-     *         in supplied order
+     *         optional external events to be dispatched in the supplied order
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public T receivesExternalEvents(EventMessage firstEvent,
-                                    EventMessage secondEvent,
-                                    EventMessage... otherEvents) {
+    public BlackBoxContext
+    receivesExternalEvents(EventMessage firstEvent,
+                           EventMessage secondEvent,
+                           EventMessage... otherEvents) {
         return receivesExternalEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
@@ -436,9 +436,9 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      *         a list of external events to be dispatched to the Bounded Context
      * @return current instance
      */
-    private T receivesExternalEvents(Collection<EventMessage> eventMessages) {
+    private BlackBoxContext receivesExternalEvents(Collection<EventMessage> eventMessages) {
         setup().postExternalEvents(eventMessages);
-        return thisRef();
+        return this;
     }
 
     /**
@@ -451,14 +451,16 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      * @param first
      *         a domain event to be dispatched to the Bounded Context first
      * @param rest
-     *         optional domain events to be dispatched to the Bounded Context in supplied order
+     *         optional domain events to be dispatched to the Bounded Context in the supplied order
      * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public T receivesEventsProducedBy(Object producerId, EventMessage first, EventMessage... rest) {
+    public BlackBoxContext
+    receivesEventsProducedBy(Object producerId, EventMessage first, EventMessage... rest) {
         List<Event> sentEvents = setup().postEvents(producerId, first, rest);
         postedEvents.addAll(sentEvents);
-        return thisRef();
+        return this;
     }
 
     /**
@@ -468,26 +470,48 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
      *         a list of domain event to be dispatched to the Bounded Context
      * @return current instance
      */
-    private T receivesEvents(Collection<EventMessage> domainEvents) {
+    private BlackBoxContext receivesEvents(Collection<EventMessage> domainEvents) {
         List<Event> sentEvents = setup().postEvents(domainEvents);
         this.postedEvents.addAll(sentEvents);
-        return thisRef();
+        return this;
     }
 
+    /**
+     * Imports the event into the Bounded Context.
+     *
+     * @param eventOrMessage
+     *         and event message or {@link Event} instance
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
+     */
     @CanIgnoreReturnValue
-    public T importsEvent(Message eventOrMessage) {
+    public BlackBoxContext importsEvent(Message eventOrMessage) {
         setup().importEvent(eventOrMessage);
-        return thisRef();
+        return this;
     }
 
+    /**
+     * Imports passed events into the Bounded Context.
+     *
+     * @param first
+     *         an event message or {@code Event} to be imported first
+     * @param second
+     *         an event message or {@code Event} to be imported first second
+     * @param rest
+     *         optional event messages or instances of {@code Event} to be imported
+     *         in the supplied order
+     * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
+     */
     @CanIgnoreReturnValue
-    public T importsEvents(EventMessage first, EventMessage second, EventMessage... rest) {
+    public BlackBoxContext
+    importsEvents(EventMessage first, EventMessage second, EventMessage... rest) {
         return importAll(asList(first, second, rest));
     }
 
-    private T importAll(Collection<EventMessage> eventMessages) {
+    private BlackBoxContext importAll(Collection<EventMessage> eventMessages) {
         setup().importEvents(eventMessages);
-        return thisRef();
+        return this;
     }
 
     private BlackBoxSetup setup() {
@@ -506,12 +530,6 @@ public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
         } catch (Exception e) {
             throw illegalStateWithCauseOf(e);
         }
-    }
-
-    /** Casts this to generic type to provide type covariance in the derived classes. */
-    @SuppressWarnings("unchecked" /* See Javadoc. */)
-    private T thisRef() {
-        return (T) this;
     }
 
     /**
