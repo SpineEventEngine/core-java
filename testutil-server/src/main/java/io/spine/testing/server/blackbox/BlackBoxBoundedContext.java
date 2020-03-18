@@ -397,7 +397,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      *         command dispatchers to register with the bounded context
      * @return current instance
      * @deprecated please use {@link BoundedContextBuilder#addCommandDispatcher(CommandDispatcher)}
-     *  and then {@link #from(BoundedContextBuilder)}
+     *         and then {@link #from(BoundedContextBuilder)}
      */
     @Deprecated
     @CanIgnoreReturnValue
@@ -425,7 +425,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      * @param dispatchers
      *         dispatchers to register with the event bus of this bounded context
      * @deprecated please use {@link BoundedContextBuilder#addEventDispatcher(EventDispatcher)} and
-     *  then {@link #from(BoundedContextBuilder)}
+     *         then {@link #from(BoundedContextBuilder)}
      */
     @Deprecated
     @CanIgnoreReturnValue
