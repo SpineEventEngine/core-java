@@ -48,7 +48,7 @@ import static com.google.common.collect.Lists.asList;
 import static java.util.stream.Collectors.toList;
 
 /**
- * A class which sets up a {@link BlackBoxBoundedContext}.
+ * A class which sets up a {@link BlackBoxContext}.
  *
  * <p>The setup may involve:
  * <ul>

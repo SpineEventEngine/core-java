@@ -33,6 +33,7 @@ import io.spine.client.Topic;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
@@ -95,7 +96,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "ClassWithTooManyMethods",
         "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>>
+public abstract class BlackBoxContext<T extends BlackBoxContext<T>>
         implements Logging {
 
     /** The context under the test. */
@@ -143,8 +144,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Creates new instance obtaining configuration parameters from the passed builder.
      */
-    public static BlackBoxBoundedContext<?> from(BoundedContextBuilder builder) {
-        BlackBoxBoundedContext<?> result = create(builder);
+    public static BlackBoxContext<?> from(BoundedContextBuilder builder) {
+        BlackBoxContext<?> result = create(builder);
         builder.repositories()
                .forEach(result::registerRepository);
         builder.commandDispatchers()
@@ -155,18 +156,18 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         return result;
     }
 
-    private static BlackBoxBoundedContext<?> create(BoundedContextBuilder builder) {
+    private static BlackBoxContext<?> create(BoundedContextBuilder builder) {
         EventEnricher enricher =
                 builder.eventEnricher()
-                       .orElseGet(BlackBoxBoundedContext::emptyEnricher);
+                       .orElseGet(BlackBoxContext::emptyEnricher);
         String name = builder.name()
                              .value();
         return builder.isMultitenant()
-               ? new MultitenantBlackBoxContext(name, enricher)
-               : new SingleTenantBlackBoxContext(name, enricher);
+               ? new MultiTenantContext(name, enricher)
+               : new SingleTenantContext(name, enricher);
     }
 
-    protected BlackBoxBoundedContext(String name, boolean multitenant, EventEnricher enricher) {
+    protected BlackBoxContext(String name, boolean multitenant, EventEnricher enricher) {
         super();
         this.commands = new CommandCollector();
         this.postedCommands = synchronizedSet(new HashSet<>());
@@ -191,6 +192,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     public BoundedContextName name() {
         return context.name();
     }
+
+    /**
+     * Makes all future requests to the context come to the tenant with the passed ID.
+     *
+     * @throws IllegalStateException
+     *         if the method is called for a single-tenant context
+     */
+    public abstract BlackBoxContext<?> withTenant(TenantId tenant);
 
     /**
      * Sets the given {@link UserId} as the actor ID for the requests produced by this context.

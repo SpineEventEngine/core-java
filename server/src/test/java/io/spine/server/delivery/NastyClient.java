@@ -32,7 +32,7 @@ import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberImported;
 import io.spine.test.delivery.NumberReacted;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -98,7 +98,7 @@ class NastyClient {
      *         the identifiers of target entities
      */
     void runWith(Set<String> targets) {
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+        BlackBoxContext<?> context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(repository)
         );
@@ -228,7 +228,7 @@ class NastyClient {
         }
     }
 
-    private void postAsync(BlackBoxBoundedContext<?> context,
+    private void postAsync(BlackBoxContext<?> context,
                            List<AddNumber> commands,
                            List<NumberImported> eventsToImport,
                            List<NumberReacted> eventsToReact) {
@@ -269,7 +269,7 @@ class NastyClient {
     }
 
     private static Stream<Callable<Object>>
-    commandCallables(BlackBoxBoundedContext<?> context, List<AddNumber> commands) {
+    commandCallables(BlackBoxContext<?> context, List<AddNumber> commands) {
         return commands.stream()
                        .map((c) -> () -> {
                            context.receivesCommand(c);
@@ -278,7 +278,7 @@ class NastyClient {
     }
 
     private static Stream<Callable<Object>>
-    importEventCallables(BlackBoxBoundedContext<?> context, List<NumberImported> events) {
+    importEventCallables(BlackBoxContext<?> context, List<NumberImported> events) {
         return events.stream()
                      .map((e) -> () -> {
                          context.importsEvent(e);
@@ -287,7 +287,7 @@ class NastyClient {
     }
 
     private static Stream<Callable<Object>>
-    reactEventsCallables(BlackBoxBoundedContext<?> context, List<NumberReacted> events) {
+    reactEventsCallables(BlackBoxContext<?> context, List<NumberReacted> events) {
         return events.stream()
                      .map((e) -> () -> {
                          context.receivesEvent(e);

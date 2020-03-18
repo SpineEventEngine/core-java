@@ -31,7 +31,7 @@ import io.spine.system.server.test.StartVerification;
 import io.spine.system.server.test.ValidateAndSet;
 import io.spine.system.server.test.ValidatedId;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +46,7 @@ class ConstraintViolatedTest {
     @DisplayName("an entity state is set to an invalid value as a result of an event")
     void afterEvent() {
         String invalidText = "123-non numerical";
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+        BlackBoxContext<?> context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                     .add(ValidatedAggregate.class)
                     .add(new ViolationsWatch.Repository())
@@ -70,7 +70,7 @@ class ConstraintViolatedTest {
     @Test
     @DisplayName("an entity state is set to an invalid value as a result of a command")
     void afterCommand() {
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+        BlackBoxContext<?> context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                 .add(VerificationProcman.class)
                 .add(new ViolationsWatch.Repository())

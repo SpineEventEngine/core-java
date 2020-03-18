@@ -102,12 +102,12 @@ import static io.spine.testing.server.blackbox.given.Given.userDeleted;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxBoundedContext}.
+ * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxContext}.
  *
  * @param <T>
  *         the type of the {@code BlackBoxBoundedContext}
  */
-abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
+abstract class BlackBoxContextTest<T extends BlackBoxContext<T>> {
 
     private T context;
 
@@ -120,7 +120,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .add(BbProjectViewProjection.class)
                .add(BbInitProcess.class);
         @SuppressWarnings("unchecked") // see Javadoc for newBuilder().
-        T ctx = (T) BlackBoxBoundedContext.from(builder);
+        T ctx = (T) BlackBoxContext.from(builder);
         context = ctx;
     }
 
@@ -380,7 +380,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             }
         };
 
-        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext.from(
+        BlackBoxContext<?> ctx = BlackBoxContext.from(
                 newBuilder().add(throwingRepo)
         );
 
@@ -403,7 +403,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private final Set<TypeName> types = toTypes(repositories);
 
-        private BlackBoxBoundedContext<?> blackBox;
+        private BlackBoxContext<?> blackBox;
         private EventEnricher enricher;
 
         @BeforeEach
@@ -420,7 +420,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(false)
                     .enrichEventsUsing(enricher);
-            assertBlackBox(builder, SingleTenantBlackBoxContext.class);
+            assertBlackBox(builder, SingleTenantContext.class);
         }
 
         @Test
@@ -428,15 +428,15 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(true)
                     .enrichEventsUsing(enricher);
-            assertBlackBox(builder, MultitenantBlackBoxContext.class);
+            assertBlackBox(builder, MultiTenantContext.class);
         }
 
         private void assertBlackBox(BoundedContextBuilder builder,
-                                    Class<? extends BlackBoxBoundedContext<?>> clazz) {
+                                    Class<? extends BlackBoxContext<?>> clazz) {
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);
-            blackBox = BlackBoxBoundedContext.from(builder);
+            blackBox = BlackBoxContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(clazz);
             assertRepositories();

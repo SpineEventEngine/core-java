@@ -37,7 +37,7 @@ import static io.spine.validate.Validate.checkValid;
 @VisibleForTesting
 final class Actor {
 
-    private static final Actor defaultActor = from(BlackBoxBoundedContext.class.getName());
+    private static final Actor defaultActor = from(BlackBoxContext.class.getName());
 
     private final UserId id;
     private final ZoneId zoneId;

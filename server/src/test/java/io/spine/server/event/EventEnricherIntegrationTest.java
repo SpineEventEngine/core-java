@@ -25,7 +25,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.enrich.given.EitProjectRepository;
 import io.spine.server.enrich.given.EitTaskRepository;
 import io.spine.server.enrich.given.EitUserRepository;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("Enricher should")
 public class EventEnricherIntegrationTest {
 
-    private BlackBoxBoundedContext<?> context;
+    private BlackBoxContext<?> context;
 
     @BeforeEach
     void setUp() {
@@ -52,7 +52,7 @@ public class EventEnricherIntegrationTest {
                 .add(projects)
                 .add(tasks)
                 .add(users);
-        context = BlackBoxBoundedContext.from(contextBuilder);
+        context = BlackBoxContext.from(contextBuilder);
     }
 
     @AfterEach

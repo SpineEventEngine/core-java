@@ -69,7 +69,7 @@ import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -513,7 +513,7 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
-        private BlackBoxBoundedContext<?> context;
+        private BlackBoxContext<?> context;
 
         /**
          * Create a fresh instance of the repository since this nested class uses
@@ -524,7 +524,7 @@ public class AggregateRepositoryTest {
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            context = BlackBoxBoundedContext.from(
+            context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(repository())
             );
@@ -603,7 +603,7 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+            BlackBoxContext<?> context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new EventDiscardingAggregateRepository())
             );

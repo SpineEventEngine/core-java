@@ -75,7 +75,7 @@ import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.AfterEach;
@@ -816,11 +816,11 @@ public class AggregateTest {
     @DisplayName("create a single event when emitting a pair without second value")
     class CreateSingleEventForPair {
 
-        private BlackBoxBoundedContext<?> context;
+        private BlackBoxContext<?> context;
 
         @BeforeEach
         void prepareContext() {
-            context = BlackBoxBoundedContext.from(
+            context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TaskAggregateRepository())
             );

@@ -20,36 +20,25 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import io.spine.core.Command;
-import io.spine.core.Event;
-import io.spine.server.event.EventEnricher;
-import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.server.BoundedContextBuilder;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-/**
- * Test fixture for single-tenant Bounded Contexts.
- */
-@VisibleForTesting
-public final class SingleTenantBlackBoxContext
-        extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
+import static io.spine.testing.core.given.GivenTenantId.generate;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    SingleTenantBlackBoxContext(String name, EventEnricher enricher) {
-        super(name, false, enricher);
-    }
+@DisplayName("Single tenant Black Box Bounded Context should")
+class SingleTenantContextTest
+        extends BlackBoxContextTest<SingleTenantContext> {
 
     @Override
-    ImmutableList<Command> select(CommandCollector collector) {
-        return collector.all();
+    BoundedContextBuilder newBuilder() {
+        return BoundedContextBuilder.assumingTests();
     }
 
-    @Override
-    ImmutableList<Event> select(EventCollector collector) {
-        return collector.all();
-    }
-
-    @Override
-    TestActorRequestFactory requestFactory() {
-        return actor().requests();
+    @Test
+    @DisplayName("not allow setting a tenant ID")
+    void prohibitTenantId() {
+        assertThrows(IllegalStateException.class, () -> context().withTenant(generate()));
     }
 }

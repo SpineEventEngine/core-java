@@ -20,7 +20,6 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -39,16 +38,15 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Test fixture for multi-tenant Bounded Contexts.
  */
-@VisibleForTesting
-public final class MultitenantBlackBoxContext
-        extends BlackBoxBoundedContext<MultitenantBlackBoxContext> {
+final class MultiTenantContext
+        extends BlackBoxContext<MultiTenantContext> {
 
     private @MonotonicNonNull TenantId tenantId;
 
     /**
      * Creates a new multi-tenant instance.
      */
-    MultitenantBlackBoxContext(String name, EventEnricher enricher) {
+    MultiTenantContext(String name, EventEnricher enricher) {
         super(name, true, enricher);
     }
 
@@ -59,7 +57,8 @@ public final class MultitenantBlackBoxContext
      *         new tenant ID
      * @return current instance
      */
-    public MultitenantBlackBoxContext withTenant(TenantId tenant) {
+    @Override
+    public MultiTenantContext withTenant(TenantId tenant) {
         this.tenantId = checkNotNull(tenant);
         return this;
     }
