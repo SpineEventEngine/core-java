@@ -21,7 +21,7 @@
 package io.spine.server.route;
 
 import io.spine.core.UserId;
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.route.given.user.SessionProjection;
 import io.spine.server.route.given.user.SessionRepository;
 import io.spine.server.route.given.user.UserAggregate;
@@ -63,13 +63,16 @@ class EventRoutingIntegrationTest {
                 .setUserConsentRequested(true)
                 .build();
 
-        BlackBoxBoundedContext.singleTenant()
-                              .with(DefaultRepository.of(UserAggregate.class))
-                              .with(new SessionRepository())
-                              .receivesEvent(event)
-                              .assertEntity(SessionProjection.class, sessionId)
-                              .hasStateThat()
-                              .comparingExpectedFieldsOnly()
-                              .isEqualTo(session);
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(UserAggregate.class)
+                                     .add(new SessionRepository())
+        );
+        context.receivesEvent(event);
+
+        context.assertEntity(SessionProjection.class, sessionId)
+               .hasStateThat()
+               .comparingExpectedFieldsOnly()
+               .isEqualTo(session);
     }
 }

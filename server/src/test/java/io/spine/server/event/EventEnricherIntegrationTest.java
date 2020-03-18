@@ -20,7 +20,8 @@
 
 package io.spine.server.event;
 
-import io.spine.server.enrich.given.EitEnricherSetup;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.enrich.given.EitProjectRepository;
 import io.spine.server.enrich.given.EitTaskRepository;
 import io.spine.server.enrich.given.EitUserRepository;
@@ -30,23 +31,28 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.core.BoundedContextNames.assumingTestsValue;
+import static io.spine.server.enrich.given.EitEnricherSetup.createEnricher;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("Enricher should")
 public class EventEnricherIntegrationTest {
 
-    private BlackBoxBoundedContext context;
+    private BlackBoxBoundedContext<?> context;
 
     @BeforeEach
     void setUp() {
         EitProjectRepository projects = new EitProjectRepository();
         EitTaskRepository tasks = new EitTaskRepository();
         EitUserRepository users = new EitUserRepository();
-        context = BlackBoxBoundedContext
-                .multiTenant(EitEnricherSetup.createEnricher(users, projects, tasks))
-                .with(projects)
-                .with(tasks)
-                .with(users);
+        EventEnricher enricher = createEnricher(users, projects, tasks);
+        BoundedContextBuilder contextBuilder = BoundedContext
+                .multitenant(assumingTestsValue())
+                .enrichEventsUsing(enricher)
+                .add(projects)
+                .add(tasks)
+                .add(users);
+        context = BlackBoxBoundedContext.from(contextBuilder);
     }
 
     @AfterEach

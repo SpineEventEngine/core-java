@@ -21,14 +21,13 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.Iterators;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.fibonacci.FibonacciRepository;
 import io.spine.server.aggregate.given.fibonacci.SequenceId;
 import io.spine.server.aggregate.given.fibonacci.command.MoveSequence;
 import io.spine.server.aggregate.given.fibonacci.command.SetStartingNumbers;
 import io.spine.server.aggregate.given.fibonacci.event.StartingNumbersSet;
-import io.spine.server.storage.StorageFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -52,15 +51,14 @@ public abstract class AggregateStorageTruncationTest {
             .setValue(newUuid())
             .vBuild();
 
-    protected abstract StorageFactory storageFactory();
-
     @Test
     @DisplayName("restore aggregate state properly")
     void restoreAggregateState() {
         FibonacciRepository repo = new FibonacciRepository();
-        SingleTenantBlackBoxContext context = BlackBoxBoundedContext
-                .singleTenant()
-                .with(repo);
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repo)
+        );
 
         // Set the starting numbers.
         SetStartingNumbers setStartingNumbers = SetStartingNumbers

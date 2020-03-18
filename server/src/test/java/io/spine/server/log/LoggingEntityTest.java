@@ -25,14 +25,13 @@ import com.google.common.flogger.LoggerConfig;
 import com.google.common.testing.TestLogHandler;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -161,10 +160,11 @@ class LoggingEntityTest {
                     .isInstanceOf(UnknownBook.class);
     }
 
-    private static SingleTenantBlackBoxContext context() {
-        return BlackBoxBoundedContext
-                .singleTenant()
-                .with(DefaultRepository.of(CardAggregate.class));
+    private static BlackBoxBoundedContext<?> context() {
+        return BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(CardAggregate.class)
+        );
     }
 
     private static BorrowBooks borrowBooks(UserId reader) {

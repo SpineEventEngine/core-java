@@ -26,6 +26,7 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.CatchUp;
 import io.spine.server.delivery.CatchUpStatus;
@@ -35,7 +36,6 @@ import io.spine.server.storage.memory.InMemoryCatchUpStorage;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,14 +57,16 @@ import static java.util.stream.Collectors.toList;
 public class CounterCatchUp {
 
     private final CounterView.Repository repo;
-    private final SingleTenantBlackBoxContext ctx;
+    private final BlackBoxBoundedContext<?> ctx;
     private final String[] ids;
 
     public CounterCatchUp(String... ids) {
         this.ids = ids.clone();
         this.repo = new CounterView.Repository();
-        this.ctx = BlackBoxBoundedContext.singleTenant()
-                                         .with(repo);
+        this.ctx = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repo)
+        );
     }
 
     public void addHistory(Timestamp when, List<NumberAdded> events) {
@@ -140,8 +142,8 @@ public class CounterCatchUp {
         }
     }
 
-    private static List<Callable<Object>> asPostEventJobs(SingleTenantBlackBoxContext ctx,
-                                                          List<NumberAdded> events) {
+    private static List<Callable<Object>>
+    asPostEventJobs(BlackBoxBoundedContext<?> ctx, List<NumberAdded> events) {
         return events.stream()
                      .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
                      .collect(toList());

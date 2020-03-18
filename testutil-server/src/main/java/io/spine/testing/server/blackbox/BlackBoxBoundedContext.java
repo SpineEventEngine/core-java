@@ -22,7 +22,6 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -31,7 +30,6 @@ import io.spine.base.EventMessage;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Topic;
-import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -46,15 +44,11 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStore;
 import io.spine.server.integration.IntegrationBroker;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.CommandErrored;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
@@ -105,10 +99,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "OverlyCoupledClass"})
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>>
-        extends AbstractEventSubscriber
         implements Logging {
 
+    /** The context under the test. */
     private final BoundedContext context;
+
+    /**
+     * All the repositories of the context under the text mapped by
+     * the type of the state of their entities.
+     */
+    private final Map<Class<? extends EntityState>, Repository<?, ?>> repositories;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -138,22 +138,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      */
     private final Set<Event> postedEvents;
 
-    private final MemoizingObserver<Ack> observer;
-
     /**
-     * A guard that verifies that unsupported commands do not get posted to the
-     * {@code BlackBoxBoundedContext}.
+     * Information about the current user and the time-zone.
      */
-    private final UnsupportedCommandGuard unsupportedCommandGuard;
-
-    private final Map<Class<? extends EntityState>, Repository<?, ?>> repositories;
-
     private Actor actor;
 
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // to inject self as event dispatcher.
-    protected BlackBoxBoundedContext(boolean multitenant,
-                                     EventEnricher enricher,
-                                     String name) {
+    protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher, String name) {
         super();
         this.commands = new CommandCollector();
         this.postedCommands = synchronizedSet(new HashSet<>());
@@ -168,67 +158,94 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
                 .addEventListener(events)
                 .enrichEventsUsing(enricher)
                 .build();
-        this.observer = memoizingObserver();
-        this.unsupportedCommandGuard = new UnsupportedCommandGuard(name);
         this.repositories = newHashMap();
-        this.context.registerEventDispatcher(this);
+        this.context.registerEventDispatcher(new UnsupportedCommandGuard(name));
         this.context.registerEventDispatcher(DiagnosticLog.instance());
         this.actor = defaultActor();
     }
 
     /**
      * Creates a single-tenant instance with the default configuration.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static SingleTenantBlackBoxContext singleTenant() {
         return singleTenant(emptyEnricher());
     }
 
     /**
      * Creates a single-tenant instance with the specified name.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static SingleTenantBlackBoxContext singleTenant(String name) {
         return singleTenant(name, emptyEnricher());
     }
 
     /**
      * Creates a single-tenant instance with the specified enricher.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static SingleTenantBlackBoxContext singleTenant(EventEnricher enricher) {
         return singleTenant(assumingTestsValue(), enricher);
     }
 
     /**
      * Creates a single-tenant instance with the specified name and enricher.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static SingleTenantBlackBoxContext singleTenant(String name, EventEnricher enricher) {
         return new SingleTenantBlackBoxContext(name, enricher);
     }
 
     /**
      * Creates a multitenant instance the default configuration.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static MultitenantBlackBoxContext multiTenant() {
         return multiTenant(emptyEnricher());
     }
 
     /**
      * Creates a multitenant instance with the specified name.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static MultitenantBlackBoxContext multiTenant(String name) {
         return multiTenant(name, emptyEnricher());
     }
 
     /**
      * Creates a multitenant instance with the specified enricher.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static MultitenantBlackBoxContext multiTenant(EventEnricher enricher) {
         return multiTenant(assumingTestsValue(), enricher);
     }
 
     /**
      * Creates a multitenant instance with the specified name and enricher.
+     *
+     * @deprecated please use {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     public static MultitenantBlackBoxContext multiTenant(String name, EventEnricher enricher) {
+        return internalMultiTenant(name, enricher);
+    }
+
+    private static MultitenantBlackBoxContext
+    internalMultiTenant(String name, EventEnricher enricher) {
         return new MultitenantBlackBoxContext(name, enricher);
     }
 
@@ -246,65 +263,21 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         EventEnricher enricher =
                 builder.eventEnricher()
                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
+        String name = builder.name()
+                             .value();
         BlackBoxBoundedContext<?> result =
                 builder.isMultitenant()
-                ? multiTenant(enricher)
-                : singleTenant(enricher);
+                ? internalMultiTenant(name, enricher)
+                : singleTenant(name, enricher);
 
         builder.repositories()
-               .forEach(result::with);
+               .forEach(result::internalWith);
         builder.commandDispatchers()
-               .forEach(result::withHandlers);
+               .forEach(result::internalWithDispatchers);
         builder.eventDispatchers()
-               .forEach(result::withEventDispatchers);
+               .forEach(result::internalWithEventDispatchers);
 
         return result;
-    }
-
-    /**
-     * Throws an {@link AssertionError}.
-     *
-     * <p>Only reachable after {@code unsupportedGuard} has
-     * {@linkplain #canDispatch(EventEnvelope) detected} a violation.
-     */
-    @Override
-    protected void handle(EventEnvelope event) {
-        unsupportedCommandGuard.failTest();
-    }
-
-    /**
-     * Checks if the given {@link CommandErrored} message represents an unsupported command
-     * {@linkplain io.spine.server.commandbus.UnsupportedCommandException error}.
-     */
-    @Override
-    public boolean canDispatch(EventEnvelope eventEnvelope) {
-        CommandErrored event = (CommandErrored) eventEnvelope.message();
-        return unsupportedCommandGuard.checkAndRemember(event);
-    }
-
-    @Override
-    public ImmutableSet<EventClass> messageClasses() {
-        return EventClass.setOf(CommandErrored.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The {@code BlackBoxBoundedContext} only consumes domestic events.
-     */
-    @Override
-    public ImmutableSet<EventClass> domesticEventClasses() {
-        return eventClasses();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The {@code BlackBoxBoundedContext} does not consume external events.
-     */
-    @Override
-    public ImmutableSet<EventClass> externalEventClasses() {
-        return ImmutableSet.of();
     }
 
     /** Obtains the name of this bounded context. */
@@ -345,6 +318,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /**
+     * Obtains repositories registered with the context.
+     */
+    @VisibleForTesting
+    Collection<Repository<?, ?>> repositories() {
+        return repositories.values();
+    }
+
+    /**
      * Obtains set of type names of entities known to this Bounded Context.
      */
     @VisibleForTesting
@@ -361,10 +342,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Appends the passed event to the history of the context under the test.
      */
+    @CanIgnoreReturnValue
     public T append(Event event) {
         checkNotNull(event);
-        EventStore eventStore = context.eventBus()
-                                       .eventStore();
+        EventStore eventStore =
+                context.eventBus()
+                       .eventStore();
         eventStore.append(event);
         return thisRef();
     }
@@ -381,9 +364,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      * @param repositories
      *         repositories to register in the Bounded Context
      * @return current instance
+     * @deprecated please use {@link BoundedContextBuilder#add(Repository)} and
+     *         then {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
+        return internalWith(repositories);
+    }
+
+    private T internalWith(Repository<?, ?>... repositories) {
         registerAll(this::registerRepository, repositories);
         return thisRef();
     }
@@ -394,8 +384,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     private void remember(Repository<?, ?> repository) {
-        Class<? extends EntityState> stateClass = repository.entityModelClass()
-                                                            .stateClass();
+        Class<? extends EntityState> stateClass =
+                repository.entityModelClass()
+                          .stateClass();
         repositories.put(stateClass, repository);
     }
 
@@ -405,9 +396,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      * @param dispatchers
      *         command dispatchers to register with the bounded context
      * @return current instance
+     * @deprecated please use {@link BoundedContextBuilder#addCommandDispatcher(CommandDispatcher)}
+     *         and then {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public final T withHandlers(CommandDispatcher... dispatchers) {
+        return internalWithDispatchers(dispatchers);
+    }
+
+    private T internalWithDispatchers(CommandDispatcher... dispatchers) {
         registerAll(this::registerCommandDispatcher, dispatchers);
         return thisRef();
     }
@@ -426,9 +424,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      *
      * @param dispatchers
      *         dispatchers to register with the event bus of this bounded context
+     * @deprecated please use {@link BoundedContextBuilder#addEventDispatcher(EventDispatcher)} and
+     *         then {@link #from(BoundedContextBuilder)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public final T withEventDispatchers(EventDispatcher... dispatchers) {
+        return internalWithEventDispatchers(dispatchers);
+    }
+
+    private T internalWithEventDispatchers(EventDispatcher... dispatchers) {
         registerAll(this::registerEventDispatcher, dispatchers);
         return thisRef();
     }
@@ -636,7 +641,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     private BlackBoxSetup setup() {
-        return new BlackBoxSetup(context, requestFactory(), observer);
+        return new BlackBoxSetup(context, requestFactory(), memoizingObserver());
     }
 
     /**

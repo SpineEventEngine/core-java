@@ -20,13 +20,15 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
@@ -37,21 +39,16 @@ class MultitenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<MultitenantBlackBoxContext> {
 
     @Override
-    MultitenantBlackBoxContext newInstance() {
-        return BlackBoxBoundedContext.multiTenant(getClass().getName())
-                                     .withTenant(generate());
+    BoundedContextBuilder newBuilder() {
+        return BoundedContextBuilder.assumingTests(true);
     }
 
-    @Test
-    @DisplayName("create builder instance with the context name")
-    void createByName() {
-        String name = getClass().getName();
-        MultitenantBlackBoxContext context =
-                BlackBoxBoundedContext.multiTenant(name);
-        assertThat(context)
-                .isNotNull();
-        assertThat(context.name().value())
-                .isEqualTo(name);
+    @BeforeEach
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    void setUp() {
+        super.setUp();
+        context().withTenant(generate());
     }
 
     @Test
@@ -62,7 +59,7 @@ class MultitenantBlackBoxContextTest
         TenantId newUser = generate();
         BbCreateProject createJohnProject = createProject();
         BbCreateProject createCarlProject = createProject();
-        MultitenantBlackBoxContext context = boundedContext()
+        MultitenantBlackBoxContext context = context()
                 // Create a project for John.
                 .withTenant(john)
                 .receivesCommand(createJohnProject)
@@ -103,9 +100,8 @@ class MultitenantBlackBoxContextTest
     void requireTenantId() {
         assertThrows(
                 IllegalStateException.class,
-                () -> BlackBoxBoundedContext
-                        .multiTenant()
-                        .assertEntityWithState(BbProject.class, "verify state")
+                () -> BlackBoxBoundedContext.from(BoundedContextBuilder.assumingTests(true))
+                                            .assertEntityWithState(BbProject.class, "verify state")
         );
     }
 }

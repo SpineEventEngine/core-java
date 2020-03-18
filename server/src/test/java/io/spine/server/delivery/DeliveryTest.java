@@ -29,7 +29,7 @@ import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.Messages;
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
@@ -45,7 +45,6 @@ import io.spine.test.delivery.DTaskView;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -328,12 +327,12 @@ public class DeliveryTest extends AbstractDeliveryTest {
     public void deliverMessagesInOrderOfEmission() throws InterruptedException {
         changeShardCountTo(20);
 
-        SingleTenantBlackBoxContext context =
-                BlackBoxBoundedContext.singleTenant()
-                                      .with(DefaultRepository.of(
-                                              TaskAggregate.class))
-                                      .with(new TaskAssignment.Repository())
-                                      .with(new TaskView.Repository());
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(TaskAggregate.class)
+                                     .add(new TaskAssignment.Repository())
+                                     .add(new TaskView.Repository())
+        );
         List<DCreateTask> commands = generateCommands(200);
         ExecutorService service = newFixedThreadPool(20);
         service.invokeAll(commands.stream()

@@ -70,7 +70,6 @@ import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -525,10 +524,10 @@ public class AggregateRepositoryTest {
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            AggregateRepository<?, ?> repository = repository();
-            context = BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(repository);
+            context = BlackBoxBoundedContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(repository())
+            );
         }
 
         @Test
@@ -604,11 +603,12 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            SingleTenantBlackBoxContext context = BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(new EventDiscardingAggregateRepository())
-                    .receivesCommands(create, start)
-                    .receivesEvent(archived);
+            BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(new EventDiscardingAggregateRepository())
+            );
+            context.receivesCommands(create, start)
+                   .receivesEvent(archived);
             context.assertEvents()
                    .isEmpty();
             context.close();

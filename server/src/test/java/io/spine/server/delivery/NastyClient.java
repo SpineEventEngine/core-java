@@ -23,6 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
 import io.spine.server.delivery.given.CalculatorSignal;
@@ -97,10 +98,10 @@ class NastyClient {
      *         the identifiers of target entities
      */
     void runWith(Set<String> targets) {
-        BlackBoxBoundedContext<?> context =
-                BlackBoxBoundedContext.singleTenant()
-                                      .with(repository);
-
+        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repository)
+        );
         DeliveryTestEnv.SignalMemoizer memoizer = subscribeToDelivered();
 
         int streamSize = targets.size() * 30;
@@ -112,9 +113,8 @@ class NastyClient {
 
         postAsync(context, commands, importEvents, reactEvents);
 
-        Stream<CalculatorSignal> signals = concat(commands.stream(),
-                                                  importEvents.stream(),
-                                                  reactEvents.stream());
+        Stream<CalculatorSignal> signals =
+                concat(commands.stream(), importEvents.stream(), reactEvents.stream());
 
         signalsPerTarget = signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
@@ -125,13 +125,15 @@ class NastyClient {
                     ImmutableSet.copyOf(signalsPerTarget.get(calcId));
             assertEquals(targetSignals, receivedMessages);
 
-            Integer sumForTarget = targetSignals.stream()
-                                                .map(CalculatorSignal::getValue)
-                                                .reduce(0, Integer::sum);
-            Calc expectedState = Calc.newBuilder()
-                                     .setId(calcId)
-                                     .setSum(sumForTarget)
-                                     .build();
+            Integer sumForTarget =
+                    targetSignals.stream()
+                                 .map(CalculatorSignal::getValue)
+                                 .reduce(0, Integer::sum);
+            Calc expectedState = Calc
+                    .newBuilder()
+                    .setId(calcId)
+                    .setSum(sumForTarget)
+                    .build();
             context.assertEntity(CalcAggregate.class, calcId)
                    .hasStateThat()
                    .comparingExpectedFieldsOnly()
@@ -153,7 +155,7 @@ class NastyClient {
 
 
     /**
-     * Returns the number of calls to  {@link #doLoadOrCreate(String)} method there were.
+     * Returns the number of calls to {@link #doLoadOrCreate(String)} method there were.
      *
      * @param id
      *         identifier of the {@link CalcAggregate}, calls to which are counted
@@ -226,7 +228,7 @@ class NastyClient {
         }
     }
 
-    private void postAsync(BlackBoxBoundedContext context,
+    private void postAsync(BlackBoxBoundedContext<?> context,
                            List<AddNumber> commands,
                            List<NumberImported> eventsToImport,
                            List<NumberReacted> eventsToReact) {
@@ -266,8 +268,8 @@ class NastyClient {
         }
     }
 
-    private static Stream<Callable<Object>> commandCallables(BlackBoxBoundedContext context,
-                                                             List<AddNumber> commands) {
+    private static Stream<Callable<Object>>
+    commandCallables(BlackBoxBoundedContext<?> context, List<AddNumber> commands) {
         return commands.stream()
                        .map((c) -> () -> {
                            context.receivesCommand(c);
@@ -275,8 +277,8 @@ class NastyClient {
                        });
     }
 
-    private static Stream<Callable<Object>> importEventCallables(BlackBoxBoundedContext context,
-                                                                 List<NumberImported> events) {
+    private static Stream<Callable<Object>>
+    importEventCallables(BlackBoxBoundedContext<?> context, List<NumberImported> events) {
         return events.stream()
                      .map((e) -> () -> {
                          context.importsEvent(e);
@@ -284,8 +286,8 @@ class NastyClient {
                      });
     }
 
-    private static Stream<Callable<Object>> reactEventsCallables(BlackBoxBoundedContext context,
-                                                                 List<NumberReacted> events) {
+    private static Stream<Callable<Object>>
+    reactEventsCallables(BlackBoxBoundedContext<?> context, List<NumberReacted> events) {
         return events.stream()
                      .map((e) -> () -> {
                          context.receivesEvent(e);

@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
@@ -40,7 +41,6 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
@@ -59,13 +59,11 @@ import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
 import io.spine.testing.server.blackbox.given.BbCommandDispatcher;
-import io.spine.testing.server.blackbox.given.BbDuplicateCommandDispatcher;
 import io.spine.testing.server.blackbox.given.BbEventDispatcher;
 import io.spine.testing.server.blackbox.given.BbInitProcess;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
-import io.spine.testing.server.blackbox.given.BbTaskViewProjection;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
@@ -94,12 +92,10 @@ import static io.spine.testing.server.blackbox.given.Given.assignSelf;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
-import static io.spine.testing.server.blackbox.given.Given.eventDispatcherRegistered;
 import static io.spine.testing.server.blackbox.given.Given.finalizeProject;
 import static io.spine.testing.server.blackbox.given.Given.initProject;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.projectDone;
-import static io.spine.testing.server.blackbox.given.Given.registerCommandDispatcher;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.given.Given.userDeleted;
@@ -116,10 +112,16 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     private T context;
 
     @BeforeEach
+    @OverridingMethodsMustInvokeSuper
     void setUp() {
-        context = newInstance().with(new BbProjectRepository(),
-                                     DefaultRepository.of(BbProjectViewProjection.class),
-                                     DefaultRepository.of(BbInitProcess.class));
+        BoundedContextBuilder builder = newBuilder();
+        builder.add(new BbProjectRepository())
+               .add(new BbReportRepository())
+               .add(BbProjectViewProjection.class)
+               .add(BbInitProcess.class);
+        @SuppressWarnings("unchecked") // see Javadoc for newBuilder().
+        T ctx = (T) BlackBoxBoundedContext.from(builder);
+        context = ctx;
     }
 
     @AfterEach
@@ -128,92 +130,15 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     /**
-     * Creates a new instance of a bounded context to be used in this test suite.
+     * Creates a new instance of the {@code BoundedContextBuilder}.
+     *
+     * <p>Implementations must ensure that multi-tenancy status of the created builder
+     * matches the type of the test.
      */
-    abstract BlackBoxBoundedContext<T> newInstance();
+    abstract BoundedContextBuilder newBuilder();
 
-    T boundedContext() {
+    final T context() {
         return context;
-    }
-
-    @Test
-    @DisplayName("register command dispatchers")
-    void registerCommandDispatchers() {
-        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
-        BbCommandDispatcher dispatcher = new BbCommandDispatcher(commandTypeToDispatch);
-        context.withHandlers(dispatcher);
-        context.receivesCommand(registerCommandDispatcher(dispatcher.getClass()));
-        assertThat(dispatcher.commandsDispatched()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("throw on an attempt to register duplicate command dispatchers")
-    void throwOnDuplicateCommandDispatchers() {
-        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
-        BbCommandDispatcher dispatcher = new BbCommandDispatcher(commandTypeToDispatch);
-        context.withHandlers(dispatcher);
-        BbDuplicateCommandDispatcher duplicateDispatcher =
-                new BbDuplicateCommandDispatcher(commandTypeToDispatch);
-
-        assertThrows(IllegalArgumentException.class,
-                     () -> context.withHandlers(duplicateDispatcher));
-    }
-
-    @Test
-    @DisplayName("throw on an attempt to register a null command dispatcher")
-    void throwOnNullCommandDispatcher() {
-        assertThrows(NullPointerException.class,
-                     () -> context.withHandlers((CommandDispatcher) null));
-    }
-
-    @Test
-    @DisplayName("throw on an attempt to register several command dispatchers one of which is null")
-    void throwOnOneOfNull() {
-        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
-        BbCommandDispatcher dispatcher = new BbCommandDispatcher(commandTypeToDispatch);
-        assertThrows(NullPointerException.class, () -> context.withHandlers(dispatcher, null));
-    }
-
-    @Test
-    @DisplayName("register a repository if it's passed as command dispatcher")
-    void registerRepoAsCommandDispatcher() {
-        BbReportRepository repository = new BbReportRepository();
-        context.withHandlers(repository);
-        assertThat(context.allStateTypes()).contains(TypeName.of(BbReport.class));
-    }
-
-    @Test
-    @DisplayName("register event dispatcher")
-    void registerEventDispatcher() {
-        BbEventDispatcher dispatcher = new BbEventDispatcher();
-        context.withEventDispatchers(dispatcher);
-        context.receivesEvent(eventDispatcherRegistered(dispatcher.getClass()));
-        assertThat(dispatcher.eventsReceived()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("throw on an attempt to register a null event dispatcher")
-    void throwOnNullEventDispatcher() {
-        assertThrows(NullPointerException.class,
-                     () -> context.withEventDispatchers((EventDispatcher) null));
-    }
-
-    @Test
-    @DisplayName("throw on an attempt to register several event dispatchers if one of them is null")
-    void throwOnOneOfEventDispatchersIsNull() {
-        BbEventDispatcher validDispatcher = new BbEventDispatcher();
-        assertThrows(NullPointerException.class,
-                     () -> context.withEventDispatchers(validDispatcher, null));
-    }
-
-    @Test
-    @DisplayName("register a repository if it's passed as event dispatcher")
-    void registerRepoAsEventDispatcher() {
-        ProjectionRepository<?, ?, ?> repository =
-                (ProjectionRepository<?, ?, ?>)
-                        DefaultRepository.of(BbTaskViewProjection.class);
-        context.withEventDispatchers(repository);
-        assertThat(context.allStateTypes()).contains(TypeName.of(BbTaskView.class));
     }
 
     @Test
@@ -345,7 +270,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     void receivesEvent() {
         BbProjectId projectId = newProjectId();
         EventSubject assertEvents = context
-                .with(new BbReportRepository())
                 .receivesCommand(createReport(projectId))
                 .receivesEvent(taskAdded(projectId))
                 .assertEvents();
@@ -359,7 +283,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     void receivesEvents() {
         BbProjectId projectId = newProjectId();
         EventSubject assertEvents = context
-                .with(new BbReportRepository())
                 .receivesCommand(createReport(projectId))
                 .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                 .assertEvents();
@@ -450,15 +373,18 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @Test
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
-        assertThrows(IllegalStateException.class, () ->
-                newInstance()
-                        .with(new RepositoryThrowingExceptionOnClose() {
-                            @Override
-                            protected void throwException() {
-                                throw new RuntimeException("Expected error");
-                            }
-                        })
-                        .close());
+        RepositoryThrowingExceptionOnClose throwingRepo = new RepositoryThrowingExceptionOnClose() {
+            @Override
+            protected void throwException() {
+                throw new RuntimeException("Expected error");
+            }
+        };
+
+        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext.from(
+                newBuilder().add(throwingRepo)
+        );
+
+        assertThrows(IllegalStateException.class, ctx::close);
     }
 
     @Nested
@@ -494,15 +420,34 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(false)
                     .enrichEventsUsing(enricher);
+            assertBlackBox(builder, SingleTenantBlackBoxContext.class);
+        }
+
+        @Test
+        void multiTenant() {
+            BoundedContextBuilder builder = BoundedContextBuilder
+                    .assumingTests(true)
+                    .enrichEventsUsing(enricher);
+            assertBlackBox(builder, MultitenantBlackBoxContext.class);
+        }
+
+        private void assertBlackBox(BoundedContextBuilder builder,
+                                    Class<? extends BlackBoxBoundedContext<?>> clazz) {
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);
             blackBox = BlackBoxBoundedContext.from(builder);
 
-            assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
+            assertThat(blackBox).isInstanceOf(clazz);
+            assertRepositories();
             assertEntityTypes();
             assertDispatchers();
             assertEnricher();
+        }
+
+        private void assertRepositories() {
+            assertThat(blackBox.repositories())
+                    .containsAnyIn(repositories);
         }
 
         private void assertEntityTypes() {
@@ -517,22 +462,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private void assertEnricher() {
             assertThat(blackBox.eventBus().enricher()).hasValue(enricher);
-        }
-
-        @Test
-        void multiTenant() {
-            BoundedContextBuilder builder = BoundedContextBuilder
-                    .assumingTests(true)
-                    .enrichEventsUsing(enricher);
-            repositories.forEach(builder::add);
-            builder.addCommandDispatcher(commandDispatcher);
-            builder.addEventDispatcher(eventDispatcher);
-            blackBox = BlackBoxBoundedContext.from(builder);
-
-            assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
-            assertEntityTypes();
-            assertDispatchers();
-            assertEnricher();
         }
 
         /**

@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.base.EventMessage;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.klasse.EngineAggregate;
 import io.spine.server.aggregate.given.klasse.EngineId;
 import io.spine.server.aggregate.given.klasse.EngineRepository;
@@ -31,7 +32,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -50,13 +50,14 @@ import static com.google.common.truth.Truth.assertThat;
 class EventImportTest {
 
     private EngineRepository repository;
-    private SingleTenantBlackBoxContext context;
+    private BlackBoxBoundedContext<?> context;
 
     void createRepository(boolean routeByFirstMessageField) {
         repository = new EngineRepository(routeByFirstMessageField);
-        context = BlackBoxBoundedContext
-                .singleTenant()
-                .with(repository);
+        context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repository)
+        );
     }
 
     @AfterEach
@@ -75,7 +76,7 @@ class EventImportTest {
         return this.repository;
     }
 
-    protected final SingleTenantBlackBoxContext context() {
+    protected final BlackBoxBoundedContext<?> context() {
         return this.context;
     }
 

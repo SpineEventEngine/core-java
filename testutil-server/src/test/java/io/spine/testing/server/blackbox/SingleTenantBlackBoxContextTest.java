@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import io.spine.server.BoundedContextBuilder;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Single tenant Black Box Bounded Context should")
@@ -27,7 +28,7 @@ class SingleTenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<SingleTenantBlackBoxContext> {
 
     @Override
-    SingleTenantBlackBoxContext newInstance() {
-        return BlackBoxBoundedContext.singleTenant(getClass().getName());
+    BoundedContextBuilder newBuilder() {
+        return BoundedContextBuilder.assumingTests();
     }
 }

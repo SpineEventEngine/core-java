@@ -20,7 +20,7 @@
 
 package io.spine.server.model.handler;
 
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.model.handler.given.RoverBot;
 import io.spine.server.model.handler.given.command.Start;
@@ -46,8 +46,10 @@ class MessageInterfaceResultTest {
 
     @BeforeEach
     void createContext() {
-        context = BlackBoxBoundedContext.singleTenant()
-                                         .with(DefaultRepository.of(RoverBot.class));
+        context = BlackBoxBoundedContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(RoverBot.class)
+        );
     }
 
     @AfterEach
