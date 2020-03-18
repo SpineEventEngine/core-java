@@ -20,10 +20,12 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +41,14 @@ class MultitenantBlackBoxContextTest
     @Override
     BoundedContextBuilder newBuilder() {
         return BoundedContextBuilder.assumingTests(true);
+    }
+
+    @BeforeEach
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    void setUp() {
+        super.setUp();
+        context().withTenant(generate());
     }
 
     @Test

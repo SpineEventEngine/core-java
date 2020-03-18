@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
@@ -116,6 +117,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     private T context;
 
     @BeforeEach
+    @OverridingMethodsMustInvokeSuper
     void setUp() {
         BoundedContextBuilder builder = newBuilder();
         builder.add(new BbProjectRepository())
