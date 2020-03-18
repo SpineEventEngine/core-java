@@ -26,6 +26,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.security.InvocationGuard;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
@@ -347,14 +348,28 @@ public abstract class BoundedContext implements Closeable, Logging {
      * @see VisibilityGuard
      */
     @Internal
-    public Optional<Repository> findRepository(Class<? extends EntityState> stateClass) {
+    public Optional<Repository<?, ?>> findRepository(Class<? extends EntityState> stateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(stateClass)) {
             throw newIllegalStateException("No repository found for the entity state class `%s`.",
                                            stateClass.getName());
         }
-        Optional<Repository> repository = guard.repositoryFor(stateClass);
+        Optional<Repository<?, ?>> repository = guard.repositoryFor(stateClass);
         return repository;
+    }
+
+    /**
+     * Internal method for obtaining repositories of the context.
+     *
+     * @throws SecurityException
+     *         if called from non-allowed sites
+     * @throws IllegalStateException
+     *         if there is not repository entities of which have the passed state
+     */
+    @Internal
+    public Repository<?, ?> getRepository(Class<? extends EntityState> stateClass) {
+        InvocationGuard.allowOnly("io.spine.testing.server.blackbox.BlackBoxContext");
+        return guard.get(stateClass);
     }
 
     /**

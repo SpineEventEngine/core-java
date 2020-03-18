@@ -63,7 +63,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -71,7 +70,6 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.server.blackbox.Actor.defaultActor;
@@ -99,12 +97,6 @@ public abstract class BlackBoxContext
 
     /** The context under the test. */
     private final BoundedContext context;
-
-    /**
-     * All the repositories of the context under the text mapped by
-     * the type of the state of their entities.
-     */
-    private final Map<Class<? extends EntityState>, Repository<?, ?>> repositories;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -182,7 +174,6 @@ public abstract class BlackBoxContext
                 .addEventDispatcher(new UnsupportedCommandGuard(name))
                 .addEventDispatcher(DiagnosticLog.instance())
                 .build();
-        this.repositories = newHashMap();
         this.actor = defaultActor();
     }
 
@@ -232,14 +223,6 @@ public abstract class BlackBoxContext
     }
 
     /**
-     * Obtains repositories registered with the context.
-     */
-    @VisibleForTesting
-    Collection<Repository<?, ?>> repositories() {
-        return repositories.values();
-    }
-
-    /**
      * Obtains set of type names of entities known to this Bounded Context.
      */
     @VisibleForTesting
@@ -274,14 +257,6 @@ public abstract class BlackBoxContext
 
     private void registerRepository(Repository<?, ?> repository) {
         context.register(repository);
-        remember(repository);
-    }
-
-    private void remember(Repository<?, ?> repository) {
-        Class<? extends EntityState> stateClass =
-                repository.entityModelClass()
-                          .stateClass();
-        repositories.put(stateClass, repository);
     }
 
     private void registerCommandDispatcher(CommandDispatcher dispatcher) {
@@ -665,8 +640,8 @@ public abstract class BlackBoxContext
     }
 
     @VisibleForTesting
-    private Repository<?, ?> repositoryOf(Class<? extends EntityState> stateClass) {
-        Repository<?, ?> repository = repositories.get(stateClass);
+    Repository<?, ?> repositoryOf(Class<? extends EntityState> stateClass) {
+        Repository<?, ?> repository = context.getRepository(stateClass);
         return repository;
     }
 

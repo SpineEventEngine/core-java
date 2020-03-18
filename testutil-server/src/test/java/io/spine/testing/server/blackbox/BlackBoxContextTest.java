@@ -26,6 +26,7 @@ import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
@@ -99,6 +100,7 @@ import static io.spine.testing.server.blackbox.given.Given.projectDone;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.given.Given.userDeleted;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -446,8 +448,12 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         }
 
         private void assertRepositories() {
-            assertThat(blackBox.repositories())
-                    .containsAnyIn(repositories);
+            for (Repository<?, ?> repository : repositories) {
+                Class<? extends EntityState> stateClass =
+                        repository.entityModelClass()
+                                  .stateClass();
+                assertDoesNotThrow(() -> context.repositoryOf(stateClass));
+            }
         }
 
         private void assertEntityTypes() {

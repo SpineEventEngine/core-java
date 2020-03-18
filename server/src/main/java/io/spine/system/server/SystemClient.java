@@ -45,7 +45,7 @@ public interface SystemClient {
     /**
      * Finds a system repository by the state class of entities.
      */
-    Optional<Repository> systemRepositoryFor(Class<? extends EntityState> stateClass);
+    Optional<Repository<?, ?>> systemRepositoryFor(Class<? extends EntityState> stateClass);
 
     /**
      * Closes the underlying system context.
