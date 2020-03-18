@@ -49,7 +49,7 @@ public final class MultitenantBlackBoxContext
      * Creates a new multi-tenant instance.
      */
     MultitenantBlackBoxContext(String name, EventEnricher enricher) {
-        super(true, enricher, name);
+        super(name, true, enricher);
     }
 
     /**

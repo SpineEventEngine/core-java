@@ -64,7 +64,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -72,7 +71,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.server.blackbox.Actor.defaultActor;
@@ -94,7 +92,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *         methods provided by this class.
  */
 @SuppressWarnings({
-        "ClassReferencesSubclass", /* See the API note. */
         "ClassWithTooManyMethods",
         "OverlyCoupledClass"})
 @VisibleForTesting
@@ -143,7 +140,33 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      */
     private Actor actor;
 
-    protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher, String name) {
+    /**
+     * Creates new instance obtaining configuration parameters from the passed builder.
+     */
+    public static BlackBoxBoundedContext<?> from(BoundedContextBuilder builder) {
+        BlackBoxBoundedContext<?> result = create(builder);
+        builder.repositories()
+               .forEach(result::registerRepository);
+        builder.commandDispatchers()
+               .forEach(result::registerCommandDispatcher);
+        builder.eventDispatchers()
+               .forEach(result::registerEventDispatcher);
+
+        return result;
+    }
+
+    private static BlackBoxBoundedContext<?> create(BoundedContextBuilder builder) {
+        EventEnricher enricher =
+                builder.eventEnricher()
+                       .orElseGet(BlackBoxBoundedContext::emptyEnricher);
+        String name = builder.name()
+                             .value();
+        return builder.isMultitenant()
+               ? new MultitenantBlackBoxContext(name, enricher)
+               : new SingleTenantBlackBoxContext(name, enricher);
+    }
+
+    protected BlackBoxBoundedContext(String name, boolean multitenant, EventEnricher enricher) {
         super();
         this.commands = new CommandCollector();
         this.postedCommands = synchronizedSet(new HashSet<>());
@@ -162,122 +185,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         this.context.registerEventDispatcher(new UnsupportedCommandGuard(name));
         this.context.registerEventDispatcher(DiagnosticLog.instance());
         this.actor = defaultActor();
-    }
-
-    /**
-     * Creates a single-tenant instance with the default configuration.
-     *
-     * @deprecated please use {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    public static SingleTenantBlackBoxContext singleTenant() {
-        return singleTenant(emptyEnricher());
-    }
-
-    /**
-     * Creates a single-tenant instance with the specified name.
-     *
-     * @deprecated please use {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    public static SingleTenantBlackBoxContext singleTenant(String name) {
-        return singleTenant(name, emptyEnricher());
-    }
-
-    /**
-     * Creates a single-tenant instance with the specified enricher.
-     *
-     * @deprecated please use {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    public static SingleTenantBlackBoxContext singleTenant(EventEnricher enricher) {
-        return singleTenant(assumingTestsValue(), enricher);
-    }
-
-    /**
-     * Creates a single-tenant instance with the specified name and enricher.
-     *
-     * @deprecated please use {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    public static SingleTenantBlackBoxContext singleTenant(String name, EventEnricher enricher) {
-        return new SingleTenantBlackBoxContext(name, enricher);
-    }
-
-    /**
-     * Creates a multitenant instance the default configuration.
-     *
-     * @deprecated please use {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    public static MultitenantBlackBoxContext multiTenant() {
-        return multiTenant(emptyEnricher());
-    }
-
-    /**
-     * Creates a multitenant instance with the specified name.
-     *
-     * @deprecated please use {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    public static MultitenantBlackBoxContext multiTenant(String name) {
-        return multiTenant(name, emptyEnricher());
-    }
-
-    /**
-     * Creates a multitenant instance with the specified enricher.
-     *
-     * @deprecated please use {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    public static MultitenantBlackBoxContext multiTenant(EventEnricher enricher) {
-        return multiTenant(assumingTestsValue(), enricher);
-    }
-
-    /**
-     * Creates a multitenant instance with the specified name and enricher.
-     *
-     * @deprecated please use {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    public static MultitenantBlackBoxContext multiTenant(String name, EventEnricher enricher) {
-        return internalMultiTenant(name, enricher);
-    }
-
-    private static MultitenantBlackBoxContext
-    internalMultiTenant(String name, EventEnricher enricher) {
-        return new MultitenantBlackBoxContext(name, enricher);
-    }
-
-    /**
-     * Creates new instance obtaining configuration parameters from the passed builder.
-     *
-     * <p>In particular:
-     * <ul>
-     *     <li>multi-tenancy status;
-     *     <li>{@code Enricher};
-     *     <li>added repositories.
-     * </ul>
-     */
-    public static BlackBoxBoundedContext<?> from(BoundedContextBuilder builder) {
-        EventEnricher enricher =
-                builder.eventEnricher()
-                       .orElseGet(BlackBoxBoundedContext::emptyEnricher);
-        String name = builder.name()
-                             .value();
-        BlackBoxBoundedContext<?> result =
-                builder.isMultitenant()
-                ? internalMultiTenant(name, enricher)
-                : singleTenant(name, enricher);
-
-        builder.repositories()
-               .forEach(result::internalWith);
-        builder.commandDispatchers()
-               .forEach(result::internalWithDispatchers);
-        builder.eventDispatchers()
-               .forEach(result::internalWithEventDispatchers);
-
-        return result;
     }
 
     /** Obtains the name of this bounded context. */
@@ -358,26 +265,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         return context.commandBus();
     }
 
-    /**
-     * Registers passed repositories with the Bounded Context under the test.
-     *
-     * @param repositories
-     *         repositories to register in the Bounded Context
-     * @return current instance
-     * @deprecated please use {@link BoundedContextBuilder#add(Repository)} and
-     *         then {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public final T with(Repository<?, ?>... repositories) {
-        return internalWith(repositories);
-    }
-
-    private T internalWith(Repository<?, ?>... repositories) {
-        registerAll(this::registerRepository, repositories);
-        return thisRef();
-    }
-
     private void registerRepository(Repository<?, ?> repository) {
         context.register(repository);
         remember(repository);
@@ -390,26 +277,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         repositories.put(stateClass, repository);
     }
 
-    /**
-     * Registers the specified command dispatchers with this bounded context.
-     *
-     * @param dispatchers
-     *         command dispatchers to register with the bounded context
-     * @return current instance
-     * @deprecated please use {@link BoundedContextBuilder#addCommandDispatcher(CommandDispatcher)}
-     *         and then {@link #from(BoundedContextBuilder)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public final T withHandlers(CommandDispatcher... dispatchers) {
-        return internalWithDispatchers(dispatchers);
-    }
-
-    private T internalWithDispatchers(CommandDispatcher... dispatchers) {
-        registerAll(this::registerCommandDispatcher, dispatchers);
-        return thisRef();
-    }
-
     private void registerCommandDispatcher(CommandDispatcher dispatcher) {
         if (dispatcher instanceof Repository) {
             registerRepository((Repository<?, ?>) dispatcher);
@@ -419,39 +286,13 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     /**
-     * Registers the specified event dispatchers with the {@code event bus} of this
-     * bounded context.
-     *
-     * @param dispatchers
-     *         dispatchers to register with the event bus of this bounded context
-     * @deprecated please use {@link BoundedContextBuilder#addEventDispatcher(EventDispatcher)} and
-     *         then {@link #from(BoundedContextBuilder)}
+     * Registers the specified event dispatcher with the context under the test.
      */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public final T withEventDispatchers(EventDispatcher... dispatchers) {
-        return internalWithEventDispatchers(dispatchers);
-    }
-
-    private T internalWithEventDispatchers(EventDispatcher... dispatchers) {
-        registerAll(this::registerEventDispatcher, dispatchers);
-        return thisRef();
-    }
-
     private void registerEventDispatcher(EventDispatcher dispatcher) {
         if (dispatcher instanceof Repository) {
             registerRepository((Repository<?, ?>) dispatcher);
         } else {
             context.registerEventDispatcher(dispatcher);
-        }
-    }
-
-    @SafeVarargs
-    private static <S> void registerAll(Consumer<S> registerFn, S... itemsToRegister) {
-        checkNotNull(itemsToRegister);
-        for (S item : itemsToRegister) {
-            checkNotNull(item);
-            registerFn.accept(item);
         }
     }
 

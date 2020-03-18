@@ -35,7 +35,7 @@ public final class SingleTenantBlackBoxContext
         extends BlackBoxBoundedContext<SingleTenantBlackBoxContext> {
 
     SingleTenantBlackBoxContext(String name, EventEnricher enricher) {
-        super(false, enricher, name);
+        super(name, false, enricher);
     }
 
     @Override
