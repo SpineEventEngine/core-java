@@ -19,7 +19,6 @@
  */
 package io.spine.server;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.BoundedContextName;
@@ -503,20 +502,6 @@ public abstract class BoundedContext implements Closeable, Logging {
         shutDownRepositories();
 
         _debug().log(closed(nameForLogging()));
-    }
-
-    /**
-     * Tells if the context is closed.
-     *
-     * <p>This is a test-only method which is needed for the tests that forcibly close a context,
-     * so that cleanup methods do not call it again.
-     *
-     * @deprecated please use {@link #isOpen()} instead
-     */
-    @Deprecated
-    @VisibleForTesting
-    public boolean isClosed() {
-        return !isOpen();
     }
 
     @Override
