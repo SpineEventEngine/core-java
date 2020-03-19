@@ -517,11 +517,16 @@ public abstract class BlackBoxContext implements Logging {
      */
     private ImmutableList<Event> events() {
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
-        return select(this.events)
+        return allEvents()
                 .stream()
                 .filter(wasNotReceived)
                 .collect(toImmutableList());
     }
+
+    /**
+     * Selects events that belong to the current tenant.
+     */
+    abstract ImmutableList<Event> select(EventCollector collector);
 
     /**
      * Obtains immutable list of all the events in this Bounded Context.
@@ -530,11 +535,6 @@ public abstract class BlackBoxContext implements Logging {
     ImmutableList<Event> allEvents() {
         return select(this.events);
     }
-
-    /**
-     * Selects events that belong to the current tenant.
-     */
-    abstract ImmutableList<Event> select(EventCollector collector);
 
     private static EventEnricher emptyEnricher() {
         return EventEnricher.newBuilder()
