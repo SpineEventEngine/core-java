@@ -166,7 +166,8 @@ abstract class AbstractCommandBusTestSuite {
 
         context = createContext();
 
-        tenantIndex = context.tenantIndex();
+        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        tenantIndex = contextAccess.tenantIndex();
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
 
         eventBus = context.eventBus();
@@ -184,7 +185,7 @@ abstract class AbstractCommandBusTestSuite {
                 ? new TestActorRequestFactory(getClass(), generate())
                 : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
-        context.registerCommandDispatcher(createProjectHandler);
+        contextAccess.registerCommandDispatcher(createProjectHandler);
         observer = memoizingObserver();
     }
 

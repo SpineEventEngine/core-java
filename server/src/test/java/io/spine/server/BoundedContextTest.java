@@ -128,7 +128,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("IntegrationBroker")
         void integrationBroker() {
-            assertNotNull(context.broker());
+            assertNotNull(context.internalAccess().broker());
         }
 
         @Test

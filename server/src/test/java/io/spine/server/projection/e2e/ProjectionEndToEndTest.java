@@ -142,7 +142,8 @@ class ProjectionEndToEndTest {
         BoundedContext groups = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        groups.register(repository);
+        groups.internalAccess()
+              .register(repository);
         UserId organizationHead = GivenUserId.newUuid();
         MessageId entityId = MessageId
                 .newBuilder()

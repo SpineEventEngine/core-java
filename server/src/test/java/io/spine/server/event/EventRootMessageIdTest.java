@@ -78,11 +78,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("Event root message should")
 public class EventRootMessageIdTest {
 
-    private BoundedContext boundedContext;
+    private BoundedContext context;
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContextBuilder
+        context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
         ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
@@ -90,15 +90,16 @@ public class EventRootMessageIdTest {
         TeamCreationRepository teamCreationRepository = new TeamCreationRepository();
         UserSignUpRepository userSignUpRepository = new UserSignUpRepository();
 
-        boundedContext.register(projectRepository);
-        boundedContext.register(teamRepository);
-        boundedContext.register(teamCreationRepository);
-        boundedContext.register(userSignUpRepository);
+        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        contextAccess.register(projectRepository);
+        contextAccess.register(teamRepository);
+        contextAccess.register(teamCreationRepository);
+        contextAccess.register(userSignUpRepository);
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        boundedContext.close();
+        context.close();
     }
 
     @Test
@@ -287,8 +288,8 @@ public class EventRootMessageIdTest {
 
     private void postCommand(Command command) {
         StreamObserver<Ack> observer = noOpObserver();
-        boundedContext.commandBus()
-                      .post(command, observer);
+        context.commandBus()
+               .post(command, observer);
     }
 
     /**
@@ -296,9 +297,9 @@ public class EventRootMessageIdTest {
      */
     private List<Event> readEvents() {
         MemoizingObserver<Event> observer = memoizingObserver();
-        with(TENANT_ID).run(() -> boundedContext.eventBus()
-                                                .eventStore()
-                                                .read(allEventsQuery(), observer));
+        with(TENANT_ID).run(() -> context.eventBus()
+                                         .eventStore()
+                                         .read(allEventsQuery(), observer));
         List<Event> results = observer.responses();
         return results;
     }

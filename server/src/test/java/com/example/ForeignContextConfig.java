@@ -44,15 +44,15 @@ public final class ForeignContextConfig {
     private ForeignContextConfig() {}
 
     public static void repositoryRegistration() {
-        context().register(DefaultRepository.of(ProjectAggregate.class));
+        context().internalAccess().register(DefaultRepository.of(ProjectAggregate.class));
     }
 
     public static void commandDispatcherRegistration() {
-        context().registerCommandDispatcher(newCommandDispatcher());
+        context().internalAccess().registerCommandDispatcher(newCommandDispatcher());
     }
 
     public static void eventDispatcherRegistration() {
-        context().registerEventDispatcher(EmptyEventDispatcher.newInstance());
+        context().internalAccess().registerEventDispatcher(EmptyEventDispatcher.newInstance());
     }
 
     private static BoundedContext context() {

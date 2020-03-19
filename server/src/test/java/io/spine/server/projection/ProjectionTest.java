@@ -178,14 +178,15 @@ class ProjectionTest {
     @Test
     @DisplayName("throw ISE if no handler is present for event")
     void throwIfNoHandlerPresent() {
-        ProjectionRepository<String, ?, ?> repository =
+        @SuppressWarnings("unchecked") ProjectionRepository<String, ?, ?> repository =
                 (ProjectionRepository<String, ?, ?>) DefaultRepository.of(SavingProjection.class);
         BoundedContext context = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        context.register(repository);
+        final BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        contextAccess.register(repository);
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        context.registerEventDispatcher(monitor);
+        contextAccess.registerEventDispatcher(monitor);
         Event event = GivenEvent.arbitrary();
         EventEnvelope envelope = EventEnvelope.of(event);
         ProjectionEndpoint<String, ?> endpoint = ProjectionEndpoint.of(repository, envelope);

@@ -80,10 +80,11 @@ class EntityEventsTest {
                                        .build();
         BoundedContext system = systemOf(context);
 
-        context.register(DefaultRepository.of(PersonAggregate.class));
-        context.register(DefaultRepository.of(PersonProjection.class));
-        context.register(DefaultRepository.of(PersonNamePart.class));
-        context.register(new PersonProcmanRepository());
+        BoundedContext.InternalAccess ctx = context.internalAccess();
+        ctx.register(DefaultRepository.of(PersonAggregate.class));
+        ctx.register(DefaultRepository.of(PersonProjection.class));
+        ctx.register(DefaultRepository.of(PersonNamePart.class));
+        ctx.register(new PersonProcmanRepository());
         eventAccumulator = new HistoryEventWatcher();
         system.eventBus()
               .register(eventAccumulator);

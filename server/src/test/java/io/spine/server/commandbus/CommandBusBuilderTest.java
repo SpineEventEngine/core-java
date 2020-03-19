@@ -62,7 +62,8 @@ class CommandBusBuilderTest
         BoundedContext context =
                 BoundedContext.multitenant(getClass().getSimpleName())
                               .build();
-        tenantIndex = context.tenantIndex();
+        tenantIndex = context.internalAccess()
+                             .tenantIndex();
     }
 
     @Test

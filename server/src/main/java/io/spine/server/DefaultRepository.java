@@ -54,30 +54,28 @@ public interface DefaultRepository {
      *
      * @param cls
      *         the class of entities
-     * @param <I>
-     *         the type of entity identifiers
      * @param <E>
      *         the type of entity
      * @return new repository instance
      */
-    @SuppressWarnings("unchecked") // Casts are ensured by class assignability checks.
-    static <I, E extends Entity<I, ?>> Repository<I, E> of(Class<E> cls) {
+    @SuppressWarnings({"unchecked", "rawtypes"}) // Casts are ensured by class assignability checks.
+    static <E extends Entity<?, ?>> Repository<?, E> of(Class<E> cls) {
         /*
          * We deliberately "save" on OOP here and detect the class by the chain of if-s below
          * (instead of implementing this using the methods in the `EntityClass` hierarchy).
          * This is done to provide more convenient syntax for our framework users.
          */
         if (AggregatePart.class.isAssignableFrom(cls)) {
-            return (Repository<I, E>) new DefaultAggregatePartRepository(cls);
+            return new DefaultAggregatePartRepository(cls);
         }
         if (Aggregate.class.isAssignableFrom(cls)) {
-            return (Repository<I, E>) new DefaultAggregateRepository(cls);
+            return new DefaultAggregateRepository(cls);
         }
         if (ProcessManager.class.isAssignableFrom(cls)) {
-            return (Repository<I, E>) new DefaultProcessManagerRepository(cls);
+            return new DefaultProcessManagerRepository(cls);
         }
         if (Projection.class.isAssignableFrom(cls)) {
-            return (Repository<I, E>) new DefaultProjectionRepository(cls);
+            return new DefaultProjectionRepository(cls);
         }
         throw newIllegalArgumentException(
                 "No default repository implementation available for the class `%s`.", cls

@@ -56,6 +56,7 @@ import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 public final class ThirdPartyContext implements Closeable {
 
     private final BoundedContext context;
+    private final BoundedContext.InternalAccess contextAccess;
     private final Any producerId;
 
     /**
@@ -94,6 +95,7 @@ public final class ThirdPartyContext implements Closeable {
 
     private ThirdPartyContext(BoundedContext context) {
         this.context = context;
+        this.contextAccess = context.internalAccess();
         this.producerId = pack(context.name());
     }
 
@@ -119,8 +121,8 @@ public final class ThirdPartyContext implements Closeable {
 
         EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
         Event event = eventFactory.createEvent(eventMessage, null);
-        context.broker()
-               .publish(EventEnvelope.of(event));
+        contextAccess.broker()
+                     .publish(EventEnvelope.of(event));
     }
 
     /**

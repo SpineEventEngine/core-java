@@ -86,7 +86,8 @@ public final class DefaultEventStore
     public void registerWith(BoundedContext context) {
         if (!isRegistered()) { // Quit recursion.
             super.registerWith(context);
-            context.register(this);
+            context.internalAccess()
+                   .register(this);
         }
     }
 

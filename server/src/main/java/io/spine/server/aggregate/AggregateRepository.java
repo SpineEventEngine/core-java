@@ -78,7 +78,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository, EventDispatcherDelegate {
@@ -118,18 +118,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Initializes the repository during its registration with a {@code BoundedContext}.
+     * Initializes the repository during its registration with its context.
      *
      * <p>Verifies that the class of aggregates of this repository subscribes to at least one
      * type of messages.
      *
      * <p>Registers itself with {@link io.spine.server.commandbus.CommandBus CommandBus},
      * {@link io.spine.server.event.EventBus EventBus}, and
-     * {@link io.spine.server.aggregate.ImportBus ImportBus} of the parent {@code BoundedContext}
-     * for dispatching messages to its aggregates.
+     * {@link io.spine.server.aggregate.ImportBus ImportBus} of the context for dispatching
+     * messages to its aggregates.
      *
      * @param context
-     *         the {@code BoundedContext} of this repository
+     *         the context of this repository
      * @throws IllegalStateException
      *         if the aggregate class does not handle any messages
      */
@@ -144,7 +144,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         setupEventRouting(eventRouting);
         setupImportRouting(eventImportRouting);
 
-        context.registerCommandDispatcher(this);
+        context.internalAccess().registerCommandDispatcher(this);
         if (aggregateClass().importsEvents()) {
             context.importBus()
                    .register(EventImportDispatcher.of(this));

@@ -23,6 +23,7 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 
@@ -40,10 +41,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 final class DefaultSystemReadSide implements SystemReadSide {
 
     private final SystemContext context;
+    private final BoundedContext.InternalAccess contextAccess;
     private final EventBus eventBus;
 
     DefaultSystemReadSide(SystemContext context) {
         this.context = context;
+        this.contextAccess = context.internalAccess();
         this.eventBus = context.eventBus();
     }
 
@@ -62,15 +65,17 @@ final class DefaultSystemReadSide implements SystemReadSide {
     @Override
     public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
         MirrorRepository repository = (MirrorRepository)
-                context.findRepository(Mirror.class)
-                       .orElseThrow(
-                               () -> newIllegalStateException(
-                                       "Mirror projection repository is not registered in `%s`.",
-                                       context.name()
-                                              .getValue()
-                               )
-                       );
+                contextAccess.findRepository(Mirror.class)
+                             .orElseThrow(this::mirrorRepositoryNotRegistered);
         Iterator<EntityStateWithVersion> result = repository.execute(query);
         return result;
+    }
+
+    private IllegalStateException mirrorRepositoryNotRegistered() {
+        return newIllegalStateException(
+                "Mirror projection repository is not registered in `%s`.",
+                context.name()
+                       .getValue()
+        );
     }
 }

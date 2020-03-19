@@ -149,7 +149,8 @@ class DefaultSystemReadSideTest {
 
         @BeforeEach
         void setUp() {
-            domainContext.register(DefaultRepository.of(ShoppingListAggregate.class));
+            domainContext.internalAccess()
+                         .register(DefaultRepository.of(ShoppingListAggregate.class));
             aggregateId = ListId
                     .newBuilder()
                     .setId(newUuid())

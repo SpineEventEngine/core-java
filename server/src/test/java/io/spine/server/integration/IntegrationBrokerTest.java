@@ -141,10 +141,12 @@ class IntegrationBrokerTest {
             BoundedContext sourceContext = newContext();
 
             BoundedContext destination1 = newContext();
-            destination1.register(new MemoizingProjectDetails1Repository());
+            destination1.internalAccess()
+                        .register(new MemoizingProjectDetails1Repository());
 
             BoundedContext destination2 = newContext();
-            destination2.register(new MemoizingProjectDetails2Repository());
+            destination2.internalAccess()
+                        .register(new MemoizingProjectDetails2Repository());
 
             assertTrue(MemoizingProjection.events()
                                           .isEmpty());
@@ -314,7 +316,8 @@ class IntegrationBrokerTest {
 
         Event event = projectCreated();
         MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-        context.broker()
+        context.internalAccess()
+               .broker()
                .dispatchLocally(event, observer);
         Error error = observer.firstResponse()
                               .getStatus()

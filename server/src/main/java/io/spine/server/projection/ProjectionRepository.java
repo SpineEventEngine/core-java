@@ -160,7 +160,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
         catchUpProcess = builder.setDispatchOp(this::sendToCatchingUp)
                                 .build();
-        context.registerEventDispatcher(catchUpProcess);
+        context.internalAccess()
+               .registerEventDispatcher(catchUpProcess);
     }
 
     private void initCache(boolean multitenant) {
