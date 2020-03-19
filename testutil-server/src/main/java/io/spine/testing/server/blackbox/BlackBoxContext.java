@@ -40,7 +40,6 @@ import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.QueryService;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
@@ -56,7 +55,6 @@ import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
-import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -214,18 +212,9 @@ public abstract class BlackBoxContext implements Logging {
         return this.actor;
     }
 
-    /**
-     * Obtains set of type names of entities known to this Bounded Context.
-     */
     @VisibleForTesting
-    Set<TypeName> allStateTypes() {
-        return context.stateTypes();
-    }
-
-    /** Obtains {@code event bus} instance used by this bounded context. */
-    @VisibleForTesting
-    EventBus eventBus() {
-        return context.eventBus();
+    BoundedContext context() {
+        return context;
     }
 
     /**
@@ -239,12 +228,6 @@ public abstract class BlackBoxContext implements Logging {
                        .eventStore();
         eventStore.append(event);
         return this;
-    }
-
-    /** Obtains {@code command bus} instance used by this bounded context. */
-    @VisibleForTesting
-    CommandBus commandBus() {
-        return context.commandBus();
     }
 
     private void registerRepository(Repository<?, ?> repository) {

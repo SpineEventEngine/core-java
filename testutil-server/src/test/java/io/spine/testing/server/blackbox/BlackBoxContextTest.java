@@ -33,12 +33,15 @@ import io.spine.client.TopicFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.UserId;
+import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.type.CommandClass;
@@ -456,17 +459,30 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         }
 
         private void assertEntityTypes() {
-            assertThat(blackBox.allStateTypes()).containsAtLeastElementsIn(types);
+            Set<TypeName> allStateTypes = context().stateTypes();
+            assertThat(allStateTypes).containsAtLeastElementsIn(types);
         }
 
         private void assertDispatchers() {
-            assertThat(blackBox.commandBus().registeredCommandClasses()).contains(commandClass);
-            assertThat(blackBox.eventBus().registeredEventClasses())
+            assertThat(commandBus().registeredCommandClasses()).contains(commandClass);
+            assertThat(eventBus().registeredEventClasses())
                     .containsAtLeastElementsIn(eventDispatcher.eventClasses());
         }
 
+        private BoundedContext context() {
+            return blackBox.context();
+        }
+
+        private EventBus eventBus() {
+            return context().eventBus();
+        }
+
+        private CommandBus commandBus() {
+            return context().commandBus();
+        }
+
         private void assertEnricher() {
-            assertThat(blackBox.eventBus().enricher()).hasValue(enricher);
+            assertThat(eventBus().enricher()).hasValue(enricher);
         }
 
         /**
