@@ -71,7 +71,8 @@ class AbstractEventSubscriberTest {
                 .singleTenant("Organizations")
                 .build();
         subscriber = new TestSubscriber();
-        groupsContext.registerEventDispatcher(subscriber);
+        groupsContext.internalAccess()
+                     .registerEventDispatcher(subscriber);
     }
 
     @AfterEach

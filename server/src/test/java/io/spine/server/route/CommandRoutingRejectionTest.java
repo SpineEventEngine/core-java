@@ -62,26 +62,27 @@ class CommandRoutingRejectionTest {
     private final TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
     private final StreamObserver<Ack> observer = noOpObserver();
 
-    private BoundedContext boundedContext;
+    private BoundedContext context;
     private CommandBus commandBus;
     private Log.Repository logRepository;
     private SwitchmanObserver switchmanObserver;
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContext.singleTenant("Railway Station").build();
-        boundedContext.register(new SwitchmanBureau());
+        context = BoundedContext.singleTenant("Railway Station").build();
+        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        contextAccess.register(new SwitchmanBureau());
         switchmanObserver = new SwitchmanObserver();
-        boundedContext.eventBus()
-                      .register(switchmanObserver);
+        context.eventBus()
+               .register(switchmanObserver);
         logRepository = new Log.Repository();
-        boundedContext.register(logRepository);
-        commandBus = boundedContext.commandBus();
+        contextAccess.register(logRepository);
+        commandBus = context.commandBus();
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        boundedContext.close();
+        context.close();
     }
 
     /**

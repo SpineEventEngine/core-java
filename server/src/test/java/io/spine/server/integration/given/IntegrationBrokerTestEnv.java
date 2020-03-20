@@ -45,21 +45,23 @@ public class IntegrationBrokerTestEnv {
     @CanIgnoreReturnValue
     public static BoundedContext
     contextWithExtEntitySubscribers() {
-        BoundedContext boundedContext = newContext();
-        boundedContext.register(DefaultRepository.of(ProjectCountAggregate.class));
-        boundedContext.register(DefaultRepository.of(ProjectWizard.class));
-        boundedContext.register(DefaultRepository.of(ProjectDetails.class));
-        return boundedContext;
+        BoundedContext context = newContext();
+        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        contextAccess.register(DefaultRepository.of(ProjectCountAggregate.class));
+        contextAccess.register(DefaultRepository.of(ProjectWizard.class));
+        contextAccess.register(DefaultRepository.of(ProjectDetails.class));
+        return context;
     }
 
     @CanIgnoreReturnValue
     public static BoundedContext contextWithExternalSubscribers() {
-        BoundedContext boundedContext = newContext();
-        boundedContext.registerEventDispatcher(new ProjectEventsSubscriber());
-        boundedContext.register(DefaultRepository.of(ProjectCountAggregate.class));
-        boundedContext.register(DefaultRepository.of(ProjectWizard.class));
-        boundedContext.registerCommandDispatcher(new ProjectCommander());
-        return boundedContext;
+        BoundedContext context = newContext();
+        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        contextAccess.registerEventDispatcher(new ProjectEventsSubscriber());
+        contextAccess.register(DefaultRepository.of(ProjectCountAggregate.class));
+        contextAccess.register(DefaultRepository.of(ProjectWizard.class));
+        contextAccess.registerCommandDispatcher(new ProjectCommander());
+        return context;
     }
 
     public static BoundedContext newContext() {

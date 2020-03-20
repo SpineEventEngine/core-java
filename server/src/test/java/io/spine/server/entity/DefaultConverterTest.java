@@ -41,10 +41,12 @@ class DefaultConverterTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContext bc = BoundedContextBuilder.assumingTests()
-                                                 .build();
+        BoundedContext context =
+                BoundedContextBuilder.assumingTests()
+                                     .build();
         RecordBasedRepository<OrganizationId, TestEntity, Organization> repo = new TestRepository();
-        bc.register(repo);
+        context.internalAccess()
+               .register(repo);
 
         TypeUrl stateType = repo.entityModelClass()
                                 .stateTypeUrl();
@@ -114,6 +116,5 @@ class DefaultConverterTest {
      */
     private static class TestRepository
             extends DefaultRecordBasedRepository<OrganizationId, TestEntity, Organization> {
-
     }
 }

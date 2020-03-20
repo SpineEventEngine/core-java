@@ -69,7 +69,8 @@ class RepositoryTest {
                 .assumingTests(true)
                 .build();
         repository = new TestRepo();
-        context.register(repository);
+        context.internalAccess()
+               .register(repository);
         tenantId = generate();
     }
 

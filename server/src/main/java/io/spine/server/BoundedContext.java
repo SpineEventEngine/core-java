@@ -215,7 +215,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      *         the class of entities which will be served by a {@link DefaultRepository}
      * @see #register(Repository)
      */
-    final void register(Class<? extends Entity<?, ?>> entityClass) {
+    final <I, E extends Entity<I, ?>> void register(Class<? extends E> entityClass) {
         checkNotNull(entityClass);
         register(DefaultRepository.of(entityClass));
     }
