@@ -144,7 +144,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         setupEventRouting(eventRouting);
         setupImportRouting(eventImportRouting);
 
-        context.internalAccess().registerCommandDispatcher(this);
+        context.internalAccess()
+               .registerCommandDispatcher(this);
         if (aggregateClass().importsEvents()) {
             context.importBus()
                    .register(EventImportDispatcher.of(this));
