@@ -116,8 +116,9 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("AggregateRootDirectory")
         void aggregateRootDirectory() {
-            BoundedContext boundedContext = builder.build();
-            assertNotNull(boundedContext.internalAccess().aggregateRootDirectory());
+            BoundedContext context = builder.build();
+            assertNotNull(context.internalAccess()
+                                 .aggregateRootDirectory());
         }
     }
 
