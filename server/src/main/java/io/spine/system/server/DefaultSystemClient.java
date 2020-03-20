@@ -43,11 +43,9 @@ final class DefaultSystemClient implements SystemClient {
     private final SystemWriteSide writeSide;
     private final SystemReadSide readSide;
     private final SystemContext context;
-    private final BoundedContext.InternalAccess contextAccess;
 
     DefaultSystemClient(SystemContext system) {
         this.context = checkNotNull(system);
-        this.contextAccess = context.internalAccess();
         this.readSide = SystemReadSide.newInstance(context);
         this.writeSide = SystemWriteSide.newInstance(context);
     }
@@ -67,7 +65,10 @@ final class DefaultSystemClient implements SystemClient {
         if (!context.hasEntitiesWithState(stateClass)) {
             return Optional.empty();
         }
-        return contextAccess.findRepository(stateClass);
+        Optional<Repository<?, ?>> result =
+                context.internalAccess()
+                       .findRepository(stateClass);
+        return result;
     }
 
     @Override
