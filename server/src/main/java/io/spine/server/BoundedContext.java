@@ -81,19 +81,36 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
 public abstract class BoundedContext implements Closeable, Logging {
 
+    /** Basic features of the context. */
     private final ContextSpec spec;
+
+    /** The Command Bus of this context. */
     private final CommandBus commandBus;
+
+    /** The Event Bus of this context. */
     private final EventBus eventBus;
-    private final IntegrationBroker broker;
+
+    /** The bus for importing events. */
     private final ImportBus importBus;
+
+    /** The broker for interaction with other contexts. */
+    private final IntegrationBroker broker;
+
+    /** The bridge to the read-side of the context. */
     private final Stand stand;
 
     /** Controls access to entities of all registered repositories. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
+
+    /** Provides access to data parts of aggregate roots of this context. */
     private final AggregateRootDirectory aggregateRootDirectory;
 
+    /** The index of tenants having data in this context. */
     private final TenantIndex tenantIndex;
 
+    /** Provides access to internally-used features of the context. */
+    private final InternalAccess internalAccess;
+    
     /**
      * Creates new instance.
      *
@@ -117,6 +134,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         this.commandBus = builder.buildCommandBus();
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
+        this.internalAccess = new InternalAccess();
     }
 
     /**
@@ -450,7 +468,7 @@ public abstract class BoundedContext implements Closeable, Logging {
     @Internal
     public InternalAccess internalAccess() {
         Security.allowOnlyFrameworkServer();
-        return new InternalAccess();
+        return this.internalAccess;
     }
 
     /**
