@@ -67,16 +67,16 @@ final class BlackBoxSetup {
     private final TestEventFactory eventFactory;
     private final MemoizingObserver<Ack> observer;
 
-    BlackBoxSetup(BoundedContext boundedContext,
+    BlackBoxSetup(BoundedContext context,
                   TestActorRequestFactory requestFactory,
                   MemoizingObserver<Ack> observer) {
-        this.commandBus = boundedContext.commandBus();
-        this.eventBus = boundedContext.eventBus();
-        this.importBus = boundedContext.importBus();
+        this.commandBus = context.commandBus();
+        this.eventBus = context.eventBus();
+        this.importBus = context.importBus();
         this.requestFactory = checkNotNull(requestFactory);
         BlackBoxId defaultProducer = BlackBoxId
                 .newBuilder()
-                .setContextName(boundedContext.name())
+                .setContextName(context.name())
                 .build();
         this.eventFactory = eventFactory(requestFactory, defaultProducer);
         this.observer = checkNotNull(observer);

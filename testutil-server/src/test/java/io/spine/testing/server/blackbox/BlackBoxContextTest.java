@@ -687,7 +687,8 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             BbCreateProject createProject = createProject();
             BbProjectId id = createProject.getProjectId();
             ZoneId zoneId = ZoneIds.of("UTC+1");
-            context.withActorIn(actor, zoneId)
+            context.withActor(actor)
+                   .in(zoneId)
                    .receivesCommand(createProject)
                    .assertEntityWithState(BbProject.class, id)
                    .exists();

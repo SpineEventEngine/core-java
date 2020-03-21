@@ -165,7 +165,7 @@ public abstract class BlackBoxContext implements Logging {
      * Sets the given {@link UserId} as the actor ID for the requests produced by this context.
      */
     public final BlackBoxContext withActor(UserId user) {
-        this.actor = Actor.from(user);
+        this.actor = this.actor.withId(user);
         return this;
     }
 
@@ -173,16 +173,7 @@ public abstract class BlackBoxContext implements Logging {
      * Sets the given time zone parameters for the actor requests produced by this context.
      */
     public final BlackBoxContext in(ZoneId zoneId) {
-        this.actor = Actor.from(zoneId);
-        return this;
-    }
-
-    /**
-     * Sets the given actor ID and time zone parameters for the actor requests produced by this
-     * context.
-     */
-    public final BlackBoxContext withActorIn(UserId userId, ZoneId zoneId) {
-        this.actor = Actor.from(userId, zoneId);
+        this.actor = this.actor.in(zoneId);
         return this;
     }
 

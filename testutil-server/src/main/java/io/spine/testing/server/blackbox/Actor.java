@@ -30,7 +30,6 @@ import io.spine.time.ZoneIds;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -39,7 +38,11 @@ import static io.spine.validate.Validate.checkValid;
 @VisibleForTesting
 final class Actor {
 
-    private static final Actor defaultActor = from(BlackBoxContext.class.getName());
+    private static final Actor defaultActor = from(
+            UserId.newBuilder()
+                  .setValue(BlackBoxContext.class.getName())
+                  .build()
+    );
 
     private final UserId id;
     private final ZoneId zoneId;
@@ -51,58 +54,45 @@ final class Actor {
                 : zoneId;
     }
 
-    /**
-     * Obtains the default actor.
-     */
+    /** Obtains the default actor. */
     static Actor defaultActor() {
         return defaultActor;
     }
 
-    private static Actor from(String userId) {
-        checkNotEmptyOrBlank(userId);
-        UserId id = UserId
-                .newBuilder()
-                .setValue(userId)
-                .build();
-        return from(id);
-    }
-
-    /**
-     * Creates a new actor with the given actor ID and the default time zone.
-     */
+    /** Creates a new actor with the given actor ID and the default time zone. */
     static Actor from(UserId userId) {
-        checkNotNull(userId);
-        checkValid(userId);
+        checkUser(userId);
         return new Actor(userId, null);
     }
 
-    /**
-     * Creates a new actor with the given time zone and the default actor ID.
-     */
-    static Actor from(ZoneId zoneId) {
-        checkNotNull(zoneId);
-        return new Actor(defaultActor.id, zoneId);
+    /** Creates a copy of this actor with the passed time zone. */
+    Actor in(ZoneId zone) {
+        checkZone(zone);
+        return new Actor(this.id, zone);
     }
 
-    /**
-     * Creates a new actor with the given actor ID and time zone.
-     */
-    static Actor from(UserId userId, ZoneId zoneId) {
+    /** Creates a copy of this actor with the passed user id. */
+    Actor withId(UserId id) {
+        checkUser(id);
+        return new Actor(id, this.zoneId);
+    }
+
+    private static void checkUser(UserId userId) {
         checkNotNull(userId);
-        checkNotNull(zoneId);
-        return new Actor(userId, zoneId);
+        checkValid(userId);
     }
 
-    /**
-     * Creates a new factory for requests of the single tenant.
-     */
+    private static void checkZone(ZoneId zone) {
+        checkNotNull(zone);
+        checkValid(zone);
+    }
+
+    /** Creates a new factory for requests of the single tenant. */
     TestActorRequestFactory requests() {
         return new TestActorRequestFactory(null, id, zoneId);
     }
 
-    /**
-     * Creates a new factory for requests of the given tenant.
-     */
+    /** Creates a new factory for requests of the given tenant. */
     TestActorRequestFactory requestsFor(TenantId tenant) {
         checkNotNull(tenant);
         checkValid(tenant);
