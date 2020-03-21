@@ -38,7 +38,7 @@ import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 /**
  * An {@code ActorRequestFactory} for running tests.
@@ -50,22 +50,28 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         super(ActorRequestFactory
                       .newBuilder()
                       .setActor(actor)
-                      .setZoneOffset(idToZoneOffset(zoneId))
+                      .setZoneOffset(toOffset(zoneId))
                       .setZoneId(zoneId)
         );
     }
 
-    public TestActorRequestFactory(@Nullable TenantId tenantId,
-                                   UserId actor,
-                                   ZoneOffset zoneOffset,
-                                   ZoneId zoneId) {
+    public TestActorRequestFactory(@Nullable TenantId tenantId, UserId actor, ZoneId zoneId) {
         super(ActorRequestFactory
                       .newBuilder()
                       .setTenantId(tenantId)
                       .setActor(actor)
-                      .setZoneOffset(zoneOffset)
+                      .setZoneOffset(toOffset(zoneId))
                       .setZoneId(zoneId)
         );
+    }
+
+    @VisibleForTesting
+    public static ZoneOffset toOffset(ZoneId zoneId) {
+        java.time.ZoneOffset offset =
+                ZoneIds.toJavaTime(zoneId)
+                       .getRules()
+                       .getOffset(Instant.now());
+        return ZoneOffsets.of(offset);
     }
 
     public TestActorRequestFactory(String actor, ZoneId zoneId) {
@@ -91,7 +97,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public TestActorRequestFactory(UserId actor, TenantId tenantId) {
-        this(tenantId, actor, ZoneOffsets.getDefault(), ZoneIds.systemDefault());
+        this(tenantId, actor, ZoneIds.systemDefault());
     }
 
     /**
@@ -107,20 +113,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     public TestActorRequestFactory(Class<?> testClass, TenantId tenantId) {
         this(tenantId,
              GivenUserId.of(testClass.getName()),
-             ZoneOffsets.getDefault(),
              ZoneIds.systemDefault());
-    }
-
-    private static ZoneOffset idToZoneOffset(ZoneId zoneId) {
-        java.time.ZoneId javaZoneId = java.time.ZoneId.of(zoneId.getValue());
-        int offsetInSeconds = ZonedDateTime.now(javaZoneId)
-                                           .getOffset()
-                                           .getTotalSeconds();
-        ZoneOffset offset = ZoneOffset
-                .newBuilder()
-                .setAmountSeconds(offsetInSeconds)
-                .build();
-        return offset;
     }
 
     /** Creates new command with the passed timestamp. */

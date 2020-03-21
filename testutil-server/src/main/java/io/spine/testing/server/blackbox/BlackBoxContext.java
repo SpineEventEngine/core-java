@@ -51,7 +51,6 @@ import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
-import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -173,8 +172,8 @@ public abstract class BlackBoxContext implements Logging {
     /**
      * Sets the given time zone parameters for the actor requests produced by this context.
      */
-    public final BlackBoxContext in(ZoneId zoneId, ZoneOffset zoneOffset) {
-        this.actor = Actor.from(zoneId, zoneOffset);
+    public final BlackBoxContext in(ZoneId zoneId) {
+        this.actor = Actor.from(zoneId);
         return this;
     }
 
@@ -182,8 +181,8 @@ public abstract class BlackBoxContext implements Logging {
      * Sets the given actor ID and time zone parameters for the actor requests produced by this
      * context.
      */
-    public final BlackBoxContext withActorIn(UserId userId, ZoneId zoneId, ZoneOffset zoneOffset) {
-        this.actor = Actor.from(userId, zoneId, zoneOffset);
+    public final BlackBoxContext withActorIn(UserId userId, ZoneId zoneId) {
+        this.actor = Actor.from(userId, zoneId);
         return this;
     }
 

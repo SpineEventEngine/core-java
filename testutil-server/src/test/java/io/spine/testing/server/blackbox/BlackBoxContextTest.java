@@ -45,6 +45,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.type.CommandClass;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.BlackBoxId;
@@ -73,7 +74,6 @@ import io.spine.testing.server.entity.EntitySubject;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -687,8 +687,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             BbCreateProject createProject = createProject();
             BbProjectId id = createProject.getProjectId();
             ZoneId zoneId = ZoneIds.of("UTC+1");
-            ZoneOffset zoneOffset = ZoneOffsets.ofHours(1);
-            context.withActorIn(actor, zoneId, zoneOffset)
+            context.withActorIn(actor, zoneId)
                    .receivesCommand(createProject)
                    .assertEntityWithState(BbProject.class, id)
                    .exists();
@@ -699,13 +698,14 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
                                          .get(0)
                                          .context()
                                          .actorContext();
+            ZoneOffset expectedOffset = TestActorRequestFactory.toOffset(zoneId);
             assertThat(context)
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(ActorContext
                                        .newBuilder()
                                        .setActor(actor)
                                        .setZoneId(zoneId)
-                                       .setZoneOffset(zoneOffset)
+                                       .setZoneOffset(expectedOffset)
                                        .buildPartial());
         }
 
@@ -715,8 +715,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             BbCreateProject createProject = createProject();
             BbProjectId id = createProject.getProjectId();
             ZoneId zoneId = ZoneIds.of("UTC-1");
-            ZoneOffset zoneOffset = ZoneOffsets.ofHours(-1);
-            context.in(zoneId, zoneOffset)
+            context.in(zoneId)
                    .receivesCommand(createProject)
                    .assertEntityWithState(BbProject.class, id)
                    .exists();
@@ -727,12 +726,13 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
                                          .get(0)
                                          .context()
                                          .actorContext();
+            ZoneOffset expectedOffset = TestActorRequestFactory.toOffset(zoneId);
             assertThat(context)
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(ActorContext
                                        .newBuilder()
                                        .setZoneId(zoneId)
-                                       .setZoneOffset(zoneOffset)
+                                       .setZoneOffset(expectedOffset)
                                        .buildPartial());
         }
     }
