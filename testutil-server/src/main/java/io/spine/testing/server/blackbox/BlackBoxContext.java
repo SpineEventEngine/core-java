@@ -368,21 +368,20 @@ public abstract class BlackBoxContext implements Logging {
      * Otherwise, an instance of {@code Event} will be generated basing on the passed event
      * message and posted to the bus.
      *
-     * @param firstEvent
+     * @param first
      *         an external event to be dispatched first
-     * @param secondEvent
+     * @param second
      *         an external event to be dispatched second
-     * @param otherEvents
+     * @param other
      *         optional external events to be dispatched in the supplied order
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
+    @SuppressWarnings("unused") // IDEA does not see the usage of this method from tests.
     @CanIgnoreReturnValue
     public BlackBoxContext
-    receivesExternalEvents(EventMessage firstEvent,
-                           EventMessage secondEvent,
-                           EventMessage... otherEvents) {
-        return receivesExternalEvents(asList(firstEvent, secondEvent, otherEvents));
+    receivesExternalEvents(EventMessage first, EventMessage second, EventMessage... other) {
+        return receivesExternalEvents(asList(first, second, other));
     }
 
     /**
