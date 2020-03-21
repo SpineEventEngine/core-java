@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.server.event.EventEnricher;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -45,8 +45,8 @@ final class MultiTenantContext extends BlackBoxContext {
     /**
      * Creates a new multi-tenant instance.
      */
-    MultiTenantContext(String name, EventEnricher enricher) {
-        super(name, true, enricher);
+    MultiTenantContext(BoundedContextBuilder b) {
+        super(b);
     }
 
     /**

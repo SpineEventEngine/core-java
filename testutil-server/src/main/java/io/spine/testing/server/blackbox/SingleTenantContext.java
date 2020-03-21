@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.server.event.EventEnricher;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.testing.client.TestActorRequestFactory;
 
 import static com.google.protobuf.TextFormat.shortDebugString;
@@ -35,8 +35,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 final class SingleTenantContext extends BlackBoxContext {
 
-    SingleTenantContext(String name, EventEnricher enricher) {
-        super(name, false, enricher);
+    SingleTenantContext(BoundedContextBuilder b) {
+        super(b);
     }
 
     @Override
