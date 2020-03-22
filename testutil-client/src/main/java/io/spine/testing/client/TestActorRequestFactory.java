@@ -65,7 +65,9 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         );
     }
 
-    @VisibleForTesting
+    /**
+     * Obtains the current offset for the passed time zone.
+     */
     public static ZoneOffset toOffset(ZoneId zoneId) {
         java.time.ZoneOffset offset =
                 ZoneIds.toJavaTime(zoneId)
@@ -86,28 +88,8 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         this(actor, ZoneIds.systemDefault());
     }
 
-    /**
-     * Deprecated.
-     *
-     * @deprecated use {@link #TestActorRequestFactory(UserId, TenantId)}
-     */
-    @Deprecated
-    public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
-        return new TestActorRequestFactory(actor, tenantId);
-    }
-
     public TestActorRequestFactory(UserId actor, TenantId tenantId) {
         this(tenantId, actor, ZoneIds.systemDefault());
-    }
-
-    /**
-     * Deprecated.
-     *
-     * @deprecated use {@link #TestActorRequestFactory(Class, TenantId)}
-     */
-    @Deprecated
-    public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
-        return new TestActorRequestFactory(testClass, tenantId);
     }
 
     public TestActorRequestFactory(Class<?> testClass, TenantId tenantId) {
