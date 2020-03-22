@@ -65,17 +65,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         );
     }
 
-    /**
-     * Obtains the current offset for the passed time zone.
-     */
-    public static ZoneOffset toOffset(ZoneId zoneId) {
-        java.time.ZoneOffset offset =
-                ZoneIds.toJavaTime(zoneId)
-                       .getRules()
-                       .getOffset(Instant.now());
-        return ZoneOffsets.of(offset);
-    }
-
     public TestActorRequestFactory(String actor, ZoneId zoneId) {
         this(GivenUserId.of(actor), zoneId);
     }
@@ -106,16 +95,19 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     private static Command withTimestamp(Command command, Timestamp timestamp) {
         CommandContext origin = command.context();
-        ActorContext withTime = origin.getActorContext()
-                                      .toBuilder()
-                                      .setTimestamp(timestamp)
-                                      .build();
-        CommandContext resultContext = origin.toBuilder()
-                                             .setActorContext(withTime)
-                                             .build();
-        Command result = command.toBuilder()
-                                .setContext(resultContext)
-                                .build();
+        ActorContext withTime =
+                origin.getActorContext()
+                      .toBuilder()
+                      .setTimestamp(timestamp)
+                      .build();
+        CommandContext resultContext =
+                origin.toBuilder()
+                      .setActorContext(withTime)
+                      .build();
+        Command result =
+                command.toBuilder()
+                       .setContext(resultContext)
+                       .build();
         return result;
     }
 
@@ -146,5 +138,16 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     @Override
     public CommandContext createCommandContext() {
         return super.createCommandContext();
+    }
+
+    /**
+     * Obtains the current offset for the passed time zone.
+     */
+    public static ZoneOffset toOffset(ZoneId zoneId) {
+        java.time.ZoneOffset offset =
+                ZoneIds.toJavaTime(zoneId)
+                       .getRules()
+                       .getOffset(Instant.now());
+        return ZoneOffsets.of(offset);
     }
 }
