@@ -71,7 +71,7 @@ final class Actor {
         return new Actor(this.id, zone);
     }
 
-    /** Creates a copy of this actor with the passed user id. */
+    /** Creates a copy of this actor with the passed user ID. */
     Actor withId(UserId id) {
         checkUser(id);
         return new Actor(id, this.zoneId);
