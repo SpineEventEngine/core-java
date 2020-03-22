@@ -466,7 +466,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      *         if called from outside the framework
      */
     @Internal
-    public InternalAccess internalAccess() {
+    public final InternalAccess internalAccess() {
         Security.allowOnlyFrameworkServer();
         return this.internalAccess;
     }
