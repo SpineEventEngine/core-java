@@ -70,10 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests {@link io.spine.server.projection.Projection}.
- *
- * @apiNote This class is named using the old-fashioned {@code Should} suffix to avoid the
- *         name clash with {@link io.spine.testing.server.projection.ProjectionTest ProjectionTest}
- *         class, which is a part of Testutil Server library.
  */
 @DisplayName("Projection should")
 class ProjectionTest {
@@ -178,8 +174,10 @@ class ProjectionTest {
     @Test
     @DisplayName("throw ISE if no handler is present for event")
     void throwIfNoHandlerPresent() {
-        @SuppressWarnings("unchecked") ProjectionRepository<String, ?, ?> repository =
-                (ProjectionRepository<String, ?, ?>) DefaultRepository.of(SavingProjection.class);
+        @SuppressWarnings({"unchecked", "RedundantSuppression"})
+        ProjectionRepository<String, SavingProjection, SavedString> repository =
+                (ProjectionRepository<String, SavingProjection, SavedString>)
+                        DefaultRepository.of(SavingProjection.class);
         BoundedContext context = BoundedContextBuilder
                 .assumingTests()
                 .build();
@@ -189,7 +187,8 @@ class ProjectionTest {
         contextAccess.registerEventDispatcher(monitor);
         Event event = GivenEvent.arbitrary();
         EventEnvelope envelope = EventEnvelope.of(event);
-        ProjectionEndpoint<String, ?> endpoint = ProjectionEndpoint.of(repository, envelope);
+        ProjectionEndpoint<String, SavingProjection, SavedString> endpoint =
+                ProjectionEndpoint.of(repository, envelope);
 
         endpoint.dispatchTo(projection.id());
 

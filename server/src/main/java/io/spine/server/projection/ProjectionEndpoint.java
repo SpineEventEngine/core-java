@@ -22,6 +22,7 @@ package io.spine.server.projection;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.server.delivery.EventEndpoint;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -37,7 +38,7 @@ import static io.spine.server.projection.ProjectionTransaction.start;
  * Dispatches an event to projections.
  */
 @Internal
-public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
+public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends EntityState>
         extends EntityMessageEndpoint<I, P, EventEnvelope>
         implements EventEndpoint<I> {
 
@@ -45,8 +46,8 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         super(repository, event);
     }
 
-    static <I, P extends Projection<I, ?, ?>>
-    ProjectionEndpoint<I, P> of(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
+    static <I, P extends Projection<I, S, ?>, S extends EntityState>
+    ProjectionEndpoint<I, P, S> of(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
         return new ProjectionEndpoint<>(repository, event);
     }
 
@@ -69,10 +70,9 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
                     .onDispatchEventToSubscriber(envelope().outerObject());
     }
 
-    @SuppressWarnings("unchecked") // Simplify massive generic args.
     protected void runTransactionFor(P projection) {
-        ProjectionTransaction<I, ?, ?> tx = start((Projection<I, ?, ?>) projection);
-        TransactionListener listener =
+        ProjectionTransaction<I, S, ?> tx = start((Projection<I, S, ?>) projection);
+        TransactionListener<I> listener =
                 EntityLifecycleMonitor.newInstance(repository(), projection.id());
         tx.setListener(listener);
         DispatchOutcome outcome = invokeDispatcher(projection);
