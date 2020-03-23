@@ -55,26 +55,29 @@ import static io.spine.base.Identifier.pack;
 class DiagnosticLogTest {
 
     private ByteArrayOutputStream output;
-    private PrintStream stderr;
+    private PrintStream saveErrorStream;
+    private PrintStream substErrorStream;
 
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     @BeforeEach
     void setUpStderr() {
-        stderr = System.err;
+        saveErrorStream = System.err;
         output = new ByteArrayOutputStream();
-        PrintStream testStream = new PrintStream(output, true);
-        System.setErr(testStream);
-        Logger.getLogger(DiagnosticLog.class.getName())
-              .setLevel(Level.OFF);
+        substErrorStream = new PrintStream(output, true);
+        System.setErr(substErrorStream);
+        logger().setLevel(Level.OFF);
+    }
+
+    private static Logger logger() {
+        return Logger.getLogger(DiagnosticLog.class.getName());
     }
 
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     @AfterEach
     void resetStderr() {
         System.err.close();
-        System.setErr(stderr);
-        Logger.getLogger(DiagnosticLog.class.getName())
-              .setLevel(Level.ALL);
+        System.setErr(saveErrorStream);
+        logger().setLevel(Level.ALL);
     }
 
     @Test
@@ -170,6 +173,7 @@ class DiagnosticLogTest {
     }
 
     private void assertLogged(String messagePart) {
+        substErrorStream.flush();
         assertThat(output.toString())
                 .contains(messagePart);
     }
