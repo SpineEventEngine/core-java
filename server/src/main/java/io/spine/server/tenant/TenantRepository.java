@@ -62,7 +62,8 @@ public abstract class TenantRepository<T extends EntityState, E extends Entity<T
     public final void registerWith(BoundedContext context) {
         if (!isRegistered()) { // Quit recursion.
             super.registerWith(context);
-            context.register(this);
+            context.internalAccess()
+                   .register(this);
         }
     }
 

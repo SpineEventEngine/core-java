@@ -101,6 +101,7 @@ class BoundedContextBuilderTest {
         void tenantIndex() {
             assertNotNull(BoundedContextBuilder.assumingTests(true)
                                                .build()
+                                               .internalAccess()
                                                .tenantIndex());
         }
         
@@ -115,8 +116,9 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("AggregateRootDirectory")
         void aggregateRootDirectory() {
-            BoundedContext boundedContext = builder.build();
-            assertNotNull(boundedContext.aggregateRootDirectory());
+            BoundedContext context = builder.build();
+            assertNotNull(context.internalAccess()
+                                 .aggregateRootDirectory());
         }
     }
 

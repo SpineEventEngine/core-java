@@ -72,7 +72,7 @@ import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -312,11 +312,11 @@ class ProcessManagerTest {
     @DisplayName("rollback state on")
     class RollbackOn {
 
-        private BlackBoxBoundedContext<?> context;
+        private BlackBoxContext context;
 
         @BeforeEach
         void setUp() {
-            context = BlackBoxBoundedContext.from(
+            context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TestProcessManagerRepo())
             );
@@ -351,11 +351,11 @@ class ProcessManagerTest {
     @DisplayName("create command(s)")
     class CommandCreation {
 
-        private BlackBoxBoundedContext<?> context;
+        private BlackBoxContext context;
 
         @BeforeEach
         void setUp() {
-            context = BlackBoxBoundedContext.from(
+            context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TestProcessManagerRepo())
             );
@@ -509,7 +509,7 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+            BlackBoxContext context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new QuizProcmanRepository())
             );

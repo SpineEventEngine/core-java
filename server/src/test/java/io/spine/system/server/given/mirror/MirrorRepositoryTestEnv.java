@@ -158,8 +158,9 @@ public final class MirrorRepositoryTestEnv {
         return events.createEvent(eventMessage);
     }
 
+    @SuppressWarnings("unchecked")
     public static AggregateRepository<MRPhotoId, PhotoAggregate> newPhotosRepository() {
-        Repository<MRPhotoId, PhotoAggregate> repository = DefaultRepository.of(PhotoAggregate.class);
+        Repository<?, ?> repository = DefaultRepository.of(PhotoAggregate.class);
         return (AggregateRepository<MRPhotoId, PhotoAggregate>) repository;
     }
 

@@ -72,9 +72,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * The {@link BoundedContext} to which the repository belongs.
      *
-     * <p>This field is null when a repository is not {@linkplain
-     * BoundedContext#register(Repository) registered} yet and
-     * after the repository is {@linkplain #close() closed}.
+     * <p>This field is {@code null} when a repository is not
+     * {@linkplain #registerWith(BoundedContext) registered with the context} yet, and
+     * after the repository is already {@linkplain #close() closed}.
      */
     private @Nullable BoundedContext context;
 
@@ -392,7 +392,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param result the result of routing
      */
     private void checkMatchesIdType(Object result) {
-        Class routingResultType = null;
+        Class<?> routingResultType = null;
         if (result instanceof Iterable) {
             Iterable<?> asIterable = (Iterable<?>) result;
             Object element = getFirst(asIterable, null);
@@ -482,6 +482,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Enumeration of generic type parameters of this class.
      */
+    @SuppressWarnings("rawtypes")
     private enum GenericParameter implements GenericTypeIndex<Repository> {
 
         /** The index of the generic type {@code <I>}. */

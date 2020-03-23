@@ -52,17 +52,16 @@ public abstract class AggregatePartRepository<I,
     }
 
     /**
-     * Registers itself with the {@link io.spine.server.BoundedContext#aggregateRootDirectory()
-     * AggregateRootDirectory} of the parent {@code BoundedContext}.
+     * {@inheritDoc}
      *
-     * @param context
-     *         the Bounded Context of this repository
+     * <p>Registers itself with the {@link AggregateRootDirectory} of the context.
      */
     @Override
     @OverridingMethodsMustInvokeSuper
     public void registerWith(BoundedContext context) {
         super.registerWith(context);
-        context.aggregateRootDirectory()
+        context.internalAccess()
+               .aggregateRootDirectory()
                .register(this);
     }
 

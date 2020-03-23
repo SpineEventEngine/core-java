@@ -35,7 +35,8 @@ public final class OrdersContext {
         BoundedContext result = BoundedContext
                 .singleTenant("Orders")
                 .build();
-        result.register(DefaultRepository.of(OrderAggregate.class));
+        result.internalAccess()
+              .register(DefaultRepository.of(OrderAggregate.class));
         return result;
     }
 }

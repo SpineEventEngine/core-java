@@ -85,7 +85,7 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -219,7 +219,8 @@ class ProcessManagerRepositoryTest
         context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        context.register(repository());
+        context.internalAccess()
+               .register(repository());
         TestProcessManager.clearMessageDeliveryHistory();
         repository().clearConfigureCalledFlag();
     }
@@ -284,7 +285,8 @@ class ProcessManagerRepositoryTest
     @DisplayName("allow customizing command routing")
     void setupOfCommandRouting() {
         ProjectCompletion.Repository repo = new ProjectCompletion.Repository();
-        context.register(repo);
+        context.internalAccess()
+               .register(repo);
         assertTrue(repo.callbackCalled());
     }
 
@@ -309,7 +311,8 @@ class ProcessManagerRepositoryTest
     @DisplayName("dispatch command and post events")
     void dispatchCommandAndPostEvents() {
         RememberingSubscriber subscriber = new RememberingSubscriber();
-        context.registerEventDispatcher(subscriber);
+        context.internalAccess()
+               .registerEventDispatcher(subscriber);
 
         testDispatchCommand(addTask());
 
@@ -328,7 +331,8 @@ class ProcessManagerRepositoryTest
         @DisplayName("events")
         void events() {
             DiagnosticMonitor monitor = new DiagnosticMonitor();
-            context.registerEventDispatcher(monitor);
+            context.internalAccess()
+                   .registerEventDispatcher(monitor);
             Event event = GivenMessage.projectStarted();
 
             dispatchEvent(event);
@@ -351,7 +355,8 @@ class ProcessManagerRepositoryTest
         @DisplayName("commands")
         void commands() {
             DiagnosticMonitor monitor = new DiagnosticMonitor();
-            context.registerEventDispatcher(monitor);
+            context.internalAccess()
+                   .registerEventDispatcher(monitor);
             Command command = GivenMessage.createProject();
 
             dispatchCommand(command);
@@ -495,7 +500,8 @@ class ProcessManagerRepositoryTest
         CommandEnvelope command = CommandEnvelope.of(unknownCommand);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        context.registerEventDispatcher(monitor);
+        context.internalAccess()
+               .registerEventDispatcher(monitor);
         repo.dispatchCommand(command);
         List<RoutingFailed> failures = monitor.routingFailures();
         assertThat(failures).hasSize(1);
@@ -606,7 +612,7 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+        BlackBoxContext context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(new EventDiscardingProcManRepository())
         );

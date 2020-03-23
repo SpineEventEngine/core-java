@@ -87,9 +87,11 @@ class MirrorRepositoryTest {
         BoundedContext domainContext = BoundedContextBuilder.assumingTests(false)
                                                             .build();
         BoundedContext systemContext = systemOf(domainContext);
-        domainContext.register(newPhotosRepository());
+        domainContext.internalAccess()
+                     .register(newPhotosRepository());
 
         repository = (MirrorRepository) systemContext
+                .internalAccess()
                 .findRepository(Mirror.class)
                 .orElseGet(() -> fail("MirrorRepository must be registered."));
         queries = new TestActorRequestFactory(MirrorRepositoryTest.class).query();

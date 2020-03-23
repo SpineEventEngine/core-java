@@ -625,4 +625,25 @@ public final class BoundedContextBuilder implements Logging {
                 .setSystemReadSide(systemReadSide);
         return result.build();
     }
+
+    /**
+     * Creates a copy of this context builder for the purpose of testing.
+     */
+    @Internal
+    @VisibleForTesting
+    public BoundedContextBuilder testingCopy() {
+        String name = name().getValue();
+        EventEnricher enricher =
+                eventEnricher().orElseGet(() -> EventEnricher.newBuilder()
+                                                             .build());
+        BoundedContextBuilder copy =
+                isMultitenant()
+                ? BoundedContext.multitenant(name)
+                : BoundedContext.singleTenant(name);
+        copy.enrichEventsUsing(enricher);
+        repositories().forEach(copy::add);
+        commandDispatchers().forEach(copy::addCommandDispatcher);
+        eventDispatchers().forEach(copy::addEventDispatcher);
+        return copy;
+    }
 }

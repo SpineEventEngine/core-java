@@ -31,7 +31,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 public class AggregateRepositoryTestEnv {
 
     private static final TestActorRequestFactory requestFactory = newRequestFactory();
-    private static BoundedContext boundedContext = newBoundedContext();
+    private static BoundedContext context = newBoundedContext();
     private static ProjectAggregateRepository repository = newRepository();
 
     /** Prevent instantiation of this utility class. */
@@ -42,8 +42,8 @@ public class AggregateRepositoryTestEnv {
         return requestFactory;
     }
 
-    public static BoundedContext boundedContext() {
-        return boundedContext;
+    public static BoundedContext context() {
+        return context;
     }
 
     public static ProjectAggregateRepository repository() {
@@ -51,10 +51,10 @@ public class AggregateRepositoryTestEnv {
     }
 
     /**
-     * Assigns a new {@link BoundedContext} instance to the test {@link #boundedContext}.
+     * Assigns a new {@link BoundedContext} instance to the test {@link #context}.
      */
     public static void resetBoundedContext() {
-        boundedContext = newBoundedContext();
+        context = newBoundedContext();
     }
 
     /**

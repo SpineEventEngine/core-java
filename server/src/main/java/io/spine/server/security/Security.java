@@ -28,7 +28,11 @@ import static java.lang.String.format;
 
 /**
  * Controls which class is allowed to call a method.
+ *
+ * @implNote The generic parameter of {@link Class} is of no importance for access restriction
+ *         checking performed by this class.
  */
+@SuppressWarnings("rawtypes") // see @implNote
 public final class Security extends SecurityManager {
 
     private static final Security INSTANCE = new Security();

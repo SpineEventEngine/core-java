@@ -60,7 +60,7 @@ public interface DefaultRepository {
      *         the type of entity
      * @return new repository instance
      */
-    @SuppressWarnings("unchecked") // Casts are ensured by class assignability checks.
+    @SuppressWarnings({"unchecked", "rawtypes"}) // Casts are ensured by class assignability checks.
     static <I, E extends Entity<I, ?>> Repository<I, E> of(Class<E> cls) {
         /*
          * We deliberately "save" on OOP here and detect the class by the chain of if-s below

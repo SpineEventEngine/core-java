@@ -22,10 +22,10 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
@@ -33,15 +33,19 @@ import io.spine.client.TopicFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.UserId;
+import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.type.CommandClass;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.BlackBoxId;
@@ -70,7 +74,6 @@ import io.spine.testing.server.entity.EntitySubject;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,15 +102,16 @@ import static io.spine.testing.server.blackbox.given.Given.projectDone;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.given.Given.userDeleted;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxBoundedContext}.
+ * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxContext}.
  *
  * @param <T>
  *         the type of the {@code BlackBoxBoundedContext}
  */
-abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
+abstract class BlackBoxContextTest<T extends BlackBoxContext> {
 
     private T context;
 
@@ -120,7 +124,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .add(BbProjectViewProjection.class)
                .add(BbInitProcess.class);
         @SuppressWarnings("unchecked") // see Javadoc for newBuilder().
-        T ctx = (T) BlackBoxBoundedContext.from(builder);
+        T ctx = (T) BlackBoxContext.from(builder);
         context = ctx;
     }
 
@@ -380,7 +384,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             }
         };
 
-        BlackBoxBoundedContext<?> ctx = BlackBoxBoundedContext.from(
+        BlackBoxContext ctx = BlackBoxContext.from(
                 newBuilder().add(throwingRepo)
         );
 
@@ -403,7 +407,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private final Set<TypeName> types = toTypes(repositories);
 
-        private BlackBoxBoundedContext<?> blackBox;
+        private BlackBoxContext blackBox;
         private EventEnricher enricher;
 
         @BeforeEach
@@ -420,7 +424,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(false)
                     .enrichEventsUsing(enricher);
-            assertBlackBox(builder, SingleTenantBlackBoxContext.class);
+            assertBlackBox(builder, SingleTenantContext.class);
         }
 
         @Test
@@ -428,15 +432,15 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(true)
                     .enrichEventsUsing(enricher);
-            assertBlackBox(builder, MultitenantBlackBoxContext.class);
+            assertBlackBox(builder, MultiTenantContext.class);
         }
 
         private void assertBlackBox(BoundedContextBuilder builder,
-                                    Class<? extends BlackBoxBoundedContext<?>> clazz) {
+                                    Class<? extends BlackBoxContext> clazz) {
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);
-            blackBox = BlackBoxBoundedContext.from(builder);
+            blackBox = BlackBoxContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(clazz);
             assertRepositories();
@@ -446,22 +450,39 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
 
         private void assertRepositories() {
-            assertThat(blackBox.repositories())
-                    .containsAnyIn(repositories);
+            for (Repository<?, ?> repository : repositories) {
+                Class<? extends EntityState> stateClass =
+                        repository.entityModelClass()
+                                  .stateClass();
+                assertDoesNotThrow(() -> context.repositoryOf(stateClass));
+            }
         }
 
         private void assertEntityTypes() {
-            assertThat(blackBox.allStateTypes()).containsAtLeastElementsIn(types);
+            Set<TypeName> allStateTypes = context().stateTypes();
+            assertThat(allStateTypes).containsAtLeastElementsIn(types);
         }
 
         private void assertDispatchers() {
-            assertThat(blackBox.commandBus().registeredCommandClasses()).contains(commandClass);
-            assertThat(blackBox.eventBus().registeredEventClasses())
+            assertThat(commandBus().registeredCommandClasses()).contains(commandClass);
+            assertThat(eventBus().registeredEventClasses())
                     .containsAtLeastElementsIn(eventDispatcher.eventClasses());
         }
 
+        private BoundedContext context() {
+            return blackBox.context();
+        }
+
+        private EventBus eventBus() {
+            return context().eventBus();
+        }
+
+        private CommandBus commandBus() {
+            return context().commandBus();
+        }
+
         private void assertEnricher() {
-            assertThat(blackBox.eventBus().enricher()).hasValue(enricher);
+            assertThat(eventBus().enricher()).hasValue(enricher);
         }
 
         /**
@@ -637,36 +658,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     @Nested
-    @DisplayName("Provide generated")
-    class Generated {
-
-        @BeforeEach
-        void postCommands() {
-            BbProjectId id = newProjectId();
-            context.receivesCommand(createProject(id))
-                   .receivesCommand(initProject(id, true)) ;
-        }
-
-        @Test
-        @DisplayName("event messages")
-        void eventMessages() {
-            IterableSubject assertEventMessages = assertThat(context.eventMessages());
-            assertEventMessages.isNotEmpty();
-            assertEventMessages.hasSize(context.events()
-                                               .size());
-        }
-
-        @Test
-        @DisplayName("command messages")
-        void commandMessages() {
-            IterableSubject assertCommandMessages = assertThat(context.commandMessages());
-            assertCommandMessages.isNotEmpty();
-            assertCommandMessages.hasSize(context.commands()
-                                                 .size());
-        }
-    }
-
-    @Nested
     @DisplayName("produce requests with the given actor")
     class WithGivenActor {
 
@@ -696,8 +687,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbCreateProject createProject = createProject();
             BbProjectId id = createProject.getProjectId();
             ZoneId zoneId = ZoneIds.of("UTC+1");
-            ZoneOffset zoneOffset = ZoneOffsets.ofHours(1);
-            context.withActorIn(actor, zoneId, zoneOffset)
+            context.withActor(actor)
+                   .in(zoneId)
                    .receivesCommand(createProject)
                    .assertEntityWithState(BbProject.class, id)
                    .exists();
@@ -708,13 +699,14 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                                          .get(0)
                                          .context()
                                          .actorContext();
+            ZoneOffset expectedOffset = TestActorRequestFactory.toOffset(zoneId);
             assertThat(context)
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(ActorContext
                                        .newBuilder()
                                        .setActor(actor)
                                        .setZoneId(zoneId)
-                                       .setZoneOffset(zoneOffset)
+                                       .setZoneOffset(expectedOffset)
                                        .buildPartial());
         }
 
@@ -724,8 +716,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             BbCreateProject createProject = createProject();
             BbProjectId id = createProject.getProjectId();
             ZoneId zoneId = ZoneIds.of("UTC-1");
-            ZoneOffset zoneOffset = ZoneOffsets.ofHours(-1);
-            context.in(zoneId, zoneOffset)
+            context.in(zoneId)
                    .receivesCommand(createProject)
                    .assertEntityWithState(BbProject.class, id)
                    .exists();
@@ -736,12 +727,13 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                                          .get(0)
                                          .context()
                                          .actorContext();
+            ZoneOffset expectedOffset = TestActorRequestFactory.toOffset(zoneId);
             assertThat(context)
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(ActorContext
                                        .newBuilder()
                                        .setZoneId(zoneId)
-                                       .setZoneOffset(zoneOffset)
+                                       .setZoneOffset(expectedOffset)
                                        .buildPartial());
         }
     }

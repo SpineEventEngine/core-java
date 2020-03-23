@@ -77,7 +77,7 @@ public class ProjectionEventDispatcher {
     private static class TestProjectionEndpoint<I,
                                                 P extends Projection<I, S, ?>,
                                                 S extends EntityState>
-            extends ProjectionEndpoint<I, P> {
+            extends ProjectionEndpoint<I, P, S> {
 
         private TestProjectionEndpoint(EventEnvelope event) {
             super(new TestProjectionRepository<>(), event);

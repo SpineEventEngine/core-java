@@ -41,18 +41,24 @@ import io.spine.server.type.EventEnvelope;
  */
 public final class ForeignContextConfig {
 
-    private ForeignContextConfig() {}
+    /** Prevents instantiation of this utility class. */
+    private ForeignContextConfig() {
+    }
+
+    private static BoundedContext.InternalAccess contextAccess() {
+        return context().internalAccess();
+    }
 
     public static void repositoryRegistration() {
-        context().register(DefaultRepository.of(ProjectAggregate.class));
+        contextAccess().register(DefaultRepository.of(ProjectAggregate.class));
     }
 
     public static void commandDispatcherRegistration() {
-        context().registerCommandDispatcher(newCommandDispatcher());
+        contextAccess().registerCommandDispatcher(newCommandDispatcher());
     }
 
     public static void eventDispatcherRegistration() {
-        context().registerEventDispatcher(EmptyEventDispatcher.newInstance());
+        contextAccess().registerEventDispatcher(EmptyEventDispatcher.newInstance());
     }
 
     private static BoundedContext context() {

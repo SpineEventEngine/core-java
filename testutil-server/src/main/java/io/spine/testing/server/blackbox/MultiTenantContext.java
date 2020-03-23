@@ -20,12 +20,11 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.server.event.EventEnricher;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -39,17 +38,15 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Test fixture for multi-tenant Bounded Contexts.
  */
-@VisibleForTesting
-public final class MultitenantBlackBoxContext
-        extends BlackBoxBoundedContext<MultitenantBlackBoxContext> {
+final class MultiTenantContext extends BlackBoxContext {
 
     private @MonotonicNonNull TenantId tenantId;
 
     /**
      * Creates a new multi-tenant instance.
      */
-    MultitenantBlackBoxContext(String name, EventEnricher enricher) {
-        super(true, enricher, name);
+    MultiTenantContext(BoundedContextBuilder b) {
+        super(b);
     }
 
     /**
@@ -59,7 +56,8 @@ public final class MultitenantBlackBoxContext
      *         new tenant ID
      * @return current instance
      */
-    public MultitenantBlackBoxContext withTenant(TenantId tenant) {
+    @Override
+    public MultiTenantContext withTenant(TenantId tenant) {
         this.tenantId = checkNotNull(tenant);
         return this;
     }
@@ -80,7 +78,7 @@ public final class MultitenantBlackBoxContext
     }
 
     @Override
-    protected <D> @Nullable D readOperation(Supplier<D> supplier) {
+    protected <@Nullable D> D readOperation(Supplier<D> supplier) {
         TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId());
         D result = tenantAwareRunner.evaluate(() -> super.readOperation(supplier));
         return result;

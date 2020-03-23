@@ -39,7 +39,7 @@ import io.spine.test.stand.DishAdded;
 import io.spine.test.stand.Menu;
 import io.spine.test.stand.MenuId;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.type.TypeName;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.AfterEach;
@@ -65,13 +65,13 @@ class EntityQueryProcessorTest {
             new TestActorRequestFactory(EntityQueryProcessorTest.class);
     private static final QueryFactory queries = factory.query();
 
-    private BlackBoxBoundedContext<?> context;
+    private BlackBoxContext context;
     private EntityQueryProcessor processor;
 
     @BeforeEach
     void setUp() {
         ProjectionRepository<?, ?, ?> repository = new MenuRepository();
-        context = BlackBoxBoundedContext
+        context = BlackBoxContext
                 .from(BoundedContext
                               .singleTenant("Cafeteria")
                               .add(repository));

@@ -52,7 +52,7 @@ import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -84,7 +84,7 @@ class ProjectionEndToEndTest {
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
-        BlackBoxBoundedContext<?> context = BlackBoxBoundedContext.from(
+        BlackBoxContext context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(new EntitySubscriberProjection.Repository())
                                      .add(new TestProjection.Repository())
@@ -111,11 +111,11 @@ class ProjectionEndToEndTest {
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
 
-        BlackBoxBoundedContext<?> sender = BlackBoxBoundedContext.from(
+        BlackBoxContext sender = BlackBoxContext.from(
                 BoundedContext.singleTenant("Organizations")
                               .add(new OrganizationProjection.Repository())
         );
-        BlackBoxBoundedContext<?> receiver = BlackBoxBoundedContext.from(
+        BlackBoxContext receiver = BlackBoxContext.from(
                 BoundedContext.singleTenant("Groups")
                 .add(new GroupNameProjection.Repository())
         );
@@ -142,7 +142,8 @@ class ProjectionEndToEndTest {
         BoundedContext groups = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        groups.register(repository);
+        groups.internalAccess()
+              .register(repository);
         UserId organizationHead = GivenUserId.newUuid();
         MessageId entityId = MessageId
                 .newBuilder()

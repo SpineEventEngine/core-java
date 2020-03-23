@@ -43,7 +43,7 @@ class AggregateRepositoryViewsTest {
     /** The Aggregate ID used in all tests. */
     private static final Long id = 100L;
     private final ActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
-    private BoundedContext boundedContext;
+    private BoundedContext context;
     /**
      * The default behaviour of an {@code AggregateRepository}.
      */
@@ -53,11 +53,12 @@ class AggregateRepositoryViewsTest {
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContextBuilder
+        context = BoundedContextBuilder
                 .assumingTests()
                 .build();
         repository = new RepoOfAggregateWithLifecycle();
-        boundedContext.register(repository);
+        context.internalAccess()
+               .register(repository);
 
         // Create the aggregate instance.
         postCommand("createCommand");
@@ -71,8 +72,8 @@ class AggregateRepositoryViewsTest {
         Command command =
                 requestFactory.command()
                               .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
-        boundedContext.commandBus()
-                      .post(command, StreamObservers.noOpObserver());
+        context.commandBus()
+               .post(command, StreamObservers.noOpObserver());
     }
 
     @Test

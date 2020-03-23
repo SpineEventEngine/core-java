@@ -46,18 +46,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class AggregateRootTest {
 
     private AggregateRootTestEnv.ProjectRoot aggregateRoot;
-    private BoundedContext boundedContext;
+    private BoundedContext context;
 
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContextBuilder.assumingTests().build();
-        ProjectId projectId = ProjectId.newBuilder()
-                                       .setId(newUuid())
-                                       .build();
-        aggregateRoot = new AggregateRootTestEnv.ProjectRoot(boundedContext, projectId);
-        boundedContext.register(new ProjectDefinitionRepository());
-        boundedContext.register(new ProjectLifeCycleRepository());
+        context = BoundedContextBuilder.assumingTests().build();
+        ProjectId projectId = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        aggregateRoot = new AggregateRootTestEnv.ProjectRoot(context, projectId);
+        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        contextAccess.register(new ProjectDefinitionRepository());
+        contextAccess.register(new ProjectLifeCycleRepository());
     }
 
     @Test
@@ -67,7 +69,7 @@ class AggregateRootTest {
                 AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
         new NullPointerTester()
                 .setDefault(Constructor.class, ctor)
-                .setDefault(BoundedContext.class, boundedContext)
+                .setDefault(BoundedContext.class, context)
                 .testStaticMethods(AggregateRoot.class, NullPointerTester.Visibility.PACKAGE);
     }
 

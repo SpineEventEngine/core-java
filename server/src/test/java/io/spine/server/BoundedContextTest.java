@@ -128,7 +128,8 @@ class BoundedContextTest {
         @Test
         @DisplayName("IntegrationBroker")
         void integrationBroker() {
-            assertNotNull(context.broker());
+            assertNotNull(context.internalAccess()
+                                 .broker());
         }
 
         @Test
@@ -230,7 +231,8 @@ class BoundedContextTest {
         BoundedContext context = BoundedContextBuilder.assumingTests().build();
         Stand stand = context.stand();
 
-        Repository<ProjectId, ProjectAggregate> repo = DefaultRepository.of(ProjectAggregate.class);
+        Repository<ProjectId, ProjectAggregate> repo =
+                DefaultRepository.of(ProjectAggregate.class);
         TypeUrl stateType = repo.entityStateType();
 
         assertThat(stand.exposedTypes())
@@ -366,7 +368,8 @@ class BoundedContextTest {
     void throwOnNoRepoRegistered() {
         // Attempt to get a repository without registering.
         assertThrows(IllegalStateException.class,
-                     () -> context.findRepository(Project.class));
+                     () -> context.internalAccess()
+                                  .findRepository(Project.class));
     }
 
     @Test
@@ -376,7 +379,8 @@ class BoundedContextTest {
 
         context.register(new SecretProjectRepository());
 
-        Truth8.assertThat(context.findRepository(SecretProject.class))
+        Truth8.assertThat(context.internalAccess()
+                                 .findRepository(SecretProject.class))
               .isEmpty();
     }
 

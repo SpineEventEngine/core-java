@@ -35,8 +35,8 @@ import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Multi-tenant `BlackBoxContext` should")
-class MultitenantBlackBoxContextTest
-        extends BlackBoxBoundedContextTest<MultitenantBlackBoxContext> {
+class MultiTenantContextTest
+        extends BlackBoxContextTest<MultiTenantContext> {
 
     @Override
     BoundedContextBuilder newBuilder() {
@@ -59,7 +59,7 @@ class MultitenantBlackBoxContextTest
         TenantId newUser = generate();
         BbCreateProject createJohnProject = createProject();
         BbCreateProject createCarlProject = createProject();
-        MultitenantBlackBoxContext context = context()
+        BlackBoxContext context = context()
                 // Create a project for John.
                 .withTenant(john)
                 .receivesCommand(createJohnProject)
@@ -76,7 +76,7 @@ class MultitenantBlackBoxContextTest
                .hasStateThat()
                .isEqualTo(createdProjectState(createJohnProject));
         // Verify project was created for Carl.
-        MultitenantBlackBoxContext contextForCarl = context.withTenant(carl);
+        BlackBoxContext contextForCarl = context.withTenant(carl);
         contextForCarl
                 .assertEvents()
                 .withType(BbProjectCreated.class)
@@ -86,7 +86,7 @@ class MultitenantBlackBoxContextTest
                 .hasStateThat()
                 .isEqualTo(createdProjectState(createCarlProject));
         // Verify nothing happened for a new user.
-        MultitenantBlackBoxContext newUserContext = context.withTenant(newUser);
+        BlackBoxContext newUserContext = context.withTenant(newUser);
         newUserContext
                 .assertCommands()
                 .isEmpty();
@@ -100,8 +100,8 @@ class MultitenantBlackBoxContextTest
     void requireTenantId() {
         assertThrows(
                 IllegalStateException.class,
-                () -> BlackBoxBoundedContext.from(BoundedContextBuilder.assumingTests(true))
-                                            .assertEntityWithState(BbProject.class, "verify state")
+                () -> BlackBoxContext.from(BoundedContextBuilder.assumingTests(true))
+                                     .assertEntityWithState(BbProject.class, "verify state")
         );
     }
 }

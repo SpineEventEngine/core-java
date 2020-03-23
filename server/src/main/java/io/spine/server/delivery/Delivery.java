@@ -553,7 +553,8 @@ public final class Delivery implements Logging {
      */
     @Internal
     public void registerDispatchersIn(BoundedContext context) {
-        context.registerEventDispatcher(new ShardMaintenanceProcess(this));
+        context.internalAccess()
+               .registerEventDispatcher(new ShardMaintenanceProcess(this));
     }
 
     /**

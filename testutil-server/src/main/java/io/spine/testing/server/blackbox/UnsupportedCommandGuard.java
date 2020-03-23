@@ -37,7 +37,7 @@ import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that the commands posted to the {@link BlackBoxBoundedContext} are not the
+ * Verifies that the commands posted to the {@link BlackBoxContext} are not the
  * {@linkplain io.spine.server.bus.DeadMessageHandler "dead"} messages.
  *
  * <p>The guard subscribes to {@link CommandErrored} event.

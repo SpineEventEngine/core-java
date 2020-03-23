@@ -64,9 +64,10 @@ class EventSubscriberTest {
         BoundedContext context = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        context.registerEventDispatcher(subscriber);
+        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        contextAccess.registerEventDispatcher(subscriber);
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        context.registerEventDispatcher(monitor);
+        contextAccess.registerEventDispatcher(monitor);
         subscriber.dispatch(eventEnvelope);
 
         assertTrue(subscriber.isMethodCalled());

@@ -75,7 +75,7 @@ import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.AfterEach;
@@ -135,7 +135,7 @@ public class AggregateTest {
 
     private TestAggregate aggregate;
     private AmishAggregate amishAggregate;
-    private BoundedContext boundedContext;
+    private BoundedContext context;
     private TestAggregateRepository repository;
 
     private static TestAggregate newAggregate(ProjectId id) {
@@ -171,15 +171,16 @@ public class AggregateTest {
         ModelTests.dropAllModels();
         aggregate = newAggregate(ID);
         amishAggregate = newAmishAggregate(ID);
-        boundedContext = BoundedContextBuilder.assumingTests(true)
-                                              .build();
+        context = BoundedContextBuilder.assumingTests(true)
+                                       .build();
         repository = new TestAggregateRepository();
-        boundedContext.register(repository);
+        context.internalAccess()
+               .register(repository);
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        boundedContext.close();
+        context.close();
     }
 
     @Test
@@ -692,7 +693,7 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.commandBus();
+            CommandBus commandBus = context.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(addTaskCommand, noOpObserver);
@@ -726,7 +727,7 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.commandBus();
+            CommandBus commandBus = context.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(startCommand, noOpObserver);
@@ -748,7 +749,8 @@ public class AggregateTest {
     @DisplayName("throw DuplicateCommandException for a duplicated command")
     void acknowledgeExceptionForDuplicateCommand() {
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        boundedContext.registerEventDispatcher(monitor);
+        context.internalAccess()
+               .registerEventDispatcher(monitor);
 
         TenantId tenantId = newTenantId();
         Command createCommand = command(createProject, tenantId);
@@ -767,7 +769,8 @@ public class AggregateTest {
     @DisplayName("run Idempotency guard when dispatching commands")
     void checkCommandsUponHistory() {
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        boundedContext.registerEventDispatcher(monitor);
+        context.internalAccess()
+               .registerEventDispatcher(monitor);
         Command createCommand = command(createProject);
         CommandEnvelope cmd = CommandEnvelope.of(createCommand);
         TenantId tenantId = newTenantId();
@@ -786,7 +789,8 @@ public class AggregateTest {
     @DisplayName("run Idempotency guard when dispatching events")
     void checkEventsUponHistory() {
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        boundedContext.registerEventDispatcher(monitor);
+        context.internalAccess()
+               .registerEventDispatcher(monitor);
         AggProjectDeleted eventMessage = AggProjectDeleted
                 .newBuilder()
                 .setProjectId(ID)
@@ -816,11 +820,11 @@ public class AggregateTest {
     @DisplayName("create a single event when emitting a pair without second value")
     class CreateSingleEventForPair {
 
-        private BlackBoxBoundedContext<?> context;
+        private BlackBoxContext context;
 
         @BeforeEach
         void prepareContext() {
-            context = BlackBoxBoundedContext.from(
+            context = BlackBoxContext.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TaskAggregateRepository())
             );

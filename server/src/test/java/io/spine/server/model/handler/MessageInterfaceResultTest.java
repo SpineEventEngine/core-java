@@ -28,7 +28,7 @@ import io.spine.server.model.handler.given.event.MovedEast;
 import io.spine.server.model.handler.given.event.MovedNorth;
 import io.spine.server.model.handler.given.event.MovedSouth;
 import io.spine.server.model.handler.given.event.MovedWest;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,11 +42,11 @@ import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 class MessageInterfaceResultTest {
 
     private final AggregateClass<?> aggregateClass = asAggregateClass(RoverBot.class);
-    private BlackBoxBoundedContext<?> context;
+    private BlackBoxContext context;
 
     @BeforeEach
     void createContext() {
-        context = BlackBoxBoundedContext.from(
+        context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(RoverBot.class)
         );

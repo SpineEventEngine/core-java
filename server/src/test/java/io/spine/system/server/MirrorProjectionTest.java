@@ -24,7 +24,7 @@ import io.spine.base.EventMessage;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -125,10 +125,10 @@ class MirrorProjectionTest {
                     .isNotEqualToDefaultInstance();
     }
 
-    private static BlackBoxBoundedContext<?> context() {
+    private static BlackBoxContext context() {
         MirrorRepository mirrorRepository = new MirrorRepository();
         mirrorRepository.addMirroredType(AGGREGATE_TYPE_URL);
-        return BlackBoxBoundedContext.from(
+        return BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(mirrorRepository)
         );
