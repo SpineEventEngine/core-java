@@ -64,7 +64,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
-import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -433,7 +432,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                       .findFirst()
                       .orElseThrow(() -> newIllegalStateException(
                               "Unable to route import event `%s`. Event: %s",
-                              messageType, shortDebugString(message))
+                              messageType)
                       );
             return id;
         };
@@ -618,10 +617,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         tx.commitIfActive();
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
-            throw newIllegalStateException(
-                    "Aggregate %s (ID: %s) cannot be loaded.%n",
-                    aggregateClass().value().getName(), result.idAsString()
-            );
+            throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n",
+                                           aggregateClass().value().getName(),
+                                           result.idAsString());
         }
         return result;
     }
