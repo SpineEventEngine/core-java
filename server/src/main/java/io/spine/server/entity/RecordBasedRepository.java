@@ -496,7 +496,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     private void checkEntityIsTransactional() {
         checkState(TransactionalEntity.class.isAssignableFrom(entityClass()),
                    "`%s` is not a transactional entity type. The requested operation is only " +
-                           "supported for transactional entity types.");
+                           "supported for transactional entity types.",
+                   entityClass().getCanonicalName()
+        );
     }
 
     /**
