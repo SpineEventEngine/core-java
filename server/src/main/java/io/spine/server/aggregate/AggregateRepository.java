@@ -431,8 +431,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             I id = ids.stream()
                       .findFirst()
                       .orElseThrow(() -> newIllegalStateException(
-                              "Unable to route import event `%s`. Event: %s",
-                              messageType)
+                              "Unable to route import event `%s`.", messageType)
                       );
             return id;
         };
@@ -530,7 +529,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        AggregateStorage<I> result = (AggregateStorage<I>) storage();
+                AggregateStorage<I> result = (AggregateStorage<I>) storage();
         return result;
     }
 
@@ -618,7 +617,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
             throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n",
-                                           aggregateClass().value().getName(),
+                                           aggregateClass().value()
+                                                           .getName(),
                                            result.idAsString());
         }
         return result;
