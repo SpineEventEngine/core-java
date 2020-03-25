@@ -428,7 +428,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     private E findOrThrow(I id) {
         return find(id).orElseThrow(() -> newIllegalArgumentException(
-                "An entity `%s` with ID `%s` is not found in the repository.", entityClass(), id
+                "An entity `%s` with ID `%s` is not found in the repository.",
+                entityClass().getCanonicalName(), id
         ));
     }
 
