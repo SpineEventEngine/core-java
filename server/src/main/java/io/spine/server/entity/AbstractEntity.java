@@ -460,8 +460,9 @@ public abstract class AbstractEntity<I, S extends EntityState>
         if (currentVersionNumber > newVersionNumber) {
             throw newIllegalArgumentException(
                     "A version with the lower number (%d) passed to `updateVersion()` " +
-                            "of the entity with the version number %d.",
-                    newVersionNumber, currentVersionNumber);
+                            "of the entity `%s` (`%s`) with the version number %d.",
+                    newVersionNumber, thisClass(), idAsString(), currentVersionNumber
+            );
         }
         setVersion(newVersion);
     }

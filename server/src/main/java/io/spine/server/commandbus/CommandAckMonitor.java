@@ -112,7 +112,11 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
                                      .build();
             case REJECTION:
             default:
-                throw newIllegalArgumentException("Invalid status %s.", status.getStatusCase());
+                throw newIllegalArgumentException(
+                        "Command `%s` has invalid status `%s`.",
+                        commandId.getUuid(),
+                        status.getStatusCase()
+                );
         }
     }
 

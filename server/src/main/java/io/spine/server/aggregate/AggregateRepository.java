@@ -529,7 +529,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        AggregateStorage<I> result = (AggregateStorage<I>) storage();
+                AggregateStorage<I> result = (AggregateStorage<I>) storage();
         return result;
     }
 
@@ -616,8 +616,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         tx.commitIfActive();
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
-            throw newIllegalStateException("Aggregate %s (ID: %s) cannot be loaded.%n",
-                                           aggregateClass().value().getName(),
+            throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n",
+                                           aggregateClass().value()
+                                                           .getName(),
                                            result.idAsString());
         }
         return result;
