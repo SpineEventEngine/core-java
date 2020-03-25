@@ -150,7 +150,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         if the entity with the given ID is not found in the repository
      * @throws IllegalStateException
      *         if the repository manages a non-transactional entity type
-     *
      * @see Migration
      * @see #applyMigration(Set, Migration) the batch version of the method
      */
@@ -188,7 +187,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @throws IllegalStateException
      *         if the repository manages a non-transactional entity type
-     *
      * @see Migration
      */
     @SuppressWarnings("unchecked") // Checked at runtime.
@@ -230,7 +228,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>Note: The storage must be assigned before calling this method.
      *
-     * @param entities the {@linkplain Entity Entities} to store
+     * @param entities
+     *         the {@linkplain Entity Entities} to store
      */
     public void store(Collection<E> entities) {
         Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
@@ -244,7 +243,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Finds an entity with the passed ID.
      *
-     * @param id the ID of the entity to find
+     * @param id
+     *         the ID of the entity to find
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID
      */
     @Override
@@ -257,7 +257,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds an entity with the passed ID even if the entity is
      * {@linkplain WithLifecycle#isActive() active}.
      *
-     * @param id the ID of the entity to find
+     * @param id
+     *         the ID of the entity to find
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID,
      *         or the entity is not active
      */
@@ -290,7 +291,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>The new entity is created if and only if there is no record with the corresponding ID.
      *
-     * @param id the ID of the entity to load
+     * @param id
+     *         the ID of the entity to load
      * @return the entity with the specified ID
      */
     protected E findOrCreate(I id) {
@@ -426,7 +428,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     private E findOrThrow(I id) {
         return find(id).orElseThrow(() -> newIllegalArgumentException(
-                "An entity with ID `%s` is not found in the repository.", id
+                "An entity `%s` with ID `%s` is not found in the repository.", entityClass(), id
         ));
     }
 
@@ -524,7 +526,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             Message idAsMessage = unpack(idAsAny);
 
             @SuppressWarnings("unchecked")
-                // As the message class is the same as expected, the conversion is safe.
+            // As the message class is the same as expected, the conversion is safe.
             I id = (I) idAsMessage;
             return id;
         }
