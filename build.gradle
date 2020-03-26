@@ -50,11 +50,9 @@ buildscript { final scriptHandler ->
 apply from: 'version.gradle'
 
 ext {
-    spineJacocoScript = "${rootDir}/config/gradle/jacoco.gradle"
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
     credentialsPropertyFile = 'credentials.properties'
-    publishPlugin = "$rootDir/config/gradle/publish.gradle"
     projectsToPublish = ["core",
                          "client",
                          "server",
@@ -260,7 +258,7 @@ subprojects {
     apply from: deps.scripts.pmd
 }
 
-apply from: publishPlugin
+apply from: deps.scripts.publish
 
 // IDEA project configuration.
 idea {
@@ -279,7 +277,7 @@ idea {
 }
 
 // Aggregated coverage report across all subprojects.
-apply from: spineJacocoScript
+apply from: deps.scripts.jacoco
 
 // Generate a repository-wide report of 3rd-party dependencies and their licenses.
 apply from: deps.scripts.repoLicenseReport
