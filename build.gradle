@@ -91,7 +91,6 @@ subprojects {
         generatedTestSpineDir = "$generatedRootDir/test/spine"
 
         filterInternalJavadocsScript = "${rootDir}/config/gradle/filter-internal-javadoc.gradle"
-        updateDocsPlugin = "$rootDir/gradle/update-gh-pages.gradle"
     }
 
     apply plugin: 'com.google.protobuf'
@@ -252,7 +251,10 @@ subprojects {
     // This plugin *must* be applied here, not in the module `build.gradle` files.
     //
     if (shouldPublishJavadoc()) {
-        apply from: updateDocsPlugin
+        apply from: deps.scripts.updateGitHubPages
+        afterEvaluate {
+            tasks.publish.dependsOn('updateGitHubPages')
+        }
     }
     
     apply from: deps.scripts.pmd
