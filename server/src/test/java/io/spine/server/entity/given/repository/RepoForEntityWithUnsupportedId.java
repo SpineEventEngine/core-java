@@ -47,7 +47,7 @@ public class RepoForEntityWithUnsupportedId extends Repository<Exception, Entity
     }
 
     @Override
-    protected Storage<Exception, ?, ?> createStorage() {
+    protected Storage<Exception, ?> createStorage() {
         return null;
     }
 }

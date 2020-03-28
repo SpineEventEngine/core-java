@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.server.delivery.event.CatchUpStarted;
@@ -57,7 +58,7 @@ final class CatchUpStation extends Station {
     CatchUpStation(DeliveryAction action, Iterable<CatchUp> jobs) {
         super();
         this.action = action;
-        this.jobs = jobs;
+        this.jobs = ImmutableList.copyOf(jobs);
     }
 
     /**

@@ -37,7 +37,6 @@ import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
@@ -78,7 +77,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
-        extends AbstractRecordStorageTest<ProjectId, S> {
+        extends AbstractMessageStorageTest<ProjectId, S> {
 
     @Override
     protected Class<? extends Entity<?, ?>> getTestEntityClass() {
@@ -103,8 +102,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 create(record, testEntity, storage);
         storage.write(id, recordWithColumns);
 
-        RecordReadRequest<ProjectId> readRequest = newReadRequest(id);
-        Optional<EntityRecord> readRecord = storage.read(readRequest);
+        Optional<EntityRecord> readRecord = storage.read(id);
         assertTrue(readRecord.isPresent());
         assertEquals(record, readRecord.get());
     }

@@ -24,6 +24,7 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.string.Stringifiers;
 
 /**
@@ -72,6 +73,8 @@ public interface Entity<I, S extends EntityState> extends WithLifecycle {
      * Obtains the version of the entity.
      */
     Version version();
+
+    EntityClass<?> modelClass();
 
     /**
      * Enumeration of generic type parameters of this interface.

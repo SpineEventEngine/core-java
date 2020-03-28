@@ -23,34 +23,50 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.system.server.SystemReadSide;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.tenant.TenantAwareRunner;
 
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.system.server.ReadSideFunction.delegatingTo;
+import static com.google.common.collect.Streams.stream;
 
 /**
  * Processes the queries targeting {@link Aggregate Aggregate} state.
  */
 class AggregateQueryProcessor implements QueryProcessor {
 
-    private final SystemReadSide systemReadSide;
+    private final AggregateRepository<?, ?> repository;
 
-    AggregateQueryProcessor(SystemReadSide systemReadSide) {
-        this.systemReadSide = systemReadSide;
+    AggregateQueryProcessor(AggregateRepository<?, ?> repository) {
+        this.repository = repository;
     }
 
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
-        TenantId tenant = tenantOf(query);
-        SystemReadSide readSide = delegatingTo(systemReadSide).get(tenant);
-        Iterator<EntityStateWithVersion> read = readSide.readDomainAggregate(query);
-        ImmutableList<EntityStateWithVersion> result = ImmutableList.copyOf(read);
-        return result;
+        TargetFilters filters = query.filters();
+        ResponseFormat format = query.responseFormat();
+        TenantId tenantId = tenantOf(query);
+        Iterator<EntityRecord> rawRecords =
+                TenantAwareRunner.with(tenantId)
+                                 .evaluate(() -> repository.findRecords(filters, format));
+
+        ImmutableList<EntityStateWithVersion> results =
+                stream(rawRecords)
+                        .map(this::toEntityState)
+                        .collect(ImmutableList.toImmutableList());
+        return results;
+//        TenantId tenant = tenantOf(query);
+//        SystemReadSide readSide = delegatingTo(systemReadSide).get(tenant);
+//        Iterator<EntityStateWithVersion> read = readSide.readDomainAggregate(query);
+//        ImmutableList<EntityStateWithVersion> result = ImmutableList.copyOf(read);
+//        return result;
     }
 
     /**
@@ -59,7 +75,8 @@ class AggregateQueryProcessor implements QueryProcessor {
      * <p>In a single-tenant environment, this value should be
      * the {@linkplain TenantId#getDefaultInstance() default ID}.
      *
-     * @param query the query to extract tenant from
+     * @param query
+     *         the query to extract tenant from
      * @return the tenant of this query
      */
     private static TenantId tenantOf(Query query) {

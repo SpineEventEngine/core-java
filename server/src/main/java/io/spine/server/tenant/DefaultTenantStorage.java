@@ -18,28 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.store;
+package io.spine.server.tenant;
+
+import io.spine.base.Time;
+import io.spine.core.TenantId;
+import io.spine.server.storage.StorageFactory;
 
 /**
- * Event-specific column names.
+ * Default implementation of {@code TenantStorage} that stores timestamps of tenant ID registration.
  */
-enum ColumnName {
+final class DefaultTenantStorage extends TenantStorage<Tenant> {
 
-    /**
-     * The name of the entity column representing the time, when the event was fired.
-     *
-     * @see EEntity#getCreated()
-     */
-    created,
+    DefaultTenantStorage(StorageFactory factory) {
+        super(factory, Tenant.class);
+    }
 
-    /**
-     * The name of the entity column representing the Protobuf type name of the event.
-     *
-     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
-     * is enclosed in the {@code spine.test} Protobuf package would have this entity column
-     * equal to {@code "spine.test.TaskAdded"}.
-     *
-     * @see EEntity#getType()
-     */
-    type
+    @Override
+    protected Tenant create(TenantId id) {
+        return Tenant.newBuilder()
+                     .setId(id)
+                     .setWhenCreated(Time.currentTime())
+                     .build();
+    }
 }

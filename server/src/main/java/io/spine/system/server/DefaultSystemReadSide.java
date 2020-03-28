@@ -21,15 +21,10 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 
-import java.util.Iterator;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The default implementation of a {@link SystemReadSide}.
@@ -59,18 +54,18 @@ final class DefaultSystemReadSide implements SystemReadSide {
         eventBus.unregister(dispatcher);
     }
 
-    @Override
-    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
-        MirrorRepository repository = (MirrorRepository)
-                context.findRepository(Mirror.class)
-                       .orElseThrow(
-                               () -> newIllegalStateException(
-                                       "Mirror projection repository is not registered in `%s`.",
-                                       context.name()
-                                              .getValue()
-                               )
-                       );
-        Iterator<EntityStateWithVersion> result = repository.execute(query);
-        return result;
-    }
+//    @Override
+//    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
+//        MirrorRepository repository = (MirrorRepository)
+//                context.findRepository(Mirror.class)
+//                       .orElseThrow(
+//                               () -> newIllegalStateException(
+//                                       "Mirror projection repository is not registered in `%s`.",
+//                                       context.name()
+//                                              .getValue()
+//                               )
+//                       );
+//        Iterator<EntityStateWithVersion> result = repository.execute(query);
+//        return result;
+//    }
 }

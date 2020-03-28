@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.protobuf.Message;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
@@ -30,25 +31,14 @@ import io.spine.server.event.EventStore;
 import io.spine.server.event.store.DefaultEventStore;
 
 /**
- * A factory for creating storages used by repositories
- * {@link EventStore EventStore}
+ * A factory for creating storages used by repositories {@link EventStore EventStore}
  * and {@link io.spine.server.stand.Stand Stand}.
  */
 public interface StorageFactory extends AutoCloseable {
 
-    /**
-     * Creates a new {@link AggregateStorage}.
-     *
-     * @param <I>
-     *         the type of aggregate IDs
-     * @param context
-     *         specification of the Bounded Context {@code AggregateRepository} of which
-     *         requests the creation of the storage
-     * @param aggregateClass
-     *         the class of {@code Aggregate}s to be stored
-     */
-    <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> aggregateClass);
+
+    <I, M extends Message> MessageStorage<I, M>
+    createMessageStorage(Columns<M> columns, boolean multitenant);
 
     /**
      * Creates a new {@link RecordStorage}.
@@ -65,6 +55,22 @@ public interface StorageFactory extends AutoCloseable {
     createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass);
 
     /**
+     * Creates a new {@link AggregateStorage}.
+     *
+     * @param <I>
+     *         the type of aggregate IDs
+     * @param context
+     *         specification of the Bounded Context {@code AggregateRepository} of which
+     *         requests the creation of the storage
+     * @param aggregateCls
+     *         the class of {@code Aggregate}s to be stored
+     */
+    default <I> AggregateStorage<I>
+    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> aggregateCls) {
+        return new AggregateStorage<>(context, aggregateCls, this);
+    }
+
+    /**
      * Creates a new {@link InboxStorage}.
      *
      * <p>The instance of {@code InboxStorage} is used in the {@link
@@ -75,7 +81,9 @@ public interface StorageFactory extends AutoCloseable {
      *
      * @param multitenant whether the created storage should be multi-tenant
      */
-    InboxStorage createInboxStorage(boolean multitenant);
+    default InboxStorage createInboxStorage(boolean multitenant) {
+        return new InboxStorage(this, multitenant);
+    }
 
     /**
      * Creates a new {@link CatchUpStorage}.
@@ -87,7 +95,9 @@ public interface StorageFactory extends AutoCloseable {
      *
      * @param multitenant whether the created storage should be multi-tenant
      */
-    CatchUpStorage createCatchUpStorage(boolean multitenant);
+    default CatchUpStorage createCatchUpStorage(boolean multitenant) {
+        return new CatchUpStorage(this, multitenant);
+    }
 
     /**
      * Creates a new {@link EventStore}.
@@ -96,6 +106,24 @@ public interface StorageFactory extends AutoCloseable {
      *         specification of the Bounded Context events of which the store would serve
      */
     default EventStore createEventStore(@SuppressWarnings("unused") ContextSpec context) {
-        return new DefaultEventStore();
+        return new DefaultEventStore(this, context.isMultitenant());
+    }
+
+    /**
+     * Creates a new {@link EntityRecordStorage}.
+     *
+     * @param <I>
+     *         the type of entity IDs
+     * @param context
+     *         specification of the Bounded Context {@code RecordBasedRepository} of which
+     *         requests the creation of the storage
+     * @param entityClass
+     *         the class of entities to be stored
+     */
+    default <I> EntityRecordStorage<I>
+    createEntityRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
+        EntityRecordStorage<I> result =
+                new EntityRecordStorage<>(this, entityClass, context.isMultitenant());
+        return result;
     }
 }

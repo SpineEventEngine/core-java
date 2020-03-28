@@ -22,6 +22,8 @@ package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.storage.StorageFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,17 +35,18 @@ import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("TenantRepository should")
-class TenantRepositoryTest {
+@DisplayName("`TenantStorage` should")
+class TenantStorageTest {
 
-    private TenantRepository<?, ?> repository;
+    private TenantStorage<?> storage;
 
     @BeforeEach
     void setUp() {
-        repository = new TenantRepositoryImpl();
+        StorageFactory storageFactory = ServerEnvironment.instance().storageFactory();
+        storage = new TenantStorageImpl(storageFactory);
         BoundedContextBuilder
                 .assumingTests(true)
-                .setTenantIndex(repository)
+                .setTenantIndex(storage)
                 .build();
     }
 
@@ -51,14 +54,11 @@ class TenantRepositoryTest {
     @DisplayName("cache passed value")
     void cachePassedValue() {
         TenantId tenantId = generate();
+        storage.keep(tenantId);
 
-        repository.keep(tenantId);
-
-        Optional<?> optional = repository.find(tenantId);
-
+        Optional<?> optional = storage.read(tenantId);
         assertThat(optional).isPresent();
-
-        assertTrue(repository.cached(tenantId));
+        assertTrue(storage.cached(tenantId));
     }
 
     @Test
@@ -66,9 +66,9 @@ class TenantRepositoryTest {
     void evictFromCache() {
         TenantId tenantId = generate();
 
-        repository.keep(tenantId);
-        assertTrue(repository.unCache(tenantId));
-        assertFalse(repository.unCache(tenantId));
+        storage.keep(tenantId);
+        assertTrue(storage.unCache(tenantId));
+        assertFalse(storage.unCache(tenantId));
     }
 
     @Test
@@ -76,14 +76,24 @@ class TenantRepositoryTest {
     void clearCache() {
         TenantId tenantId = generate();
 
-        repository.keep(tenantId);
+        storage.keep(tenantId);
 
-        repository.clearCache();
+        storage.clearCache();
 
-        assertFalse(repository.unCache(tenantId));
+        assertFalse(storage.unCache(tenantId));
     }
 
-    private static class TenantRepositoryImpl
-            extends TenantRepository<Tenant, DefaultTenantRepository.Entity> {
+    private static class TenantStorageImpl extends TenantStorage<Tenant> {
+
+        private TenantStorageImpl(StorageFactory factory) {
+            super(factory, Tenant.class);
+        }
+
+        @Override
+        protected Tenant create(TenantId id) {
+            return Tenant.newBuilder()
+                         .setId(id)
+                         .build();
+        }
     }
 }

@@ -57,7 +57,6 @@ import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
 import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
-import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_ORDER_BY;
 import static io.spine.client.given.QueryBuilderTestEnv.FIRST_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
@@ -150,7 +149,7 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
-            assertThat(format.getOrderBy()).isEqualTo(EMPTY_ORDER_BY);
+            assertThat(format.getOrderByCount()).isEqualTo(0);
             assertThat(format.getLimit()).isEqualTo(0);
 
             assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
@@ -167,7 +166,7 @@ class QueryBuilderTest {
             assertFalse(format.hasFieldMask());
 
             OrderBy expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
-            assertEquals(expectedOrderBy, format.getOrderBy());
+            assertEquals(expectedOrderBy, format.getOrderBy(0));
 
             assertThat(format.getLimit()).isEqualTo(0);
 
@@ -190,7 +189,7 @@ class QueryBuilderTest {
             assertFalse(format.hasFieldMask());
 
             OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
-            assertEquals(expectedOrderBy, format.getOrderBy());
+            assertEquals(expectedOrderBy, format.getOrderBy(0));
 
             assertThat(format.getLimit()).isEqualTo(limit);
 
@@ -452,7 +451,7 @@ class QueryBuilderTest {
             assertEquals(columnValue2, actualGenericValue2);
 
             OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
-            assertEquals(expectedOrderBy, format.getOrderBy());
+            assertEquals(expectedOrderBy, format.getOrderBy(0));
 
             assertThat(format.getLimit()).isEqualTo(limit);
         }
@@ -549,7 +548,7 @@ class QueryBuilderTest {
                                  .orderBy(FIRST_FIELD, DESCENDING)
                                  .build();
             assertNotNull(query);
-            assertEquals(orderBy(FIRST_FIELD, DESCENDING), query.getFormat().getOrderBy());
+            assertEquals(orderBy(FIRST_FIELD, DESCENDING), query.getFormat().getOrderBy(0));
         }
     }
 

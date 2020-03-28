@@ -20,14 +20,13 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.delivery.CatchUpStorage;
-import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.storage.Columns;
+import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
@@ -51,13 +50,6 @@ public final class InMemoryStorageFactory implements StorageFactory {
     private InMemoryStorageFactory() {
     }
 
-    /** <b>NOTE</b>: the parameter is unused. */
-    @Override
-    public <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> unused) {
-        return new InMemoryAggregateStorage<>(context.isMultitenant());
-    }
-
     @Override
     public <I> RecordStorage<I>
     createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
@@ -67,13 +59,9 @@ public final class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public InboxStorage createInboxStorage(boolean multitenant) {
-        return new InMemoryInboxStorage(multitenant);
-    }
-
-    @Override
-    public CatchUpStorage createCatchUpStorage(boolean multitenant) {
-        return new InMemoryCatchUpStorage(multitenant);
+    public <I, M extends Message> MessageStorage<I, M>
+    createMessageStorage(Columns<M> columns, boolean multitenant) {
+        return new InMemoryMessageStorage<>(columns, multitenant);
     }
 
     /**

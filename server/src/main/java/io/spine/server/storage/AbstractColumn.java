@@ -18,25 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.tenant;
+package io.spine.server.storage;
 
-import io.spine.base.Time;
-import io.spine.core.TenantId;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.Internal;
+import io.spine.server.entity.storage.ColumnName;
 
 /**
- * Default implementation of {code TenantRepository} that stores timestamps
- * of tenant ID registration.
+ * An abstract base for different column types.
  */
-final class DefaultTenantRepository
-      extends TenantRepository<Tenant, DefaultTenantRepository.Entity> {
+@Immutable
+@Internal
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
+// Prevent instantiation in favor of concrete column types.
+public abstract class AbstractColumn implements Column {
 
-    static final class Entity extends TenantRepository.Entity<Tenant> {
+    private final ColumnName name;
+    private final Class<?> type;
 
-        private Entity(TenantId id) {
-            super(id, (i) -> Tenant.newBuilder()
-                                   .setId(i)
-                                   .setWhenCreated(Time.currentTime())
-                                   .build());
-        }
+    protected AbstractColumn(ColumnName name, Class<?> type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    @Override
+    public ColumnName name() {
+        return name;
+    }
+
+    @Override
+    public Class<?> type() {
+        return type;
     }
 }

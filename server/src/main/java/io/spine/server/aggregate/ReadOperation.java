@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.Event;
+import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Deque;
@@ -31,6 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Preconditions2.checkPositive;
 
 /**
  * Method object for reading {@link AggregateHistory}s.
@@ -40,41 +42,57 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 final class ReadOperation<I> {
 
     private final AggregateStorage<I> storage;
-    private final AggregateReadRequest<I> request;
     private final Deque<Event> history;
+    private final I id;
+    private final int batchSize;
 
     private @MonotonicNonNull Snapshot snapshot = null;
 
-    ReadOperation(AggregateStorage<I> storage, AggregateReadRequest<I> request) {
+    ReadOperation(AggregateStorage<I> storage, I id, int batchSize) {
         storage.checkNotClosed();
         this.storage = storage;
-        this.request = checkNotNull(request);
+        this.id = checkNotNull(id);
+        checkPositive(batchSize);
+        this.batchSize = batchSize;
         this.history = newLinkedList();
     }
 
+    @SuppressWarnings("WhileLoopSpinsOnField")
     Optional<AggregateHistory> perform() {
-        Iterator<AggregateEventRecord> historyBackward = storage.historyBackward(request);
+        Iterator<AggregateEventRecord> historyBackward = storage.historyBackward(id, batchSize);
         if (!historyBackward.hasNext()) {
             return Optional.empty();
         }
 
-        while (historyBackward.hasNext() && snapshot == null) {
-            AggregateEventRecord record = historyBackward.next();
-            handleRecord(record);
+        boolean historyBottomReached = false;
+        while(snapshot == null && !historyBottomReached) {
+            Version lastHandledVersion = null;
+            while(historyBackward.hasNext() && snapshot == null) {
+                AggregateEventRecord record = historyBackward.next();
+                lastHandledVersion = handleRecord(record);
+            }
+            if(snapshot == null) {
+                if(lastHandledVersion == null) {
+                    historyBottomReached = true;
+                } else {
+                    historyBackward = storage.historyBackward(id, batchSize, lastHandledVersion);
+                }
+            }
         }
+
 
         AggregateHistory result = buildRecord();
         return Optional.of(result);
     }
 
-    private void handleRecord(AggregateEventRecord record) {
+    private Version handleRecord(AggregateEventRecord record) {
         switch (record.getKindCase()) {
             case EVENT:
                 history.addFirst(record.getEvent());
-                break;
+                return record.getEvent().getContext().getVersion();
             case SNAPSHOT:
                 snapshot = record.getSnapshot();
-                break;
+                return snapshot.getVersion();
             case KIND_NOT_SET:
             default:
                 throw newIllegalStateException("Event or snapshot missing in record: \"%s\"",

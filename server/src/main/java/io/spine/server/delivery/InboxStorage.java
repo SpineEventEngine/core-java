@@ -20,10 +20,30 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
-import io.spine.server.storage.Storage;
+import io.spine.client.OrderBy;
+import io.spine.client.ResponseFormat;
+import io.spine.server.entity.storage.QueryParameters;
+import io.spine.server.storage.MessageColumns;
+import io.spine.server.storage.MessageQuery;
+import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.MessageStorageDelegate;
+import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.StorageFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+
+import static com.google.common.collect.Streams.stream;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
+import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
+import static io.spine.server.entity.storage.QueryParameters.eq;
+import static io.spine.server.entity.storage.QueryParameters.gt;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A contract for storages of {@link Inbox} messages.
@@ -36,8 +56,18 @@ import java.util.Optional;
  * {@code BoundedContext}s to store the delivered messages.
  */
 @SPI
-public interface InboxStorage
-        extends Storage<InboxMessageId, InboxMessage, InboxReadRequest> {
+public class InboxStorage extends MessageStorageDelegate<InboxMessageId, InboxMessage> {
+
+    public InboxStorage(StorageFactory factory, boolean multitenant) {
+        super(createStorage(factory, multitenant));
+    }
+
+    private static MessageStorage<InboxMessageId, InboxMessage>
+    createStorage(StorageFactory factory, boolean multitenant) {
+        MessageColumns<InboxMessage> columns =
+                new MessageColumns<>(InboxMessage.class, InboxColumn.definitions());
+        return factory.createMessageStorage(columns, multitenant);
+    }
 
     /**
      * Reads the contents of the storage by the given shard index and returns the first page
@@ -51,7 +81,44 @@ public interface InboxStorage
      *         the maximum number of the elements per page
      * @return the first page of the results
      */
-    Page<InboxMessage> readAll(ShardIndex index, int pageSize);
+    public Page<InboxMessage> readAll(ShardIndex index, int pageSize) {
+        Page<InboxMessage> page = new InboxPage(sinceWhen -> readAll(index, sinceWhen, pageSize));
+        return page;
+    }
+
+    public ImmutableList<InboxMessage>
+    readAll(ShardIndex index, @Nullable Timestamp sinceWhen, int pageSize) {
+        QueryParameters byIndex = eq(InboxColumn.shardIndex.column(), index);
+        MessageQuery<InboxMessageId> query = MessageQuery.of(byIndex);
+        if (sinceWhen != null) {
+            QueryParameters byTime = gt(InboxColumn.receivedAt.column(), sinceWhen);
+            query = query.append(byTime);
+        }
+        ResponseFormat limit = queryResponse(pageSize);
+        Iterator<InboxMessage> iterator = readAll(query, limit);
+        return ImmutableList.copyOf(iterator);
+    }
+
+    private static ResponseFormat queryResponse(int pageSize) {
+        OrderBy olderFirst = OrderBy.newBuilder()
+                                    .setColumn(InboxColumn.receivedAt.column()
+                                                                     .name()
+                                                                     .value())
+                                    .setDirection(ASCENDING)
+                                    .vBuild();
+        OrderBy byVersion = OrderBy.newBuilder()
+                                   .setColumn(InboxColumn.version.column()
+                                                                 .name()
+                                                                 .value())
+                                   .setDirection(ASCENDING)
+                                   .vBuild();
+
+        return ResponseFormat.newBuilder()
+                             .addOrderBy(olderFirst)
+                             .addOrderBy(byVersion)
+                             .setLimit(pageSize)
+                             .vBuild();
+    }
 
     /**
      * Finds the newest message {@linkplain InboxMessageStatus#TO_DELIVER to deliver}
@@ -62,15 +129,22 @@ public interface InboxStorage
      * @return the message found or {@code Optional.empty()} if there are no messages to deliver
      *         in the specified shard
      */
-    Optional<InboxMessage> newestMessageToDeliver(ShardIndex index);
+    public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
+        QueryParameters byIndex = eq(InboxColumn.shardIndex.column(), index);
+        MessageQuery<InboxMessageId> query = MessageQuery.of(byIndex);
+        query = query.append(eq(InboxColumn.status.column(), TO_DELIVER));
+        ResponseFormat limitToOne = ResponseFormat.newBuilder()
+                                                  .setLimit(1)
+                                                  .vBuild();
+        Iterator<InboxMessage> iterator = readAll(query, limitToOne);
+        Optional<InboxMessage> result = iterator.hasNext() ? Optional.of(iterator.next())
+                                                           : Optional.empty();
+        return result;
+    }
 
-    /**
-     * Writes a message to the storage.
-     *
-     * @param message
-     *         a message to write
-     */
-    void write(InboxMessage message);
+    public synchronized void write(InboxMessage message) {
+        write(message.getId(), message);
+    }
 
     /**
      * Writes several messages to the storage.
@@ -78,7 +152,13 @@ public interface InboxStorage
      * @param messages
      *         messages to write
      */
-    void writeAll(Iterable<InboxMessage> messages);
+    public synchronized void writeBatch(Iterable<InboxMessage> messages) {
+        List<MessageWithColumns<InboxMessageId, InboxMessage>> toStore =
+                stream(messages)
+                        .map(m -> MessageWithColumns.create(m.getId(), m, columns()))
+                        .collect(toList());
+        writeAll(toStore);
+    }
 
     /**
      * Removes the passed messages from the storage.
@@ -88,5 +168,9 @@ public interface InboxStorage
      * @param messages
      *         the messages to remove
      */
-    void removeAll(Iterable<InboxMessage> messages);
+    synchronized void removeBatch(Iterable<InboxMessage> messages) {
+        List<InboxMessageId> toRemove = stream(messages).map(InboxMessage::getId)
+                                                        .collect(toList());
+        deleteAll(toRemove);
+    }
 }

@@ -25,50 +25,28 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.spine.base.EntityState;
 import io.spine.core.TenantId;
-import io.spine.server.BoundedContext;
-import io.spine.server.ContextSpec;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.DefaultRecordBasedRepository;
-import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.Storage;
+import io.spine.server.storage.MessageColumns;
+import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.tenant.TenantRepository.Entity;
 
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
- * Abstract base for repositories storing information about tenants.
+ * Abstract base for storage storing information about tenants.
  *
- * @param <T> the type of data associated with the tenant ID
+ * @param <T>
+ *         the type of data associated with the tenant ID
  */
-public abstract class TenantRepository<T extends EntityState, E extends Entity<T>>
-        extends DefaultRecordBasedRepository<TenantId, E, T>
+public abstract class TenantStorage<T extends EntityState>
+        extends MessageStorageDelegate<TenantId, T>
         implements TenantIndex {
 
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
 
-    @Override
-    protected final RecordStorage<TenantId> createStorage() {
-        StorageFactory sf = defaultStorageFactory();
-        ContextSpec singleTenant = context().spec().toSingleTenant();
-        RecordStorage<TenantId> result = sf.createRecordStorage(singleTenant, entityClass());
-        return result;
-    }
-
-    @Override
-    public final void registerWith(BoundedContext context) {
-        if (!isRegistered()) { // Quit recursion.
-            super.registerWith(context);
-            context.register(this);
-        }
-    }
-
-    @Override
-    protected final boolean isTypeSupplier() {
-        return false;
+    protected TenantStorage(StorageFactory factory, Class<T> stateClass) {
+        super(factory.createMessageStorage(MessageColumns.emptyOf(stateClass), false));
     }
 
     /**
@@ -77,7 +55,8 @@ public abstract class TenantRepository<T extends EntityState, E extends Entity<T
      * <p>If there is an entity with the passed ID, the method quits. Otherwise,
      * a new entity with the default state will be created and stored.
      *
-     * @param id the tenant ID to store
+     * @param id
+     *         the tenant ID to store
      */
     @Override
     public final void keep(TenantId id) {
@@ -85,13 +64,15 @@ public abstract class TenantRepository<T extends EntityState, E extends Entity<T
             return;
         }
 
-        Optional<E> optional = find(id);
+        Optional<T> optional = read(id);
         if (!optional.isPresent()) {
-            E newEntity = create(id);
-            store(newEntity);
+            T newRecord = create(id);
+            write(id, newRecord);
         }
         cache(id);
     }
+
+    protected abstract T create(TenantId id);
 
     private void cache(TenantId id) {
         cache.add(id);
@@ -101,13 +82,15 @@ public abstract class TenantRepository<T extends EntityState, E extends Entity<T
     final boolean cached(TenantId id) {
         return cache.contains(id);
     }
+
     /**
      * Removes the passed value from the in-memory cache of known tenant IDs.
      *
      * <p>Implementations should call this method for removing the cached value
      * for a tenant for which the record was removed from the repository.
      *
-     * @param id the ID to remove from the cache
+     * @param id
+     *         the ID to remove from the cache
      * @return {@code true} if the value was cached before and removed, {@code false} otherwise
      */
     protected final boolean unCache(TenantId id) {
@@ -124,26 +107,9 @@ public abstract class TenantRepository<T extends EntityState, E extends Entity<T
 
     @Override
     public final Set<TenantId> all() {
-        Storage<TenantId, ?, ?> storage = storage();
-        Iterator<TenantId> index = storage.index();
+        Iterator<TenantId> index = index();
         Set<TenantId> result = ImmutableSet.copyOf(index);
         cache.addAll(result);
         return result;
-    }
-
-    /**
-     * Stores data associated with a tenant ID.
-     *
-     * @param <T> the type of the data associated with the tenant ID
-     */
-    public static class Entity<T extends EntityState> extends AbstractEntity<TenantId, T> {
-
-        protected Entity(TenantId id) {
-            super(id);
-        }
-
-        protected Entity(TenantId id, Function<TenantId, T> defaultState) {
-            super(id, defaultState);
-        }
     }
 }

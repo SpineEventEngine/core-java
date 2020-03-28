@@ -218,8 +218,8 @@ final class Conveyor implements Iterable<InboxMessage> {
                         .stream()
                         .filter(message -> this.dirtyMessages.contains(message.getId()))
                         .collect(toList());
-        storage.writeAll(dirtyMessages);
-        storage.removeAll(removals);
+        storage.writeBatch(dirtyMessages);
+        storage.removeBatch(removals);
         dirtyMessages.clear();
         removals.clear();
         duplicates.clear();

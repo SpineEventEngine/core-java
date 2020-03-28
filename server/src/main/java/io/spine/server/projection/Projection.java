@@ -85,7 +85,7 @@ public abstract class Projection<I,
 
     @Internal
     @Override
-    protected ProjectionClass<?> modelClass() {
+    public final ProjectionClass<?> modelClass() {
         return asProjectionClass(getClass());
     }
 

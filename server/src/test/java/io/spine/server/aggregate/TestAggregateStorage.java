@@ -34,28 +34,29 @@ import java.util.Optional;
 final class TestAggregateStorage extends AggregateStorage<ProjectId> {
 
     private final AggregateStorage<ProjectId> delegate;
-    private AggregateReadRequest<ProjectId> memoizedRequest;
+    private ProjectId memoizedId;
+    private int memoizedBatchSize;
 
     TestAggregateStorage(AggregateStorage<ProjectId> delegate) {
-        super(delegate.isMultitenant());
+        super(delegate);
         this.delegate = delegate;
     }
 
     @Override
-    public Optional<AggregateHistory> read(AggregateReadRequest<ProjectId> request) {
-        memoizedRequest = request;
+    public Optional<AggregateHistory> read(ProjectId id, int batchSize) {
+        memoizedId = id;
+        memoizedBatchSize = batchSize;
         return Optional.empty();
     }
 
     @Override
-    protected void writeRecord(ProjectId id, AggregateEventRecord record) {
-        delegate.writeRecord(id, record);
+    protected void writeEventRecord(ProjectId id, AggregateEventRecord record) {
+        delegate.writeEventRecord(id, record);
     }
 
     @Override
-    protected Iterator<AggregateEventRecord>
-    historyBackward(AggregateReadRequest<ProjectId> request) {
-        return delegate.historyBackward(request);
+    protected Iterator<AggregateEventRecord> historyBackward(ProjectId id, int batchSize) {
+        return delegate.historyBackward(id, batchSize);
     }
 
     @Override
@@ -83,7 +84,11 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId> {
         delegate.writeLifecycleFlags(id, flags);
     }
 
-    AggregateReadRequest<ProjectId> memoizedRequest() {
-        return memoizedRequest;
+    ProjectId memoizedId() {
+        return memoizedId;
+    }
+
+    int memoizedBatchSize() {
+        return memoizedBatchSize;
     }
 }

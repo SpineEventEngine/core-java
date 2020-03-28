@@ -31,6 +31,9 @@ import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
 import io.spine.client.TargetFilters;
+import io.spine.server.storage.Column;
+import io.spine.server.storage.Columns;
+import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.RecordStorage;
 
 import java.util.List;
@@ -66,18 +69,19 @@ public final class EntityQueries {
      *         a storage for which the query is created
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
+    //TODO:2020-03-18:alex.tymchenko: remove this one, as it is used only in tests.
     public static <I> EntityQuery<I> from(TargetFilters filters,
                                           RecordStorage<I> storage) {
         checkNotNull(filters);
         checkNotNull(storage);
 
-        Columns entityColumns = storage.columns();
+        EntityColumns entityColumns = storage.columns();
         EntityQuery<I> result = from(filters, entityColumns);
         return result;
     }
 
     @VisibleForTesting
-    static <I> EntityQuery<I> from(TargetFilters filters, Columns columns) {
+    static <I> EntityQuery<I> from(TargetFilters filters, Columns<?> columns) {
         checkNotNull(filters);
         checkNotNull(columns);
 
@@ -88,14 +92,25 @@ public final class EntityQueries {
         return result;
     }
 
-    private static QueryParameters toQueryParams(TargetFilters filters, Columns columns) {
+    public static <I> MessageQuery<I> messageQueryFrom(TargetFilters filters, Columns<?> columns) {
+        checkNotNull(filters);
+        checkNotNull(columns);
+
+        QueryParameters queryParams = toQueryParams(filters, columns);
+        List<I> ids = toIdentifiers(filters);
+
+        MessageQuery<I> result = MessageQuery.of(ids, queryParams);
+        return result;
+    }
+
+    private static QueryParameters toQueryParams(TargetFilters filters, Columns<?> columns) {
 
         List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, columns);
         return newQueryParameters(parameters);
     }
 
     private static List<CompositeQueryParameter>
-    getFiltersQueryParams(TargetFilters filters, Columns columns) {
+    getFiltersQueryParams(TargetFilters filters, Columns<?> columns) {
         return filters.getFilterList()
                       .stream()
                       .map(filter -> queryParameterFromFilter(filter, columns))
@@ -109,14 +124,14 @@ public final class EntityQueries {
     }
 
     private static CompositeQueryParameter
-    queryParameterFromFilter(CompositeFilter filter, Columns columns) {
+    queryParameterFromFilter(CompositeFilter filter, Columns<?> columns) {
         Multimap<Column, Filter> filters = splitFilters(filter, columns);
         CompositeOperator operator = filter.getOperator();
         return CompositeQueryParameter.from(filters, operator);
     }
 
     private static Multimap<Column, Filter>
-    splitFilters(CompositeFilter filter, Columns columns) {
+    splitFilters(CompositeFilter filter, Columns<?> columns) {
         Multimap<Column, Filter> filters = create(filter.getFilterCount(), 1);
         for (Filter columnFilter : filter.getFilterList()) {
             Column column = findMatchingColumn(columnFilter, columns);
@@ -126,7 +141,7 @@ public final class EntityQueries {
         return filters;
     }
 
-    private static Column findMatchingColumn(Filter filter, Columns columns) {
+    private static Column findMatchingColumn(Filter filter, Columns<?> columns) {
         FieldPath fieldPath = filter.getFieldPath();
         checkArgument(fieldPath.getFieldNameCount() == 1,
                       "Incorrect Column name in Entity Filter: %s",

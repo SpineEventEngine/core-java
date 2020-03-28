@@ -77,9 +77,9 @@ public final class SystemContext extends BoundedContext {
             register(commandLog);
             register(new ScheduledCommandRepository());
         }
-        if (features.includeAggregateMirroring()) {
-            register(new MirrorRepository());
-        }
+//        if (features.includeAggregateMirroring()) {
+//            register(new MirrorRepository());
+//        }
     }
 
     private void registerTracing() {

@@ -29,10 +29,8 @@ import com.google.protobuf.Message;
  *
  * @param <I> the type of IDs of storage records
  * @param <M> the type of records kept in the storage
- * @param <R> the type of {@linkplain ReadRequest read requests} for the storage
  */
-public abstract class AbstractStorage<I, M extends Message, R extends ReadRequest<I>>
-                implements Storage<I, M, R> {
+public abstract class AbstractStorage<I, M extends Message> implements Storage<I, M> {
 
     private final boolean multitenant;
     private boolean open = true;

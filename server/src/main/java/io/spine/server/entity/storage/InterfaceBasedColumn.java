@@ -25,6 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.AbstractColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;

@@ -26,6 +26,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
+import io.spine.server.storage.Column;
 import io.spine.server.storage.RecordStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -62,7 +63,7 @@ public final class EntityRecordWithColumns implements WithLifecycle {
     public static EntityRecordWithColumns create(EntityRecord record,
                                                  Entity<?, ?> entity,
                                                  RecordStorage<?> recordStorage) {
-        Columns columns = recordStorage.columns();
+        EntityColumns columns = recordStorage.columns();
         Map<ColumnName, @Nullable Object> storageFields = columns.valuesIn(entity);
         return of(record, storageFields);
     }

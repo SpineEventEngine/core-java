@@ -28,12 +28,16 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.Filter;
+import io.spine.client.Filters;
+import io.spine.server.storage.Column;
+import io.spine.server.storage.Columns;
+import io.spine.server.storage.MessageColumn;
 import io.spine.server.storage.RecordStorage;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
-import static io.spine.client.Filters.eq;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
@@ -46,7 +50,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
 @SPI // Available to SPI users providing own `Storage` implementations.
 public final class QueryParameters implements Iterable<CompositeQueryParameter> {
 
-    static final String FIELD_PARAMETERS = "parameters";
+    public static final String FIELD_PARAMETERS = "parameters";
 
     private final ImmutableList<CompositeQueryParameter> parameters;
 
@@ -85,6 +89,8 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
      * @return new {@code QueryParameters} with {@linkplain io.spine.server.entity.LifecycleFlags
      *         lifecycle flags} filters
      */
+    @Deprecated
+    //TODO:2020-03-19:alex.tymchenko: remove this one.
     public static QueryParameters activeEntityQueryParams(RecordStorage<?> storage) {
         ImmutableMap<ColumnName, Column> lifecycleColumns = storage.lifecycleColumns();
 
@@ -97,11 +103,64 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
             return newBuilder().build();
         }
         CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(archivedColumn, eq(archivedColumnName.value(), false),
-                                     deletedColumn, eq(deletedColumnName.value(), false)),
+                ImmutableMultimap.of(archivedColumn, Filters.eq(archivedColumnName.value(), false),
+                                     deletedColumn, Filters.eq(deletedColumnName.value(), false)),
                 ALL
         );
-        return newBuilder().add(lifecycleParameter).build();
+        return newBuilder().add(lifecycleParameter)
+                           .build();
+    }
+
+    public static QueryParameters activeEntityQueryParams(Columns<?> columns) {
+        ColumnName archivedColumnName = ColumnName.of(archived);
+        ColumnName deletedColumnName = ColumnName.of(deleted);
+        Optional<Column> archivedColumn = columns.find(archivedColumnName);
+        Optional<Column> deletedColumn = columns.find(deletedColumnName);
+        boolean entityHasLifecycle = archivedColumn.isPresent() && deletedColumn.isPresent();
+        if (!entityHasLifecycle) {
+            return newBuilder().build();
+        }
+        CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
+                ImmutableMultimap.of(archivedColumn.get(),
+                                     Filters.eq(archivedColumnName.value(), false),
+                                     deletedColumn.get(),
+                                     Filters.eq(deletedColumnName.value(), false)),
+                ALL
+        );
+        return newBuilder().add(lifecycleParameter)
+                           .build();
+    }
+
+    public static <V> QueryParameters eq(MessageColumn<?, ?> column, V value) {
+        return forSingleColumn(column, Filters.eq(column.name()
+                                                        .value(), value));
+    }
+
+    public static <V> QueryParameters gt(MessageColumn<?, ?> column, V value) {
+        return forSingleColumn(column, Filters.gt(column.name()
+                                                        .value(), value));
+    }
+
+    public static <V> QueryParameters ge(MessageColumn<?, ?> column, V value) {
+        return forSingleColumn(column, Filters.ge(column.name()
+                                                        .value(), value));
+    }
+
+    public static <V> QueryParameters lt(MessageColumn<?, ?> column, V value) {
+        return forSingleColumn(column, Filters.lt(column.name()
+                                                        .value(), value));
+    }
+
+    public static <V> QueryParameters le(MessageColumn<?, ?> column, V value) {
+        return forSingleColumn(column, Filters.le(column.name()
+                                                        .value(), value));
+    }
+
+    private static <V> QueryParameters forSingleColumn(MessageColumn<?, ?> column, Filter filter) {
+        ImmutableMultimap<Column, Filter> filters = ImmutableMultimap.of(column, filter);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
+        return newBuilder().add(parameter)
+                           .build();
     }
 
     /**

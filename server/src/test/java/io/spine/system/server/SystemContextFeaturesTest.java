@@ -34,6 +34,7 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -100,6 +101,8 @@ class SystemContextFeaturesTest {
 
     @Test
     @DisplayName("mirror domain aggregates")
+    @Disabled
+    //TODO:2020-03-28:alex.tymchenko: remove this one.
     void mirror() {
         BoundedContext domain = BoundedContextBuilder
                 .assumingTests()

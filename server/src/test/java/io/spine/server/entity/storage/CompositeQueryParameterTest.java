@@ -25,6 +25,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
 import io.spine.client.Filter;
 import io.spine.server.entity.storage.given.TestEntity;
+import io.spine.server.storage.Column;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +60,7 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with other instances")
     void mergeWithOtherInstances() {
-        Columns columns = Columns.of(TestEntity.class);
+        EntityColumns columns = EntityColumns.of(TestEntity.class);
 
         ColumnName archivedColumnName = ColumnName.of(archived);
         ColumnName deletedColumnName = ColumnName.of(deleted);
@@ -88,7 +89,7 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with single filter")
     void mergeWithSingleFilter() {
-        Columns columns = Columns.of(TestEntity.class);
+        EntityColumns columns = EntityColumns.of(TestEntity.class);
 
         ColumnName archivedColumnName = ColumnName.of(archived);
         ColumnName deletedColumnName = ColumnName.of(deleted);

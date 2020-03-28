@@ -25,6 +25,7 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link LifecycleFlags}.
  */
+//TODO:2020-03-25:alex.tymchenko: get rid of this test.
+@Disabled
 public abstract class AggregateStorageLifecycleFlagsHandlingTest {
 
     protected abstract AggregateStorage<ProjectId> getAggregateStorage(
@@ -88,7 +91,7 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
         assertFalse(entityStatus.isPresent());
     }
 
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static void assertStatus(Optional<LifecycleFlags> entityStatus,
                                      boolean archived,
                                      boolean deleted) {

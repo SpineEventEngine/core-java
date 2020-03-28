@@ -44,8 +44,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ReadOperationTest {
 
     private static final String ID = "test-aggregate-ID";
-    protected static final ContextSpec spec = singleTenant(assumingTestsValue());
+    private static final int BATCH_SIZE = 100;
     private static final StorageFactory storageFactory = InMemoryStorageFactory.newInstance();
+
+    protected static final ContextSpec spec = singleTenant(assumingTestsValue());
 
     private AggregateStorage<String> storage;
 
@@ -59,8 +61,7 @@ class ReadOperationTest {
     void readAll() {
         int eventCount = 10;
         fillEvents(eventCount);
-        AggregateReadRequest<String> request = new AggregateReadRequest<>(ID, 100);
-        ReadOperation<String> operation = new ReadOperation<>(storage, request);
+        ReadOperation<String> operation = new ReadOperation<>(storage, ID, 100);
         Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
         AggregateHistory stateRecord = record.get();
@@ -74,8 +75,7 @@ class ReadOperationTest {
     @DisplayName("read snapshot if present")
     void readSnapshot() {
         fillEventsWithSnapshot(5);
-        AggregateReadRequest<String> request = new AggregateReadRequest<>(ID, 100);
-        ReadOperation<String> operation = new ReadOperation<>(storage, request);
+        ReadOperation<String> operation = new ReadOperation<>(storage, ID, 100);
         Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
         AggregateHistory stateRecord = record.get();
@@ -91,8 +91,7 @@ class ReadOperationTest {
         int expectedEventCount = 7;
         fillEvents(expectedEventCount);
 
-        AggregateReadRequest<String> request = new AggregateReadRequest<>(ID, 100);
-        ReadOperation<String> operation = new ReadOperation<>(storage, request);
+        ReadOperation<String> operation = new ReadOperation<>(storage, ID, BATCH_SIZE);
         Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
         AggregateHistory stateRecord = record.get();

@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import io.spine.annotation.SPI;
+import io.spine.server.storage.Column;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

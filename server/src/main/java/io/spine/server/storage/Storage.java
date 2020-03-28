@@ -31,10 +31,9 @@ import java.util.Optional;
  *
  * @param <I> the type of identifiers
  * @param <M> the type of records
- * @param <R> the type of {@linkplain ReadRequest read requests}
  */
 @SPI
-public interface Storage<I, M extends Message, R extends ReadRequest<I>> extends AutoCloseable {
+public interface Storage<I, M extends Message> extends AutoCloseable {
 
     /**
      * Verifies whether the storage is multitenant.
@@ -50,14 +49,14 @@ public interface Storage<I, M extends Message, R extends ReadRequest<I>> extends
     Iterator<I> index();
 
     /**
-     * Reads a record from the storage by the specified request.
+     * Reads a record from the storage by the specified record identifier.
      *
-     * @param request the request to read the record
+     * @param id the identifier  to read the record
      * @return a record instance
      *         or {@code Optional.empty()} if there is no record matching this request
      * @throws IllegalStateException if the storage was closed before
      */
-    Optional<M> read(R request);
+    Optional<M> read(I id);
 
     /**
      * Writes a record into the storage.

@@ -21,6 +21,7 @@
 package io.spine.server.storage.system.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
@@ -28,6 +29,8 @@ import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
+import io.spine.server.storage.Columns;
+import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -78,6 +81,13 @@ public final class MemoizingStorageFactory implements StorageFactory {
     @Override
     public EventStore createEventStore(ContextSpec context) {
         requestedEventStore = true;
+        return nullRef();
+    }
+
+    @Override
+    public <I, M extends Message> MessageStorage<I, M>
+    createMessageStorage(Columns<M> columns, boolean multitenant) {
+        requestedStorages.add(columns.recordType());
         return nullRef();
     }
 

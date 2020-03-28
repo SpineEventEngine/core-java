@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
+import io.spine.server.storage.AbstractColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;

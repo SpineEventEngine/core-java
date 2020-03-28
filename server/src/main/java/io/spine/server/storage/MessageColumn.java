@@ -18,32 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
+import io.spine.server.entity.storage.ColumnName;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Function;
 
 /**
- * A column of the {@linkplain io.spine.server.entity.Entity entity}.
- *
- * <p>Columns are the entity state fields which are stored separately from the entity record and
- * can be used as criteria for query {@linkplain io.spine.client.Filter filters}.
- *
- * <p>The {@linkplain #name() name} of the column represents the value which needs to be specified
- * to the filter. The {@linkplain #type() type} is an expected type of the filter value.
+ * @author Alex Tymchenko
  */
 @Immutable
-public interface Column {
+@Internal
+public final class MessageColumn<V, M extends Message> extends AbstractColumn {
 
-    /**
-     * The name of the column in the storage.
-     */
-    ColumnName name();
+    private final Getter<M, V> getter;
 
-    /**
-     * The type of the column.
-     *
-     * <p>As user-defined columns are proto-based, there is a fixed set of possible column types.
-     * See {@link ColumnMapping}.
-     */
-    Class<?> type();
+    public MessageColumn(ColumnName name, Class<V> type, Getter<M, V> getter) {
+        super(name, type);
+        this.getter = getter;
+    }
+
+    public @Nullable V valueIn(M record) {
+        return getter.apply(record);
+    }
+
+    @Immutable
+    public interface Getter<M extends Message, V> extends Function<M, V> {
+    }
 }

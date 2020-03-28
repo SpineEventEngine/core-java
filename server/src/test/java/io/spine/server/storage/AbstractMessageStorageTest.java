@@ -51,6 +51,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.testing.Tests.assertMatchesMask;
+import static io.spine.testing.Tests.nullRef;
 import static io.spine.testing.server.entity.given.GivenLifecycleFlags.archived;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,20 +61,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Abstract base for tests of record storages.
- * 
+ * Abstract base for tests of message storage implementations.
+ *
  * <p>This abstract test should not contain {@linkplain org.junit.jupiter.api.Nested nested tests}
- * because they are not under control of {@code AbstractRecordStorageTest} inheritors. 
- * Such a control is required for overriding or disabling tests due to a lag between read and 
- * write on remote storages, etc.
+ * because they are not under control of {@code AbstractMessageStorageTest} inheritors.
+ * Such a control is required for overriding or disabling tests due to a lag between read and
+ * write on remote storage implementations, etc.
  *
  * @param <I>
  *         the type of identifiers a storage uses
  * @param <S>
  *         the type of storage under the test
  */
-public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
-        extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
+public abstract class AbstractMessageStorageTest<I, S extends RecordStorage<I>>
+        extends AbstractStorageTest<I, EntityRecord, S> {
 
     private static EntityRecord newStorageRecord(EntityState state) {
         Any wrappedState = pack(state);
@@ -96,11 +97,6 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
      */
     protected abstract EntityState newState(I id);
 
-    @Override
-    protected RecordReadRequest<I> newReadRequest(I id) {
-        return new RecordReadRequest<>(id);
-    }
-
     protected EntityRecord newStorageRecord(I id) {
         return newStorageRecord(newState(id));
     }
@@ -113,8 +109,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         EntityRecord expected = newStorageRecord(id);
         storage.write(id, expected);
 
-        RecordReadRequest<I> readRequest = newReadRequest(id);
-        Optional<EntityRecord> optional = storage.read(readRequest);
+        Optional<EntityRecord> optional = storage.read(id);
         assertTrue(optional.isPresent());
         EntityRecord actual = optional.get();
 
@@ -154,8 +149,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         assertTrue(storage.delete(id));
 
         // There's no record with such ID.
-        RecordReadRequest<I> readRequest = newReadRequest(id);
-        assertFalse(storage.read(readRequest)
+        assertFalse(storage.read(id)
                            .isPresent());
     }
 
@@ -180,8 +174,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         RecordStorage<I> storage = storage();
 
         storage.write(id, recordWithStorageFields);
-        RecordReadRequest<I> readRequest = newReadRequest(id);
-        Optional<EntityRecord> actualRecord = storage.read(readRequest);
+        Optional<EntityRecord> actualRecord = storage.read(id);
         assertTrue(actualRecord.isPresent());
         assertEquals(record, actualRecord.get());
     }
@@ -268,7 +261,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                        .stream()
                        .map(recordWithColumns -> recordWithColumns != null
                                                  ? recordWithColumns.record()
-                                                 : null)
+                                                 : nullRef())
                        .collect(toList());
         assertThat(actual).containsExactlyElementsIn(expected);
 

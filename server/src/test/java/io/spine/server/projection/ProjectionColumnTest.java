@@ -20,10 +20,10 @@
 
 package io.spine.server.projection;
 
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.Columns;
+import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.projection.given.SavingProjection;
+import io.spine.server.storage.Column;
 import io.spine.server.storage.StorageField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -55,7 +55,7 @@ class ProjectionColumnTest {
 
     private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
                                         StorageField storageField) {
-        Columns columns = Columns.of(projectionType);
+        EntityColumns columns = EntityColumns.of(projectionType);
         ColumnName columnName = ColumnName.of(storageField);
         Optional<Column> result = columns.find(columnName);
         assertThat(result).isPresent();

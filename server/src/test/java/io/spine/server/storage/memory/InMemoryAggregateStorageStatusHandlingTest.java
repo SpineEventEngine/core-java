@@ -33,6 +33,6 @@ public class InMemoryAggregateStorageStatusHandlingTest
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
-        return InMemoryAggregateStorage.newInstance();
+        return InMemoryAggregateStorage.newInstance(aggregateClass);
     }
 }

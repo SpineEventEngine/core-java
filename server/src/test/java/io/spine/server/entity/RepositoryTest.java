@@ -28,7 +28,7 @@ import io.spine.server.entity.given.repository.ProjectEntity;
 import io.spine.server.entity.given.repository.RepoForEntityWithUnsupportedId;
 import io.spine.server.entity.given.repository.TestRepo;
 import io.spine.server.model.ModelError;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.EntityRecordStorage;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.entity.Project;
@@ -152,7 +152,7 @@ class RepositoryTest {
     @Test
     @DisplayName("close storage on close")
     void closeStorageOnClose() {
-        RecordStorage<?> storage = (RecordStorage<?>) repository.storage();
+        EntityRecordStorage<?> storage = (EntityRecordStorage<?>) repository.storage();
         repository.close();
 
         assertTrue(storage.isClosed());

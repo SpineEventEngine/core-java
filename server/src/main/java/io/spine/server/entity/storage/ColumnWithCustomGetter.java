@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.Column;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

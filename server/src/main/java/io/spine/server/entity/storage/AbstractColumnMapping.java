@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import io.spine.server.storage.Column;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;

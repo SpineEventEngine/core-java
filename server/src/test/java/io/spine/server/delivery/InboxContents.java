@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.spine.core.TenantId;
 import io.spine.server.ServerEnvironment;
@@ -38,19 +39,18 @@ final class InboxContents {
     /**
      * Fetches the contents of the {@code Inbox}es for each of the {@code ShardIndex}es.
      */
-    static ImmutableMap<ShardIndex, Page<InboxMessage>> get() {
+    static ImmutableMap<ShardIndex, ImmutableList<InboxMessage>> get() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         InboxStorage storage = delivery.inboxStorage();
         int shardCount = delivery.shardCount();
-        ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
+        ImmutableMap.Builder<ShardIndex, ImmutableList<InboxMessage>> builder =
                 ImmutableMap.builder();
         for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
             ShardIndex index = DeliveryStrategy.newIndex(shardIndex, shardCount);
             Page<InboxMessage> page = with(TenantId.getDefaultInstance())
                     .evaluate(() -> storage.readAll(index, Integer.MAX_VALUE));
-
-            builder.put(index, page);
+            builder.put(index, page.contents());
         }
 
         return builder.build();

@@ -103,7 +103,7 @@ class BoundedContextBuilderTest {
                                                .build()
                                                .tenantIndex());
         }
-        
+
         @Test
         @DisplayName("CommandBus and EventBus simultaneously")
         void commandBusAndEventBus() {
@@ -144,16 +144,6 @@ class BoundedContextBuilderTest {
      * Stub implementation of {@code TenantIndex}.
      */
     private static class StubTenantIndex implements TenantIndex {
-
-        @Override
-        public void registerWith(BoundedContext context) {
-            // Do nothing.
-        }
-
-        @Override
-        public boolean isRegistered() {
-            return true;
-        }
 
         @Override
         public void keep(TenantId id) {
@@ -336,6 +326,7 @@ class BoundedContextBuilderTest {
             builder.removeEventDispatcher(repository);
             assertFalse(builder.hasRepository(repository));
         }
+
         @Test
         @DisplayName("check repository presence in Builder if it's queried as event dispatcher")
         void checkHasRepo() {
@@ -381,7 +372,8 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("commands")
         void forCommands() {
-            Listener<CommandEnvelope> listener = c -> {};
+            Listener<CommandEnvelope> listener = c -> {
+            };
 
             builder.addCommandListener(listener);
 
@@ -393,7 +385,8 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("events")
         void forEvents() {
-            Listener<EventEnvelope> listener = c -> {};
+            Listener<EventEnvelope> listener = c -> {
+            };
 
             builder.addEventListener(listener);
 

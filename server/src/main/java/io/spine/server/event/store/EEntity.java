@@ -34,9 +34,9 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  *
  * <p>An underlying event doesn't contain {@linkplain Event#clearEnrichments() enrichments}.
  */
+//TODO:2020-03-19:alex.tymchenko: remove this one.
 final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
 
-    static final String CREATED_COLUMN = "created";
     /** Cached value of the event message type name. */
     private @MonotonicNonNull TypeName typeName;
 
@@ -59,9 +59,9 @@ final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
      * <p>This method represents an entity column {@code created}.
      *
      * @return the time when the underlying event was fired
-     * @see ColumnName#created
+     * @see EventColumn#created
      */
-    @SystemColumn(name = CREATED_COLUMN)
+    @SystemColumn(name = "created")
     public Timestamp getCreated() {
         return state().context()
                       .getTimestamp();
@@ -73,7 +73,7 @@ final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
      * <p>This method represents an entity column {@link TypeName}.
      *
      * @return the {@link TypeName} value of the event represented by this entity
-     * @see ColumnName#type
+     * @see EventColumn#type
      */
     @SystemColumn(name = "type")
     public String getType() {

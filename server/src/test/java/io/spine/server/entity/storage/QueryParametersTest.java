@@ -33,6 +33,7 @@ import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.server.ContextSpec;
 import io.spine.server.bc.given.ProjectProjection;
+import io.spine.server.storage.Column;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.bc.ProjectId;

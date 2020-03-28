@@ -43,7 +43,6 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -115,13 +114,13 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
     private static Stream<EntityRecordWithColumns>
     orderAndLimit(Stream<EntityRecordWithColumns> data, ResponseFormat format) {
         Stream<EntityRecordWithColumns> stream = data;
-        if (format.hasOrderBy()) {
-            stream = stream.sorted(orderedBy(format.getOrderBy()));
-        }
-        int limit = format.getLimit();
-        if (limit > 0) {
-            stream = stream.limit(limit);
-        }
+//        if (format.hasOrderBy()) {
+//            stream = stream.sorted(orderedBy(format.getOrderBy()));
+//        }
+//        int limit = format.getLimit();
+//        if (limit > 0) {
+//            stream = stream.limit(limit);
+//        }
         return stream;
     }
 

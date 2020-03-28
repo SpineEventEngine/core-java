@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -38,6 +40,7 @@ import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.RepositoryCache;
@@ -56,6 +59,7 @@ import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorRepository;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -484,10 +488,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private void initMirror() {
         if (shouldBeMirrored()) {
-            mirrorRepository().ifPresent(repo -> {
-                repo.registerMirroredType(this);
-                aggregateStorage().configureMirror(repo, entityStateType());
-            });
+//            mirrorRepository().ifPresent(repo -> {
+//                repo.registerMirroredType(this);
+//                aggregateStorage().configureMirror(repo, entityStateType());
+//            });
+            aggregateStorage().enableMirror();
         }
     }
 
@@ -592,8 +597,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private Optional<AggregateHistory> loadHistory(I id) {
         AggregateStorage<I> storage = aggregateStorage();
         int batchSize = snapshotTrigger + 1;
-        AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
-        Optional<AggregateHistory> result = storage.read(request);
+        Optional<AggregateHistory> result = storage.read(id, batchSize);
         return result;
     }
 
@@ -653,5 +657,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (inbox != null) {
             inbox.unregister();
         }
+    }
+
+    public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
+        return aggregateStorage().readStates(filters, format);
     }
 }

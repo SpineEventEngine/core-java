@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.Subscribe;
+import io.spine.logging.Logging;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
@@ -37,8 +38,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.Math.abs;
+import static java.lang.String.format;
 
 /**
  * A projection which expects the events to be delivered with the consecutive positive
@@ -55,7 +56,8 @@ import static java.lang.Math.abs;
  * as expected.
  */
 public class ConsecutiveProjection
-        extends Projection<String, ConsecutiveNumberView, ConsecutiveNumberView.Builder> {
+        extends Projection<String, ConsecutiveNumberView, ConsecutiveNumberView.Builder>
+        implements Logging {
 
     private static UsageMode mode = UsageMode.POSITIVES_ONLY;
 
@@ -83,14 +85,16 @@ public class ConsecutiveProjection
         mode.validate(newValue);
 
         int lastValue = state().getLastValue();
-        if (abs(newValue) - abs(lastValue) != 1) {
-            throw newIllegalStateException(
-                    "`ConsecutiveNumberProjection` with ID `%s` got wrong value. " +
-                            "Current value is %d, but got `%d`.",
-                    id, lastValue, newValue);
+        int difference = abs(newValue) - abs(lastValue);
+        if (difference != 1) {
+            String message =
+                    format("`ConsecutiveNumberProjection` with ID `%s` got wrong value. " +
+                                   "Current value is %d, but got `%d`.",
+                           id, lastValue, newValue);
+            _warn().log(message);
+        } else {
+            builder().setLastValue(newValue);
         }
-
-        builder().setLastValue(newValue);
     }
 
     @SuppressWarnings("Immutable")  // effectively immutable.

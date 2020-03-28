@@ -283,9 +283,8 @@ public class DeliveryTest extends AbstractDeliveryTest {
             assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.TO_DELIVER);
         }
 
-        ImmutableMap<ShardIndex, Page<InboxMessage>> contents = InboxContents.get();
-        for (Page<InboxMessage> page : contents.values()) {
-            ImmutableList<InboxMessage> messages = page.contents();
+        ImmutableMap<ShardIndex, ImmutableList<InboxMessage>> contents = InboxContents.get();
+        for (ImmutableList<InboxMessage> messages : contents.values()) {
             for (InboxMessage message : messages) {
                 assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.DELIVERED);
             }

@@ -44,16 +44,16 @@ import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
 import io.spine.server.projection.given.EntitySubscriberProjection;
-import io.spine.server.projection.migration.MarkProjectionArchived;
-import io.spine.server.projection.migration.MarkProjectionDeleted;
-import io.spine.server.projection.migration.RemoveProjectionFromStorage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.projection.given.TestProjection;
+import io.spine.server.projection.migration.MarkProjectionArchived;
+import io.spine.server.projection.migration.MarkProjectionDeleted;
+import io.spine.server.projection.migration.RemoveProjectionFromStorage;
 import io.spine.server.projection.migration.UpdateProjectionColumns;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.EntityRecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
@@ -485,7 +485,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("entity storage")
         void entityStorage() {
-            RecordStorage<ProjectId> recordStorage = repository().recordStorage();
+            EntityRecordStorage<ProjectId> recordStorage = repository().recordStorage();
             assertNotNull(recordStorage);
         }
     }

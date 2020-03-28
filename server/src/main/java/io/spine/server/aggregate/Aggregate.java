@@ -203,7 +203,7 @@ public abstract class Aggregate<I,
 
     @Internal
     @Override
-    protected AggregateClass<?> modelClass() {
+    public AggregateClass<?> modelClass() {
         return asAggregateClass(getClass());
     }
 

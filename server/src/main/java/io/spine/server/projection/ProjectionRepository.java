@@ -49,7 +49,7 @@ import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.EntityRecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.time.TimestampTemporal;
@@ -310,7 +310,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * <p>Overrides the parent method to expose it to this package.
      */
     @Override
-    protected final RecordStorage<I> recordStorage() {
+    protected final EntityRecordStorage<I> recordStorage() {
         return super.recordStorage();
     }
 

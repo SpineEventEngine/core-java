@@ -77,7 +77,7 @@ final class QueryToFilters {
         CompositeFilter.Builder timeFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL);
-        String createdColumn = ColumnName.created.name();
+        String createdColumn = EventColumn.created.name();
         if (query.hasAfter()) {
             Timestamp timestamp = query.getAfter();
             Filter filter = gt(createdColumn, timestamp);
@@ -96,7 +96,7 @@ final class QueryToFilters {
         CompositeFilter.Builder typeFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(EITHER);
-        String typeColumn = ColumnName.type.name();
+        String typeColumn = EventColumn.type.name();
         for (EventFilter eventFilter : query.getFilterList()) {
             String type = eventFilter.getEventType()
                                      .trim();

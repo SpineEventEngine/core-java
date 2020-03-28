@@ -18,33 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
-
-import com.google.errorprone.annotations.Immutable;
+package io.spine.server.storage;
 
 /**
- * An abstract base for different column types.
+ * @author Alex Tymchenko
  */
-@Immutable
-@SuppressWarnings("AbstractClassWithoutAbstractMethods")
-// Prevent instantiation in favor of concrete column types.
-abstract class AbstractColumn implements Column {
+public final class MessageReadRequest<I> implements ReadRequest<I> {
 
-    private final ColumnName name;
-    private final Class<?> type;
+    private final I recordId;
 
-    protected AbstractColumn(ColumnName name, Class<?> type) {
-        this.name = name;
-        this.type = type;
+    public MessageReadRequest(I id) {
+        recordId = id;
     }
 
     @Override
-    public ColumnName name() {
-        return name;
-    }
-
-    @Override
-    public Class<?> type() {
-        return type;
+    public I recordId() {
+        return recordId;
     }
 }

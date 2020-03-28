@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
+import io.spine.server.storage.Column;
 import io.spine.server.storage.LifecycleFlagField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,15 +38,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("`Columns` should")
-class ColumnsTest {
+class EntityColumnsTest {
 
-    private final Columns columns = Columns.of(TaskViewProjection.class);
+    private final EntityColumns columns = EntityColumns.of(TaskViewProjection.class);
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(Columns.class);
+                .testAllPublicStaticMethods(EntityColumns.class);
         new NullPointerTester()
                 .testAllPublicInstanceMethods(columns);
     }
@@ -53,7 +54,7 @@ class ColumnsTest {
     @Test
     @DisplayName("be extracted from an entity class")
     void beExtractedFromEntityClass() {
-        Columns columns = Columns.of(TaskListViewProjection.class);
+        EntityColumns columns = EntityColumns.of(TaskListViewProjection.class);
         ColumnName columnName = ColumnName.of("description");
         Optional<Column> descriptionColumn = columns.find(columnName);
 

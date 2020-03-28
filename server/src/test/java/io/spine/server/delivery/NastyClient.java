@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
@@ -45,12 +46,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Streams.concat;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Posts numerous messages to instances of {@link CalcAggregate} in a selected number of threads
@@ -214,14 +214,11 @@ class NastyClient {
 
     private void ensureInboxesEmpty() {
         if (shouldInboxBeEmpty) {
-            ImmutableMap<ShardIndex, Page<InboxMessage>> shardedItems = InboxContents.get();
+            ImmutableMap<ShardIndex, ImmutableList<InboxMessage>> shardedItems = InboxContents.get();
 
             for (ShardIndex index : shardedItems.keySet()) {
-                Page<InboxMessage> page = shardedItems.get(index);
-                assertTrue(page.contents()
-                               .isEmpty());
-                assertFalse(page.next()
-                                .isPresent());
+                ImmutableList<InboxMessage> page = shardedItems.get(index);
+                assertThat(page).isEmpty();
             }
         }
     }

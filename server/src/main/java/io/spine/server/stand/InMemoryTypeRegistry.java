@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -45,14 +44,11 @@ final class InMemoryTypeRegistry implements TypeRegistry {
      * The mapping between {@code TypeUrl} instances and repositories providing
      * the entities of this type.
      */
-    private final ConcurrentMap<TypeUrl, RecordBasedRepository<?, ?, ?>> typeToRepositoryMap =
+    private final ConcurrentMap<TypeUrl, RecordBasedRepository<?, ?, ?>> recordRepositories =
             new ConcurrentHashMap<>();
 
-    /**
-     * Stores  known {@code Aggregate} types in order to distinguish
-     * them among all instances of {@code TypeUrl}.
-     */
-    private final Set<TypeUrl> knownAggregateTypes = newConcurrentHashSet();
+    private final ConcurrentMap<TypeUrl, AggregateRepository<?, ?>> aggregateRepositories =
+            new ConcurrentHashMap<>();
 
     /** Prevents instantiation from the outside. */
     private InMemoryTypeRegistry() {
@@ -70,39 +66,48 @@ final class InMemoryTypeRegistry implements TypeRegistry {
         if (repository instanceof RecordBasedRepository) {
             RecordBasedRepository<I, E, ? extends EntityState> recordBasedRepository
                     = (RecordBasedRepository<I, E, ? extends EntityState>) repository;
-            typeToRepositoryMap.put(entityType, recordBasedRepository);
+            recordRepositories.put(entityType, recordBasedRepository);
         }
         if (repository instanceof AggregateRepository) {
-            knownAggregateTypes.add(entityType);
+            AggregateRepository<I, ?> aggregateRepository = (AggregateRepository<I, ?>) repository;
+            aggregateRepositories.put(entityType, aggregateRepository);
         }
     }
 
     @Override
     public Optional<? extends RecordBasedRepository<?, ?, ?>> recordRepositoryOf(TypeUrl type) {
-        RecordBasedRepository<?, ?, ?> repo = typeToRepositoryMap.get(type);
+        RecordBasedRepository<?, ?, ?> repo = recordRepositories.get(type);
         Optional<? extends RecordBasedRepository<?, ?, ?>> result = ofNullable(repo);
         return result;
     }
 
     @Override
     public ImmutableSet<TypeUrl> aggregateTypes() {
-        ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
+        ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(aggregateRepositories.keySet());
+        return result;
+    }
+
+    @Override
+    public Optional<? extends AggregateRepository<?, ?>> aggregateRepositoryOf(TypeUrl type) {
+        AggregateRepository<?, ?> repo = aggregateRepositories.get(type);
+        Optional<? extends AggregateRepository<?, ?>> result = ofNullable(repo);
         return result;
     }
 
     @Override
     public ImmutableSet<TypeUrl> allTypes() {
         ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
-        Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
+        Set<TypeUrl> projectionTypes = recordRepositories.keySet();
+        Set<TypeUrl> aggregateTypes = aggregateRepositories.keySet();
         resultBuilder.addAll(projectionTypes)
-                     .addAll(knownAggregateTypes);
+                     .addAll(aggregateTypes);
         ImmutableSet<TypeUrl> result = resultBuilder.build();
         return result;
     }
 
     @Override
     public void close() {
-        typeToRepositoryMap.clear();
-        knownAggregateTypes.clear();
+        recordRepositories.clear();
+        aggregateRepositories.clear();
     }
 }

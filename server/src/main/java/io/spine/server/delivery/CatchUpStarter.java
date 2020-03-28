@@ -33,6 +33,7 @@ import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -131,7 +132,7 @@ final class CatchUpStarter<I> {
     }
 
     private void checkNotActive(@Nullable Set<I> ids) throws CatchUpAlreadyStartedException {
-        Iterable<CatchUp> ongoing = storage.readByType(projectionStateType);
+        Iterator<CatchUp> ongoing = storage.readByType(projectionStateType);
         List<CatchUp> active = stream(ongoing)
                 .filter(catchUp -> CatchUpStatus.COMPLETED != catchUp.getStatus())
                 .collect(toList());

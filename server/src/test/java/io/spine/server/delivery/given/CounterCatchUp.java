@@ -29,10 +29,11 @@ import io.spine.core.EventContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.CatchUp;
 import io.spine.server.delivery.CatchUpStatus;
+import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.LocalDispatchingObserver;
 import io.spine.server.event.EventStore;
-import io.spine.server.storage.memory.InMemoryCatchUpStorage;
+import io.spine.server.storage.StorageFactory;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -155,7 +156,9 @@ public class CounterCatchUp {
     }
 
     public static void addOngoingCatchUpRecord(WhatToCatchUp target, CatchUpStatus status) {
-        InMemoryCatchUpStorage storage = new InMemoryCatchUpStorage(false);
+        StorageFactory factory = ServerEnvironment.instance()
+                                                  .storageFactory();
+        CatchUpStorage storage = new CatchUpStorage(factory,false);
         Collection<Object> ids = null;
         if(!target.shouldCatchUpAll()) {
             String identifier = checkNotNull(target.id());

@@ -25,10 +25,10 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.Columns;
+import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.projection.Projection;
+import io.spine.server.storage.Column;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectWithColumns;
@@ -78,7 +78,7 @@ public final class EntityQueryMatcherTestEnv {
     }
 
     private static Column column(String name) {
-        Columns columns = Columns.of(ProjectView.class);
+        EntityColumns columns = EntityColumns.of(ProjectView.class);
         ColumnName columnName = ColumnName.of(name);
         Column column = columns.get(columnName);
         return column;

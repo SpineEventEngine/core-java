@@ -97,7 +97,7 @@ public abstract class ProcessManager<I,
 
     @Internal
     @Override
-    protected ProcessManagerClass<?> modelClass() {
+    public final ProcessManagerClass<?> modelClass() {
         return asProcessManagerClass(getClass());
     }
 

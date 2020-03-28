@@ -261,13 +261,12 @@ public final class QueryFactory {
     private static ResponseFormat responseFormat(@Nullable FieldMask mask,
                                                  @Nullable OrderBy ordering,
                                                  int limit) {
-        ResponseFormat.Builder result = ResponseFormat
-                .newBuilder();
+        ResponseFormat.Builder result = ResponseFormat.newBuilder();
         if (mask != null) {
             result.setFieldMask(mask);
         }
         if (ordering != null) {
-            result.setOrderBy(ordering);
+            result.addOrderBy(ordering);
         }
         if (limit > 0) {
             result.setLimit(limit);

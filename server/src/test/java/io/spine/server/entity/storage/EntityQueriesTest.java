@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
@@ -36,7 +37,9 @@ import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.entity.storage.given.TestProjection;
+import io.spine.server.storage.Columns;
 import io.spine.server.storage.LifecycleFlagField;
+import io.spine.server.storage.MessageColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.storage.ProjectId;
@@ -76,13 +79,14 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
               .setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
               .setDefault(RecordStorage.class, storage)
-              .setDefault(Columns.class, Columns.of(TestEntity.class))
+              .setDefault(EntityColumns.class, EntityColumns.of(TestEntity.class))
+              .setDefault(Columns.class, MessageColumns.emptyOf(Empty.class))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
     private static EntityQuery<?> createEntityQuery(TargetFilters filters,
                                                     Class<? extends Entity<?, ?>> entityClass) {
-        Columns columns = Columns.of(entityClass);
+        EntityColumns columns = EntityColumns.of(entityClass);
         return EntityQueries.from(filters, columns);
     }
 

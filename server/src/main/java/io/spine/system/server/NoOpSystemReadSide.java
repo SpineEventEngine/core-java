@@ -20,13 +20,7 @@
 
 package io.spine.system.server;
 
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
 import io.spine.server.event.EventDispatcher;
-
-import java.util.Iterator;
-
-import static java.util.Collections.emptyIterator;
 
 /**
  * An implementation of {@link SystemReadSide} which never performs an operation.
@@ -50,8 +44,8 @@ public enum NoOpSystemReadSide implements SystemReadSide {
         // NOP.
     }
 
-    @Override
-    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
-        return emptyIterator();
-    }
+//    @Override
+//    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
+//        return emptyIterator();
+//    }
 }

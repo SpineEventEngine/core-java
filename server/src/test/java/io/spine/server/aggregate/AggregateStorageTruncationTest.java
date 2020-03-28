@@ -109,9 +109,7 @@ public abstract class AggregateStorageTruncationTest {
     }
 
     private static int recordCount(AggregateStorage<SequenceId> storage) {
-        int batchSize = 1;
-        AggregateReadRequest<SequenceId> request = new AggregateReadRequest<>(ID, batchSize);
-        Iterator<AggregateEventRecord> iterator = storage.historyBackward(request);
+        Iterator<AggregateEventRecord> iterator = storage.historyBackward(ID, Integer.MAX_VALUE);
         return Iterators.size(iterator);
     }
 }

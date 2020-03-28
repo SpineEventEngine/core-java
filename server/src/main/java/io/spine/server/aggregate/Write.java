@@ -42,11 +42,10 @@ final class Write<I> {
 
     private Write(AggregateStorage<I> storage,
                   Aggregate<I, ?, ?> aggregate,
-                  I id,
                   int snapshotTrigger) {
         this.storage = storage;
         this.aggregate = aggregate;
-        this.id = id;
+        this.id = aggregate.id();
         this.snapshotTrigger = snapshotTrigger;
     }
 
@@ -68,8 +67,7 @@ final class Write<I> {
 
         AggregateStorage<I> storage = repository.aggregateStorage();
         int snapshotTrigger = repository.snapshotTrigger();
-        I id = aggregate.id();
-        return new Write<>(storage, aggregate, id, snapshotTrigger);
+        return new Write<>(storage, aggregate, snapshotTrigger);
     }
 
     /**
@@ -79,6 +77,7 @@ final class Write<I> {
         UncommittedEvents uncommittedEvents = aggregate.getUncommittedEvents();
         List<Event> eventsToStore = uncommittedEvents.list();
         writeEvents(eventsToStore);
+        storage.writeState(aggregate);
     }
 
     private void writeEvents(List<Event> events) {
@@ -124,8 +123,8 @@ final class Write<I> {
     private void commit(int eventCount) {
         aggregate.commitEvents();
         aggregate.setEventCountAfterLastSnapshot(eventCount);
-        if (aggregate.lifecycleFlagsChanged()) {
-            storage.writeLifecycleFlags(aggregate.id(), aggregate.lifecycleFlags());
-        }
+//        if (aggregate.lifecycleFlagsChanged()) {
+//            storage.writeLifecycleFlags(aggregate.id(), aggregate.lifecycleFlags());
+//        }
     }
 }

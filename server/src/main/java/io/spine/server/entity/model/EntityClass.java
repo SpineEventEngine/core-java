@@ -28,7 +28,7 @@ import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
-import io.spine.server.entity.storage.Columns;
+import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.system.server.EntityTypeName;
@@ -73,7 +73,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * The entity columns of this class.
      */
     @LazyInit
-    private transient volatile @MonotonicNonNull Columns columns;
+    private transient volatile @MonotonicNonNull EntityColumns columns;
 
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
@@ -152,13 +152,13 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the entity columns of this class.
      */
-    public final Columns columns() {
-        Columns result = columns;
+    public final EntityColumns columns() {
+        EntityColumns result = columns;
         if (result == null) {
             synchronized (this) {
                 result = columns;
                 if (result == null) {
-                    columns = Columns.of(this);
+                    columns = EntityColumns.of(this);
                     result = columns;
                 }
             }

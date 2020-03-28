@@ -248,9 +248,9 @@ public final class CatchUpProcess<I>
      * @param ids
      *         identifiers of the projections to catch up, or {@code null} if all of the
      *         instances should be caught up
+     * @return identifier of the catch-up operation
      * @throws CatchUpAlreadyStartedException
      *         if at least one of the selected instances is already catching up at the moment
-     * @return identifier of the catch-up operation
      */
     @Internal
     public CatchUpId startCatchUp(Timestamp since, @Nullable Set<I> ids)
@@ -260,6 +260,29 @@ public final class CatchUpProcess<I>
 
     /**
      * Moves the process from {@code Not Started} to {@code IN_PROGRESS} state.
+     *
+     * <p>The same {@code CatchUpStarted} event is returned to be dispatched to this very
+     * process via its inbox and move it to the next phase.
+     */
+    @React
+    CatchUpStarted handle(CatchUpRequested e, EventContext ctx) {
+        CatchUpId id = e.getId();
+
+        CatchUp.Request request = e.getRequest();
+
+        Timestamp sinceWhen = request.getSinceWhen();
+        Timestamp withWindow = subtract(sinceWhen, fromNanos(1));
+        builder().setWhenLastRead(withWindow)
+                 .setRequest(request);
+        CatchUpStarted started = started(id);
+        builder().setStatus(CatchUpStatus.IN_PROGRESS);
+        flushState();
+        return started;
+    }
+
+    /**
+     * Performs the first read from the event history and dispatches the results to the inboxes
+     * of respective projections.
      *
      * <p>There are several key actions performed at this stage.
      *
@@ -279,42 +302,20 @@ public final class CatchUpProcess<I>
      *
      *      <li>{@link CatchUpStarted} event is dispatched directly to the inboxes of the catching-up
      *      targets.
-     *
-     *      <li>The same {@code CatchUpStarted} event is returned to be dispatched to this very
-     *      process via its inbox and move it to the next phase.
      * </ul>
-     */
-    @React
-    CatchUpStarted handle(CatchUpRequested e, EventContext ctx) {
-        CatchUpId id = e.getId();
-
-        CatchUp.Request request = e.getRequest();
-
-        Timestamp sinceWhen = request.getSinceWhen();
-        Timestamp withWindow = subtract(sinceWhen, fromNanos(1));
-        builder().setWhenLastRead(withWindow)
-                 .setRequest(request);
-        CatchUpStarted started = started(id);
-        builder().setStatus(CatchUpStatus.IN_PROGRESS);
-        flushState();
-
-        Event event = wrapAsEvent(started, ctx);
-        Set<I> ids = targetsForCatchUpSignals(request);
-        dispatchAll(ImmutableList.of(event), ids);
-
-        return started;
-    }
-
-    /**
-     * Performs the first read from the event history and dispatches the results to the inboxes
-     * of respective projections.
      *
      * <p>If the history has been read fully (i.e. until the start of the {@linkplain Turbulence
      * turbulence period}), emits {@code HistoryFullyRecalled} event. Otherwise, emits
      * {@code HistoryEventsRecalled} by which it triggers the next round of history reading.
      */
     @React
-    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
+    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
+    handle(CatchUpStarted started, EventContext ctx) {
+
+        Event event = wrapAsEvent(started, ctx);
+        Set<I> ids = targetsForCatchUpSignals(builder().getRequest());
+        dispatchAll(ImmutableList.of(event), ids);
+
         return recallMoreEvents();
     }
 
@@ -399,7 +400,7 @@ public final class CatchUpProcess<I>
      * the {@linkplain Turbulence turbulence} are dispatched to the target inboxes.
      */
     @React
-    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
+    CatchUpCompleted on(LiveEventsPickedUp event) {
         return completeProcess(event.getId());
     }
 
@@ -597,7 +598,7 @@ public final class CatchUpProcess<I>
 
     @Override
     protected Optional<CatchUp> load(CatchUpId id) {
-        return storage.read(new CatchUpReadRequest(id));
+        return storage.read(id);
     }
 
     @Override

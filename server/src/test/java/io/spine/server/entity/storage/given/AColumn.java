@@ -20,9 +20,9 @@
 
 package io.spine.server.entity.storage.given;
 
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.Columns;
+import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.storage.Column;
 
 @SuppressWarnings("DuplicateStringLiteralInspection")
 public final class AColumn {
@@ -48,7 +48,7 @@ public final class AColumn {
     }
 
     private static Column column(String name) {
-        Columns columns = Columns.of(TaskViewProjection.class);
+        EntityColumns columns = EntityColumns.of(TaskViewProjection.class);
         ColumnName columnName = ColumnName.of(name);
         Column column = columns.get(columnName);
         return column;

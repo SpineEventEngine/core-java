@@ -128,7 +128,6 @@ public abstract class BoundedContext implements Closeable, Logging {
      */
     protected final void init() {
         eventBus.registerWith(this);
-        tenantIndex.registerWith(this);
         broker.registerWith(this);
     }
     

@@ -21,6 +21,7 @@
 package io.spine.server.storage.system;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
@@ -30,6 +31,8 @@ import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
+import io.spine.server.storage.Columns;
+import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -110,6 +113,12 @@ public final class SystemAwareStorageFactory implements StorageFactory {
         return context.storesEvents()
                ? delegate.createEventStore(context)
                : new EmptyEventStore();
+    }
+
+    @Override
+    public <I, M extends Message> MessageStorage<I, M>
+    createMessageStorage(Columns<M> columns, boolean multitenant) {
+        return delegate.createMessageStorage(columns, multitenant);
     }
 
     /**

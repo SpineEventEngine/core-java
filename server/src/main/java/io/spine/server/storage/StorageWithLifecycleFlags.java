@@ -29,7 +29,7 @@ import java.util.Optional;
  * A storage that allows to update {@linkplain LifecycleFlags lifecycle flags} of entities.
  */
 public interface StorageWithLifecycleFlags<I, M extends Message, R extends ReadRequest<I>>
-        extends Storage<I, M, R> {
+        extends Storage<I, M> {
 
     /**
      * Reads the lifecycle status for the entity with the passed ID.

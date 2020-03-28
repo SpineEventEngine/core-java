@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
+import io.spine.server.storage.Column;
 
 import java.util.function.Function;
 

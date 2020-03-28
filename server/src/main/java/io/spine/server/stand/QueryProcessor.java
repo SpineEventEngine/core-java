@@ -21,8 +21,10 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import io.grpc.stub.StreamObserver;
+import io.spine.annotation.Internal;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
+import io.spine.server.entity.EntityRecord;
 
 /**
  * Processes a query and returns the result.
@@ -36,4 +38,14 @@ interface QueryProcessor {
      * @return the query result
      */
     ImmutableCollection<EntityStateWithVersion> process(Query query);
+
+    @Internal
+    default EntityStateWithVersion toEntityState(EntityRecord record) {
+        EntityStateWithVersion result = EntityStateWithVersion
+                .newBuilder()
+                .setState(record.getState())
+                .setVersion(record.getVersion())
+                .build();
+        return result;
+    }
 }

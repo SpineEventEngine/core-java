@@ -88,14 +88,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class AggregateStorageTest
         extends AbstractStorageTest<ProjectId,
-                                    AggregateHistory,
-                                    AggregateReadRequest<ProjectId>,
-                                    AggregateStorage<ProjectId>> {
+        AggregateHistory,
+        AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
 
     private final TestEventFactory eventFactory = newInstance(AggregateStorageTest.class);
     private AggregateStorage<ProjectId> storage;
+
     private static Snapshot newSnapshot(Timestamp time) {
         return Snapshot.newBuilder()
                        .setState(Any.getDefaultInstance())
@@ -145,13 +145,16 @@ public abstract class AggregateStorageTest
     }
 
     @Override
-    protected AggregateReadRequest<ProjectId> newReadRequest(ProjectId id) {
-        return new AggregateReadRequest<>(id, MAX_VALUE);
+    protected Class<? extends Entity<?, ?>> getTestEntityClass() {
+        return TestAggregate.class;
     }
 
     @Override
-    protected Class<? extends Entity<?, ?>> getTestEntityClass() {
-        return TestAggregate.class;
+    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
+        @SuppressWarnings("unchecked")
+        Class<? extends Aggregate<ProjectId, ?, ?>> asAggregateClass =
+                (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
+        return newStorage(ProjectId.class, asAggregateClass);
     }
 
     /**
@@ -185,8 +188,7 @@ public abstract class AggregateStorageTest
         @Test
         @DisplayName("absent AggregateStateRecord on reading record")
         void absentRecord() {
-            AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
-            Optional<AggregateHistory> record = storage.read(readRequest);
+            Optional<AggregateHistory> record = storage.read(id);
 
             assertFalse(record.isPresent());
         }
@@ -200,7 +202,7 @@ public abstract class AggregateStorageTest
         @DisplayName("request ID when reading history")
         void idForReadHistory() {
             assertThrows(NullPointerException.class,
-                         () -> storage.historyBackward(Tests.nullRef()));
+                         () -> storage.historyBackward(Tests.nullRef(), 10));
         }
 
         @Test
@@ -274,9 +276,9 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("write and read one record")
     void writeAndReadRecord() {
-        AggregateEventRecord expected = StorageRecords.create(currentTime());
+        AggregateEventRecord expected = StorageRecords.create(id, currentTime());
 
-        storage.writeRecord(id, expected);
+        storage.writeEventRecord(id, expected);
 
         Iterator<AggregateEventRecord> iterator = historyBackward();
         assertTrue(iterator.hasNext());
@@ -324,12 +326,12 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("return an iterator over unique aggregate IDs through `index`")
     void provideUniqueIdsThroughIndex() {
-        AggregateEventRecord record1 = StorageRecords.create(currentTime());
-        storage.writeRecord(id, record1);
+        AggregateEventRecord record1 = StorageRecords.create(id, currentTime());
+        storage.writeEventRecord(id, record1);
 
         Timestamp otherTime = subtract(currentTime(), Durations.fromSeconds(1));
-        AggregateEventRecord record2 = StorageRecords.create(otherTime);
-        storage.writeRecord(id, record2);
+        AggregateEventRecord record2 = StorageRecords.create(id, otherTime);
+        storage.writeEventRecord(id, record2);
 
         Iterator<ProjectId> index = storage.index();
 
@@ -347,7 +349,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
                                                                .setArchived(true)
                                                                .build();
-            storage.writeRecord(id, StorageRecords.create(currentTime()));
+            storage.writeEventRecord(id, StorageRecords.create(id, currentTime()));
             storage.writeLifecycleFlags(id, archivedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -359,7 +361,8 @@ public abstract class AggregateStorageTest
             LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
                                                               .setDeleted(true)
                                                               .build();
-            storage.writeRecord(id, StorageRecords.create(currentTime()));
+            storage.writeEventRecord(id, StorageRecords.create(id, currentTime()));
+            //TODO:2020-03-20:alex.tymchenko: rewrite this test at all.
             storage.writeLifecycleFlags(id, deletedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -431,7 +434,7 @@ public abstract class AggregateStorageTest
             for (int i = 0; i < eventsNumber; i++) {
                 Project state = Project.getDefaultInstance();
                 Event event = eventFactory.createEvent(event(state), currentVersion, timestamp);
-                AggregateEventRecord record = StorageRecords.create(timestamp, event);
+                AggregateEventRecord record = StorageRecords.create(id, timestamp, event);
                 records.add(record);
                 currentVersion = increment(currentVersion);
             }
@@ -497,7 +500,7 @@ public abstract class AggregateStorageTest
             Timestamp time2 = add(time1, delta);
             Timestamp time3 = add(time2, delta);
 
-            storage.writeRecord(id, StorageRecords.create(time1));
+            storage.writeEventRecord(id, StorageRecords.create(id, time1));
             storage.writeSnapshot(id, newSnapshot(time2));
 
             testWriteRecordsAndLoadHistory(time3);
@@ -521,9 +524,7 @@ public abstract class AggregateStorageTest
             storage.writeEvent(id, event);
         }
 
-        int batchSize = 1;
-        AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
-        Optional<AggregateHistory> optionalStateRecord = storage.read(request);
+        Optional<AggregateHistory> optionalStateRecord = storage.read(id, 1);
 
         assertTrue(optionalStateRecord.isPresent());
         AggregateHistory stateRecord = optionalStateRecord.get();
@@ -555,7 +556,8 @@ public abstract class AggregateStorageTest
             List<AggregateEventRecord> records = newArrayList(historyBackward());
             assertThat(records)
                     .hasSize(1);
-            assertThat(records.get(0).getSnapshot())
+            assertThat(records.get(0)
+                              .getSnapshot())
                     .isEqualTo(latestSnapshot);
         }
 
@@ -578,9 +580,11 @@ public abstract class AggregateStorageTest
             List<AggregateEventRecord> records = newArrayList(historyBackward());
             assertThat(records)
                     .hasSize(2);
-            assertThat(records.get(0).getSnapshot())
+            assertThat(records.get(0)
+                              .getSnapshot())
                     .isEqualTo(latestSnapshot);
-            assertThat(records.get(1).getEvent())
+            assertThat(records.get(1)
+                              .getEvent())
                     .isEqualTo(latestEvent);
         }
 
@@ -604,13 +608,17 @@ public abstract class AggregateStorageTest
             // The `event1` should be preserved event though it occurred before the specified date.
             List<AggregateEventRecord> records = newArrayList(historyBackward());
             assertThat(records).hasSize(4);
-            assertThat(records.get(0).getSnapshot())
+            assertThat(records.get(0)
+                              .getSnapshot())
                     .isEqualTo(snapshot2);
-            assertThat(records.get(1).getEvent())
+            assertThat(records.get(1)
+                              .getEvent())
                     .isEqualTo(event2);
-            assertThat(records.get(2).getEvent())
+            assertThat(records.get(2)
+                              .getEvent())
                     .isEqualTo(event1);
-            assertThat(records.get(3).getSnapshot())
+            assertThat(records.get(3)
+                              .getSnapshot())
                     .isEqualTo(snapshot1);
         }
 
@@ -667,7 +675,8 @@ public abstract class AggregateStorageTest
             MessageId messageId = MessageId
                     .newBuilder()
                     .setId(AnyPacker.pack(newEventId()))
-                    .setTypeUrl(TypeUrl.of(Nothing.class).value())
+                    .setTypeUrl(TypeUrl.of(Nothing.class)
+                                       .value())
                     .buildPartial();
             Origin origin = Origin
                     .newBuilder()
@@ -728,19 +737,17 @@ public abstract class AggregateStorageTest
     }
 
     private AggregateHistory readRecord(ProjectId id) {
-        Optional<AggregateHistory> optional = storage.read(newReadRequest(id));
+        Optional<AggregateHistory> optional = storage.read(id);
         assertTrue(optional.isPresent());
         return optional.get();
     }
-
 
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
         Event expectedEvent = eventFactory.createEvent(event(Project.getDefaultInstance()));
 
         storage.writeEvent(id, expectedEvent);
 
-        AggregateReadRequest<I> readRequest = new AggregateReadRequest<>(id, MAX_VALUE);
-        Optional<AggregateHistory> optional = storage.read(readRequest);
+        Optional<AggregateHistory> optional = storage.read(id, MAX_VALUE);
         assertTrue(optional.isPresent());
         AggregateHistory events = optional.get();
         assertEquals(1, events.getEventCount());
@@ -765,13 +772,12 @@ public abstract class AggregateStorageTest
 
     protected void writeAll(ProjectId id, Iterable<AggregateEventRecord> records) {
         for (AggregateEventRecord record : records) {
-            storage.writeRecord(id, record);
+            storage.writeEventRecord(id, record);
         }
     }
 
     private Iterator<AggregateEventRecord> historyBackward() {
-        AggregateReadRequest<ProjectId> readRequest = newReadRequest(id);
-        return storage.historyBackward(readRequest);
+        return storage.historyBackward(id, MAX_VALUE);
     }
 
     public static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {

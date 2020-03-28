@@ -21,10 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
 import io.spine.server.event.EventDispatcher;
-
-import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -71,7 +68,7 @@ public interface SystemReadSide {
      * @see MirrorProjection
      * @see io.spine.client.QueryFactory
      */
-    Iterator<EntityStateWithVersion> readDomainAggregate(Query query);
+//    Iterator<EntityStateWithVersion> readDomainAggregate(Query query);
 
     /**
      * Creates a new instance of {@code SystemReadSide} for the given system context.

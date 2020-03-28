@@ -34,9 +34,8 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.Columns;
+import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,7 +56,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of entity IDs
  */
 public abstract class RecordStorage<I>
-        extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
+        extends AbstractStorage<I, EntityRecord>
         implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
@@ -77,16 +76,17 @@ public abstract class RecordStorage<I>
     /**
      * Reads a record which matches the specified {@linkplain RecordReadRequest request}.
      *
-     * @param request
-     *         the request to read the record
+     * @param id
+     *         the identifier of the record to read
      * @return a record instance or {@code Optional.empty()} if there is no record with this ID
      */
     @Override
-    public Optional<EntityRecord> read(RecordReadRequest<I> request) {
+    public Optional<EntityRecord> read(I id) {
         checkNotClosed();
-        checkNotNull(request);
+        checkNotNull(id);
 
-        Optional<EntityRecord> record = readRecord(request.recordId());
+
+        Optional<EntityRecord> record = readRecord(id);
         return record;
     }
 
@@ -100,11 +100,11 @@ public abstract class RecordStorage<I>
      *         fields to read.
      * @return the item with the given ID and with the {@code FieldMask} applied
      *         or {@code Optional.empty()} if there is no record matching this request
-     * @see #read(RecordReadRequest)
+     * @see #read(Object)
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
-        Optional<EntityRecord> rawResult = read(request);
+        Optional<EntityRecord> rawResult = read(request.recordId());
 
         if (!rawResult.isPresent()) {
             return Optional.empty();
@@ -122,7 +122,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Writes a record and its {@linkplain io.spine.server.entity.storage.Column columns} into the
+     * Writes a record and its {@linkplain Column columns} into the
      * storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
@@ -170,15 +170,13 @@ public abstract class RecordStorage<I>
 
     @Override
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
-        RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        Optional<EntityRecord> optional = read(request);
+        Optional<EntityRecord> optional = read(id);
         return optional.map(EntityRecord::getLifecycleFlags);
     }
 
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        Optional<EntityRecord> optional = read(request);
+        Optional<EntityRecord> optional = read(id);
         if (optional.isPresent()) {
             EntityRecord record = optional.get();
             EntityRecord updated = record.toBuilder()
@@ -275,7 +273,7 @@ public abstract class RecordStorage<I>
     /**
      * Obtains a list of columns of the managed {@link Entity}.
      *
-     * @see io.spine.server.entity.storage.Column
+     * @see Column
      * @see io.spine.code.proto.ColumnOption
      */
     protected final ImmutableList<Column> columnList() {
@@ -285,16 +283,16 @@ public abstract class RecordStorage<I>
     /**
      * Returns the columns of the managed {@link Entity}.
      *
-     * @see io.spine.server.entity.storage.Column
+     * @see Column
      * @see io.spine.code.proto.ColumnOption
      */
     @Internal
-    public Columns columns() {
+    public EntityColumns columns() {
         return entityClass.columns();
     }
 
     /**
-     * Returns a {@code Map} of {@linkplain io.spine.server.entity.storage.Column columns}
+     * Returns a {@code Map} of {@linkplain Column columns}
      * corresponded to the {@link LifecycleFlagField lifecycle storage fields} of the
      * {@link Entity} class managed by this storage.
      *
@@ -359,7 +357,7 @@ public abstract class RecordStorage<I>
     readAllRecords(EntityQuery<I> query, ResponseFormat format);
 
     /**
-     * Writes a record and the associated {@linkplain io.spine.server.entity.storage.Column column}
+     * Writes a record and the associated {@linkplain Column column}
      * values into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.

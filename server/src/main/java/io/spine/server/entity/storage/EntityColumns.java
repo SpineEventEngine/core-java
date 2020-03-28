@@ -25,8 +25,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.storage.Column;
+import io.spine.server.storage.Columns;
 import io.spine.server.storage.LifecycleFlagField;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -43,7 +46,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 @Immutable
 @Internal
-public final class Columns {
+public final class EntityColumns extends Columns<EntityRecord> {
 
     /**
      * The {@linkplain SystemColumn system columns} of the entity.
@@ -62,11 +65,12 @@ public final class Columns {
 
     private final EntityClass<?> entityClass;
 
-    private Columns(
+    private EntityColumns(
             ImmutableMap<ColumnName, SysColumn> systemColumns,
             ImmutableMap<ColumnName, SimpleColumn> simpleColumns,
             ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns,
             EntityClass<?> entityClass) {
+        super(EntityRecord.class);
         this.systemColumns = systemColumns;
         this.simpleColumns = simpleColumns;
         this.interfaceBasedColumns = interfaceBasedColumns;
@@ -76,37 +80,23 @@ public final class Columns {
     /**
      * Gathers columns of the entity class.
      */
-    public static Columns of(EntityClass<?> entityClass) {
+    public static EntityColumns of(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
         Scanner scanner = new Scanner(entityClass);
-        return new Columns(scanner.systemColumns(),
-                           scanner.simpleColumns(),
-                           scanner.interfaceBasedColumns(),
-                           entityClass);
+        return new EntityColumns(scanner.systemColumns(),
+                                 scanner.simpleColumns(),
+                                 scanner.interfaceBasedColumns(),
+                                 entityClass);
     }
 
     /**
      * Gathers columns of the entity class.
      */
-    public static Columns of(Class<? extends Entity<?, ?>> entityClass) {
-        return of(asEntityClass(entityClass));
+    public static EntityColumns of(Class<? extends Entity<?, ?>> cls) {
+        return of(asEntityClass(cls));
     }
 
-    /**
-     * Obtains a column by name.
-     *
-     * @throws IllegalArgumentException
-     *         if the column with the specified name is not found
-     */
-    public Column get(ColumnName columnName) {
-        checkNotNull(columnName);
-        Column result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
-        return result;
-    }
-
-    /**
-     * Searches for a column with a given name.
-     */
+    @Override
     public Optional<Column> find(ColumnName columnName) {
         checkNotNull(columnName);
         Column column = systemColumns.get(columnName);
@@ -126,23 +116,26 @@ public final class Columns {
      * state while the system columns are obtained from the entity itself via the corresponding
      * getters.
      *
-     * @implNote This method assumes that the {@linkplain InterfaceBasedColumn interface-based}
+     * @implNote This method assumes that the {@linkplain InterfaceBasedColumn
+     *         interface-based}
      *         column values are already propagated to the entity state as they are finalized by
      *         the moment of transaction {@linkplain Transaction#commit() commit}. The values are
      *         thus extracted from the entity state directly, avoiding any recalculation to prevent
      *         possible inconsistencies in the stored data as well as performance drops.
      */
-    public Map<ColumnName, @Nullable Object> valuesIn(Entity<?, ?> source) {
+    @Override
+    public Map<ColumnName, @Nullable Object> valuesIn(Object source) {
         checkNotNull(source);
+        Entity<?, ?> entity = (Entity<?, ?>) source;
         Map<ColumnName, @Nullable Object> result = new HashMap<>();
         systemColumns.forEach(
-                (name, column) -> result.put(name, column.valueIn(source))
+                (name, column) -> result.put(name, column.valueIn(entity))
         );
         simpleColumns.forEach(
-                (name, column) -> result.put(name, column.valueIn(source.state()))
+                (name, column) -> result.put(name, column.valueIn(entity.state()))
         );
         interfaceBasedColumns.forEach(
-                (name, column) -> result.put(name, column.valueIn(source.state()))
+                (name, column) -> result.put(name, column.valueIn(entity.state()))
         );
         return result;
     }
@@ -150,6 +143,7 @@ public final class Columns {
     /**
      * Returns all columns of the entity.
      */
+    @Override
     public ImmutableList<Column> columnList() {
         ImmutableList.Builder<Column> builder = ImmutableList.builder();
         builder.addAll(systemColumns.values());
@@ -180,9 +174,10 @@ public final class Columns {
         return interfaceBasedColumns;
     }
 
-    private IllegalArgumentException columnNotFound(ColumnName columnName) {
+    @Override
+    protected IllegalArgumentException columnNotFound(ColumnName columnName) {
         throw newIllegalArgumentException(
-                "A column with name '%s' not found in entity state class `%s`.",
+                "A column with name '%s' not found in the `Entity` class `%s`.",
                 columnName, entityClass.stateClass()
                                        .getCanonicalName());
     }

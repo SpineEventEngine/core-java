@@ -216,7 +216,8 @@ public abstract class AbstractEntity<I, S extends EntityState>
      * Obtains the model class.
      */
     @Internal
-    protected EntityClass<?> modelClass() {
+    @Override
+    public EntityClass<?> modelClass() {
         return EntityClass.asEntityClass(getClass());
     }
 

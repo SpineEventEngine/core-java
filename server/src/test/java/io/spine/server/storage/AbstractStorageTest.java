@@ -58,14 +58,16 @@ import static org.junit.jupiter.api.Assertions.fail;
  * <p>All storages should be {@linkplain #close(AbstractStorage) closed} after a test
  * to avoid the issues, which may occur due to unreleased resources.
  *
- * @param <I> the type of IDs of storage records
- * @param <M> the type of records kept in the storage
- * @param <R> the type of read requests for the storage
+ * @param <I>
+ *         the type of IDs of storage records
+ * @param <M>
+ *         the type of records kept in the storage
+ * @param <R>
+ *         the type of read requests for the storage
  */
 public abstract class AbstractStorageTest<I,
-                                          M extends Message,
-                                          R extends ReadRequest<I>,
-                                          S extends AbstractStorage<I, M, R>> {
+        M extends Message,
+        S extends AbstractStorage<I, M>> {
 
     private S storage;
 
@@ -108,9 +110,6 @@ public abstract class AbstractStorageTest<I,
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
 
-    /** Creates a new read request with the specified ID. */
-    protected abstract R newReadRequest(I id);
-
     /** Returns the class of the test entity. */
     protected abstract Class<? extends Entity<?, ?>> getTestEntityClass();
 
@@ -129,7 +128,7 @@ public abstract class AbstractStorageTest<I,
 
     /** Closes the storage and fails the test if any exception occurs. */
     @SuppressWarnings("CallToPrintStackTrace")
-    private void closeAndFailIfException(AbstractStorage<I, M, R> storage) {
+    private void closeAndFailIfException(AbstractStorage<I, M> storage) {
         try {
             storage.close();
         } catch (Exception e) {
@@ -142,8 +141,7 @@ public abstract class AbstractStorageTest<I,
     private void writeAndReadRecordTest(I id) {
         M expected = writeRecord(id);
 
-        R readRequest = newReadRequest(id);
-        Optional<M> actual = storage.read(readRequest);
+        Optional<M> actual = storage.read(id);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -159,8 +157,7 @@ public abstract class AbstractStorageTest<I,
     @Test
     @DisplayName("handle absence of record with passed ID")
     void handleAbsenceOfRecord() {
-        R readRequest = newReadRequest(newId());
-        Optional<M> record = storage.read(readRequest);
+        Optional<M> record = storage.read(newId());
 
         assertResultForMissingId(record);
     }
@@ -335,9 +332,7 @@ public abstract class AbstractStorageTest<I,
         @DisplayName("read operation")
         void read() {
             closeAndFailIfException(storage);
-
-            R readRequest = newReadRequest(newId());
-            assertThrows(IllegalStateException.class, () -> storage.read(readRequest));
+            assertThrows(IllegalStateException.class, () -> storage.read(newId()));
         }
 
         @Test

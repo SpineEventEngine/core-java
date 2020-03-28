@@ -20,6 +20,7 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
@@ -67,6 +68,8 @@ interface TypeRegistry extends AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     ImmutableSet<TypeUrl> aggregateTypes();
+
+    Optional<? extends AggregateRepository<?, ?>> aggregateRepositoryOf(TypeUrl type);
 
     /**
      * Reads all entity types, which repositories are registered in this instance of registry.

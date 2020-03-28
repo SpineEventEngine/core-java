@@ -88,7 +88,7 @@ public abstract class AggregatePart<I,
 
     @Internal
     @Override
-    protected final AggregatePartClass<?> modelClass() {
+    public final AggregatePartClass<?> modelClass() {
         return asAggregatePartClass(getClass());
     }
 

@@ -39,6 +39,7 @@ import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.Identity;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
@@ -118,7 +119,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     private final QueryValidator queryValidator;
     private final SubscriptionValidator subscriptionValidator;
 
-    private final AggregateQueryProcessor aggregateQueryProcessor;
+//    private final AggregateQueryProcessor aggregateQueryProcessor;
 
     private Stand(Builder builder) {
         super();
@@ -131,7 +132,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         this.topicValidator = builder.topicValidator();
         this.queryValidator = builder.queryValidator();
         this.subscriptionValidator = builder.subscriptionValidator();
-        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.systemReadSide());
+//        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.systemReadSide());
     }
 
     public static Builder newBuilder() {
@@ -427,20 +428,20 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return suitable implementation of {@code QueryProcessor}
      */
     private QueryProcessor processorFor(TypeUrl type) {
-        Optional<? extends RecordBasedRepository<?, ?, ?>> foundRepository =
+        Optional<? extends RecordBasedRepository<?, ?, ?>> maybeRecordRepo =
                 typeRegistry.recordRepositoryOf(type);
-        if (foundRepository.isPresent()) {
-            RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
-            return new EntityQueryProcessor(repository);
-        } else if (exposedAggregateTypes().contains(type)) {
-            return aggregateProcessor();
-        } else {
-            return NO_OP_PROCESSOR;
+        if (maybeRecordRepo.isPresent()) {
+            RecordBasedRepository<?, ?, ?> recordRepo = maybeRecordRepo.get();
+            return new EntityQueryProcessor(recordRepo);
         }
-    }
+        Optional<? extends AggregateRepository<?, ?>> maybeAggregateRepo =
+                typeRegistry.aggregateRepositoryOf(type);
+        if (maybeAggregateRepo.isPresent()) {
+            AggregateRepository<?, ?> aggregateRepo = maybeAggregateRepo.get();
+            return new AggregateQueryProcessor(aggregateRepo);
+        }
 
-    private QueryProcessor aggregateProcessor() {
-        return aggregateQueryProcessor;
+        return NO_OP_PROCESSOR;
     }
 
     @CanIgnoreReturnValue

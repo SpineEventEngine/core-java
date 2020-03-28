@@ -94,7 +94,7 @@ public abstract class InboxStorageTest {
         assertThat(pageWithSingleRecord.contents()
                                        .get(0)).isEqualTo(firstMessage);
 
-        storage.writeAll(messages.subList(1, messages.size()));
+        storage.writeBatch(messages.subList(1, messages.size()));
         Page<InboxMessage> pageWithAllRecords = readContents(index);
         assertSameContent(messages, pageWithAllRecords);
     }
@@ -107,9 +107,9 @@ public abstract class InboxStorageTest {
         int pageSize = 13;
 
         ImmutableList<InboxMessage> messages = generateMessages(index, totalMessages);
-        storage.writeAll(messages);
-        storage.writeAll(generateMessages(newIndex(19, 2019), 19));
-        storage.writeAll(generateMessages(newIndex(21, 2019), 23));
+        storage.writeBatch(messages);
+        storage.writeBatch(generateMessages(newIndex(19, 2019), 19));
+        storage.writeBatch(generateMessages(newIndex(21, 2019), 23));
 
         List<List<InboxMessage>> expected = Lists.partition(messages, pageSize);
         Page<InboxMessage> actualPage = storage.readAll(index, pageSize);

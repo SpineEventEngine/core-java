@@ -26,6 +26,7 @@ import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromEntity;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromState;
+import io.spine.server.storage.Column;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
@@ -37,7 +38,8 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * An extractor of entity columns.
+ * Scans and extracts the {@link EntityColumns columns}
+ * from the passed {@link io.spine.server.entity.Entity Entity}.
  */
 final class Scanner {
 

@@ -21,27 +21,36 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
-import io.spine.server.storage.Storage;
+import io.spine.server.storage.MessageColumns;
+import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.MessageStorageDelegate;
+import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
+
+import java.util.Iterator;
+
+import static io.spine.server.storage.MessageQuery.byColumn;
 
 /**
  * A storage for the state of the ongoing catch-up processes.
  */
 @SPI
-public interface CatchUpStorage extends Storage<CatchUpId, CatchUp, CatchUpReadRequest> {
+public class CatchUpStorage extends MessageStorageDelegate<CatchUpId, CatchUp> {
 
-    /**
-     * Writes a message to the storage.
-     *
-     * @param message
-     *         a message to write
-     */
-    void write(CatchUp message);
+    public CatchUpStorage(StorageFactory factory, boolean multitenant) {
+        super(createStorage(factory, multitenant));
+    }
 
-    /**
-     * Returns an {@code Iterable} over all the stored catch-up processes.
-     */
-    Iterable<CatchUp> readAll();
+    private static MessageStorage<CatchUpId, CatchUp>
+    createStorage(StorageFactory factory, boolean multitenant) {
+        MessageColumns<CatchUp> columns =
+                new MessageColumns<>(CatchUp.class, CatchUpColumn.definitions());
+        return factory.createMessageStorage(columns, multitenant);
+    }
+
+    public void write(CatchUp record) {
+        write(record.getId(), record);
+    }
 
     /**
      * Reads all the catch-up processes which update the projection of the specified type.
@@ -49,5 +58,10 @@ public interface CatchUpStorage extends Storage<CatchUpId, CatchUp, CatchUpReadR
      * @param projectionType
      *         the type of the projection state to use for filtering
      */
-    Iterable<CatchUp> readByType(TypeUrl projectionType);
+    public Iterator<CatchUp> readByType(TypeUrl projectionType) {
+        Iterator<CatchUp> result =
+                readAll(byColumn(CatchUpColumn.projectionType.column(), projectionType.value()));
+        return result;
+    }
+
 }
