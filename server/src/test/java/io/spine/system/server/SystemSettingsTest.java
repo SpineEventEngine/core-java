@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("SystemFeatures should")
-class SystemFeaturesTest {
+class SystemSettingsTest {
 
     @Nested
     @DisplayName("by default")
@@ -37,21 +37,21 @@ class SystemFeaturesTest {
         @Test
         @DisplayName("enable aggregate mirroring")
         void mirrors() {
-            SystemFeatures features = SystemFeatures.defaults();
+            SystemSettings features = SystemSettings.defaults();
             assertTrue(features.includeAggregateMirroring());
         }
 
         @Test
         @DisplayName("disable command log")
         void commands() {
-            SystemFeatures features = SystemFeatures.defaults();
+            SystemSettings features = SystemSettings.defaults();
             assertFalse(features.includeCommandLog());
         }
 
         @Test
         @DisplayName("disable event store")
         void events() {
-            SystemFeatures features = SystemFeatures.defaults();
+            SystemSettings features = SystemSettings.defaults();
             assertFalse(features.includePersistentEvents());
         }
     }
@@ -62,7 +62,7 @@ class SystemFeaturesTest {
         @Test
         @DisplayName("aggregate mirroring")
         void mirrors() {
-            SystemFeatures features = SystemFeatures
+            SystemSettings features = SystemSettings
                     .defaults()
                     .disableAggregateQuerying();
             assertFalse(features.includeAggregateMirroring());
@@ -71,7 +71,7 @@ class SystemFeaturesTest {
         @Test
         @DisplayName("command log")
         void commands() {
-            SystemFeatures features = SystemFeatures
+            SystemSettings features = SystemSettings
                     .defaults()
                     .enableCommandLog();
             assertTrue(features.includeCommandLog());
@@ -80,7 +80,7 @@ class SystemFeaturesTest {
         @Test
         @DisplayName("event store")
         void events() {
-            SystemFeatures features = SystemFeatures
+            SystemSettings features = SystemSettings
                     .defaults()
                     .persistEvents();
             assertTrue(features.includePersistentEvents());

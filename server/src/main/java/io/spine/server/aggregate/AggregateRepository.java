@@ -54,6 +54,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorRepository;
+import io.spine.system.server.SystemSettings;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -511,7 +512,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Returns a {@link MirrorRepository} of a corresponding {@link BoundedContext}.
      *
      * <p>Returns {@code Optional.empty()} if aggregate mirroring is
-     * {@linkplain io.spine.system.server.SystemFeatures disabled} in the system context.
+     * {@linkplain SystemSettings disabled} in the system context.
      */
     private Optional<MirrorRepository> mirrorRepository() {
         Optional<MirrorRepository> result = context().systemClient()
