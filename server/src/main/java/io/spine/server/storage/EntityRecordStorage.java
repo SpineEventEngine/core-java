@@ -57,17 +57,35 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
         return (EntityColumns) super.columns();
     }
 
+    /**
+     * Returns the iterator over all non-archived and non-deleted entity records.
+     */
     @Override
     public Iterator<I> index() {
         Iterator<EntityRecord> iterator = readAll(findActiveRecordsQuery);
         return asIdStream(iterator);
     }
 
+    /**
+     * Reads all non-archived and non-deleted entity records according
+     * to the response format specified.
+     *
+     * @param format
+     *         the format of the expected response
+     * @return iterator over the matching entity records
+     */
     @Override
     public Iterator<EntityRecord> readAll(ResponseFormat format) {
         return readAll(findActiveRecordsQuery, format);
     }
 
+    /**
+     * Transforms the iterator over the entity records into the iterator over their identifiers.
+     *
+     * @param iterator
+     *         source iterator
+     * @return iterator over the identifiers of the passed {@code EntityRecord}s
+     */
     @SuppressWarnings("unchecked")
     private Iterator<I> asIdStream(Iterator<EntityRecord> iterator) {
         ImmutableList<I> ids = stream(iterator)
