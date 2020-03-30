@@ -40,7 +40,7 @@ import io.spine.core.Signal;
 import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.storage.EntityRecordStorage;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.RecordStorage;

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -27,8 +27,9 @@ import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityColumns;
-import io.spine.server.entity.storage.QueryParameters;
+import io.spine.server.storage.MessageQuery;
+import io.spine.server.storage.MessageStorageDelegate;
+import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
 
@@ -43,7 +44,7 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
 
     private final MessageQuery<I> findActiveRecordsQuery;
 
-    EntityRecordStorage(StorageFactory factory,
+    public EntityRecordStorage(StorageFactory factory,
                         Class<? extends Entity<I, ?>> entityClass,
                         boolean multitenant) {
         super(factory.createMessageStorage(EntityColumns.of(entityClass), multitenant));
