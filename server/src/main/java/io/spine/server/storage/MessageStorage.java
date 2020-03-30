@@ -22,6 +22,7 @@ package io.spine.server.storage;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
 
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import java.util.Iterator;
  * <p>Additionally, some attributes may be stored along with the message itself
  * to allow further querying.
  */
+@SPI
 public abstract class MessageStorage<I, M extends Message> extends AbstractStorage<I, M> {
 
     private final Columns<M> columns;
