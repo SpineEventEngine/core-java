@@ -49,7 +49,6 @@ import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filters.eq;
 import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
 import static io.spine.server.entity.storage.TestEntityQueryFactory.createQuery;
-import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.anyColumn;
 import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.anyValue;
 import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.booleanColumn;
@@ -131,7 +130,8 @@ class EntityQueryMatcherTest {
                 ImmutableMap.of(columnName, actualValue);
         EntityRecordWithColumns nonMatchingRecord =
                 EntityRecordWithColumns.of(nonMatching, Collections.emptyMap());
-        EntityRecordWithColumns matchingRecord = createRecord(matching, matchingColumns);
+        EntityRecordWithColumns matchingRecord =
+                EntityRecordWithColumns.of(matching, matchingColumns);
 
         assertTrue(matcher.test(matchingRecord));
         assertFalse(matcher.test(nonMatchingRecord));
@@ -147,7 +147,8 @@ class EntityQueryMatcherTest {
 
         EntityRecord record = Sample.messageOfType(EntityRecord.class);
         Map<ColumnName, Object> columns = singletonMap(columnName, actualValue);
-        EntityRecordWithColumns recordWithColumns = createRecord(record, columns);
+
+        EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record, columns);
 
         Multimap<Column, Filter> filters =
                 ImmutableMultimap.of(column, eq(columnName.value(), actualValue));

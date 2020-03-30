@@ -20,12 +20,14 @@
 
 package io.spine.server.storage;
 
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * An abstract base for storage implementations, which store the Protobuf messages as records.
@@ -62,10 +64,40 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the record to store
      */
     @Override
-    public final synchronized void write(I id, M record) {
+    public synchronized void write(I id, M record) {
         MessageWithColumns<I, M> withCols = MessageWithColumns.create(id, record, this.columns);
         write(withCols);
     }
+
+    /**
+     * Writes the message along with its filled-in column values to the storage.
+     *
+     * @param record
+     *         the message to write and additional columns with their values
+     */
+    @Internal
+    public abstract void write(MessageWithColumns<I, M> record);
+
+    /**
+     * Writes the batch of the messages along with their filled-in columns to the storage.
+     *
+     * @param records
+     *         messages and their column values
+     */
+    @Internal
+    public abstract void writeAll(Iterable<? extends MessageWithColumns<I, M>> records);
+
+    /**
+     * Reads the message record by the passed identifier and applies the given field mask to it.
+     *
+     * @param id
+     *         the identifier of the mesage record to read
+     * @param mask
+     *         the field mask to apply
+     * @return the message with the given identifier, after the field mask has been applied to it,
+     *         or {@code Optional.empty()} if no message is found by the ID
+     */
+    public abstract Optional<M> read(I id, FieldMask mask);
 
     /**
      * Reads all message records according to the passed query.
@@ -76,7 +108,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the query to execute
      * @return iterator over the matching messages
      */
-    public final Iterator<M> readAll(MessageQuery<I> query) {
+    public Iterator<M> readAll(MessageQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
@@ -85,17 +117,42 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *
      * @return iterator over the records
      */
-    public final Iterator<M> readAll() {
+    public Iterator<M> readAll() {
         return readAll(MessageQuery.all());
     }
 
     /**
-     * Returns the definition of the columns to store along with each message record
-     * in this storage.
+     * Reads all the message records according to the passed identifiers.
+     *
+     * <p>The response contains only the records which were found.
+     *
+     * @param ids
+     *         the identifiers of the records to read
+     * @return iterator over the records with the passed IDs
      */
-    @Internal
-    public Columns<M> columns() {
-        return columns;
+    public Iterator<M> readAll(Iterable<I> ids) {
+        MessageQuery<I> query = MessageQuery.of(ids);
+        return readAll(query);
+    }
+
+    /**
+     * Reads all the message records according to the passed record identifiers and returns
+     * each record applying the passed field mask.
+     *
+     * <p>The response contains only the records which were found.
+     *
+     * @param ids
+     *         the identifiers of the records to read
+     * @param mask
+     *         the mask to apply to each message
+     * @return the iterator over the records
+     */
+    public Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
+        MessageQuery<I> query = MessageQuery.of(ids);
+        ResponseFormat format = ResponseFormat.newBuilder()
+                                              .setFieldMask(mask)
+                                              .vBuild();
+        return readAll(query, format);
     }
 
     /**
@@ -120,24 +177,6 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
     public abstract Iterator<M> readAll(MessageQuery<I> query, ResponseFormat format);
 
     /**
-     * Writes the message along with its filled-in column values to the storage.
-     *
-     * @param record
-     *         the message to write and additional columns with their values
-     */
-    @Internal
-    public abstract void write(MessageWithColumns<I, M> record);
-
-    /**
-     * Writes the batch of the messages along with their filled-in columns to the storage.
-     *
-     * @param records
-     *         messages and their column values
-     */
-    @Internal
-    public abstract void writeAll(Iterable<MessageWithColumns<I, M>> records);
-
-    /**
      * Physically deletes the message record from the storage by the record identifier.
      *
      * <p>In case the record with the specified identifier is not found in the storage,
@@ -160,4 +199,13 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         identifiers of the records to delete
      */
     public abstract void deleteAll(Iterable<I> ids);
+
+    /**
+     * Returns the definition of the columns to store along with each message record
+     * in this storage.
+     */
+    @Internal
+    public Columns<M> columns() {
+        return columns;
+    }
 }

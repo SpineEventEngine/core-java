@@ -29,13 +29,16 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorageDelegate;
+import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
+import java.util.List;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A {@code MessageStorage} which stores {@link EntityRecord}s.
@@ -45,8 +48,8 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
     private final MessageQuery<I> findActiveRecordsQuery;
 
     public EntityRecordStorage(StorageFactory factory,
-                        Class<? extends Entity<I, ?>> entityClass,
-                        boolean multitenant) {
+                               Class<? extends Entity<I, ?>> entityClass,
+                               boolean multitenant) {
         super(factory.createMessageStorage(EntityColumns.of(entityClass), multitenant));
         QueryParameters params = activeEntityQueryParams(columns());
         this.findActiveRecordsQuery = MessageQuery.of(ImmutableSet.of(), params);
@@ -78,6 +81,13 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
     @Override
     public Iterator<EntityRecord> readAll(ResponseFormat format) {
         return readAll(findActiveRecordsQuery, format);
+    }
+
+    public void writeBulk(Iterable<EntityRecordWithColumns<I>> records) {
+        List<MessageWithColumns<I, EntityRecord>> convertedList = stream(records).map(
+                r -> (MessageWithColumns<I, EntityRecord>) r)
+                                                                                 .collect(toList());
+        writeAll(convertedList);
     }
 
     /**

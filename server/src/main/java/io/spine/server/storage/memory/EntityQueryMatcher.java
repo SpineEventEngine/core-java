@@ -52,7 +52,7 @@ import static java.util.stream.Collectors.toSet;
  *         the type of the IDs of the matched records
  * @see EntityQuery for the matching contract
  */
-final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWithColumns> {
+final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWithColumns<?>> {
 
     private final Set<Any> acceptedIds;
     private final QueryParameters queryParams;
@@ -70,7 +70,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
     }
 
     @Override
-    public boolean test(@Nullable EntityRecordWithColumns input) {
+    public boolean test(@Nullable EntityRecordWithColumns<?> input) {
         if (input == null) {
             return false;
         }
@@ -78,7 +78,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return result;
     }
 
-    private boolean idMatches(EntityRecordWithColumns record) {
+    private boolean idMatches(EntityRecordWithColumns<?> record) {
         if (!acceptedIds.isEmpty()) {
             Any packedId = record.record()
                                  .getEntityId();
@@ -89,7 +89,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
-    private boolean columnValuesMatch(EntityRecordWithColumns record) {
+    private boolean columnValuesMatch(EntityRecordWithColumns<?> record) {
         boolean match;
         for (CompositeQueryParameter filter : queryParams) {
             CompositeOperator operator = filter.operator();
@@ -112,7 +112,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
     }
 
     private static boolean checkAll(Multimap<Column, Filter> filters,
-                                    EntityRecordWithColumns record) {
+                                    EntityRecordWithColumns<?> record) {
         if (filters.isEmpty()) {
             return true;
         }
@@ -124,7 +124,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
     }
 
     private static boolean checkEither(Multimap<Column, Filter> filters,
-                                       EntityRecordWithColumns record) {
+                                       EntityRecordWithColumns<?> record) {
         if (filters.isEmpty()) {
             return true;
         }
@@ -135,7 +135,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return result;
     }
 
-    private static boolean matches(EntityRecordWithColumns record,
+    private static boolean matches(EntityRecordWithColumns<?> record,
                                    Map.Entry<Column, Filter> filter) {
         if (!hasColumn(record, filter)) {
             return false;
@@ -146,7 +146,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return result;
     }
 
-    private static boolean hasColumn(EntityRecordWithColumns record,
+    private static boolean hasColumn(EntityRecordWithColumns<?> record,
                                      Map.Entry<Column, Filter> filter) {
         boolean result = record.hasColumn(filter.getKey()
                                                 .name());
@@ -171,7 +171,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         return result;
     }
 
-    private static @Nullable Object columnValue(EntityRecordWithColumns record,
+    private static @Nullable Object columnValue(EntityRecordWithColumns<?> record,
                                                 Column column) {
         ColumnName columnName = column.name();
         Object value = record.columnValue(columnName);

@@ -41,6 +41,7 @@ import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.RecordStorage;
@@ -476,7 +477,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     MessageWithColumns<I, EntityRecord> toRecord(E entity) {
         EntityColumns columns = EntityColumns.of(entity.modelClass());
         MessageWithColumns<I, EntityRecord> result =
-                MessageWithColumns.create(entity, storageConverter(), columns);
+                EntityRecordWithColumns.create(entity, storageConverter(), columns);
         return result;
     }
 

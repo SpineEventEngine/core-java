@@ -33,10 +33,7 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.EntityQueries;
-import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectWithColumns;
@@ -50,7 +47,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
-import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,7 +100,7 @@ public class RecordStorageTestEnv {
         TestTransaction.delete(entity);
     }
 
-    public static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
+    public static <I> EntityRecordWithColumns<I> withLifecycleColumns(EntityRecord record) {
         LifecycleFlags flags = record.getLifecycleFlags();
         Map<ColumnName, Object> columns = ImmutableMap.of(
                 ColumnName.of(archived),
@@ -112,7 +108,8 @@ public class RecordStorageTestEnv {
                 ColumnName.of(deleted),
                 flags.getDeleted()
         );
-        EntityRecordWithColumns result = createRecord(record, columns);
+
+        EntityRecordWithColumns<I> result = EntityRecordWithColumns.of(record, columns);
         return result;
     }
 
@@ -121,11 +118,6 @@ public class RecordStorageTestEnv {
         EntityRecord singleRecord = actual.next();
         assertFalse(actual.hasNext());
         assertEquals(expected, singleRecord);
-    }
-
-    public static <T> EntityQuery<T>
-    newEntityQuery(TargetFilters filters, RecordStorage<T> storage) {
-        return EntityQueries.from(filters, storage);
     }
 
     public static TargetFilters emptyFilters() {

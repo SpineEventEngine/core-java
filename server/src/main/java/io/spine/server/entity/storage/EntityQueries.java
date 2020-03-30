@@ -92,6 +92,7 @@ public final class EntityQueries {
         return result;
     }
 
+    //TODO:2020-03-30:alex.tymchenko: move this one!
     public static <I> MessageQuery<I> messageQueryFrom(TargetFilters filters, Columns<?> columns) {
         checkNotNull(filters);
         checkNotNull(columns);

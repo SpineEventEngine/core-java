@@ -34,14 +34,18 @@ import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.core.Version;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.EntityQuery;
+import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityQueries;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.Task;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +62,9 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.storage.EntityQueries.messageQueryFrom;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
@@ -67,17 +73,18 @@ import static io.spine.server.storage.given.RecordStorageTestEnv.buildStorageRec
 import static io.spine.server.storage.given.RecordStorageTestEnv.delete;
 import static io.spine.server.storage.given.RecordStorageTestEnv.emptyFilters;
 import static io.spine.server.storage.given.RecordStorageTestEnv.newEntity;
-import static io.spine.server.storage.given.RecordStorageTestEnv.newEntityQuery;
 import static io.spine.test.storage.Project.Status.CANCELLED;
 import static io.spine.test.storage.Project.Status.DONE;
+import static java.lang.String.format;
+import static java.lang.System.nanoTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
-public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
-        extends AbstractEntityRecordStorageTest<ProjectId, S> {
+@DisplayName("`EntityRecordStorage` should")
+public class RecordStorageTest
+        extends AbstractEntityRecordStorageTest<ProjectId, EntityRecordStorage<ProjectId>> {
 
     @Override
     protected Class<? extends Entity<?, ?>> getTestEntityClass() {
@@ -91,16 +98,36 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                         .build();
     }
 
+    @Override
+    protected EntityRecordStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
+        StorageFactory factory = ServerEnvironment.instance()
+                                                  .storageFactory();
+        return new EntityRecordStorage<>(factory, TestCounterEntity.class, false);
+    }
+
+    @Override
+    protected EntityState newState(ProjectId id) {
+        String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
+        Project project = Project
+                .newBuilder()
+                .setId(id)
+                .setStatus(Project.Status.CREATED)
+                .setName(uniqueName)
+                .addTask(Task.getDefaultInstance())
+                .build();
+        return project;
+    }
+
     @Test
     @DisplayName("write record with columns")
     void writeRecordWithColumns() {
         ProjectId id = newId();
         EntityRecord record = newStorageRecord(id);
         Entity<ProjectId, ?> testEntity = newEntity(id);
-        RecordStorage<ProjectId> storage = storage();
-        EntityRecordWithColumns recordWithColumns =
-                create(record, testEntity, storage);
-        storage.write(id, recordWithColumns);
+        EntityRecordStorage<ProjectId> storage = storage();
+        EntityRecordWithColumns<ProjectId> recordWithColumns =
+                create(testEntity, storage.columns(), record);
+        storage.write(recordWithColumns);
 
         Optional<EntityRecord> readRecord = storage.read(id);
         assertTrue(readRecord.isPresent());
@@ -134,9 +161,9 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addFilter(aggregatingFilter)
                 .build();
 
-        RecordStorage<ProjectId> storage = storage();
+        EntityRecordStorage<ProjectId> storage = storage();
 
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
+        MessageQuery<ProjectId> query = messageQueryFrom(filters, storage.columns());
         ProjectId idMatching = newId();
         ProjectId idWrong1 = newId();
         ProjectId idWrong2 = newId();
@@ -160,16 +187,16 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
         EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
-        EntityRecordWithColumns recordRight =
-                create(fineRecord, matchingEntity, storage);
-        EntityRecordWithColumns recordWrong1 =
-                create(notFineRecord1, wrongEntity1, storage);
-        EntityRecordWithColumns recordWrong2 =
-                create(notFineRecord2, wrongEntity2, storage);
+        EntityRecordWithColumns<ProjectId> recordRight =
+                create(matchingEntity, storage.columns(), fineRecord);
+        EntityRecordWithColumns<ProjectId> recordWrong1 =
+                create(wrongEntity1, storage.columns(), notFineRecord1);
+        EntityRecordWithColumns<ProjectId> recordWrong2 =
+                create(wrongEntity2, storage.columns(), notFineRecord2);
 
-        storage.write(idMatching, recordRight);
-        storage.write(idWrong1, recordWrong1);
-        storage.write(idWrong2, recordWrong2);
+        storage.write(recordRight);
+        storage.write(recordWrong1);
+        storage.write(recordWrong2);
 
         Iterator<EntityRecord> readRecords = storage.readAll(query);
         assertSingleRecord(fineRecord, readRecords);
@@ -191,24 +218,24 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
         EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
-        RecordStorage<ProjectId> storage = storage();
+        EntityRecordStorage<ProjectId> storage = storage();
 
-        EntityRecordWithColumns recordRight =
-                create(fineRecord, matchingEntity, storage);
-        EntityRecordWithColumns recordWrong1 =
-                create(notFineRecord1, wrongEntity1, storage);
-        EntityRecordWithColumns recordWrong2 =
-                create(notFineRecord2, wrongEntity2, storage);
+        EntityRecordWithColumns<ProjectId> recordRight =
+                create(matchingEntity, storage.columns(), fineRecord);
+        EntityRecordWithColumns<ProjectId> recordWrong1 =
+                create(wrongEntity1, storage.columns(), notFineRecord1);
+        EntityRecordWithColumns<ProjectId> recordWrong2 =
+                create(wrongEntity2, storage.columns(), notFineRecord2);
 
         // Fill the storage
-        storage.write(idWrong1, recordWrong1);
-        storage.write(idMatching, recordRight);
-        storage.write(idWrong2, recordWrong2);
+        storage.write(recordWrong1);
+        storage.write(recordRight);
+        storage.write(recordWrong2);
 
         // Prepare the query
         Any entityId = TypeConverter.toAny(idMatching);
         TargetFilters filters = Targets.acceptingOnly(entityId);
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
+        MessageQuery<ProjectId> query = messageQueryFrom(filters, storage.columns());
 
         // Perform the query
         Iterator<EntityRecord> readRecords = storage.readAll(query);
@@ -231,17 +258,16 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         archive(archivedEntity);
 
-        RecordStorage<ProjectId> storage = storage();
-        storage.write(activeRecordId,
-                      create(activeRecord, activeEntity, storage));
-        storage.write(archivedRecordId,
-                      create(archivedRecord, archivedEntity, storage));
+        EntityRecordStorage<ProjectId> storage = storage();
+        storage.write(create(activeEntity, storage.columns(), activeRecord));
+        storage.write(
+                create(archivedEntity, storage.columns(), archivedRecord));
 
         TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(all(eq(archived.toString(), true)))
                 .build();
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
+        MessageQuery<ProjectId> query = messageQueryFrom(filters, storage.columns());
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(archivedRecord, read);
     }
@@ -266,13 +292,13 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.lifecycleFlags());
 
-        RecordStorage<ProjectId> storage = storage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+        EntityRecordStorage<ProjectId> storage = storage();
+        storage.write(create(deletedEntity, storage.columns(), deletedRecord));
+        storage.write(create(activeEntity, storage.columns(), activeRecord));
+        storage.write(create(archivedEntity, storage.columns(), archivedRecord));
 
         TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
-        EntityQuery<ProjectId> query = newEntityQuery(emptyFilters(), storage);
+        MessageQuery<ProjectId> query = messageQueryFrom(emptyFilters(), storage.columns());
 
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(activeRecord, read);
@@ -298,15 +324,16 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.lifecycleFlags());
 
-        RecordStorage<ProjectId> storage = storage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+        EntityRecordStorage<ProjectId> storage = storage();
+        storage.write(create(deletedEntity, storage.columns(), deletedRecord));
+        storage.write(create(activeEntity, storage.columns(), activeRecord));
+        storage.write(
+                create(archivedEntity, storage.columns(), archivedRecord));
 
         TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
-                .withActiveLifecycle(storage);
-
+        MessageQuery<ProjectId> query =
+                EntityQueries.<ProjectId>messageQueryFrom(filters, storage.columns())
+                        .append(activeEntityQueryParams(storage.columns()));
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(activeRecord, read);
     }
@@ -331,13 +358,13 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.lifecycleFlags());
 
-        RecordStorage<ProjectId> storage = storage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+        EntityRecordStorage<ProjectId> storage = storage();
+        storage.write(create(deletedEntity, storage.columns(), deletedRecord));
+        storage.write(create(activeEntity, storage.columns(), activeRecord));
+        storage.write(create(archivedEntity, storage.columns(), archivedRecord));
 
         TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
+        MessageQuery<ProjectId> query = messageQueryFrom(filters, storage.columns());
 
         Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(activeRecord, read);
@@ -363,14 +390,13 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.lifecycleFlags());
 
-        RecordStorage<ProjectId> storage = storage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+        EntityRecordStorage<ProjectId> storage = storage();
+        storage.write(create(deletedEntity, storage.columns(), deletedRecord));
+        storage.write(create(activeEntity, storage.columns(), activeRecord));
+        storage.write(create(archivedEntity, storage.columns(), archivedRecord));
 
         ImmutableSet<ProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
-        Iterable<EntityRecord> read =
-                () -> storage.readMultiple(targetIds, FieldMask.getDefaultInstance());
+        Iterable<EntityRecord> read = () -> storage.readAll(targetIds);
 
         assertSingleValueAndNulls(2, read);
     }
@@ -408,9 +434,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addFilter(aggregatingFilter)
                 .build();
 
-        RecordStorage<ProjectId> storage = storage();
-
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
+        EntityRecordStorage<ProjectId> storage = storage();
+        MessageQuery<ProjectId> query = messageQueryFrom(filters, storage.columns());
 
         ProjectId id = newId();
         TestCounterEntity entity = newEntity(id);
@@ -418,7 +443,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         entity.assignStatus(initialStatus);
 
         EntityRecord record = buildStorageRecord(id, newState(id));
-        EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
+        EntityRecordWithColumns<ProjectId> recordWithColumns =
+                create(entity, storage.columns(), record);
 
         FieldMask fieldMask = FieldMask.getDefaultInstance();
 
@@ -427,16 +453,16 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setFieldMask(fieldMask)
                 .vBuild();
         // Create the record.
-        storage.write(id, recordWithColumns);
+        storage.write(recordWithColumns);
         Iterator<EntityRecord> recordsBefore = storage.readAll(query, format);
         assertSingleRecord(record, recordsBefore);
 
         // Update the entity columns of the record.
         entity.assignStatus(statusAfterUpdate);
 
-        EntityRecordWithColumns updatedRecordWithColumns =
-                create(record, entity, storage);
-        storage.write(id, updatedRecordWithColumns);
+        EntityRecordWithColumns<ProjectId> updatedRecordWithColumns =
+                create(entity, storage.columns(), record);
+        storage.write(updatedRecordWithColumns);
 
         Iterator<EntityRecord> recordsAfter = storage.readAll(query, format);
         assertFalse(recordsAfter.hasNext());
@@ -471,9 +497,10 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                        .toBuilder()
                        .addFilter(filter)
                        .build();
-        RecordStorage<ProjectId> storage = storage();
-        EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
-                .withActiveLifecycle(storage);
+        EntityRecordStorage<ProjectId> storage = storage();
+        MessageQuery<ProjectId> filteringQuery = messageQueryFrom(filters, storage.columns());
+        MessageQuery<ProjectId> query =
+                filteringQuery.append(activeEntityQueryParams(storage.columns()));
         Iterator<EntityRecord> read = storage.readAll(query);
         List<EntityRecord> readRecords = newArrayList(read);
         assertEquals(1, readRecords.size());
@@ -482,17 +509,19 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         assertEquals(targetId, Identifier.unpack(readRecord.getEntityId()));
     }
 
+    //TODO:2020-03-30:alex.tymchenko: move this test.
     @Test
     @DisplayName("return a list of entity columns")
     void returnColumnList() {
-        S storage = storage();
-        ImmutableList<Column> columns = storage.columnList();
+        EntityRecordStorage<ProjectId> storage = storage();
+        ImmutableList<Column> columnList = storage.columns()
+                                                  .columnList();
 
         int systemColumnCount = LifecycleFlagField.values().length;
         int protoColumnCount = 6;
 
         int expectedSize = systemColumnCount + protoColumnCount;
-        assertThat(columns).hasSize(expectedSize);
+        assertThat(columnList).hasSize(expectedSize);
     }
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
@@ -512,9 +541,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
     }
 
     private void write(Entity<ProjectId, ?> entity) {
-        RecordStorage<ProjectId> storage = storage();
+        EntityRecordStorage<ProjectId> storage = storage();
         EntityRecord record = buildStorageRecord(entity.id(), entity.state(),
                                                  entity.lifecycleFlags());
-        storage.write(entity.id(), create(record, entity, storage));
+        EntityColumns columns = storage.columns();
+
+        storage.write(create(entity, columns, record));
     }
 }

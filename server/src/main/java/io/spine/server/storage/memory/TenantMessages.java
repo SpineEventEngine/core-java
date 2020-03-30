@@ -51,7 +51,6 @@ import static java.util.stream.Collectors.toList;
  */
 class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWithColumns<I, R>> {
 
-//    private final Map<I, MessageWithColumns<I, R>> records = newConcurrentMap();
     private final Map<I, MessageWithColumns<I, R>> records = synchronizedMap(new HashMap<>());
 
     @Override
@@ -64,6 +63,15 @@ class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWi
     @Override
     public void put(I id, MessageWithColumns<I, R> record) {
         records.put(id, record);
+    }
+
+    /**
+     * Returns the message with the passed identifier and applies the given field mask to it.
+     *
+     * <p>If there is no such a message stored, returns {@code Optional.empty()}.
+     */
+    public Optional<R> get(I id, FieldMask mask) {
+        return get(id).map(r -> new FieldMaskApplier(mask).apply(r.record()));
     }
 
     @Override

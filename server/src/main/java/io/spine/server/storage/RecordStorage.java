@@ -135,7 +135,7 @@ public abstract class RecordStorage<I>
      *         if the storage is closed
      * @see #write(Object, EntityRecord)
      */
-    public void write(I id, EntityRecordWithColumns record) {
+    public void write(I id, EntityRecordWithColumns<I> record) {
         checkNotNull(id);
         checkArgument(record.record()
                             .hasState(), "Record does not have state field.");
@@ -146,7 +146,7 @@ public abstract class RecordStorage<I>
 
     @Override
     public void write(I id, EntityRecord record) {
-        EntityRecordWithColumns recordWithStorageFields =
+        EntityRecordWithColumns<I> recordWithStorageFields =
                 EntityRecordWithColumns.of(record);
         write(id, recordWithStorageFields);
     }

@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.testing.core.given.GivenVersion;
@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -52,12 +51,10 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;
-import static io.spine.testing.server.entity.given.GivenLifecycleFlags.archived;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -73,7 +70,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @param <S>
  *         the type of storage under the test
  */
-public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage<I>>
+public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, S> {
 
     private static EntityRecord newStorageRecord(EntityState state) {
@@ -104,7 +101,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
     @Test
     @DisplayName("write and read record by Message ID")
     void writeAndReadByMessageId() {
-        RecordStorage<I> storage = storage();
+        EntityRecordStorage<I> storage = storage();
         I id = newId();
         EntityRecord expected = newStorageRecord(id);
         storage.write(id, expected);
@@ -128,7 +125,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
                 .newBuilder()
                 .setFieldMask(nonEmptyFieldMask)
                 .vBuild();
-        RecordStorage storage = storage();
+        EntityRecordStorage storage = storage();
         Iterator empty = storage.readAll(format);
 
         assertNotNull(empty);
@@ -138,7 +135,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
     @Test
     @DisplayName("delete record")
     void deleteRecord() {
-        RecordStorage<I> storage = storage();
+        EntityRecordStorage<I> storage = storage();
         I id = newId();
         EntityRecord record = newStorageRecord(id);
 
@@ -154,26 +151,16 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
     }
 
     @Test
-    @DisplayName("fail to write lifecycle flags to non-existing record")
-    void notWriteStatusToNonExistent() {
-        I id = newId();
-        RecordStorage<I> storage = storage();
-
-        assertThrows(IllegalStateException.class,
-                     () -> storage.writeLifecycleFlags(id, archived()));
-    }
-
-    @Test
     @DisplayName("accept records with empty storage fields")
     void acceptRecordsWithEmptyColumns() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
-        EntityRecordWithColumns recordWithStorageFields =
+        EntityRecordWithColumns<I> recordWithStorageFields =
                 EntityRecordWithColumns.of(record, Collections.emptyMap());
         assertFalse(recordWithStorageFields.hasColumns());
-        RecordStorage<I> storage = storage();
+        EntityRecordStorage<I> storage = storage();
 
-        storage.write(id, recordWithStorageFields);
+        storage.write(recordWithStorageFields);
         Optional<EntityRecord> actualRecord = storage.read(id);
         assertTrue(actualRecord.isPresent());
         assertEquals(record, actualRecord.get());
@@ -189,14 +176,13 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
     void singleRecord() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
-        RecordStorage<I> storage = storage();
+        EntityRecordStorage<I> storage = storage();
         storage.write(id, record);
 
         EntityState state = newState(id);
         FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
 
-        RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
-        Optional<EntityRecord> optional = storage.read(readRequest, idMask);
+        Optional<EntityRecord> optional = storage.read(id, idMask);
         assertTrue(optional.isPresent());
         EntityRecord entityRecord = optional.get();
 
@@ -208,7 +194,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
     @Test
     @DisplayName("given field mask, read multiple records")
     void multipleRecords() {
-        RecordStorage<I> storage = storage();
+        EntityRecordStorage<I> storage = storage();
         int count = 10;
         List<I> ids = new ArrayList<>();
         Class<? extends EntityState> stateClass = null;
@@ -226,9 +212,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
 
         int bulkCount = count / 2;
         FieldMask fieldMask = fromFieldNumbers(stateClass, 2);
-        Iterator<EntityRecord> readRecords = storage.readMultiple(
-                ids.subList(0, bulkCount),
-                fieldMask);
+        Iterator<EntityRecord> readRecords = storage.readAll(ids.subList(0, bulkCount), fieldMask);
         List<EntityRecord> readList = newArrayList(readRecords);
         assertThat(readList).hasSize(bulkCount);
         for (EntityRecord record : readList) {
@@ -240,20 +224,20 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
     @Test
     @DisplayName("given bulk of records, write them for the first time")
     void forTheFirstTime() {
-        RecordStorage<I> storage = storage();
+        EntityRecordStorage<I> storage = storage();
         int bulkSize = 5;
 
-        Map<I, EntityRecordWithColumns> initial = new HashMap<>(bulkSize);
+        Map<I, EntityRecordWithColumns<I>> initial = new HashMap<>(bulkSize);
 
         for (int i = 0; i < bulkSize; i++) {
             I id = newId();
             EntityRecord record = newStorageRecord(id);
             initial.put(id, EntityRecordWithColumns.of(record));
         }
-        storage.write(initial);
+        storage.writeAll(initial.values());
 
         Iterator<@Nullable EntityRecord> records =
-                storage.readMultiple(initial.keySet(), FieldMask.getDefaultInstance());
+                storage.readAll(initial.keySet());
         Collection<@Nullable EntityRecord> actual = newArrayList(records);
 
         Collection<@Nullable EntityRecord> expected =
@@ -272,7 +256,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
     @DisplayName("given bulk of records, write them re-writing existing ones")
     void rewritingExisting() {
         int recordCount = 3;
-        RecordStorage<I> storage = storage();
+        EntityRecordStorage<I> storage = storage();
 
         Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
         Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
@@ -289,53 +273,23 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage
             v2Records.put(id, alternateRecord);
         }
 
-        storage.write(transformValues(v1Records, RecordStorageTestEnv::withLifecycleColumns));
-        Iterator<EntityRecord> firstRevision = storage.readAll(ResponseFormat.getDefaultInstance());
+        storage.writeAll(recordsWithColumnsFrom(v1Records));
+        Iterator<EntityRecord> firstRevision = storage.readAll();
         RecordStorageTestEnv.assertIteratorsEqual(v1Records.values()
                                                            .iterator(), firstRevision);
 
-        storage.write(transformValues(v2Records, RecordStorageTestEnv::withLifecycleColumns));
+        storage.writeAll(recordsWithColumnsFrom(v2Records));
         Iterator<EntityRecord> secondRevision =
                 storage.readAll(ResponseFormat.getDefaultInstance());
         RecordStorageTestEnv.assertIteratorsEqual(v2Records.values()
                                                            .iterator(), secondRevision);
     }
 
-    @Test
-    @DisplayName("return lifecycle flags for missing record")
-    void forMissingRecord() {
-        I id = newId();
-        RecordStorage<I> storage = storage();
-        Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
-        assertFalse(optional.isPresent());
-    }
-
-    @Test
-    @DisplayName("return lifecycle flags for new record")
-    void forNewRecord() {
-        I id = newId();
-        EntityRecord record = newStorageRecord(id);
-        RecordStorage<I> storage = storage();
-        storage.write(id, record);
-
-        Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
-        assertTrue(optional.isPresent());
-        assertEquals(LifecycleFlags.getDefaultInstance(), optional.get());
-    }
-
-    @Test
-    @DisplayName("return lifecycle flags for a record where they were updated")
-    void forUpdatedRecord() {
-        I id = newId();
-        EntityRecord record = newStorageRecord(id);
-        RecordStorage<I> storage = storage();
-        storage.write(id, EntityRecordWithColumns.of(record));
-
-        storage.writeLifecycleFlags(id, archived());
-
-        Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
-        assertTrue(optional.isPresent());
-        assertTrue(optional.get()
-                           .getArchived());
+    private List<EntityRecordWithColumns<I>>
+    recordsWithColumnsFrom(Map<I, EntityRecord> recordMap) {
+        return recordMap.values()
+                        .stream()
+                        .map(RecordStorageTestEnv::<I>withLifecycleColumns)
+                        .collect(toList());
     }
 }

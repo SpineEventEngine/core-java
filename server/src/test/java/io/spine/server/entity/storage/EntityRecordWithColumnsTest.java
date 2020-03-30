@@ -27,6 +27,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.server.entity.storage.given.TestColumnMapping;
+import io.spine.test.entity.ProjectId;
 import io.spine.test.storage.TaskId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("`EntityRecordWithColumns` should")
 class EntityRecordWithColumnsTest {
 
-    private static EntityRecordWithColumns newRecord() {
+    private static EntityRecordWithColumns<ProjectId> newRecord() {
         return EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
                                           Collections.emptyMap());
     }
@@ -118,7 +119,7 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("record")
         void record() {
-            EntityRecordWithColumns recordWithFields = newRecord();
+            EntityRecordWithColumns<?> recordWithFields = newRecord();
             EntityRecord record = recordWithFields.record();
             assertNotNull(record);
         }
@@ -129,7 +130,7 @@ class EntityRecordWithColumnsTest {
             ColumnName columnName = ColumnName.of(archived.name());
             Object value = false;
             Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
-            EntityRecordWithColumns record = EntityRecordWithColumns.of(
+            EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(
                     Sample.messageOfType(EntityRecord.class),
                     columnsExpected
             );
@@ -196,7 +197,7 @@ class EntityRecordWithColumnsTest {
         int columnValue = 42;
 
         ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
-        EntityRecordWithColumns record =
+        EntityRecordWithColumns<?> record =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
         String value = record.columnValue(columnName, new TestColumnMapping());
 

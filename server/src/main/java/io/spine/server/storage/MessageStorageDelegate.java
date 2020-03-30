@@ -20,7 +20,9 @@
 
 package io.spine.server.storage;
 
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.ResponseFormat;
 
 import java.util.Iterator;
@@ -30,6 +32,7 @@ import java.util.Optional;
  * A {@code MessageStorage} which delegates all of its operations to another instance
  * of {@code MessageStorage}.
  */
+@Internal
 public abstract class MessageStorageDelegate<I, M extends Message> extends MessageStorage<I, M> {
 
     private final MessageStorage<I, M> delegate;
@@ -42,6 +45,31 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     @Override
     public Optional<M> read(I id) {
         return delegate.read(id);
+    }
+
+    @Override
+    public Optional<M> read(I id, FieldMask mask) {
+        return delegate.read(id, mask);
+    }
+
+    @Override
+    public Iterator<M> readAll(MessageQuery<I> query) {
+        return delegate.readAll(query);
+    }
+
+    @Override
+    public Iterator<M> readAll() {
+        return delegate.readAll();
+    }
+
+    @Override
+    public Iterator<M> readAll(Iterable<I> ids) {
+        return delegate.readAll(ids);
+    }
+
+    @Override
+    public Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
+        return delegate.readAll(ids, mask);
     }
 
     @Override
@@ -60,7 +88,12 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     }
 
     @Override
-    public void writeAll(Iterable<MessageWithColumns<I, M>> records) {
+    public synchronized void write(I id, M record) {
+        delegate.write(id, record);
+    }
+
+    @Override
+    public void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
         delegate.writeAll(records);
     }
 
@@ -80,18 +113,14 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     }
 
     @Override
+    @Internal
+    public Columns<M> columns() {
+        return delegate.columns();
+    }
+
+    @Override
     public boolean isMultitenant() {
         return delegate.isMultitenant();
-    }
-
-    @Override
-    protected void checkNotClosed(String message) throws IllegalStateException {
-        delegate.checkNotClosed(message);
-    }
-
-    @Override
-    protected void checkNotClosed() throws IllegalStateException {
-        delegate.checkNotClosed();
     }
 
     @Override
@@ -102,6 +131,16 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     @Override
     public boolean isClosed() {
         return delegate.isClosed();
+    }
+
+    @Override
+    protected void checkNotClosed(String message) throws IllegalStateException {
+        delegate.checkNotClosed(message);
+    }
+
+    @Override
+    protected void checkNotClosed() throws IllegalStateException {
+        delegate.checkNotClosed();
     }
 
     @Override

@@ -32,6 +32,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Columns of a stored record.
+ *
+ * @param <R>
+ *         the type of the stored record
  */
 @Internal
 public abstract class Columns<R> {
@@ -71,6 +74,5 @@ public abstract class Columns<R> {
     }
 
     protected abstract IllegalArgumentException columnNotFound(ColumnName columnName);
-
 
 }

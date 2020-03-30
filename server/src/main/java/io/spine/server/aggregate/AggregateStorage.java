@@ -43,6 +43,7 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityRecordStorage;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.MessageColumns;
@@ -522,7 +523,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory>{
         }
         EntityRecord record = builder.vBuild();
         MessageWithColumns<I, EntityRecord> result =
-                MessageWithColumns.create(aggregate, columns, record);
+                EntityRecordWithColumns.create(aggregate, columns, record);
 
         stateStorage.write(result);
     }

@@ -49,10 +49,10 @@ import static java.util.stream.Collectors.toList;
  * The memory-based storage for {@link EntityRecord} that represents
  * all storage operations available for data of a single tenant.
  */
-final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
+final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns<I>> {
 
-    private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
-    private final Map<I, EntityRecordWithColumns> activeRecords =
+    private final Map<I, EntityRecordWithColumns<I>> records = newConcurrentMap();
+    private final Map<I, EntityRecordWithColumns<I>> activeRecords =
             filterValues(records, r -> r != null && r.isActive());
     private static final EntityRecordUnpacker UNPACKER = EntityRecordUnpacker.INSTANCE;
 
@@ -64,13 +64,13 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
     }
 
     @Override
-    public void put(I id, EntityRecordWithColumns record) {
+    public void put(I id, EntityRecordWithColumns<I> record) {
         records.put(id, record);
     }
 
     @Override
-    public Optional<EntityRecordWithColumns> get(I id) {
-        EntityRecordWithColumns record = records.get(id);
+    public Optional<EntityRecordWithColumns<I>> get(I id) {
+        EntityRecordWithColumns<I> record = records.get(id);
         return Optional.ofNullable(record);
     }
 
@@ -78,12 +78,12 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
         return records.remove(id) != null;
     }
 
-    private Map<I, EntityRecordWithColumns> activeRecords() {
+    private Map<I, EntityRecordWithColumns<I>> activeRecords() {
         return activeRecords;
     }
 
     Iterator<EntityRecord> readAll(ResponseFormat format) {
-        Stream<EntityRecordWithColumns> records = activeRecords()
+        Stream<EntityRecordWithColumns<I>> records = activeRecords()
                 .values()
                 .stream();
         FieldMask fieldMask = format.getFieldMask();
@@ -95,7 +95,7 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
 
     Iterator<EntityRecord> readAll(EntityQuery<I> query, ResponseFormat format) {
         FieldMask fieldMask = format.getFieldMask();
-        List<EntityRecordWithColumns> records = findRecords(query, format).collect(toList());
+        List<EntityRecordWithColumns<I>> records = findRecords(query, format).collect(toList());
         return records
                 .stream()
                 .map(UNPACKER)
@@ -103,17 +103,17 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
                 .iterator();
     }
 
-    private Stream<EntityRecordWithColumns>
+    private Stream<EntityRecordWithColumns<I>>
     findRecords(EntityQuery<I> query, ResponseFormat format) {
-        Map<I, EntityRecordWithColumns> records = new HashMap<>(filterRecords(query));
-        Stream<EntityRecordWithColumns> stream = records.values()
+        Map<I, EntityRecordWithColumns<I>> records = new HashMap<>(filterRecords(query));
+        Stream<EntityRecordWithColumns<I>> stream = records.values()
                                                         .stream();
         return orderAndLimit(stream, format);
     }
 
-    private static Stream<EntityRecordWithColumns>
-    orderAndLimit(Stream<EntityRecordWithColumns> data, ResponseFormat format) {
-        Stream<EntityRecordWithColumns> stream = data;
+    private static <I> Stream<EntityRecordWithColumns<I>>
+    orderAndLimit(Stream<EntityRecordWithColumns<I>> data, ResponseFormat format) {
+        Stream<EntityRecordWithColumns<I>> stream = data;
 //        if (format.hasOrderBy()) {
 //            stream = stream.sorted(orderedBy(format.getOrderBy()));
 //        }
@@ -128,14 +128,14 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
      * Filters the records returning only the ones matching the
      * {@linkplain EntityQuery entity query}.
      */
-    private Map<I, EntityRecordWithColumns> filterRecords(EntityQuery<I> query) {
+    private Map<I, EntityRecordWithColumns<I>> filterRecords(EntityQuery<I> query) {
         EntityQueryMatcher<I> matcher = new EntityQueryMatcher<>(query);
         return filterValues(records, matcher::test);
     }
 
     @Nullable
     EntityRecord findAndApplyFieldMask(I targetId, FieldMask fieldMask) {
-        EntityRecordWithColumns recordWithColumns = activeRecords().get(targetId);
+        EntityRecordWithColumns<I> recordWithColumns = activeRecords().get(targetId);
         if (recordWithColumns == null) {
             return null;
         }

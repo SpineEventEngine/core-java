@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.ResponseFormat;
 import io.spine.server.storage.Columns;
@@ -53,7 +54,13 @@ public class InMemoryMessageStorage<I, M extends Message> extends MessageStorage
 
     @Override
     public Optional<M> read(I id) {
-        return records().get(id).map(MessageWithColumns::record);
+        return records().get(id)
+                        .map(MessageWithColumns::record);
+    }
+
+    @Override
+    public Optional<M> read(I id, FieldMask mask) {
+        return records().get(id, mask);
     }
 
     @Override
@@ -72,7 +79,7 @@ public class InMemoryMessageStorage<I, M extends Message> extends MessageStorage
     }
 
     @Override
-    public void writeAll(Iterable<MessageWithColumns<I, M>> records) {
+    public void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
         for (MessageWithColumns<I, M> record : records) {
             records().put(record.id(), record);
         }

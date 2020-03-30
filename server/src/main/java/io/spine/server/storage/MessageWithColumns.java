@@ -23,13 +23,9 @@ package io.spine.server.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.StorageConverter;
 import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.DefaultColumnMapping;
-import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -43,7 +39,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * @author Alex Tymchenko
  */
-public final class MessageWithColumns<I, R extends Message> {
+public class MessageWithColumns<I, R extends Message> {
 
     private final R record;
     private final I id;
@@ -53,7 +49,7 @@ public final class MessageWithColumns<I, R extends Message> {
      */
     private final Map<ColumnName, @Nullable Object> storageFields;
 
-    private MessageWithColumns(I identifier, R record, Map<ColumnName, Object> storageFields) {
+    protected MessageWithColumns(I identifier, R record, Map<ColumnName, Object> storageFields) {
         this.id = checkNotNull(identifier);
         this.record = checkNotNull(record);
         this.storageFields = new HashMap<>(storageFields);
@@ -79,23 +75,6 @@ public final class MessageWithColumns<I, R extends Message> {
         checkNotNull(record);
         checkNotNull(fields);
         return of(identifier, record, fields);
-    }
-
-    /**
-     * Creates a new record extracting the column values from the passed entity.
-     */
-    public static <I, E extends Entity<I, ?>> MessageWithColumns<I, EntityRecord>
-    create(E entity, StorageConverter<I, E, ?> converter, EntityColumns columns) {
-        EntityRecord record = converter.convert(entity);
-        checkNotNull(record);   //TODO:2020-03-19:alex.tymchenko: suspicious?
-        return create(entity, columns, record);
-    }
-
-    //TODO:2020-03-17:alex.tymchenko: avoid ambiguity.
-    public static <I, E extends Entity<I, ?>> MessageWithColumns<I, EntityRecord>
-    create(E entity, EntityColumns columns, EntityRecord record) {
-        Map<ColumnName, @Nullable Object> storageFields = columns.valuesIn(entity);
-        return of(entity.id(), record, storageFields);
     }
 
     /**
