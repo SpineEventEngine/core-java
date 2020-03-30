@@ -1,4 +1,0 @@
-Host github.com-publish
-	HostName github.com
-	User git
-	IdentityFile @rsakey@

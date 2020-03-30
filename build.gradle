@@ -50,11 +50,9 @@ buildscript { final scriptHandler ->
 apply from: 'version.gradle'
 
 ext {
-    spineJacocoScript = "${rootDir}/config/gradle/jacoco.gradle"
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
     credentialsPropertyFile = 'credentials.properties'
-    publishPlugin = "$rootDir/config/gradle/publish.gradle"
     projectsToPublish = ["core",
                          "client",
                          "server",
@@ -91,7 +89,6 @@ subprojects {
         generatedTestSpineDir = "$generatedRootDir/test/spine"
 
         filterInternalJavadocsScript = "${rootDir}/config/gradle/filter-internal-javadoc.gradle"
-        updateDocsPlugin = "$rootDir/gradle/update-gh-pages.gradle"
     }
 
     apply plugin: 'com.google.protobuf'
@@ -252,13 +249,16 @@ subprojects {
     // This plugin *must* be applied here, not in the module `build.gradle` files.
     //
     if (shouldPublishJavadoc()) {
-        apply from: updateDocsPlugin
+        apply from: deps.scripts.updateGitHubPages
+        afterEvaluate {
+            tasks.publish.dependsOn('updateGitHubPages')
+        }
     }
     
     apply from: deps.scripts.pmd
 }
 
-apply from: publishPlugin
+apply from: deps.scripts.publish
 
 // IDEA project configuration.
 idea {
@@ -277,7 +277,7 @@ idea {
 }
 
 // Aggregated coverage report across all subprojects.
-apply from: spineJacocoScript
+apply from: deps.scripts.jacoco
 
 // Generate a repository-wide report of 3rd-party dependencies and their licenses.
 apply from: deps.scripts.repoLicenseReport
