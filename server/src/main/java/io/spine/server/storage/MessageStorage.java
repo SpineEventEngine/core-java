@@ -29,13 +29,23 @@ import java.util.Iterator;
 /**
  * An abstract base for storage implementations, which store the Protobuf messages as records.
  *
- * <p>Each stored message must be identified. Additionally, some attributes may be stored along with
- * the message itself to allow further querying.
+ * <p>Each stored message must be identified.
+ *
+ * <p>Additionally, some attributes may be stored along with the message itself
+ * to allow further querying.
  */
 public abstract class MessageStorage<I, M extends Message> extends AbstractStorage<I, M> {
 
     private final Columns<M> columns;
 
+    /**
+     * Creates the new storage instance.
+     *
+     * @param columns
+     *         definitions of the columns to store along with each message
+     * @param multitenant
+     *         whether this storage should support multi-tenancy
+     */
     protected MessageStorage(Columns<M> columns, boolean multitenant) {
         super(multitenant);
         this.columns = columns;
