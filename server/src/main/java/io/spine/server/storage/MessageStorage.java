@@ -27,10 +27,12 @@ import io.spine.client.ResponseFormat;
 import java.util.Iterator;
 
 /**
- * @author Alex Tymchenko
+ * An abstract base for storage implementations, which store the Protobuf messages as records.
+ *
+ * <p>Each stored message must be identified. Additionally, some attributes may be stored along with
+ * the message itself to allow further querying.
  */
-public abstract class MessageStorage<I, M extends Message> extends AbstractStorage<I, M>
-        implements PlainMessageStorage<I, M> {
+public abstract class MessageStorage<I, M extends Message> extends AbstractStorage<I, M> {
 
     private final Columns<M> columns;
 
@@ -39,23 +41,111 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
         this.columns = columns;
     }
 
+    /**
+     * Writes the message as the storage record by the given identifier.
+     *
+     * @param id
+     *         the ID for the record
+     * @param record
+     *         the record to store
+     */
     @Override
     public final synchronized void write(I id, M record) {
         MessageWithColumns<I, M> withCols = MessageWithColumns.create(id, record, this.columns);
         write(withCols);
     }
 
-    @Override
+    /**
+     * Reads all message records according to the passed query.
+     *
+     * <p>The default {@link ResponseFormat} is used.
+     *
+     * @param query
+     *         the query to execute
+     * @return iterator over the matching messages
+     */
     public final Iterator<M> readAll(MessageQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
+    /**
+     * Reads all message records in the storage.
+     *
+     * @return iterator over the records
+     */
     public final Iterator<M> readAll() {
         return readAll(MessageQuery.all());
     }
 
+    /**
+     * Returns the definition of the columns to store along with each message record
+     * in this storage.
+     */
     @Internal
     public Columns<M> columns() {
         return columns;
     }
+
+    /**
+     * Reads all message records in this storage according to the passed response format.
+     *
+     * @param format
+     *         the format of the response
+     * @return iterator over the message records
+     */
+    public abstract Iterator<M> readAll(ResponseFormat format);
+
+    /**
+     * Reads the message records which match the passed query and returns the result
+     * in the specified response format.
+     *
+     * @param query
+     *         the query to execute
+     * @param format
+     *         format of the expected response
+     * @return iterator over the matching message records
+     */
+    public abstract Iterator<M> readAll(MessageQuery<I> query, ResponseFormat format);
+
+    /**
+     * Writes the message along with its filled-in column values to the storage.
+     *
+     * @param record
+     *         the message to write and additional columns with their values
+     */
+    @Internal
+    public abstract void write(MessageWithColumns<I, M> record);
+
+    /**
+     * Writes the batch of the messages along with their filled-in columns to the storage.
+     *
+     * @param records
+     *         messages and their column values
+     */
+    @Internal
+    public abstract void writeAll(Iterable<MessageWithColumns<I, M>> records);
+
+    /**
+     * Physically deletes the message record from the storage by the record identifier.
+     *
+     * <p>In case the record with the specified identifier is not found in the storage,
+     * this method does nothing and returns {@code false}.
+     *
+     * @param id
+     *         identifier of the record to delete
+     * @return {@code true} if the record was deleted,
+     *         or {@code false} if the record with the specified identifier was not found
+     */
+    public abstract boolean delete(I id);
+
+    /**
+     * Deletes the batch of message records by their identifiers.
+     *
+     * <p>If for some provided identifiers there is no records in the storage, such identifiers
+     * are silently skipped.
+     *
+     * @param ids
+     *         identifiers of the records to delete
+     */
+    public abstract void deleteAll(Iterable<I> ids);
 }
