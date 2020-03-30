@@ -73,7 +73,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @param <S>
  *         the type of storage under the test
  */
-public abstract class AbstractMessageStorageTest<I, S extends RecordStorage<I>>
+public abstract class AbstractEntityRecordStorageTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, S> {
 
     private static EntityRecord newStorageRecord(EntityState state) {

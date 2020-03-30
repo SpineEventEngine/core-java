@@ -77,7 +77,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
-        extends AbstractMessageStorageTest<ProjectId, S> {
+        extends AbstractEntityRecordStorageTest<ProjectId, S> {
 
     @Override
     protected Class<? extends Entity<?, ?>> getTestEntityClass() {
