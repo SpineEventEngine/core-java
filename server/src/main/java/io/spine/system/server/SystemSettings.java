@@ -57,7 +57,8 @@ public final class SystemSettings implements SystemFeatures {
         return new SystemSettings()
                 .disableCommandLog()
                 .enableAggregateQuerying()
-                .forgetEvents();
+                .forgetEvents()
+                .enableParallelPosting();
     }
 
     /**
@@ -147,6 +148,7 @@ public final class SystemSettings implements SystemFeatures {
      *
      * @return self for method chaining
      */
+    @CanIgnoreReturnValue
     public SystemSettings enableParallelPosting() {
         this.parallelPosting = true;
         return this;
@@ -159,6 +161,7 @@ public final class SystemSettings implements SystemFeatures {
      *
      * @return self for method chaining
      */
+    @CanIgnoreReturnValue
     public SystemSettings disableParallelPosting() {
         this.parallelPosting = false;
         return this;
