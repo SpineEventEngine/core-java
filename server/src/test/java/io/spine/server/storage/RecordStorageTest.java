@@ -71,7 +71,6 @@ import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
 import static io.spine.server.storage.given.RecordStorageTestEnv.assertSingleRecord;
 import static io.spine.server.storage.given.RecordStorageTestEnv.buildStorageRecord;
 import static io.spine.server.storage.given.RecordStorageTestEnv.delete;
-import static io.spine.server.storage.given.RecordStorageTestEnv.emptyFilters;
 import static io.spine.server.storage.given.RecordStorageTestEnv.newEntity;
 import static io.spine.test.storage.Project.Status.CANCELLED;
 import static io.spine.test.storage.Project.Status.DONE;
@@ -297,10 +296,7 @@ public class RecordStorageTest
         storage.write(create(activeEntity, storage.columns(), activeRecord));
         storage.write(create(archivedEntity, storage.columns(), archivedRecord));
 
-        TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
-        MessageQuery<ProjectId> query = messageQueryFrom(emptyFilters(), storage.columns());
-
-        Iterator<EntityRecord> read = storage.readAll(query);
+        Iterator<EntityRecord> read = storage.readAll();
         assertSingleRecord(activeRecord, read);
     }
 
@@ -339,38 +335,6 @@ public class RecordStorageTest
     }
 
     @Test
-    @DisplayName("filter inactive records on bulk read with query containing IDs by default")
-    void filterWithQueryIdsFilterByDefault() {
-        ProjectId activeId = newId();
-        ProjectId archivedId = newId();
-        ProjectId deletedId = newId();
-
-        TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeId);
-        TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedId);
-        TransactionalEntity<ProjectId, ?, ?> deletedEntity = newEntity(deletedId);
-        archive(archivedEntity);
-        delete(deletedEntity);
-
-        EntityRecord activeRecord = buildStorageRecord(activeId, activeEntity.state(),
-                                                       activeEntity.lifecycleFlags());
-        EntityRecord archivedRecord = buildStorageRecord(archivedId, archivedEntity.state(),
-                                                         archivedEntity.lifecycleFlags());
-        EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
-                                                        deletedEntity.lifecycleFlags());
-
-        EntityRecordStorage<ProjectId> storage = storage();
-        storage.write(create(deletedEntity, storage.columns(), deletedRecord));
-        storage.write(create(activeEntity, storage.columns(), activeRecord));
-        storage.write(create(archivedEntity, storage.columns(), archivedRecord));
-
-        TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
-        MessageQuery<ProjectId> query = messageQueryFrom(filters, storage.columns());
-
-        Iterator<EntityRecord> read = storage.readAll(query);
-        assertSingleRecord(activeRecord, read);
-    }
-
-    @Test
     @DisplayName("filter inactive records on bulk read by IDs by default")
     void filterByIdByDefaultInBulk() {
         ProjectId activeId = newId();
@@ -396,22 +360,23 @@ public class RecordStorageTest
         storage.write(create(archivedEntity, storage.columns(), archivedRecord));
 
         ImmutableSet<ProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
-        Iterable<EntityRecord> read = () -> storage.readAll(targetIds);
+        Iterable<EntityRecord> actual = () -> storage.readAll(targetIds);
 
-        assertSingleValueAndNulls(2, read);
+        assertThat(actual).hasSize(  1);
+        assertThat(actual.iterator().next()).isEqualTo(activeRecord);
     }
 
-    private static void assertSingleValueAndNulls(int expectedNullCount,
-                                                  Iterable<EntityRecord> values) {
-        assertThat(values).hasSize(expectedNullCount + 1);
-        int nullCount = 0;
-        for (EntityRecord record : values) {
-            if (record == null) {
-                nullCount++;
-            }
-        }
-        assertEquals(expectedNullCount, nullCount, "An unexpected amount of nulls.");
-    }
+//    private static void assertSingleValueAndNulls(int expectedNullCount,
+//                                                  Iterable<EntityRecord> values) {
+//        assertThat(values).hasSize(expectedNullCount + 1);
+//        int nullCount = 0;
+//        for (EntityRecord record : values) {
+//            if (record == null) {
+//                nullCount++;
+//            }
+//        }
+//        assertEquals(expectedNullCount, nullCount, "An unexpected amount of nulls.");
+//    }
 
     @Test
     @DisplayName("update entity column values")

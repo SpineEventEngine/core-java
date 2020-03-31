@@ -48,27 +48,27 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     }
 
     @Override
-    public Optional<M> read(I id, FieldMask mask) {
+    protected Optional<M> read(I id, FieldMask mask) {
         return delegate.read(id, mask);
     }
 
     @Override
-    public Iterator<M> readAll(MessageQuery<I> query) {
+    protected Iterator<M> readAll(MessageQuery<I> query) {
         return delegate.readAll(query);
     }
 
     @Override
-    public Iterator<M> readAll() {
+    protected Iterator<M> readAll() {
         return delegate.readAll();
     }
 
     @Override
-    public Iterator<M> readAll(Iterable<I> ids) {
+    protected Iterator<M> readAll(Iterable<I> ids) {
         return delegate.readAll(ids);
     }
 
     @Override
-    public Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
+    protected Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
         return delegate.readAll(ids, mask);
     }
 
@@ -83,7 +83,7 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     }
 
     @Override
-    public void write(MessageWithColumns<I, M> record) {
+    protected void write(MessageWithColumns<I, M> record) {
         delegate.write(record);
     }
 
@@ -93,7 +93,7 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     }
 
     @Override
-    public void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
+    protected void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
         delegate.writeAll(records);
     }
 
@@ -103,7 +103,7 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     }
 
     @Override
-    public void deleteAll(Iterable<I> ids) {
+    protected void deleteAll(Iterable<I> ids) {
         delegate.deleteAll(ids);
     }
 
@@ -114,7 +114,7 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
 
     @Override
     @Internal
-    public Columns<M> columns() {
+    protected Columns<M> columns() {
         return delegate.columns();
     }
 
@@ -146,5 +146,26 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     @Override
     public void close() {
         delegate.close();
+    }
+
+    @Override
+    protected void writeRecord(MessageWithColumns<I, M> record) {
+        delegate.writeRecord(record);
+    }
+
+    @Override
+    @Internal
+    protected void writeAllRecords(Iterable<? extends MessageWithColumns<I, M>> records) {
+        delegate.writeAllRecords(records);
+    }
+
+    @Override
+    protected Iterator<M> readAllRecords(MessageQuery<I> query, ResponseFormat format) {
+        return delegate.readAllRecords(query, format);
+    }
+
+    @Override
+    protected boolean deleteRecord(I id) {
+        return delegate.deleteRecord(id);
     }
 }

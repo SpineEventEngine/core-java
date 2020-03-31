@@ -20,22 +20,22 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.base.EntityState;
-import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.ContextSpec;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageTest;
 import org.junit.jupiter.api.DisplayName;
 
-@DisplayName("InMemoryAggregateStorage should")
+@DisplayName("`AggregateStorage` based on in-memory `MessageStorage` should")
 class InMemoryAggregateStorageTest extends AggregateStorageTest {
 
     @Override
-    protected <I> AggregateStorage<I> newStorage(
-            Class<? extends I> idClass,
-            Class<? extends Aggregate<I,
-                                      ? extends EntityState,
-                                      ? extends ValidatingBuilder<?>>> aggregateClass) {
-        return InMemoryAggregateStorage.newInstance(aggregateClass);
+    protected <I> AggregateStorage<I> newStorage(Class<? extends I> idClass,
+                                                 Class<? extends Aggregate<I, ?, ?>> aggregateCls) {
+        ContextSpec spec = ContextSpec.singleTenant("InMemoryAggregateStorage tests");
+        return ServerEnvironment.instance()
+                                .storageFactory()
+                                .createAggregateStorage(spec, aggregateCls);
     }
 }

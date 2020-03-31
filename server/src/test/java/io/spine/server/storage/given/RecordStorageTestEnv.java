@@ -88,7 +88,9 @@ public class RecordStorageTestEnv {
      */
     public static TestCounterEntity newEntity(ProjectId id) {
         TestCounterEntity entity = new TestCounterEntity(id);
-        injectState(entity, Project.newBuilder().setId(id).build(), Versions.zero());
+        injectState(entity, Project.newBuilder()
+                                   .setId(id)
+                                   .build(), Versions.zero());
         return entity;
     }
 
@@ -100,7 +102,7 @@ public class RecordStorageTestEnv {
         TestTransaction.delete(entity);
     }
 
-    public static <I> EntityRecordWithColumns<I> withLifecycleColumns(EntityRecord record) {
+    public static <I> EntityRecordWithColumns<I> withLifecycleColumns(I id, EntityRecord record) {
         LifecycleFlags flags = record.getLifecycleFlags();
         Map<ColumnName, Object> columns = ImmutableMap.of(
                 ColumnName.of(archived),
@@ -109,7 +111,7 @@ public class RecordStorageTestEnv {
                 flags.getDeleted()
         );
 
-        EntityRecordWithColumns<I> result = EntityRecordWithColumns.of(record, columns);
+        EntityRecordWithColumns<I> result = EntityRecordWithColumns.create(id, record, columns);
         return result;
     }
 

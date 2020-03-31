@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.ResponseFormat;
 import io.spine.server.storage.Columns;
@@ -29,7 +28,6 @@ import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.MessageWithColumns;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 /**
  * An in-memory implementation of {@link MessageStorage}.
@@ -53,53 +51,29 @@ public class InMemoryMessageStorage<I, M extends Message> extends MessageStorage
     }
 
     @Override
-    public Optional<M> read(I id) {
-        return records().get(id)
-                        .map(MessageWithColumns::record);
+    public Iterator<I> index() {
+        return records().index();
     }
 
     @Override
-    public Optional<M> read(I id, FieldMask mask) {
-        return records().get(id, mask);
-    }
-
-    @Override
-    public Iterator<M> readAll(MessageQuery<I> query, ResponseFormat format) {
+    protected Iterator<M> readAllRecords(MessageQuery<I> query, ResponseFormat format) {
         return records().readAll(query, format);
     }
 
     @Override
-    public Iterator<M> readAll(ResponseFormat format) {
-        return records().readAll(format);
-    }
-
-    @Override
-    public void write(MessageWithColumns<I, M> record) {
+    protected void writeRecord(MessageWithColumns<I, M> record) {
         records().put(record.id(), record);
     }
 
     @Override
-    public void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
+    protected void writeAllRecords(Iterable<? extends MessageWithColumns<I, M>> records) {
         for (MessageWithColumns<I, M> record : records) {
             records().put(record.id(), record);
         }
     }
 
     @Override
-    public Iterator<I> index() {
-        return records().index();
-    }
-
-    @Override
-    public boolean delete(I id) {
+    protected boolean deleteRecord(I id) {
         return records().delete(id);
     }
-
-    @Override
-    public void deleteAll(Iterable<I> ids) {
-        for (I id : ids) {
-            records().delete(id);
-        }
-    }
-
 }

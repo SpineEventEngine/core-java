@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -32,6 +33,7 @@ import io.spine.server.storage.MessageWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -39,6 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A value of {@link EntityRecord} associated with the values of its {@linkplain Column columns}.
  */
+@Internal
 public final class EntityRecordWithColumns<I>
         extends MessageWithColumns<I, EntityRecord> implements WithLifecycle {
 
@@ -85,6 +88,18 @@ public final class EntityRecordWithColumns<I>
         return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
     }
 
+    public static <I> EntityRecordWithColumns<I>
+    create(I id, EntityRecord record, Map<ColumnName, Object> columns) {
+        checkNotNull(id);
+        checkNotNull(record);
+        checkNotNull(columns);
+        return new EntityRecordWithColumns<>(id, record, columns);
+    }
+
+    @Internal
+    public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
+        return create(id, record, new HashMap<>());
+    }
     /**
      * Wraps a passed entity record.
      *

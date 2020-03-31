@@ -53,6 +53,16 @@ public class CatchUpStorage extends MessageStorageDelegate<CatchUpId, CatchUp> {
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides the parent method in order to expose it as a part of public API.
+     */
+    @Override
+    public Iterator<CatchUp> readAll() {
+        return super.readAll();
+    }
+
+    /**
      * Reads all the catch-up processes which update the projection of the specified type.
      *
      * @param projectionType

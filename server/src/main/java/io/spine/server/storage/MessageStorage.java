@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -72,32 +73,64 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
     /**
      * Writes the message along with its filled-in column values to the storage.
      *
+     * <p>If this storage is {@linkplain #isClosed() closed},
+     * throws an {@link IllegalStateException}.
+     *
      * @param record
-     *         the message to write and additional columns with their values
+     *         the message and additional columns with their values
      */
-    @Internal
-    public abstract void write(MessageWithColumns<I, M> record);
+    protected void write(MessageWithColumns<I, M> record) {
+        checkNotClosed();
+        writeRecord(record);
+    }
 
     /**
      * Writes the batch of the messages along with their filled-in columns to the storage.
      *
+     * <p>If this storage is {@linkplain #isClosed() closed},
+     * throws an {@link IllegalStateException}.
+     *
      * @param records
      *         messages and their column values
      */
-    @Internal
-    public abstract void writeAll(Iterable<? extends MessageWithColumns<I, M>> records);
+    protected void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
+        checkNotClosed();
+        writeAllRecords(records);
+    }
+
+    @Override
+    public Optional<M> read(I id) {
+        MessageQuery<I> query = MessageQuery.of(ImmutableList.of(id));
+        Optional<M> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
+        return result;
+    }
 
     /**
      * Reads the message record by the passed identifier and applies the given field mask to it.
      *
+     * <p>If this storage is {@linkplain #isClosed() closed},
+     * throws an {@link IllegalStateException}.
+     *
      * @param id
-     *         the identifier of the mesage record to read
+     *         the identifier of the message record to read
      * @param mask
      *         the field mask to apply
      * @return the message with the given identifier, after the field mask has been applied to it,
      *         or {@code Optional.empty()} if no message is found by the ID
      */
-    public abstract Optional<M> read(I id, FieldMask mask);
+    protected Optional<M> read(I id, FieldMask mask) {
+        MessageQuery<I> query = MessageQuery.of(ImmutableList.of(id));
+        ResponseFormat format = formatWith(mask);
+        Optional<M> result = readSingleRecord(query, format);
+        return result;
+    }
+
+    private Optional<M> readSingleRecord(MessageQuery<I> query, ResponseFormat format) {
+        Iterator<M> iterator = readAll(query, format);
+        return iterator.hasNext()
+                             ? Optional.of(iterator.next())
+                             : Optional.empty();
+    }
 
     /**
      * Reads all message records according to the passed query.
@@ -108,7 +141,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the query to execute
      * @return iterator over the matching messages
      */
-    public Iterator<M> readAll(MessageQuery<I> query) {
+    protected Iterator<M> readAll(MessageQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
@@ -117,7 +150,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *
      * @return iterator over the records
      */
-    public Iterator<M> readAll() {
+    protected Iterator<M> readAll() {
         return readAll(MessageQuery.all());
     }
 
@@ -130,7 +163,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the identifiers of the records to read
      * @return iterator over the records with the passed IDs
      */
-    public Iterator<M> readAll(Iterable<I> ids) {
+    protected Iterator<M> readAll(Iterable<I> ids) {
         MessageQuery<I> query = MessageQuery.of(ids);
         return readAll(query);
     }
@@ -147,11 +180,9 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the mask to apply to each message
      * @return the iterator over the records
      */
-    public Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
+    protected Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
         MessageQuery<I> query = MessageQuery.of(ids);
-        ResponseFormat format = ResponseFormat.newBuilder()
-                                              .setFieldMask(mask)
-                                              .vBuild();
+        ResponseFormat format = formatWith(mask);
         return readAll(query, format);
     }
 
@@ -162,11 +193,17 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the format of the response
      * @return iterator over the message records
      */
-    public abstract Iterator<M> readAll(ResponseFormat format);
+    public Iterator<M> readAll(ResponseFormat format) {
+        MessageQuery<I> query = MessageQuery.all();
+        return readAll(query, format);
+    }
 
     /**
      * Reads the message records which match the passed query and returns the result
      * in the specified response format.
+     *
+     * <p>If this storage is {@linkplain #isClosed() closed},
+     * throws an {@link IllegalStateException}.
      *
      * @param query
      *         the query to execute
@@ -174,7 +211,10 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         format of the expected response
      * @return iterator over the matching message records
      */
-    public abstract Iterator<M> readAll(MessageQuery<I> query, ResponseFormat format);
+    public Iterator<M> readAll(MessageQuery<I> query, ResponseFormat format) {
+        checkNotClosed();
+        return readAllRecords(query, format);
+    }
 
     /**
      * Physically deletes the message record from the storage by the record identifier.
@@ -182,12 +222,18 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * <p>In case the record with the specified identifier is not found in the storage,
      * this method does nothing and returns {@code false}.
      *
+     * <p>If this storage is {@linkplain #isClosed() closed},
+     * throws an {@link IllegalStateException}.
+     *
      * @param id
      *         identifier of the record to delete
      * @return {@code true} if the record was deleted,
      *         or {@code false} if the record with the specified identifier was not found
      */
-    public abstract boolean delete(I id);
+    public boolean delete(I id) {
+        checkNotClosed();
+        return deleteRecord(id);
+    }
 
     /**
      * Deletes the batch of message records by their identifiers.
@@ -198,14 +244,69 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @param ids
      *         identifiers of the records to delete
      */
-    public abstract void deleteAll(Iterable<I> ids);
+    protected void deleteAll(Iterable<I> ids) {
+        for (I id : ids) {
+            delete(id);
+        }
+    }
+
+    /**
+     * Performs writing the message and its column values to the storage.
+     *
+     * @param record
+     *         the message and additional columns with their values
+     */
+    protected abstract void writeRecord(MessageWithColumns<I, M> record);
+
+    /**
+     * Performs writing of the message batch along with messages' filled-in columns to the storage.
+     *
+     * @param records
+     *         messages and the values of their columns
+     */
+    @Internal
+    protected abstract void writeAllRecords(Iterable<? extends MessageWithColumns<I, M>> records);
+
+    /**
+     * Performs reading of the message records by executing the passed query.
+     *
+     * <p>Returns the result according to the specified response format.
+     *
+     * @param query
+     *         the query to execute
+     * @param format
+     *         format of the expected response
+     * @return iterator over the matching message records
+     */
+    protected abstract Iterator<M> readAllRecords(MessageQuery<I> query, ResponseFormat format);
+
+    /**
+     * Performs the physical removal of the message record from the storage
+     * by the identifier of the record.
+     *
+     * <p>In case the record with the specified identifier is not found in the storage,
+     * this method does nothing and returns {@code false}.
+     *
+     * @param id
+     *         identifier of the record to delete
+     * @return {@code true} if the record was deleted,
+     *         or {@code false} if the record with the specified identifier was not found
+     */
+    protected abstract boolean deleteRecord(I id);
 
     /**
      * Returns the definition of the columns to store along with each message record
      * in this storage.
      */
     @Internal
-    public Columns<M> columns() {
+    protected Columns<M> columns() {
         return columns;
+    }
+
+    //TODO:2020-03-31:alex.tymchenko: move away.
+    private static ResponseFormat formatWith(FieldMask mask) {
+        return ResponseFormat.newBuilder()
+                             .setFieldMask(mask)
+                             .vBuild();
     }
 }

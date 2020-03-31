@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +48,7 @@ import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
+import static io.spine.server.storage.given.RecordStorageTestEnv.withLifecycleColumns;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;
 import static java.util.stream.Collectors.toList;
@@ -156,7 +156,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordS
         I id = newId();
         EntityRecord record = newStorageRecord(id);
         EntityRecordWithColumns<I> recordWithStorageFields =
-                EntityRecordWithColumns.of(record, Collections.emptyMap());
+                EntityRecordWithColumns.create(id, record);
         assertFalse(recordWithStorageFields.hasColumns());
         EntityRecordStorage<I> storage = storage();
 
@@ -232,7 +232,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordS
         for (int i = 0; i < bulkSize; i++) {
             I id = newId();
             EntityRecord record = newStorageRecord(id);
-            initial.put(id, EntityRecordWithColumns.of(record));
+            initial.put(id, EntityRecordWithColumns.create(id, record));
         }
         storage.writeAll(initial.values());
 
@@ -265,7 +265,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordS
             I id = newId();
             EntityRecord record = newStorageRecord(id);
 
-            // Some records are changed and some are not
+            // Some records are changed and some are not.
             EntityRecord alternateRecord = (i % 2 == 0)
                                            ? record
                                            : newStorageRecord(id);
@@ -287,9 +287,9 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordS
 
     private List<EntityRecordWithColumns<I>>
     recordsWithColumnsFrom(Map<I, EntityRecord> recordMap) {
-        return recordMap.values()
+        return recordMap.entrySet()
                         .stream()
-                        .map(RecordStorageTestEnv::<I>withLifecycleColumns)
+                        .map(entry -> withLifecycleColumns(entry.getKey(), entry.getValue()))
                         .collect(toList());
     }
 }

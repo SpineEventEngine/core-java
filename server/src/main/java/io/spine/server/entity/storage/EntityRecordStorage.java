@@ -32,13 +32,12 @@ import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.StorageFactory;
 
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A {@code MessageStorage} which stores {@link EntityRecord}s.
@@ -46,19 +45,14 @@ import static java.util.stream.Collectors.toList;
 public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityRecord> {
 
     private final MessageQuery<I> findActiveRecordsQuery;
+    private final QueryParameters activeQueryParams;
 
     public EntityRecordStorage(StorageFactory factory,
                                Class<? extends Entity<I, ?>> entityClass,
                                boolean multitenant) {
         super(factory.createMessageStorage(EntityColumns.of(entityClass), multitenant));
-        QueryParameters params = activeEntityQueryParams(columns());
-        this.findActiveRecordsQuery = MessageQuery.of(ImmutableSet.of(), params);
-    }
-
-    @Internal
-    @Override
-    public final EntityColumns columns() {
-        return (EntityColumns) super.columns();
+        activeQueryParams = activeEntityQueryParams(columns());
+        this.findActiveRecordsQuery = MessageQuery.of(ImmutableSet.of(), activeQueryParams);
     }
 
     /**
@@ -68,6 +62,34 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
     public Iterator<I> index() {
         Iterator<EntityRecord> iterator = readAll(findActiveRecordsQuery);
         return asIdStream(iterator);
+    }
+
+    @Override
+    public synchronized void write(I id, EntityRecord record) {
+        MessageWithColumns<I, EntityRecord> withEmptyColumns =
+                MessageWithColumns.create(id, record, new HashMap<>());
+        write(withEmptyColumns);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides the parent method in order to expose it as a part of public API.
+     */
+    @Override
+    //TODO:2020-03-31:alex.tymchenko: do we take `EntityRecordWithColumns` instead?
+    public void write(MessageWithColumns<I, EntityRecord> record) {
+        super.write(record);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides the parent method in order to expose it as a part of public API.
+     */
+    @Override
+    public void writeAll(Iterable<? extends MessageWithColumns<I, EntityRecord>> records) {
+        super.writeAll(records);
     }
 
     /**
@@ -83,11 +105,37 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
         return readAll(findActiveRecordsQuery, format);
     }
 
-    public void writeBulk(Iterable<EntityRecordWithColumns<I>> records) {
-        List<MessageWithColumns<I, EntityRecord>> convertedList = stream(records).map(
-                r -> (MessageWithColumns<I, EntityRecord>) r)
-                                                                                 .collect(toList());
-        writeAll(convertedList);
+    /**
+     * Reads the entity records by the passed record identifiers, limiting the results
+     * to non-archived and non-deleted records.
+     *
+     * @param ids
+     *         identifiers of the records of interest
+     * @return iterator over the matching entity records
+     */
+    @Override
+    public Iterator<EntityRecord> readAll(Iterable<I> ids) {
+        MessageQuery<I> query = MessageQuery.of(ids, activeQueryParams);
+        return readAll(query);
+    }
+
+    /**
+     * Returns the iterator over all stored non-archived and non-deleted entity records.
+     */
+    @Override
+    public Iterator<EntityRecord> readAll() {
+        return readAll(findActiveRecordsQuery);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides the parent method in sake of the covariance of the returned value.
+     */
+    @Internal
+    @Override
+    public final EntityColumns columns() {
+        return (EntityColumns) super.columns();
     }
 
     /**
