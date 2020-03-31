@@ -20,12 +20,15 @@
 
 package io.spine.system.server;
 
+import io.spine.base.Environment;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @DisplayName("SystemFeatures should")
 class SystemSettingsTest {
@@ -33,6 +36,11 @@ class SystemSettingsTest {
     @Nested
     @DisplayName("by default")
     class Defaults {
+
+        @AfterEach
+        void resetEnv() {
+            Environment.instance().reset();
+        }
 
         @Test
         @DisplayName("enable aggregate mirroring")
@@ -53,6 +61,18 @@ class SystemSettingsTest {
         void events() {
             SystemSettings features = SystemSettings.defaults();
             assertFalse(features.includePersistentEvents());
+        }
+
+        @Test
+        @DisplayName("allow parallel posting for system events")
+        void parallelism() {
+            Environment env = Environment.instance();
+
+            assumeTrue(env.isTests());
+            assertFalse(SystemSettings.defaults().postEventsInParallel());
+
+            env.setToProduction();
+            assertTrue(SystemSettings.defaults().postEventsInParallel());
         }
     }
 
@@ -84,6 +104,15 @@ class SystemSettingsTest {
                     .defaults()
                     .persistEvents();
             assertTrue(features.includePersistentEvents());
+        }
+
+        @Test
+        @DisplayName("system events to be posted in synch")
+        void parallelism() {
+            SystemSettings features = SystemSettings
+                    .defaults()
+                    .disableParallelPosting();
+            assertFalse(features.postEventsInParallel());
         }
     }
 }

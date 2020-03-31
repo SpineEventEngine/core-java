@@ -23,6 +23,7 @@ package io.spine.system.server;
 import com.google.common.base.Objects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
+import io.spine.base.Environment;
 
 /**
  * A configuration of features of a system context.
@@ -51,14 +52,20 @@ public final class SystemSettings implements SystemFeatures {
      *     <li>Enables querying of the latest {@code Aggregate} states.
      *     <li>Does not store {@link io.spine.system.server.CommandLog CommandLog}.
      *     <li>Does not store system events.
+     *     <li>Allows parallel posting of system events in production and disallows in tests.
      * </ol>
      */
     public static SystemSettings defaults() {
-        return new SystemSettings()
+        SystemSettings settings = new SystemSettings()
                 .disableCommandLog()
                 .enableAggregateQuerying()
-                .forgetEvents()
-                .enableParallelPosting();
+                .forgetEvents();
+        if (Environment.instance().isProduction()) {
+            settings.enableParallelPosting();
+        } else {
+            settings.disableParallelPosting();
+        }
+        return settings;
     }
 
     /**
@@ -144,7 +151,7 @@ public final class SystemSettings implements SystemFeatures {
      *
      * <p>The events are posted using {@link java.util.concurrent.ForkJoinPool#commonPool()}.
      *
-     * <p>This is the default setting.
+     * <p>This is the default setting in production environment.
      *
      * @return self for method chaining
      */
@@ -158,6 +165,8 @@ public final class SystemSettings implements SystemFeatures {
      * Configures the system context clients NOT to post system events in parallel.
      *
      * <p>Choosing this configuration option may effect performance.
+     *
+     * <p>This is the default setting in test environment.
      *
      * @return self for method chaining
      */
