@@ -47,8 +47,8 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemFeatures;
 import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemSettings;
 import io.spine.system.server.SystemWriteSide;
 
 import java.util.ArrayList;
@@ -88,7 +88,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     private final Collection<EventDispatcher> eventDispatchers = new ArrayList<>();
 
-    private final SystemFeatures systemFeatures;
+    private final SystemSettings systemFeatures;
 
     private Stand stand;
     private Supplier<AggregateRootDirectory> rootDirectory;
@@ -106,7 +106,7 @@ public final class BoundedContextBuilder implements Logging {
      * @see BoundedContext#multitenant
      */
     BoundedContextBuilder(ContextSpec spec) {
-        this(spec, SystemFeatures.defaults());
+        this(spec, SystemSettings.defaults());
     }
 
     /**
@@ -119,7 +119,7 @@ public final class BoundedContextBuilder implements Logging {
      * @see BoundedContext#singleTenant
      * @see BoundedContext#multitenant
      */
-    private BoundedContextBuilder(ContextSpec spec, SystemFeatures systemFeatures) {
+    private BoundedContextBuilder(ContextSpec spec, SystemSettings systemFeatures) {
         this.spec = checkNotNull(spec);
         this.systemFeatures = checkNotNull(systemFeatures);
     }
@@ -509,9 +509,9 @@ public final class BoundedContextBuilder implements Logging {
      *
      * <p>Users may enable or disable some features of the system context.
      *
-     * @see SystemFeatures
+     * @see SystemSettings
      */
-    public SystemFeatures systemFeatures() {
+    public SystemSettings systemFeatures() {
         return systemFeatures;
     }
 

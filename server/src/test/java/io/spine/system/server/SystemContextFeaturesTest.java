@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.CommandId;
@@ -31,16 +32,22 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.system.server.event.EntityCreated;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.given.entity.HistoryEventWatcher;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.option.EntityOption.Kind.ENTITY;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
+import static java.time.Duration.ofSeconds;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -117,6 +124,32 @@ class SystemContextFeaturesTest {
         BoundedContext domain = contextBuilder.build();
         BoundedContext system = systemOf(domain);
         assertFalse(system.hasEntitiesWithState(Mirror.class));
+    }
+
+    @Test
+    @DisplayName("post system events in parallel")
+    void asyncEvents() {
+        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
+        contextBuilder.systemFeatures()
+                      .enableParallelPosting();
+        BoundedContext domain = contextBuilder.build();
+        BoundedContext system = systemOf(domain);
+        HistoryEventWatcher watcher = new HistoryEventWatcher();
+        system.eventBus().register(watcher);
+        MessageId messageId = MessageId.newBuilder()
+                                       .setTypeUrl(TypeUrl.of(Empty.class).value())
+                                       .setId(Identifier.pack(newUuid()))
+                                       .build();
+        EntityCreated event = EntityCreated
+                .newBuilder()
+                .setEntity(messageId)
+                .setKind(ENTITY)
+                .build();
+        domain.systemClient()
+              .writeSide()
+              .postEvent(event);
+        sleepUninterruptibly(ofSeconds(1));
+        watcher.assertReceivedEvent(EntityCreated.class);
     }
 
     private static MemoizingObserver<Event> postSystemEvent(EventBus systemBus, Event event) {
