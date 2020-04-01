@@ -342,7 +342,7 @@ public class Stand implements AutoCloseable {
     /**
      * Registers the passed {@code Repository} as an entity/event type supplier.
      */
-    public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
+    public void registerTypeSupplier(Repository<?, ?> repository) {
         typeRegistry.register(repository);
         eventRegistry.register(repository);
     }
@@ -481,7 +481,7 @@ public class Stand implements AutoCloseable {
             if (subscriptionRegistry == null) {
                 subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
             }
-            topicValidator = new TopicValidator(typeRegistry, eventRegistry);
+            topicValidator = new TopicValidator(typeRegistry);
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 

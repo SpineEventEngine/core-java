@@ -39,6 +39,8 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.React;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.aggregate.Project;
@@ -47,6 +49,7 @@ import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggOwnerNotified;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -257,6 +260,17 @@ public class Given {
         private void event(AggProjectStarted event) {
             builder().setId(event.getProjectId())
                      .setStatus(Status.STARTED);
+        }
+    }
+
+    public static class AggProjectCreatedReactor extends AbstractEventReactor {
+
+        @React
+        AggOwnerNotified on(AggProjectCreated event, EventContext context) {
+            return AggOwnerNotified
+                    .newBuilder()
+                    .setOwner(context.actor())
+                    .vBuild();
         }
     }
 

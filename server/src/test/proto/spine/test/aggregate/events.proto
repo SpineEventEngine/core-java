@@ -92,3 +92,6 @@ message AggCommentAdded {
     string text = 3;
 }
 
+message AggOwnerNotified {
+    spine.core.UserId owner = 1;
+}
