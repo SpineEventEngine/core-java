@@ -191,8 +191,8 @@ public final class BoundedContextBuilder implements Logging {
      */
     TenantIndex buildTenantIndex() {
         TenantIndex result = isMultitenant()
-            ? checkNotNull(tenantIndex)
-            : TenantIndex.singleTenant();
+                             ? checkNotNull(tenantIndex)
+                             : TenantIndex.singleTenant();
         return result;
     }
 
@@ -318,7 +318,8 @@ public final class BoundedContextBuilder implements Logging {
      * <p>The order of appending the filters to the builder is the order of the filters in
      * the {@code EventBus}.
      *
-     * @param filter the filter to add
+     * @param filter
+     *         the filter to add
      */
     public BoundedContextBuilder addEventFilter(BusFilter<EventEnvelope> filter) {
         checkNotNull(filter);
@@ -603,7 +604,9 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private <B extends BoundedContext>
-    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client, @Nullable Stand systemStand) {
+    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
+                   SystemClient client,
+                   @Nullable Stand systemStand) {
         initTenantIndex();
         initCommandBus(client.writeSide());
         this.stand = createStand(client.readSide(), systemStand);
