@@ -41,7 +41,6 @@ import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityColumns;
-import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
@@ -498,7 +497,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     }
 
     Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
-        MessageQuery<I> query = EntityQueries.messageQueryFrom(filters, stateStorage.columns());
+        MessageQuery<I> query = MessageQuery.messageQueryFrom(filters, stateStorage.columns());
         return stateStorage.readAll(query, format);
     }
 

@@ -32,14 +32,11 @@ import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import io.spine.server.storage.system.given.TestAggregate;
-import io.spine.server.storage.system.given.TestProjection;
 import io.spine.system.server.CompanyId;
-import io.spine.test.storage.TaskId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -99,17 +96,6 @@ class SystemAwareStorageFactoryTest {
                 systemAware.createAggregateStorage(CONTEXT, aggregateClass);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages()).containsExactly(aggregateClass);
-    }
-
-    @Test
-    @DisplayName("delegate record storage creation to given factory")
-    void delegateRecordStorage() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        Class<TestProjection> projectionClass = TestProjection.class;
-        RecordStorage<TaskId> storage = systemAware.createRecordStorage(CONTEXT, projectionClass);
-        assertThat(storage).isNull();
-        assertThat(factory.requestedStorages()).containsExactly(projectionClass);
     }
 
     @Test

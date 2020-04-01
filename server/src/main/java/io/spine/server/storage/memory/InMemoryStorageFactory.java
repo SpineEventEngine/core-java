@@ -21,17 +21,9 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
-import io.spine.base.EntityState;
-import io.spine.server.ContextSpec;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.Columns;
 import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.type.TypeUrl;
-
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
  * A factory for in-memory storages.
@@ -51,30 +43,9 @@ public final class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
-        EntityClass<?> modelClass = asEntityClass(entityClass);
-        StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
-        return new InMemoryRecordStorage<>(storageSpec, entityClass, context.isMultitenant());
-    }
-
-    @Override
     public <I, M extends Message> MessageStorage<I, M>
     createMessageStorage(Columns<M> columns, boolean multitenant) {
         return new InMemoryMessageStorage<>(columns, multitenant);
-    }
-
-    /**
-     * Obtains storage specification for the passed entity class.
-     */
-    private static <I>
-    StorageSpec<I> toStorageSpec(ContextSpec context, EntityClass<?> modelClass) {
-        Class<? extends EntityState> stateClass = modelClass.stateClass();
-        @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
-        Class<I> idClass = (Class<I>) modelClass.idClass();
-        TypeUrl stateUrl = TypeUrl.of(stateClass);
-        StorageSpec<I> result = StorageSpec.of(context.name(), stateUrl, idClass);
-        return result;
     }
 
     @Override

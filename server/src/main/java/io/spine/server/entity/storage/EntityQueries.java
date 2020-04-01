@@ -20,32 +20,7 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
-import io.spine.base.FieldPath;
-import io.spine.base.Identifier;
-import io.spine.client.CompositeFilter;
-import io.spine.client.CompositeFilter.CompositeOperator;
-import io.spine.client.Filter;
-import io.spine.client.TargetFilters;
-import io.spine.server.storage.Column;
-import io.spine.server.storage.Columns;
-import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.RecordStorage;
-
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.HashMultimap.create;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.primitives.Primitives.wrap;
-import static io.spine.protobuf.TypeConverter.toObject;
-import static java.lang.String.join;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -59,119 +34,36 @@ public final class EntityQueries {
     private EntityQueries() {
     }
 
-    /**
-     * Creates new {@link EntityQuery} instances for the given {@link TargetFilters} and
-     * {@link RecordStorage}.
-     *
-     * @param filters
-     *         filters for the Entities specifying the query predicate
-     * @param storage
-     *         a storage for which the query is created
-     * @return new instance of the {@code EntityQuery} with the specified attributes
-     */
-    //TODO:2020-03-18:alex.tymchenko: remove this one, as it is used only in tests.
-    public static <I> EntityQuery<I> from(TargetFilters filters,
-                                          RecordStorage<I> storage) {
-        checkNotNull(filters);
-        checkNotNull(storage);
+//    /**
+//     * Creates new {@link EntityQuery} instances for the given {@link TargetFilters} and
+//     * {@link RecordStorage}.
+//     *
+//     * @param filters
+//     *         filters for the Entities specifying the query predicate
+//     * @param storage
+//     *         a storage for which the query is created
+//     * @return new instance of the {@code EntityQuery} with the specified attributes
+//     */
+//    //TODO:2020-03-18:alex.tymchenko: remove this one, as it is used only in tests.
+//    public static <I> EntityQuery<I> from(TargetFilters filters,
+//                                          RecordStorage<I> storage) {
+//        checkNotNull(filters);
+//        checkNotNull(storage);
+//
+//        EntityColumns entityColumns = storage.columns();
+//        EntityQuery<I> result = from(filters, entityColumns);
+//        return result;
+//    }
 
-        EntityColumns entityColumns = storage.columns();
-        EntityQuery<I> result = from(filters, entityColumns);
-        return result;
-    }
-
-    @VisibleForTesting
-    public static <I> EntityQuery<I> from(TargetFilters filters, EntityColumns columns) {
-        checkNotNull(filters);
-        checkNotNull(columns);
-
-        QueryParameters queryParams = toQueryParams(filters, columns);
-        List<I> ids = toIdentifiers(filters);
-
-        EntityQuery<I> result = EntityQuery.of(ids, queryParams);
-        return result;
-    }
-
-    //TODO:2020-03-30:alex.tymchenko: move this one!
-    public static <I> MessageQuery<I> messageQueryFrom(TargetFilters filters, Columns<?> columns) {
-        checkNotNull(filters);
-        checkNotNull(columns);
-
-        QueryParameters queryParams = toQueryParams(filters, columns);
-        List<I> ids = toIdentifiers(filters);
-
-        MessageQuery<I> result = MessageQuery.of(ids, queryParams);
-        return result;
-    }
-
-    private static QueryParameters toQueryParams(TargetFilters filters, Columns<?> columns) {
-
-        List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, columns);
-        return newQueryParameters(parameters);
-    }
-
-    private static List<CompositeQueryParameter>
-    getFiltersQueryParams(TargetFilters filters, Columns<?> columns) {
-        return filters.getFilterList()
-                      .stream()
-                      .map(filter -> queryParameterFromFilter(filter, columns))
-                      .collect(toList());
-    }
-
-    private static QueryParameters newQueryParameters(List<CompositeQueryParameter> parameters) {
-        return QueryParameters.newBuilder()
-                              .addAll(parameters)
-                              .build();
-    }
-
-    private static CompositeQueryParameter
-    queryParameterFromFilter(CompositeFilter filter, Columns<?> columns) {
-        Multimap<Column, Filter> filters = splitFilters(filter, columns);
-        CompositeOperator operator = filter.getOperator();
-        return CompositeQueryParameter.from(filters, operator);
-    }
-
-    private static Multimap<Column, Filter>
-    splitFilters(CompositeFilter filter, Columns<?> columns) {
-        Multimap<Column, Filter> filters = create(filter.getFilterCount(), 1);
-        for (Filter columnFilter : filter.getFilterList()) {
-            Column column = findMatchingColumn(columnFilter, columns);
-            checkFilterType(column, columnFilter);
-            filters.put(column, columnFilter);
-        }
-        return filters;
-    }
-
-    private static Column findMatchingColumn(Filter filter, Columns<?> columns) {
-        FieldPath fieldPath = filter.getFieldPath();
-        checkArgument(fieldPath.getFieldNameCount() == 1,
-                      "Incorrect Column name in Entity Filter: %s",
-                      join(".", fieldPath.getFieldNameList()));
-        String column = fieldPath.getFieldName(0);
-        ColumnName columnName = ColumnName.of(column);
-        return columns.get(columnName);
-    }
-
-    private static void checkFilterType(Column column, Filter filter) {
-        Class<?> expectedType = column.type();
-        Any filterConvent = filter.getValue();
-        Object filterValue = toObject(filterConvent, expectedType);
-        Class<?> actualType = filterValue.getClass();
-        checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
-                      "Column type mismatch. Column `%s` cannot have value `%s`.",
-                      column,
-                      filterValue);
-    }
-
-    @SuppressWarnings("unchecked" /* The caller is responsible to pass the proper IDs. */)
-    private static <I> List<I> toIdentifiers(TargetFilters filters) {
-        ImmutableList<I> result =
-                filters.getIdFilter()
-                       .getIdList()
-                       .stream()
-                       .map(Identifier::unpack)
-                       .map(i -> (I) i)
-                       .collect(toImmutableList());
-        return result;
-    }
+//    @VisibleForTesting
+//    public static <I> EntityQuery<I> from(TargetFilters filters, EntityColumns columns) {
+//        checkNotNull(filters);
+//        checkNotNull(columns);
+//
+//        QueryParameters queryParams = MessageQuery.toQueryParams(filters, columns);
+//        List<I> ids = MessageQuery.toIdentifiers(filters);
+//
+//        EntityQuery<I> result = EntityQuery.of(ids, queryParams);
+//        return result;
+//    }
 }

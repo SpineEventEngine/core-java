@@ -38,13 +38,11 @@ import io.spine.client.Targets;
 import io.spine.core.Event;
 import io.spine.core.Signal;
 import io.spine.server.entity.storage.EntityColumns;
-import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageWithColumns;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -70,7 +68,7 @@ import static io.spine.validate.Validate.checkValid;
 /**
  * The base class for repositories that store entities as records.
  *
- * <p>Such a repository is backed by {@link RecordStorage}.
+ * <p>Such a repository is backed by {@link EntityRecordStorage}.
  * Entity states are stored as {@link EntityRecord}s.
  *
  * @param <I>
@@ -385,7 +383,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>The field paths in the entity column field filters are specified
      * to contain a single path member - the name of the entity column.
      *
-     * <p>The filtering process is delegated to the underlying {@link RecordStorage}.
+     * <p>The filtering process is delegated to the underlying {@link EntityRecordStorage}.
      *
      * <p>Note: The storage must be assigned before calling this method.
      *
@@ -422,7 +420,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         EntityRecordStorage<I> storage = recordStorage();
         EntityColumns entityColumns = storage.columns();
-        MessageQuery<I> entityQuery = EntityQueries.messageQueryFrom(filters, entityColumns);
+        MessageQuery<I> entityQuery = MessageQuery.messageQueryFrom(filters, entityColumns);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
     }

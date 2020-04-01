@@ -42,20 +42,6 @@ public interface StorageFactory extends AutoCloseable {
     createMessageStorage(Columns<M> columns, boolean multitenant);
 
     /**
-     * Creates a new {@link RecordStorage}.
-     *
-     * @param <I>
-     *         the type of entity IDs
-     * @param context
-     *         specification of the Bounded Context {@code RecordBasedRepository} of which
-     *         requests the creation of the storage
-     * @param entityClass
-     *         the class of entities to be stored
-     */
-    <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass);
-
-    /**
      * Creates a new {@link AggregateStorage}.
      *
      * @param <I>

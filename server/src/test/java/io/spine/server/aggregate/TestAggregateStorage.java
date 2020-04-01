@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.Optional;
 
 /**
- * An {@link AggregateStorage} whose purpose is to intercept the incoming
- * {@linkplain AggregateReadRequest read request}.
+ * An {@link AggregateStorage} whose purpose is to intercept and remember
+ * the parameter values of executed read operations.
  */
 final class TestAggregateStorage extends AggregateStorage<ProjectId> {
 

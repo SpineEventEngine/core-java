@@ -32,7 +32,6 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
-import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.MessageColumns;
@@ -176,7 +175,7 @@ public final class DefaultEventStore
         } else {
             //TODO:2020-03-23:alex.tymchenko: simplify the transformation from `Query` to `MessageQuery`.
             TargetFilters filters = QueryToFilters.convert(query);
-            MessageQuery<EventId> messageQuery = EntityQueries.messageQueryFrom(filters, columns());
+            MessageQuery<EventId> messageQuery = MessageQuery.messageQueryFrom(filters, columns());
 
             return readAll(messageQuery, format);
         }

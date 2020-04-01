@@ -24,15 +24,30 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.protobuf.Any;
+import io.spine.base.FieldPath;
+import io.spine.base.Identifier;
+import io.spine.client.CompositeFilter;
+import io.spine.client.Filter;
+import io.spine.client.TargetFilters;
+import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.QueryParameters;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.HashMultimap.create;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.primitives.Primitives.wrap;
+import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.server.entity.storage.QueryParameters.FIELD_PARAMETERS;
+import static java.lang.String.join;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Alex Tymchenko
@@ -77,6 +92,34 @@ public final class MessageQuery<I> {
         return of(queryParams);
     }
 
+    public static <I> MessageQuery<I> messageQueryFrom(TargetFilters filters, Columns<?> columns) {
+        checkNotNull(filters);
+        checkNotNull(columns);
+
+        QueryParameters queryParams = toQueryParams(filters, columns);
+        List<I> ids = toIdentifiers(filters);
+
+        MessageQuery<I> result = of(ids, queryParams);
+        return result;
+    }
+
+    public static QueryParameters toQueryParams(TargetFilters filters, Columns<?> columns) {
+        List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, columns);
+        return newQueryParameters(parameters);
+    }
+
+    @SuppressWarnings("unchecked" /* The caller is responsible to pass the proper IDs. */)
+    public static <I> List<I> toIdentifiers(TargetFilters filters) {
+        ImmutableList<I> result =
+                filters.getIdFilter()
+                       .getIdList()
+                       .stream()
+                       .map(Identifier::unpack)
+                       .map(i -> (I) i)
+                       .collect(toImmutableList());
+        return result;
+    }
+
     /**
      * Obtains an immutable set of accepted ID values.
      */
@@ -100,6 +143,59 @@ public final class MessageQuery<I> {
         return new MessageQuery<>(ids, newParams);
     }
 
+    private static List<CompositeQueryParameter>
+    getFiltersQueryParams(TargetFilters filters, Columns<?> columns) {
+        return filters.getFilterList()
+                      .stream()
+                      .map(filter -> queryParameterFromFilter(filter, columns))
+                      .collect(toList());
+    }
+
+    private static QueryParameters newQueryParameters(List<CompositeQueryParameter> parameters) {
+        return QueryParameters.newBuilder()
+                              .addAll(parameters)
+                              .build();
+    }
+
+    private static CompositeQueryParameter
+    queryParameterFromFilter(CompositeFilter filter, Columns<?> columns) {
+        Multimap<Column, Filter> filters = splitFilters(filter, columns);
+        CompositeFilter.CompositeOperator operator = filter.getOperator();
+        return CompositeQueryParameter.from(filters, operator);
+    }
+
+    private static Multimap<Column, Filter>
+    splitFilters(CompositeFilter filter, Columns<?> columns) {
+        Multimap<Column, Filter> filters = create(filter.getFilterCount(), 1);
+        for (Filter columnFilter : filter.getFilterList()) {
+            Column column = findMatchingColumn(columnFilter, columns);
+            checkFilterType(column, columnFilter);
+            filters.put(column, columnFilter);
+        }
+        return filters;
+    }
+
+    private static Column findMatchingColumn(Filter filter, Columns<?> columns) {
+        FieldPath fieldPath = filter.getFieldPath();
+        checkArgument(fieldPath.getFieldNameCount() == 1,
+                      "Incorrect Column name in Entity Filter: %s",
+                      join(".", fieldPath.getFieldNameList()));
+        String column = fieldPath.getFieldName(0);
+        ColumnName columnName = ColumnName.of(column);
+        return columns.get(columnName);
+    }
+
+    private static void checkFilterType(Column column, Filter filter) {
+        Class<?> expectedType = column.type();
+        Any filterConvent = filter.getValue();
+        Object filterValue = toObject(filterConvent, expectedType);
+        Class<?> actualType = filterValue.getClass();
+        checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
+                      "Column type mismatch. Column `%s` cannot have value `%s`.",
+                      column,
+                      filterValue);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -108,7 +204,7 @@ public final class MessageQuery<I> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        EntityQuery<?> query = (EntityQuery<?>) o;
+        MessageQuery<?> query = (MessageQuery<?>) o;
         return Objects.equal(getIds(), query.getIds()) &&
                 Objects.equal(getParameters(), query.getParameters());
     }

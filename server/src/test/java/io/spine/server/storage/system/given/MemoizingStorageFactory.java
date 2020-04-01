@@ -27,11 +27,9 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
-import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
 import io.spine.server.storage.Columns;
 import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.ArrayList;
@@ -56,13 +54,6 @@ public final class MemoizingStorageFactory implements StorageFactory {
     createAggregateStorage(ContextSpec context,
                            Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
         requestedStorages.add(aggregateClass);
-        return nullRef();
-    }
-
-    @Override
-    public <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
-        requestedStorages.add(entityClass);
         return nullRef();
     }
 

@@ -26,16 +26,13 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.Column;
-import io.spine.server.storage.RecordStorage;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.storage.QueryParameters.FIELD_PARAMETERS;
-import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
 
 /**
  * A query to a {@link io.spine.server.storage.RecordStorage RecordStorage} for the records
@@ -122,28 +119,6 @@ public final class EntityQuery<I> {
     @Internal
     public boolean isLifecycleAttributesSet() {
         return parameters.isLifecycleAttributesSet();
-    }
-
-    /**
-     * Creates a new instance of {@code EntityQuery} with all the parameters from current instance
-     * and the default values of the {@link io.spine.server.entity.LifecycleFlags LifecycleFlags}.
-     *
-     * <p>The precondition for this method is that current instance
-     * {@linkplain #isLifecycleAttributesSet() does not specify the values}.
-     *
-     * @param storage
-     *         the {@linkplain RecordStorage storage} for which this {@code EntityQuery} is created
-     * @return new instance of {@code EntityQuery}
-     */
-    @Internal
-    public EntityQuery<I> withActiveLifecycle(RecordStorage<I> storage) {
-        checkState(canAppendLifecycleFlags(),
-                   "The query overrides Lifecycle Flags default values.");
-        QueryParameters parameters = QueryParameters.newBuilder(getParameters())
-                                                    .addAll(activeEntityQueryParams(storage))
-                                                    .build();
-        EntityQuery<I> result = new EntityQuery<>(ids, parameters);
-        return result;
     }
 
     @Override
