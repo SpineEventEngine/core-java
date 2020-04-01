@@ -29,6 +29,7 @@ import io.spine.server.storage.MessageColumn;
 /**
  * Columns stored along with an {@link AggregateEventRecord}.
  */
+//TODO:2020-04-01:alex.tymchenko: consider introducing a common interface for the enums like this one.
 public enum AggregateEventRecordColumn {
 
     aggregateId("aggregate_id",

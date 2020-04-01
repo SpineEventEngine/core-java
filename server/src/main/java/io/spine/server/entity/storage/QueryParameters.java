@@ -44,6 +44,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
  * implementations.
  */
+//TODO:2020-04-01:alex.tymchenko: consider another package.
 @SPI // Available to SPI users providing own `Storage` implementations.
 public final class QueryParameters implements Iterable<CompositeQueryParameter> {
 

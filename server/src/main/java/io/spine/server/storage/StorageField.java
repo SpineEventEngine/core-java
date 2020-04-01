@@ -30,6 +30,7 @@ package io.spine.server.storage;
  * <p>Owing to that, we may simply call {@link Enum#toString()} or {@link Enum#name()}
  * to get a valid field name.
  */
+//TODO:2020-04-01:alex.tymchenko: remove in favour of the columns.
 public interface StorageField {
 
     /**

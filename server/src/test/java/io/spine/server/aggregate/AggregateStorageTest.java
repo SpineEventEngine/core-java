@@ -89,6 +89,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+//TODO:2020-04-01:alex.tymchenko: test the new Aggregate columns feature.
 public class AggregateStorageTest
         extends AbstractStorageTest<ProjectId, AggregateHistory, AggregateStorage<ProjectId>> {
 
