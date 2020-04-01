@@ -32,7 +32,6 @@ import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.StorageFactory;
 
-import java.util.HashMap;
 import java.util.Iterator;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -66,9 +65,8 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
 
     @Override
     public synchronized void write(I id, EntityRecord record) {
-        MessageWithColumns<I, EntityRecord> withEmptyColumns =
-                MessageWithColumns.create(id, record, new HashMap<>());
-        write(withEmptyColumns);
+        EntityRecordWithColumns<I> withLifecycleCols = EntityRecordWithColumns.create(id, record);
+        write(withLifecycleCols);
     }
 
     /**

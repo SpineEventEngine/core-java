@@ -88,7 +88,7 @@ import static java.lang.String.format;
  *         the type of IDs of aggregates managed by this storage
  */
 @SPI
-public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory>{
+public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
 
     private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
             "The specified snapshot index is incorrect";
@@ -507,7 +507,14 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory>{
 //        if (!mirrorEnabled) {
 //            return;
 //        }
+        EntityRecord record = toStateRecord(aggregate);
         EntityColumns columns = EntityColumns.of(aggregate.modelClass());
+        EntityRecordWithColumns<I> result =
+                EntityRecordWithColumns.create(aggregate, columns, record);
+        stateStorage.write(result);
+    }
+
+    private EntityRecord toStateRecord(Aggregate<I, ?, ?> aggregate) {
         LifecycleFlags flags = aggregate.lifecycleFlags();
         I id = aggregate.id();
         Version version = aggregate.version();
@@ -521,11 +528,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory>{
             EntityState state = aggregate.state();
             builder.setState(AnyPacker.pack(state));
         }
-        EntityRecord record = builder.vBuild();
-        MessageWithColumns<I, EntityRecord> result =
-                EntityRecordWithColumns.create(aggregate, columns, record);
-
-        stateStorage.write(result);
+        return builder.vBuild();
     }
 
     /**

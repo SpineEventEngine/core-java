@@ -96,6 +96,15 @@ public final class EntityColumns extends Columns<EntityRecord> {
         return of(asEntityClass(cls));
     }
 
+    static ImmutableMap<ColumnName, Object> lifecycleValuesIn(EntityRecord record) {
+        ImmutableMap.Builder<ColumnName, Object> builder = ImmutableMap.builder();
+        for (LifecycleColumn column : LifecycleColumn.values()) {
+            Boolean value = column.valueIn(record);
+            builder.put(column.columnName(), value);
+        }
+        return builder.build();
+    }
+
     @Override
     public Optional<Column> find(ColumnName columnName) {
         checkNotNull(columnName);

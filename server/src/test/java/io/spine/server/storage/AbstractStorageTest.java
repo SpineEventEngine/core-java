@@ -105,7 +105,7 @@ public abstract class AbstractStorageTest<I,
     protected abstract S newStorage(Class<? extends Entity<?, ?>> cls);
 
     /** Creates a new storage record. */
-    protected abstract M newStorageRecord();
+    protected abstract M newStorageRecord(I id);
 
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
@@ -149,7 +149,7 @@ public abstract class AbstractStorageTest<I,
 
     @CanIgnoreReturnValue
     private M writeRecord(I id) {
-        M expected = newStorageRecord();
+        M expected = newStorageRecord(id);
         storage.write(id, expected);
         return expected;
     }
@@ -181,7 +181,7 @@ public abstract class AbstractStorageTest<I,
         @DisplayName("writing by null ID")
         void writeByNullId() {
             assertThrows(NullPointerException.class,
-                         () -> storage.write(nullRef(), newStorageRecord()));
+                         () -> storage.write(nullRef(), newStorageRecord(newId())));
         }
 
         @Test
@@ -340,8 +340,9 @@ public abstract class AbstractStorageTest<I,
         void write() {
             closeAndFailIfException(storage);
 
+            I id = newId();
             assertThrows(IllegalStateException.class,
-                         () -> storage.write(newId(), newStorageRecord()));
+                         () -> storage.write(id, newStorageRecord(id)));
         }
 
         @Test

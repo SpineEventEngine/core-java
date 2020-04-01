@@ -117,7 +117,7 @@ public abstract class AggregateStorageTest
     }
 
     @Override
-    protected AggregateHistory newStorageRecord() {
+    protected AggregateHistory newStorageRecord(ProjectId id) {
         List<AggregateEventRecord> records = sequenceFor(id);
         List<Event> expectedEvents = records.stream()
                                             .map(AggregateStorageTest::toEvent)
@@ -399,7 +399,7 @@ public abstract class AggregateStorageTest
         }
 
         private void readRecordsWithLifecycle(LifecycleFlags flags) {
-            AggregateHistory record = newStorageRecord();
+            AggregateHistory record = newStorageRecord(id);
             storage.write(id, record);
             storage.writeLifecycleFlags(id, flags);
             AggregateHistory readRecord = readRecord(id);

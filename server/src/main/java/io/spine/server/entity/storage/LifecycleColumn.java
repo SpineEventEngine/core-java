@@ -18,36 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.entity.storage;
 
-import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
-import io.spine.server.entity.storage.ColumnName;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.function.Function;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.LifecycleFlagField;
+import io.spine.server.storage.MessageColumn;
 
 /**
  * @author Alex Tymchenko
  */
-@Immutable
-@Internal
-public final class MessageColumn<V, M extends Message> extends AbstractColumn {
+public enum LifecycleColumn {
 
-    private final Getter<M, V> getter;
+    archived(new MessageColumn<>(ColumnName.of(LifecycleFlagField.archived),
+                                 Boolean.class,
+                                 (r) -> r.getLifecycleFlags()
+                                         .getArchived())),
 
-    public MessageColumn(ColumnName name, Class<V> type, Getter<M, V> getter) {
-        super(name, type);
-        this.getter = getter;
+    deleted(new MessageColumn<>(ColumnName.of(LifecycleFlagField.deleted),
+                                Boolean.class,
+                                (r) -> r.getLifecycleFlags()
+                                        .getDeleted()));
+
+    private final MessageColumn<Boolean, EntityRecord> column;
+
+    LifecycleColumn(MessageColumn<Boolean, EntityRecord> column) {
+        this.column = column;
     }
 
-    public @Nullable V valueIn(M record) {
-        return getter.apply(record);
+    ColumnName columnName() {
+        return column.name();
     }
 
-    @Immutable
-    @FunctionalInterface
-    public interface Getter<M extends Message, V> extends Function<M, V> {
+    Boolean valueIn(EntityRecord record) {
+        return column.valueIn(record);
     }
 }

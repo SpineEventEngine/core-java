@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.server.entity.Entity;
@@ -33,7 +34,6 @@ import io.spine.server.storage.MessageWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -88,17 +88,12 @@ public final class EntityRecordWithColumns<I>
         return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
     }
 
-    public static <I> EntityRecordWithColumns<I>
-    create(I id, EntityRecord record, Map<ColumnName, Object> columns) {
-        checkNotNull(id);
-        checkNotNull(record);
-        checkNotNull(columns);
-        return new EntityRecordWithColumns<>(id, record, columns);
-    }
-
     @Internal
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
-        return create(id, record, new HashMap<>());
+        checkNotNull(id);
+        checkNotNull(record);
+        ImmutableMap<ColumnName, Object> lifecycleValues = EntityColumns.lifecycleValuesIn(record);
+        return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
     /**
      * Wraps a passed entity record.

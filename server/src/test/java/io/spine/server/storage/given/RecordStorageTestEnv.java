@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.given;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityState;
@@ -32,7 +31,6 @@ import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
@@ -41,14 +39,11 @@ import io.spine.testing.core.given.GivenVersion;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -103,15 +98,7 @@ public class RecordStorageTestEnv {
     }
 
     public static <I> EntityRecordWithColumns<I> withLifecycleColumns(I id, EntityRecord record) {
-        LifecycleFlags flags = record.getLifecycleFlags();
-        Map<ColumnName, Object> columns = ImmutableMap.of(
-                ColumnName.of(archived),
-                flags.getArchived(),
-                ColumnName.of(deleted),
-                flags.getDeleted()
-        );
-
-        EntityRecordWithColumns<I> result = EntityRecordWithColumns.create(id, record, columns);
+        EntityRecordWithColumns<I> result = EntityRecordWithColumns.create(id, record);
         return result;
     }
 

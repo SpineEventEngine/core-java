@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
+import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
@@ -73,10 +74,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, S> {
 
-    private static EntityRecord newStorageRecord(EntityState state) {
+    private static <I> EntityRecord newStorageRecord(I id, EntityState state) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
                 .newBuilder()
+                .setEntityId(Identifier.pack(id))
                 .setState(wrappedState)
                 .setVersion(GivenVersion.withNumber(0))
                 .build();
@@ -94,8 +96,9 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordS
      */
     protected abstract EntityState newState(I id);
 
+    @Override
     protected EntityRecord newStorageRecord(I id) {
-        return newStorageRecord(newState(id));
+        return newStorageRecord(id, newState(id));
     }
 
     @Test
@@ -151,27 +154,6 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordS
     }
 
     @Test
-    @DisplayName("accept records with empty storage fields")
-    void acceptRecordsWithEmptyColumns() {
-        I id = newId();
-        EntityRecord record = newStorageRecord(id);
-        EntityRecordWithColumns<I> recordWithStorageFields =
-                EntityRecordWithColumns.create(id, record);
-        assertFalse(recordWithStorageFields.hasColumns());
-        EntityRecordStorage<I> storage = storage();
-
-        storage.write(recordWithStorageFields);
-        Optional<EntityRecord> actualRecord = storage.read(id);
-        assertTrue(actualRecord.isPresent());
-        assertEquals(record, actualRecord.get());
-    }
-
-    @Override
-    protected EntityRecord newStorageRecord() {
-        return newStorageRecord(newState(newId()));
-    }
-
-    @Test
     @DisplayName("given field mask, read single record")
     void singleRecord() {
         I id = newId();
@@ -205,7 +187,7 @@ public abstract class AbstractEntityRecordStorageTest<I, S extends EntityRecordS
             if (stateClass == null) {
                 stateClass = state.getClass();
             }
-            EntityRecord record = newStorageRecord(state);
+            EntityRecord record = newStorageRecord(id, state);
             storage.write(id, record);
             ids.add(id);
         }

@@ -77,6 +77,7 @@ final class SimpleColumn
     }
 
     @Immutable
+    @FunctionalInterface
     interface Getter extends Function<EntityState, Object> {
     }
 }

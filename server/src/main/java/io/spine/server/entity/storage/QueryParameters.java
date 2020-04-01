@@ -111,6 +111,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                            .build();
     }
 
+    //TODO:2020-04-01:alex.tymchenko: use `EntityColumns` here.
     public static QueryParameters activeEntityQueryParams(Columns<?> columns) {
         ColumnName archivedColumnName = ColumnName.of(archived);
         ColumnName deletedColumnName = ColumnName.of(deleted);
