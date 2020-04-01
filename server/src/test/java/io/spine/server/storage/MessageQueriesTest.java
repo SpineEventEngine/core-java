@@ -59,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`MessageQueries` utility should")
+//TODO:2020-04-01:alex.tymchenko: add the tests for the rest of the factory methods.
 class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
 
     private MessageQueriesTest() {
