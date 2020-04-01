@@ -50,6 +50,7 @@ import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemSettings;
 import io.spine.system.server.SystemWriteSide;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -551,6 +552,7 @@ public final class BoundedContextBuilder implements Logging {
     EventBus buildEventBus(BoundedContext context) {
         checkNotNull(context);
         eventBus.injectContext(context);
+        eventBus.addListener(stand.eventObserver());
         return eventBus.build();
     }
 
@@ -574,7 +576,7 @@ public final class BoundedContextBuilder implements Logging {
         SystemClient systemClient = system.createClient();
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemClient);
-        BoundedContext result = buildPartial(instanceFactory, systemClient);
+        BoundedContext result = buildPartial(instanceFactory, systemClient, system.stand());
         return result;
     }
 
@@ -597,9 +599,14 @@ public final class BoundedContextBuilder implements Logging {
 
     private <B extends BoundedContext>
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
+        return buildPartial(instanceFactory, client, null);
+    }
+
+    private <B extends BoundedContext>
+    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client, @Nullable Stand systemStand) {
         initTenantIndex();
         initCommandBus(client.writeSide());
-        this.stand = createStand(client.readSide());
+        this.stand = createStand(client.readSide(), systemStand);
         B result = instanceFactory.apply(this);
         return result;
     }
@@ -618,11 +625,14 @@ public final class BoundedContextBuilder implements Logging {
                   .injectTenantIndex(tenantIndex);
     }
 
-    private Stand createStand(SystemReadSide systemReadSide) {
+    private Stand createStand(SystemReadSide systemReadSide, @Nullable Stand systemStand) {
         Stand.Builder result = Stand
                 .newBuilder()
                 .setMultitenant(isMultitenant())
                 .setSystemReadSide(systemReadSide);
+        if (systemStand != null) {
+            result.withSubscriptionRegistryFrom(systemStand);
+        }
         return result.build();
     }
 

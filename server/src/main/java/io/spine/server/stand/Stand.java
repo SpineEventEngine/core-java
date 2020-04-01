@@ -22,7 +22,6 @@ package io.spine.server.stand;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -39,18 +38,16 @@ import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.Identity;
+import io.spine.server.bus.Listener;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.model.StateClass;
-import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.event.EntityStateChanged;
@@ -72,9 +69,7 @@ import static io.spine.grpc.StreamObservers.ack;
  * <p>Each {@link io.spine.server.BoundedContext BoundedContext} contains only one
  * instance of {@code Stand}.
  *
- * <p>To deliver subscription updates to {@link io.spine.server.SubscriptionService
- * SubscriptionService} the {@code Stand} subscribes to all the {@linkplain #messageClasses()
- * domestic events} produced in the {@code BoundedContext} to which it belongs.
+ * // TODO:2020-04-01:dmytro.dashenkov: Explain {@link EventTap}.
  *
  * <p>The {@code Stand} is responsible for obtaining results of
  * {@linkplain #execute(Query, StreamObserver) queries} sent by
@@ -83,14 +78,14 @@ import static io.spine.grpc.StreamObservers.ack;
  * <p>The {@code Stand} also manages {@linkplain #subscribe(Topic, StreamObserver)
  * creation of subscriptions}, their
  * {@linkplain #activate(Subscription, SubscriptionCallback, StreamObserver) activation}, and
- * {@linkplain #handle(EventEnvelope) delivering updates} to the subscribers when requested by
+ * delivering updates to the subscribers when requested by
  * the {@linkplain io.spine.server.SubscriptionService SubscriptionService}.
  *
  * @see <a href="https://spine.io/docs/concepts/diagrams/spine-architecture-diagram-full-screen.html">
  *     Spine Architecture Diagram</a>
  */
 @SuppressWarnings("OverlyCoupledClass")
-public class Stand extends AbstractEventSubscriber implements AutoCloseable {
+public class Stand implements AutoCloseable {
 
     /**
      * Used to return an empty result collection for {@link Query}.
@@ -119,6 +114,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     private final SubscriptionValidator subscriptionValidator;
 
     private final AggregateQueryProcessor aggregateQueryProcessor;
+    private final EventTap eventTap;
 
     private Stand(Builder builder) {
         super();
@@ -132,6 +128,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         this.queryValidator = builder.queryValidator();
         this.subscriptionValidator = builder.subscriptionValidator();
         this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.systemReadSide());
+        this.eventTap = new EventTap(subscriptionRegistry);
     }
 
     public static Builder newBuilder() {
@@ -167,67 +164,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         lifecycle.onStateChanged(change,
                                  ImmutableSet.of(origin),
                                  Origin.getDefaultInstance());
-    }
-
-    /**
-     * Receives an event and notifies matching subscriptions.
-     */
-    @Override
-    protected void handle(EventEnvelope event) {
-        TypeUrl typeUrl = event.typeUrl();
-        if (subscriptionRegistry.hasType(typeUrl)) {
-            subscriptionRegistry.byType(typeUrl)
-                                .stream()
-                                .filter(SubscriptionRecord::isActive)
-                                .forEach(record -> record.update(event));
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Always returns {@code true} as the filtering happens in {@link #handle(EventEnvelope)}.
-     */
-    @Override
-    public boolean canDispatch(EventEnvelope event) {
-        return true;
-    }
-
-    /**
-     * Obtains all classes of all the events to which the {@code Stand} subscribes.
-     *
-     * <p>This includes all types of the events produced by the associated repositories and
-     * {@link EntityStateChanged}. The latter is for the {@code Stand} to notify subscriptions
-     * on updated entity states.
-     */
-    @Override
-    public ImmutableSet<EventClass> messageClasses() {
-        ImmutableSet<EventClass> resultSet =
-                ImmutableSet.<EventClass>builder()
-                        .addAll(eventRegistry.eventClasses())
-                        .add(StateClass.updateEvent())
-                        .build();
-        return resultSet;
-    }
-
-    /**
-     * Returns empty set because {@code Stand} does not consume external events.
-     */
-    @Override
-    public ImmutableSet<EventClass> externalEventClasses() {
-        return ImmutableSet.of();
-    }
-
-    /**
-     * Obtains the set of event classes to which the {@code Stand} subscribes.
-     *
-     * <p>Returns the same as {@link #messageClasses()}.
-     *
-     * @see #messageClasses()
-     */
-    @Override
-    public ImmutableSet<EventClass> domesticEventClasses() {
-        return eventClasses();
     }
 
     @Internal
@@ -323,6 +259,10 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             }
         };
         op.execute();
+    }
+
+    public Listener<EventEnvelope> eventObserver() {
+        return eventTap;
     }
 
     /**
@@ -443,7 +383,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         return aggregateQueryProcessor;
     }
 
-    @CanIgnoreReturnValue
     public static class Builder {
 
         /**
@@ -467,15 +406,25 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         private SubscriptionValidator subscriptionValidator;
         private SystemReadSide systemReadSide;
 
+        @CanIgnoreReturnValue
         @Internal
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
         }
 
+        @CanIgnoreReturnValue
         @Internal
         public Builder setSystemReadSide(SystemReadSide readSide) {
             this.systemReadSide = checkNotNull(readSide);
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        @Internal
+        public Builder withSubscriptionRegistryFrom(Stand other) {
+            checkNotNull(other);
+            this.subscriptionRegistry = checkNotNull(other.subscriptionRegistry);
             return this;
         }
 
@@ -520,14 +469,15 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
          *
          * @return new instance of Stand
          */
-        @CheckReturnValue
         @Internal
         public Stand build() {
             checkState(systemReadSide != null, "SystemWriteSide is not set.");
             boolean multitenant = this.multitenant == null
                                   ? false
                                   : this.multitenant;
-            subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
+            if (subscriptionRegistry == null) {
+                subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
+            }
             topicValidator = new TopicValidator(typeRegistry, eventRegistry);
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
