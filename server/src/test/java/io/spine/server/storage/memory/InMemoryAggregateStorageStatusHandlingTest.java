@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageLifecycleFlagsHandlingTest;
@@ -35,6 +36,8 @@ public class InMemoryAggregateStorageStatusHandlingTest
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
-        return InMemoryAggregateStorage.newInstance(aggregateClass);
+        ContextSpec spec =
+                ContextSpec.singleTenant("In-memory `AggregateStorage` tests of lifecycle flags");
+        return InMemoryStorageFactory.newInstance().createAggregateStorage(spec, aggregateClass);
     }
 }

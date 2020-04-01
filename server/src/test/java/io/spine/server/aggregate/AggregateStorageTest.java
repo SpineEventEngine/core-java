@@ -37,6 +37,8 @@ import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.ContextSpec;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
@@ -53,6 +55,7 @@ import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -86,10 +89,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public abstract class AggregateStorageTest
-        extends AbstractStorageTest<ProjectId,
-        AggregateHistory,
-        AggregateStorage<ProjectId>> {
+public class AggregateStorageTest
+        extends AbstractStorageTest<ProjectId, AggregateHistory, AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
 
@@ -170,8 +171,16 @@ public abstract class AggregateStorageTest
      *         the type of aggregate IDs
      * @return a new storage instance
      */
-    protected abstract <I> AggregateStorage<I>
-    newStorage(Class<? extends I> idClass, Class<? extends Aggregate<I, ?, ?>> aggregateClass);
+    protected <I> AggregateStorage<I>
+    newStorage(Class<? extends I> idClass, Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
+        ContextSpec spec = ContextSpec.singleTenant("`AggregateStorage` tests");
+        AggregateStorage<I> result =
+                ServerEnvironment.instance()
+                                 .storageFactory()
+                                 .createAggregateStorage(spec,
+                                                         aggregateClass);
+        return result;
+    }
 
     @Nested
     @DisplayName("being empty, return")
@@ -288,12 +297,10 @@ public abstract class AggregateStorageTest
     }
 
     // Ignore this test because several records can be stored by an aggregate ID.
-    @SuppressWarnings({
-            "NoopMethodInAbstractClass",
-            "RefusedBequest",
-    })
+    @SuppressWarnings("RefusedBequest")
     @Override
     @Test
+    @Disabled
     @DisplayName("re-write record if writing by the same ID")
     protected void rewriteRecord() {
     }

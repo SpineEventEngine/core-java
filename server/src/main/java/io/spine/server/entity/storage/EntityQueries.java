@@ -81,7 +81,7 @@ public final class EntityQueries {
     }
 
     @VisibleForTesting
-    static <I> EntityQuery<I> from(TargetFilters filters, Columns<?> columns) {
+    public static <I> EntityQuery<I> from(TargetFilters filters, EntityColumns columns) {
         checkNotNull(filters);
         checkNotNull(columns);
 

@@ -21,20 +21,20 @@
 package io.spine.server.entity.storage;
 
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.MessageColumn;
 
 /**
- * @author Alex Tymchenko
+ * {@link MessageColumn}s storing the lifecycle attributes of an {@code Entity} within
+ * an {@link EntityRecord}.
  */
 public enum LifecycleColumn {
 
-    archived(new MessageColumn<>(ColumnName.of(LifecycleFlagField.archived),
+    archived(new MessageColumn<>(ColumnName.of("archived"),
                                  Boolean.class,
                                  (r) -> r.getLifecycleFlags()
                                          .getArchived())),
 
-    deleted(new MessageColumn<>(ColumnName.of(LifecycleFlagField.deleted),
+    deleted(new MessageColumn<>(ColumnName.of("deleted"),
                                 Boolean.class,
                                 (r) -> r.getLifecycleFlags()
                                         .getDeleted()));

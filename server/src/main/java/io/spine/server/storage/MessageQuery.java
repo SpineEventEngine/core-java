@@ -45,15 +45,7 @@ public final class MessageQuery<I> {
     private final QueryParameters parameters;
 
     /**
-     * Creates new instance of {@code EntityQuery}.
-     *
-     * @param ids
-     *         the accepted ID values
-     * @param parameters
-     *         the values of the {@link Column}s stored in a mapping of the
-     *         {@link Column}'s metadata to the (multiple) acceptable values;
-     *         if there are no values, all the values are matched upon such a column
-     * @return new instance of {@code EntityQuery}
+     * Creates new instance of {@code MessageQuery}.
      */
     public static <I> MessageQuery<I> of(Iterable<I> ids, QueryParameters parameters) {
         checkNotNull(ids);

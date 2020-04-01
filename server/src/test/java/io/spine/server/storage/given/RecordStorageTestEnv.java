@@ -23,7 +23,6 @@ package io.spine.server.storage.given;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityState;
-import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.EntityRecord;
@@ -78,6 +77,18 @@ public class RecordStorageTestEnv {
         return record;
     }
 
+    public static EntityRecord buildStorageRecord(TestCounterEntity entity) {
+        Any wrappedState = pack(entity.state());
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(pack(entity.id()))
+                .setState(wrappedState)
+                .setVersion(GivenVersion.withNumber(0))
+                .setLifecycleFlags(entity.lifecycleFlags())
+                .build();
+        return record;
+    }
+
     /**
      * Creates new instance of the test entity.
      */
@@ -107,10 +118,6 @@ public class RecordStorageTestEnv {
         EntityRecord singleRecord = actual.next();
         assertFalse(actual.hasNext());
         assertEquals(expected, singleRecord);
-    }
-
-    public static TargetFilters emptyFilters() {
-        return TargetFilters.getDefaultInstance();
     }
 
     public static <E> void assertIteratorsEqual(Iterator<? extends E> first,

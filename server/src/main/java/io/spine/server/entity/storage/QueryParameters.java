@@ -30,7 +30,6 @@ import io.spine.annotation.SPI;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.server.storage.Column;
-import io.spine.server.storage.Columns;
 import io.spine.server.storage.MessageColumn;
 import io.spine.server.storage.RecordStorage;
 
@@ -111,8 +110,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                            .build();
     }
 
-    //TODO:2020-04-01:alex.tymchenko: use `EntityColumns` here.
-    public static QueryParameters activeEntityQueryParams(Columns<?> columns) {
+    public static QueryParameters activeEntityQueryParams(EntityColumns columns) {
         ColumnName archivedColumnName = ColumnName.of(archived);
         ColumnName deletedColumnName = ColumnName.of(deleted);
         Optional<Column> archivedColumn = columns.find(archivedColumnName);
