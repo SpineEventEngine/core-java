@@ -552,7 +552,7 @@ public final class BoundedContextBuilder implements Logging {
     EventBus buildEventBus(BoundedContext context) {
         checkNotNull(context);
         eventBus.injectContext(context);
-        eventBus.addListener(stand.eventObserver());
+        eventBus.addListener(stand.eventListener());
         return eventBus.build();
     }
 

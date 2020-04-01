@@ -69,8 +69,6 @@ import static io.spine.grpc.StreamObservers.ack;
  * <p>Each {@link io.spine.server.BoundedContext BoundedContext} contains only one
  * instance of {@code Stand}.
  *
- * // TODO:2020-04-01:dmytro.dashenkov: Explain {@link EventTap}.
- *
  * <p>The {@code Stand} is responsible for obtaining results of
  * {@linkplain #execute(Query, StreamObserver) queries} sent by
  * the {@link io.spine.server.QueryService QueryService}.
@@ -94,6 +92,8 @@ public class Stand implements AutoCloseable {
 
     /**
      * Manages the subscriptions for this instance of {@code Stand}.
+     *
+     * <p>The registry is shared between a domain Bounded Context and its system counterpart.
      */
     private final SubscriptionRegistry subscriptionRegistry;
 
@@ -261,7 +261,10 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
-    public Listener<EventEnvelope> eventObserver() {
+    /**
+     * Obtains the bus listener which propagates all events and state updates to subscriptions.
+     */
+    public Listener<EventEnvelope> eventListener() {
         return eventTap;
     }
 
