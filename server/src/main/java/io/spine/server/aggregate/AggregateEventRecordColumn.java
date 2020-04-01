@@ -27,7 +27,7 @@ import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.storage.MessageColumn;
 
 /**
- * @author Alex Tymchenko
+ * Columns stored along with an {@link AggregateEventRecord}.
  */
 public enum AggregateEventRecordColumn {
 
