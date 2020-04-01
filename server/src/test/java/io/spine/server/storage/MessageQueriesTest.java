@@ -21,12 +21,42 @@
 package io.spine.server.storage;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Message;
+import io.spine.base.Identifier;
+import io.spine.client.CompositeFilter;
+import io.spine.client.Filter;
+import io.spine.client.Filters;
+import io.spine.client.IdFilter;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.CompositeQueryParameter;
+import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.entity.storage.QueryParameters;
+import io.spine.server.entity.storage.given.TestEntity;
+import io.spine.server.entity.storage.given.TestProjection;
+import io.spine.test.entity.ProjectId;
+import io.spine.testdata.Sample;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.Collection;
+import java.util.List;
+
+import static com.google.common.collect.Iterators.size;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`MessageQueries` utility should")
 class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
@@ -40,9 +70,10 @@ class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
         super.configure(tester);
 
         tester.setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
-                .setDefault(QueryParameters.class, QueryParameters.newBuilder().build())
-                .setDefault(MessageColumn.class, sampleColumn())
-                .setDefault(Columns.class, MessageColumns.emptyOf(Any.class))
+              .setDefault(QueryParameters.class, QueryParameters.newBuilder()
+                                                                .build())
+              .setDefault(MessageColumn.class, sampleColumn())
+              .setDefault(Columns.class, MessageColumns.emptyOf(Any.class))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -50,100 +81,101 @@ class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
         return new MessageColumn<>(ColumnName.of("sample"), String.class, (v) -> "");
     }
 
-//    private static MessageQuery<?> createEntityQuery(TargetFilters filters,
-//                                                    Class<? extends Entity<?, ?>> entityClass) {
-//        EntityColumns columns = EntityColumns.of(entityClass);
-//        return EntityQueries.from(filters, columns);
-//    }
-//
-//    @Test
-//    @DisplayName("check filter type")
-//    void checkFilterType() {
-//        // Boolean EntityColumn queried for for an Integer value
-//        Filter filter = Filters.gt(archived.name(), 42);
-//        CompositeFilter compositeFilter = Filters.all(filter);
-//        TargetFilters filters = TargetFilters
-//                .newBuilder()
-//                .addFilter(compositeFilter)
-//                .build();
-//
-//        assertThrows(IllegalArgumentException.class,
-//                     () -> createEntityQuery(filters, TestEntity.class));
-//    }
-//
-//    @Test
-//    @DisplayName("not create query for non-existing column")
-//    void notCreateForNonExisting() {
-//        Filter filter = Filters.eq("nonExistingColumn", 42);
-//        CompositeFilter compositeFilter = Filters.all(filter);
-//        TargetFilters filters = TargetFilters
-//                .newBuilder()
-//                .addFilter(compositeFilter)
-//                .build();
-//
-//        assertThrows(IllegalArgumentException.class,
-//                     () -> createEntityQuery(filters, TestEntity.class));
-//    }
-//
-//    @Test
-//    @DisplayName("construct empty queries")
-//    void constructEmptyQueries() {
-//        TargetFilters filters = TargetFilters.getDefaultInstance();
-//        EntityQuery<?> query = createEntityQuery(filters, TestEntity.class);
-//        assertNotNull(query);
-//
-//        assertTrue(query.getIds()
-//                        .isEmpty());
-//
-//        QueryParameters parameters = query.getParameters();
-//        assertEquals(0, size(parameters.iterator()));
-//    }
-//
-//    @Test
-//    @DisplayName("construct non-empty queries")
-//    void constructNonEmptyQueries() {
-//        Message someGenericId = Sample.messageOfType(ProjectId.class);
-//        Any entityId = AnyPacker.pack(someGenericId);
-//        IdFilter idFilter = IdFilter
-//                .newBuilder()
-//                .addId(entityId)
-//                .build();
-//        BoolValue archived = BoolValue
-//                .newBuilder()
-//                .setValue(true)
-//                .build();
-//        Filter archivedFilter = Filters
-//                .eq(LifecycleFlagField.archived.name(), archived);
-//        CompositeFilter aggregatingFilter = CompositeFilter
-//                .newBuilder()
-//                .addFilter(archivedFilter)
-//                .setOperator(EITHER)
-//                .build();
-//        TargetFilters filters = TargetFilters
-//                .newBuilder()
-//                .setIdFilter(idFilter)
-//                .addFilter(aggregatingFilter)
-//                .build();
-//        EntityQuery<?> query = createEntityQuery(filters, TestProjection.class);
-//        assertNotNull(query);
-//
-//        Collection<?> ids = query.getIds();
-//        assertFalse(ids.isEmpty());
-//        assertThat(ids).hasSize(1);
-//        Object singleId = ids.iterator()
-//                             .next();
-//        assertEquals(someGenericId, singleId);
-//
-//        QueryParameters parameters = query.getParameters();
-//
-//        List<CompositeQueryParameter> values = newArrayList(parameters);
-//        assertThat(values).hasSize(1);
-//
-//        CompositeQueryParameter singleParam = values.get(0);
-//        Collection<Filter> columnFilters = singleParam.filters()
-//                                                      .values();
-//        assertEquals(EITHER, singleParam.operator());
-//        IterableSubject assertColumnFilters = assertThat(columnFilters);
-//        assertColumnFilters.contains(archivedFilter);
-//    }
+    @Test
+    @DisplayName("check filter type")
+    void checkFilterType() {
+        // `Boolean` column is queried for an Integer value.
+        Filter filter = Filters.gt(archived.name(), 42);
+        CompositeFilter compositeFilter = Filters.all(filter);
+        TargetFilters filters = TargetFilters
+                .newBuilder()
+                .addFilter(compositeFilter)
+                .build();
+
+        EntityColumns columns = EntityColumns.of(TestEntity.class);
+
+        assertThrows(IllegalArgumentException.class,
+                     () -> MessageQueries.from(filters, columns));
+    }
+
+    @Test
+    @DisplayName("not create query for non-existing column")
+    void notCreateForNonExisting() {
+        // `Boolean` column is queried for an Integer value.
+        Filter filter = Filters.gt("column that does not exist", 42);
+        CompositeFilter compositeFilter = Filters.all(filter);
+        TargetFilters filters = TargetFilters
+                .newBuilder()
+                .addFilter(compositeFilter)
+                .build();
+
+        EntityColumns columns = EntityColumns.of(TestEntity.class);
+
+        assertThrows(IllegalArgumentException.class,
+                     () -> MessageQueries.from(filters, columns));
+    }
+
+    @Test
+    @DisplayName("construct empty queries")
+    void constructEmptyQueries() {
+        TargetFilters filters = TargetFilters.getDefaultInstance();
+        EntityColumns columns = EntityColumns.of(TestEntity.class);
+        MessageQuery<?> query = MessageQueries.from(filters, columns);
+        assertNotNull(query);
+
+        assertTrue(query.getIds()
+                        .isEmpty());
+
+        QueryParameters parameters = query.getParameters();
+        assertEquals(0, size(parameters.iterator()));
+    }
+
+    @Test
+    @DisplayName("construct non-empty queries")
+    void constructNonEmptyQueries() {
+        Message someGenericId = Sample.messageOfType(ProjectId.class);
+        Any entityId = Identifier.pack(someGenericId);
+        IdFilter idFilter = IdFilter
+                .newBuilder()
+                .addId(entityId)
+                .build();
+        BoolValue archived = BoolValue
+                .newBuilder()
+                .setValue(true)
+                .build();
+        Filter archivedFilter = Filters
+                .eq(LifecycleColumn.archived.name(), archived);
+        CompositeFilter aggregatingFilter = CompositeFilter
+                .newBuilder()
+                .addFilter(archivedFilter)
+                .setOperator(EITHER)
+                .build();
+        TargetFilters filters = TargetFilters
+                .newBuilder()
+                .setIdFilter(idFilter)
+                .addFilter(aggregatingFilter)
+                .build();
+        EntityColumns columns = EntityColumns.of(TestProjection.class);
+        MessageQuery<?> query = MessageQueries.from(filters, columns);
+        assertNotNull(query);
+
+        Collection<?> ids = query.getIds();
+        assertFalse(ids.isEmpty());
+        assertThat(ids).hasSize(1);
+        Object singleId = ids.iterator()
+                             .next();
+        assertEquals(someGenericId, singleId);
+
+        QueryParameters parameters = query.getParameters();
+
+        List<CompositeQueryParameter> values = newArrayList(parameters);
+        assertThat(values).hasSize(1);
+
+        CompositeQueryParameter singleParam = values.get(0);
+        Collection<Filter> columnFilters = singleParam.filters()
+                                                      .values();
+        assertEquals(EITHER, singleParam.operator());
+        IterableSubject assertColumnFilters = assertThat(columnFilters);
+        assertColumnFilters.contains(archivedFilter);
+    }
 }
