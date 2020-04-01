@@ -100,7 +100,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
 
     @Override
     public Optional<M> read(I id) {
-        MessageQuery<I> query = MessageQuery.of(ImmutableList.of(id));
+        MessageQuery<I> query = MessageQueries.of(ImmutableList.of(id));
         Optional<M> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
         return result;
     }
@@ -119,7 +119,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         or {@code Optional.empty()} if no message is found by the ID
      */
     protected Optional<M> read(I id, FieldMask mask) {
-        MessageQuery<I> query = MessageQuery.of(ImmutableList.of(id));
+        MessageQuery<I> query = MessageQueries.of(ImmutableList.of(id));
         ResponseFormat format = formatWith(mask);
         Optional<M> result = readSingleRecord(query, format);
         return result;
@@ -151,7 +151,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @return iterator over the records
      */
     protected Iterator<M> readAll() {
-        return readAll(MessageQuery.all());
+        return readAll(MessageQueries.all());
     }
 
     /**
@@ -164,7 +164,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @return iterator over the records with the passed IDs
      */
     protected Iterator<M> readAll(Iterable<I> ids) {
-        MessageQuery<I> query = MessageQuery.of(ids);
+        MessageQuery<I> query = MessageQueries.of(ids);
         return readAll(query);
     }
 
@@ -181,7 +181,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @return the iterator over the records
      */
     protected Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
-        MessageQuery<I> query = MessageQuery.of(ids);
+        MessageQuery<I> query = MessageQueries.of(ids);
         ResponseFormat format = formatWith(mask);
         return readAll(query, format);
     }
@@ -194,7 +194,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @return iterator over the message records
      */
     public Iterator<M> readAll(ResponseFormat format) {
-        MessageQuery<I> query = MessageQuery.all();
+        MessageQuery<I> query = MessageQueries.all();
         return readAll(query, format);
     }
 

@@ -29,7 +29,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.Iterator;
 
-import static io.spine.server.storage.MessageQuery.byColumn;
+import static io.spine.server.storage.MessageQueries.byColumn;
 
 /**
  * A storage for the state of the ongoing catch-up processes.

@@ -46,6 +46,7 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.MessageColumns;
+import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.MessageWithColumns;
@@ -375,7 +376,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
 
     private MessageQuery<AggregateEventRecordId> historyBackwardQuery(I id) {
         QueryParameters params = QueryParameters.eq(aggregateId.column(), Identifier.pack(id));
-        return MessageQuery.of(params);
+        return MessageQueries.of(params);
     }
 
     private static ResponseFormat historyBackwardResponseFormat(@Nullable Integer batchSize) {
@@ -497,7 +498,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     }
 
     Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
-        MessageQuery<I> query = MessageQuery.messageQueryFrom(filters, stateStorage.columns());
+        MessageQuery<I> query = MessageQueries.from(filters, stateStorage.columns());
         return stateStorage.readAll(query, format);
     }
 

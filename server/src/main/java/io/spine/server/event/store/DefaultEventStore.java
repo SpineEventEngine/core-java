@@ -35,6 +35,7 @@ import io.spine.logging.Logging;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.MessageColumns;
+import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.MessageStorageDelegate;
@@ -175,7 +176,7 @@ public final class DefaultEventStore
         } else {
             //TODO:2020-03-23:alex.tymchenko: simplify the transformation from `Query` to `MessageQuery`.
             TargetFilters filters = QueryToFilters.convert(query);
-            MessageQuery<EventId> messageQuery = MessageQuery.messageQueryFrom(filters, columns());
+            MessageQuery<EventId> messageQuery = MessageQueries.from(filters, columns());
 
             return readAll(messageQuery, format);
         }

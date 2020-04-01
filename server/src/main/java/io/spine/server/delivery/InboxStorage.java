@@ -27,6 +27,7 @@ import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.MessageColumns;
+import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.MessageStorageDelegate;
@@ -89,7 +90,7 @@ public class InboxStorage extends MessageStorageDelegate<InboxMessageId, InboxMe
     public ImmutableList<InboxMessage>
     readAll(ShardIndex index, @Nullable Timestamp sinceWhen, int pageSize) {
         QueryParameters byIndex = eq(InboxColumn.shardIndex.column(), index);
-        MessageQuery<InboxMessageId> query = MessageQuery.of(byIndex);
+        MessageQuery<InboxMessageId> query = MessageQueries.of(byIndex);
         if (sinceWhen != null) {
             QueryParameters byTime = gt(InboxColumn.receivedAt.column(), sinceWhen);
             query = query.append(byTime);
@@ -131,7 +132,7 @@ public class InboxStorage extends MessageStorageDelegate<InboxMessageId, InboxMe
      */
     public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
         QueryParameters byIndex = eq(InboxColumn.shardIndex.column(), index);
-        MessageQuery<InboxMessageId> query = MessageQuery.of(byIndex);
+        MessageQuery<InboxMessageId> query = MessageQueries.of(byIndex);
         query = query.append(eq(InboxColumn.status.column(), TO_DELIVER));
         ResponseFormat limitToOne = ResponseFormat.newBuilder()
                                                   .setLimit(1)

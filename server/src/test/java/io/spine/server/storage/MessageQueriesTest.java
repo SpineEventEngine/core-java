@@ -18,30 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage;
 
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
+import io.spine.client.TargetFilters;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.QueryParameters;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 
-@DisplayName("EntityQueries utility should")
-//TODO:2020-04-01:alex.tymchenko: remove this one.
-class EntityQueriesTest/* extends UtilityClassTest<EntityQueries>*/ {
+@DisplayName("`MessageQueries` utility should")
+class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
 
-//    private EntityQueriesTest() {
-//        super(EntityQueries.class);
-//    }
-//
-//    @Override
-//    protected void configure(NullPointerTester tester) {
-//        super.configure(tester);
-//
-//        tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
-//              .setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
-//              .setDefault(EntityColumns.class, EntityColumns.of(TestEntity.class))
-//              .setDefault(Columns.class, MessageColumns.emptyOf(Empty.class))
-//              .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
-//    }
-//
-//    private static EntityQuery<?> createEntityQuery(TargetFilters filters,
+    private MessageQueriesTest() {
+        super(MessageQueries.class);
+    }
+
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+
+        tester.setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
+                .setDefault(QueryParameters.class, QueryParameters.newBuilder().build())
+                .setDefault(MessageColumn.class, sampleColumn())
+                .setDefault(Columns.class, MessageColumns.emptyOf(Any.class))
+              .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
+    }
+
+    private static MessageColumn<String, Any> sampleColumn() {
+        return new MessageColumn<>(ColumnName.of("sample"), String.class, (v) -> "");
+    }
+
+//    private static MessageQuery<?> createEntityQuery(TargetFilters filters,
 //                                                    Class<? extends Entity<?, ?>> entityClass) {
 //        EntityColumns columns = EntityColumns.of(entityClass);
 //        return EntityQueries.from(filters, columns);

@@ -41,6 +41,7 @@ import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.StorageFactory;
@@ -337,7 +338,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         EntityRecordStorage<I> storage = recordStorage();
-        MessageQuery<I> query = MessageQuery.of(ids);
+        MessageQuery<I> query = MessageQueries.of(ids);
         ResponseFormat format = ResponseFormat.newBuilder()
                                               .setFieldMask(fieldMask)
                                               .vBuild();
@@ -420,7 +421,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         EntityRecordStorage<I> storage = recordStorage();
         EntityColumns entityColumns = storage.columns();
-        MessageQuery<I> entityQuery = MessageQuery.messageQueryFrom(filters, entityColumns);
+        MessageQuery<I> entityQuery = MessageQueries.from(filters, entityColumns);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
     }

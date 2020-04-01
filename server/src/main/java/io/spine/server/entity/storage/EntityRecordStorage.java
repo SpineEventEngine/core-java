@@ -27,6 +27,7 @@ import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.MessageWithColumns;
@@ -51,7 +52,7 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
                                boolean multitenant) {
         super(factory.createMessageStorage(EntityColumns.of(entityClass), multitenant));
         activeQueryParams = activeEntityQueryParams(columns());
-        this.findActiveRecordsQuery = MessageQuery.of(ImmutableSet.of(), activeQueryParams);
+        this.findActiveRecordsQuery = MessageQueries.of(ImmutableSet.of(), activeQueryParams);
     }
 
     /**
@@ -113,7 +114,7 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
      */
     @Override
     public Iterator<EntityRecord> readAll(Iterable<I> ids) {
-        MessageQuery<I> query = MessageQuery.of(ids, activeQueryParams);
+        MessageQuery<I> query = MessageQueries.of(ids, activeQueryParams);
         return readAll(query);
     }
 
