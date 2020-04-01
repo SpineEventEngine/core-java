@@ -24,9 +24,11 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageLifecycleFlagsHandlingTest;
 import io.spine.test.aggregate.ProjectId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("InMemoryAggregateStorage, when saving aggregate with lifecycle flags, should")
+@Disabled
 public class InMemoryAggregateStorageStatusHandlingTest
         extends AggregateStorageLifecycleFlagsHandlingTest {
 
