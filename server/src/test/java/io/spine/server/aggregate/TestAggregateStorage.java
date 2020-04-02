@@ -21,7 +21,12 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
+import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -52,8 +57,65 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId> {
     }
 
     @Override
-    protected void writeEventRecord(ProjectId id, AggregateEventRecord record) {
+    public void enableMirror() {
+        delegate.enableMirror();
+    }
+
+    @Override
+    public void checkNotClosed() throws IllegalStateException {
+        delegate.checkNotClosed();
+    }
+
+    @Override
+    public Iterator<ProjectId> index() {
+        return delegate.index();
+    }
+
+    @Override
+    public Optional<LifecycleFlags> readLifecycleFlags(ProjectId id) {
+        return delegate.readLifecycleFlags(id);
+    }
+
+    @Override
+    public void writeLifecycleFlags(ProjectId id, LifecycleFlags flags) {
+        delegate.writeLifecycleFlags(id, flags);
+    }
+
+    @Override
+    public Optional<AggregateHistory> read(ProjectId id) {
+        return delegate.read(id);
+    }
+
+    @Override
+    public void write(ProjectId id, AggregateHistory events) {
+        delegate.write(id, events);
+    }
+
+    @Override
+    public void writeEvent(ProjectId id, Event event) {
+        delegate.writeEvent(id, event);
+    }
+
+    @Override
+    public void writeSnapshot(ProjectId aggregateId, Snapshot snapshot) {
+        delegate.writeSnapshot(aggregateId, snapshot);
+    }
+
+    @Override
+    public void writeEventRecord(ProjectId id, AggregateEventRecord record) {
         delegate.writeEventRecord(id, record);
+    }
+
+    @Override
+    public Iterator<EntityRecord> readStates(
+            TargetFilters filters, ResponseFormat format) {
+        return delegate.readStates(filters, format);
+    }
+
+    @Override
+    public void writeState(
+            Aggregate<ProjectId, ?, ?> aggregate) {
+        delegate.writeState(aggregate);
     }
 
     @Override
@@ -68,28 +130,30 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId> {
     }
 
     @Override
-    protected void truncate(int snapshotIndex) {
+    @Internal
+    public void truncateOlderThan(int snapshotIndex) {
+        delegate.truncateOlderThan(snapshotIndex);
+    }
+
+    @Override
+    @Internal
+    public void truncateOlderThan(int snapshotIndex, Timestamp date) {
+        delegate.truncateOlderThan(snapshotIndex, date);
+    }
+
+    @Override
+    public void truncate(int snapshotIndex) {
         delegate.truncate(snapshotIndex);
     }
 
     @Override
-    protected void truncate(int snapshotIndex, Timestamp date) {
+    public void truncate(int snapshotIndex, Timestamp date) {
         delegate.truncate(snapshotIndex, date);
     }
 
     @Override
-    protected Iterator<ProjectId> distinctAggregateIds() {
+    public Iterator<ProjectId> distinctAggregateIds() {
         return delegate.distinctAggregateIds();
-    }
-
-    @Override
-    public Optional<LifecycleFlags> readLifecycleFlags(ProjectId id) {
-        return delegate.readLifecycleFlags(id);
-    }
-
-    @Override
-    public void writeLifecycleFlags(ProjectId id, LifecycleFlags flags) {
-        delegate.writeLifecycleFlags(id, flags);
     }
 
     ProjectId memoizedId() {
