@@ -204,7 +204,6 @@ public abstract class BoundedContext implements Closeable, Logging {
         registerIfAware(repository);
         guard.register(repository);
         repository.onRegistered();
-        registerEventDispatcher(stand());
     }
 
     /**

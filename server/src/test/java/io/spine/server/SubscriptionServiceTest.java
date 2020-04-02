@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityUpdates;
+import io.spine.client.EventUpdates;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
@@ -34,14 +35,17 @@ import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.client.TopicFactory;
 import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.Given.AggProjectCreatedReactor;
 import io.spine.server.Given.ProjectAggregateRepository;
-import io.spine.system.server.event.EntityStateChanged;
+import io.spine.server.stand.InvalidSubscriptionException;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.aggregate.event.AggOwnerNotified;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -58,7 +62,10 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.Given.CommandMessage.createProject;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -86,6 +93,7 @@ class SubscriptionServiceTest {
         context = BoundedContextBuilder
                 .assumingTests()
                 .add(new ProjectAggregateRepository())
+                .addEventDispatcher(new AggProjectCreatedReactor())
                 .build();
         subscriptionService = SubscriptionService
                 .newBuilder()
@@ -231,7 +239,31 @@ class SubscriptionServiceTest {
             checkSubscribesTo(AggProjectCreated.class);
         }
 
-        private void checkSubscribesTo(Class<? extends Message> aClass) {
+        @Test
+        @DisplayName("events from abstract reactors")
+        void eventsFromReactors() {
+            Subscription subscription = checkSubscribesTo(AggOwnerNotified.class);
+            MemoizingObserver<SubscriptionUpdate> observer = StreamObservers.memoizingObserver();
+            subscriptionService.activate(subscription, observer);
+            ProjectId projectId = ProjectId
+                    .newBuilder()
+                    .setId(newUuid())
+                    .build();
+            Command command = new TestActorRequestFactory(SubscriptionServiceTest.class)
+                    .createCommand(createProject(projectId));
+            context.commandBus()
+                   .post(command, noOpObserver());
+            EventUpdates events = observer.firstResponse()
+                                          .getEventUpdates();
+            assertThat(events.getEventList())
+                    .hasSize(1);
+            Event event = events.getEvent(0);
+            assertThat(event.enclosedMessage())
+                    .isInstanceOf(AggOwnerNotified.class);
+        }
+
+        @CanIgnoreReturnValue
+        private Subscription checkSubscribesTo(Class<? extends Message> aClass) {
             Target target = Targets.allOf(aClass);
             Topic topic = topic().forTarget(target);
             subscriptionService.subscribe(topic, observer);
@@ -248,19 +280,8 @@ class SubscriptionServiceTest {
                     .isNull();
             assertThat(observer.isCompleted())
                     .isTrue();
+            return response;
         }
-    }
-
-    @Test
-    @MuteLogging
-    @DisplayName("receive IAE in observer error callback on subscribing to system event")
-    void failOnSystemEventSubscribe() {
-        Topic topic = topic().allOf(EntityStateChanged.class);
-        subscriptionService.subscribe(topic, observer);
-
-        assertThat(observer.responses()).isEmpty();
-        assertThat(observer.isCompleted()).isFalse();
-        assertThat(observer.getError()).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -294,10 +315,10 @@ class SubscriptionServiceTest {
                 .newBuilder()
                 .setId("some-id")
                 .build();
-        AggCreateProject cmd = Given.CommandMessage.createProject(projectId);
+        AggCreateProject cmd = createProject(projectId);
         Command command = requestFactory.createCommand(cmd);
         context.commandBus()
-               .post(command, StreamObservers.noOpObserver());
+               .post(command, noOpObserver());
         return projectId;
     }
 
@@ -329,11 +350,12 @@ class SubscriptionServiceTest {
     void failOnActivatingNonExistent() {
         Subscription invalidSubscription = invalidSubscription();
         subscriptionService.activate(invalidSubscription, activationObserver);
-
-        // Check observer is not completed and contains an error.
-        assertThat(activationObserver.responses()).isEmpty();
-        assertThat(activationObserver.isCompleted()).isFalse();
-        assertThat(activationObserver.getError()).isInstanceOf(IllegalArgumentException.class);
+        assertThat(activationObserver.responses())
+                .isEmpty();
+        assertThat(activationObserver.isCompleted())
+                .isFalse();
+        assertThat(activationObserver.getError())
+                .isInstanceOf(InvalidSubscriptionException.class);
     }
 
     @Test
