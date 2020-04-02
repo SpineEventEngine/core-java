@@ -18,11 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
@@ -31,10 +29,6 @@ import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
-import io.spine.server.entity.storage.given.TestEntity;
-import io.spine.server.storage.Column;
-import io.spine.server.storage.CompositeQueryParameter;
-import io.spine.server.storage.QueryParameters;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
@@ -52,16 +46,14 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filter.Operator.EQUAL;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.server.entity.storage.given.AColumn.column;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-@DisplayName("EntityQuery should")
-class EntityQueryTest {
+@DisplayName("`MessageQuery` should")
+class MessageQueryTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -70,7 +62,7 @@ class EntityQueryTest {
                 .setDefault(IdFilter.class, IdFilter.getDefaultInstance())
                 .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                   .build())
-                .testStaticMethods(EntityQuery.class, NullPointerTester.Visibility.PACKAGE);
+                .testStaticMethods(MessageQuery.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
@@ -84,7 +76,7 @@ class EntityQueryTest {
         Map<Column, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
-        EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
+        MessageQuery<?> query = MessageQueries.of(ids, paramsFromValues(params));
 
         StringSubject assertQuery = assertThat(query.toString());
         assertQuery.contains(query.getIds()
@@ -104,21 +96,22 @@ class EntityQueryTest {
         tester.testEquals();
     }
 
-    @Test
-    @DisplayName("fail to append lifecycle columns if they are already present")
-    void notDuplicateLifecycleColumns() {
-        EntityColumns columns = EntityColumns.of(TestEntity.class);
-        Column deletedColumn = columns.get(ColumnName.of(deleted));
-        CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(deletedColumn, Filter.getDefaultInstance()), ALL
-        );
-        QueryParameters parameters = QueryParameters
-                .newBuilder()
-                .add(queryParameter)
-                .build();
-        EntityQuery<String> query = EntityQuery.of(ImmutableSet.of(), parameters);
-        assertFalse(query.canAppendLifecycleFlags());
-    }
+    //TODO:2020-04-02:alex.tymchenko: should we migrate this one?
+//    @Test
+//    @DisplayName("fail to append lifecycle columns if they are already present")
+//    void notDuplicateLifecycleColumns() {
+//        EntityColumns columns = EntityColumns.of(TestEntity.class);
+//        Column deletedColumn = columns.get(ColumnName.of(deleted));
+//        CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
+//                ImmutableMultimap.of(deletedColumn, Filter.getDefaultInstance()), ALL
+//        );
+//        QueryParameters parameters = QueryParameters
+//                .newBuilder()
+//                .add(queryParameter)
+//                .build();
+//        MessageQuery<String> query = MessageQueries.of(parameters);
+//        assertFalse(query.canAppendLifecycleFlags());
+//    }
 
     /**
      * Adds an equality group containing a single Query of two IDs and two Query parameters to
@@ -129,7 +122,7 @@ class EntityQueryTest {
         Map<Column, Object> params = new IdentityHashMap<>(2);
         params.put(column(), "anything");
         params.put(column(), 5);
-        EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
+        MessageQuery<?> query = MessageQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query);
     }
 
@@ -141,8 +134,8 @@ class EntityQueryTest {
         Collection<?> ids = emptyList();
         Map<Column, Object> params = new HashMap<>(1);
         params.put(column(), 5);
-        EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
-        EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
+        MessageQuery<?> query1 = MessageQueries.of(ids, paramsFromValues(params));
+        MessageQuery<?> query2 = MessageQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
@@ -159,8 +152,8 @@ class EntityQueryTest {
         Object value = 42;
         Map<Column, Object> params = new HashMap<>(1);
         params.put(column, value);
-        EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
-        EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
+        MessageQuery<?> query1 = MessageQueries.of(ids, paramsFromValues(params));
+        MessageQuery<?> query2 = MessageQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
@@ -171,7 +164,7 @@ class EntityQueryTest {
     private static void addEqualityGroupD(EqualsTester tester) {
         Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
         Map<Column, Object> columns = Collections.emptyMap();
-        EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
+        MessageQuery<?> query = MessageQueries.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
     }
 
