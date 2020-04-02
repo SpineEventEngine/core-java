@@ -24,16 +24,16 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.Filter;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.Column;
+import io.spine.server.storage.MessageQueries;
+import io.spine.server.storage.MessageQuery;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.TaskId;
 import io.spine.testdata.Sample;
@@ -44,30 +44,27 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filters.eq;
 import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
-import static io.spine.server.entity.storage.TestEntityQueryFactory.createQuery;
-import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.anyColumn;
-import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.anyValue;
-import static io.spine.server.storage.memory.given.EntityQueryMatcherTestEnv.booleanColumn;
-import static java.util.Collections.emptySet;
+import static io.spine.server.storage.memory.given.MessageQueryMatcherTestEnv.anyColumn;
+import static io.spine.server.storage.memory.given.MessageQueryMatcherTestEnv.anyValue;
+import static io.spine.server.storage.memory.given.MessageQueryMatcherTestEnv.booleanColumn;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EntityQueryMatcher should")
-class EntityQueryMatcherTest {
+@DisplayName("`MessageQueryMatcher` should")
+class MessageQueryMatcherTest {
 
     @Test
     @DisplayName("match everything except null to empty query")
     void matchEverythingToEmpty() {
         Collection<Object> idFilter = Collections.emptyList();
-        EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
+        MessageQuery<?> query = MessageQueries.of(idFilter);
 
-        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        MessageQueryMatcher<?, EntityRecord> matcher = new MessageQueryMatcher<>(query);
 
         assertFalse(matcher.test(null));
         assertTrue(matcher.test(EntityRecordWithColumns.of(sampleEntityRecord(),
@@ -77,16 +74,16 @@ class EntityQueryMatcherTest {
     @Test
     @DisplayName("match IDs")
     void matchIds() {
-        Message genericId = Sample.messageOfType(ProjectId.class);
-        Collection<Object> idFilter = singleton(genericId);
-        EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
+        ProjectId genericId = Sample.messageOfType(ProjectId.class);
+        Collection<ProjectId> idFilter = singleton(genericId);
+        MessageQuery<ProjectId> query = MessageQueries.of(idFilter);
 
-        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        MessageQueryMatcher<ProjectId, EntityRecord> matcher = new MessageQueryMatcher<>(query);
         EntityRecord matching = sampleEntityRecord(genericId);
         EntityRecord nonMatching = sampleEntityRecord(Sample.messageOfType(ProjectId.class));
-        EntityRecordWithColumns matchingRecord =
+        EntityRecordWithColumns<ProjectId> matchingRecord =
                 EntityRecordWithColumns.of(matching, Collections.emptyMap());
-        EntityRecordWithColumns nonMatchingRecord =
+        EntityRecordWithColumns<ProjectId> nonMatchingRecord =
                 EntityRecordWithColumns.of(nonMatching, Collections.emptyMap());
         assertTrue(matcher.test(matchingRecord));
         assertFalse(matcher.test(nonMatchingRecord));
@@ -99,26 +96,18 @@ class EntityQueryMatcherTest {
         boolean actualValue = false;
 
         ColumnName columnName = column.name();
+        QueryParameters params = QueryParameters.eq(column, actualValue);
+        MessageQuery<TaskId> query = MessageQueries.of(params);
 
-        Collection<Object> ids = Collections.emptyList();
-
-        Multimap<Column, Filter> filters =
-                ImmutableMultimap.of(column, eq(columnName.value(), actualValue));
-        CompositeQueryParameter parameter = createParams(filters, ALL);
-        QueryParameters params = QueryParameters.newBuilder()
-                                                .add(parameter)
-                                                .build();
-        EntityQuery<?> query = createQuery(ids, params);
-
-        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        MessageQueryMatcher<TaskId, EntityRecord> matcher = new MessageQueryMatcher<>(query);
 
         EntityRecord matching = sampleEntityRecord(Sample.messageOfType(TaskId.class));
         Map<ColumnName, Object> matchingColumns = ImmutableMap.of(columnName, actualValue);
-        EntityRecordWithColumns matchingRecord =
+        EntityRecordWithColumns<TaskId> matchingRecord =
                 EntityRecordWithColumns.of(matching, matchingColumns);
 
         EntityRecord nonMatching = sampleEntityRecord(Sample.messageOfType(TaskId.class));
-        EntityRecordWithColumns nonMatchingRecord =
+        EntityRecordWithColumns<TaskId> nonMatchingRecord =
                 EntityRecordWithColumns.of(nonMatching, Collections.emptyMap());
 
         assertTrue(matcher.test(matchingRecord));
@@ -126,7 +115,7 @@ class EntityQueryMatcherTest {
     }
 
     @Test
-    @DisplayName("match Any instances")
+    @DisplayName("match `Any` instances")
     void matchAnyInstances() {
         Column column = anyColumn();
         Any actualValue = anyValue();
@@ -135,19 +124,13 @@ class EntityQueryMatcherTest {
 
         EntityRecord record = sampleEntityRecord();
         Map<ColumnName, Object> columns = singletonMap(columnName, actualValue);
+        EntityRecordWithColumns<String> recordAndCols = EntityRecordWithColumns.of(record, columns);
 
-        EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record, columns);
+        QueryParameters parameters = QueryParameters.eq(column, actualValue);
+        MessageQuery<String> query = MessageQueries.of(parameters);
 
-        Multimap<Column, Filter> filters =
-                ImmutableMultimap.of(column, eq(columnName.value(), actualValue));
-        CompositeQueryParameter parameter = createParams(filters, ALL);
-        QueryParameters parameters = QueryParameters.newBuilder()
-                                                    .add(parameter)
-                                                    .build();
-        EntityQuery<?> query = createQuery(emptySet(), parameters);
-
-        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
-        assertTrue(matcher.test(recordWithColumns));
+        MessageQueryMatcher<String, EntityRecord> matcher = new MessageQueryMatcher<>(query);
+        assertTrue(matcher.test(recordAndCols));
     }
 
     @Test
@@ -162,18 +145,13 @@ class EntityQueryMatcherTest {
         QueryParameters params = QueryParameters.newBuilder()
                                                 .add(parameter)
                                                 .build();
-        EntityQuery<?> query = createQuery(Collections.emptyList(), params);
-        EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        MessageQuery<String> query = MessageQueries.of(params);
+        MessageQueryMatcher<String, EntityRecord> matcher = new MessageQueryMatcher<>(query);
 
         EntityRecord record = sampleEntityRecord();
-        EntityRecordWithColumns recordWithColumns =
+        EntityRecordWithColumns<String> recordWithColumns =
                 EntityRecordWithColumns.of(record, Collections.emptyMap());
         assertFalse(matcher.test(recordWithColumns));
-    }
-
-    private static QueryParameters defaultQueryParameters() {
-        return QueryParameters.newBuilder()
-                              .build();
     }
 
     private static EntityRecord sampleEntityRecord() {

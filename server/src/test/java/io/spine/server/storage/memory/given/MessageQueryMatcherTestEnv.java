@@ -35,15 +35,15 @@ import io.spine.test.storage.ProjectWithColumns;
 import io.spine.testdata.Sample;
 
 /**
- * The test environment for {@link io.spine.server.storage.memory.EntityQueryMatcher} tests.
+ * The test environment for {@link io.spine.server.storage.memory.MessageQueryMatcherTest} tests.
  *
- * <p>Provides various types of {@linkplain EntityColumn entity columns} that can be used to
- * emulate a client-side query.
+ * <p>Provides various types of {@linkplain io.spine.server.storage.MessageColumn message columns}
+ * that can be used to emulate a client-side query.
  */
-public final class EntityQueryMatcherTestEnv {
+public final class MessageQueryMatcherTestEnv {
 
     /** Prevents instantiation of this test env class. */
-    private EntityQueryMatcherTestEnv() {
+    private MessageQueryMatcherTestEnv() {
     }
 
     /**
@@ -73,7 +73,8 @@ public final class EntityQueryMatcherTestEnv {
      * The {@code boolean} value held by the corresponding {@linkplain #booleanColumn() entity
      * column}.
      */
-    public static boolean booleanValue() {
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass")   // for the sake of consistency.
+    private static boolean booleanValue() {
         return true;
     }
 

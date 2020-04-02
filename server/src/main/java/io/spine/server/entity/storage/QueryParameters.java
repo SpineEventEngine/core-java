@@ -29,7 +29,6 @@ import io.spine.annotation.SPI;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.server.storage.Column;
-import io.spine.server.storage.MessageColumn;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -98,32 +97,32 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                            .build();
     }
 
-    public static <V> QueryParameters eq(MessageColumn<?, ?> column, V value) {
+    public static <V> QueryParameters eq(Column column, V value) {
         return forSingleColumn(column, Filters.eq(column.name()
                                                         .value(), value));
     }
 
-    public static <V> QueryParameters gt(MessageColumn<?, ?> column, V value) {
+    public static <V> QueryParameters gt(Column column, V value) {
         return forSingleColumn(column, Filters.gt(column.name()
                                                         .value(), value));
     }
 
-    public static <V> QueryParameters ge(MessageColumn<?, ?> column, V value) {
+    public static <V> QueryParameters ge(Column column, V value) {
         return forSingleColumn(column, Filters.ge(column.name()
                                                         .value(), value));
     }
 
-    public static <V> QueryParameters lt(MessageColumn<?, ?> column, V value) {
+    public static <V> QueryParameters lt(Column column, V value) {
         return forSingleColumn(column, Filters.lt(column.name()
                                                         .value(), value));
     }
 
-    public static <V> QueryParameters le(MessageColumn<?, ?> column, V value) {
+    public static <V> QueryParameters le(Column column, V value) {
         return forSingleColumn(column, Filters.le(column.name()
                                                         .value(), value));
     }
 
-    private static <V> QueryParameters forSingleColumn(MessageColumn<?, ?> column, Filter filter) {
+    private static <V> QueryParameters forSingleColumn(Column column, Filter filter) {
         ImmutableMultimap<Column, Filter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         return newBuilder().add(parameter)
