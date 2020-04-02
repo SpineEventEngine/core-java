@@ -26,6 +26,10 @@ import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * An Event {@link Listener} which propagates events into to subscribers of
+ * {@link io.spine.server.SubscriptionService}.
+ */
 final class EventTap implements Listener<EventEnvelope> {
 
     /**
