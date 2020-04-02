@@ -24,13 +24,11 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.entity.storage.QueryParameters;
 
 import java.util.Map;
 import java.util.Set;
 
-import static io.spine.server.entity.storage.QueryParameters.FIELD_PARAMETERS;
+import static io.spine.server.storage.QueryParameters.FIELD_PARAMETERS;
 
 /**
  * @author Alex Tymchenko

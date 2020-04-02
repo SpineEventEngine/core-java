@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.Multimap;
 import io.spine.client.Filter;
 import io.spine.server.storage.Column;
+import io.spine.server.storage.CompositeQueryParameter;
 
 import static io.spine.client.CompositeFilter.CompositeOperator;
 

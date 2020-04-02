@@ -33,6 +33,8 @@ import io.spine.client.Filter;
 import io.spine.client.IdFilter;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.storage.Column;
+import io.spine.server.storage.CompositeQueryParameter;
+import io.spine.server.storage.QueryParameters;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;

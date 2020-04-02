@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -28,7 +28,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
-import io.spine.server.storage.Column;
+import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.EntityColumns;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -38,12 +39,11 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
- * The parameters of an {@link EntityQuery}.
+ * The parameters of an {@link MessageQuery}.
  *
  * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
  * implementations.
  */
-//TODO:2020-04-01:alex.tymchenko: consider another package.
 @SPI // Available to SPI users providing own `Storage` implementations.
 public final class QueryParameters implements Iterable<CompositeQueryParameter> {
 
@@ -122,7 +122,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                                                         .value(), value));
     }
 
-    private static <V> QueryParameters forSingleColumn(Column column, Filter filter) {
+    private static QueryParameters forSingleColumn(Column column, Filter filter) {
         ImmutableMultimap<Column, Filter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         return newBuilder().add(parameter)
@@ -132,7 +132,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
     /**
      * Returns an iterator over the {@linkplain Filter column filters}.
      *
-     * <p>The resulting {@code Iterator} throws {@link UnsupportedOperationException} on call
+     * <p>The resulting {@code Iterator} throws {@link UnsupportedOperationException} on a call
      * to {@link Iterator#remove() Iterator.remove()}.
      *
      * @return an {@link Iterator}.
@@ -143,8 +143,8 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
     }
 
     /**
-     * Verifies whether this parameters include filters by
-     * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags} or not.
+     * Tells whether these parameters include filters by
+     * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags}.
      */
     public boolean isLifecycleAttributesSet() {
         return hasLifecycle;

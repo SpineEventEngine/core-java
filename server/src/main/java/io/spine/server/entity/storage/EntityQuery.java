@@ -26,13 +26,14 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.Column;
+import io.spine.server.storage.QueryParameters;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.QueryParameters.FIELD_PARAMETERS;
+import static io.spine.server.storage.QueryParameters.FIELD_PARAMETERS;
 
 /**
  * A query to a {@link io.spine.server.storage.RecordStorage RecordStorage} for the records

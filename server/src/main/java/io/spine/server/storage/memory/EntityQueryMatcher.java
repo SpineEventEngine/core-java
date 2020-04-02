@@ -27,11 +27,11 @@ import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.Column;
+import io.spine.server.storage.CompositeQueryParameter;
+import io.spine.server.storage.QueryParameters;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;

@@ -26,6 +26,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.client.Filter;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.storage.Column;
+import io.spine.server.storage.CompositeQueryParameter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

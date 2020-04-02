@@ -31,8 +31,6 @@ import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.entity.storage.QueryParameters;
 
 import java.util.List;
 

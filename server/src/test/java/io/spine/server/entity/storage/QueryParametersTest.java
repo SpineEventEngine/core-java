@@ -29,6 +29,8 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.server.storage.Column;
+import io.spine.server.storage.CompositeQueryParameter;
+import io.spine.server.storage.QueryParameters;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

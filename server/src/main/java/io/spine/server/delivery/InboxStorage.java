@@ -25,13 +25,13 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
-import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.MessageColumns;
 import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -42,8 +42,8 @@ import java.util.Optional;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
-import static io.spine.server.entity.storage.QueryParameters.eq;
-import static io.spine.server.entity.storage.QueryParameters.gt;
+import static io.spine.server.storage.QueryParameters.eq;
+import static io.spine.server.storage.QueryParameters.gt;
 import static java.util.stream.Collectors.toList;
 
 /**

@@ -56,20 +56,10 @@ public final class EntityRecordWithColumns<I>
         this.record = checkNotNull(record);
     }
 
+    @SuppressWarnings("unchecked")  // according to the contract of the class.
     private static <I> I extractId(EntityRecord record) {
         return (I) Identifier.unpack(record.getEntityId());
     }
-//
-//    /**
-//     * Creates a new record extracting the column values from the passed entity.
-//     */
-//    public static <I> EntityRecordWithColumns<I> create(EntityRecord record,
-//                                                 Entity<I, ?> entity,
-//                                                 RecordStorage<?> recordStorage) {
-//        EntityColumns columns = recordStorage.columns();
-//        Map<ColumnName, @Nullable Object> storageFields = columns.valuesIn(entity);
-//        return of(record, storageFields);
-//    }
 
     /**
      * Creates a new record extracting the column values from the passed entity.

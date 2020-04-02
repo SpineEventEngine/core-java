@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -29,7 +29,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
-import io.spine.server.storage.Column;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -63,7 +62,6 @@ public final class CompositeQueryParameter {
      *         the operator to apply to the given filters
      * @return new instance of {@code CompositeQueryParameter}
      */
-    //TODO:2020-03-20:alex.tymchenko: move to another package
     public static CompositeQueryParameter from(Multimap<Column, Filter> filters,
                                         CompositeOperator operator) {
         checkNotNull(filters);

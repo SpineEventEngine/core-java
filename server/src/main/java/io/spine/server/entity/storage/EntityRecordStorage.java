@@ -31,13 +31,14 @@ import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
-import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
+import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
 
 /**
  * A {@code MessageStorage} which stores {@link EntityRecord}s.
