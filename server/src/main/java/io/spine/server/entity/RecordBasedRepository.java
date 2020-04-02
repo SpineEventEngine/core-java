@@ -38,7 +38,6 @@ import io.spine.client.Targets;
 import io.spine.core.Event;
 import io.spine.core.Signal;
 import io.spine.server.entity.storage.EntityColumns;
-import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.MessageQueries;
@@ -393,7 +392,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @param format
      *         the expected format of the query response
      * @return all the entities in this repository passed through the filters
-     * @see EntityQuery
      */
     public Iterator<E> find(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);

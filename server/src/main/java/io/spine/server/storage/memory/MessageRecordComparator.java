@@ -36,7 +36,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * @author Alex Tymchenko
+ * A comparator for sorting the contents of {@link TenantMessages}
+ * in a provided {@link OrderBy order}.
+ *
+ * @implNote More sophisticated storage implementations can order records by
+ *         non-{@link Comparable} fields like {@link com.google.protobuf.Message message}-type
+ *         fields, depending on their storage method (e.g. comparing the string content of
+ *         messages).The in-memory implementation stores all column values "as-is" and cannot do
+ *         that. Trying to {@linkplain OrderBy order by} column of non-comparable type will lead to
+ *         an exception being thrown.
  */
 public class MessageRecordComparator<I, R extends Message>
         implements Comparator<MessageWithColumns<I, R>>, Serializable {
@@ -51,7 +59,7 @@ public class MessageRecordComparator<I, R extends Message>
 
     /**
      * A static factory for {@code EntityRecordComparator} instances, which sort the
-     * {@link TenantRecords} contents in the specified {@link OrderBy orderBy} list.
+     * {@link TenantMessages} contents in the specified {@link OrderBy orderBy} list.
      *
      * @param orderByList
      *         a specification of columns and the directions for ordering
