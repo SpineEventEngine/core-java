@@ -51,7 +51,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @param multitenant
      *         whether this storage should support multi-tenancy
      */
-    protected MessageStorage(Columns<M> columns, boolean multitenant) {
+    public MessageStorage(Columns<M> columns, boolean multitenant) {
         super(multitenant);
         this.columns = columns;
     }
@@ -79,7 +79,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @param record
      *         the message and additional columns with their values
      */
-    protected void write(MessageWithColumns<I, M> record) {
+    public void write(MessageWithColumns<I, M> record) {
         checkNotClosed();
         writeRecord(record);
     }
@@ -93,7 +93,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @param records
      *         messages and their column values
      */
-    protected void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
+    public void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
         checkNotClosed();
         writeAllRecords(records);
     }
@@ -118,7 +118,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @return the message with the given identifier, after the field mask has been applied to it,
      *         or {@code Optional.empty()} if no message is found by the ID
      */
-    protected Optional<M> read(I id, FieldMask mask) {
+    public Optional<M> read(I id, FieldMask mask) {
         MessageQuery<I> query = MessageQueries.of(ImmutableList.of(id));
         ResponseFormat format = formatWith(mask);
         Optional<M> result = readSingleRecord(query, format);
@@ -141,7 +141,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the query to execute
      * @return iterator over the matching messages
      */
-    protected Iterator<M> readAll(MessageQuery<I> query) {
+    public Iterator<M> readAll(MessageQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
@@ -150,7 +150,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *
      * @return iterator over the records
      */
-    protected Iterator<M> readAll() {
+    public Iterator<M> readAll() {
         return readAll(MessageQueries.all());
     }
 
@@ -163,7 +163,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the identifiers of the records to read
      * @return iterator over the records with the passed IDs
      */
-    protected Iterator<M> readAll(Iterable<I> ids) {
+    public Iterator<M> readAll(Iterable<I> ids) {
         MessageQuery<I> query = MessageQueries.of(ids);
         return readAll(query);
     }
@@ -180,7 +180,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the mask to apply to each message
      * @return the iterator over the records
      */
-    protected Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
+    public Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
         MessageQuery<I> query = MessageQueries.of(ids);
         ResponseFormat format = formatWith(mask);
         return readAll(query, format);
@@ -244,7 +244,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @param ids
      *         identifiers of the records to delete
      */
-    protected void deleteAll(Iterable<I> ids) {
+    public void deleteAll(Iterable<I> ids) {
         for (I id : ids) {
             delete(id);
         }

@@ -30,7 +30,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorageDelegate;
-import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.StorageFactory;
 
@@ -69,27 +68,6 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
     public synchronized void write(I id, EntityRecord record) {
         EntityRecordWithColumns<I> withLifecycleCols = EntityRecordWithColumns.create(id, record);
         write(withLifecycleCols);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides the parent method in order to expose it as a part of public API.
-     */
-    @Override
-    //TODO:2020-03-31:alex.tymchenko: do we take `EntityRecordWithColumns` instead?
-    public void write(MessageWithColumns<I, EntityRecord> record) {
-        super.write(record);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides the parent method in order to expose it as a part of public API.
-     */
-    @Override
-    public void writeAll(Iterable<? extends MessageWithColumns<I, EntityRecord>> records) {
-        super.writeAll(records);
     }
 
     /**

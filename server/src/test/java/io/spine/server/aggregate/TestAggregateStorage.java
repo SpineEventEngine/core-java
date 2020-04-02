@@ -21,8 +21,10 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
+import io.spine.core.Version;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.ProjectId;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -55,8 +57,14 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId> {
     }
 
     @Override
-    protected Iterator<AggregateEventRecord> historyBackward(ProjectId id, int batchSize) {
+    public Iterator<AggregateEventRecord> historyBackward(ProjectId id, int batchSize) {
         return delegate.historyBackward(id, batchSize);
+    }
+
+    @Override
+    public Iterator<AggregateEventRecord> historyBackward(ProjectId id, int batchSize,
+                                                          @Nullable Version startingFrom) {
+        return delegate.historyBackward(id, batchSize, startingFrom);
     }
 
     @Override

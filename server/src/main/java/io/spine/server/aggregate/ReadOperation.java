@@ -57,7 +57,7 @@ final class ReadOperation<I> {
         this.history = newLinkedList();
     }
 
-    @SuppressWarnings("WhileLoopSpinsOnField")
+    //TODO:2020-04-02:alex.tymchenko: simplify this one.
     Optional<AggregateHistory> perform() {
         Iterator<AggregateEventRecord> historyBackward = storage.historyBackward(id, batchSize);
         if (!historyBackward.hasNext()) {

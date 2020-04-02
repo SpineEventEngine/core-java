@@ -23,6 +23,7 @@ package io.spine.server.storage;
 import com.google.protobuf.Message;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateEventStorage;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
@@ -36,7 +37,6 @@ import io.spine.server.event.store.DefaultEventStore;
  * and {@link io.spine.server.stand.Stand Stand}.
  */
 public interface StorageFactory extends AutoCloseable {
-
 
     <I, M extends Message> MessageStorage<I, M>
     createMessageStorage(Columns<M> columns, boolean multitenant);
@@ -58,6 +58,16 @@ public interface StorageFactory extends AutoCloseable {
     }
 
     /**
+     * Creates a new {@link AggregateEventStorage}.
+     *
+     * @param multitenant
+     *         whether the created storage should be multi-tenant
+     */
+    default AggregateEventStorage createAggregateEventStorage(boolean multitenant) {
+        return new AggregateEventStorage(this, multitenant);
+    }
+
+    /**
      * Creates a new {@link InboxStorage}.
      *
      * <p>The instance of {@code InboxStorage} is used in the {@link
@@ -66,7 +76,8 @@ public interface StorageFactory extends AutoCloseable {
      * ServerEnvironment} instance, unlike other {@code Storage} types which instances are created
      * per-{@link io.spine.server.BoundedContext BoundedContext}.
      *
-     * @param multitenant whether the created storage should be multi-tenant
+     * @param multitenant
+     *         whether the created storage should be multi-tenant
      */
     default InboxStorage createInboxStorage(boolean multitenant) {
         return new InboxStorage(this, multitenant);
@@ -80,7 +91,8 @@ public interface StorageFactory extends AutoCloseable {
      * instance of {@code CatchUpStorage} per {@link io.spine.server.ServerEnvironment
      * ServerEnvironment}.
      *
-     * @param multitenant whether the created storage should be multi-tenant
+     * @param multitenant
+     *         whether the created storage should be multi-tenant
      */
     default CatchUpStorage createCatchUpStorage(boolean multitenant) {
         return new CatchUpStorage(this, multitenant);
