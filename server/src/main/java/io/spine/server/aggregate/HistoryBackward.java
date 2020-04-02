@@ -43,7 +43,6 @@ import static io.spine.server.aggregate.AggregateEventRecordColumn.version;
 @SPI
 public class HistoryBackward<I> {
 
-    //TODO:2020-04-02:alex.tymchenko: make `static`.
     private static final OrderBy newestFirst = newestFirst();
     private static final OrderBy higherVersionFirst = higherVersionFirst();
 
