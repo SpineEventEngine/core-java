@@ -37,7 +37,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("DuplicateStringLiteralInspection")
-@DisplayName("`Columns` should")
+@DisplayName("`EntityColumns` should")
 class EntityColumnsTest {
 
     private final EntityColumns columns = EntityColumns.of(TaskViewProjection.class);
