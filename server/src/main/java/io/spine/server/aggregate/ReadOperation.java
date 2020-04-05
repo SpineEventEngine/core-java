@@ -80,7 +80,6 @@ final class ReadOperation<I> {
             }
         }
 
-
         AggregateHistory result = buildRecord();
         return Optional.of(result);
     }
@@ -100,7 +99,8 @@ final class ReadOperation<I> {
         }
     }
 
-    @SuppressWarnings("CheckReturnValue") // calling builder
+
+    @SuppressWarnings("ResultOfMethodCallIgnored") // calling builder
     private AggregateHistory buildRecord() {
         AggregateHistory.Builder builder = AggregateHistory.newBuilder();
         if (snapshot != null) {
