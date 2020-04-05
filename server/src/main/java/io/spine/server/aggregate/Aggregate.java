@@ -37,6 +37,7 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecentHistory;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
@@ -343,13 +344,14 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Restores the state and version from the passed snapshot.
+     * Restores the state, the version and the lifecycle flags from the passed snapshot.
      *
      * <p>If this method is called during a {@linkplain #play(AggregateHistory) replay}
      * (because the snapshot was encountered) the method uses the state
      * {@linkplain #builder() builder}, which is used during the replay.
      *
-     * <p>If not in replay, the method sets the state and version directly to the aggregate.
+     * <p>If not in replay, the method sets the state, the version and the lifecycle flags
+     * directly to the aggregate.
      *
      * @param snapshot the snapshot with the state to restore
      */
@@ -359,6 +361,9 @@ public abstract class Aggregate<I,
         S stateToRestore = (S) unpack(snapshot.getState());
         Version versionFromSnapshot = snapshot.getVersion();
         setInitialState(stateToRestore, versionFromSnapshot);
+        LifecycleFlags lifecycle = snapshot.getLifecycle();
+        setArchived(lifecycle.getArchived());
+        setDeleted(lifecycle.getDeleted());
     }
 
     /**
@@ -400,7 +405,8 @@ public abstract class Aggregate<I,
                 .newBuilder()
                 .setState(state)
                 .setVersion(version())
-                .setTimestamp(currentTime());
+                .setTimestamp(currentTime())
+                .setLifecycle(lifecycleFlags());
         return builder.build();
     }
 

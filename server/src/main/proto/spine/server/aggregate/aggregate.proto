@@ -55,6 +55,9 @@ message Snapshot {
     // This field is used when storing a snapshot in `AggregateEventRecord`.
     //
     google.protobuf.Timestamp timestamp = 3;
+
+    // The lifecycle flags of the aggregate at the moment of the creation of this snapshot.
+    spine.server.entity.LifecycleFlags lifecycle = 4;
 }
 
 message AggregateEventRecordId {
