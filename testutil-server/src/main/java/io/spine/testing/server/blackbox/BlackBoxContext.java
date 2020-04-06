@@ -166,6 +166,7 @@ public abstract class BlackBoxContext implements Logging {
      * Sets the given {@link UserId} as the actor ID for the requests produced by this context.
      */
     public final BlackBoxContext withActor(UserId user) {
+        checkNotNull(user);
         this.actor = this.actor.withId(user);
         return this;
     }
@@ -174,6 +175,7 @@ public abstract class BlackBoxContext implements Logging {
      * Sets the given time zone parameters for the actor requests produced by this context.
      */
     public final BlackBoxContext in(ZoneId zoneId) {
+        checkNotNull(zoneId);
         this.actor = this.actor.in(zoneId);
         return this;
     }
@@ -212,6 +214,7 @@ public abstract class BlackBoxContext implements Logging {
      */
     @CanIgnoreReturnValue
     public final BlackBoxContext receivesCommand(CommandMessage domainCommand) {
+        checkNotNull(domainCommand);
         return receivesCommands(singletonList(domainCommand));
     }
 
@@ -230,6 +233,8 @@ public abstract class BlackBoxContext implements Logging {
     @CanIgnoreReturnValue
     public final BlackBoxContext
     receivesCommands(CommandMessage first, CommandMessage second, CommandMessage... rest) {
+        checkNotNull(first);
+        checkNotNull(second);
         return receivesCommands(asList(first, second, rest));
     }
 
@@ -241,6 +246,7 @@ public abstract class BlackBoxContext implements Logging {
      * @return current instance
      */
     private BlackBoxContext receivesCommands(Collection<CommandMessage> domainCommands) {
+        checkNotNull(domainCommands);
         List<Command> posted = setup().postCommands(domainCommands);
         postedCommands.addAll(posted);
         return this;
@@ -259,6 +265,7 @@ public abstract class BlackBoxContext implements Logging {
      */
     @CanIgnoreReturnValue
     public final BlackBoxContext receivesEvent(EventMessage messageOrEvent) {
+        checkNotNull(messageOrEvent);
         return receivesEvents(singletonList(messageOrEvent));
     }
 
@@ -282,6 +289,8 @@ public abstract class BlackBoxContext implements Logging {
     @CanIgnoreReturnValue
     public final BlackBoxContext
     receivesEvents(EventMessage first, EventMessage second, EventMessage... rest) {
+        checkNotNull(first);
+        checkNotNull(second);
         return receivesEvents(asList(first, second, rest));
     }
 
@@ -298,6 +307,7 @@ public abstract class BlackBoxContext implements Logging {
      */
     @CanIgnoreReturnValue
     public final BlackBoxContext receivesExternalEvent(Message messageOrEvent) {
+        checkNotNull(messageOrEvent);
         setup().postExternalEvent(messageOrEvent);
         return this;
     }
@@ -324,6 +334,8 @@ public abstract class BlackBoxContext implements Logging {
     @CanIgnoreReturnValue
     public final BlackBoxContext
     receivesExternalEvents(EventMessage first, EventMessage second, EventMessage... other) {
+        checkNotNull(first);
+        checkNotNull(second);
         return receivesExternalEvents(asList(first, second, other));
     }
 
@@ -514,7 +526,7 @@ public abstract class BlackBoxContext implements Logging {
     private <I> @Nullable Entity<I, ?>
     findEntity(I id, Class<? extends Entity<I, ?>> entityClass) {
         Class<? extends EntityState> stateClass = stateClassOf(entityClass);
-        return findByState(stateClass, id);
+        return findByState(id, stateClass);
     }
 
     /**
@@ -533,12 +545,12 @@ public abstract class BlackBoxContext implements Logging {
      */
     public final <I, S extends EntityState>
     EntitySubject assertEntityWithState(I id, Class<S> stateClass) {
-        @Nullable Entity<I, S> found = findByState(stateClass, id);
+        @Nullable Entity<I, S> found = findByState(id, stateClass);
         return EntitySubject.assertEntity(found);
     }
 
     private <I, S extends EntityState> @Nullable Entity<I, S>
-    findByState(Class<S> stateClass, I id) {
+    findByState(I id, Class<S> stateClass) {
         @SuppressWarnings("unchecked")
         Repository<I, ? extends Entity<I, S>> repo =
                 (Repository<I, ? extends Entity<I, S>>) repositoryOf(stateClass);
@@ -554,6 +566,34 @@ public abstract class BlackBoxContext implements Logging {
     }
 
     /**
+     * Asserts that the is an entity with the passed ID and the passed type of state.
+     *
+     * @return assertion that compares only expected fields
+     */
+    public final <I, S extends EntityState> ProtoFluentAssertion
+    assertState(I id, Class<S> stateClass) {
+        checkNotNull(id);
+        checkNotNull(stateClass);
+        ProtoFluentAssertion stateAssertion =
+                assertEntityWithState(id, stateClass)
+                         .hasStateThat()
+                         .comparingExpectedFieldsOnly();
+        return stateAssertion;
+    }
+
+    /**
+     * Asserts that there is an entity with the passed ID and the passed state.
+     *
+     * <p>The method compares only fields in the passed state.
+     */
+    public final <I, S extends EntityState> void assertState(I id, S entityState) {
+        checkNotNull(id);
+        checkNotNull(entityState);
+        assertState(id, entityState.getClass())
+                .isEqualTo(entityState);
+    }
+
+    /**
      * Obtains the subject for checking commands generated by the entities of this Bounded Context.
      */
     public final CommandSubject assertCommands() {
@@ -566,7 +606,6 @@ public abstract class BlackBoxContext implements Logging {
     public final EventSubject assertEvents() {
         return EventSubject.assertThat(events());
     }
-
 
     /**
      * Asserts that the context generated only one event of the passed type.

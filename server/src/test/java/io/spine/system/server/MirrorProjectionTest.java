@@ -67,8 +67,6 @@ class MirrorProjectionTest {
         assertMirror.deletedFlag()
                     .isFalse();
         assertMirror.hasStateThat()
-                    .isNotEqualToDefaultInstance();
-        assertMirror.hasStateThat()
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(Mirror.newBuilder()
                                      .setLifecycle(LifecycleFlags.newBuilder().setArchived(true))

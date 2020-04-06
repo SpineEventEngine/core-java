@@ -179,9 +179,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             BbCreateProject createProject = createProject();
             BbProjectView expectedProject = createProjectView(createProject);
             context.receivesCommand(createProject)
-                   .assertEntityWithState(createProject.getProjectId(), expectedProject.getClass())
-                   .hasStateThat()
-                   .isEqualTo(expectedProject);
+                   .assertState(createProject.getProjectId(), expectedProject);
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {
@@ -671,14 +669,11 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             BbAssignSelf assignSelf = assignSelf(id);
             context.withActor(actor)
                    .receivesCommands(createProject, assignSelf)
-                   .assertEntityWithState(id, BbProject.class)
-                   .hasStateThat()
-                   .comparingExpectedFieldsOnly()
-                   .isEqualTo(BbProject
-                                      .newBuilder()
-                                      .setId(id)
-                                      .addAssignee(actor)
-                                      .buildPartial());
+                   .assertState(id,
+                                BbProject.newBuilder()
+                                         .setId(id)
+                                         .addAssignee(actor)
+                                         .buildPartial());
         }
 
         @Test

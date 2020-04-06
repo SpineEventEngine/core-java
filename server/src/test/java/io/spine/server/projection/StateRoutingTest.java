@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
@@ -76,9 +75,7 @@ class StateRoutingTest {
                               .build()
         );
 
-        context.assertEntityWithState(BRETON, ArtistMood.class)
-               .hasStateThat()
-               .comparingExpectedFieldsOnly()
+        context.assertState(BRETON, ArtistMood.class)
                .isEqualTo(ArtistMood.newBuilder()
                                     .setMood(ArtistMood.Mood.ANGER)
                                     .build());
@@ -98,14 +95,11 @@ class StateRoutingTest {
                         .build()
         );
 
-        ProtoSubject assertWorks =
-                context.assertEntity(artist, WorksProjection.class)
-                       .hasStateThat();
-        Works expectedWork =
+        context.assertState(
+                artist,
                 Works.newBuilder()
                      .addWork(automaticDrawing)
-                     .build();
-        assertWorks.comparingExpectedFieldsOnly()
-                   .isEqualTo(expectedWork);
+                     .build()
+        );
     }
 }
