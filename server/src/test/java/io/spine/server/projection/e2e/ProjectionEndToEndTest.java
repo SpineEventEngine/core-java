@@ -95,15 +95,18 @@ class ProjectionEndToEndTest {
                                          firstTaskAdded,
                                          secondTaskAdded);
 
-        context.assertEntityWithState(ProjectTaskNames.class, producerId)
-                .hasStateThat()
-                .isEqualTo(ProjectTaskNames
-                                   .newBuilder()
-                                   .setProjectId(producerId)
-                                   .setProjectName(created.getName())
-                                   .addTaskName(firstTaskAdded.getTask().getTitle())
-                                   .addTaskName(secondTaskAdded.getTask().getTitle())
-                                   .build());
+        context.assertState(
+                producerId,
+                ProjectTaskNames
+                        .newBuilder()
+                        .setProjectId(producerId)
+                        .setProjectName(created.getName())
+                        .addTaskName(firstTaskAdded.getTask()
+                                                   .getTitle())
+                        .addTaskName(secondTaskAdded.getTask()
+                                                    .getTitle())
+                        .build()
+        );
     }
 
     @Test
@@ -126,7 +129,7 @@ class ProjectionEndToEndTest {
                 .newBuilder()
                 .setUuid(producerId.getUuid())
                 .build();
-        receiver.assertEntityWithState(GroupName.class, groupId)
+        receiver.assertEntityWithState(groupId, GroupName.class)
                 .hasStateThat()
                 .isEqualTo(GroupName.newBuilder()
                                     .setId(groupId)

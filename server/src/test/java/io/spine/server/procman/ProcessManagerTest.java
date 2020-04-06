@@ -334,15 +334,18 @@ class ProcessManagerTest {
             context.assertEvents()
                    .withType(StandardRejections.EntityAlreadyArchived.class)
                    .hasSize(1);
-            context.assertEntity(TestProcessManager.class, TestProcessManager.ID)
-                   .doesNotExist();
+            assertNoEntity();
         }
 
         @Test
         @DisplayName("exception")
         void exception() {
             context.receivesCommand(throwRuntimeException());
-            context.assertEntity(TestProcessManager.class, TestProcessManager.ID)
+            assertNoEntity();
+        }
+
+        private void assertNoEntity() {
+            context.assertEntity(TestProcessManager.ID, TestProcessManager.class)
                    .doesNotExist();
         }
     }

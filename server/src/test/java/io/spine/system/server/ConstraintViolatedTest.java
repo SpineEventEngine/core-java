@@ -57,7 +57,7 @@ class ConstraintViolatedTest {
                               .setTextToValidate(invalidText)
                               .vBuild()
         );
-        context.assertEntity(ViolationsWatch.class, DEFAULT)
+        context.assertEntity(DEFAULT, ViolationsWatch.class)
                .hasStateThat()
                .isEqualTo(InvalidText.newBuilder()
                                      .setId(DEFAULT)
@@ -84,7 +84,7 @@ class ConstraintViolatedTest {
                                                 .setValue("a@b.c"))
                         .vBuild()
         );
-        context.assertEntity(ViolationsWatch.class, DEFAULT)
+        context.assertEntity(DEFAULT, ViolationsWatch.class)
                .hasStateThat()
                .isEqualTo(InvalidText.newBuilder()
                                      .setId(DEFAULT)

@@ -72,7 +72,7 @@ class MultiTenantContextTest
                .assertEvents()
                .withType(BbProjectCreated.class)
                .hasSize(1);
-        context.assertEntityWithState(BbProject.class, createJohnProject.getProjectId())
+        context.assertEntityWithState(createJohnProject.getProjectId(), BbProject.class)
                .hasStateThat()
                .isEqualTo(createdProjectState(createJohnProject));
         // Verify project was created for Carl.
@@ -82,7 +82,7 @@ class MultiTenantContextTest
                 .withType(BbProjectCreated.class)
                 .hasSize(1);
         contextForCarl
-                .assertEntityWithState(BbProject.class, createCarlProject.getProjectId())
+                .assertEntityWithState(createCarlProject.getProjectId(), BbProject.class)
                 .hasStateThat()
                 .isEqualTo(createdProjectState(createCarlProject));
         // Verify nothing happened for a new user.
@@ -101,7 +101,7 @@ class MultiTenantContextTest
         assertThrows(
                 IllegalStateException.class,
                 () -> BlackBoxContext.from(BoundedContextBuilder.assumingTests(true))
-                                     .assertEntityWithState(BbProject.class, "verify state")
+                                     .assertEntityWithState("verify state", BbProject.class)
         );
     }
 }

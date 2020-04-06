@@ -198,7 +198,7 @@ class EventImportTest {
         private void assertRouted(EventEnvelope event) {
             EntitySubject assertEntity =
                     context().importsEvent(event.outerObject())
-                             .assertEntity(EngineAggregate.class, engineId);
+                             .assertEntity(engineId, EngineAggregate.class);
             assertEntity.exists();
         }
     }
