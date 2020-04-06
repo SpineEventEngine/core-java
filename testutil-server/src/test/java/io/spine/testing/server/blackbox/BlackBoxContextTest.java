@@ -149,12 +149,13 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
     @DisplayName("ignore sent events in emitted")
     void ignoreSentEvents() {
         BbProjectId id = newProjectId();
-        EventSubject assertEvents = context
-                .receivesCommand(createProject(id))
-                .receivesEvent(taskAdded(id))
-                .assertEvents();
-        assertEvents.hasSize(1);
-        assertEvents.withType(BbProjectCreated.class).isNotEmpty();
+        context.receivesCommand(createProject(id))
+                .receivesEvent(taskAdded(id));
+        context.assertEvent(
+                BbProjectCreated
+                        .newBuilder()
+                        .setProjectId(id)
+                        .build());
     }
 
     @Nested
@@ -167,7 +168,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             BbCreateProject createProject = createProject();
             BbProject expectedProject = createdProjectState(createProject);
             context.receivesCommand(createProject)
-                   .assertEntityWithState(expectedProject.getClass(), createProject.getProjectId())
+                   .assertEntityWithState(createProject.getProjectId(), expectedProject.getClass())
                    .hasStateThat()
                    .isEqualTo(expectedProject);
         }
@@ -178,7 +179,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             BbCreateProject createProject = createProject();
             BbProjectView expectedProject = createProjectView(createProject);
             context.receivesCommand(createProject)
-                   .assertEntityWithState(expectedProject.getClass(), createProject.getProjectId())
+                   .assertEntityWithState(createProject.getProjectId(), expectedProject.getClass())
                    .hasStateThat()
                    .isEqualTo(expectedProject);
         }
@@ -511,7 +512,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         @Test
         @DisplayName("via entity class")
         void entityClass() {
-            EntitySubject subject = context.assertEntity(BbInitProcess.class, id);
+            EntitySubject subject = context.assertEntity(id, BbInitProcess.class);
             assertThat(subject)
                     .isNotNull();
             subject.isInstanceOf(BbInitProcess.class);
@@ -520,7 +521,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         @Test
         @DisplayName("via entity state class")
         void entityStateClass() {
-            EntitySubject subject = context.assertEntityWithState(BbInit.class, id);
+            EntitySubject subject = context.assertEntityWithState(id, BbInit.class);
             assertThat(subject)
                     .isNotNull();
             subject.hasStateThat()
@@ -535,7 +536,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
 
             @BeforeEach
             void getSubj() {
-                assertProcessManager = context.assertEntity(BbInitProcess.class, id);
+                assertProcessManager = context.assertEntity(id, BbInitProcess.class);
             }
 
             @Test
@@ -670,7 +671,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             BbAssignSelf assignSelf = assignSelf(id);
             context.withActor(actor)
                    .receivesCommands(createProject, assignSelf)
-                   .assertEntityWithState(BbProject.class, id)
+                   .assertEntityWithState(id, BbProject.class)
                    .hasStateThat()
                    .comparingExpectedFieldsOnly()
                    .isEqualTo(BbProject
@@ -690,7 +691,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             context.withActor(actor)
                    .in(zoneId)
                    .receivesCommand(createProject)
-                   .assertEntityWithState(BbProject.class, id)
+                   .assertEntityWithState(id, BbProject.class)
                    .exists();
             EventSubject events = context.assertEvents()
                                          .withType(BbProjectCreated.class);
@@ -718,7 +719,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             ZoneId zoneId = ZoneIds.of("UTC-1");
             context.in(zoneId)
                    .receivesCommand(createProject)
-                   .assertEntityWithState(BbProject.class, id)
+                   .assertEntityWithState(id, BbProject.class)
                    .exists();
             EventSubject events = context.assertEvents()
                                          .withType(BbProjectCreated.class);

@@ -76,7 +76,7 @@ class StateRoutingTest {
                               .build()
         );
 
-        context.assertEntityWithState(ArtistMood.class, BRETON)
+        context.assertEntityWithState(BRETON, ArtistMood.class)
                .hasStateThat()
                .comparingExpectedFieldsOnly()
                .isEqualTo(ArtistMood.newBuilder()
@@ -99,7 +99,7 @@ class StateRoutingTest {
         );
 
         ProtoSubject assertWorks =
-                context.assertEntity(WorksProjection.class, artist)
+                context.assertEntity(artist, WorksProjection.class)
                        .hasStateThat();
         Works expectedWork =
                 Works.newBuilder()

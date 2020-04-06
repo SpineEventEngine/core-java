@@ -343,7 +343,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
         for (DCreateTask command : commands) {
             String taskId = command.getId();
-            EntitySubject subject = context.assertEntity(TaskView.class, taskId);
+            EntitySubject subject = context.assertEntity(taskId, TaskView.class);
             subject.exists();
 
             TaskView actualView = (TaskView) subject.actual();

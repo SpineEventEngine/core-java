@@ -70,7 +70,7 @@ class EventRoutingIntegrationTest {
         );
         context.receivesEvent(event);
 
-        context.assertEntity(SessionProjection.class, sessionId)
+        context.assertEntity(sessionId, SessionProjection.class)
                .hasStateThat()
                .comparingExpectedFieldsOnly()
                .isEqualTo(session);

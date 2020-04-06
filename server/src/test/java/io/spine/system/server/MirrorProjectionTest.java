@@ -46,7 +46,7 @@ class MirrorProjectionTest {
         EntityStateChanged event = entityStateChanged();
         context()
                 .receivesEvent(event)
-                .assertEntityWithState(Mirror.class, ID)
+                .assertEntityWithState(ID, Mirror.class)
                 .hasStateThat()
                 .comparingExpectedFieldsOnly()
                 .isEqualTo(Mirror.newBuilder()
@@ -61,7 +61,7 @@ class MirrorProjectionTest {
         EventMessage event = entityArchived();
         EntitySubject assertMirror = context()
                 .receivesEvents(entityStateChanged(), event)
-                .assertEntityWithState(Mirror.class, ID);
+                .assertEntityWithState(ID, Mirror.class);
         assertMirror.archivedFlag()
                     .isTrue();
         assertMirror.deletedFlag()
@@ -81,7 +81,7 @@ class MirrorProjectionTest {
         EventMessage event = entityDeleted();
         EntitySubject assertMirror = context()
                 .receivesEvents(entityStateChanged(), event)
-                .assertEntityWithState(Mirror.class, ID);
+                .assertEntityWithState(ID, Mirror.class);
         assertMirror.archivedFlag()
                     .isFalse();
         assertMirror.deletedFlag()
@@ -101,7 +101,7 @@ class MirrorProjectionTest {
         EventMessage event = entityExtracted();
         EntitySubject assertMirror = context()
                 .receivesEvents(entityStateChanged(), entityArchived(), event)
-                .assertEntityWithState(Mirror.class, ID);
+                .assertEntityWithState(ID, Mirror.class);
         assertMirror.archivedFlag()
                     .isFalse();
         assertMirror.deletedFlag()
@@ -116,7 +116,7 @@ class MirrorProjectionTest {
         EventMessage event = entityRestored();
         EntitySubject assertMirror = context()
                 .receivesEvents(entityStateChanged(), entityDeleted(), event)
-                .assertEntityWithState(Mirror.class, ID);
+                .assertEntityWithState(ID, Mirror.class);
         assertMirror.archivedFlag()
                     .isFalse();
         assertMirror.deletedFlag()

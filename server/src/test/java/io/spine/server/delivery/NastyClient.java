@@ -134,7 +134,7 @@ class NastyClient {
                     .setId(calcId)
                     .setSum(sumForTarget)
                     .build();
-            context.assertEntity(CalcAggregate.class, calcId)
+            context.assertEntity(calcId, CalcAggregate.class)
                    .hasStateThat()
                    .comparingExpectedFieldsOnly()
                    .isEqualTo(expectedState);

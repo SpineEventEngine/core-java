@@ -22,6 +22,7 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.extensions.proto.ProtoFluentAssertion;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -185,7 +186,7 @@ public abstract class BlackBoxContext implements Logging {
     }
 
     @VisibleForTesting
-    BoundedContext context() {
+    final BoundedContext context() {
         return context;
     }
 
@@ -193,7 +194,7 @@ public abstract class BlackBoxContext implements Logging {
      * Appends the passed event to the history of the context under the test.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext append(Event event) {
+    public final BlackBoxContext append(Event event) {
         checkNotNull(event);
         EventStore eventStore =
                 context.eventBus()
@@ -210,7 +211,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext receivesCommand(CommandMessage domainCommand) {
+    public final BlackBoxContext receivesCommand(CommandMessage domainCommand) {
         return receivesCommands(singletonList(domainCommand));
     }
 
@@ -227,7 +228,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext
+    public final BlackBoxContext
     receivesCommands(CommandMessage first, CommandMessage second, CommandMessage... rest) {
         return receivesCommands(asList(first, second, rest));
     }
@@ -257,7 +258,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext receivesEvent(EventMessage messageOrEvent) {
+    public final BlackBoxContext receivesEvent(EventMessage messageOrEvent) {
         return receivesEvents(singletonList(messageOrEvent));
     }
 
@@ -279,7 +280,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext
+    public final BlackBoxContext
     receivesEvents(EventMessage first, EventMessage second, EventMessage... rest) {
         return receivesEvents(asList(first, second, rest));
     }
@@ -296,7 +297,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext receivesExternalEvent(Message messageOrEvent) {
+    public final BlackBoxContext receivesExternalEvent(Message messageOrEvent) {
         setup().postExternalEvent(messageOrEvent);
         return this;
     }
@@ -321,7 +322,7 @@ public abstract class BlackBoxContext implements Logging {
      */
     @SuppressWarnings("unused") // IDEA does not see the usage of this method from tests.
     @CanIgnoreReturnValue
-    public BlackBoxContext
+    public final BlackBoxContext
     receivesExternalEvents(EventMessage first, EventMessage second, EventMessage... other) {
         return receivesExternalEvents(asList(first, second, other));
     }
@@ -353,7 +354,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext
+    public final BlackBoxContext
     receivesEventsProducedBy(Object producerId, EventMessage first, EventMessage... rest) {
         List<Event> sentEvents = setup().postEvents(producerId, first, rest);
         postedEvents.addAll(sentEvents);
@@ -401,7 +402,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext
+    public final BlackBoxContext
     importsEvents(EventMessage first, EventMessage second, EventMessage... rest) {
         return importAll(asList(first, second, rest));
     }
@@ -421,7 +422,7 @@ public abstract class BlackBoxContext implements Logging {
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
      * that may occur while closing, into an {@link IllegalStateException}.
      */
-    public void close() {
+    public final void close() {
         try {
             context.close();
         } catch (Exception e) {
@@ -479,7 +480,7 @@ public abstract class BlackBoxContext implements Logging {
      * Obtains immutable list of all the events in this Bounded Context.
      */
     @VisibleForTesting
-    ImmutableList<Event> allEvents() {
+    final ImmutableList<Event> allEvents() {
         return select(this.events);
     }
 
@@ -492,24 +493,46 @@ public abstract class BlackBoxContext implements Logging {
 
     /**
      * Obtains a Subject for an entity of the passed class with the given ID.
+     *
+     * @deprecated please use {@link #assertEntity(Object, Class)}
      */
-    public <I, E extends Entity<I, ? extends EntityState>>
+    @Deprecated
+    public final <I, E extends Entity<I, ? extends EntityState>>
     EntitySubject assertEntity(Class<E> entityClass, I id) {
-        @Nullable Entity<I, ?> found = findEntity(entityClass, id);
+        return assertEntity(id, entityClass);
+    }
+
+    /**
+     * Obtains a Subject for an entity of the passed class with the given ID.
+     */
+    public final <I, E extends Entity<I, ? extends EntityState>>
+    EntitySubject assertEntity(I id, Class<E> entityClass) {
+        @Nullable Entity<I, ?> found = findEntity(id, entityClass);
         return EntitySubject.assertEntity(found);
     }
 
     private <I> @Nullable Entity<I, ?>
-    findEntity(Class<? extends Entity<I, ?>> entityClass, I id) {
+    findEntity(I id, Class<? extends Entity<I, ?>> entityClass) {
         Class<? extends EntityState> stateClass = stateClassOf(entityClass);
         return findByState(stateClass, id);
     }
 
     /**
      * Obtains a Subject for an entity which has the state of the passed class with the given ID.
+     *
+     * @deprecated please use {@link #assertEntityWithState(Object, Class)}
      */
-    public <I, S extends EntityState> EntitySubject
+    @Deprecated
+    public final <I, S extends EntityState> EntitySubject
     assertEntityWithState(Class<S> stateClass, I id) {
+        return assertEntityWithState(id, stateClass);
+    }
+
+    /**
+     * Obtains a Subject for an entity which has the state of the passed class with the given ID.
+     */
+    public final <I, S extends EntityState>
+    EntitySubject assertEntityWithState(I id, Class<S> stateClass) {
         @Nullable Entity<I, S> found = findByState(stateClass, id);
         return EntitySubject.assertEntity(found);
     }
@@ -523,7 +546,7 @@ public abstract class BlackBoxContext implements Logging {
     }
 
     @VisibleForTesting
-    Repository<?, ?> repositoryOf(Class<? extends EntityState> stateClass) {
+    final Repository<?, ?> repositoryOf(Class<? extends EntityState> stateClass) {
         Repository<?, ?> repository =
                 context.internalAccess()
                        .getRepository(stateClass);
@@ -533,15 +556,38 @@ public abstract class BlackBoxContext implements Logging {
     /**
      * Obtains the subject for checking commands generated by the entities of this Bounded Context.
      */
-    public CommandSubject assertCommands() {
+    public final CommandSubject assertCommands() {
         return CommandSubject.assertThat(commands());
     }
 
     /**
      * Obtains the subject for checking events emitted by the entities of this Bounded Context.
      */
-    public EventSubject assertEvents() {
+    public final EventSubject assertEvents() {
         return EventSubject.assertThat(events());
+    }
+
+
+    /**
+     * Asserts that the context generated only one event of the passed type.
+     *
+     * @param eventClass
+     *         the type of the event to assert
+     * @return the subject for further assertions
+     */
+    public final ProtoFluentAssertion assertEvent(Class<? extends EventMessage> eventClass) {
+        EventSubject assertEvents =
+                assertEvents().withType(eventClass);
+        assertEvents.hasSize(1);
+        return assertEvents.message(0)
+                           .comparingExpectedFieldsOnly();
+    }
+
+    /**
+     * Asserts that the context generated only one passed event.
+     */
+    public final void assertEvent(EventMessage event) {
+        assertEvent(event.getClass()).isEqualTo(event);
     }
 
     /**
