@@ -62,11 +62,6 @@ class AggregateQueryProcessor implements QueryProcessor {
                         .map(this::toEntityState)
                         .collect(ImmutableList.toImmutableList());
         return results;
-//        TenantId tenant = tenantOf(query);
-//        SystemReadSide readSide = delegatingTo(systemReadSide).get(tenant);
-//        Iterator<EntityStateWithVersion> read = readSide.readDomainAggregate(query);
-//        ImmutableList<EntityStateWithVersion> result = ImmutableList.copyOf(read);
-//        return result;
     }
 
     /**

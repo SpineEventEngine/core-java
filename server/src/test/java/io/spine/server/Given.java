@@ -27,6 +27,7 @@ import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -60,9 +61,11 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
 import io.spine.time.Now;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.spine.base.Identifier.newUuid;
@@ -263,8 +266,26 @@ public class Given {
     public static class CustomerAggregateRepository
             extends AggregateRepository<CustomerId, CustomerAggregate> {
 
+        private @Nullable TargetFilters memoizedFilters;
+        private @Nullable ResponseFormat memoizedFormat;
+
         public CustomerAggregateRepository() {
             super();
+        }
+
+        @Override
+        public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
+            this.memoizedFilters = filters;
+            this.memoizedFormat = format;
+            return super.findRecords(filters, format);
+        }
+
+        public Optional<TargetFilters> memoizedFilters() {
+            return Optional.ofNullable(memoizedFilters);
+        }
+
+        public Optional<ResponseFormat> memoizedFormat() {
+            return Optional.ofNullable(memoizedFormat);
         }
     }
 

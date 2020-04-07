@@ -53,7 +53,6 @@ import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -62,7 +61,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.grpc.StreamObservers.ack;
 
 /**
@@ -466,17 +464,10 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
-        private SystemReadSide systemReadSide;
 
         @Internal
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
-            return this;
-        }
-
-        @Internal
-        public Builder setSystemReadSide(SystemReadSide readSide) {
-            this.systemReadSide = checkNotNull(readSide);
             return this;
         }
 
@@ -509,10 +500,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             return eventRegistry;
         }
 
-        private SystemReadSide systemReadSide() {
-            return systemReadSide;
-        }
-
         /**
          * Builds an instance of {@code Stand}.
          *
@@ -524,7 +511,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         @CheckReturnValue
         @Internal
         public Stand build() {
-            checkState(systemReadSide != null, "SystemWriteSide is not set.");
             boolean multitenant = this.multitenant == null
                                   ? false
                                   : this.multitenant;

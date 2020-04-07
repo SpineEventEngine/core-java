@@ -34,11 +34,13 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.client.ResponseFormat;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
+import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Command;
@@ -62,7 +64,6 @@ import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.stand.given.StandTestEnv.MemoizeSubscriptionCallback;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.NoOpSystemReadSide;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
@@ -71,12 +72,12 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.TestBoundedContext;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -86,6 +87,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -96,6 +98,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
@@ -651,28 +654,27 @@ class StandTest extends TenantAwareTest {
     }
 
     @Test
-    @DisplayName("query system BC for aggregate states")
-    //TODO:2020-03-28:alex.tymchenko: rewrite this one
-    @Disabled
+    @DisplayName("query `AggregateRepository` for aggregate states")
     void readAggregates() {
-//        boolean multitenant = isMultitenant();
-//        MemoizingReadSide readSide = multitenant
-//                                     ? MemoizingReadSide.multitenant()
-//                                     : MemoizingReadSide.singleTenant();
-//        Stand stand = Stand
-//                .newBuilder()
-//                .setMultitenant(multitenant)
-//                .setSystemReadSide(readSide)
-//                .build();
-//        stand.registerTypeSupplier(new CustomerAggregateRepository());
-//        Query query = getRequestFactory().query()
-//                                         .all(Customer.class);
-//        stand.execute(query, noOpObserver());
-//
-//        Message actualQuery = readSide.lastSeenQuery()
-//                                      .message();
-//        assertNotNull(actualQuery);
-//        assertEquals(query, actualQuery);
+        boolean multitenant = isMultitenant();
+        Stand stand = Stand
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .build();
+        CustomerAggregateRepository repository = new CustomerAggregateRepository();
+        TestBoundedContext.create().register(repository);
+        stand.registerTypeSupplier(repository);
+        Query query = getRequestFactory().query()
+                                         .all(Customer.class);
+        stand.execute(query, noOpObserver());
+
+        Optional<TargetFilters> actualFilter = repository.memoizedFilters();
+        assertThat(actualFilter).isPresent();
+        assertThat(actualFilter.get()).isEqualTo(query.filters());
+
+        Optional<ResponseFormat> actualFormat = repository.memoizedFormat();
+        assertThat(actualFormat).isPresent();
+        assertThat(actualFormat.get()).isEqualTo(query.getFormat());
     }
 
     @Test
@@ -733,7 +735,6 @@ class StandTest extends TenantAwareTest {
         @DisplayName("if querying unknown type")
         void ifQueryingUnknownType() {
             Stand stand = Stand.newBuilder()
-                               .setSystemReadSide(NoOpSystemReadSide.INSTANCE)
                                .setMultitenant(isMultitenant())
                                .build();
             checkTypesEmpty(stand);
@@ -779,7 +780,6 @@ class StandTest extends TenantAwareTest {
         void ifSubscribingToUnknownType() {
             Stand stand = Stand.newBuilder()
                                .setMultitenant(isMultitenant())
-                               .setSystemReadSide(NoOpSystemReadSide.INSTANCE)
                                .build();
             checkTypesEmpty(stand);
 

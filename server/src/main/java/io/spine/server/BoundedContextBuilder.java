@@ -48,7 +48,6 @@ import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemFeatures;
-import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 
 import java.util.ArrayList;
@@ -599,7 +598,7 @@ public final class BoundedContextBuilder implements Logging {
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
         initTenantIndex();
         initCommandBus(client.writeSide());
-        this.stand = createStand(client.readSide());
+        this.stand = createStand();
         B result = instanceFactory.apply(this);
         return result;
     }
@@ -618,11 +617,10 @@ public final class BoundedContextBuilder implements Logging {
                   .injectTenantIndex(tenantIndex);
     }
 
-    private Stand createStand(SystemReadSide systemReadSide) {
+    private Stand createStand() {
         Stand.Builder result = Stand
                 .newBuilder()
-                .setMultitenant(isMultitenant())
-                .setSystemReadSide(systemReadSide);
+                .setMultitenant(isMultitenant());
         return result.build();
     }
 }
