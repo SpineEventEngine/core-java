@@ -55,8 +55,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
-import io.spine.system.server.Mirror;
-import io.spine.system.server.MirrorRepository;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Iterator;
@@ -484,8 +482,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Sets up entity state {@linkplain MirrorRepository mirroring} for the aggregates of this
-     * repository.
+     * Checks if the aggregate should be mirrored, and configures the storage accordingly.
      */
     private void initMirror() {
         if (shouldBeMirrored()) {
@@ -511,19 +508,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         boolean shouldBeMirrored = aggregateClass().visibility()
                                                    .isNotNone();
         return shouldBeMirrored;
-    }
-
-    /**
-     * Returns a {@link MirrorRepository} of a corresponding {@link BoundedContext}.
-     *
-     * <p>Returns {@code Optional.empty()} if aggregate mirroring is
-     * {@linkplain io.spine.system.server.SystemFeatures disabled} in the system context.
-     */
-    private Optional<MirrorRepository> mirrorRepository() {
-        Optional<MirrorRepository> result = context().systemClient()
-                                                     .systemRepositoryFor(Mirror.class)
-                                                     .map(MirrorRepository.class::cast);
-        return result;
     }
 
     /**

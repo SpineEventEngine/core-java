@@ -40,7 +40,6 @@ import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.MirrorRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -54,7 +53,7 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 
 /**
- * An event-sourced storage of aggregate part events and snapshots.
+ * A storage of aggregate events, snapshots and the most recent aggregate states.
  *
  * @param <I>
  *         the type of IDs of aggregates managed by this storage
@@ -107,19 +106,16 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     /**
      * {@inheritDoc}
      *
-     * <p>Attempts to read aggregate IDs from the {@link MirrorRepository}, as they are already
-     * stored there in a convenient form.
+     * <p>While it is possible to write individual event records only, in scope of the expected
+     * usage scenarios, the IDs, lifecycle and versions of the {@code Aggregates} are
+     * {@link #writeState(Aggregate) written} to this storage as well.
      *
-     * <p>If an aggregate {@link MirrorRepository} is not configured to use for reads with this
-     * repository, falls back to the default method of getting distinct aggregate IDs
-     * from the event records.
+     * <p>Therefore, this index contains only the identifiers of the {@code Aggregates} which
+     * state was written to the storage.
      */
     @Override
     public Iterator<I> index() {
-        if (mirrorEnabled) {
-            return stateStorage.index();
-        }
-        return distinctAggregateIds();
+        return stateStorage.index();
     }
 
     /**
@@ -225,10 +221,6 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     }
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
-        //TODO:2020-03-21:alex.tymchenko: this behavior seems not to be tested.
-//        if (!mirrorEnabled) {
-//            return;
-//        }
         EntityRecord record = AggregateRecords.newStateRecord(aggregate, mirrorEnabled);
         EntityColumns columns = EntityColumns.of(aggregate.modelClass());
         EntityRecordWithColumns<I> result =

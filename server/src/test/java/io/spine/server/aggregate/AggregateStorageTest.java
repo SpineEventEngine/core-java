@@ -20,11 +20,11 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
@@ -40,6 +40,9 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.StorageRecords;
+import io.spine.server.aggregate.given.repo.GivenAggregate;
+import io.spine.server.aggregate.given.repo.ProjectAggregate;
+import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.Nothing;
 import io.spine.server.storage.AbstractStorageTest;
@@ -50,6 +53,7 @@ import io.spine.testdata.Sample;
 import io.spine.testing.TestValues;
 import io.spine.testing.Tests;
 import io.spine.testing.core.given.GivenCommandContext;
+import io.spine.testing.server.TestBoundedContext;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,15 +63,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Streams.stream;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
@@ -321,19 +324,29 @@ public class AggregateStorageTest
     }
 
     @Test
-    @DisplayName("return an iterator over unique aggregate IDs through `index`")
-    void provideUniqueIdsThroughIndex() {
-        AggregateEventRecord record1 = StorageRecords.create(id, currentTime());
-        storage.writeEventRecord(id, record1);
+    @Override
+    protected void immutableIndex() {
+        ProjectAggregate aggregate = givenAggregate().withUncommittedEvents();
+        storage.writeState(aggregate);
+        assertIndexImmutability();
+    }
 
-        Timestamp otherTime = subtract(currentTime(), Durations.fromSeconds(1));
-        AggregateEventRecord record2 = StorageRecords.create(id, otherTime);
-        storage.writeEventRecord(id, record2);
+    @Test
+    @Override
+    protected void indexCountingAllIds() {
+        GivenAggregate given = givenAggregate();
+        int batchSize = 5;
+        List<ProjectId> expectedIds = new ArrayList<>(batchSize);
+        for(int index = 0; index < batchSize; index++) {
+            ProjectId id = Sample.messageOfType(ProjectId.class);
+            ProjectAggregate aggregate = given.withUncommittedEvents(id);
+            storage.writeState(aggregate);
+            expectedIds.add(id);
+        }
 
         Iterator<ProjectId> index = storage.index();
-
-        List<ProjectId> result = stream(index).collect(toImmutableList());
-        assertThat(result).containsExactly(id);
+        ImmutableList<ProjectId> actualIds = ImmutableList.copyOf(index);
+        assertThat(actualIds).containsExactlyElementsIn(expectedIds);
     }
 
     @Nested
@@ -374,27 +387,27 @@ public class AggregateStorageTest
             reverse(records); // expected records should be in a reverse order
             assertEquals(records, actual);
         }
-    }
 
-    @Test
-    @DisplayName("sort by version rather than by timestamp")
-    void sortByVersionFirstly() {
-        Project state = Project.getDefaultInstance();
-        Version minVersion = zero();
-        Version maxVersion = increment(minVersion);
-        Timestamp minTimestamp = Timestamps.MIN_VALUE;
-        Timestamp maxTimestamp = Timestamps.MAX_VALUE;
+        @Test
+        @DisplayName("sorted by version rather than by timestamp")
+        void sortByVersionFirstly() {
+            Project state = Project.getDefaultInstance();
+            Version minVersion = zero();
+            Version maxVersion = increment(minVersion);
+            Timestamp minTimestamp = Timestamps.MIN_VALUE;
+            Timestamp maxTimestamp = Timestamps.MAX_VALUE;
 
-        // The first event is an event, which is the oldest, i.e. with the minimal version.
-        Event expectedFirst = eventFactory.createEvent(event(state), minVersion, maxTimestamp);
-        Event expectedSecond = eventFactory.createEvent(event(state), maxVersion, minTimestamp);
+            // The first event is an event, which is the oldest, i.e. with the minimal version.
+            Event expectedFirst = eventFactory.createEvent(event(state), minVersion, maxTimestamp);
+            Event expectedSecond = eventFactory.createEvent(event(state), maxVersion, minTimestamp);
 
-        storage.writeEvent(id, expectedSecond);
-        storage.writeEvent(id, expectedFirst);
+            storage.writeEvent(id, expectedSecond);
+            storage.writeEvent(id, expectedFirst);
 
-        AggregateHistory record = readRecord(id);
-        List<Event> events = record.getEventList();
-        assertTrue(events.indexOf(expectedFirst) < events.indexOf(expectedSecond));
+            AggregateHistory record = readRecord(id);
+            List<Event> events = record.getEventList();
+            assertTrue(events.indexOf(expectedFirst) < events.indexOf(expectedSecond));
+        }
     }
 
     @Test
@@ -730,5 +743,11 @@ public class AggregateStorageTest
                 .newBuilder()
                 .setState(Any.pack(state))
                 .vBuild();
+    }
+
+    private static GivenAggregate givenAggregate() {
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        TestBoundedContext.create().register(repository);
+        return new GivenAggregate(repository);
     }
 }

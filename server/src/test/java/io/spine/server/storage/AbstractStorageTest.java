@@ -225,51 +225,54 @@ public abstract class AbstractStorageTest<I,
         writeAndReadRecordTest(id);
     }
 
-    @Nested
-    @DisplayName("have index which")
-    class HaveIndex {
+    /**
+     * Index-based tests here and below aren't grouped into a {@code Nested} test class to allow
+     * overriding them in descendants.
+     */
+    @Test
+    @DisplayName("return non-null `index()`")
+    protected void nonNullIndex() {
+        Iterator<I> index = storage.index();
+        assertNotNull(index);
+    }
 
-        @Test
-        @DisplayName("is non-null")
-        void nonNull() {
-            Iterator<I> index = storage.index();
-            assertNotNull(index);
+    @Test
+    @DisplayName("return immutable `index()`")
+    protected void immutableIndex() {
+        writeRecord(newId());
+        assertIndexImmutability();
+    }
+
+    protected void assertIndexImmutability() {
+        Iterator<I> index = storage.index();
+        assertTrue(index.hasNext());
+        try {
+            index.remove();
+            fail("Storage#index is mutable");
+
+            // One of collections used in in-memory implementation throws IllegalStateException
+            // but default behavior is UnsupportedOperationException
+        } catch (UnsupportedOperationException | IllegalStateException ignored) {
+            // One of valid exceptions was thrown
+        }
+    }
+
+    @Test
+    @DisplayName("have all IDs counted by `index()`")
+    protected void indexCountingAllIds() {
+        int recordCount = 10;
+        Set<I> ids = new HashSet<>(recordCount);
+        for (int i = 0; i < recordCount; i++) {
+            I id = newId();
+            writeRecord(id);
+            ids.add(id);
         }
 
-        @Test
-        @DisplayName("counts all IDs")
-        void countingAllIds() {
-            int recordCount = 10;
-            Set<I> ids = new HashSet<>(recordCount);
-            for (int i = 0; i < recordCount; i++) {
-                I id = newId();
-                writeRecord(id);
-                ids.add(id);
-            }
+        Iterator<I> index = storage.index();
+        Collection<I> indexValues = newHashSet(index);
 
-            Iterator<I> index = storage.index();
-            Collection<I> indexValues = newHashSet(index);
-
-            assertEquals(ids.size(), indexValues.size());
-            assertThat(indexValues).containsExactlyElementsIn(ids);
-        }
-
-        @Test
-        @DisplayName("is immutable")
-        void immutable() {
-            writeRecord(newId());
-            Iterator<I> index = storage.index();
-            assertTrue(index.hasNext());
-            try {
-                index.remove();
-                fail("Storage#index is mutable");
-
-                // One of collections used in in-memory implementation throws IllegalStateException
-                // but default behavior is UnsupportedOperationException
-            } catch (UnsupportedOperationException | IllegalStateException ignored) {
-                // One of valid exceptions was thrown
-            }
-        }
+        assertEquals(ids.size(), indexValues.size());
+        assertThat(indexValues).containsExactlyElementsIn(ids);
     }
 
     @Nested

@@ -75,6 +75,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+//TODO:2020-04-07:alex.tymchenko: migrate.
 @DisplayName("MirrorRepository should")
 @Disabled
 class MirrorRepositoryTest {
