@@ -173,9 +173,9 @@ class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWi
         @Override
         public @Nullable R apply(@Nullable R input) {
             checkNotNull(input);
-//            if(fieldMask.getPathsList().isEmpty()) {
-//                return input;
-//            }
+            if(fieldMask.getPathsList().isEmpty()) {
+                return input;
+            }
             if(input instanceof EntityRecord) {
                 return (R) maskEntityRecord((EntityRecord)input);
             }
