@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -34,14 +33,12 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.MirrorRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -54,6 +51,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Streams.stream;
+import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 
 /**
  * An event-sourced storage of aggregate part events and snapshots.
@@ -66,7 +64,6 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
 
     private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
             "The specified snapshot index is incorrect";
-    private static final int DEFAULT_HISTORY_DEPTH = 50;
 
     private final AggregateEventStorage eventStorage;
     private final EntityRecordStorage<I> stateStorage;
@@ -125,33 +122,6 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
         return distinctAggregateIds();
     }
 
-    public Optional<LifecycleFlags> readLifecycleFlags(I id) {
-        return stateStorage.read(id)
-                           .map(EntityRecord::getLifecycleFlags);
-    }
-
-    //TODO:2020-03-25:alex.tymchenko: get rid of this method.
-    // Only allow to update the lifecycle flags for the entity.
-    public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        Optional<EntityRecord> read = stateStorage.read(id);
-        EntityRecord record;
-        if (read.isPresent()) {
-            record = read.get();
-            record = record.toBuilder()
-                           .setLifecycleFlags(flags)
-                           .vBuild();
-
-        } else {
-            record = EntityRecord.newBuilder()
-                                 .setEntityId(Identifier.pack(id))
-                                 .setLifecycleFlags(flags)
-                                 .vBuild();
-        }
-        MessageWithColumns<I, EntityRecord> asMessage =
-                MessageWithColumns.create(id, record, ImmutableMap.of());
-        stateStorage.write(asMessage);
-    }
-
     /**
      * Forms and returns an {@link AggregateHistory} based on the
      * {@linkplain #historyBackward(Object, int)}  aggregate history}.
@@ -173,7 +143,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
 
     @Override
     public Optional<AggregateHistory> read(I id) {
-        return read(id, DEFAULT_HISTORY_DEPTH);
+        return read(id, DEFAULT_SNAPSHOT_TRIGGER);
     }
 
     /**

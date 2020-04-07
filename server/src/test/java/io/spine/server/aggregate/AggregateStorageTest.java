@@ -41,7 +41,6 @@ import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.model.Nothing;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
@@ -281,6 +280,21 @@ public class AggregateStorageTest
             int id = 10;
             writeAndReadEventTest(id, storage);
         }
+
+        private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
+            Event expectedEvent = eventFactory.createEvent(event(Project.getDefaultInstance()));
+
+            storage.writeEvent(id, expectedEvent);
+
+            Optional<AggregateHistory> optional = storage.read(id, MAX_VALUE);
+            assertTrue(optional.isPresent());
+            AggregateHistory events = optional.get();
+            assertEquals(1, events.getEventCount());
+            Event actualEvent = events.getEvent(0);
+            assertEquals(expectedEvent, actualEvent);
+
+            close(storage);
+        }
     }
 
     @Test
@@ -306,31 +320,6 @@ public class AggregateStorageTest
     protected void rewriteRecord() {
     }
 
-    @Nested
-    @DisplayName("read history of aggregate with status")
-    class ReadHistory {
-
-        @Test
-        @DisplayName("`archived`")
-        void ofArchived() {
-            LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
-                                                               .setArchived(true)
-                                                               .build();
-            storage.writeLifecycleFlags(id, archivedRecordFlags);
-            writeAndReadEventTest(id, storage);
-        }
-
-        @Test
-        @DisplayName("`deleted`")
-        void ofDeleted() {
-            LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
-                                                              .setDeleted(true)
-                                                              .build();
-            storage.writeLifecycleFlags(id, deletedRecordFlags);
-            writeAndReadEventTest(id, storage);
-        }
-    }
-
     @Test
     @DisplayName("return an iterator over unique aggregate IDs through `index`")
     void provideUniqueIdsThroughIndex() {
@@ -345,74 +334,6 @@ public class AggregateStorageTest
 
         List<ProjectId> result = stream(index).collect(toImmutableList());
         assertThat(result).containsExactly(id);
-    }
-
-    @Nested
-    @DisplayName("index aggregate with status")
-    class IndexAggregate {
-
-        @Test
-        @DisplayName("`archived`")
-        void archived() {
-            LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
-                                                               .setArchived(true)
-                                                               .build();
-            storage.writeEventRecord(id, StorageRecords.create(id, currentTime()));
-            storage.writeLifecycleFlags(id, archivedRecordFlags);
-            assertTrue(storage.index()
-                              .hasNext());
-        }
-
-        @Test
-        @DisplayName("`deleted`")
-        void deleted() {
-            LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
-                                                              .setDeleted(true)
-                                                              .build();
-            storage.writeEventRecord(id, StorageRecords.create(id, currentTime()));
-            //TODO:2020-03-20:alex.tymchenko: rewrite this test at all.
-            storage.writeLifecycleFlags(id, deletedRecordFlags);
-            assertTrue(storage.index()
-                              .hasNext());
-        }
-    }
-
-    @Nested
-    @DisplayName("read records with status")
-    class ReadRecords {
-
-        @Test
-        @DisplayName("`archived`")
-        void archived() {
-            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
-                                                   .setArchived(true)
-                                                   .build());
-        }
-
-        @Test
-        @DisplayName("`deleted`")
-        void deleted() {
-            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
-                                                   .setDeleted(true)
-                                                   .build());
-        }
-
-        @Test
-        @DisplayName("`archived` and `deleted`")
-        void archivedAndDeleted() {
-            readRecordsWithLifecycle(LifecycleFlags.newBuilder()
-                                                   .setArchived(true)
-                                                   .setDeleted(true)
-                                                   .build());
-        }
-
-        private void readRecordsWithLifecycle(LifecycleFlags flags) {
-            AggregateHistory record = newStorageRecord(id);
-            storage.write(id, record);
-            storage.writeLifecycleFlags(id, flags);
-            AggregateHistory readRecord = readRecord(id);
-            assertEquals(record, readRecord);
-        }
     }
 
     @Nested
@@ -748,21 +669,6 @@ public class AggregateStorageTest
         Optional<AggregateHistory> optional = storage.read(id);
         assertTrue(optional.isPresent());
         return optional.get();
-    }
-
-    private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
-        Event expectedEvent = eventFactory.createEvent(event(Project.getDefaultInstance()));
-
-        storage.writeEvent(id, expectedEvent);
-
-        Optional<AggregateHistory> optional = storage.read(id, MAX_VALUE);
-        assertTrue(optional.isPresent());
-        AggregateHistory events = optional.get();
-        assertEquals(1, events.getEventCount());
-        Event actualEvent = events.getEvent(0);
-        assertEquals(expectedEvent, actualEvent);
-
-        close(storage);
     }
 
     void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {

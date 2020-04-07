@@ -27,7 +27,6 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -69,16 +68,6 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId> {
     @Override
     public Iterator<ProjectId> index() {
         return delegate.index();
-    }
-
-    @Override
-    public Optional<LifecycleFlags> readLifecycleFlags(ProjectId id) {
-        return delegate.readLifecycleFlags(id);
-    }
-
-    @Override
-    public void writeLifecycleFlags(ProjectId id, LifecycleFlags flags) {
-        delegate.writeLifecycleFlags(id, flags);
     }
 
     @Override

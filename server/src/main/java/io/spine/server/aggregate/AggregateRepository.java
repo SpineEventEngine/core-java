@@ -489,6 +489,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private void initMirror() {
         if (shouldBeMirrored()) {
+            //TODO:2020-04-07:alex.tymchenko: kill along with the mirror classes.
 //            mirrorRepository().ifPresent(repo -> {
 //                repo.registerMirroredType(this);
 //                aggregateStorage().configureMirror(repo, entityStateType());
