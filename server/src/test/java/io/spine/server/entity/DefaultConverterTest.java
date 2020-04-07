@@ -28,16 +28,13 @@ import io.spine.server.given.organizations.Organization;
 import io.spine.server.given.organizations.OrganizationId;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.entity.DefaultConverter.forAllFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//TODO:2020-03-19:alex.tymchenko: remove this at all.
 @DisplayName("`DefaultConverter` should")
-@Disabled
 class DefaultConverterTest {
 
     private StorageConverter<OrganizationId, TestEntity, Organization> converter;
