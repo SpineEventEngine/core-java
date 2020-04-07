@@ -59,7 +59,7 @@ public class ProjectAggregate
     @Apply
     private void apply(AggProjectCreated event) {
         builder().setId(event.getProjectId())
-                    .setName(event.getName());
+                 .setName(event.getName());
     }
 
     @Assign
@@ -73,7 +73,7 @@ public class ProjectAggregate
     @Apply
     private void apply(AggTaskAdded event) {
         builder().setId(event.getProjectId())
-                    .addTask(event.getTask());
+                 .addTask(event.getTask());
     }
 
     @Assign

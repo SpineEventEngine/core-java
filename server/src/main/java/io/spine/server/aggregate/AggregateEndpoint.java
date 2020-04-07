@@ -136,7 +136,8 @@ abstract class AggregateEndpoint<I,
                                            .getProducedEvents()
                                            .getEventList();
         AggregateTransaction<I, ?, ?> tx = startTransaction(aggregate);
-        BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events);
+        int snapshotTrigger = repository().snapshotTrigger();
+        BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events, snapshotTrigger);
         if (batchDispatchOutcome.getSuccessful()) {
             tx.commitIfActive();
             return correctProducedEvents(commandOutcome, batchDispatchOutcome);
@@ -213,16 +214,11 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected final boolean isModified(A aggregate) {
-        UncommittedEvents events = aggregate.getUncommittedEvents();
-        return events.nonEmpty();
+        return aggregate.hasUncommittedEvents();
     }
 
     @Override
     public final AggregateRepository<I, A> repository() {
         return (AggregateRepository<I, A>) super.repository();
-    }
-
-    private AggregateStorage<I> storage() {
-        return repository().aggregateStorage();
     }
 }

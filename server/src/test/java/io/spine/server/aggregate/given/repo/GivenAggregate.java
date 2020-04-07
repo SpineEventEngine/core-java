@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.given.repo;
 
 import io.spine.base.CommandMessage;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
@@ -36,15 +37,17 @@ import static io.spine.testdata.Sample.builderForType;
 /** Utility factory for test aggregates. */
 public class GivenAggregate {
 
-    /** Prevents instantiation of this utility class. */
-    private GivenAggregate() {
+    private final AggregateRepository<ProjectId, ProjectAggregate> repository;
+
+    public GivenAggregate(AggregateRepository<ProjectId, ProjectAggregate> repository) {
+        this.repository = repository;
     }
 
-    public static ProjectAggregate withUncommittedEvents() {
+    public ProjectAggregate withUncommittedEvents() {
         return withUncommittedEvents(Sample.messageOfType(ProjectId.class));
     }
 
-    public static ProjectAggregate withUncommittedEvents(ProjectId id) {
+    public ProjectAggregate withUncommittedEvents(ProjectId id) {
         ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
                                           .withId(id)
                                           .build();
@@ -56,9 +59,9 @@ public class GivenAggregate {
         AggStartProject.Builder startProject = builderForType(AggStartProject.class);
         startProject.setProjectId(id);
 
-        dispatchCommand(aggregate, env(createProject.build()));
-        dispatchCommand(aggregate, env(addTask.build()));
-        dispatchCommand(aggregate, env(startProject.build()));
+        dispatchCommand(aggregate, repository, env(createProject.build()));
+        dispatchCommand(aggregate, repository, env(addTask.build()));
+        dispatchCommand(aggregate, repository, env(startProject.build()));
 
         return aggregate;
     }

@@ -241,7 +241,7 @@ public abstract class Transaction<I,
         return active;
     }
 
-    final LifecycleFlags lifecycleFlags() {
+    protected LifecycleFlags lifecycleFlags() {
         return lifecycleFlags;
     }
 
@@ -265,7 +265,7 @@ public abstract class Transaction<I,
     /**
      * Returns the version of the entity, modified within this transaction.
      */
-    final Version version() {
+    protected final Version version() {
         return version;
     }
 

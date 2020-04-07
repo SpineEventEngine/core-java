@@ -64,6 +64,10 @@ public class AggregateRepositoryTestEnv {
         repository = newRepository();
     }
 
+    public static GivenAggregate givenAggregate() {
+        return new GivenAggregate(repository);
+    }
+
     public static ProjectId givenAggregateId(String id) {
         return ProjectId.newBuilder()
                         .setId(id)
@@ -72,7 +76,7 @@ public class AggregateRepositoryTestEnv {
 
     public static ProjectAggregate givenStoredAggregate() {
         ProjectId id = Sample.messageOfType(ProjectId.class);
-        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(id);
+        ProjectAggregate aggregate = givenAggregate().withUncommittedEvents(id);
 
         repository.storeAggregate(aggregate);
         return aggregate;
@@ -80,7 +84,7 @@ public class AggregateRepositoryTestEnv {
 
     public static void givenStoredAggregateWithId(String id) {
         ProjectId projectId = givenAggregateId(id);
-        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(projectId);
+        ProjectAggregate aggregate = givenAggregate().withUncommittedEvents(projectId);
 
         repository.storeAggregate(aggregate);
     }

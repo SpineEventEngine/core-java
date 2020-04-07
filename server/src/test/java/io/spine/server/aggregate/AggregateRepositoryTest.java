@@ -32,7 +32,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.repo.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.repo.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.repo.FailingAggregateRepository;
-import io.spine.server.aggregate.given.repo.GivenAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
 import io.spine.server.aggregate.given.repo.ReactingAggregate;
@@ -85,6 +84,7 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.boundedContext;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregate;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenStoredAggregate;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenStoredAggregateWithId;
@@ -156,11 +156,8 @@ public class AggregateRepositoryTest {
         @DisplayName("using snapshot")
         void usingSnapshot() {
             ProjectId id = Sample.messageOfType(ProjectId.class);
-            ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
-
-            UncommittedEvents events = ((Aggregate<?, ?, ?>) expected).getUncommittedEvents();
-            repository().setSnapshotTrigger(events.list()
-                                                  .size());
+            repository().setSnapshotTrigger(3);
+            ProjectAggregate expected = givenAggregate().withUncommittedEvents(id);
             repository().store(expected);
 
             ProjectAggregate actual = assertFound(id);
@@ -173,7 +170,7 @@ public class AggregateRepositoryTest {
         @DisplayName("without using snapshot")
         void notUsingSnapshot() {
             ProjectId id = Sample.messageOfType(ProjectId.class);
-            ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
+            ProjectAggregate expected = givenAggregate().withUncommittedEvents(id);
 
             repository().store(expected);
             ProjectAggregate actual = assertFound(id);
@@ -197,11 +194,9 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("when it's required to store snapshot")
         void whenNeededToStore() {
-            ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
             // This should make the repository write the snapshot.
-            UncommittedEvents events = ((Aggregate<?, ?, ?>) aggregate).getUncommittedEvents();
-            repository().setSnapshotTrigger(events.list()
-                                                  .size());
+            repository().setSnapshotTrigger(3);
+            ProjectAggregate aggregate = givenAggregate().withUncommittedEvents();
 
             repository().store(aggregate);
             AggregateHistory record = readRecord(aggregate);
@@ -212,7 +207,7 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("when storing snapshot isn't needed")
         void whenStoreNotNeeded() {
-            ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
+            ProjectAggregate aggregate = givenAggregate().withUncommittedEvents();
 
             repository().store(aggregate);
             AggregateHistory record = readRecord(aggregate);

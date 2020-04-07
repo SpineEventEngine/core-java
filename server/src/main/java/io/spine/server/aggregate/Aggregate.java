@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterators.any;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -120,25 +119,12 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for this central concept.
 public abstract class Aggregate<I,
-                                S extends EntityState,
-                                B extends ValidatingBuilder<S>>
+        S extends EntityState,
+        B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventPlayer, EventReactor {
 
-    /**
-     * The count of events stored to the {@linkplain AggregateStorage storage} since
-     * the last snapshot.
-     *
-     * <p>This field is set in {@link #play(AggregateHistory)} and is effectively final.
-     */
-    private int eventCountAfterLastSnapshot = 0;
-
-    /**
-     * Events generated in the process of handling commands that were not yet committed.
-     *
-     * @see #commitEvents()
-     */
-    private UncommittedEvents uncommittedEvents = UncommittedEvents.ofNone();
+    private final UncommittedHistory uncommittedHistory = new UncommittedHistory(this::toSnapshot);
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
@@ -154,7 +140,7 @@ public abstract class Aggregate<I,
      *           <li>These constructors need to be accessible from tests in the same package.
      *         </ol>
      *
-     *         <p>If you do have tests that create aggregates using constructors, consider annotating
+     *         <p>If you do have tests that create aggregates via constructors, consider annotating
      *         them with {@code @VisibleForTesting}. Otherwise, aggregate constructors (that are
      *         invoked by {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
      *         using Reflection) may be left {@code private}.
@@ -199,7 +185,7 @@ public abstract class Aggregate<I,
      */
     @Override
     protected AggregateClass<?> thisClass() {
-        return (AggregateClass<?>)super.thisClass();
+        return (AggregateClass<?>) super.thisClass();
     }
 
     @Internal
@@ -213,7 +199,8 @@ public abstract class Aggregate<I,
      *
      * <p>In {@code Aggregate} this method must be called only from within an event applier.
      *
-     * @throws IllegalStateException if the method is called from outside an event applier
+     * @throws IllegalStateException
+     *         if the method is called from outside an event applier
      */
     @Override
     protected final B builder() {
@@ -226,8 +213,8 @@ public abstract class Aggregate<I,
      * <p>Dispatching the commands results in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
      *
-     * @param  command
-     *          the envelope with the command to dispatch
+     * @param command
+     *         the envelope with the command to dispatch
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
@@ -253,8 +240,8 @@ public abstract class Aggregate<I,
      * <p>Reacting on a event may result in emitting event messages.
      * All the {@linkplain Empty empty} messages are filtered out from the result.
      *
-     * @param  event
-     *          the envelope with the event to dispatch
+     * @param event
+     *         the envelope with the event to dispatch
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change because of the event
      */
@@ -293,11 +280,11 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Applies passed events.
+     * Restores the aggregate state from the passed event history.
      *
-     * <p>The events passed to this method is the aggregate data (which may include
-     * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
-     * it restores its state.
+     * <p>The historical events are {@linkplain #play(Iterable) played} on this aggregate instance.
+     * If the history includes a {@code Snapshot}, the aggregate state is restored from it first,
+     * and only then the event history is applied.
      *
      * @param history
      *         the aggregate state with events to play
@@ -305,15 +292,15 @@ public abstract class Aggregate<I,
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
      */
-    final BatchDispatchOutcome play(AggregateHistory history) {
+    final BatchDispatchOutcome replay(AggregateHistory history) {
         Snapshot snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
         List<Event> events = history.getEventList();
-        eventCountAfterLastSnapshot = events.size();
         BatchDispatchOutcome batchDispatchOutcome = play(events);
-        remember(events);
+        uncommittedHistory.onAggregateRestored(history);
+        appendToRecentHistory(events);
         return batchDispatchOutcome;
     }
 
@@ -331,29 +318,53 @@ public abstract class Aggregate<I,
      * the {@code events} list is of size 3, the applied events will have versions {@code 43},
      * {@code 44}, and {@code 45}.
      *
+     * <p>All the events applied to the aggregate instance are
+     * {@linkplain UncommittedHistory#startTracking(int) tracked} as a part of the aggregate's
+     * {@link UncommittedHistory} and later are stored.
+     *
+     * <p>If during the application of the events, the number of the events since the last snapshot
+     * exceeds the passed snapshot trigger, a new snapshot is made. The snapshot is then tracked
+     * as a part of the aggregate's {@code UncommittedHistory}.
+     *
      * @param events
      *         the events to apply
+     * @param snapshotTrigger
+     *         the snapshot trigger
      * @return the exact list of {@code events} but with adjusted versions
      */
-    final BatchDispatchOutcome apply(List<Event> events) {
+    final BatchDispatchOutcome apply(List<Event> events, int snapshotTrigger) {
         VersionSequence versionSequence = new VersionSequence(version());
         ImmutableList<Event> versionedEvents = versionSequence.update(events);
-        BatchDispatchOutcome batchDispatchOutcome = play(versionedEvents);
-        uncommittedEvents = uncommittedEvents.append(versionedEvents);
-        return batchDispatchOutcome;
+        uncommittedHistory.startTracking(snapshotTrigger);
+        BatchDispatchOutcome result = play(versionedEvents);
+        uncommittedHistory.stopTracking();
+        return result;
     }
 
     /**
+     * A callback telling that the event has been played on this aggregate in scope
+     * of a transaction.
+     *
+     * <p>If this event is new in the aggregate history (e.g. it's not already stored), it is
+     * recorded as a part of the aggregate's {@link UncommittedHistory}.
+     */
+    final void onAfterEventPlayed(EventEnvelope event) {
+        uncommittedHistory.track(event);
+    }
+
+    /**
+     * //TODO:2020-04-06:alex.tymchenko: rewrite this piece
      * Restores the state, the version and the lifecycle flags from the passed snapshot.
      *
-     * <p>If this method is called during a {@linkplain #play(AggregateHistory) replay}
+     * <p>If this method is called during a {@linkplain #replay(AggregateHistory) replay}
      * (because the snapshot was encountered) the method uses the state
      * {@linkplain #builder() builder}, which is used during the replay.
      *
      * <p>If not in replay, the method sets the state, the version and the lifecycle flags
      * directly to the aggregate.
      *
-     * @param snapshot the snapshot with the state to restore
+     * @param snapshot
+     *         the snapshot with the state to restore
      */
     final void restore(Snapshot snapshot) {
         @SuppressWarnings("unchecked") /* The cast is safe since the snapshot is created
@@ -371,18 +382,34 @@ public abstract class Aggregate<I,
      *
      * @return immutable view of all uncommitted events
      */
+    @VisibleForTesting
     UncommittedEvents getUncommittedEvents() {
-        return uncommittedEvents;
+        return uncommittedHistory.events();
     }
 
     /**
-     * {@linkplain #remember Remembers} the uncommitted events as
+     * Tells if there any uncommitted events.
+     */
+    boolean hasUncommittedEvents() {
+        return uncommittedHistory.hasEvents();
+    }
+
+    /**
+     * Returns the uncommitted events and snapshots for this aggregate.
+     */
+    UncommittedHistory uncommittedHistory() {
+        return uncommittedHistory;
+    }
+
+    /**
+     * {@linkplain #appendToRecentHistory Remembers} the uncommitted events as
      * the {@link io.spine.server.entity.RecentHistory RecentHistory} and clears them.
      */
     final void commitEvents() {
-        List<Event> recentEvents = uncommittedEvents.list();
-        remember(recentEvents);
-        uncommittedEvents = UncommittedEvents.ofNone();
+        List<Event> recentEvents = uncommittedHistory.events()
+                                                     .list();
+        appendToRecentHistory(recentEvents);
+        uncommittedHistory.commit();
     }
 
     /**
@@ -397,16 +424,33 @@ public abstract class Aggregate<I,
     /**
      * Transforms the current state of the aggregate into the {@link Snapshot} instance.
      *
+     * <p>If the {@linkplain #isTransactionInProgress() transaction is in progress}, the state,
+     * version and lifecycle are taken from the transactional data.
+     *
      * @return new snapshot
      */
     final Snapshot toSnapshot() {
-        Any state = AnyPacker.pack(state());
+        S state;
+        Version version;
+        LifecycleFlags lifecycle;
+        if (isTransactionInProgress()) {
+            AggregateTransaction tx = (AggregateTransaction) tx();
+            state = builder().buildPartial();
+            version = tx.currentVersion();
+            lifecycle = tx.lifecycleFlags();
+        } else {
+            state = state();
+            version = version();
+            lifecycle = lifecycleFlags();
+        }
+
+        Any packedState = AnyPacker.pack(state);
         Snapshot.Builder builder = Snapshot
                 .newBuilder()
-                .setState(state)
-                .setVersion(version())
+                .setState(packedState)
+                .setVersion(version)
                 .setTimestamp(currentTime())
-                .setLifecycle(lifecycleFlags());
+                .setLifecycle(lifecycle);
         return builder.build();
     }
 
@@ -462,20 +506,5 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected final int versionNumber() {
         return super.versionNumber();
-    }
-
-    /**
-     * Obtains the number of events stored in the associated storage since last snapshot.
-     */
-    final int eventCountAfterLastSnapshot() {
-        return eventCountAfterLastSnapshot;
-    }
-
-    /**
-     * Updates the number of events stores in the associated storage since last snapshot.
-     */
-    final void setEventCountAfterLastSnapshot(int count) {
-        checkArgument(count >= 0, "Event count cannot be negative.");
-        this.eventCountAfterLastSnapshot = count;
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
@@ -263,6 +264,14 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
         EntityRecordWithColumns<I> result =
                 EntityRecordWithColumns.create(aggregate, columns, record);
         stateStorage.write(result);
+    }
+
+    protected void writeAll(Aggregate<I, ?, ?> aggregate,
+                            ImmutableList<AggregateHistory> historySegments) {
+        for (AggregateHistory history : historySegments) {
+            write(aggregate.id(), history);
+        }
+        writeState(aggregate);
     }
 
     /**

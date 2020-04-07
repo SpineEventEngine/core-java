@@ -60,6 +60,20 @@ public class AggregateMessageDispatcher {
     }
 
     /**
+     * Dispatches the {@linkplain CommandEnvelope command envelope} and applies the resulting events
+     * to the given {@code Aggregate}.
+     *
+     * @return the list of event messages.
+     */
+    @CanIgnoreReturnValue
+    public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
+    dispatchCommand(A aggregate, AggregateRepository<I, A> repository, CommandEnvelope command) {
+        checkNotNull(aggregate);
+        checkNotNull(command);
+        return AggregateTestSupport.dispatchCommand(repository, aggregate, command);
+    }
+
+    /**
      * Dispatches the command and applies the resulting events
      * to the given {@code Aggregate}.
      *

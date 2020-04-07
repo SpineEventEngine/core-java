@@ -30,7 +30,6 @@ import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
@@ -88,13 +87,11 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -183,14 +180,6 @@ public class AggregateTest {
     @AfterEach
     void tearDown() throws Exception {
         boundedContext.close();
-    }
-
-    @Test
-    @DisplayName("not allow a negative event count after last snapshot")
-    void negativeEventCount() {
-        Aggregate<?, ?, ?> aggregate = this.aggregate;
-        assertThrows(IllegalArgumentException.class,
-                     () -> aggregate.setEventCountAfterLastSnapshot(-1));
     }
 
     @Nested
@@ -415,7 +404,7 @@ public class AggregateTest {
     }
 
     @Test
-    @DisplayName("play events")
+    @DisplayName("replay historical events")
     void playEvents() {
         List<Event> events = generateProjectEvents();
         AggregateHistory aggregateHistory =
@@ -424,7 +413,7 @@ public class AggregateTest {
                                 .build();
 
         AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
-        aggregate().play(aggregateHistory);
+        aggregate().replay(aggregateHistory);
         tx.commit();
 
         assertTrue(aggregate.projectCreatedEventApplied);
@@ -442,7 +431,7 @@ public class AggregateTest {
         Aggregate<?, ?, ?> anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(anotherAggregate);
-        anotherAggregate.play(AggregateHistory.newBuilder()
+        anotherAggregate.replay(AggregateHistory.newBuilder()
                                               .setSnapshot(snapshot)
                                               .build());
         tx.commit();
@@ -652,7 +641,7 @@ public class AggregateTest {
                     .addEvent(event)
                     .build();
             BatchDispatchOutcome batchDispatchOutcome =
-                    ((Aggregate<?, ?, ?>) faultyAggregate).play(history);
+                    ((Aggregate<?, ?, ?>) faultyAggregate).replay(history);
             assertThat(batchDispatchOutcome.getSuccessful()).isFalse();
             MessageId expectedTarget = MessageId
                     .newBuilder()

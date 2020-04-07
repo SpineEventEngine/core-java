@@ -296,8 +296,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @VisibleForTesting
     protected void doStore(A aggregate) {
-        Write<I> operation = Write.operationFor(this, aggregate);
-        operation.perform();
+        UncommittedHistory history = aggregate.uncommittedHistory();
+        aggregateStorage().writeAll(aggregate, history.get());
+        aggregate.commitEvents();
     }
 
     /**
@@ -567,7 +568,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>This method defines the basic flow of an {@code Aggregate} loading. First,
      * the {@linkplain AggregateHistory Aggregate history} is
      * {@linkplain #loadHistory fetched} from the storage. Then the {@code Aggregate} is
-     * {@linkplain #play restored} from its state history.
+     * {@linkplain #restore restored} from its state history.
      *
      * @param id
      *         the ID of the aggregate
@@ -576,7 +577,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private Optional<A> load(I id) {
         Optional<AggregateHistory> found = loadHistory(id);
-        Optional<A> result = found.map(history -> play(id, history));
+        Optional<A> result = found.map(history -> restore(id, history));
         return result;
     }
 
@@ -611,10 +612,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         the state record of the {@code Aggregate} to load
      * @return an instance of {@link Aggregate}
      */
-    protected A play(I id, AggregateHistory history) {
+    protected A restore(I id, AggregateHistory history) {
         A result = create(id);
         AggregateTransaction<I, ?, ?> tx = AggregateTransaction.start(result);
-        BatchDispatchOutcome outcome = result.play(history);
+        BatchDispatchOutcome outcome = result.replay(history);
         boolean success = outcome.getSuccessful();
         tx.commitIfActive();
         if (!success) {
