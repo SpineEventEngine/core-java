@@ -26,12 +26,12 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.DefaultColumnMapping;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -182,15 +182,14 @@ public class MessageWithColumns<I, R extends Message> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
-        EntityRecordWithColumns other = (EntityRecordWithColumns) o;
-
-        return record().equals(other.record());
+        MessageWithColumns<?, ?> columns = (MessageWithColumns<?, ?>) o;
+        return Objects.equals(record, columns.record) &&
+                Objects.equals(id, columns.id) &&
+                Objects.equals(storageFields, columns.storageFields);
     }
 
     @Override
     public int hashCode() {
-        return record().hashCode();
+        return Objects.hash(record, id, storageFields);
     }
-
 }
