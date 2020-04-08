@@ -34,12 +34,12 @@ import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.storage.MessageQueries;
-import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageDelegate;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -177,9 +177,9 @@ public final class DefaultEventStore
         } else {
             //TODO:2020-03-23:alex.tymchenko: simplify the transformation from `Query` to `MessageQuery`.
             TargetFilters filters = QueryToFilters.convert(query);
-            MessageQuery<EventId> messageQuery = MessageQueries.from(filters, columns());
+            RecordQuery<EventId> recordQuery = RecordQueries.from(filters, columns());
 
-            return readAll(messageQuery, format);
+            return readAll(recordQuery, format);
         }
     }
 
@@ -204,10 +204,10 @@ public final class DefaultEventStore
     }
 
     private void store(Iterable<Event> events) {
-        ImmutableList<MessageWithColumns<EventId, Event>> records =
+        ImmutableList<RecordWithColumns<EventId, Event>> records =
                 Streams.stream(events)
                        .map(Event::clearEnrichments)
-                       .map((e) -> MessageWithColumns.create(e.getId(), e, columns()))
+                       .map((e) -> RecordWithColumns.create(e.getId(), e, columns()))
                        .collect(toImmutableList());
         writeAll(records);
     }

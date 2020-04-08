@@ -52,8 +52,8 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-@DisplayName("`MessageQuery` should")
-class MessageQueryTest {
+@DisplayName("`RecordQuery` should")
+class RecordQueryTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -62,7 +62,7 @@ class MessageQueryTest {
                 .setDefault(IdFilter.class, IdFilter.getDefaultInstance())
                 .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                   .build())
-                .testStaticMethods(MessageQuery.class, NullPointerTester.Visibility.PACKAGE);
+                .testStaticMethods(RecordQuery.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
@@ -76,7 +76,7 @@ class MessageQueryTest {
         Map<Column, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
-        MessageQuery<?> query = MessageQueries.of(ids, paramsFromValues(params));
+        RecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(params));
 
         StringSubject assertQuery = assertThat(query.toString());
         assertQuery.contains(query.getIds()
@@ -122,7 +122,7 @@ class MessageQueryTest {
         Map<Column, Object> params = new IdentityHashMap<>(2);
         params.put(column(), "anything");
         params.put(column(), 5);
-        MessageQuery<?> query = MessageQueries.of(ids, paramsFromValues(params));
+        RecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query);
     }
 
@@ -134,8 +134,8 @@ class MessageQueryTest {
         Collection<?> ids = emptyList();
         Map<Column, Object> params = new HashMap<>(1);
         params.put(column(), 5);
-        MessageQuery<?> query1 = MessageQueries.of(ids, paramsFromValues(params));
-        MessageQuery<?> query2 = MessageQueries.of(ids, paramsFromValues(params));
+        RecordQuery<?> query1 = RecordQueries.of(ids, paramsFromValues(params));
+        RecordQuery<?> query2 = RecordQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
@@ -152,8 +152,8 @@ class MessageQueryTest {
         Object value = 42;
         Map<Column, Object> params = new HashMap<>(1);
         params.put(column, value);
-        MessageQuery<?> query1 = MessageQueries.of(ids, paramsFromValues(params));
-        MessageQuery<?> query2 = MessageQueries.of(ids, paramsFromValues(params));
+        RecordQuery<?> query1 = RecordQueries.of(ids, paramsFromValues(params));
+        RecordQuery<?> query2 = RecordQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
@@ -164,7 +164,7 @@ class MessageQueryTest {
     private static void addEqualityGroupD(EqualsTester tester) {
         Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
         Map<Column, Object> columns = Collections.emptyMap();
-        MessageQuery<?> query = MessageQueries.of(ids, paramsFromValues(columns));
+        RecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
     }
 
@@ -173,7 +173,9 @@ class MessageQueryTest {
         Multimap<Column, Filter> filters = HashMultimap.create(values.size(), 1);
         for (Map.Entry<Column, Object> param : values.entrySet()) {
             Column column = param.getKey();
-            FieldPath fieldPath = Field.parse(column.name().value()).path();
+            FieldPath fieldPath = Field.parse(column.name()
+                                                    .value())
+                                       .path();
             Filter filter = Filter
                     .newBuilder()
                     .setOperator(EQUAL)

@@ -27,9 +27,9 @@ import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.MessageQueries;
-import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.QueryParameters;
+import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 
@@ -44,7 +44,7 @@ import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
  */
 public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecord> {
 
-    private final MessageQuery<I> findActiveRecordsQuery;
+    private final RecordQuery<I> findActiveRecordsQuery;
     private final QueryParameters activeQueryParams;
 
     public EntityRecordStorage(StorageFactory factory,
@@ -52,7 +52,7 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
                                boolean multitenant) {
         super(factory.createRecordStorage(EntityColumns.of(entityClass), multitenant));
         activeQueryParams = activeEntityQueryParams(columns());
-        this.findActiveRecordsQuery = MessageQueries.of(ImmutableSet.of(), activeQueryParams);
+        this.findActiveRecordsQuery = RecordQueries.of(ImmutableSet.of(), activeQueryParams);
     }
 
     /**
@@ -93,7 +93,7 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
      */
     @Override
     public Iterator<EntityRecord> readAll(Iterable<I> ids) {
-        MessageQuery<I> query = MessageQueries.of(ids, activeQueryParams);
+        RecordQuery<I> query = RecordQueries.of(ids, activeQueryParams);
         return readAll(query);
     }
 

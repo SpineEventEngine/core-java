@@ -58,7 +58,7 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    public Iterator<R> readAll(MessageQuery<I> query) {
+    public Iterator<R> readAll(RecordQuery<I> query) {
         return delegate.readAll(query);
     }
 
@@ -83,12 +83,12 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    public Iterator<R> readAll(MessageQuery<I> query, ResponseFormat format) {
+    public Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
         return delegate.readAll(query, format);
     }
 
     @Override
-    public void write(MessageWithColumns<I, R> record) {
+    public void write(RecordWithColumns<I, R> record) {
         delegate.write(record);
     }
 
@@ -98,7 +98,7 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    public void writeAll(Iterable<? extends MessageWithColumns<I, R>> records) {
+    public void writeAll(Iterable<? extends RecordWithColumns<I, R>> records) {
         delegate.writeAll(records);
     }
 
@@ -154,18 +154,18 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    protected void writeRecord(MessageWithColumns<I, R> record) {
+    protected void writeRecord(RecordWithColumns<I, R> record) {
         delegate.writeRecord(record);
     }
 
     @Override
     @Internal
-    protected void writeAllRecords(Iterable<? extends MessageWithColumns<I, R>> records) {
+    protected void writeAllRecords(Iterable<? extends RecordWithColumns<I, R>> records) {
         delegate.writeAllRecords(records);
     }
 
     @Override
-    protected Iterator<R> readAllRecords(MessageQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format) {
         return delegate.readAllRecords(query, format);
     }
 

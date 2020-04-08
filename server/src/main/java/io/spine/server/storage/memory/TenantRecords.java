@@ -25,8 +25,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.RecordQuery;
+import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
@@ -42,16 +42,18 @@ import static com.google.common.collect.Maps.filterValues;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.storage.memory.MessageRecordComparator.orderedBy;
+import static io.spine.server.storage.memory.RecordComparator.orderedBy;
 import static java.util.Collections.synchronizedMap;
 import static java.util.stream.Collectors.toList;
 
 /**
- * @author Alex Tymchenko
+ * The memory-based storage for message records.
+ *
+ * <p>Acts like a facade API for the operations available over the data of a single tenant.
  */
-class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWithColumns<I, R>> {
+class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWithColumns<I, R>> {
 
-    private final Map<I, MessageWithColumns<I, R>> records = synchronizedMap(new HashMap<>());
+    private final Map<I, RecordWithColumns<I, R>> records = synchronizedMap(new HashMap<>());
 
     @Override
     public Iterator<I> index() {
@@ -61,7 +63,7 @@ class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWi
     }
 
     @Override
-    public void put(I id, MessageWithColumns<I, R> record) {
+    public void put(I id, RecordWithColumns<I, R> record) {
         records.put(id, record);
     }
 
@@ -75,8 +77,8 @@ class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWi
     }
 
     @Override
-    public Optional<MessageWithColumns<I, R>> get(I id) {
-        MessageWithColumns<I, R> record = records.get(id);
+    public Optional<RecordWithColumns<I, R>> get(I id) {
+        RecordWithColumns<I, R> record = records.get(id);
         return Optional.ofNullable(record);
     }
 
@@ -84,41 +86,28 @@ class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWi
         return records.remove(id) != null;
     }
 
-    Iterator<R> readAll(ResponseFormat format) {
-        synchronized (records) {
-            Stream<MessageWithColumns<I, R>> records = this.records.values()
-                                                                   .stream();
-            FieldMask fieldMask = format.getFieldMask();
-            return orderAndLimit(records, format)
-                    .map(MessageWithColumns::record)
-                    .map(new FieldMaskApplier(fieldMask))
-                    .iterator();
-        }
-    }
-
-    Iterator<R> readAll(MessageQuery<I> query, ResponseFormat format) {
+    Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
         FieldMask fieldMask = format.getFieldMask();
-        List<MessageWithColumns<I, R>> records = findRecords(query, format);
+        List<RecordWithColumns<I, R>> records = findRecords(query, format);
         return records
                 .stream()
-                .map(MessageWithColumns::record)
+                .map(RecordWithColumns::record)
                 .map(new FieldMaskApplier(fieldMask))
                 .iterator();
     }
 
-    private List<MessageWithColumns<I, R>>
-    findRecords(MessageQuery<I> query, ResponseFormat format) {
+    private List<RecordWithColumns<I, R>> findRecords(RecordQuery<I> query, ResponseFormat format) {
         synchronized (records) {
-            Map<I, MessageWithColumns<I, R>> filtered = filterRecords(query);
-            Stream<MessageWithColumns<I, R>> stream = filtered.values()
+            Map<I, RecordWithColumns<I, R>> filtered = filterRecords(query);
+            Stream<RecordWithColumns<I, R>> stream = filtered.values()
                                                              .stream();
             return orderAndLimit(stream, format).collect(toList());
         }
     }
 
-    private static <I, R extends Message> Stream<MessageWithColumns<I, R>>
-    orderAndLimit(Stream<MessageWithColumns<I, R>> data, ResponseFormat format) {
-        Stream<MessageWithColumns<I, R>> stream = data;
+    private static <I, R extends Message> Stream<RecordWithColumns<I, R>>
+    orderAndLimit(Stream<RecordWithColumns<I, R>> data, ResponseFormat format) {
+        Stream<RecordWithColumns<I, R>> stream = data;
         if (format.getOrderByCount() > 0) {
             stream = stream.sorted(orderedBy(format.getOrderByList()));
         }
@@ -131,22 +120,11 @@ class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWi
 
     /**
      * Filters the records returning only the ones matching the
-     * {@linkplain MessageQuery message query}.
+     * {@linkplain RecordQuery message query}.
      */
-    private Map<I, MessageWithColumns<I, R>> filterRecords(MessageQuery<I> query) {
-        MessageQueryMatcher<I, R> matcher = new MessageQueryMatcher<>(query);
+    private Map<I, RecordWithColumns<I, R>> filterRecords(RecordQuery<I> query) {
+        RecordQueryMatcher<I, R> matcher = new RecordQueryMatcher<>(query);
         return filterValues(records, matcher::test);
-    }
-
-    @Nullable
-    R findAndApplyFieldMask(I targetId, FieldMask fieldMask) {
-        MessageWithColumns<I, R> recordWithColumns = records.get(targetId);
-        if (recordWithColumns == null) {
-            return null;
-        }
-        R record = recordWithColumns.record();
-        R masked = applyMask(fieldMask, record);
-        return masked;
     }
 
     @Override
@@ -173,11 +151,12 @@ class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWi
         @Override
         public @Nullable R apply(@Nullable R input) {
             checkNotNull(input);
-            if(fieldMask.getPathsList().isEmpty()) {
+            if (fieldMask.getPathsList()
+                         .isEmpty()) {
                 return input;
             }
-            if(input instanceof EntityRecord) {
-                return (R) maskEntityRecord((EntityRecord)input);
+            if (input instanceof EntityRecord) {
+                return (R) maskEntityRecord((EntityRecord) input);
             }
             return applyMask(fieldMask, input);
         }

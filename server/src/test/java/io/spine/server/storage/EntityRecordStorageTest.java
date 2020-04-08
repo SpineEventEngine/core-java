@@ -74,8 +74,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.MessageQueries.from;
 import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
+import static io.spine.server.storage.RecordQueries.from;
 import static io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
 import static io.spine.server.storage.given.RecordStorageTestEnv.assertSingleRecord;
@@ -230,7 +230,7 @@ public class EntityRecordStorageTest
                     .newBuilder()
                     .addFilter(all(eq(archived.toString(), true)))
                     .build();
-            MessageQuery<ProjectId> query = from(filters, storage.columns());
+            RecordQuery<ProjectId> query = from(filters, storage.columns());
             Iterator<EntityRecord> read = storage.readAll(query);
             assertSingleRecord(archivedRecord, read);
         }
@@ -270,7 +270,7 @@ public class EntityRecordStorageTest
 
             EntityRecordStorage<ProjectId> storage = storage();
 
-            MessageQuery<ProjectId> query = from(filters, storage.columns());
+            RecordQuery<ProjectId> query = from(filters, storage.columns());
             ProjectId idMatching = newId();
             ProjectId idWrong1 = newId();
             ProjectId idWrong2 = newId();
@@ -339,8 +339,8 @@ public class EntityRecordStorageTest
                            .addFilter(filter)
                            .build();
             EntityRecordStorage<ProjectId> storage = storage();
-            MessageQuery<ProjectId> filteringQuery = from(filters, storage.columns());
-            MessageQuery<ProjectId> query =
+            RecordQuery<ProjectId> filteringQuery = from(filters, storage.columns());
+            RecordQuery<ProjectId> query =
                     filteringQuery.append(activeEntityQueryParams(storage.columns()));
             Iterator<EntityRecord> read = storage.readAll(query);
             List<EntityRecord> readRecords = newArrayList(read);
@@ -369,7 +369,8 @@ public class EntityRecordStorageTest
             EntityRecordStorage<ProjectId> storage = storage();
 
             EntityColumns columns = storage.columns();
-            EntityRecordWithColumns<ProjectId> matchingWithCols = create(matchingEntity, columns, matchingRecord);
+            EntityRecordWithColumns<ProjectId> matchingWithCols = create(matchingEntity, columns,
+                                                                         matchingRecord);
             EntityRecordWithColumns<ProjectId> nonMatching1WithCols =
                     create(nonMatchingEntity, columns, nonMatching1);
             EntityRecordWithColumns<ProjectId> nontMatching2WithCols =
@@ -383,7 +384,7 @@ public class EntityRecordStorageTest
             // Prepare the query
             Any entityId = Identifier.pack(idMatching);
             TargetFilters filters = Targets.acceptingOnly(entityId);
-            MessageQuery<ProjectId> query = from(filters, columns);
+            RecordQuery<ProjectId> query = from(filters, columns);
 
             // Perform the query
             Iterator<EntityRecord> readRecords = storage.readAll(query);
@@ -442,7 +443,7 @@ public class EntityRecordStorageTest
             storage.write(create(archivedEntity, columns, archivedRecord));
 
             TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
-            MessageQuery<ProjectId> query = from(filters, columns);
+            RecordQuery<ProjectId> query = from(filters, columns);
             Iterator<EntityRecord> result = storage.readAll(query);
             ImmutableSet<EntityRecord> actualRecords = ImmutableSet.copyOf(result);
 
@@ -609,7 +610,7 @@ public class EntityRecordStorageTest
                     .build();
 
             EntityRecordStorage<ProjectId> storage = storage();
-            MessageQuery<ProjectId> query = from(filters, storage.columns());
+            RecordQuery<ProjectId> query = from(filters, storage.columns());
 
             ProjectId id = newId();
             TestCounterEntity entity = newEntity(id);

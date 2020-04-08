@@ -44,15 +44,15 @@ class MultitenantStorageTest {
 
     private static final boolean IS_MULTITENANT = false;
 
-    private MultitenantStorage<TenantMessages<ProjectId, EntityRecord>> multitenantStorage;
+    private MultitenantStorage<TenantRecords<ProjectId, EntityRecord>> multitenantStorage;
 
     @BeforeEach
     void setUp() {
         multitenantStorage =
-                new MultitenantStorage<TenantMessages<ProjectId, EntityRecord>>(IS_MULTITENANT) {
+                new MultitenantStorage<TenantRecords<ProjectId, EntityRecord>>(IS_MULTITENANT) {
                     @Override
-                    TenantMessages<ProjectId, EntityRecord> createSlice() {
-                        return new TenantMessages<>();
+                    TenantRecords<ProjectId, EntityRecord> createSlice() {
+                        return new TenantRecords<>();
                     }
                 };
     }
@@ -62,17 +62,17 @@ class MultitenantStorageTest {
     void returnSameSlice()
             throws InterruptedException, ExecutionException {
         int numberOfTasks = 1000;
-        Collection<Callable<TenantMessages>> tasks = newArrayListWithExpectedSize(numberOfTasks);
+        Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);
 
         for (int i = 0; i < numberOfTasks; i++) {
             tasks.add(() -> {
-                TenantMessages<ProjectId, EntityRecord> storage = multitenantStorage.currentSlice();
+                TenantRecords<ProjectId, EntityRecord> storage = multitenantStorage.currentSlice();
                 return storage;
             });
         }
 
-        List<Future<TenantMessages>> futures = executeInMultithreadedEnvironment(tasks);
-        Set<TenantMessages> tenantRecords = convertFuturesToSetOfCompletedResults(futures);
+        List<Future<TenantRecords>> futures = executeInMultithreadedEnvironment(tasks);
+        Set<TenantRecords> tenantRecords = convertFuturesToSetOfCompletedResults(futures);
 
         int expected = 1;
         assertEquals(expected, tenantRecords.size());

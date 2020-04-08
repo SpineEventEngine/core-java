@@ -36,7 +36,7 @@ import io.spine.client.Filter;
 import io.spine.client.IdFilter;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
-import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.entity.given.GivenLifecycleFlags;
 import io.spine.testing.server.model.ModelTests;
@@ -385,7 +385,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
             assertThat(found).hasSize(entities.size());
 
             for (E entity : entities) {
-                MessageWithColumns<I, EntityRecord> record = repository.toRecord(entity);
+                RecordWithColumns<I, EntityRecord> record = repository.toRecord(entity);
                 assertThat(found).contains(record.record());
             }
         }

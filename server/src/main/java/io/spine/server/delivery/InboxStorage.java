@@ -25,13 +25,13 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
-import io.spine.server.storage.MessageQueries;
-import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageDelegate;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -90,7 +90,7 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
     public ImmutableList<InboxMessage>
     readAll(ShardIndex index, @Nullable Timestamp sinceWhen, int pageSize) {
         QueryParameters byIndex = eq(InboxColumn.shardIndex.column(), index);
-        MessageQuery<InboxMessageId> query = MessageQueries.of(byIndex);
+        RecordQuery<InboxMessageId> query = RecordQueries.of(byIndex);
         if (sinceWhen != null) {
             QueryParameters byTime = gt(InboxColumn.receivedAt.column(), sinceWhen);
             query = query.append(byTime);
@@ -132,7 +132,7 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
      */
     public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
         QueryParameters byIndex = eq(InboxColumn.shardIndex.column(), index);
-        MessageQuery<InboxMessageId> query = MessageQueries.of(byIndex);
+        RecordQuery<InboxMessageId> query = RecordQueries.of(byIndex);
         query = query.append(eq(InboxColumn.status.column(), TO_DELIVER));
         ResponseFormat limitToOne = ResponseFormat.newBuilder()
                                                   .setLimit(1)
@@ -154,9 +154,9 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
      *         messages to write
      */
     public synchronized void writeBatch(Iterable<InboxMessage> messages) {
-        List<MessageWithColumns<InboxMessageId, InboxMessage>> toStore =
+        List<RecordWithColumns<InboxMessageId, InboxMessage>> toStore =
                 stream(messages)
-                        .map(m -> MessageWithColumns.create(m.getId(), m, columns()))
+                        .map(m -> RecordWithColumns.create(m.getId(), m, columns()))
                         .collect(toList());
         writeAll(toStore);
     }

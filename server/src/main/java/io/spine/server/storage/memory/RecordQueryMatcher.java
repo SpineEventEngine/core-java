@@ -29,9 +29,9 @@ import io.spine.client.Filter;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.storage.Column;
 import io.spine.server.storage.CompositeQueryParameter;
-import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.QueryParameters;
+import io.spine.server.storage.RecordQuery;
+import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
@@ -44,15 +44,20 @@ import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * @author Alex Tymchenko
+ * Matches the records to the given {@link RecordQuery}.
+ *
+ * @param <I>
+ *         the type of the identifiers of the matched records
+ * @param <R>
+ *         the type of the matched records
  */
-public class MessageQueryMatcher<I, R extends Message>
-        implements Predicate<@Nullable MessageWithColumns<I, R>> {
+public class RecordQueryMatcher<I, R extends Message>
+        implements Predicate<@Nullable RecordWithColumns<I, R>> {
 
     private final Set<I> acceptedIds;
     private final QueryParameters queryParams;
 
-    MessageQueryMatcher(MessageQuery<I> query) {
+    RecordQueryMatcher(RecordQuery<I> query) {
         checkNotNull(query);
         // Pack IDs from the query for faster search using packed IDs from loaded records.
         Set<I> ids = query.getIds();
@@ -63,7 +68,7 @@ public class MessageQueryMatcher<I, R extends Message>
     }
 
     @Override
-    public boolean test(@Nullable MessageWithColumns<I, R> input) {
+    public boolean test(@Nullable RecordWithColumns<I, R> input) {
         if (input == null) {
             return false;
         }
@@ -71,8 +76,8 @@ public class MessageQueryMatcher<I, R extends Message>
         return result;
     }
 
-    private boolean idMatches(MessageWithColumns<I, R> record) {
-        if(acceptedIds.isEmpty()) {
+    private boolean idMatches(RecordWithColumns<I, R> record) {
+        if (acceptedIds.isEmpty()) {
             return true;
         }
         I actualId = record.id();
@@ -80,7 +85,7 @@ public class MessageQueryMatcher<I, R extends Message>
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
-    private boolean columnValuesMatch(MessageWithColumns<I, R> record) {
+    private boolean columnValuesMatch(RecordWithColumns<I, R> record) {
         boolean match;
         for (CompositeQueryParameter filter : queryParams) {
             CompositeFilter.CompositeOperator operator = filter.operator();
@@ -103,7 +108,7 @@ public class MessageQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> boolean
-    checkAll(Multimap<Column, Filter> filters, MessageWithColumns<I, R> record) {
+    checkAll(Multimap<Column, Filter> filters, RecordWithColumns<I, R> record) {
         if (filters.isEmpty()) {
             return true;
         }
@@ -115,7 +120,7 @@ public class MessageQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> boolean
-    checkEither(Multimap<Column, Filter> filters, MessageWithColumns<I, R> record) {
+    checkEither(Multimap<Column, Filter> filters, RecordWithColumns<I, R> record) {
         if (filters.isEmpty()) {
             return true;
         }
@@ -127,7 +132,7 @@ public class MessageQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> boolean
-    matches(MessageWithColumns<I, R> record, Map.Entry<Column, Filter> filter) {
+    matches(RecordWithColumns<I, R> record, Map.Entry<Column, Filter> filter) {
         if (!hasColumn(record, filter)) {
             return false;
         }
@@ -138,7 +143,7 @@ public class MessageQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> boolean
-    hasColumn(MessageWithColumns<I, R> record, Map.Entry<Column, Filter> filter) {
+    hasColumn(RecordWithColumns<I, R> record, Map.Entry<Column, Filter> filter) {
         boolean result = record.hasColumn(filter.getKey()
                                                 .name());
         return result;
@@ -163,10 +168,9 @@ public class MessageQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> @Nullable Object
-    columnValue(MessageWithColumns<I, R> record, Column column) {
+    columnValue(RecordWithColumns<I, R> record, Column column) {
         ColumnName columnName = column.name();
         Object value = record.columnValue(columnName);
         return value;
     }
-
 }

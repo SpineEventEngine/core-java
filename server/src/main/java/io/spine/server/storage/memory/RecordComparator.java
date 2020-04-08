@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.OrderBy;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.RecordWithColumns;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A comparator for sorting the contents of {@link TenantMessages}
+ * A comparator for sorting the contents of {@link TenantRecords}
  * in a provided {@link OrderBy order}.
  *
  * @implNote More sophisticated storage implementations can order records by
@@ -46,20 +46,20 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         that. Trying to {@linkplain OrderBy order by} column of non-comparable type will lead to
  *         an exception being thrown.
  */
-public class MessageRecordComparator<I, R extends Message>
-        implements Comparator<MessageWithColumns<I, R>>, Serializable {
+public class RecordComparator<I, R extends Message>
+        implements Comparator<RecordWithColumns<I, R>>, Serializable {
 
     private static final long serialVersionUID = 0L;
 
     private final String column;
 
-    private MessageRecordComparator(String column) {
+    private RecordComparator(String column) {
         this.column = column;
     }
 
     /**
      * A static factory for {@code EntityRecordComparator} instances, which sort the
-     * {@link TenantMessages} contents in the specified {@link OrderBy orderBy} list.
+     * {@link TenantRecords} contents in the specified {@link OrderBy orderBy} list.
      *
      * @param orderByList
      *         a specification of columns and the directions for ordering
@@ -69,12 +69,12 @@ public class MessageRecordComparator<I, R extends Message>
      *         if the provided {@code OrderBy} list is empty
      */
     static <I, R extends Message>
-    Comparator<MessageWithColumns<I, R>> orderedBy(List<OrderBy> orderByList) {
+    Comparator<RecordWithColumns<I, R>> orderedBy(List<OrderBy> orderByList) {
         checkArgument(!orderByList.isEmpty(),
                       "`MessageRecordComparator` requires at least one `OrderBy` instance.");
-        Comparator<MessageWithColumns<I, R>> result = null;
+        Comparator<RecordWithColumns<I, R>> result = null;
         for (OrderBy orderBy : orderByList) {
-            Comparator<MessageWithColumns<I, R>> thisComparator;
+            Comparator<RecordWithColumns<I, R>> thisComparator;
             OrderBy.Direction direction = orderBy.getDirection();
             String columnName = orderBy.getColumn();
             thisComparator = direction == OrderBy.Direction.ASCENDING
@@ -89,18 +89,18 @@ public class MessageRecordComparator<I, R extends Message>
     }
 
     private static <I, R extends Message>
-    Comparator<MessageWithColumns<I, R>> ascending(String columnName) {
-        return new MessageRecordComparator<>(columnName);
+    Comparator<RecordWithColumns<I, R>> ascending(String columnName) {
+        return new RecordComparator<>(columnName);
     }
 
     private static <I, R extends Message>
-    Comparator<MessageWithColumns<I, R>> descending(String columnName) {
-        return MessageRecordComparator.<I, R>ascending(columnName).reversed();
+    Comparator<RecordWithColumns<I, R>> descending(String columnName) {
+        return RecordComparator.<I, R>ascending(columnName).reversed();
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks")    // Different special cases are covered.
     @Override
-    public int compare(MessageWithColumns<I, R> a, MessageWithColumns<I, R> b) {
+    public int compare(RecordWithColumns<I, R> a, RecordWithColumns<I, R> b) {
         checkNotNull(a);
         checkNotNull(b);
         ColumnName columnName = ColumnName.of(column);

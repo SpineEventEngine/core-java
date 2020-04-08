@@ -37,8 +37,8 @@ import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.AbstractStorage;
-import io.spine.server.storage.MessageQueries;
-import io.spine.server.storage.MessageQuery;
+import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -216,7 +216,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     }
 
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
-        MessageQuery<I> query = MessageQueries.from(filters, stateStorage.columns());
+        RecordQuery<I> query = RecordQueries.from(filters, stateStorage.columns());
         return stateStorage.readAll(query, format);
     }
 

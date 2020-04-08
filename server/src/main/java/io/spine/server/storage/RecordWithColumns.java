@@ -37,9 +37,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * @author Alex Tymchenko
+ * A value of some message record along with the values of its {@linkplain Column columns}.
+ *
+ * @param <I>
+ *         the type of the record identifiers
+ * @param <R>
+ *         the type of the stored records
  */
-public class MessageWithColumns<I, R extends Message> {
+public class RecordWithColumns<I, R extends Message> {
 
     private final R record;
     private final I id;
@@ -49,7 +54,7 @@ public class MessageWithColumns<I, R extends Message> {
      */
     private final Map<ColumnName, @Nullable Object> storageFields;
 
-    protected MessageWithColumns(I identifier, R record, Map<ColumnName, Object> storageFields) {
+    protected RecordWithColumns(I identifier, R record, Map<ColumnName, Object> storageFields) {
         this.id = checkNotNull(identifier);
         this.record = checkNotNull(record);
         this.storageFields = new HashMap<>(storageFields);
@@ -59,7 +64,7 @@ public class MessageWithColumns<I, R extends Message> {
      * Creates a new record extracting the column values from the passed entity.
      */
     public static <I, R extends Message>
-    MessageWithColumns<I, R> create(I identifier, R record, Columns<R> columns) {
+    RecordWithColumns<I, R> create(I identifier, R record, Columns<R> columns) {
         checkNotNull(identifier);
         checkNotNull(record);
         checkNotNull(columns);
@@ -68,9 +73,9 @@ public class MessageWithColumns<I, R extends Message> {
     }
 
     public static <I, R extends Message>
-    MessageWithColumns<I, R> create(I identifier,
-                                    R record,
-                                    Map<ColumnName, @Nullable Object> fields) {
+    RecordWithColumns<I, R> create(I identifier,
+                                   R record,
+                                   Map<ColumnName, @Nullable Object> fields) {
         checkNotNull(identifier);
         checkNotNull(record);
         checkNotNull(fields);
@@ -82,8 +87,8 @@ public class MessageWithColumns<I, R extends Message> {
      *
      * <p>Such instance of {@code EntityRecordWithColumns} will contain no storage fields.
      */
-    public static <I, R extends Message> MessageWithColumns of(I id, R record) {
-        return new MessageWithColumns<>(id, record, Collections.emptyMap());
+    public static <I, R extends Message> RecordWithColumns of(I id, R record) {
+        return new RecordWithColumns<>(id, record, Collections.emptyMap());
     }
 
     /**
@@ -91,8 +96,8 @@ public class MessageWithColumns<I, R extends Message> {
      */
     @VisibleForTesting
     public static <I, R extends Message>
-    MessageWithColumns<I, R> of(I identifier, R record, Map<ColumnName, Object> storageFields) {
-        return new MessageWithColumns<>(identifier, record, storageFields);
+    RecordWithColumns<I, R> of(I identifier, R record, Map<ColumnName, Object> storageFields) {
+        return new RecordWithColumns<>(identifier, record, storageFields);
     }
 
     public I id() {
@@ -182,7 +187,7 @@ public class MessageWithColumns<I, R extends Message> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        MessageWithColumns<?, ?> columns = (MessageWithColumns<?, ?>) o;
+        RecordWithColumns<?, ?> columns = (RecordWithColumns<?, ?>) o;
         return Objects.equals(record, columns.record) &&
                 Objects.equals(id, columns.id) &&
                 Objects.equals(storageFields, columns.storageFields);

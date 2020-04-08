@@ -56,12 +56,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`MessageQueries` utility should")
+@DisplayName("`RecordQueries` utility should")
 //TODO:2020-04-01:alex.tymchenko: add the tests for the rest of the factory methods.
-class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
+class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
 
-    private MessageQueriesTest() {
-        super(MessageQueries.class);
+    private RecordQueriesTest() {
+        super(RecordQueries.class);
     }
 
     @Override
@@ -94,7 +94,7 @@ class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
         EntityColumns columns = EntityColumns.of(TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
-                     () -> MessageQueries.from(filters, columns));
+                     () -> RecordQueries.from(filters, columns));
     }
 
     @Test
@@ -111,7 +111,7 @@ class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
         EntityColumns columns = EntityColumns.of(TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
-                     () -> MessageQueries.from(filters, columns));
+                     () -> RecordQueries.from(filters, columns));
     }
 
     @Test
@@ -119,7 +119,7 @@ class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
     void constructEmptyQueries() {
         TargetFilters filters = TargetFilters.getDefaultInstance();
         EntityColumns columns = EntityColumns.of(TestEntity.class);
-        MessageQuery<?> query = MessageQueries.from(filters, columns);
+        RecordQuery<?> query = RecordQueries.from(filters, columns);
         assertNotNull(query);
 
         assertTrue(query.getIds()
@@ -155,7 +155,7 @@ class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
                 .addFilter(aggregatingFilter)
                 .build();
         EntityColumns columns = EntityColumns.of(TestProjection.class);
-        MessageQuery<?> query = MessageQueries.from(filters, columns);
+        RecordQuery<?> query = RecordQueries.from(filters, columns);
         assertNotNull(query);
 
         Collection<?> ids = query.getIds();

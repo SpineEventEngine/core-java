@@ -23,9 +23,9 @@ package io.spine.server.storage.memory;
 import com.google.protobuf.Message;
 import io.spine.client.ResponseFormat;
 import io.spine.server.storage.Columns;
-import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.RecordWithColumns;
 
 import java.util.Iterator;
 
@@ -39,19 +39,19 @@ import java.util.Iterator;
  */
 public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
-    private final MultitenantStorage<TenantMessages<I, R>> multitenantStorage;
+    private final MultitenantStorage<TenantRecords<I, R>> multitenantStorage;
 
     InMemoryRecordStorage(Columns<R> columns, boolean multitenant) {
         super(columns, multitenant);
-        this.multitenantStorage = new MultitenantStorage<TenantMessages<I, R>>(multitenant) {
+        this.multitenantStorage = new MultitenantStorage<TenantRecords<I, R>>(multitenant) {
             @Override
-            TenantMessages<I, R> createSlice() {
-                return new TenantMessages<>();
+            TenantRecords<I, R> createSlice() {
+                return new TenantRecords<>();
             }
         };
     }
 
-    private TenantMessages<I, R> records() {
+    private TenantRecords<I, R> records() {
         return multitenantStorage.currentSlice();
     }
 
@@ -61,18 +61,18 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
     }
 
     @Override
-    protected Iterator<R> readAllRecords(MessageQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format) {
         return records().readAll(query, format);
     }
 
     @Override
-    protected void writeRecord(MessageWithColumns<I, R> record) {
+    protected void writeRecord(RecordWithColumns<I, R> record) {
         records().put(record.id(), record);
     }
 
     @Override
-    protected void writeAllRecords(Iterable<? extends MessageWithColumns<I, R>> records) {
-        for (MessageWithColumns<I, R> record : records) {
+    protected void writeAllRecords(Iterable<? extends RecordWithColumns<I, R>> records) {
+        for (RecordWithColumns<I, R> record : records) {
             records().put(record.id(), record);
         }
     }

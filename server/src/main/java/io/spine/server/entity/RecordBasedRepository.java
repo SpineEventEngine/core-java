@@ -40,9 +40,9 @@ import io.spine.core.Signal;
 import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.MessageQueries;
-import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.RecordQuery;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -119,7 +119,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     public void store(E entity) {
-        MessageWithColumns<I, EntityRecord> record = toRecord(entity);
+        RecordWithColumns<I, EntityRecord> record = toRecord(entity);
         EntityRecordStorage<I> storage = recordStorage();
         storage.write(record);
     }
@@ -149,7 +149,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         if the entity with the given ID is not found in the repository
      * @throws IllegalStateException
      *         if the repository manages a non-transactional entity type
-     *
      * @see Migration
      * @see #applyMigration(Set, Migration) the batch version of the method
      */
@@ -187,7 +186,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @throws IllegalStateException
      *         if the repository manages a non-transactional entity type
-     *
      * @see Migration
      */
     @SuppressWarnings("unchecked") // Checked at runtime.
@@ -220,7 +218,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     protected EntityRecordStorage<I> createStorage() {
         StorageFactory sf = defaultStorageFactory();
-        EntityRecordStorage<I> result = sf.createEntityRecordStorage(context().spec(), entityClass());
+        EntityRecordStorage<I> result = sf.createEntityRecordStorage(context().spec(),
+                                                                     entityClass());
         return result;
     }
 
@@ -229,10 +228,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>Note: The storage must be assigned before calling this method.
      *
-     * @param entities the {@linkplain Entity Entities} to store
+     * @param entities
+     *         the {@linkplain Entity Entities} to store
      */
     public void store(Collection<E> entities) {
-        ImmutableList<MessageWithColumns<I, EntityRecord>> records =
+        ImmutableList<RecordWithColumns<I, EntityRecord>> records =
                 entities.stream()
                         .map(this::toRecord)
                         .collect(toImmutableList());
@@ -242,7 +242,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Finds an entity with the passed ID.
      *
-     * @param id the ID of the entity to find
+     * @param id
+     *         the ID of the entity to find
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID
      */
     @Override
@@ -255,7 +256,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds an entity with the passed ID even if the entity is
      * {@linkplain WithLifecycle#isActive() active}.
      *
-     * @param id the ID of the entity to find
+     * @param id
+     *         the ID of the entity to find
      * @return the entity or {@link Optional#empty()} if there is no entity with such ID,
      *         or the entity is not active
      */
@@ -287,7 +289,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>The new entity is created if and only if there is no record with the corresponding ID.
      *
-     * @param id the ID of the entity to load
+     * @param id
+     *         the ID of the entity to load
      * @return the entity with the specified ID
      */
     protected E findOrCreate(I id) {
@@ -337,7 +340,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         EntityRecordStorage<I> storage = recordStorage();
-        MessageQuery<I> query = MessageQueries.of(ids);
+        RecordQuery<I> query = RecordQueries.of(ids);
         ResponseFormat format = ResponseFormat.newBuilder()
                                               .setFieldMask(fieldMask)
                                               .vBuild();
@@ -412,7 +415,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         EntityRecordStorage<I> storage = recordStorage();
         EntityColumns entityColumns = storage.columns();
-        MessageQuery<I> entityQuery = MessageQueries.from(filters, entityColumns);
+        RecordQuery<I> entityQuery = RecordQueries.from(filters, entityColumns);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
     }
@@ -464,11 +467,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Converts the passed entity into the record.
      */
     @VisibleForTesting
-    MessageWithColumns<I, EntityRecord> toRecord(E entity) {
+    RecordWithColumns<I, EntityRecord> toRecord(E entity) {
         EntityColumns columns = EntityColumns.of(entity.modelClass());
         EntityRecord record = storageConverter().convert(entity);
         checkNotNull(record);
-        MessageWithColumns<I, EntityRecord> result =
+        RecordWithColumns<I, EntityRecord> result =
                 EntityRecordWithColumns.create(entity, columns, record);
         return result;
     }
@@ -518,7 +521,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             Message idAsMessage = unpack(idAsAny);
 
             @SuppressWarnings("unchecked")
-                // As the message class is the same as expected, the conversion is safe.
+            // As the message class is the same as expected, the conversion is safe.
             I id = (I) idAsMessage;
             return id;
         }

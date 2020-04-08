@@ -71,7 +71,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      */
     @Override
     public synchronized void write(I id, R record) {
-        MessageWithColumns<I, R> withCols = MessageWithColumns.create(id, record, this.columns);
+        RecordWithColumns<I, R> withCols = RecordWithColumns.create(id, record, this.columns);
         write(withCols);
     }
 
@@ -84,7 +84,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param record
      *         the record and additional columns with their values
      */
-    public void write(MessageWithColumns<I, R> record) {
+    public void write(RecordWithColumns<I, R> record) {
         checkNotClosed();
         writeRecord(record);
     }
@@ -98,14 +98,14 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param records
      *         records and their column values
      */
-    public void writeAll(Iterable<? extends MessageWithColumns<I, R>> records) {
+    public void writeAll(Iterable<? extends RecordWithColumns<I, R>> records) {
         checkNotClosed();
         writeAllRecords(records);
     }
 
     @Override
     public Optional<R> read(I id) {
-        MessageQuery<I> query = MessageQueries.of(ImmutableList.of(id));
+        RecordQuery<I> query = RecordQueries.of(ImmutableList.of(id));
         Optional<R> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
         return result;
     }
@@ -124,13 +124,13 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         or {@code Optional.empty()} if no record is found by the ID
      */
     public Optional<R> read(I id, FieldMask mask) {
-        MessageQuery<I> query = MessageQueries.of(ImmutableList.of(id));
+        RecordQuery<I> query = RecordQueries.of(ImmutableList.of(id));
         ResponseFormat format = formatWith(mask);
         Optional<R> result = readSingleRecord(query, format);
         return result;
     }
 
-    private Optional<R> readSingleRecord(MessageQuery<I> query, ResponseFormat format) {
+    private Optional<R> readSingleRecord(RecordQuery<I> query, ResponseFormat format) {
         Iterator<R> iterator = readAll(query, format);
         return iterator.hasNext()
                ? Optional.of(iterator.next())
@@ -146,7 +146,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         the query to execute
      * @return iterator over the matching records
      */
-    public Iterator<R> readAll(MessageQuery<I> query) {
+    public Iterator<R> readAll(RecordQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
@@ -156,7 +156,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @return iterator over the records
      */
     public Iterator<R> readAll() {
-        return readAll(MessageQueries.all());
+        return readAll(RecordQueries.all());
     }
 
     /**
@@ -169,7 +169,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @return iterator over the records with the passed IDs
      */
     public Iterator<R> readAll(Iterable<I> ids) {
-        MessageQuery<I> query = MessageQueries.of(ids);
+        RecordQuery<I> query = RecordQueries.of(ids);
         return readAll(query);
     }
 
@@ -186,7 +186,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @return the iterator over the records
      */
     public Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
-        MessageQuery<I> query = MessageQueries.of(ids);
+        RecordQuery<I> query = RecordQueries.of(ids);
         ResponseFormat format = formatWith(mask);
         return readAll(query, format);
     }
@@ -199,7 +199,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @return iterator over the message records
      */
     public Iterator<R> readAll(ResponseFormat format) {
-        MessageQuery<I> query = MessageQueries.all();
+        RecordQuery<I> query = RecordQueries.all();
         return readAll(query, format);
     }
 
@@ -216,7 +216,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         format of the expected response
      * @return iterator over the matching message records
      */
-    public Iterator<R> readAll(MessageQuery<I> query, ResponseFormat format) {
+    public Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
         checkNotClosed();
         return readAllRecords(query, format);
     }
@@ -261,7 +261,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param record
      *         the record and additional columns with their values
      */
-    protected abstract void writeRecord(MessageWithColumns<I, R> record);
+    protected abstract void writeRecord(RecordWithColumns<I, R> record);
 
     /**
      * Performs writing of the record batch along with records' filled-in columns to the storage.
@@ -270,7 +270,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         records and the values of their columns
      */
     @Internal
-    protected abstract void writeAllRecords(Iterable<? extends MessageWithColumns<I, R>> records);
+    protected abstract void writeAllRecords(Iterable<? extends RecordWithColumns<I, R>> records);
 
     /**
      * Performs reading of the message records by executing the passed query.
@@ -283,7 +283,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         format of the expected response
      * @return iterator over the matching message records
      */
-    protected abstract Iterator<R> readAllRecords(MessageQuery<I> query, ResponseFormat format);
+    protected abstract Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format);
 
     /**
      * Performs the physical removal of the message record from the storage

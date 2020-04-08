@@ -44,10 +44,10 @@ import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 
 /**
- * @author Alex Tymchenko
+ * A set of the factory methods for the creation of {@link RecordQuery} instances.
  */
 @Internal
-public final class MessageQueries {
+public final class RecordQueries {
 
     private static final QueryParameters EMPTY_PARAMS = QueryParameters.newBuilder()
                                                                        .build();
@@ -55,47 +55,47 @@ public final class MessageQueries {
     /**
      * Prevents this utility class from instantiation.
      */
-    private MessageQueries() {
+    private RecordQueries() {
     }
 
-    public static <I> MessageQuery<I> all() {
-        return new MessageQuery<>(ImmutableSet.of(), EMPTY_PARAMS);
+    public static <I> RecordQuery<I> all() {
+        return new RecordQuery<>(ImmutableSet.of(), EMPTY_PARAMS);
     }
 
-    public static <I> MessageQuery<I> of(Iterable<I> ids) {
+    public static <I> RecordQuery<I> of(Iterable<I> ids) {
         checkNotNull(ids);
-        return new MessageQuery<>(ids, EMPTY_PARAMS);
+        return new RecordQuery<>(ids, EMPTY_PARAMS);
     }
 
     /**
-     * Creates new instance of {@code MessageQuery}.
+     * Creates new instance of {@code RecordQuery}.
      */
-    public static <I> MessageQuery<I> of(Iterable<I> ids, QueryParameters parameters) {
+    public static <I> RecordQuery<I> of(Iterable<I> ids, QueryParameters parameters) {
         checkNotNull(ids);
         checkNotNull(parameters);
-        return new MessageQuery<>(ids, parameters);
+        return new RecordQuery<>(ids, parameters);
     }
 
-    public static <I> MessageQuery<I> of(QueryParameters parameters) {
+    public static <I> RecordQuery<I> of(QueryParameters parameters) {
         checkNotNull(parameters);
-        return new MessageQuery<>(ImmutableSet.of(), parameters);
+        return new RecordQuery<>(ImmutableSet.of(), parameters);
     }
 
-    public static <I, V> MessageQuery<I> byColumn(RecordColumn<?, ?> column, V value) {
+    public static <I, V> RecordQuery<I> byColumn(RecordColumn<?, ?> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         QueryParameters queryParams = QueryParameters.eq(column, value);
         return of(queryParams);
     }
 
-    public static <I> MessageQuery<I> from(TargetFilters filters, Columns<?> columns) {
+    public static <I> RecordQuery<I> from(TargetFilters filters, Columns<?> columns) {
         checkNotNull(filters);
         checkNotNull(columns);
 
         QueryParameters queryParams = toQueryParams(filters, columns);
         List<I> ids = toIdentifiers(filters);
 
-        MessageQuery<I> result = of(ids, queryParams);
+        RecordQuery<I> result = of(ids, queryParams);
         return result;
     }
 

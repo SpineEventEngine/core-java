@@ -26,9 +26,9 @@ import io.spine.base.Identifier;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.core.Version;
-import io.spine.server.storage.MessageQueries;
-import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.QueryParameters;
+import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.RecordQuery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -54,7 +54,7 @@ public class HistoryBackward<I> {
 
     protected Iterator<AggregateEventRecord>
     read(I aggregateId, int batchSize, @Nullable Version startingFrom) {
-        MessageQuery<AggregateEventRecordId> query = historyBackwardQuery(aggregateId);
+        RecordQuery<AggregateEventRecordId> query = historyBackwardQuery(aggregateId);
         if (startingFrom != null) {
             QueryParameters lessThanVersion =
                     QueryParameters.lt(version.column(), startingFrom.getNumber());
@@ -65,10 +65,10 @@ public class HistoryBackward<I> {
         return iterator;
     }
 
-    protected MessageQuery<AggregateEventRecordId> historyBackwardQuery(I id) {
+    protected RecordQuery<AggregateEventRecordId> historyBackwardQuery(I id) {
         Any packedId = Identifier.pack(id);
         QueryParameters params = QueryParameters.eq(aggregateId.column(), packedId);
-        return MessageQueries.of(params);
+        return RecordQueries.of(params);
     }
 
     protected static ResponseFormat chronologicalResponseWith(@Nullable Integer batchSize) {

@@ -39,7 +39,7 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
- * The parameters of an {@link MessageQuery}.
+ * The parameters of an {@link RecordQuery}.
  *
  * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
  * implementations.

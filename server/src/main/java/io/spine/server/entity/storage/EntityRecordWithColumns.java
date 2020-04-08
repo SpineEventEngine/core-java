@@ -29,7 +29,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.Column;
-import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
@@ -42,7 +42,7 @@ import static java.util.Collections.emptyMap;
  */
 @Internal
 public final class EntityRecordWithColumns<I>
-        extends MessageWithColumns<I, EntityRecord> implements WithLifecycle {
+        extends RecordWithColumns<I, EntityRecord> implements WithLifecycle {
 
     private EntityRecordWithColumns(I id, EntityRecord record, Map<ColumnName, Object> columns) {
         super(id, record, columns);
