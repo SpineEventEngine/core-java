@@ -109,8 +109,8 @@ class TenantMessages<I, R extends Message> implements TenantStorage<I, MessageWi
     private List<MessageWithColumns<I, R>>
     findRecords(MessageQuery<I> query, ResponseFormat format) {
         synchronized (records) {
-            Map<I, MessageWithColumns<I, R>> records = filterRecords(query);
-            Stream<MessageWithColumns<I, R>> stream = records.values()
+            Map<I, MessageWithColumns<I, R>> filtered = filterRecords(query);
+            Stream<MessageWithColumns<I, R>> stream = filtered.values()
                                                              .stream();
             return orderAndLimit(stream, format).collect(toList());
         }

@@ -645,6 +645,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         }
     }
 
+    //TODO:2020-04-08:alex.tymchenko: unite with other repos via an interface.
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         return aggregateStorage().readStates(filters, format);
     }

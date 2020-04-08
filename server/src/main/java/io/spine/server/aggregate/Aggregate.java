@@ -37,6 +37,7 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecentHistory;
 import io.spine.server.event.EventReactor;
@@ -122,7 +123,7 @@ public abstract class Aggregate<I,
         S extends EntityState,
         B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventPlayer, EventReactor {
+        implements EventPlayer, EventReactor, HasLifecycleColumns<I, S> {
 
     private final UncommittedHistory uncommittedHistory = new UncommittedHistory(this::toSnapshot);
 

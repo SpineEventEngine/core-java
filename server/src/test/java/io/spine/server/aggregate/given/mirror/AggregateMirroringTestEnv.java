@@ -18,11 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server.given.mirror;
+package io.spine.server.aggregate.given.mirror;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
-import io.spine.base.EntityState;
+import com.google.common.collect.ImmutableList;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -36,43 +34,35 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
+import io.spine.system.server.MRArchivePhoto;
+import io.spine.system.server.MRDeletePhoto;
 import io.spine.system.server.MRUploadPhoto;
-import io.spine.system.server.event.EntityArchived;
-import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.system.server.MRPhoto;
+import io.spine.test.system.server.MRPhotoArchived;
+import io.spine.test.system.server.MRPhotoDeleted;
 import io.spine.test.system.server.MRPhotoId;
 import io.spine.test.system.server.MRPhotoUploaded;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.type.TypeUrl;
 
-import java.util.Map;
+import java.util.Collection;
 
-import static io.spine.base.Time.currentTime;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
-public final class MirrorRepositoryTestEnv {
+public final class AggregateMirroringTestEnv {
 
-    public static final TestEventFactory events = newInstance(MirrorRepositoryTestEnv.class);
+    public static final TestEventFactory events = newInstance(AggregateMirroringTestEnv.class);
 
     /**
      * Prevents the utility class instantiation.
      */
-    private MirrorRepositoryTestEnv() {
+    private AggregateMirroringTestEnv() {
     }
 
-    public static Map<MessageId, MRPhoto> givenPhotos() {
+    public static Collection<MRPhoto> givenPhotos() {
         MRPhoto spineLogo = newPhoto("spine.io/logo", "Spine Logo");
         MRPhoto projectsLogo = newPhoto("projects.tm/logo", "Projects Logo");
         MRPhoto jxBrowserLogo = newPhoto("teamdev.com/jxbrowser/logo", "JxBrowser Logo");
-        Map<MessageId, MRPhoto> map = ImmutableMap
-                .<MessageId, MRPhoto>builder()
-                .put(historyIdOf(spineLogo), spineLogo)
-                .put(historyIdOf(projectsLogo), projectsLogo)
-                .put(historyIdOf(jxBrowserLogo), jxBrowserLogo)
-                .build();
-        return map;
+        return ImmutableList.of(spineLogo, projectsLogo, jxBrowserLogo);
     }
 
     private static MRPhoto newPhoto(String url, String altText) {
@@ -94,29 +84,6 @@ public final class MirrorRepositoryTestEnv {
         return photo;
     }
 
-    private static MessageId historyIdOf(MRPhoto photo) {
-        Any id = pack(photo.getId());
-        TypeUrl typeUrl = TypeUrl.of(MRPhoto.class);
-        MessageId historyId = MessageId
-                .newBuilder()
-                .setId(id)
-                .setTypeUrl(typeUrl.value())
-                .vBuild();
-        return historyId;
-    }
-
-    public static Event entityStateChanged(MessageId entityId, EntityState state) {
-        EntityStateChanged stateChanged = EntityStateChanged
-                .newBuilder()
-                .setEntity(entityId)
-                .setOldState(pack(state))
-                .setNewState(pack(state))
-                .setWhen(currentTime())
-                .addSignalId(cause())
-                .vBuild();
-        return event(stateChanged);
-    }
-
     public static MessageId cause() {
         EventId causeOfChange = EventId
                 .newBuilder()
@@ -131,39 +98,39 @@ public final class MirrorRepositoryTestEnv {
         return messageId;
     }
 
-    public static Event archived(MRPhoto aggregate) {
-        MessageId entityId = historyIdOf(aggregate);
-        EntityArchived archived = EntityArchived
-                .newBuilder()
-                .setEntity(entityId)
-                .setWhen(currentTime())
-                .addSignalId(cause())
-                .vBuild();
-        return event(archived);
-    }
-
-    public static Event deleted(MRPhoto aggregate) {
-        MessageId historyId = historyIdOf(aggregate);
-        EntityDeleted deleted = EntityDeleted
-                .newBuilder()
-                .setEntity(historyId)
-                .setWhen(currentTime())
-                .addSignalId(cause())
-                .setMarkedAsDeleted(true)
-                .vBuild();
-        return event(deleted);
-    }
-
     public static Event event(EventMessage eventMessage) {
         return events.createEvent(eventMessage);
     }
 
     public static AggregateRepository<MRPhotoId, PhotoAggregate> newPhotosRepository() {
-        Repository<MRPhotoId, PhotoAggregate> repository = DefaultRepository.of(PhotoAggregate.class);
+        Repository<MRPhotoId, PhotoAggregate> repository =
+                DefaultRepository.of(PhotoAggregate.class);
         return (AggregateRepository<MRPhotoId, PhotoAggregate>) repository;
     }
 
-    private static class PhotoAggregate extends Aggregate<MRPhotoId, MRPhoto, MRPhoto.Builder> {
+    public static MRUploadPhoto upload(MRPhoto state) {
+        return MRUploadPhoto
+                .newBuilder()
+                .setId(state.getId())
+                .setFullSizeUrl(state.getFullSizeUrl())
+                .setThumbnailUrl(state.getThumbnailUrl())
+                .setAltText(state.getAltText())
+                .vBuild();
+    }
+
+    public static MRArchivePhoto archive(MRPhoto photo) {
+        return MRArchivePhoto.newBuilder()
+                             .setId(photo.getId())
+                             .vBuild();
+    }
+
+    public static MRDeletePhoto delete(MRPhoto photo) {
+        return MRDeletePhoto.newBuilder()
+                            .setId(photo.getId())
+                            .vBuild();
+    }
+
+    public static class PhotoAggregate extends Aggregate<MRPhotoId, MRPhoto, MRPhoto.Builder> {
 
         @Assign
         MRPhotoUploaded handle(MRUploadPhoto cmd) {
@@ -183,6 +150,30 @@ public final class MirrorRepositoryTestEnv {
                      .setFullSizeUrl(event.getFullSizeUrl())
                      .setThumbnailUrl(event.getThumbnailUrl())
                      .setAltText(event.getAltText());
+        }
+
+        @Assign
+        MRPhotoArchived handle(MRArchivePhoto photo) {
+            return MRPhotoArchived.newBuilder()
+                                  .setId(photo.getId())
+                                  .vBuild();
+        }
+
+        @Apply
+        private void on(MRPhotoArchived event) {
+            setArchived(true);
+        }
+
+        @Assign
+        MRPhotoDeleted handle(MRDeletePhoto photo) {
+            return MRPhotoDeleted.newBuilder()
+                                 .setId(photo.getId())
+                                 .vBuild();
+        }
+
+        @Apply
+        private void on(MRPhotoDeleted event) {
+            setDeleted(true);
         }
     }
 }

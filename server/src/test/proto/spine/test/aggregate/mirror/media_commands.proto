@@ -20,7 +20,7 @@
 
 syntax = "proto3";
 
-package spine.test.system.server;
+package spine.test.aggregate.mirror;
 
 import "spine/options.proto";
 
@@ -30,7 +30,7 @@ option java_outer_classname = "MirrorTestCommandsProto";
 option java_multiple_files = true;
 
 import "spine/net/url.proto";
-import "spine/test/system/server/mirror_test.proto";
+import "spine/test/aggregate/mirror/media.proto";
 
 message MRUploadPhoto {
 
@@ -41,4 +41,14 @@ message MRUploadPhoto {
     spine.net.Url thumbnail_url = 3 [(validate) = true, (required) = false];
 
     string alt_text = 4;
+}
+
+message MRArchivePhoto {
+
+    MRPhotoId id = 1;
+}
+
+message MRDeletePhoto {
+
+    MRPhotoId id = 1;
 }
