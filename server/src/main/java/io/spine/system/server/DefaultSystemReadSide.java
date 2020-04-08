@@ -34,11 +34,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 final class DefaultSystemReadSide implements SystemReadSide {
 
-    private final SystemContext context;
     private final EventBus eventBus;
 
     DefaultSystemReadSide(SystemContext context) {
-        this.context = context;
         this.eventBus = context.eventBus();
     }
 
@@ -53,19 +51,4 @@ final class DefaultSystemReadSide implements SystemReadSide {
         checkNotNull(dispatcher);
         eventBus.unregister(dispatcher);
     }
-
-//    @Override
-//    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
-//        MirrorRepository repository = (MirrorRepository)
-//                context.findRepository(Mirror.class)
-//                       .orElseThrow(
-//                               () -> newIllegalStateException(
-//                                       "Mirror projection repository is not registered in `%s`.",
-//                                       context.name()
-//                                              .getValue()
-//                               )
-//                       );
-//        Iterator<EntityStateWithVersion> result = repository.execute(query);
-//        return result;
-//    }
 }

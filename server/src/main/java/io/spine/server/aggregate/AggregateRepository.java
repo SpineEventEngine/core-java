@@ -496,9 +496,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Returns {@code true} if the aggregates of this repository should be mirrored.
      *
-     * <p>When the entity is mirrored, its latest state is stored in a dedicated system
-     * {@linkplain io.spine.system.server.MirrorProjection projection}, allowing for efficient
-     * querying from outside.
+     * <p>When the entity is mirrored, its latest state is stored in an {@link AggregateStorage},
+     * allowing for efficient querying from outside.
      *
      * <p>All aggregates visible for querying or subscribing should be mirrored.
      */
