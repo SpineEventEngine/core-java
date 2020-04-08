@@ -22,7 +22,7 @@ package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
 import io.spine.server.storage.Columns;
-import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
 /**
@@ -43,9 +43,9 @@ public final class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I, M extends Message> MessageStorage<I, M>
-    createMessageStorage(Columns<M> columns, boolean multitenant) {
-        return new InMemoryMessageStorage<>(columns, multitenant);
+    public <I, M extends Message> RecordStorage<I, M>
+    createRecordStorage(Columns<M> columns, boolean multitenant) {
+        return new InMemoryRecordStorage<>(columns, multitenant);
     }
 
     @Override

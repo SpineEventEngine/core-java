@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.spine.base.EntityState;
 import io.spine.core.TenantId;
-import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
@@ -40,13 +40,13 @@ import java.util.Set;
  *         the type of data associated with the tenant ID
  */
 public abstract class TenantStorage<T extends EntityState>
-        extends MessageStorageDelegate<TenantId, T>
+        extends RecordStorageDelegate<TenantId, T>
         implements TenantIndex {
 
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
 
     protected TenantStorage(StorageFactory factory, Class<T> stateClass) {
-        super(factory.createMessageStorage(RecordColumns.emptyOf(stateClass), false));
+        super(factory.createRecordStorage(RecordColumns.emptyOf(stateClass), false));
     }
 
     /**

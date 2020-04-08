@@ -21,9 +21,9 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
-import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
@@ -35,17 +35,17 @@ import static io.spine.server.storage.MessageQueries.byColumn;
  * A storage for the state of the ongoing catch-up processes.
  */
 @SPI
-public class CatchUpStorage extends MessageStorageDelegate<CatchUpId, CatchUp> {
+public class CatchUpStorage extends RecordStorageDelegate<CatchUpId, CatchUp> {
 
     public CatchUpStorage(StorageFactory factory, boolean multitenant) {
         super(createStorage(factory, multitenant));
     }
 
-    private static MessageStorage<CatchUpId, CatchUp>
+    private static RecordStorage<CatchUpId, CatchUp>
     createStorage(StorageFactory factory, boolean multitenant) {
         RecordColumns<CatchUp> columns =
                 new RecordColumns<>(CatchUp.class, CatchUpColumn.definitions());
-        return factory.createMessageStorage(columns, multitenant);
+        return factory.createRecordStorage(columns, multitenant);
     }
 
     public void write(CatchUp record) {

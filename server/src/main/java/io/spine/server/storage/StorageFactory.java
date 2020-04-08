@@ -38,8 +38,20 @@ import io.spine.server.event.store.DefaultEventStore;
  */
 public interface StorageFactory extends AutoCloseable {
 
-    <I, M extends Message> MessageStorage<I, M>
-    createMessageStorage(Columns<M> columns, boolean multitenant);
+    /**
+     * Creates a new {@link RecordStorage}.
+     *
+     * @param columns
+     *         the definitions of the columns to store along with each record
+     * @param multitenant
+     *         whether the storage should be multi-tenant
+     * @param <I>
+     *         the type of the record identifiers
+     * @param <R>
+     *         the type of the stored records
+     */
+    <I, R extends Message> RecordStorage<I, R>
+    createRecordStorage(Columns<R> columns, boolean multitenant);
 
     /**
      * Creates a new {@link AggregateStorage}.

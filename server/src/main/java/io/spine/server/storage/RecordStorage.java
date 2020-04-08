@@ -33,31 +33,36 @@ import java.util.Optional;
 /**
  * An abstract base for storage implementations, which store the Protobuf messages as records.
  *
- * <p>Each stored message must be identified.
+ * <p>Each stored record must be identified.
  *
- * <p>Additionally, some attributes may be stored along with the message itself
+ * <p>Additionally, some attributes may be stored along with the record itself
  * to allow further querying.
+ *
+ * @param <I>
+ *         the type of the record identifiers
+ * @param <R>
+ *         the type of the message record
  */
 @SPI
-public abstract class MessageStorage<I, M extends Message> extends AbstractStorage<I, M> {
+public abstract class RecordStorage<I, R extends Message> extends AbstractStorage<I, R> {
 
-    private final Columns<M> columns;
+    private final Columns<R> columns;
 
     /**
      * Creates the new storage instance.
      *
      * @param columns
-     *         definitions of the columns to store along with each message
+     *         definitions of the columns to store along with each record
      * @param multitenant
      *         whether this storage should support multi-tenancy
      */
-    public MessageStorage(Columns<M> columns, boolean multitenant) {
+    public RecordStorage(Columns<R> columns, boolean multitenant) {
         super(multitenant);
         this.columns = columns;
     }
 
     /**
-     * Writes the message as the storage record by the given identifier.
+     * Writes the record as the storage record by the given identifier.
      *
      * @param id
      *         the ID for the record
@@ -65,43 +70,43 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the record to store
      */
     @Override
-    public synchronized void write(I id, M record) {
-        MessageWithColumns<I, M> withCols = MessageWithColumns.create(id, record, this.columns);
+    public synchronized void write(I id, R record) {
+        MessageWithColumns<I, R> withCols = MessageWithColumns.create(id, record, this.columns);
         write(withCols);
     }
 
     /**
-     * Writes the message along with its filled-in column values to the storage.
+     * Writes the record along with its filled-in column values to the storage.
      *
      * <p>If this storage is {@linkplain #isClosed() closed},
      * throws an {@link IllegalStateException}.
      *
      * @param record
-     *         the message and additional columns with their values
+     *         the record and additional columns with their values
      */
-    public void write(MessageWithColumns<I, M> record) {
+    public void write(MessageWithColumns<I, R> record) {
         checkNotClosed();
         writeRecord(record);
     }
 
     /**
-     * Writes the batch of the messages along with their filled-in columns to the storage.
+     * Writes the batch of the records along with their filled-in columns to the storage.
      *
      * <p>If this storage is {@linkplain #isClosed() closed},
      * throws an {@link IllegalStateException}.
      *
      * @param records
-     *         messages and their column values
+     *         records and their column values
      */
-    public void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
+    public void writeAll(Iterable<? extends MessageWithColumns<I, R>> records) {
         checkNotClosed();
         writeAllRecords(records);
     }
 
     @Override
-    public Optional<M> read(I id) {
+    public Optional<R> read(I id) {
         MessageQuery<I> query = MessageQueries.of(ImmutableList.of(id));
-        Optional<M> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
+        Optional<R> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
         return result;
     }
 
@@ -115,21 +120,21 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the identifier of the message record to read
      * @param mask
      *         the field mask to apply
-     * @return the message with the given identifier, after the field mask has been applied to it,
-     *         or {@code Optional.empty()} if no message is found by the ID
+     * @return the record with the given identifier, after the field mask has been applied to it,
+     *         or {@code Optional.empty()} if no record is found by the ID
      */
-    public Optional<M> read(I id, FieldMask mask) {
+    public Optional<R> read(I id, FieldMask mask) {
         MessageQuery<I> query = MessageQueries.of(ImmutableList.of(id));
         ResponseFormat format = formatWith(mask);
-        Optional<M> result = readSingleRecord(query, format);
+        Optional<R> result = readSingleRecord(query, format);
         return result;
     }
 
-    private Optional<M> readSingleRecord(MessageQuery<I> query, ResponseFormat format) {
-        Iterator<M> iterator = readAll(query, format);
+    private Optional<R> readSingleRecord(MessageQuery<I> query, ResponseFormat format) {
+        Iterator<R> iterator = readAll(query, format);
         return iterator.hasNext()
-                             ? Optional.of(iterator.next())
-                             : Optional.empty();
+               ? Optional.of(iterator.next())
+               : Optional.empty();
     }
 
     /**
@@ -139,9 +144,9 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *
      * @param query
      *         the query to execute
-     * @return iterator over the matching messages
+     * @return iterator over the matching records
      */
-    public Iterator<M> readAll(MessageQuery<I> query) {
+    public Iterator<R> readAll(MessageQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
@@ -150,7 +155,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *
      * @return iterator over the records
      */
-    public Iterator<M> readAll() {
+    public Iterator<R> readAll() {
         return readAll(MessageQueries.all());
     }
 
@@ -163,7 +168,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the identifiers of the records to read
      * @return iterator over the records with the passed IDs
      */
-    public Iterator<M> readAll(Iterable<I> ids) {
+    public Iterator<R> readAll(Iterable<I> ids) {
         MessageQuery<I> query = MessageQueries.of(ids);
         return readAll(query);
     }
@@ -177,10 +182,10 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * @param ids
      *         the identifiers of the records to read
      * @param mask
-     *         the mask to apply to each message
+     *         the mask to apply to each record
      * @return the iterator over the records
      */
-    public Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
+    public Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
         MessageQuery<I> query = MessageQueries.of(ids);
         ResponseFormat format = formatWith(mask);
         return readAll(query, format);
@@ -193,7 +198,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         the format of the response
      * @return iterator over the message records
      */
-    public Iterator<M> readAll(ResponseFormat format) {
+    public Iterator<R> readAll(ResponseFormat format) {
         MessageQuery<I> query = MessageQueries.all();
         return readAll(query, format);
     }
@@ -211,7 +216,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         format of the expected response
      * @return iterator over the matching message records
      */
-    public Iterator<M> readAll(MessageQuery<I> query, ResponseFormat format) {
+    public Iterator<R> readAll(MessageQuery<I> query, ResponseFormat format) {
         checkNotClosed();
         return readAllRecords(query, format);
     }
@@ -251,21 +256,21 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
     }
 
     /**
-     * Performs writing the message and its column values to the storage.
+     * Performs writing the record and its column values to the storage.
      *
      * @param record
-     *         the message and additional columns with their values
+     *         the record and additional columns with their values
      */
-    protected abstract void writeRecord(MessageWithColumns<I, M> record);
+    protected abstract void writeRecord(MessageWithColumns<I, R> record);
 
     /**
-     * Performs writing of the message batch along with messages' filled-in columns to the storage.
+     * Performs writing of the record batch along with records' filled-in columns to the storage.
      *
      * @param records
-     *         messages and the values of their columns
+     *         records and the values of their columns
      */
     @Internal
-    protected abstract void writeAllRecords(Iterable<? extends MessageWithColumns<I, M>> records);
+    protected abstract void writeAllRecords(Iterable<? extends MessageWithColumns<I, R>> records);
 
     /**
      * Performs reading of the message records by executing the passed query.
@@ -278,7 +283,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      *         format of the expected response
      * @return iterator over the matching message records
      */
-    protected abstract Iterator<M> readAllRecords(MessageQuery<I> query, ResponseFormat format);
+    protected abstract Iterator<R> readAllRecords(MessageQuery<I> query, ResponseFormat format);
 
     /**
      * Performs the physical removal of the message record from the storage
@@ -299,7 +304,7 @@ public abstract class MessageStorage<I, M extends Message> extends AbstractStora
      * in this storage.
      */
     @Internal
-    protected Columns<M> columns() {
+    protected Columns<R> columns() {
         return columns;
     }
 

@@ -31,7 +31,7 @@ import io.spine.server.delivery.InboxStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
 import io.spine.server.storage.Columns;
-import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -108,9 +108,9 @@ public final class SystemAwareStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I, M extends Message> MessageStorage<I, M>
-    createMessageStorage(Columns<M> columns, boolean multitenant) {
-        return delegate.createMessageStorage(columns, multitenant);
+    public <I, M extends Message> RecordStorage<I, M>
+    createRecordStorage(Columns<M> columns, boolean multitenant) {
+        return delegate.createRecordStorage(columns, multitenant);
     }
 
     /**

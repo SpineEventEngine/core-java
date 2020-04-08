@@ -32,18 +32,18 @@ import java.util.Set;
 import static io.spine.server.storage.QueryParameters.FIELD_PARAMETERS;
 
 /**
- * A query to a {@link io.spine.server.storage.MessageStorage MessageStorage} for the records
+ * A query to a {@link RecordStorage MessageStorage} for the records
  * matching the given parameters.
  *
  * <p>Acts like a DTO between the
  * {@linkplain io.spine.server.entity.RecordBasedRepository repository} and the
- * {@link io.spine.server.storage.MessageStorage MessageStorage}.
+ * {@link RecordStorage MessageStorage}.
  *
  * <p>The query contains the acceptable values of the record IDs and the
  * {@linkplain Column entity columns}.
  *
  * <p>A storage may ignore the query or throw an exception if it's specified. By default,
- * {@link io.spine.server.storage.MessageStorage MessageStorage} supports the Entity queries.
+ * {@link RecordStorage MessageStorage} supports the Entity queries.
  *
  * <p>If the {@linkplain MessageQuery#getIds() accepted IDs set} is empty, all the IDs are
  * considered to be queried.
@@ -60,7 +60,7 @@ import static io.spine.server.storage.QueryParameters.FIELD_PARAMETERS;
  *
  * <p>If the query specifies the values of
  * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle Columns}, then
- * the {@linkplain io.spine.server.storage.MessageStorage#readAll default behavior} will be
+ * the {@linkplain RecordStorage#readAll default behavior} will be
  * overridden meaning that the records resulting to such query may active or inactive.
  *
  * @param <I>

@@ -29,8 +29,8 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.QueryParameters;
+import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
@@ -42,7 +42,7 @@ import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
 /**
  * A {@code MessageStorage} which stores {@link EntityRecord}s.
  */
-public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityRecord> {
+public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecord> {
 
     private final MessageQuery<I> findActiveRecordsQuery;
     private final QueryParameters activeQueryParams;
@@ -50,7 +50,7 @@ public class EntityRecordStorage<I> extends MessageStorageDelegate<I, EntityReco
     public EntityRecordStorage(StorageFactory factory,
                                Class<? extends Entity<I, ?>> entityClass,
                                boolean multitenant) {
-        super(factory.createMessageStorage(EntityColumns.of(entityClass), multitenant));
+        super(factory.createRecordStorage(EntityColumns.of(entityClass), multitenant));
         activeQueryParams = activeEntityQueryParams(columns());
         this.findActiveRecordsQuery = MessageQueries.of(ImmutableSet.of(), activeQueryParams);
     }

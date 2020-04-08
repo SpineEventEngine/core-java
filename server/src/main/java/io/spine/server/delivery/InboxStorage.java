@@ -27,11 +27,11 @@ import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
-import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -57,17 +57,17 @@ import static java.util.stream.Collectors.toList;
  * {@code BoundedContext}s to store the delivered messages.
  */
 @SPI
-public class InboxStorage extends MessageStorageDelegate<InboxMessageId, InboxMessage> {
+public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMessage> {
 
     public InboxStorage(StorageFactory factory, boolean multitenant) {
         super(createStorage(factory, multitenant));
     }
 
-    private static MessageStorage<InboxMessageId, InboxMessage>
+    private static RecordStorage<InboxMessageId, InboxMessage>
     createStorage(StorageFactory factory, boolean multitenant) {
         RecordColumns<InboxMessage> columns =
                 new RecordColumns<>(InboxMessage.class, InboxColumn.definitions());
-        return factory.createMessageStorage(columns, multitenant);
+        return factory.createRecordStorage(columns, multitenant);
     }
 
     /**

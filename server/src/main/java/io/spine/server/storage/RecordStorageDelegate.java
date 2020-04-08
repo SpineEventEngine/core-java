@@ -29,71 +29,76 @@ import java.util.Iterator;
 import java.util.Optional;
 
 /**
- * A {@code MessageStorage} which delegates all of its operations to another instance
- * of {@code MessageStorage}.
+ * A {@link RecordStorage} which delegates all of its operations to another instance
+ * of {@code RecordStorage}.
+ *
+ * @param <I>
+ *         the type of the record identifiers
+ * @param <R>
+ *         the type of the message records
  */
 @Internal
-public abstract class MessageStorageDelegate<I, M extends Message> extends MessageStorage<I, M> {
+public abstract class RecordStorageDelegate<I, R extends Message> extends RecordStorage<I, R> {
 
-    private final MessageStorage<I, M> delegate;
+    private final RecordStorage<I, R> delegate;
 
-    protected MessageStorageDelegate(MessageStorage<I, M> delegate) {
+    protected RecordStorageDelegate(RecordStorage<I, R> delegate) {
         super(delegate.columns(), delegate.isMultitenant());
         this.delegate = delegate;
     }
 
     @Override
-    public Optional<M> read(I id) {
+    public Optional<R> read(I id) {
         return delegate.read(id);
     }
 
     @Override
-    public Optional<M> read(I id, FieldMask mask) {
+    public Optional<R> read(I id, FieldMask mask) {
         return delegate.read(id, mask);
     }
 
     @Override
-    public Iterator<M> readAll(MessageQuery<I> query) {
+    public Iterator<R> readAll(MessageQuery<I> query) {
         return delegate.readAll(query);
     }
 
     @Override
-    public Iterator<M> readAll() {
+    public Iterator<R> readAll() {
         return delegate.readAll();
     }
 
     @Override
-    public Iterator<M> readAll(Iterable<I> ids) {
+    public Iterator<R> readAll(Iterable<I> ids) {
         return delegate.readAll(ids);
     }
 
     @Override
-    public Iterator<M> readAll(Iterable<I> ids, FieldMask mask) {
+    public Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
         return delegate.readAll(ids, mask);
     }
 
     @Override
-    public Iterator<M> readAll(ResponseFormat format) {
+    public Iterator<R> readAll(ResponseFormat format) {
         return delegate.readAll(format);
     }
 
     @Override
-    public Iterator<M> readAll(MessageQuery<I> query, ResponseFormat format) {
+    public Iterator<R> readAll(MessageQuery<I> query, ResponseFormat format) {
         return delegate.readAll(query, format);
     }
 
     @Override
-    public void write(MessageWithColumns<I, M> record) {
+    public void write(MessageWithColumns<I, R> record) {
         delegate.write(record);
     }
 
     @Override
-    public synchronized void write(I id, M record) {
+    public synchronized void write(I id, R record) {
         delegate.write(id, record);
     }
 
     @Override
-    public void writeAll(Iterable<? extends MessageWithColumns<I, M>> records) {
+    public void writeAll(Iterable<? extends MessageWithColumns<I, R>> records) {
         delegate.writeAll(records);
     }
 
@@ -114,7 +119,7 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
 
     @Override
     @Internal
-    protected Columns<M> columns() {
+    protected Columns<R> columns() {
         return delegate.columns();
     }
 
@@ -149,18 +154,18 @@ public abstract class MessageStorageDelegate<I, M extends Message> extends Messa
     }
 
     @Override
-    protected void writeRecord(MessageWithColumns<I, M> record) {
+    protected void writeRecord(MessageWithColumns<I, R> record) {
         delegate.writeRecord(record);
     }
 
     @Override
     @Internal
-    protected void writeAllRecords(Iterable<? extends MessageWithColumns<I, M>> records) {
+    protected void writeAllRecords(Iterable<? extends MessageWithColumns<I, R>> records) {
         delegate.writeAllRecords(records);
     }
 
     @Override
-    protected Iterator<M> readAllRecords(MessageQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAllRecords(MessageQuery<I> query, ResponseFormat format) {
         return delegate.readAllRecords(query, format);
     }
 

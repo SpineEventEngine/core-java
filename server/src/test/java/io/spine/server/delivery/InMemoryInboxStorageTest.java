@@ -20,11 +20,12 @@
 
 package io.spine.server.delivery;
 
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 
 /**
  * Tests of {@link io.spine.server.storage.memory.InboxStorage InboxStorage} working on top
- * of the in-memory {@link io.spine.server.storage.MessageStorage MessageStorage}.
+ * of the in-memory {@link RecordStorage}.
  */
 class InMemoryInboxStorageTest extends InboxStorageTest {
 
