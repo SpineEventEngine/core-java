@@ -248,7 +248,6 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
      *         the maximum number of the history records to read
      * @return new iterator instance
      */
-    //TODO:2020-04-01:alex.tymchenko: review the request considering the original `AggregateEventRecord` comparator.
     Iterator<AggregateEventRecord> historyBackward(I id, int batchSize) {
         return historyBackward(id, batchSize, null);
     }
