@@ -661,7 +661,6 @@ public class EntityRecordStorageTest
                            .isPresent());
     }
 
-    //TODO:2020-03-30:alex.tymchenko: move this test.
     @Test
     @DisplayName("return a list of entity columns")
     void returnColumnList() {
@@ -676,8 +675,8 @@ public class EntityRecordStorageTest
         assertThat(columnList).hasSize(expectedSize);
     }
 
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
-                                                               checking via #contains(Object). */)
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection" /* Storing of generated objects and
+                                                                checking via #contains(Object). */)
     @Test
     @DisplayName("create unique states for same ID")
     void createUniqueStatesForSameId() {
