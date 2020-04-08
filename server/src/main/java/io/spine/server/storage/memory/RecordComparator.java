@@ -71,7 +71,7 @@ public class RecordComparator<I, R extends Message>
     static <I, R extends Message>
     Comparator<RecordWithColumns<I, R>> orderedBy(List<OrderBy> orderByList) {
         checkArgument(!orderByList.isEmpty(),
-                      "`MessageRecordComparator` requires at least one `OrderBy` instance.");
+                      "`RecordComparator` requires at least one `OrderBy` instance.");
         Comparator<RecordWithColumns<I, R>> result = null;
         for (OrderBy orderBy : orderByList) {
             Comparator<RecordWithColumns<I, R>> thisComparator;
