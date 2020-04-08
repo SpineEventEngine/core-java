@@ -29,6 +29,7 @@ import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.projection.Projection;
 import io.spine.server.storage.Column;
+import io.spine.server.storage.RecordColumn;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectWithColumns;
@@ -37,7 +38,7 @@ import io.spine.testdata.Sample;
 /**
  * The test environment for {@link io.spine.server.storage.memory.MessageQueryMatcherTest} tests.
  *
- * <p>Provides various types of {@linkplain io.spine.server.storage.MessageColumn message columns}
+ * <p>Provides various types of {@linkplain RecordColumn record columns}
  * that can be used to emulate a client-side query.
  */
 public final class MessageQueryMatcherTestEnv {

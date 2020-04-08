@@ -25,13 +25,13 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
-import io.spine.server.storage.MessageColumns;
 import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.MessageWithColumns;
 import io.spine.server.storage.QueryParameters;
+import io.spine.server.storage.RecordColumns;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -65,8 +65,8 @@ public class InboxStorage extends MessageStorageDelegate<InboxMessageId, InboxMe
 
     private static MessageStorage<InboxMessageId, InboxMessage>
     createStorage(StorageFactory factory, boolean multitenant) {
-        MessageColumns<InboxMessage> columns =
-                new MessageColumns<>(InboxMessage.class, InboxColumn.definitions());
+        RecordColumns<InboxMessage> columns =
+                new RecordColumns<>(InboxMessage.class, InboxColumn.definitions());
         return factory.createMessageStorage(columns, multitenant);
     }
 

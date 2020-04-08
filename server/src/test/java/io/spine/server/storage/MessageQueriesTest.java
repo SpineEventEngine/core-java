@@ -71,13 +71,13 @@ class MessageQueriesTest extends UtilityClassTest<MessageQueries> {
         tester.setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
               .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                 .build())
-              .setDefault(MessageColumn.class, sampleColumn())
-              .setDefault(Columns.class, MessageColumns.emptyOf(Any.class))
+              .setDefault(RecordColumn.class, sampleColumn())
+              .setDefault(Columns.class, RecordColumns.emptyOf(Any.class))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
-    private static MessageColumn<String, Any> sampleColumn() {
-        return new MessageColumn<>(ColumnName.of("sample"), String.class, (v) -> "");
+    private static RecordColumn<String, Any> sampleColumn() {
+        return new RecordColumn<>(ColumnName.of("sample"), String.class, (v) -> "");
     }
 
     @Test

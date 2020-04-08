@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.MessageColumn;
+import io.spine.server.storage.RecordColumn;
 
 /**
  * Event-specific column names.
@@ -49,18 +49,19 @@ enum EventColumn {
      */
     type("created",
          Timestamp.class,
-         (m) -> m.getContext().getTimestamp());
+         (m) -> m.getContext()
+                 .getTimestamp());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final MessageColumn<?, Event> column;
+    private final RecordColumn<?, Event> column;
 
-    <T> EventColumn(String columnName, Class<T> type, MessageColumn.Getter<Event, T> getter) {
+    <T> EventColumn(String columnName, Class<T> type, RecordColumn.Getter<Event, T> getter) {
         ColumnName name = ColumnName.of(columnName);
-        this.column = new MessageColumn<>(name, type, getter);
+        this.column = new RecordColumn<>(name, type, getter);
     }
 
-    static ImmutableList<MessageColumn<?, Event>> definitions() {
-        ImmutableList.Builder<MessageColumn<?, Event>> list = ImmutableList.builder();
+    static ImmutableList<RecordColumn<?, Event>> definitions() {
+        ImmutableList.Builder<RecordColumn<?, Event>> list = ImmutableList.builder();
         for (EventColumn value : EventColumn.values()) {
             list.add(value.column);
         }

@@ -21,9 +21,9 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
-import io.spine.server.storage.MessageColumns;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.MessageStorageDelegate;
+import io.spine.server.storage.RecordColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
@@ -43,8 +43,8 @@ public class CatchUpStorage extends MessageStorageDelegate<CatchUpId, CatchUp> {
 
     private static MessageStorage<CatchUpId, CatchUp>
     createStorage(StorageFactory factory, boolean multitenant) {
-        MessageColumns<CatchUp> columns =
-                new MessageColumns<>(CatchUp.class, CatchUpColumn.definitions());
+        RecordColumns<CatchUp> columns =
+                new RecordColumns<>(CatchUp.class, CatchUpColumn.definitions());
         return factory.createMessageStorage(columns, multitenant);
     }
 

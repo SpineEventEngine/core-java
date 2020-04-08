@@ -21,27 +21,27 @@
 package io.spine.server.entity.storage;
 
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.MessageColumn;
+import io.spine.server.storage.RecordColumn;
 
 /**
- * {@link MessageColumn}s storing the lifecycle attributes of an {@code Entity} within
+ * {@link RecordColumn}s storing the lifecycle attributes of an {@code Entity} within
  * an {@link EntityRecord}.
  */
 public enum LifecycleColumn {
 
-    archived(new MessageColumn<>(ColumnName.of("archived"),
-                                 Boolean.class,
-                                 (r) -> r.getLifecycleFlags()
-                                         .getArchived())),
-
-    deleted(new MessageColumn<>(ColumnName.of("deleted"),
+    archived(new RecordColumn<>(ColumnName.of("archived"),
                                 Boolean.class,
                                 (r) -> r.getLifecycleFlags()
-                                        .getDeleted()));
+                                        .getArchived())),
 
-    private final MessageColumn<Boolean, EntityRecord> column;
+    deleted(new RecordColumn<>(ColumnName.of("deleted"),
+                               Boolean.class,
+                               (r) -> r.getLifecycleFlags()
+                                       .getDeleted()));
 
-    LifecycleColumn(MessageColumn<Boolean, EntityRecord> column) {
+    private final RecordColumn<Boolean, EntityRecord> column;
+
+    LifecycleColumn(RecordColumn<Boolean, EntityRecord> column) {
         this.column = column;
     }
 

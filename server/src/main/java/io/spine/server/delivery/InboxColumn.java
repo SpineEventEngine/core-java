@@ -23,7 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.MessageColumn;
+import io.spine.server.storage.RecordColumn;
 
 /**
  * @author Alex Tymchenko
@@ -51,23 +51,23 @@ public enum InboxColumn {
     version("version", Integer.class, InboxMessage::getVersion);
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final MessageColumn<?, InboxMessage> column;
+    private final RecordColumn<?, InboxMessage> column;
 
     <T> InboxColumn(String columnName, Class<T> type,
-                    MessageColumn.Getter<InboxMessage, T> getter) {
+                    RecordColumn.Getter<InboxMessage, T> getter) {
         ColumnName name = ColumnName.of(columnName);
-        this.column = new MessageColumn<>(name, type, getter);
+        this.column = new RecordColumn<>(name, type, getter);
     }
 
-    static ImmutableList<MessageColumn<?, InboxMessage>> definitions() {
-        ImmutableList.Builder<MessageColumn<?, InboxMessage>> list = ImmutableList.builder();
+    static ImmutableList<RecordColumn<?, InboxMessage>> definitions() {
+        ImmutableList.Builder<RecordColumn<?, InboxMessage>> list = ImmutableList.builder();
         for (InboxColumn value : InboxColumn.values()) {
             list.add(value.column);
         }
         return list.build();
     }
 
-    public MessageColumn<?, InboxMessage> column() {
+    public RecordColumn<?, InboxMessage> column() {
         return column;
     }
 }

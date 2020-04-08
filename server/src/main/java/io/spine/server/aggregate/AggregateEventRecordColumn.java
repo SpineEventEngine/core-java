@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.MessageColumn;
+import io.spine.server.storage.RecordColumn;
 
 /**
  * Columns stored along with an {@link AggregateEventRecord}.
@@ -50,24 +50,24 @@ public enum AggregateEventRecordColumn {
              AggregateEventRecord::hasSnapshot);
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final MessageColumn<?, AggregateEventRecord> column;
+    private final RecordColumn<?, AggregateEventRecord> column;
 
     <T> AggregateEventRecordColumn(String columnName,
                                    Class<T> type,
-                                   MessageColumn.Getter<AggregateEventRecord, T> getter) {
+                                   RecordColumn.Getter<AggregateEventRecord, T> getter) {
         ColumnName name = ColumnName.of(columnName);
-        this.column = new MessageColumn<>(name, type, getter);
+        this.column = new RecordColumn<>(name, type, getter);
     }
 
-    static ImmutableList<MessageColumn<?, AggregateEventRecord>> definitions() {
-        ImmutableList.Builder<MessageColumn<?, AggregateEventRecord>> list = ImmutableList.builder();
+    static ImmutableList<RecordColumn<?, AggregateEventRecord>> definitions() {
+        ImmutableList.Builder<RecordColumn<?, AggregateEventRecord>> list = ImmutableList.builder();
         for (AggregateEventRecordColumn value : values()) {
             list.add(value.column);
         }
         return list.build();
     }
 
-    MessageColumn<?, AggregateEventRecord> column() {
+    RecordColumn<?, AggregateEventRecord> column() {
         return column;
     }
 

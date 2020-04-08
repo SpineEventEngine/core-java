@@ -38,37 +38,40 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A message to store, along with the additional columns to store for further querying.
+ * A message record to store, along with the additional columns to store for further querying.
+ *
+ * @param <R>
+ *         the class of the record
  */
 @Immutable
 @Internal
-public class MessageColumns<M extends Message> extends Columns<M> {
+public class RecordColumns<R extends Message> extends Columns<R> {
 
     /**
-     * The columns to store along with the message itself.
+     * The columns to store along with the record itself.
      */
-    private final ImmutableMap<ColumnName, MessageColumn<?, M>> columns;
+    private final ImmutableMap<ColumnName, RecordColumn<?, R>> columns;
 
-    private final Class<M> messageClass;
+    private final Class<R> recordClass;
 
-    public MessageColumns(Class<M> messageClass, Iterable<MessageColumn<?, M>> columns) {
-        super(messageClass);
+    public RecordColumns(Class<R> recordClass, Iterable<RecordColumn<?, R>> columns) {
+        super(recordClass);
         this.columns = stream(columns).collect(toImmutableMap(AbstractColumn::name, (c) -> c));
-        this.messageClass = messageClass;
+        this.recordClass = recordClass;
     }
 
-    private MessageColumns(Class<M> aClass) {
+    private RecordColumns(Class<R> aClass) {
         this(aClass, ImmutableList.of());
     }
 
-    public static <M extends Message> MessageColumns<M> emptyOf(Class<M> messageClass) {
-        return new MessageColumns<>(messageClass);
+    public static <M extends Message> RecordColumns<M> emptyOf(Class<M> recordClass) {
+        return new RecordColumns<>(recordClass);
     }
 
     @Override
     public Map<ColumnName, @Nullable Object> valuesIn(Object record) {
         checkNotNull(record);
-        M message = asMessage(record);
+        R message = asMessage(record);
         Map<ColumnName, @Nullable Object> result = new HashMap<>();
         columns.forEach(
                 (name, column) -> result.put(name, column.valueIn(message))
@@ -77,13 +80,13 @@ public class MessageColumns<M extends Message> extends Columns<M> {
     }
 
     @SuppressWarnings("unchecked")  /* It's cheaper to attempt to cast,
-                                       than verify that the object is of type `M`.*/
-    private M asMessage(Object record) {
-        return (M) record;
+                                       than verify that the object is of type `R`.*/
+    private R asMessage(Object record) {
+        return (R) record;
     }
 
     /**
-     * Returns all columns of the message.
+     * Returns all columns of the record.
      */
     @Override
     public final ImmutableList<Column> columnList() {
@@ -105,6 +108,6 @@ public class MessageColumns<M extends Message> extends Columns<M> {
     protected IllegalArgumentException columnNotFound(ColumnName columnName) {
         throw newIllegalArgumentException(
                 "A column with name '%s' not found in the `Message` class `%s`.",
-                columnName, messageClass.getCanonicalName());
+                columnName, recordClass.getCanonicalName());
     }
 }

@@ -34,12 +34,12 @@ import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.storage.MessageColumns;
 import io.spine.server.storage.MessageQueries;
 import io.spine.server.storage.MessageQuery;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.MessageStorageDelegate;
 import io.spine.server.storage.MessageWithColumns;
+import io.spine.server.storage.RecordColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -82,8 +82,8 @@ public final class DefaultEventStore
 
     private static MessageStorage<EventId, Event>
     storageForEvents(StorageFactory factory, boolean multitenant) {
-        MessageColumns<Event> columns =
-                new MessageColumns<>(Event.class, EventColumn.definitions());
+        RecordColumns<Event> columns =
+                new RecordColumns<>(Event.class, EventColumn.definitions());
         return factory.createMessageStorage(columns, multitenant);
     }
 

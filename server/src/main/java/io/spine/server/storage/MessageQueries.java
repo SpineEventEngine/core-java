@@ -81,7 +81,7 @@ public final class MessageQueries {
         return new MessageQuery<>(ImmutableSet.of(), parameters);
     }
 
-    public static <I, V> MessageQuery<I> byColumn(MessageColumn<?, ?> column, V value) {
+    public static <I, V> MessageQuery<I> byColumn(RecordColumn<?, ?> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         QueryParameters queryParams = QueryParameters.eq(column, value);

@@ -23,7 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.MessageColumn;
+import io.spine.server.storage.RecordColumn;
 
 /**
  * The columns stored for {@link CatchUp} statuses.
@@ -44,22 +44,22 @@ public enum CatchUpColumn {
                            .getProjectionType());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final MessageColumn<?, CatchUp> column;
+    private final RecordColumn<?, CatchUp> column;
 
-    <T> CatchUpColumn(String columnName, Class<T> type, MessageColumn.Getter<CatchUp, T> getter) {
+    <T> CatchUpColumn(String columnName, Class<T> type, RecordColumn.Getter<CatchUp, T> getter) {
         ColumnName name = ColumnName.of(columnName);
-        this.column = new MessageColumn<>(name, type, getter);
+        this.column = new RecordColumn<>(name, type, getter);
     }
 
-    static ImmutableList<MessageColumn<?, CatchUp>> definitions() {
-        ImmutableList.Builder<MessageColumn<?, CatchUp>> list = ImmutableList.builder();
+    static ImmutableList<RecordColumn<?, CatchUp>> definitions() {
+        ImmutableList.Builder<RecordColumn<?, CatchUp>> list = ImmutableList.builder();
         for (CatchUpColumn value : CatchUpColumn.values()) {
             list.add(value.column);
         }
         return list.build();
     }
 
-    public MessageColumn<?, CatchUp> column() {
+    public RecordColumn<?, CatchUp> column() {
         return column;
     }
 }

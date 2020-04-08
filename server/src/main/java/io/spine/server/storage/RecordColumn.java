@@ -29,15 +29,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.function.Function;
 
 /**
- * @author Alex Tymchenko
+ * A column to store along with a message record.
+ *
+ * <p>The value of the column is determined by a {@linkplain Getter getter} and should be extracted
+ * from the record fields.
  */
 @Immutable
 @Internal
-public final class MessageColumn<V, M extends Message> extends AbstractColumn {
+public final class RecordColumn<V, M extends Message> extends AbstractColumn {
 
     private final Getter<M, V> getter;
 
-    public MessageColumn(ColumnName name, Class<V> type, Getter<M, V> getter) {
+    public RecordColumn(ColumnName name, Class<V> type, Getter<M, V> getter) {
         super(name, type);
         this.getter = getter;
     }
