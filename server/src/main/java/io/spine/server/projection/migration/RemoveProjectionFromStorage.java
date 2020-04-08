@@ -29,7 +29,7 @@ import io.spine.server.projection.ProjectionMigration;
 
 /**
  * A migration operation that physically deletes the entity record from the
- * {@linkplain io.spine.server.storage.EntityRecordStorage storage}.
+ * {@linkplain io.spine.server.storage.MessageStorage storage}.
  *
  * <p>Depending on the actual storage implementation, this operation may be irreversible, so it
  * should be used in the client code with care.
