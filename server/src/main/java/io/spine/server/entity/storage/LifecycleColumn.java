@@ -27,6 +27,7 @@ import io.spine.server.storage.RecordColumn;
  * {@link RecordColumn}s storing the lifecycle attributes of an {@code Entity} within
  * an {@link EntityRecord}.
  */
+@SuppressWarnings("DuplicateStringLiteralInspection")   // the column names are commonly used words
 public enum LifecycleColumn {
 
     archived(new RecordColumn<>(ColumnName.of("archived"),
@@ -39,13 +40,14 @@ public enum LifecycleColumn {
                                (r) -> r.getLifecycleFlags()
                                        .getDeleted()));
 
+    @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final RecordColumn<Boolean, EntityRecord> column;
 
     LifecycleColumn(RecordColumn<Boolean, EntityRecord> column) {
         this.column = column;
     }
 
-    ColumnName columnName() {
+    public ColumnName columnName() {
         return column.name();
     }
 

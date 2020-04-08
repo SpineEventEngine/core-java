@@ -30,7 +30,6 @@ import io.spine.server.entity.Transaction;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.Column;
 import io.spine.server.storage.Columns;
-import io.spine.server.storage.LifecycleFlagField;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
@@ -166,8 +165,9 @@ public final class EntityColumns extends Columns<EntityRecord> {
      */
     public ImmutableMap<ColumnName, Column> lifecycleColumns() {
         ImmutableMap.Builder<ColumnName, Column> result = ImmutableMap.builder();
-        for (LifecycleFlagField field : LifecycleFlagField.values()) {
-            ColumnName name = ColumnName.of(field.name());
+
+        for (LifecycleColumn declaration : LifecycleColumn.values()) {
+            ColumnName name = declaration.columnName();
             SysColumn column = systemColumns.get(name);
             if (column != null) {
                 result.put(name, column);

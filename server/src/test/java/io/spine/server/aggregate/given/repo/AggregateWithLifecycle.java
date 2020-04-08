@@ -27,8 +27,8 @@ import io.spine.server.test.shared.StringAggregate;
 import io.spine.test.aggregate.cli.Evaluate;
 import io.spine.test.aggregate.cli.Evaluated;
 
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 
 /**
  * The aggregate that can handle status flags.

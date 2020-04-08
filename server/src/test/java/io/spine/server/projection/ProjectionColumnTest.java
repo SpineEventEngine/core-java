@@ -22,9 +22,10 @@ package io.spine.server.projection;
 
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.GivenEntityColumns;
+import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.projection.given.SavingProjection;
 import io.spine.server.storage.Column;
-import io.spine.server.storage.StorageField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,9 +33,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 
 @Nested
 @DisplayName("Projection should have columns")
@@ -43,20 +41,19 @@ class ProjectionColumnTest {
     @Test
     @DisplayName("`version`")
     void version() {
-        assertHasColumn(SavingProjection.class, version);
+        assertHasColumn(SavingProjection.class, GivenEntityColumns.version);
     }
 
     @Test
     @DisplayName("`archived` and `deleted`")
     void lifecycleColumns() {
-        assertHasColumn(SavingProjection.class, archived);
-        assertHasColumn(SavingProjection.class, deleted);
+        assertHasColumn(SavingProjection.class, LifecycleColumn.archived.columnName());
+        assertHasColumn(SavingProjection.class, LifecycleColumn.deleted.columnName());
     }
 
     private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
-                                        StorageField storageField) {
+                                        ColumnName columnName) {
         EntityColumns columns = EntityColumns.of(projectionType);
-        ColumnName columnName = ColumnName.of(storageField);
         Optional<Column> result = columns.find(columnName);
         assertThat(result).isPresent();
     }

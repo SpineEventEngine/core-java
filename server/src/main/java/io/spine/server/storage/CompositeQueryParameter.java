@@ -33,8 +33,8 @@ import io.spine.client.Filter;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 
 /**
  * A set of {@link Filter} instances joined by a logical
@@ -47,8 +47,8 @@ public final class CompositeQueryParameter {
     private final ImmutableMultimap<Column, Filter> filters;
 
     /**
-     * A flag that shows if current instance of {@code CompositeQueryParameter} has
-     * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set or not.
+     * A flag that shows whether the current instance of {@code CompositeQueryParameter} has
+     * the {@link io.spine.server.entity.storage.LifecycleColumn lifecycle attributes} set.
      */
     private final boolean hasLifecycle;
 
@@ -86,8 +86,8 @@ public final class CompositeQueryParameter {
 
     private static boolean isLifecycleColumn(Column column) {
         checkNotNull(column);
-        boolean result = archived.name().equals(column.name().value())
-                || deleted.name().equals(column.name().value());
+        boolean result = archived.columnName().equals(column.name())
+                || deleted.columnName().equals(column.name());
         return result;
     }
 

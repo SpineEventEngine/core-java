@@ -25,7 +25,6 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.server.storage.Column;
-import io.spine.server.storage.LifecycleFlagField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +32,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -101,7 +102,7 @@ class EntityColumnsTest {
     @Test
     @DisplayName("return the list of columns")
     void returnColumns() {
-        int systemColumnCount = ColumnTests.defaultColumns.size();
+        int systemColumnCount = GivenEntityColumns.defaultEntityColumns.size();
         int protoColumnCount = 4;
 
         int expectedSize = systemColumnCount + protoColumnCount;
@@ -148,12 +149,10 @@ class EntityColumnsTest {
 
         assertThat(columns).hasSize(2);
 
-        ColumnName archived = ColumnName.of(LifecycleFlagField.archived);
-        Column archivedColumn = columns.get(archived);
+        Column archivedColumn = columns.get(archived.columnName());
         assertThat(archivedColumn).isNotNull();
 
-        ColumnName deleted = ColumnName.of(LifecycleFlagField.deleted);
-        Column deletedColumn = columns.get(deleted);
+        Column deletedColumn = columns.get(deleted.columnName());
         assertThat(deletedColumn).isNotNull();
     }
 }

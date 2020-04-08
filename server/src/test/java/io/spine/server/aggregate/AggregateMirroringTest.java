@@ -52,8 +52,8 @@ import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.a
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.delete;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.givenPhotos;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.newPhotosRepository;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -108,7 +108,7 @@ class AggregateMirroringTest {
             MRPhotoId targetId = target.getId();
             Query query = queries.select(MRPhoto.class)
                                  .byId(targetId)
-                                 .where(eq(archived.name(), true))
+                                 .where(eq(archived.columnName().value(), true))
                                  .build();
             checkRead(query, target);
         }
@@ -121,7 +121,7 @@ class AggregateMirroringTest {
             MRPhotoId targetId = target.getId();
             Query query = queries.select(MRPhoto.class)
                                  .byId(targetId)
-                                 .where(eq(deleted.name(), true))
+                                 .where(eq(deleted.columnName().value(), true))
                                  .build();
             checkRead(query, target);
         }
@@ -135,8 +135,8 @@ class AggregateMirroringTest {
             archiveItem(secondPhoto);
 
             Query query = queries.select(MRPhoto.class)
-                                 .where(eq(archived.name(), true),
-                                        eq(deleted.name(), false))
+                                 .where(eq(archived.columnName().value(), true),
+                                        eq(deleted.columnName().value(), false))
                                  .build();
             checkRead(query, firstPhoto, secondPhoto);
         }

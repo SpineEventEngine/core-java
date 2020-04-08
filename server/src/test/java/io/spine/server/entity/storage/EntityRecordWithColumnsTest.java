@@ -38,8 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
-import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.entity.storage.GivenEntityColumns.defaultEntityColumns;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -136,7 +135,7 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("column values")
         void columnValues() {
-            ColumnName columnName = ColumnName.of(archived.name());
+            ColumnName columnName = LifecycleColumn.archived.columnName();
             Object value = false;
             Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
             EntityRecordWithColumns<?> record =
@@ -175,7 +174,7 @@ class EntityRecordWithColumnsTest {
 
         EntityRecordWithColumns<?> record =
                 EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        assertThat(record.columnNames()).containsExactlyElementsIn(defaultColumns);
+        assertThat(record.columnNames()).containsExactlyElementsIn(defaultEntityColumns);
     }
 
     @Test

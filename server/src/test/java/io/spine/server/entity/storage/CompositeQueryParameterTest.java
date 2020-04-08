@@ -35,8 +35,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.CCF_CO_UNDEFINED;
 import static io.spine.client.Filters.eq;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,8 +63,8 @@ class CompositeQueryParameterTest {
     void mergeWithOtherInstances() {
         EntityColumns columns = EntityColumns.of(TestEntity.class);
 
-        ColumnName archivedColumnName = ColumnName.of(archived);
-        ColumnName deletedColumnName = ColumnName.of(deleted);
+        ColumnName archivedColumnName = archived.columnName();
+        ColumnName deletedColumnName = deleted.columnName();
 
         Column archivedColumn = columns.get(archivedColumnName);
         Column deletedColumn = columns.get(deletedColumnName);
@@ -92,8 +92,8 @@ class CompositeQueryParameterTest {
     void mergeWithSingleFilter() {
         EntityColumns columns = EntityColumns.of(TestEntity.class);
 
-        ColumnName archivedColumnName = ColumnName.of(archived);
-        ColumnName deletedColumnName = ColumnName.of(deleted);
+        ColumnName archivedColumnName = archived.columnName();
+        ColumnName deletedColumnName = deleted.columnName();
 
         Column archivedColumn = columns.get(archivedColumnName);
         Column deletedColumn = columns.get(deletedColumnName);

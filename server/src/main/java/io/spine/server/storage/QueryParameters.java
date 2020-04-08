@@ -35,8 +35,8 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 
 /**
  * The parameters of an {@link RecordQuery}.
@@ -52,8 +52,8 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
     private final ImmutableList<CompositeQueryParameter> parameters;
 
     /**
-     * A flag that shows if the current instance of {@code CompositeQueryParameter} has
-     * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set or not.
+     * A flag that tells whether the current instance of {@code CompositeQueryParameter} has
+     * the {@link io.spine.server.entity.storage.LifecycleColumn lifecycle attributes} set.
      *
      * <p>This flag turns into {@code true} if at least one of the underlying
      * {@linkplain CompositeQueryParameter parameters}
@@ -78,8 +78,8 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
     }
 
     public static QueryParameters activeEntityQueryParams(EntityColumns columns) {
-        ColumnName archivedColumnName = ColumnName.of(archived);
-        ColumnName deletedColumnName = ColumnName.of(deleted);
+        ColumnName archivedColumnName = archived.columnName();
+        ColumnName deletedColumnName = deleted.columnName();
         Optional<Column> archivedColumn = columns.find(archivedColumnName);
         Optional<Column> deletedColumn = columns.find(deletedColumnName);
         boolean entityHasLifecycle = archivedColumn.isPresent() && deletedColumn.isPresent();

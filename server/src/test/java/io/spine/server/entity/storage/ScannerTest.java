@@ -35,9 +35,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`Scanner` should")
@@ -50,9 +47,8 @@ class ScannerTest {
         Scanner scanner = new Scanner(entityClass);
         ImmutableMap<ColumnName, SysColumn> systemColumns = scanner.systemColumns();
 
-        assertThat(systemColumns).containsKey(ColumnName.of(archived));
-        assertThat(systemColumns).containsKey(ColumnName.of(deleted));
-        assertThat(systemColumns).containsKey(ColumnName.of(version));
+        assertThat(systemColumns.keySet())
+                .containsExactlyElementsIn(GivenEntityColumns.defaultEntityColumns);
     }
 
     @Test

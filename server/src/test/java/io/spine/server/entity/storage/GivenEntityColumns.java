@@ -18,14 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.entity.storage;
 
-import org.junit.jupiter.api.DisplayName;
+import com.google.common.collect.ImmutableSet;
 
-@DisplayName("StateField should")
-class StateFieldTest extends AbstractStorageFieldTest<StateField> {
+/**
+ * Utilities for testing columns.
+ */
+public final class GivenEntityColumns {
 
-    StateFieldTest() {
-        super(StateField.class);
+    public static final ColumnName version = ColumnName.of("version");
+
+    static final ImmutableSet<ColumnName> defaultEntityColumns =
+            ImmutableSet.of(
+                    LifecycleColumn.archived.columnName(),
+                    LifecycleColumn.deleted.columnName(),
+                    version
+            );
+
+    /** Prevent instantiation of this utility class. */
+    private GivenEntityColumns() {
     }
 }

@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.code.proto.FieldDeclaration;
-import io.spine.server.storage.LifecycleFlagField;
 import io.spine.test.entity.TaskView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,15 +56,6 @@ class ColumnNameTest {
     @DisplayName("not be constructed from empty string")
     void notInitFromEmpty() {
         assertThrows(IllegalArgumentException.class, () -> ColumnName.of(""));
-    }
-
-    @Test
-    @DisplayName("be constructed from `StorageField`")
-    void initFromStorageField() {
-        LifecycleFlagField storageField = LifecycleFlagField.archived;
-        ColumnName name = ColumnName.of(storageField);
-
-        assertThat(name.value()).isEqualTo(storageField.name());
     }
 
     @Test

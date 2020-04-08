@@ -22,7 +22,6 @@ package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.code.proto.FieldDeclaration;
-import io.spine.server.storage.StorageField;
 import io.spine.value.StringTypeValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,11 +42,6 @@ public final class ColumnName extends StringTypeValue {
     public static ColumnName of(String value) {
         checkNotEmptyOrBlank(value);
         return new ColumnName(value);
-    }
-
-    public static ColumnName of(StorageField storageField) {
-        checkNotNull(storageField);
-        return of(storageField.name());
     }
 
     public static ColumnName of(FieldDeclaration field) {

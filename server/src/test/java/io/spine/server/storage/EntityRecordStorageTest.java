@@ -41,6 +41,7 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
@@ -73,7 +74,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
 import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
 import static io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
@@ -222,12 +223,12 @@ public class EntityRecordStorageTest
 
             EntityRecordStorage<ProjectId> storage = storage();
             storage.write(create(activeEntity, storage.columns(), activeRecord));
-            storage.write(
-                    create(archivedEntity, storage.columns(), archivedRecord));
+            storage.write(create(archivedEntity, storage.columns(), archivedRecord));
 
             TargetFilters filters = TargetFilters
                     .newBuilder()
-                    .addFilter(all(eq(archived.toString(), true)))
+                    .addFilter(all(eq(archived.columnName()
+                                              .value(), true)))
                     .build();
             RecordQuery<ProjectId> query = RecordQueries.from(filters, storage.columns());
             Iterator<EntityRecord> read = storage.readAll(query);
@@ -668,7 +669,7 @@ public class EntityRecordStorageTest
         ImmutableList<Column> columnList = storage.columns()
                                                   .columnList();
 
-        int systemColumnCount = LifecycleFlagField.values().length;
+        int systemColumnCount = LifecycleColumn.values().length;
         int protoColumnCount = 6;
 
         int expectedSize = systemColumnCount + protoColumnCount;
