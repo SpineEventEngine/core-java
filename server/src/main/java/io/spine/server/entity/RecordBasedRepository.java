@@ -80,7 +80,7 @@ import static io.spine.validate.Validate.checkValid;
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends EntityState>
-        extends Repository<I, E> {
+        extends Repository<I, E> implements QueryableRepository {
 
     /** Creates a new instance. */
     protected RecordBasedRepository() {
@@ -403,14 +403,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
-    /**
-     * Obtains iterator over {@linkplain EntityRecord entity records} matching the passed filters.
-     *
-     * @param filters
-     *         entity filters
-     *         the mask to apply to the entities
-     * @return the iterator over the matching records
-     */
+    @Override
     @Internal
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);

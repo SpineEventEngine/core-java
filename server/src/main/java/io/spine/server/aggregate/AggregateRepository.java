@@ -42,6 +42,7 @@ import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventProducingRepository;
+import io.spine.server.entity.QueryableRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
@@ -83,7 +84,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
-        implements CommandDispatcher, EventProducingRepository, EventDispatcherDelegate {
+        implements CommandDispatcher, EventProducingRepository,
+                   EventDispatcherDelegate, QueryableRepository {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -482,15 +484,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Checks if the aggregate should be mirrored, and configures the storage accordingly.
+     * Checks if the aggregate should be mirrored, and configures
+     * the underlying storage accordingly.
      */
     private void initMirror() {
-        if (shouldBeMirrored()) {
-            //TODO:2020-04-07:alex.tymchenko: kill along with the mirror classes.
-//            mirrorRepository().ifPresent(repo -> {
-//                repo.registerMirroredType(this);
-//                aggregateStorage().configureMirror(repo, entityStateType());
-//            });
+        if(shouldBeMirrored()) {
             aggregateStorage().enableMirror();
         }
     }
@@ -606,7 +604,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
             throw newIllegalStateException("Aggregate %s (ID: %s) cannot be loaded.%n",
-                                           aggregateClass().value().getName(),
+                                           aggregateClass().value()
+                                                           .getName(),
                                            result.idAsString());
         }
         return result;
@@ -645,7 +644,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         }
     }
 
-    //TODO:2020-04-08:alex.tymchenko: unite with other repos via an interface.
+    @Override
+    @Internal
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         return aggregateStorage().readStates(filters, format);
     }
