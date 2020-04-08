@@ -56,8 +56,9 @@ public class HistoryBackward<I> {
     read(I aggregateId, int batchSize, @Nullable Version startingFrom) {
         MessageQuery<AggregateEventRecordId> query = historyBackwardQuery(aggregateId);
         if (startingFrom != null) {
-            query = query.append(
-                    QueryParameters.lt(version.column(), startingFrom.getNumber()));
+            QueryParameters lessThanVersion =
+                    QueryParameters.lt(version.column(), startingFrom.getNumber());
+            query = query.append(lessThanVersion);
         }
         ResponseFormat responseFormat = chronologicalResponseWith(batchSize);
         Iterator<AggregateEventRecord> iterator = eventStorage.readAll(query, responseFormat);
@@ -66,8 +67,7 @@ public class HistoryBackward<I> {
 
     protected MessageQuery<AggregateEventRecordId> historyBackwardQuery(I id) {
         Any packedId = Identifier.pack(id);
-        QueryParameters params =
-                QueryParameters.eq(aggregateId.column(), packedId);
+        QueryParameters params = QueryParameters.eq(aggregateId.column(), packedId);
         return MessageQueries.of(params);
     }
 
