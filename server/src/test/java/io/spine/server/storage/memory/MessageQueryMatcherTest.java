@@ -67,8 +67,7 @@ class MessageQueryMatcherTest {
         MessageQueryMatcher<?, EntityRecord> matcher = new MessageQueryMatcher<>(query);
 
         assertFalse(matcher.test(null));
-        assertTrue(matcher.test(EntityRecordWithColumns.of(sampleEntityRecord(),
-                                                           Collections.emptyMap())));
+        assertTrue(matcher.test(EntityRecordWithColumns.of(sampleEntityRecord())));
     }
 
     @Test
@@ -81,10 +80,9 @@ class MessageQueryMatcherTest {
         MessageQueryMatcher<ProjectId, EntityRecord> matcher = new MessageQueryMatcher<>(query);
         EntityRecord matching = sampleEntityRecord(genericId);
         EntityRecord nonMatching = sampleEntityRecord(Sample.messageOfType(ProjectId.class));
-        EntityRecordWithColumns<ProjectId> matchingRecord =
-                EntityRecordWithColumns.of(matching, Collections.emptyMap());
+        EntityRecordWithColumns<ProjectId> matchingRecord = EntityRecordWithColumns.of(matching);
         EntityRecordWithColumns<ProjectId> nonMatchingRecord =
-                EntityRecordWithColumns.of(nonMatching, Collections.emptyMap());
+                EntityRecordWithColumns.of(nonMatching);
         assertTrue(matcher.test(matchingRecord));
         assertFalse(matcher.test(nonMatchingRecord));
     }
@@ -107,8 +105,7 @@ class MessageQueryMatcherTest {
                 EntityRecordWithColumns.of(matching, matchingColumns);
 
         EntityRecord nonMatching = sampleEntityRecord(Sample.messageOfType(TaskId.class));
-        EntityRecordWithColumns<TaskId> nonMatchingRecord =
-                EntityRecordWithColumns.of(nonMatching, Collections.emptyMap());
+        EntityRecordWithColumns<TaskId> nonMatchingRecord = EntityRecordWithColumns.of(nonMatching);
 
         assertTrue(matcher.test(matchingRecord));
         assertFalse(matcher.test(nonMatchingRecord));
@@ -149,8 +146,7 @@ class MessageQueryMatcherTest {
         MessageQueryMatcher<String, EntityRecord> matcher = new MessageQueryMatcher<>(query);
 
         EntityRecord record = sampleEntityRecord();
-        EntityRecordWithColumns<String> recordWithColumns =
-                EntityRecordWithColumns.of(record, Collections.emptyMap());
+        EntityRecordWithColumns<String> recordWithColumns = EntityRecordWithColumns.of(record);
         assertFalse(matcher.test(recordWithColumns));
     }
 

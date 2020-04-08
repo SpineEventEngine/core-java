@@ -34,7 +34,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,13 +56,11 @@ class EntityRecordWithColumnsTest {
     private static final Any PACKED_SAMPLE_ID = Identifier.pack(SAMPLE_ID);
 
     private static EntityRecordWithColumns<?> sampleRecordWithEmptyColumns() {
-        return EntityRecordWithColumns.of(sampleEntityRecord(),
-                                          Collections.emptyMap());
+        return EntityRecordWithColumns.of(sampleEntityRecord());
     }
 
     private static EntityRecordWithColumns<?> randomRecordWithEmptyColumns() {
-        return EntityRecordWithColumns.of(randomEntityRecord(),
-                                          Collections.emptyMap());
+        return EntityRecordWithColumns.of(randomEntityRecord());
     }
 
     @Test
@@ -91,20 +88,16 @@ class EntityRecordWithColumnsTest {
     void supportEquality() {
         ColumnName columnName = LifecycleColumn.archived.columnName();
         Object value = false;
-        EntityRecordWithColumns<?> emptyFieldsEnvelope = EntityRecordWithColumns.of(
-                sampleEntityRecord(),
-                Collections.emptyMap()
-        );
+        EntityRecordWithColumns<?> emptyFieldsEnvelope =
+                EntityRecordWithColumns.of(sampleEntityRecord());
         EntityRecordWithColumns<?> notEmptyFieldsEnvelope =
-                EntityRecordWithColumns.of(
-                        sampleEntityRecord(),
-                        singletonMap(columnName, value)
-                );
+                EntityRecordWithColumns.of(sampleEntityRecord(), singletonMap(columnName, value));
         new EqualsTester()
                 .addEqualityGroup(emptyFieldsEnvelope, notEmptyFieldsEnvelope)
                 .addEqualityGroup(randomRecordWithEmptyColumns())
                 .addEqualityGroup(
-                        randomRecordWithEmptyColumns()) // Each one has different EntityRecord
+                        randomRecordWithEmptyColumns()  // Each one has a different `EntityRecord`.
+                )
                 .testEquals();
     }
 
@@ -115,10 +108,7 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("record and storage fields")
         void recordAndColumns() {
-            EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(
-                    sampleEntityRecord(),
-                    Collections.emptyMap()
-            );
+            EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(sampleEntityRecord());
             assertNotNull(record);
         }
 
@@ -182,10 +172,8 @@ class EntityRecordWithColumnsTest {
         EntityColumns columns = EntityColumns.of(entity.getClass());
         Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
 
-        EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(
-                sampleEntityRecord(),
-                storageFields
-        );
+        EntityRecordWithColumns<?> record =
+                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
         assertThat(record.columnNames()).containsExactlyElementsIn(defaultColumns);
     }
 
