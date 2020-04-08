@@ -33,10 +33,10 @@ import io.spine.server.storage.Column;
 import io.spine.server.storage.MessageWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyMap;
 
 /**
  * A value of {@link EntityRecord} associated with the values of its {@linkplain Column columns}.
@@ -45,17 +45,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EntityRecordWithColumns<I>
         extends MessageWithColumns<I, EntityRecord> implements WithLifecycle {
 
-    private EntityRecordWithColumns(EntityRecord record, Map<ColumnName, Object> columns) {
-        this(extractId(record), record, columns);
-    }
-
     private EntityRecordWithColumns(I id, EntityRecord record, Map<ColumnName, Object> columns) {
         super(id, record, columns);
-    }
-
-    @SuppressWarnings("unchecked")  // according to the contract of the class.
-    private static <I> I extractId(EntityRecord record) {
-        return (I) Identifier.unpack(record.getEntityId());
     }
 
     /**
@@ -64,7 +55,7 @@ public final class EntityRecordWithColumns<I>
     public static <I, E extends Entity<I, ?>> EntityRecordWithColumns<I>
     create(E entity, StorageConverter<I, E, ?> converter, EntityColumns columns) {
         EntityRecord record = converter.convert(entity);
-        checkNotNull(record);   //TODO:2020-03-19:alex.tymchenko: suspicious?
+        checkNotNull(record);
         return create(entity, columns, record);
     }
 
@@ -82,22 +73,41 @@ public final class EntityRecordWithColumns<I>
         ImmutableMap<ColumnName, Object> lifecycleValues = EntityColumns.lifecycleValuesIn(record);
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
+
     /**
-     * Wraps a passed entity record.
+     * Wraps a passed entity record into a {@code EntityWithColumns} with no storage fields.
      *
-     * <p>Such instance of {@code EntityRecordWithColumns} will contain no storage fields.
+     * <p>This is a shortcut for {@link #of(EntityRecord, Map) of(EntityRecord, Map)}.
+     *
+     * @see #of(EntityRecord, Map) for the notes on usage
      */
+    @VisibleForTesting
     public static <I> EntityRecordWithColumns<I> of(EntityRecord record) {
-        return new EntityRecordWithColumns<>(record, Collections.emptyMap());
+        return of(record, emptyMap());
     }
 
     /**
      * Creates a new instance from the passed record and storage fields.
+     *
+     * @apiNote This test-only method unpacks the identifier of the passed record and casts
+     *         it to the type {@code I}. It is a responsibility of the caller to provide the record
+     *         with the matching identifier
      */
     @VisibleForTesting
     public static <I> EntityRecordWithColumns<I>
     of(EntityRecord record, Map<ColumnName, Object> storageFields) {
-        return new EntityRecordWithColumns<>(record, storageFields);
+        I id = extractId(record);
+        return new EntityRecordWithColumns<>(id, record, storageFields);
+    }
+
+    /**
+     * Extracts the identifier from the passed record and casts it to the type {@code I}.
+     *
+     * <p>It is a responsibility of the caller to provide a record with the matching identifier.
+     */
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})    // see the docs.
+    private static <I> I extractId(EntityRecord record) {
+        return (I) Identifier.unpack(record.getEntityId());
     }
 
     @Override

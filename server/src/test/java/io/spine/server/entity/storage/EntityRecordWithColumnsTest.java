@@ -93,7 +93,8 @@ class EntityRecordWithColumnsTest {
         EntityRecordWithColumns<?> notEmptyFieldsEnvelope =
                 EntityRecordWithColumns.of(sampleEntityRecord(), singletonMap(columnName, value));
         new EqualsTester()
-                .addEqualityGroup(emptyFieldsEnvelope, notEmptyFieldsEnvelope)
+                .addEqualityGroup(emptyFieldsEnvelope)
+                .addEqualityGroup(notEmptyFieldsEnvelope)
                 .addEqualityGroup(randomRecordWithEmptyColumns())
                 .addEqualityGroup(
                         randomRecordWithEmptyColumns()  // Each one has a different `EntityRecord`.
