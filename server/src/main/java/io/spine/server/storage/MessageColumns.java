@@ -38,7 +38,7 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * @author Alex Tymchenko
+ * A message to store, along with the additional columns to store for further querying.
  */
 @Immutable
 @Internal
@@ -68,12 +68,18 @@ public class MessageColumns<M extends Message> extends Columns<M> {
     @Override
     public Map<ColumnName, @Nullable Object> valuesIn(Object record) {
         checkNotNull(record);
-        M message = (M) record;
+        M message = asMessage(record);
         Map<ColumnName, @Nullable Object> result = new HashMap<>();
         columns.forEach(
                 (name, column) -> result.put(name, column.valueIn(message))
         );
         return result;
+    }
+
+    @SuppressWarnings("unchecked")  /* It's cheaper to attempt to cast,
+                                       than verify that the object is of type `M`.*/
+    private M asMessage(Object record) {
+        return (M) record;
     }
 
     /**
