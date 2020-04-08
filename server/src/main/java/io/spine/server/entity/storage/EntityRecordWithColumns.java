@@ -45,15 +45,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EntityRecordWithColumns<I>
         extends MessageWithColumns<I, EntityRecord> implements WithLifecycle {
 
-    private final EntityRecord record;
-
     private EntityRecordWithColumns(EntityRecord record, Map<ColumnName, Object> columns) {
         this(extractId(record), record, columns);
     }
 
     private EntityRecordWithColumns(I id, EntityRecord record, Map<ColumnName, Object> columns) {
         super(id, record, columns);
-        this.record = checkNotNull(record);
     }
 
     @SuppressWarnings("unchecked")  // according to the contract of the class.
@@ -105,40 +102,21 @@ public final class EntityRecordWithColumns<I>
 
     @Override
     public LifecycleFlags getLifecycleFlags() {
-        return record.getLifecycleFlags();
+        return record().getLifecycleFlags();
     }
 
     @Override
     public boolean isArchived() {
-        return record.isArchived();
+        return record().isArchived();
     }
 
     @Override
     public boolean isDeleted() {
-        return record.isDeleted();
+        return record().isDeleted();
     }
 
     @Override
     public boolean isActive() {
-        return record.isActive();
-    }
-
-    @Override
-    public boolean equals(@Nullable Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        EntityRecordWithColumns other = (EntityRecordWithColumns) o;
-
-        return record().equals(other.record());
-    }
-
-    @Override
-    public int hashCode() {
-        return record().hashCode();
+        return record().isActive();
     }
 }
