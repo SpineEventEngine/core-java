@@ -21,6 +21,7 @@
 package io.spine.server.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.server.entity.storage.ColumnMapping;
@@ -29,7 +30,6 @@ import io.spine.server.entity.storage.DefaultColumnMapping;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -52,12 +52,12 @@ public class RecordWithColumns<I, R extends Message> {
     /**
      * A map of column names to the corresponding column values.
      */
-    private final Map<ColumnName, @Nullable Object> storageFields;
+    private final ImmutableMap<ColumnName, @Nullable Object> storageFields;
 
     protected RecordWithColumns(I identifier, R record, Map<ColumnName, Object> storageFields) {
         this.id = checkNotNull(identifier);
         this.record = checkNotNull(record);
-        this.storageFields = new HashMap<>(storageFields);
+        this.storageFields = ImmutableMap.copyOf(storageFields);
     }
 
     /**
@@ -184,7 +184,7 @@ public class RecordWithColumns<I, R extends Message> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof RecordWithColumns)) {
             return false;
         }
         RecordWithColumns<?, ?> columns = (RecordWithColumns<?, ?>) o;
