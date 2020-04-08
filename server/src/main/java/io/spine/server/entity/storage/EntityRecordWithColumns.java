@@ -27,7 +27,6 @@ import io.spine.base.Identifier;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.StorageConverter;
 import io.spine.server.entity.WithLifecycle;
 import io.spine.server.storage.Column;
 import io.spine.server.storage.MessageWithColumns;
@@ -50,23 +49,42 @@ public final class EntityRecordWithColumns<I>
     }
 
     /**
-     * Creates a new record extracting the column values from the passed entity.
+     * Creates the new instance of {@code EntityRecordWithColumns} by evaluating the values
+     * of the passed columns for the passed entity.
+     *
+     * @param entity
+     *         the entity to use as a provider of the record identifier and the column values
+     * @param columns
+     *         the definitions of the columns
+     * @param record
+     *         the record prepared for storage
+     * @param <I>
+     *         the type of the entity identifiers
+     * @param <E>
+     *         the type of the entity
+     * @return a new instance of {@code EntityRecordWithColumns}
      */
-    public static <I, E extends Entity<I, ?>> EntityRecordWithColumns<I>
-    create(E entity, StorageConverter<I, E, ?> converter, EntityColumns columns) {
-        EntityRecord record = converter.convert(entity);
-        checkNotNull(record);
-        return create(entity, columns, record);
-    }
-
-    //TODO:2020-03-17:alex.tymchenko: avoid ambiguity.
     public static <I, E extends Entity<I, ?>> EntityRecordWithColumns<I>
     create(E entity, EntityColumns columns, EntityRecord record) {
         Map<ColumnName, @Nullable Object> storageFields = columns.valuesIn(entity);
         return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
     }
 
-    @Internal
+    /**
+     * Creates the new instance of {@code EntityRecordWithColumns} using the pre-created
+     * entity record and the entity identifier.
+     *
+     * <p>This method considers only the values of the
+     * {@linkplain LifecycleColumn lifecycle columns}.
+     *
+     * @param id
+     *         the identifier of the entity
+     * @param record
+     *         the record to store; it is also used as a source for the lifecycle column values
+     * @param <I>
+     *         the type of the identiiers
+     * @return a new instance of {@code EntityRecordWithColumns}
+     */
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
         checkNotNull(id);
         checkNotNull(record);

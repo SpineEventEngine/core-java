@@ -466,8 +466,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @VisibleForTesting
     MessageWithColumns<I, EntityRecord> toRecord(E entity) {
         EntityColumns columns = EntityColumns.of(entity.modelClass());
+        EntityRecord record = storageConverter().convert(entity);
+        checkNotNull(record);
         MessageWithColumns<I, EntityRecord> result =
-                EntityRecordWithColumns.create(entity, storageConverter(), columns);
+                EntityRecordWithColumns.create(entity, columns, record);
         return result;
     }
 
