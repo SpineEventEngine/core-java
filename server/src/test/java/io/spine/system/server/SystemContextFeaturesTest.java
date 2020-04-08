@@ -34,7 +34,6 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -97,29 +96,6 @@ class SystemContextFeaturesTest {
         BoundedContext domain = contextBuilder.build();
         BoundedContext system = systemOf(domain);
         assertTrue(system.hasEntitiesWithState(CommandLog.class));
-    }
-
-    @Test
-    @DisplayName("mirror domain aggregates")
-    @Disabled
-    //TODO:2020-03-28:alex.tymchenko: remove this one.
-    void mirror() {
-        BoundedContext domain = BoundedContextBuilder
-                .assumingTests()
-                .build();
-        BoundedContext system = systemOf(domain);
-        assertTrue(system.hasEntitiesWithState(Mirror.class));
-    }
-
-    @Test
-    @DisplayName("not mirror domain aggregates if disabled")
-    void notMirror() {
-        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-        contextBuilder.systemFeatures()
-                      .disableAggregateQuerying();
-        BoundedContext domain = contextBuilder.build();
-        BoundedContext system = systemOf(domain);
-        assertFalse(system.hasEntitiesWithState(Mirror.class));
     }
 
     private static MemoizingObserver<Event> postSystemEvent(EventBus systemBus, Event event) {
