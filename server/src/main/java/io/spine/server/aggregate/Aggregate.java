@@ -354,15 +354,10 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * //TODO:2020-04-06:alex.tymchenko: rewrite this piece
      * Restores the state, the version and the lifecycle flags from the passed snapshot.
      *
-     * <p>If this method is called during a {@linkplain #replay(AggregateHistory) replay}
-     * (because the snapshot was encountered) the method uses the state
-     * {@linkplain #builder() builder}, which is used during the replay.
-     *
-     * <p>If not in replay, the method sets the state, the version and the lifecycle flags
-     * directly to the aggregate.
+     * <p>This method must be invoked in the scope of an {@linkplain #isTransactionInProgress()
+     * active transaction}.
      *
      * @param snapshot
      *         the snapshot with the state to restore
