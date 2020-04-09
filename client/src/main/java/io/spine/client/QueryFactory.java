@@ -32,6 +32,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.client.ResponseFormats.responseFormat;
 import static io.spine.client.Targets.composeTarget;
 import static java.lang.String.format;
 
@@ -187,7 +188,7 @@ public final class QueryFactory {
                                @Nullable Set<?> ids,
                                @Nullable Set<CompositeFilter> filters,
                                @Nullable FieldMask fieldMask) {
-        ResponseFormat format = responseFormat(fieldMask, null, 0);
+        ResponseFormat format = responseFormat(fieldMask, null, null);
         Query.Builder builder = queryBuilderFor(entityClass, ids, filters)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -208,7 +209,7 @@ public final class QueryFactory {
 
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        ResponseFormat format = responseFormat(fieldMask, null, 0);
+        ResponseFormat format = responseFormat(fieldMask, null, null);
         Query.Builder builder = queryBuilderFor(target)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -227,7 +228,7 @@ public final class QueryFactory {
                        @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
-        ResponseFormat format = responseFormat(fieldMask, orderBy, 0);
+        ResponseFormat format = responseFormat(fieldMask, orderBy, null);
         Query.Builder builder = queryBuilderFor(target)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -258,19 +259,4 @@ public final class QueryFactory {
                       .vBuild();
     }
 
-    private static ResponseFormat responseFormat(@Nullable FieldMask mask,
-                                                 @Nullable OrderBy ordering,
-                                                 int limit) {
-        ResponseFormat.Builder result = ResponseFormat.newBuilder();
-        if (mask != null) {
-            result.setFieldMask(mask);
-        }
-        if (ordering != null) {
-            result.addOrderBy(ordering);
-        }
-        if (limit > 0) {
-            result.setLimit(limit);
-        }
-        return result.vBuild();
-    }
 }

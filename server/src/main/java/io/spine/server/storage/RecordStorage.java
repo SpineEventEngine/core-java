@@ -30,6 +30,8 @@ import io.spine.client.ResponseFormat;
 import java.util.Iterator;
 import java.util.Optional;
 
+import static io.spine.client.ResponseFormats.formatWith;
+
 /**
  * An abstract base for storage implementations, which store the Protobuf messages as records.
  *
@@ -306,12 +308,5 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     @Internal
     protected Columns<R> columns() {
         return columns;
-    }
-
-    //TODO:2020-03-31:alex.tymchenko: move away.
-    private static ResponseFormat formatWith(FieldMask mask) {
-        return ResponseFormat.newBuilder()
-                             .setFieldMask(mask)
-                             .vBuild();
     }
 }
