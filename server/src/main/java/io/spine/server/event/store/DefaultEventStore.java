@@ -176,7 +176,6 @@ public final class DefaultEventStore
         if (query.includeAll()) {
             return readAll(format);
         } else {
-            //TODO:2020-03-23:alex.tymchenko: simplify the transformation from `Query` to `RecordQuery`.
             TargetFilters filters = QueryToFilters.convert(query);
             RecordQuery<EventId> recordQuery = RecordQueries.from(filters, columns());
 
