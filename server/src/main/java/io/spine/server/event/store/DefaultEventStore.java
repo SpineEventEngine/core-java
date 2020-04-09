@@ -81,10 +81,10 @@ public final class DefaultEventStore
         this.log = new Log();
     }
 
+    //TODO:2020-04-09:alex.tymchenko: create a typed storage for events.
     private static RecordStorage<EventId, Event>
     storageForEvents(StorageFactory factory, boolean multitenant) {
-        RecordColumns<Event> columns =
-                new RecordColumns<>(Event.class, EventColumn.definitions());
+        RecordColumns<Event> columns = new RecordColumns<>(Event.class, EventColumn.definitions());
         return factory.createRecordStorage(columns, multitenant);
     }
 
