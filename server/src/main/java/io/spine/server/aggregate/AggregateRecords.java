@@ -101,9 +101,7 @@ final class AggregateRecords {
 
         String stringId = Stringifiers.toString(aggregateId);
         String snapshotTimestamp = Timestamps.toString(snapshot.getTimestamp());
-        String snapshotColumnName = AggregateEventRecordColumn.snapshot.column()
-                                                                       .name()
-                                                                       .value();
+        String snapshotColumnName = AggregateEventRecordColumn.snapshot.name();
         String snapshotId = format("%s_%s_%s", snapshotColumnName, stringId, snapshotTimestamp);
         AggregateEventRecordId recordId = eventRecordId(snapshotId);
         return AggregateEventRecord.newBuilder()

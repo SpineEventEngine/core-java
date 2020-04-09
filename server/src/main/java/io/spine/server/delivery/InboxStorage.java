@@ -41,6 +41,10 @@ import java.util.Optional;
 
 import static com.google.common.collect.Streams.stream;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
+import static io.spine.server.delivery.InboxColumn.inbox_shard;
+import static io.spine.server.delivery.InboxColumn.received_at;
+import static io.spine.server.delivery.InboxColumn.status;
+import static io.spine.server.delivery.InboxColumn.version;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 import static io.spine.server.storage.QueryParameters.eq;
 import static io.spine.server.storage.QueryParameters.gt;
@@ -89,10 +93,10 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
 
     public ImmutableList<InboxMessage>
     readAll(ShardIndex index, @Nullable Timestamp sinceWhen, int pageSize) {
-        QueryParameters byIndex = eq(InboxColumn.shardIndex.column(), index);
+        QueryParameters byIndex = eq(inbox_shard, index);
         RecordQuery<InboxMessageId> query = RecordQueries.of(byIndex);
         if (sinceWhen != null) {
-            QueryParameters byTime = gt(InboxColumn.receivedAt.column(), sinceWhen);
+            QueryParameters byTime = gt(received_at, sinceWhen);
             query = query.append(byTime);
         }
         ResponseFormat limit = queryResponse(pageSize);
@@ -102,15 +106,11 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
 
     private static ResponseFormat queryResponse(int pageSize) {
         OrderBy olderFirst = OrderBy.newBuilder()
-                                    .setColumn(InboxColumn.receivedAt.column()
-                                                                     .name()
-                                                                     .value())
+                                    .setColumn(received_at.name())
                                     .setDirection(ASCENDING)
                                     .vBuild();
         OrderBy byVersion = OrderBy.newBuilder()
-                                   .setColumn(InboxColumn.version.column()
-                                                                 .name()
-                                                                 .value())
+                                   .setColumn(version.name())
                                    .setDirection(ASCENDING)
                                    .vBuild();
 
@@ -131,9 +131,9 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
      *         in the specified shard
      */
     public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
-        QueryParameters byIndex = eq(InboxColumn.shardIndex.column(), index);
+        QueryParameters byIndex = eq(inbox_shard, index);
         RecordQuery<InboxMessageId> query = RecordQueries.of(byIndex);
-        query = query.append(eq(InboxColumn.status.column(), TO_DELIVER));
+        query = query.append(eq(status, TO_DELIVER));
         ResponseFormat limitToOne = ResponseFormat.newBuilder()
                                                   .setLimit(1)
                                                   .vBuild();

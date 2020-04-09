@@ -29,7 +29,8 @@ import io.spine.type.TypeUrl;
 
 import java.util.Iterator;
 
-import static io.spine.server.storage.RecordQueries.byColumn;
+import static io.spine.server.delivery.CatchUpColumn.projection_type;
+import static io.spine.server.storage.RecordQueries.byField;
 
 /**
  * A storage for the state of the ongoing catch-up processes.
@@ -53,25 +54,13 @@ public class CatchUpStorage extends RecordStorageDelegate<CatchUpId, CatchUp> {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides the parent method in order to expose it as a part of public API.
-     */
-    @Override
-    public Iterator<CatchUp> readAll() {
-        return super.readAll();
-    }
-
-    /**
      * Reads all the catch-up processes which update the projection of the specified type.
      *
      * @param projectionType
      *         the type of the projection state to use for filtering
      */
     public Iterator<CatchUp> readByType(TypeUrl projectionType) {
-        Iterator<CatchUp> result =
-                readAll(byColumn(CatchUpColumn.projectionType.column(), projectionType.value()));
+        Iterator<CatchUp> result = readAll(byField(projection_type, projectionType.value()));
         return result;
     }
-
 }

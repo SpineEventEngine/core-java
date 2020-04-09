@@ -108,7 +108,7 @@ class AggregateMirroringTest {
             MRPhotoId targetId = target.getId();
             Query query = queries.select(MRPhoto.class)
                                  .byId(targetId)
-                                 .where(eq(archived.columnName().value(), true))
+                                 .where(eq(archived.name(), true))
                                  .build();
             checkRead(query, target);
         }
@@ -121,7 +121,7 @@ class AggregateMirroringTest {
             MRPhotoId targetId = target.getId();
             Query query = queries.select(MRPhoto.class)
                                  .byId(targetId)
-                                 .where(eq(deleted.columnName().value(), true))
+                                 .where(eq(deleted.name(), true))
                                  .build();
             checkRead(query, target);
         }
@@ -135,8 +135,8 @@ class AggregateMirroringTest {
             archiveItem(secondPhoto);
 
             Query query = queries.select(MRPhoto.class)
-                                 .where(eq(archived.columnName().value(), true),
-                                        eq(deleted.columnName().value(), false))
+                                 .where(eq(archived.name(), true),
+                                        eq(deleted.name(), false))
                                  .build();
             checkRead(query, firstPhoto, secondPhoto);
         }

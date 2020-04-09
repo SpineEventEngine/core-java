@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 
-import static io.spine.server.aggregate.AggregateEventRecordColumn.aggregateId;
+import static io.spine.server.aggregate.AggregateEventRecordColumn.aggregate_id;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.created;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.version;
 
@@ -56,8 +56,7 @@ public class HistoryBackward<I> {
     read(I aggregateId, int batchSize, @Nullable Version startingFrom) {
         RecordQuery<AggregateEventRecordId> query = historyBackwardQuery(aggregateId);
         if (startingFrom != null) {
-            QueryParameters lessThanVersion =
-                    QueryParameters.lt(version.column(), startingFrom.getNumber());
+            QueryParameters lessThanVersion = QueryParameters.lt(version, startingFrom.getNumber());
             query = query.append(lessThanVersion);
         }
         ResponseFormat responseFormat = chronologicalResponseWith(batchSize);
@@ -67,7 +66,7 @@ public class HistoryBackward<I> {
 
     protected RecordQuery<AggregateEventRecordId> historyBackwardQuery(I id) {
         Any packedId = Identifier.pack(id);
-        QueryParameters params = QueryParameters.eq(aggregateId.column(), packedId);
+        QueryParameters params = QueryParameters.eq(aggregate_id, packedId);
         return RecordQueries.of(params);
     }
 
@@ -85,18 +84,14 @@ public class HistoryBackward<I> {
     private static OrderBy newestFirst() {
         return OrderBy.newBuilder()
                       .setDirection(OrderBy.Direction.DESCENDING)
-                      .setColumn(created.column()
-                                        .name()
-                                        .value())
+                      .setColumn(created.name())
                       .vBuild();
     }
 
     private static OrderBy higherVersionFirst() {
         return OrderBy.newBuilder()
                       .setDirection(OrderBy.Direction.DESCENDING)
-                      .setColumn(version.column()
-                                        .name()
-                                        .value())
+                      .setColumn(version.name())
                       .vBuild();
     }
 }

@@ -24,38 +24,29 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.storage.QueryableField;
 import io.spine.server.storage.RecordColumn;
+import io.spine.server.storage.RecordColumn.Getter;
 
 /**
  * Columns stored along with an {@link AggregateEventRecord}.
  */
-//TODO:2020-04-01:alex.tymchenko: consider introducing a common interface for the enums like this one.
-public enum AggregateEventRecordColumn {
+public enum AggregateEventRecordColumn implements QueryableField<AggregateEventRecord> {
 
-    aggregateId("aggregate_id",
-                Any.class,
-                AggregateEventRecord::getAggregateId),
+    aggregate_id(Any.class, AggregateEventRecord::getAggregateId),
 
-    created("created",
-            Timestamp.class,
-            AggregateEventRecord::getTimestamp),
+    created(Timestamp.class, AggregateEventRecord::getTimestamp),
 
-    version("version",
-            Integer.class,
-            r -> r.hasEvent() ? versionOfEvent(r)
-                              : versionOfSnapshot(r)),
+    version(Integer.class, r -> r.hasEvent() ? versionOfEvent(r)
+                                             : versionOfSnapshot(r)),
 
-    snapshot("snapshot",
-             Boolean.class,
-             AggregateEventRecord::hasSnapshot);
+    snapshot(Boolean.class, AggregateEventRecord::hasSnapshot);
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final RecordColumn<?, AggregateEventRecord> column;
 
-    <T> AggregateEventRecordColumn(String columnName,
-                                   Class<T> type,
-                                   RecordColumn.Getter<AggregateEventRecord, T> getter) {
-        ColumnName name = ColumnName.of(columnName);
+    <T> AggregateEventRecordColumn(Class<T> type, Getter<AggregateEventRecord, T> getter) {
+        ColumnName name = ColumnName.of(name());
         this.column = new RecordColumn<>(name, type, getter);
     }
 
@@ -67,7 +58,8 @@ public enum AggregateEventRecordColumn {
         return list.build();
     }
 
-    RecordColumn<?, AggregateEventRecord> column() {
+    @Override
+    public RecordColumn<?, AggregateEventRecord> column() {
         return column;
     }
 

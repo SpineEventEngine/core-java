@@ -55,6 +55,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.server.event.EventComparator.chronological;
+import static io.spine.server.event.store.EventColumn.created;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -187,7 +188,7 @@ public final class DefaultEventStore
         ResponseFormat.Builder formatBuilder = ResponseFormat.newBuilder();
         OrderBy ascendingByCreated = OrderBy
                 .newBuilder()
-                .setColumn(EventColumn.created.name())
+                .setColumn(created.name())
                 .setDirection(OrderBy.Direction.ASCENDING)
                 .vBuild();
         formatBuilder.addOrderBy(ascendingByCreated);

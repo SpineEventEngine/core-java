@@ -88,6 +88,13 @@ public final class RecordQueries {
         return of(queryParams);
     }
 
+    public static <I, V> RecordQuery<I> byField(QueryableField<?> field, V value) {
+        checkNotNull(field);
+        checkNotNull(value);
+        QueryParameters queryParams = QueryParameters.eq(field.column(), value);
+        return of(queryParams);
+    }
+
     public static <I> RecordQuery<I> from(TargetFilters filters, Columns<?> columns) {
         checkNotNull(filters);
         checkNotNull(columns);

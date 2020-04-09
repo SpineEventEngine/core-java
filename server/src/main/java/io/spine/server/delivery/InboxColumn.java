@@ -23,39 +23,38 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.storage.QueryableField;
 import io.spine.server.storage.RecordColumn;
+import io.spine.server.storage.RecordColumn.Getter;
 
 /**
- * @author Alex Tymchenko
+ * Columns stored along with each {@link InboxMessage}.
  */
-public enum InboxColumn {
+public enum InboxColumn implements QueryableField<InboxMessage> {
 
-    signalId("signal_id",
-             InboxSignalId.class,
-             InboxMessage::getSignalId),
+    signal_id(InboxSignalId.class, InboxMessage::getSignalId),
 
-    inboxId("inbox_id", InboxId.class, InboxMessage::getInboxId),
+    inbox_id(InboxId.class, InboxMessage::getInboxId),
 
-    shardIndex("inbox_shard", ShardIndex.class, InboxMessage::shardIndex),
+    inbox_shard(ShardIndex.class, InboxMessage::shardIndex),
 
-    isEvent("is_event", Boolean.class, InboxMessage::hasEvent),
+    is_event(Boolean.class, InboxMessage::hasEvent),
 
-    isCommand("is_command", Boolean.class, InboxMessage::hasCommand),
+    is_command(Boolean.class, InboxMessage::hasCommand),
 
-    label("label", InboxLabel.class, InboxMessage::getLabel),
+    label(InboxLabel.class, InboxMessage::getLabel),
 
-    status("status", InboxMessageStatus.class, InboxMessage::getStatus),
+    status(InboxMessageStatus.class, InboxMessage::getStatus),
 
-    receivedAt("received_at", Timestamp.class, InboxMessage::getWhenReceived),
+    received_at(Timestamp.class, InboxMessage::getWhenReceived),
 
-    version("version", Integer.class, InboxMessage::getVersion);
+    version(Integer.class, InboxMessage::getVersion);
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final RecordColumn<?, InboxMessage> column;
 
-    <T> InboxColumn(String columnName, Class<T> type,
-                    RecordColumn.Getter<InboxMessage, T> getter) {
-        ColumnName name = ColumnName.of(columnName);
+    <T> InboxColumn(Class<T> type, Getter<InboxMessage, T> getter) {
+        ColumnName name = ColumnName.of(name());
         this.column = new RecordColumn<>(name, type, getter);
     }
 
@@ -67,6 +66,7 @@ public enum InboxColumn {
         return list.build();
     }
 
+    @Override
     public RecordColumn<?, InboxMessage> column() {
         return column;
     }

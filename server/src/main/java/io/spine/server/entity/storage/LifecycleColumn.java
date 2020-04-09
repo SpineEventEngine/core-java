@@ -21,37 +21,35 @@
 package io.spine.server.entity.storage;
 
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.QueryableField;
 import io.spine.server.storage.RecordColumn;
+import io.spine.server.storage.RecordColumn.Getter;
 
 /**
- * {@link RecordColumn}s storing the lifecycle attributes of an {@code Entity} within
- * an {@link EntityRecord}.
+ * Columns storing the lifecycle attributes of an {@code Entity} within an {@link EntityRecord}.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")   // the column names are commonly used words
-public enum LifecycleColumn {
+public enum LifecycleColumn implements QueryableField<EntityRecord> {
 
-    archived(new RecordColumn<>(ColumnName.of("archived"),
-                                Boolean.class,
-                                (r) -> r.getLifecycleFlags()
-                                        .getArchived())),
+    archived((r) -> r.getLifecycleFlags()
+                     .getArchived()),
 
-    deleted(new RecordColumn<>(ColumnName.of("deleted"),
-                               Boolean.class,
-                               (r) -> r.getLifecycleFlags()
-                                       .getDeleted()));
+    deleted((r) -> r.getLifecycleFlags()
+                    .getDeleted());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final RecordColumn<Boolean, EntityRecord> column;
 
-    LifecycleColumn(RecordColumn<Boolean, EntityRecord> column) {
-        this.column = column;
-    }
-
-    public ColumnName columnName() {
-        return column.name();
+    <T> LifecycleColumn(Getter<EntityRecord, Boolean> getter) {
+        ColumnName name = ColumnName.of(name());
+        this.column = new RecordColumn<>(name, Boolean.class, getter);
     }
 
     Boolean valueIn(EntityRecord record) {
         return column.valueIn(record);
+    }
+
+    @Override
+    public RecordColumn<?, EntityRecord> column() {
+        return column;
     }
 }

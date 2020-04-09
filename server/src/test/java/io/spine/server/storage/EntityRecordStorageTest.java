@@ -227,8 +227,7 @@ public class EntityRecordStorageTest
 
             TargetFilters filters = TargetFilters
                     .newBuilder()
-                    .addFilter(all(eq(archived.columnName()
-                                              .value(), true)))
+                    .addFilter(all(eq(archived.name(), true)))
                     .build();
             RecordQuery<ProjectId> query = RecordQueries.from(filters, storage.columns());
             Iterator<EntityRecord> read = storage.readAll(query);

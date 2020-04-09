@@ -557,7 +557,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         storeEntity(archivedEntity);
         storeEntity(deletedEntity);
 
-        CompositeFilter filter = all(eq(archived.columnName().value(), false));
+        CompositeFilter filter = all(eq(archived.name(), false));
         TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(filter)

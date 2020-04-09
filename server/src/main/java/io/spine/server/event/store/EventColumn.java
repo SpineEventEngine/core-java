@@ -24,21 +24,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.storage.QueryableField;
 import io.spine.server.storage.RecordColumn;
+import io.spine.server.storage.RecordColumn.Getter;
 
 /**
- * Event-specific column names.
+ * Columns stored along with {@link Event}.
  */
-enum EventColumn {
+enum EventColumn implements QueryableField<Event> {
 
     /**
      * The name of the column representing the time, when the event was fired.
      */
-    created("type",
-            String.class,
-            (m) -> m.enclosedTypeUrl()
-                    .toTypeName()
-                    .value()),
+    created(String.class, (m) -> m.enclosedTypeUrl()
+                                  .toTypeName()
+                                  .value()),
 
     /**
      * The name of the column representing the Protobuf type name of the event.
@@ -47,16 +47,14 @@ enum EventColumn {
      * is enclosed in the {@code spine.test} Protobuf package would have this column
      * equal to {@code "spine.test.TaskAdded"}.
      */
-    type("created",
-         Timestamp.class,
-         (m) -> m.getContext()
-                 .getTimestamp());
+    type(Timestamp.class, (m) -> m.getContext()
+                                  .getTimestamp());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final RecordColumn<?, Event> column;
 
-    <T> EventColumn(String columnName, Class<T> type, RecordColumn.Getter<Event, T> getter) {
-        ColumnName name = ColumnName.of(columnName);
+    <T> EventColumn(Class<T> type, Getter<Event, T> getter) {
+        ColumnName name = ColumnName.of(name());
         this.column = new RecordColumn<>(name, type, getter);
     }
 
@@ -68,7 +66,8 @@ enum EventColumn {
         return list.build();
     }
 
-    ColumnName columnName() {
-        return column.name();
+    @Override
+    public RecordColumn<?, Event> column() {
+        return column;
     }
 }

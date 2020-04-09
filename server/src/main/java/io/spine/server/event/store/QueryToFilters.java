@@ -32,6 +32,7 @@ import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.gt;
 import static io.spine.client.Filters.lt;
+import static io.spine.server.event.store.EventColumn.created;
 
 /**
  * Converts {@link EventStreamQuery} to {@link TargetFilters}.
@@ -77,7 +78,7 @@ final class QueryToFilters {
         CompositeFilter.Builder timeFilter = CompositeFilter
                 .newBuilder()
                 .setOperator(ALL);
-        String createdColumn = EventColumn.created.name();
+        String createdColumn = created.name();
         if (query.hasAfter()) {
             Timestamp timestamp = query.getAfter();
             Filter filter = gt(createdColumn, timestamp);

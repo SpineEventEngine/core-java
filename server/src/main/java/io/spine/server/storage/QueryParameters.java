@@ -97,9 +97,17 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                            .build();
     }
 
+    public static <V> QueryParameters eq(QueryableField field, V value) {
+        return forSingleField(field, Filters.eq(field.columnName().value(), value));
+    }
+
     public static <V> QueryParameters eq(Column column, V value) {
         return forSingleColumn(column, Filters.eq(column.name()
                                                         .value(), value));
+    }
+
+    public static <V> QueryParameters gt(QueryableField field, V value) {
+        return forSingleField(field, Filters.gt(field.columnName().value(), value));
     }
 
     public static <V> QueryParameters gt(Column column, V value) {
@@ -107,14 +115,26 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                                                         .value(), value));
     }
 
+    public static <V> QueryParameters ge(QueryableField field, V value) {
+        return forSingleField(field, Filters.ge(field.columnName().value(), value));
+    }
+
     public static <V> QueryParameters ge(Column column, V value) {
         return forSingleColumn(column, Filters.ge(column.name()
                                                         .value(), value));
     }
 
+    public static <V> QueryParameters lt(QueryableField field, V value) {
+        return forSingleField(field, Filters.lt(field.columnName().value(), value));
+    }
+
     public static <V> QueryParameters lt(Column column, V value) {
         return forSingleColumn(column, Filters.lt(column.name()
                                                         .value(), value));
+    }
+
+    public static <V> QueryParameters le(QueryableField field, V value) {
+        return forSingleField(field, Filters.le(field.columnName().value(), value));
     }
 
     public static <V> QueryParameters le(Column column, V value) {
@@ -124,6 +144,14 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
 
     private static QueryParameters forSingleColumn(Column column, Filter filter) {
         ImmutableMultimap<Column, Filter> filters = ImmutableMultimap.of(column, filter);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
+        return newBuilder().add(parameter)
+                           .build();
+    }
+
+
+    private static QueryParameters forSingleField(QueryableField<?> field, Filter filter) {
+        ImmutableMultimap<Column, Filter> filters = ImmutableMultimap.of(field.column(), filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         return newBuilder().add(parameter)
                            .build();
