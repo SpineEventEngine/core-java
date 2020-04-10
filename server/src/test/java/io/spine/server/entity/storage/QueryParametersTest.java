@@ -28,15 +28,22 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
+import io.spine.server.ContextSpec;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.bc.given.ProjectProjection;
 import io.spine.server.storage.Column;
 import io.spine.server.storage.CompositeQueryParameter;
 import io.spine.server.storage.QueryParameters;
+import io.spine.server.storage.StorageFactory;
+import io.spine.test.bc.ProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -46,12 +53,16 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.gt;
 import static io.spine.client.Filters.le;
+import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 import static io.spine.server.entity.storage.given.AColumn.column;
 import static io.spine.server.entity.storage.given.AColumn.intColumn;
 import static io.spine.server.entity.storage.given.AColumn.stringColumn;
 import static io.spine.server.entity.storage.given.AColumn.timestampColumn;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("QueryParameters should")
@@ -187,42 +198,40 @@ class QueryParametersTest {
         assertTimeFilters.containsExactly(startTimeFilter, deadlineFilter);
     }
 
-    //TODO:2020-04-01:alex.tymchenko: deal with this one
-//    @Test
-//    @DisplayName("create parameters with active lifecycle flags")
-//    void createActiveParams() {
-//        InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-//        ContextSpec spec = ContextSpec.multitenant("random name");
-//        RecordStorage<ProjectId> storage =
-//                factory.createRecordStorage(spec, ProjectProjection.class);
-//
-//        QueryParameters parameters = QueryParameters.activeEntityQueryParams(storage);
-//
-//        assertTrue(parameters.isLifecycleAttributesSet());
-//
-//        Iterator<CompositeQueryParameter> paramsIterator = parameters.iterator();
-//        CompositeQueryParameter lifecycleParameter = paramsIterator.next();
-//        assertFalse(paramsIterator.hasNext());
-//        assertTrue(lifecycleParameter.hasLifecycle());
-//        assertEquals(ALL, lifecycleParameter.operator());
-//        ImmutableMultimap<Column, Filter> filters = lifecycleParameter.filters();
-//
-//        ImmutableMap<ColumnName, Column> lifecycleColumns = storage.lifecycleColumns();
-//        ColumnName archivedName = ColumnName.of(archived);
-//        Column archivedColumn = lifecycleColumns.get(archivedName);
-//        ColumnName deletedName = ColumnName.of(deleted);
-//        Column deletedColumn = lifecycleColumns.get(deletedName);
-//
-//        ImmutableCollection<Filter> archivedFilters = filters.get(archivedColumn);
-//        UnmodifiableIterator<Filter> archivedFilterIterator = archivedFilters.iterator();
-//        assertEquals(eq(archivedName.value(), false), archivedFilterIterator.next());
-//        assertFalse(archivedFilterIterator.hasNext());
-//
-//        ImmutableCollection<Filter> deletedFilters = filters.get(deletedColumn);
-//        UnmodifiableIterator<Filter> deletedFilterIterator = deletedFilters.iterator();
-//        assertEquals(eq(deletedName.value(), false), deletedFilterIterator.next());
-//        assertFalse(deletedFilterIterator.hasNext());
-//    }
+    @Test
+    @DisplayName("create parameters with active lifecycle flags")
+    void createActiveParams() {
+        StorageFactory factory = ServerEnvironment.instance().storageFactory();
+        ContextSpec spec = ContextSpec.multitenant("random name");
+        EntityRecordStorage<ProjectId> storage =
+                factory.createEntityRecordStorage(spec, ProjectProjection.class);
+        QueryParameters parameters = QueryParameters.activeEntityQueryParams(storage.columns());
+
+        assertTrue(parameters.isLifecycleAttributesSet());
+
+        Iterator<CompositeQueryParameter> paramsIterator = parameters.iterator();
+        CompositeQueryParameter lifecycleParameter = paramsIterator.next();
+        assertFalse(paramsIterator.hasNext());
+        assertTrue(lifecycleParameter.hasLifecycle());
+        assertEquals(ALL, lifecycleParameter.operator());
+        ImmutableMultimap<Column, Filter> filters = lifecycleParameter.filters();
+        assertThat(filters.size()).isEqualTo(2);
+
+        Filter expectedFilterArchived = eq(archived.name(), false);
+        Filter expectedFilterDeleted = eq(deleted.name(), false);
+
+        for (Map.Entry<Column, Filter> entry : filters.entries()) {
+            Column column = entry.getKey();
+            ColumnName actualName = column.name();
+            Filter actualFilter = entry.getValue();
+
+            boolean archivedMatches = actualName.equals(archived.columnName())
+                    && actualFilter.equals(expectedFilterArchived);
+            boolean deletedMatches = actualName.equals(deleted.columnName())
+                    && actualFilter.equals(expectedFilterDeleted);
+            assertTrue(archivedMatches || deletedMatches);
+        }
+    }
 
     private static CompositeQueryParameter aggregatingParameter(Column column,
                                                                 Filter filter) {
