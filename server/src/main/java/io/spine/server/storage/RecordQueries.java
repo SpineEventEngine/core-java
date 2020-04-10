@@ -58,17 +58,39 @@ public final class RecordQueries {
     private RecordQueries() {
     }
 
+    /**
+     * Creates a new {@code RecordQuery} which targets all the records of the storage.
+     *
+     * @param <I>
+     *         the type of the record identifiers
+     */
     public static <I> RecordQuery<I> all() {
         return new RecordQuery<>(ImmutableSet.of(), EMPTY_PARAMS);
     }
 
+    /**
+     * Creates a new {@code RecordQuery} targeting the records with the given identifiers.
+     *
+     * @param ids
+     *         the identifiers of the records to query
+     * @param <I>
+     *         the type of the record identifiers
+     */
     public static <I> RecordQuery<I> of(Iterable<I> ids) {
         checkNotNull(ids);
         return new RecordQuery<>(ids, EMPTY_PARAMS);
     }
 
     /**
-     * Creates new instance of {@code RecordQuery}.
+     * Creates a new {@code RecordQuery} targeting the records with the given identifiers which
+     * satisfy the specified query parameters.
+     *
+     * @param ids
+     *         the identifiers of the records to query
+     * @param parameters
+     *         criteria applied to the records
+     * @param <I>
+     *         the type of the record identifiers
      */
     public static <I> RecordQuery<I> of(Iterable<I> ids, QueryParameters parameters) {
         checkNotNull(ids);
@@ -76,11 +98,33 @@ public final class RecordQueries {
         return new RecordQuery<>(ids, parameters);
     }
 
+    /**
+     * Creates a new {@code RecordQuery} targeting the records which match the specified
+     * query parameters.
+     *
+     * @param parameters
+     *         criteria applied to the records
+     * @param <I>
+     *         the type of the record identifiers
+     */
     public static <I> RecordQuery<I> of(QueryParameters parameters) {
         checkNotNull(parameters);
         return new RecordQuery<>(ImmutableSet.of(), parameters);
     }
 
+    /**
+     * Creates a new {@code RecordQuery} targeting the records which specific column matches the
+     * passed column value.
+     *
+     * @param column
+     *         the column of the record to query
+     * @param value
+     *         the expected value to which the actual column value of the record should match
+     * @param <I>
+     *         the type of the record identifiers
+     * @param <V>
+     *         the type of the values stored in the column
+     */
     public static <I, V> RecordQuery<I> byColumn(RecordColumn<?, ?> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
@@ -88,6 +132,19 @@ public final class RecordQueries {
         return of(queryParams);
     }
 
+    /**
+     * Creates a new {@code RecordQuery} targeting the records which queryable field matches the
+     * passed field value.
+     *
+     * @param field
+     *         the field of the record to query
+     * @param value
+     *         the expected value to which the actual field value of the record should match
+     * @param <I>
+     *         the type of the record identifiers
+     * @param <V>
+     *         the type of the field
+     */
     public static <I, V> RecordQuery<I> byField(QueryableField<?> field, V value) {
         checkNotNull(field);
         checkNotNull(value);
@@ -95,6 +152,17 @@ public final class RecordQueries {
         return of(queryParams);
     }
 
+    /**
+     * Creates a new {@code RecordQuery} targeting the records which satisfy
+     * the passed {@link TargetFilters} and have the passed column definitions.
+     *
+     * @param filters
+     *         the filters applied to the records
+     * @param columns
+     *         the definitions of columns stored along with each record in the storage
+     * @param <I>
+     *         the type of the record identifiers
+     */
     public static <I> RecordQuery<I> from(TargetFilters filters, Columns<?> columns) {
         checkNotNull(filters);
         checkNotNull(columns);

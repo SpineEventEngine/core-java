@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
@@ -45,19 +46,18 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.storage.LifecycleColumn.archived;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`RecordQueries` utility should")
-//TODO:2020-04-01:alex.tymchenko: add the tests for the rest of the factory methods.
 class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
 
     private RecordQueriesTest() {
@@ -115,23 +115,8 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
     }
 
     @Test
-    @DisplayName("construct empty queries")
-    void constructEmptyQueries() {
-        TargetFilters filters = TargetFilters.getDefaultInstance();
-        EntityColumns columns = EntityColumns.of(TestEntity.class);
-        RecordQuery<?> query = RecordQueries.from(filters, columns);
-        assertNotNull(query);
-
-        assertTrue(query.getIds()
-                        .isEmpty());
-
-        QueryParameters parameters = query.getParameters();
-        assertEquals(0, size(parameters.iterator()));
-    }
-
-    @Test
-    @DisplayName("construct non-empty queries")
-    void constructNonEmptyQueries() {
+    @DisplayName("create queries from `TargetFilters` and `Columns`.")
+    void createQueryFromTargetFiltersAndColumns() {
         Message someGenericId = Sample.messageOfType(ProjectId.class);
         Any entityId = Identifier.pack(someGenericId);
         IdFilter idFilter = IdFilter
@@ -176,5 +161,84 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
         assertEquals(EITHER, singleParam.operator());
         IterableSubject assertColumnFilters = assertThat(columnFilters);
         assertColumnFilters.contains(archivedFilter);
+    }
+
+    @Test
+    @DisplayName("create a `RecordQuery` targeting all the records of the storage")
+    void createQueryForAll() {
+        RecordQuery<Object> actual = RecordQueries.all();
+
+        assertIdsEmpty(actual);
+        assertParametersEmpty(actual);
+    }
+
+    @Test
+    @DisplayName("create a `RecordQuery` targeting only the records with the selected IDs")
+    void createQueryForIds() {
+        ImmutableList<Integer> expectedIds = sampleIds();
+        RecordQuery<Integer> actual = RecordQueries.of(expectedIds);
+
+        assertThat(actual.getIds()).containsExactlyElementsIn(expectedIds);
+        assertParametersEmpty(actual);
+    }
+
+    @Test
+    @DisplayName("create a `RecordQuery` by the record IDs and query parameters")
+    void createQueryForIdsAndParameters() {
+        ImmutableList<Integer> expectedIds = sampleIds();
+        QueryParameters expectedParams = sampleParams();
+        RecordQuery<Integer> actual = RecordQueries.of(expectedIds, expectedParams);
+
+        assertThat(actual.getIds()).containsExactlyElementsIn(expectedIds);
+        assertThat(actual.getParameters()).isEqualTo(expectedParams);
+    }
+
+    @Test
+    @DisplayName("create a `RecordQuery` targeting records by the specific query parameters only")
+    void createQueryForParameters() {
+        QueryParameters expectedParams = sampleParams();
+        RecordQuery<Object> actual = RecordQueries.of(expectedParams);
+
+        assertIdsEmpty(actual);
+        assertThat(actual.getParameters()).isEqualTo(expectedParams);
+    }
+
+    @Test
+    void createQueryByTheColumnValue() {
+        RecordColumn<String, Any> expectedColumn = sampleColumn();
+        Any expectedValue = pack(currentTime());
+        RecordQuery<Object> actual = RecordQueries.byColumn(expectedColumn, expectedValue);
+
+        assertIdsEmpty(actual);
+        assertThat(actual.getParameters())
+                .isEqualTo(QueryParameters.eq(expectedColumn, expectedValue));
+    }
+
+    @Test
+    void createQueryByTheFieldValue() {
+        RecordColumn<String, Any> columnUsed = sampleColumn();
+        QueryableField<Any> expectedField = () -> columnUsed;
+        Any expectedValue = pack(currentTime());
+        RecordQuery<Object> actual = RecordQueries.byField(expectedField, expectedValue);
+
+        assertIdsEmpty(actual);
+        assertThat(actual.getParameters())
+                .isEqualTo(QueryParameters.eq(columnUsed, expectedValue));
+    }
+
+    private static QueryParameters sampleParams() {
+        return QueryParameters.eq(sampleColumn(), pack(currentTime()));
+    }
+
+    private static ImmutableList<Integer> sampleIds() {
+        return ImmutableList.of(41, 17, 324);
+    }
+
+    private static void assertIdsEmpty(RecordQuery<Object> actual) {
+        assertThat(actual.getIds()).isEmpty();
+    }
+
+    private static void assertParametersEmpty(RecordQuery<?> actual) {
+        assertThat(actual.getParameters().iterator().hasNext()).isFalse();
     }
 }
