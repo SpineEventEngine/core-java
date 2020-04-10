@@ -119,7 +119,7 @@ public class RecordComparator<I, R extends Message>
         }
 
         if (aValue instanceof Timestamp) {
-            @SuppressWarnings({"rawtypes"}) // For convenience.
+            @SuppressWarnings("rawtypes") // For convenience.
                     int result = Timestamps.compare((Timestamp) aValue, (Timestamp) bValue);
             return result;
         }
