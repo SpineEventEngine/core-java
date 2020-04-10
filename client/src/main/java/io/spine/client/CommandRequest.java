@@ -67,11 +67,11 @@ public final class CommandRequest extends ClientRequest {
      * Adds the passed consumer to the subscribers of the event of the passed type.
      *
      * @param type
-     *          the type of the event message to be received by the consumer
+     *         the type of the event message to be received by the consumer
      * @param consumer
-     *          the consumer
+     *         the consumer
      * @param <E>
-     *          the type of the event
+     *         the type of the event
      */
     @CanIgnoreReturnValue
     public <E extends EventMessage> CommandRequest
@@ -85,11 +85,11 @@ public final class CommandRequest extends ClientRequest {
      * Adds the passed event consumer to the subscribers of the event of the passed type.
      *
      * @param type
-     *          the type of the event message to be received by the consumer
+     *         the type of the event message to be received by the consumer
      * @param consumer
-     *          the consumer of the event message and its context
+     *         the consumer of the event message and its context
      * @param <E>
-     *          the type of the event
+     *         the type of the event
      */
     @CanIgnoreReturnValue
     public <E extends EventMessage> CommandRequest
