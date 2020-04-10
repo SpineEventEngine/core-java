@@ -96,23 +96,6 @@ class RecordQueryTest {
         tester.testEquals();
     }
 
-    //TODO:2020-04-02:alex.tymchenko: should we migrate this one?
-//    @Test
-//    @DisplayName("fail to append lifecycle columns if they are already present")
-//    void notDuplicateLifecycleColumns() {
-//        EntityColumns columns = EntityColumns.of(TestEntity.class);
-//        Column deletedColumn = columns.get(ColumnName.of(deleted));
-//        CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
-//                ImmutableMultimap.of(deletedColumn, Filter.getDefaultInstance()), ALL
-//        );
-//        QueryParameters parameters = QueryParameters
-//                .newBuilder()
-//                .add(queryParameter)
-//                .build();
-//        MessageQuery<String> query = MessageQueries.of(parameters);
-//        assertFalse(query.canAppendLifecycleFlags());
-//    }
-
     /**
      * Adds an equality group containing a single Query of two IDs and two Query parameters to
      * the given {@link EqualsTester}.
