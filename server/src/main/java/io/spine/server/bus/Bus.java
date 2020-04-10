@@ -253,12 +253,15 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      * <p>Any filter in the filter chain may process the message by itself. In this case an observer
      * is notified by the filter directly.
      *
-     * @param messages the message to filter
-     * @param observer the observer to receive the negative outcome of the operation
+     * @param messages
+     *         the message to filter
+     * @param observer
+     *         the observer to receive the negative outcome of the operation
      * @return a map of filtered messages where keys are messages, and values are envelopes with
      *         these messages
-     * @implNote This method returns a map to avoid repeated creation of envelopes when dispatching.
-     * Messages in the returned map come in the same order as in the incoming sequence.
+     * @implNote This method returns a map to avoid repeated creation of envelopes when
+     *         dispatching. Messages in the returned map come in the same order as in
+     *         the incoming sequence.
      */
     private Map<T, E> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
