@@ -42,8 +42,7 @@ import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.LifecycleColumn;
-import io.spine.server.storage.given.RecordStorageTestEnv;
-import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
+import io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
@@ -76,13 +75,14 @@ import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.entity.storage.LifecycleColumn.archived;
 import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
-import static io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
-import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
-import static io.spine.server.storage.given.RecordStorageTestEnv.assertSingleRecord;
-import static io.spine.server.storage.given.RecordStorageTestEnv.buildStorageRecord;
-import static io.spine.server.storage.given.RecordStorageTestEnv.delete;
-import static io.spine.server.storage.given.RecordStorageTestEnv.newEntity;
-import static io.spine.server.storage.given.RecordStorageTestEnv.withLifecycleColumns;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.archive;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.assertIteratorsEqual;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.assertSingleRecord;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.buildStorageRecord;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.delete;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newEntity;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.withLifecycleColumns;
 import static io.spine.test.storage.Project.Status.CANCELLED;
 import static io.spine.test.storage.Project.Status.DONE;
 import static io.spine.testing.Tests.assertMatchesMask;
@@ -578,13 +578,13 @@ public class EntityRecordStorageTest
 
             storage.writeAll(recordsWithColumnsFrom(v1Records));
             Iterator<EntityRecord> firstRevision = storage.readAll();
-            RecordStorageTestEnv.assertIteratorsEqual(v1Records.values()
-                                                               .iterator(), firstRevision);
+            assertIteratorsEqual(v1Records.values()
+                                          .iterator(), firstRevision);
             storage.writeAll(recordsWithColumnsFrom(v2Records));
             Iterator<EntityRecord> secondRevision =
                     storage.readAll(ResponseFormat.getDefaultInstance());
-            RecordStorageTestEnv.assertIteratorsEqual(v2Records.values()
-                                                               .iterator(), secondRevision);
+            assertIteratorsEqual(v2Records.values()
+                                          .iterator(), secondRevision);
         }
 
         @Test

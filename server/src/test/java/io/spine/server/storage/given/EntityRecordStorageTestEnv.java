@@ -47,10 +47,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RecordStorageTestEnv {
+public class EntityRecordStorageTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private RecordStorageTestEnv() {
+    private EntityRecordStorageTestEnv() {
     }
 
     public static EntityRecord buildStorageRecord(ProjectId id, EntityState state) {
