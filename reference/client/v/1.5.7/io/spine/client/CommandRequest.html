@@ -273,6 +273,15 @@ public&nbsp;<a href="../../../io/spine/client/CommandRequest.html" title="class 
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>subscription to the events</dd>
+<dt><span class="simpleTagLabel">Implementation Note:</span></dt>
+<dd>Subscriptions should be cancelled to free up client and server resources
+         required for their maintenance. It is not possible to cancel the returned
+         subscription in an automatic way because of the following.
+         Subscriptions by nature are asynchronous and infinite requests.
+         Even that we know expected types of the events produced by the command, only the
+         client code "knows" how many of them it expects. Also, some events may not arrive
+         because of communication or business logic reasons. That's why the returned
+         subscriptions should be cancelled by the client code when it no longer needs it.</dd>
 </dl>
 </li>
 </ul>
