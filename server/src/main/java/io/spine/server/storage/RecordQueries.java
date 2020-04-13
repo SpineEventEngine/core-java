@@ -226,7 +226,7 @@ public final class RecordQueries {
     private static Column findMatchingColumn(Filter filter, Columns<?> columns) {
         FieldPath fieldPath = filter.getFieldPath();
         checkArgument(fieldPath.getFieldNameCount() == 1,
-                      "Incorrect Column name in Entity Filter: %s",
+                      "Incorrect column name in the passed `Filter`: %s",
                       join(".", fieldPath.getFieldNameList()));
         String column = fieldPath.getFieldName(0);
         ColumnName columnName = ColumnName.of(column);
