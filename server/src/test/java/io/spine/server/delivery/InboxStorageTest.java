@@ -26,7 +26,7 @@ import com.google.common.truth.Truth8;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.storage.RecordStorageDelegateTest;
+import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -52,7 +52,7 @@ import static io.spine.server.delivery.InboxIds.newSignalId;
  */
 @DisplayName("`InboxStorage` should")
 public class InboxStorageTest
-        extends RecordStorageDelegateTest<InboxMessageId, InboxMessage, InboxStorage> {
+        extends AbstractStorageTest<InboxMessageId, InboxMessage, InboxStorage> {
 
     private static final String TARGET_ID = "the-storage-calc";
 
