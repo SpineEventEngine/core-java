@@ -43,7 +43,6 @@ import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.aggregate.given.repo.GivenAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
-import io.spine.server.entity.Entity;
 import io.spine.server.model.Nothing;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
@@ -149,16 +148,8 @@ public class AggregateStorageTest
     }
 
     @Override
-    protected Class<? extends Entity<?, ?>> getTestEntityClass() {
-        return TestAggregate.class;
-    }
-
-    @Override
-    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
-        @SuppressWarnings("unchecked")
-        Class<? extends Aggregate<ProjectId, ?, ?>> asAggregateClass =
-                (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
-        return newStorage(ProjectId.class, asAggregateClass);
+    protected AggregateStorage<ProjectId> newStorage() {
+        return newStorage(TestAggregate.class);
     }
 
     /**
@@ -166,22 +157,18 @@ public class AggregateStorageTest
      *
      * <p>The created storage should be closed manually.
      *
-     * @param idClass
-     *         the class of aggregate ID
      * @param aggregateClass
      *         the aggregate class
      * @param <I>
      *         the type of aggregate IDs
      * @return a new storage instance
      */
-    protected <I> AggregateStorage<I>
-    newStorage(Class<? extends I> idClass, Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
+    <I> AggregateStorage<I> newStorage(Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
         ContextSpec spec = ContextSpec.singleTenant("`AggregateStorage` tests");
         AggregateStorage<I> result =
                 ServerEnvironment.instance()
                                  .storageFactory()
-                                 .createAggregateStorage(spec,
-                                                         aggregateClass);
+                                 .createAggregateStorage(spec,aggregateClass);
         return result;
     }
 
@@ -248,7 +235,7 @@ public class AggregateStorageTest
     }
 
     @Nested
-    @DisplayName("write and read one event by ID of type")
+    @DisplayName("write and read single event by ID of type")
     class WriteAndReadEvent {
 
         @Test
@@ -260,8 +247,7 @@ public class AggregateStorageTest
         @Test
         @DisplayName("String")
         void byStringId() {
-            AggregateStorage<String> storage = newStorage(String.class,
-                                                          TestAggregateWithIdString.class);
+            AggregateStorage<String> storage = newStorage(TestAggregateWithIdString.class);
             String id = newUuid();
             writeAndReadEventTest(id, storage);
         }
@@ -269,8 +255,7 @@ public class AggregateStorageTest
         @Test
         @DisplayName("Long")
         void byLongId() {
-            AggregateStorage<Long> storage = newStorage(Long.class,
-                                                        TestAggregateWithIdLong.class);
+            AggregateStorage<Long> storage = newStorage(TestAggregateWithIdLong.class);
             long id = 10L;
             writeAndReadEventTest(id, storage);
         }
@@ -278,8 +263,7 @@ public class AggregateStorageTest
         @Test
         @DisplayName("Integer")
         void byIntegerId() {
-            AggregateStorage<Integer> storage = newStorage(Integer.class,
-                                                           TestAggregateWithIdInteger.class);
+            AggregateStorage<Integer> storage = newStorage(TestAggregateWithIdInteger.class);
             int id = 10;
             writeAndReadEventTest(id, storage);
         }

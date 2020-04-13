@@ -144,7 +144,7 @@ public class EntityRecordStorageTest
     }
 
     @Override
-    protected EntityRecordStorage<StgProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
+    protected EntityRecordStorage<StgProjectId> newStorage() {
         StorageFactory factory = ServerEnvironment.instance()
                                                   .storageFactory();
         return new EntityRecordStorage<>(factory, TestCounterEntity.class, false);
@@ -160,11 +160,6 @@ public class EntityRecordStorageTest
         return StgProjectId.newBuilder()
                            .setId(newUuid())
                            .build();
-    }
-
-    @Override
-    protected Class<? extends Entity<?, ?>> getTestEntityClass() {
-        return TestCounterEntity.class;
     }
 
     @Test

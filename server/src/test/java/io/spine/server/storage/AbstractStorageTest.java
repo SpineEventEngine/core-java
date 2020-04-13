@@ -22,7 +22,6 @@ package io.spine.server.storage;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.server.entity.Entity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,34 +45,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * An abstract base for test suites testing storages.
+ * An abstract base for test suites testing storage implementations.
  *
- * <p>Manages creation and closing of the {@linkplain #storage() storage}
- * for the {@linkplain #getTestEntityClass() test entity class}.
+ * <p>Carries the tests of the API defined in {@link AbstractStorage}. Any custom functionality
+ * of the storage-under-test should be implemented by the descendants.
  *
- * <p>In case if the storage for different entity class should be tested,
- * it can be {@linkplain #newStorage(Class) created} manually, but closing of this storage
- * is a responsibility of a caller.
- *
- * <p>All storages should be {@linkplain #close(AbstractStorage) closed} after a test
- * to avoid the issues, which may occur due to unreleased resources.
+ * <p>This abstract base handles the {@linkplain #newStorage() initialization} and
+ * {@linkplain #close(AbstractStorage) closing} of the tested storage instance.
+ * So the descendants should omit closing the tested storage instance manually, unless it is
+ * required for the particular test scenario.
  *
  * @param <I>
  *         the type of IDs of storage records
  * @param <M>
  *         the type of records kept in the storage
- * @param <R>
- *         the type of read requests for the storage
+ * @param <S>
+ *         the type of the storage under test
  */
-public abstract class AbstractStorageTest<I,
-        M extends Message,
-        S extends AbstractStorage<I, M>> {
+public abstract class AbstractStorageTest<I, M extends Message, S extends AbstractStorage<I, M>> {
 
     private S storage;
 
     @BeforeEach
     protected void setUpAbstractStorageTest() {
-        storage = newStorage(getTestEntityClass());
+        storage = newStorage();
     }
 
     @AfterEach
@@ -91,18 +86,17 @@ public abstract class AbstractStorageTest<I,
     }
 
     /**
-     * Creates the storage for the specified entity class.
+     * Creates a new storage instance.
      *
      * <p>The resulting storage should be {@linkplain #close(AbstractStorage) closed} manually to
      * release resources, which may be used by the storage.
      *
-     * <p>Use {@linkplain #storage() existing storage} if the storage may be tested for
-     * the {@linkplain #getTestEntityClass() entity class}.
+     * <p>Use {@link #storage() storage()} method to access the created instance in tests.
      *
-     * @return an empty storage instance
+     * @return a newly created and empty storage
      * @see AbstractStorage#close()
      */
-    protected abstract S newStorage(Class<? extends Entity<?, ?>> cls);
+    protected abstract S newStorage();
 
     /** Creates a new storage record. */
     protected abstract M newStorageRecord(I id);
@@ -110,13 +104,10 @@ public abstract class AbstractStorageTest<I,
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
 
-    /** Returns the class of the test entity. */
-    protected abstract Class<? extends Entity<?, ?>> getTestEntityClass();
-
     /**
      * Closes the storage and propagates an exception if any occurs.
      */
-    protected void close(AbstractStorage storage) {
+    protected void close(AbstractStorage<?, ?> storage) {
         if (storage.isOpen()) {
             try {
                 storage.close();
@@ -158,56 +149,12 @@ public abstract class AbstractStorageTest<I,
     @DisplayName("handle absence of record with passed ID")
     void handleAbsenceOfRecord() {
         Optional<M> record = storage.read(newId());
-
         assertResultForMissingId(record);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // This is the purpose of the method.
     private void assertResultForMissingId(Optional<M> record) {
         assertFalse(record.isPresent());
-    }
-
-    @Nested
-    @DisplayName("throw NPE when")
-    class ThrowNpeIf {
-
-        @Test
-        @DisplayName("reading by null ID")
-        void readByNullId() {
-            assertThrows(NullPointerException.class, () -> storage.read(nullRef()));
-        }
-
-        @Test
-        @DisplayName("writing by null ID")
-        void writeByNullId() {
-            assertThrows(NullPointerException.class,
-                         () -> storage.write(nullRef(), newStorageRecord(newId())));
-        }
-
-        @Test
-        @DisplayName("writing null record")
-        void writeNullRecord() {
-            assertThrows(NullPointerException.class, () -> storage.write(newId(), nullRef()));
-        }
-    }
-
-    @Nested
-    @DisplayName("write and read")
-    class WriteAndRead {
-
-        @Test
-        @DisplayName("one record")
-        void record() {
-            writeAndReadRecordTest(newId());
-        }
-
-        @Test
-        @DisplayName("several records by different IDs")
-        void severalRecords() {
-            writeAndReadRecordTest(newId());
-            writeAndReadRecordTest(newId());
-            writeAndReadRecordTest(newId());
-        }
     }
 
     /**
@@ -273,6 +220,64 @@ public abstract class AbstractStorageTest<I,
 
         assertEquals(ids.size(), indexValues.size());
         assertThat(indexValues).containsExactlyElementsIn(ids);
+    }
+
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
+                                                               checking via #contains(Object). */)
+    @Test
+    @DisplayName("return unique ID")
+    void returnUniqueID() {
+        int checkCount = 10;
+        Set<I> ids = newHashSet();
+        for (int i = 0; i < checkCount; i++) {
+            I newId = newId();
+            if (ids.contains(newId)) {
+                fail("AbstractStorageTest.newId() should return unique IDs.");
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("throw NPE when")
+    class ThrowNpeIf {
+
+        @Test
+        @DisplayName("reading by null ID")
+        void readByNullId() {
+            assertThrows(NullPointerException.class, () -> storage.read(nullRef()));
+        }
+
+        @Test
+        @DisplayName("writing by null ID")
+        void writeByNullId() {
+            assertThrows(NullPointerException.class,
+                         () -> storage.write(nullRef(), newStorageRecord(newId())));
+        }
+
+        @Test
+        @DisplayName("writing null record")
+        void writeNullRecord() {
+            assertThrows(NullPointerException.class, () -> storage.write(newId(), nullRef()));
+        }
+    }
+
+    @Nested
+    @DisplayName("write and read")
+    class WriteAndRead {
+
+        @Test
+        @DisplayName("one record")
+        void record() {
+            writeAndReadRecordTest(newId());
+        }
+
+        @Test
+        @DisplayName("several records by different IDs")
+        void severalRecords() {
+            writeAndReadRecordTest(newId());
+            writeAndReadRecordTest(newId());
+            writeAndReadRecordTest(newId());
+        }
     }
 
     @Nested
@@ -353,21 +358,6 @@ public abstract class AbstractStorageTest<I,
         void close() {
             storage.close();
             assertThrows(IllegalStateException.class, () -> storage.close());
-        }
-    }
-
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
-                                                               checking via #contains(Object). */)
-    @Test
-    @DisplayName("return unique ID")
-    void returnUniqueID() {
-        int checkCount = 10;
-        Set<I> ids = newHashSet();
-        for (int i = 0; i < checkCount; i++) {
-            I newId = newId();
-            if (ids.contains(newId)) {
-                fail("AbstractStorageTest.newId() should return unique IDs.");
-            }
         }
     }
 }

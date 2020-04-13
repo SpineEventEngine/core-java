@@ -27,8 +27,6 @@ import com.google.protobuf.Message;
  * {@link RecordStorage}.
  */
 public abstract
-class RecordStorageDelegateTest<I, R extends Message, S extends RecordStorageDelegate<I, R>> {
-
-    protected abstract S storage();
-
+class RecordStorageDelegateTest<I, R extends Message, S extends RecordStorageDelegate<I, R>>
+        extends AbstractStorageTest<I, R, S> {
 }
