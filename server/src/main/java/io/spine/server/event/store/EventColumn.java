@@ -60,7 +60,7 @@ enum EventColumn implements QueryableField<Event> {
 
     static ImmutableList<RecordColumn<?, Event>> definitions() {
         ImmutableList.Builder<RecordColumn<?, Event>> list = ImmutableList.builder();
-        for (EventColumn value : EventColumn.values()) {
+        for (EventColumn value : values()) {
             list.add(value.column);
         }
         return list.build();
