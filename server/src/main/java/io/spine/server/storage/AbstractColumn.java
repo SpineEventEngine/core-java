@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.storage.ColumnName;
@@ -49,5 +50,13 @@ public abstract class AbstractColumn implements Column {
     @Override
     public Class<?> type() {
         return type;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .add("type", type)
+                          .toString();
     }
 }
