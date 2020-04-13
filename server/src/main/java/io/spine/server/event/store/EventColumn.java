@@ -34,21 +34,21 @@ import io.spine.server.storage.RecordColumn.Getter;
 enum EventColumn implements QueryableField<Event> {
 
     /**
-     * The name of the column representing the time, when the event was fired.
-     */
-    created(String.class, (m) -> m.enclosedTypeUrl()
-                                  .toTypeName()
-                                  .value()),
-
-    /**
-     * The name of the column representing the Protobuf type name of the event.
+     * The name of the column storing the Protobuf type name of the event.
      *
      * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
      * is enclosed in the {@code spine.test} Protobuf package would have this column
      * equal to {@code "spine.test.TaskAdded"}.
      */
-    type(Timestamp.class, (m) -> m.getContext()
-                                  .getTimestamp());
+    type(String.class, (m) -> m.enclosedTypeUrl()
+                               .toTypeName()
+                               .value()),
+
+    /**
+     * The name of the column storing the time, when the event was fired.
+     */
+    created(Timestamp.class, (m) -> m.getContext()
+                                     .getTimestamp());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final RecordColumn<?, Event> column;
