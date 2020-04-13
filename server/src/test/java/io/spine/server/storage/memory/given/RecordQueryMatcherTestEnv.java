@@ -30,9 +30,9 @@ import io.spine.server.entity.storage.EntityColumns;
 import io.spine.server.projection.Projection;
 import io.spine.server.storage.Column;
 import io.spine.server.storage.RecordColumn;
-import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.ProjectWithColumns;
+import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
+import io.spine.test.storage.StgProjectWithColumns;
 import io.spine.testdata.Sample;
 
 /**
@@ -58,7 +58,7 @@ public final class RecordQueryMatcherTestEnv {
      * The {@link Any} value held by the corresponding {@linkplain #anyColumn() entity column}.
      */
     public static Any anyValue() {
-        Project someMessage = Sample.messageOfType(Project.class);
+        StgProject someMessage = Sample.messageOfType(StgProject.class);
         Any value = AnyPacker.pack(someMessage);
         return value;
     }
@@ -87,8 +87,8 @@ public final class RecordQueryMatcherTestEnv {
     }
 
     private static class ProjectView
-            extends Projection<ProjectId, Project, Project.Builder>
-            implements ProjectWithColumns {
+            extends Projection<StgProjectId, StgProject, StgProject.Builder>
+            implements StgProjectWithColumns {
 
         @Override
         public String getIdString() {

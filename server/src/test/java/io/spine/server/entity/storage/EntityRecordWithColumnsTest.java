@@ -29,7 +29,7 @@ import io.spine.base.Identifier;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.server.entity.storage.given.TestColumnMapping;
-import io.spine.test.storage.TaskId;
+import io.spine.test.storage.StgTaskId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,9 +49,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("`EntityRecordWithColumns` should")
 class EntityRecordWithColumnsTest {
 
-    private static final TaskId SAMPLE_ID = TaskId.newBuilder()
-                                                  .setId(42)
-                                                  .build();
+    private static final StgTaskId SAMPLE_ID = StgTaskId.newBuilder()
+                                                        .setId(42)
+                                                        .build();
     private static final Any PACKED_SAMPLE_ID = Identifier.pack(SAMPLE_ID);
 
     private static EntityRecordWithColumns<?> sampleRecordWithEmptyColumns() {
@@ -60,14 +60,6 @@ class EntityRecordWithColumnsTest {
 
     private static EntityRecordWithColumns<?> randomRecordWithEmptyColumns() {
         return EntityRecordWithColumns.of(randomEntityRecord());
-    }
-
-    @Test
-    @DisplayName("not accept `null`s in constructor")
-    void rejectNullInCtor() {
-        new NullPointerTester()
-                .setDefault(EntityRecord.class, sampleEntityRecord())
-                .testAllPublicConstructors(EntityRecordWithColumns.class);
     }
 
     private static EntityRecord sampleEntityRecord() {
@@ -80,6 +72,14 @@ class EntityRecordWithColumnsTest {
         return EntityRecord.newBuilder()
                            .setEntityId(Identifier.pack(Identifier.newUuid()))
                            .build();
+    }
+
+    @Test
+    @DisplayName("not accept `null`s in constructor")
+    void rejectNullInCtor() {
+        new NullPointerTester()
+                .setDefault(EntityRecord.class, sampleEntityRecord())
+                .testAllPublicConstructors(EntityRecordWithColumns.class);
     }
 
     @Test
@@ -99,52 +99,6 @@ class EntityRecordWithColumnsTest {
                         randomRecordWithEmptyColumns()  // Each one has a different `EntityRecord`.
                 )
                 .testEquals();
-    }
-
-    @Nested
-    @DisplayName("support being initialized with")
-    class BeInitializedWith {
-
-        @Test
-        @DisplayName("record and storage fields")
-        void recordAndColumns() {
-            EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(sampleEntityRecord());
-            assertNotNull(record);
-        }
-
-        @Test
-        @DisplayName("record only")
-        void recordOnly() {
-            EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
-            assertNotNull(record);
-        }
-    }
-
-    @Nested
-    @DisplayName("store")
-    class Store {
-
-        @Test
-        @DisplayName("record")
-        void record() {
-            EntityRecordWithColumns<?> recordWithFields = sampleRecordWithEmptyColumns();
-            EntityRecord record = recordWithFields.record();
-            assertNotNull(record);
-        }
-
-        @Test
-        @DisplayName("column values")
-        void columnValues() {
-            ColumnName columnName = LifecycleColumn.archived.columnName();
-            Object value = false;
-            Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
-            EntityRecordWithColumns<?> record =
-                    EntityRecordWithColumns.of(sampleEntityRecord(), columnsExpected);
-            ImmutableSet<ColumnName> columnNames = record.columnNames();
-            assertThat(columnNames).hasSize(1);
-            assertTrue(columnNames.contains(columnName));
-            assertEquals(value, record.columnValue(columnName));
-        }
     }
 
     @Test
@@ -215,5 +169,51 @@ class EntityRecordWithColumnsTest {
         Object value = record.columnValue(columnName);
 
         assertThat(value).isNull();
+    }
+
+    @Nested
+    @DisplayName("support being initialized with")
+    class BeInitializedWith {
+
+        @Test
+        @DisplayName("record and storage fields")
+        void recordAndColumns() {
+            EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(sampleEntityRecord());
+            assertNotNull(record);
+        }
+
+        @Test
+        @DisplayName("record only")
+        void recordOnly() {
+            EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
+            assertNotNull(record);
+        }
+    }
+
+    @Nested
+    @DisplayName("store")
+    class Store {
+
+        @Test
+        @DisplayName("record")
+        void record() {
+            EntityRecordWithColumns<?> recordWithFields = sampleRecordWithEmptyColumns();
+            EntityRecord record = recordWithFields.record();
+            assertNotNull(record);
+        }
+
+        @Test
+        @DisplayName("column values")
+        void columnValues() {
+            ColumnName columnName = LifecycleColumn.archived.columnName();
+            Object value = false;
+            Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
+            EntityRecordWithColumns<?> record =
+                    EntityRecordWithColumns.of(sampleEntityRecord(), columnsExpected);
+            ImmutableSet<ColumnName> columnNames = record.columnNames();
+            assertThat(columnNames).hasSize(1);
+            assertTrue(columnNames.contains(columnName));
+            assertEquals(value, record.columnValue(columnName));
+        }
     }
 }

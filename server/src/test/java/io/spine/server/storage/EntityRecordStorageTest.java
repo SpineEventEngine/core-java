@@ -43,9 +43,9 @@ import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity;
-import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.Task;
+import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
+import io.spine.test.storage.StgTask;
 import io.spine.testing.core.given.GivenVersion;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
@@ -83,8 +83,8 @@ import static io.spine.server.storage.given.EntityRecordStorageTestEnv.buildStor
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.delete;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newEntity;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.withLifecycleColumns;
-import static io.spine.test.storage.Project.Status.CANCELLED;
-import static io.spine.test.storage.Project.Status.DONE;
+import static io.spine.test.storage.StgProject.Status.CANCELLED;
+import static io.spine.test.storage.StgProject.Status.DONE;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;
 import static java.lang.String.format;
@@ -97,40 +97,74 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Abstract base for tests of message storage implementations.
- *
- * <p>This abstract test should not contain {@linkplain org.junit.jupiter.api.Nested nested tests}
- * because they are not under control of {@code AbstractMessageStorageTest} inheritors.
- * Such a control is required for overriding or disabling tests due to a lag between read and
- * write on remote storage implementations, etc.
- *
- * @param <ProjectId>
- *         the type of identifiers a storage uses
- * @param <S>
- *         the type of storage under the test
+ * Tests the storage which store data as {@link EntityRecord}s.
  */
-
 @DisplayName("`EntityRecordStorage` should")
 public class EntityRecordStorageTest
-        extends AbstractStorageTest<ProjectId, EntityRecord, EntityRecordStorage<ProjectId>> {
+        extends AbstractStorageTest<StgProjectId, EntityRecord, EntityRecordStorage<StgProjectId>> {
+
+    private static EntityRecord newStorageRecord(StgProjectId id, EntityState state) {
+        Any wrappedState = pack(state);
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(id))
+                .setState(wrappedState)
+                .setVersion(GivenVersion.withNumber(0))
+                .build();
+        return record;
+    }
+
+    /**
+     * Creates an unique {@code EntityState} with the specified ID.
+     *
+     * <p>Two calls for the same ID should return messages, which are not equal.
+     *
+     * @param id
+     *         the ID for the message
+     * @return the unique {@code EntityState}
+     */
+    private static EntityState newState(StgProjectId id) {
+        String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
+        StgProject project = StgProject
+                .newBuilder()
+                .setId(id)
+                .setStatus(StgProject.Status.CREATED)
+                .setName(uniqueName)
+                .addTask(StgTask.getDefaultInstance())
+                .build();
+        return project;
+    }
+
+    private static List<EntityRecordWithColumns<StgProjectId>>
+    recordsWithColumnsFrom(Map<StgProjectId, EntityRecord> recordMap) {
+        return recordMap.entrySet()
+                        .stream()
+                        .map(entry -> withLifecycleColumns(entry.getKey(), entry.getValue()))
+                        .collect(toList());
+    }
 
     @Override
-    protected final ProjectId newId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+    protected EntityRecordStorage<StgProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
+        StorageFactory factory = ServerEnvironment.instance()
+                                                  .storageFactory();
+        return new EntityRecordStorage<>(factory, TestCounterEntity.class, false);
+    }
+
+    @Override
+    protected EntityRecord newStorageRecord(StgProjectId id) {
+        return newStorageRecord(id, newState(id));
+    }
+
+    @Override
+    protected final StgProjectId newId() {
+        return StgProjectId.newBuilder()
+                           .setId(newUuid())
+                           .build();
     }
 
     @Override
     protected Class<? extends Entity<?, ?>> getTestEntityClass() {
         return TestCounterEntity.class;
-    }
-
-    @Override
-    protected EntityRecordStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
-        StorageFactory factory = ServerEnvironment.instance()
-                                                  .storageFactory();
-        return new EntityRecordStorage<>(factory, TestCounterEntity.class, false);
     }
 
     @Test
@@ -144,11 +178,59 @@ public class EntityRecordStorageTest
                 .newBuilder()
                 .setFieldMask(nonEmptyFieldMask)
                 .vBuild();
-        EntityRecordStorage storage = storage();
-        Iterator empty = storage.readAll(format);
+        EntityRecordStorage<?> storage = storage();
+        Iterator<?> empty = storage.readAll(format);
 
         assertNotNull(empty);
         assertFalse(empty.hasNext(), "Iterator is not empty!");
+    }
+
+    @Test
+    @DisplayName("delete record")
+    void deleteRecord() {
+        EntityRecordStorage<StgProjectId> storage = storage();
+        StgProjectId id = newId();
+        EntityRecord record = newStorageRecord(id);
+
+        // Write the record.
+        storage.write(id, record);
+
+        // Delete the record.
+        assertTrue(storage.delete(id));
+
+        // There's no record with such ID.
+        assertFalse(storage.read(id)
+                           .isPresent());
+    }
+
+    @Test
+    @DisplayName("return a list of entity columns")
+    void returnColumnList() {
+        EntityRecordStorage<StgProjectId> storage = storage();
+        ImmutableList<Column> columnList = storage.columns()
+                                                  .columnList();
+
+        int systemColumnCount = LifecycleColumn.values().length;
+        int protoColumnCount = 6;
+
+        int expectedSize = systemColumnCount + protoColumnCount;
+        assertThat(columnList).hasSize(expectedSize);
+    }
+
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection" /* Storing of generated objects and
+                                                                checking via #contains(Object). */)
+    @Test
+    @DisplayName("create unique states for same ID")
+    void createUniqueStatesForSameId() {
+        int checkCount = 10;
+        StgProjectId id = newId();
+        Set<EntityState> states = newHashSet();
+        for (int i = 0; i < checkCount; i++) {
+            EntityState newState = newState(id);
+            if (states.contains(newState)) {
+                fail("RecordStorageTest.newState() should return unique messages.");
+            }
+        }
     }
 
     @Nested
@@ -158,9 +240,9 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("single record according to the specific field mask")
         void singleRecord() {
-            ProjectId id = newId();
+            StgProjectId id = newId();
             EntityRecord record = newStorageRecord(id);
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
             storage.write(id, record);
 
             EntityState state = newState(id);
@@ -178,13 +260,13 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("multiple records according to the given field mask")
         void multipleRecords() {
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
             int count = 10;
-            List<ProjectId> ids = new ArrayList<>();
+            List<StgProjectId> ids = new ArrayList<>();
             Class<? extends EntityState> stateClass = null;
 
             for (int i = 0; i < count; i++) {
-                ProjectId id = newId();
+                StgProjectId id = newId();
                 EntityState state = newState(id);
                 if (stateClass == null) {
                     stateClass = state.getClass();
@@ -209,19 +291,19 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("archived records if specified")
         void archivedRecords() {
-            ProjectId activeRecordId = newId();
-            ProjectId archivedRecordId = newId();
+            StgProjectId activeRecordId = newId();
+            StgProjectId archivedRecordId = newId();
 
             EntityRecord activeRecord =
                     buildStorageRecord(activeRecordId, newState(activeRecordId));
             EntityRecord archivedRecord =
                     buildStorageRecord(archivedRecordId, newState(archivedRecordId));
-            TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeRecordId);
-            TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedRecordId);
+            TransactionalEntity<StgProjectId, ?, ?> activeEntity = newEntity(activeRecordId);
+            TransactionalEntity<StgProjectId, ?, ?> archivedEntity = newEntity(archivedRecordId);
 
             archive(archivedEntity);
 
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
             storage.write(create(activeEntity, storage.columns(), activeRecord));
             storage.write(create(archivedEntity, storage.columns(), archivedRecord));
 
@@ -229,7 +311,7 @@ public class EntityRecordStorageTest
                     .newBuilder()
                     .addFilter(all(eq(archived.name(), true)))
                     .build();
-            RecordQuery<ProjectId> query = RecordQueries.from(filters, storage.columns());
+            RecordQuery<StgProjectId> query = RecordQueries.from(filters, storage.columns());
             Iterator<EntityRecord> read = storage.readAll(query);
             assertSingleRecord(archivedRecord, read);
         }
@@ -243,7 +325,7 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("by columns")
         void byColumns() {
-            Project.Status requiredValue = DONE;
+            StgProject.Status requiredValue = DONE;
             Int32Value wrappedValue = Int32Value
                     .newBuilder()
                     .setValue(requiredValue.getNumber())
@@ -267,12 +349,12 @@ public class EntityRecordStorageTest
                     .addFilter(aggregatingFilter)
                     .build();
 
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
 
-            RecordQuery<ProjectId> query = RecordQueries.from(filters, storage.columns());
-            ProjectId idMatching = newId();
-            ProjectId idWrong1 = newId();
-            ProjectId idWrong2 = newId();
+            RecordQuery<StgProjectId> query = RecordQueries.from(filters, storage.columns());
+            StgProjectId idMatching = newId();
+            StgProjectId idWrong1 = newId();
+            StgProjectId idWrong2 = newId();
 
             TestCounterEntity matchingEntity = newEntity(idMatching);
             TestCounterEntity wrongEntity1 = newEntity(idWrong1);
@@ -293,11 +375,11 @@ public class EntityRecordStorageTest
             EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
             EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
-            EntityRecordWithColumns<ProjectId> recordRight =
+            EntityRecordWithColumns<StgProjectId> recordRight =
                     create(matchingEntity, storage.columns(), fineRecord);
-            EntityRecordWithColumns<ProjectId> recordWrong1 =
+            EntityRecordWithColumns<StgProjectId> recordWrong1 =
                     create(wrongEntity1, storage.columns(), notFineRecord1);
-            EntityRecordWithColumns<ProjectId> recordWrong2 =
+            EntityRecordWithColumns<StgProjectId> recordWrong2 =
                     create(wrongEntity2, storage.columns(), notFineRecord2);
 
             storage.write(recordRight);
@@ -311,7 +393,7 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("both by columns and IDs")
         void byColumnsAndId() {
-            ProjectId targetId = newId();
+            StgProjectId targetId = newId();
             TestCounterEntity targetEntity = newEntity(targetId);
             TestCounterEntity noMatchEntity = newEntity(newId());
             TestCounterEntity noMatchIdEntity = newEntity(newId());
@@ -337,9 +419,10 @@ public class EntityRecordStorageTest
                            .toBuilder()
                            .addFilter(filter)
                            .build();
-            EntityRecordStorage<ProjectId> storage = storage();
-            RecordQuery<ProjectId> filteringQuery = RecordQueries.from(filters, storage.columns());
-            RecordQuery<ProjectId> query =
+            EntityRecordStorage<StgProjectId> storage = storage();
+            RecordQuery<StgProjectId> filteringQuery = RecordQueries.from(filters,
+                                                                          storage.columns());
+            RecordQuery<StgProjectId> query =
                     filteringQuery.append(activeEntityQueryParams(storage.columns()));
             Iterator<EntityRecord> read = storage.readAll(query);
             List<EntityRecord> readRecords = newArrayList(read);
@@ -353,26 +436,26 @@ public class EntityRecordStorageTest
         @DisplayName("by ID and not use columns")
         void byIdAndNoColumns() {
             // Create the test data
-            ProjectId idMatching = newId();
-            ProjectId idWrong1 = newId();
-            ProjectId idWrong2 = newId();
+            StgProjectId idMatching = newId();
+            StgProjectId idWrong1 = newId();
+            StgProjectId idWrong2 = newId();
 
-            Entity<ProjectId, ?> matchingEntity = newEntity(idMatching);
-            Entity<ProjectId, ?> nonMatchingEntity = newEntity(idWrong1);
-            Entity<ProjectId, ?> nonMatchingEntity2 = newEntity(idWrong2);
+            Entity<StgProjectId, ?> matchingEntity = newEntity(idMatching);
+            Entity<StgProjectId, ?> nonMatchingEntity = newEntity(idWrong1);
+            Entity<StgProjectId, ?> nonMatchingEntity2 = newEntity(idWrong2);
 
             EntityRecord matchingRecord = buildStorageRecord(idMatching, newState(idMatching));
             EntityRecord nonMatching1 = buildStorageRecord(idWrong1, newState(idWrong1));
             EntityRecord nonMatching2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
 
             EntityColumns columns = storage.columns();
-            EntityRecordWithColumns<ProjectId> matchingWithCols = create(matchingEntity, columns,
-                                                                         matchingRecord);
-            EntityRecordWithColumns<ProjectId> nonMatching1WithCols =
+            EntityRecordWithColumns<StgProjectId> matchingWithCols = create(matchingEntity, columns,
+                                                                            matchingRecord);
+            EntityRecordWithColumns<StgProjectId> nonMatching1WithCols =
                     create(nonMatchingEntity, columns, nonMatching1);
-            EntityRecordWithColumns<ProjectId> nontMatching2WithCols =
+            EntityRecordWithColumns<StgProjectId> nontMatching2WithCols =
                     create(nonMatchingEntity2, columns, nonMatching2);
 
             // Fill the storage
@@ -383,7 +466,7 @@ public class EntityRecordStorageTest
             // Prepare the query
             Any entityId = Identifier.pack(idMatching);
             TargetFilters filters = Targets.acceptingOnly(entityId);
-            RecordQuery<ProjectId> query = RecordQueries.from(filters, columns);
+            RecordQuery<StgProjectId> query = RecordQueries.from(filters, columns);
 
             // Perform the query
             Iterator<EntityRecord> readRecords = storage.readAll(query);
@@ -394,9 +477,9 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("to exclude inactive records by default")
         void emptyQueryExcludesInactive() {
-            ProjectId activeId = newId();
-            ProjectId archivedId = newId();
-            ProjectId deletedId = newId();
+            StgProjectId activeId = newId();
+            StgProjectId archivedId = newId();
+            StgProjectId deletedId = newId();
 
             TestCounterEntity activeEntity = newEntity(activeId);
             TestCounterEntity archivedEntity = newEntity(archivedId);
@@ -408,7 +491,7 @@ public class EntityRecordStorageTest
             EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
             EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
 
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
             EntityColumns columns = storage.columns();
             storage.write(create(deletedEntity, columns, deletedRecord));
             storage.write(create(activeEntity, columns, activeRecord));
@@ -421,9 +504,9 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("include inactive records when reading by a query")
         void withQueryIdsAndStatusFilter() {
-            ProjectId activeId = newId();
-            ProjectId archivedId = newId();
-            ProjectId deletedId = newId();
+            StgProjectId activeId = newId();
+            StgProjectId archivedId = newId();
+            StgProjectId deletedId = newId();
 
             TestCounterEntity activeEntity = newEntity(activeId);
             TestCounterEntity archivedEntity = newEntity(archivedId);
@@ -435,14 +518,14 @@ public class EntityRecordStorageTest
             EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
             EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
 
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
             EntityColumns columns = storage.columns();
             storage.write(create(deletedEntity, columns, deletedRecord));
             storage.write(create(activeEntity, columns, activeRecord));
             storage.write(create(archivedEntity, columns, archivedRecord));
 
             TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
-            RecordQuery<ProjectId> query = RecordQueries.from(filters, columns);
+            RecordQuery<StgProjectId> query = RecordQueries.from(filters, columns);
             Iterator<EntityRecord> result = storage.readAll(query);
             ImmutableSet<EntityRecord> actualRecords = ImmutableSet.copyOf(result);
 
@@ -452,9 +535,9 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("exclude inactive records on bulk read by IDs by default")
         void filterByIdByDefaultInBulk() {
-            ProjectId activeId = newId();
-            ProjectId archivedId = newId();
-            ProjectId deletedId = newId();
+            StgProjectId activeId = newId();
+            StgProjectId archivedId = newId();
+            StgProjectId deletedId = newId();
 
             TestCounterEntity activeEntity = newEntity(activeId);
             TestCounterEntity archivedEntity = newEntity(archivedId);
@@ -466,21 +549,21 @@ public class EntityRecordStorageTest
             EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
             EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
 
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
             EntityColumns columns = storage.columns();
             storage.write(create(deletedEntity, columns, deletedRecord));
             storage.write(create(activeEntity, columns, activeRecord));
             storage.write(create(archivedEntity, columns, archivedRecord));
 
-            ImmutableSet<ProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
+            ImmutableSet<StgProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
             //TODO:2020-04-01:alex.tymchenko: deal with the inconsistency read(ids) vs. read(query).
             Iterator<EntityRecord> actual = storage.readAll(targetIds);
 
             assertSingleRecord(activeRecord, actual);
         }
 
-        private void write(Entity<ProjectId, ?> entity) {
-            EntityRecordStorage<ProjectId> storage = storage();
+        private void write(Entity<StgProjectId, ?> entity) {
+            EntityRecordStorage<StgProjectId> storage = storage();
             EntityRecord record = buildStorageRecord(entity.id(), entity.state(),
                                                      entity.lifecycleFlags());
             EntityColumns columns = storage.columns();
@@ -496,8 +579,8 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("a record with no custom columns")
         void withoutColumns() {
-            EntityRecordStorage<ProjectId> storage = storage();
-            ProjectId id = newId();
+            EntityRecordStorage<StgProjectId> storage = storage();
+            StgProjectId id = newId();
             EntityRecord expected = newStorageRecord(id);
             storage.write(id, expected);
 
@@ -512,11 +595,11 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("a record with custom columns")
         void withColumns() {
-            ProjectId id = newId();
+            StgProjectId id = newId();
             EntityRecord record = newStorageRecord(id);
-            Entity<ProjectId, ?> testEntity = newEntity(id);
-            EntityRecordStorage<ProjectId> storage = storage();
-            EntityRecordWithColumns<ProjectId> recordWithColumns =
+            Entity<StgProjectId, ?> testEntity = newEntity(id);
+            EntityRecordStorage<StgProjectId> storage = storage();
+            EntityRecordWithColumns<StgProjectId> recordWithColumns =
                     create(testEntity, storage.columns(), record);
             storage.write(recordWithColumns);
 
@@ -528,13 +611,14 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("several records which did not exist in storage")
         void severalNewRecords() {
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
             int bulkSize = 5;
 
-            Map<ProjectId, EntityRecordWithColumns<ProjectId>> initial = new HashMap<>(bulkSize);
+            Map<StgProjectId, EntityRecordWithColumns<StgProjectId>> initial = new HashMap<>(
+                    bulkSize);
 
             for (int i = 0; i < bulkSize; i++) {
-                ProjectId id = newId();
+                StgProjectId id = newId();
                 EntityRecord record = newStorageRecord(id);
                 initial.put(id, EntityRecordWithColumns.create(id, record));
             }
@@ -559,13 +643,13 @@ public class EntityRecordStorageTest
         @DisplayName("several records which previously existed in storage and rewrite them")
         void rewritingExisting() {
             int recordCount = 3;
-            EntityRecordStorage<ProjectId> storage = storage();
+            EntityRecordStorage<StgProjectId> storage = storage();
 
-            Map<ProjectId, EntityRecord> v1Records = new HashMap<>(recordCount);
-            Map<ProjectId, EntityRecord> v2Records = new HashMap<>(recordCount);
+            Map<StgProjectId, EntityRecord> v1Records = new HashMap<>(recordCount);
+            Map<StgProjectId, EntityRecord> v2Records = new HashMap<>(recordCount);
 
             for (int i = 0; i < recordCount; i++) {
-                ProjectId id = newId();
+                StgProjectId id = newId();
                 EntityRecord record = newStorageRecord(id);
 
                 // Some records are changed and some are not.
@@ -590,9 +674,9 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("a record and update its column values")
         void updateColumnValues() {
-            Project.Status initialStatus = DONE;
+            StgProject.Status initialStatus = DONE;
             @SuppressWarnings("UnnecessaryLocalVariable") // is used for documentation purposes.
-                    Project.Status statusAfterUpdate = CANCELLED;
+                    StgProject.Status statusAfterUpdate = CANCELLED;
             Int32Value initialStatusValue = Int32Value
                     .newBuilder()
                     .setValue(initialStatus.getNumber())
@@ -608,16 +692,16 @@ public class EntityRecordStorageTest
                     .addFilter(aggregatingFilter)
                     .build();
 
-            EntityRecordStorage<ProjectId> storage = storage();
-            RecordQuery<ProjectId> query = RecordQueries.from(filters, storage.columns());
+            EntityRecordStorage<StgProjectId> storage = storage();
+            RecordQuery<StgProjectId> query = RecordQueries.from(filters, storage.columns());
 
-            ProjectId id = newId();
+            StgProjectId id = newId();
             TestCounterEntity entity = newEntity(id);
 
             entity.assignStatus(initialStatus);
 
             EntityRecord record = buildStorageRecord(id, newState(id));
-            EntityRecordWithColumns<ProjectId> recordWithColumns =
+            EntityRecordWithColumns<StgProjectId> recordWithColumns =
                     create(entity, storage.columns(), record);
 
             FieldMask fieldMask = FieldMask.getDefaultInstance();
@@ -634,105 +718,12 @@ public class EntityRecordStorageTest
             // Update the entity columns of the record.
             entity.assignStatus(statusAfterUpdate);
 
-            EntityRecordWithColumns<ProjectId> updatedRecordWithColumns =
+            EntityRecordWithColumns<StgProjectId> updatedRecordWithColumns =
                     create(entity, storage.columns(), record);
             storage.write(updatedRecordWithColumns);
 
             Iterator<EntityRecord> recordsAfter = storage.readAll(query, format);
             assertFalse(recordsAfter.hasNext());
         }
-    }
-
-    @Test
-    @DisplayName("delete record")
-    void deleteRecord() {
-        EntityRecordStorage<ProjectId> storage = storage();
-        ProjectId id = newId();
-        EntityRecord record = newStorageRecord(id);
-
-        // Write the record.
-        storage.write(id, record);
-
-        // Delete the record.
-        assertTrue(storage.delete(id));
-
-        // There's no record with such ID.
-        assertFalse(storage.read(id)
-                           .isPresent());
-    }
-
-    @Test
-    @DisplayName("return a list of entity columns")
-    void returnColumnList() {
-        EntityRecordStorage<ProjectId> storage = storage();
-        ImmutableList<Column> columnList = storage.columns()
-                                                  .columnList();
-
-        int systemColumnCount = LifecycleColumn.values().length;
-        int protoColumnCount = 6;
-
-        int expectedSize = systemColumnCount + protoColumnCount;
-        assertThat(columnList).hasSize(expectedSize);
-    }
-
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection" /* Storing of generated objects and
-                                                                checking via #contains(Object). */)
-    @Test
-    @DisplayName("create unique states for same ID")
-    void createUniqueStatesForSameId() {
-        int checkCount = 10;
-        ProjectId id = newId();
-        Set<EntityState> states = newHashSet();
-        for (int i = 0; i < checkCount; i++) {
-            EntityState newState = newState(id);
-            if (states.contains(newState)) {
-                fail("RecordStorageTest.newState() should return unique messages.");
-            }
-        }
-    }
-
-    @Override
-    protected EntityRecord newStorageRecord(ProjectId id) {
-        return newStorageRecord(id, newState(id));
-    }
-
-    private static EntityRecord newStorageRecord(ProjectId id, EntityState state) {
-        Any wrappedState = pack(state);
-        EntityRecord record = EntityRecord
-                .newBuilder()
-                .setEntityId(Identifier.pack(id))
-                .setState(wrappedState)
-                .setVersion(GivenVersion.withNumber(0))
-                .build();
-        return record;
-    }
-
-    /**
-     * Creates an unique {@code EntityState} with the specified ID.
-     *
-     * <p>Two calls for the same ID should return messages, which are not equal.
-     *
-     * @param id
-     *         the ID for the message
-     * @return the unique {@code EntityState}
-     */
-    private static EntityState newState(ProjectId id) {
-        String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
-        Project project = Project
-                .newBuilder()
-                .setId(id)
-                .setStatus(Project.Status.CREATED)
-                .setName(uniqueName)
-                .addTask(Task.getDefaultInstance())
-                .build();
-        return project;
-    }
-
-    private static List<EntityRecordWithColumns<ProjectId>>
-    recordsWithColumnsFrom(Map<ProjectId, EntityRecord> recordMap) {
-        return recordMap.entrySet()
-                        .stream()
-                        .map(entry -> withLifecycleColumns(entry.getKey(), entry.getValue()))
-                        .collect(toList());
     }
 }

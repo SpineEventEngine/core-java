@@ -31,9 +31,9 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.ProjectWithColumns;
+import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
+import io.spine.test.storage.StgProjectWithColumns;
 import io.spine.testing.core.given.GivenVersion;
 
 import java.util.Collection;
@@ -53,7 +53,7 @@ public class EntityRecordStorageTestEnv {
     private EntityRecordStorageTestEnv() {
     }
 
-    public static EntityRecord buildStorageRecord(ProjectId id, EntityState state) {
+    public static EntityRecord buildStorageRecord(StgProjectId id, EntityState state) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
                 .newBuilder()
@@ -64,7 +64,7 @@ public class EntityRecordStorageTestEnv {
         return record;
     }
 
-    public static EntityRecord buildStorageRecord(ProjectId id, EntityState state,
+    public static EntityRecord buildStorageRecord(StgProjectId id, EntityState state,
                                                   LifecycleFlags lifecycleFlags) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
@@ -92,19 +92,19 @@ public class EntityRecordStorageTestEnv {
     /**
      * Creates new instance of the test entity.
      */
-    public static TestCounterEntity newEntity(ProjectId id) {
+    public static TestCounterEntity newEntity(StgProjectId id) {
         TestCounterEntity entity = new TestCounterEntity(id);
-        injectState(entity, Project.newBuilder()
-                                   .setId(id)
-                                   .build(), Versions.zero());
+        injectState(entity, StgProject.newBuilder()
+                                      .setId(id)
+                                      .build(), Versions.zero());
         return entity;
     }
 
-    public static void archive(TransactionalEntity<ProjectId, ?, ?> entity) {
+    public static void archive(TransactionalEntity<StgProjectId, ?, ?> entity) {
         TestTransaction.archive(entity);
     }
 
-    public static void delete(TransactionalEntity<ProjectId, ?, ?> entity) {
+    public static void delete(TransactionalEntity<StgProjectId, ?, ?> entity) {
         TestTransaction.delete(entity);
     }
 
@@ -130,8 +130,8 @@ public class EntityRecordStorageTestEnv {
 
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity
-            extends TransactionalEntity<ProjectId, Project, Project.Builder>
-            implements ProjectWithColumns, HasLifecycleColumns<ProjectId, Project> {
+            extends TransactionalEntity<StgProjectId, StgProject, StgProject.Builder>
+            implements StgProjectWithColumns, HasLifecycleColumns<StgProjectId, StgProject> {
 
         public static final Timestamp PROJECT_VERSION_TIMESTAMP = Timestamp.newBuilder()
                                                                            .setSeconds(124565)
@@ -140,7 +140,7 @@ public class EntityRecordStorageTestEnv {
 
         private int counter = 0;
 
-        public TestCounterEntity(ProjectId id) {
+        public TestCounterEntity(StgProjectId id) {
             super(id);
         }
 
@@ -180,8 +180,8 @@ public class EntityRecordStorageTestEnv {
                             .build();
         }
 
-        public void assignStatus(Project.Status status) {
-            Project newState = Project
+        public void assignStatus(StgProject.Status status) {
+            StgProject newState = StgProject
                     .newBuilder(state())
                     .setId(id())
                     .setStatus(status)
@@ -192,7 +192,7 @@ public class EntityRecordStorageTestEnv {
         public void assignCounter(int counter) {
             this.counter = counter;
             // Manually inject state so the `project_version` storage field is populated.
-            Project newState = Project
+            StgProject newState = StgProject
                     .newBuilder(state())
                     .setId(id())
                     .setProjectVersion(getProjectVersion())

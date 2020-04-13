@@ -18,11 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.system.given;
+package io.spine.server.storage;
 
-import io.spine.server.projection.Projection;
-import io.spine.test.storage.Task;
-import io.spine.test.storage.TaskId;
+import com.google.protobuf.Message;
 
-public class TestProjection extends Projection<TaskId, Task, Task.Builder> {
+/**
+ * An abstract base for the storage implementations which delegate the execution to the configured
+ * {@link RecordStorage}.
+ */
+public abstract
+class RecordStorageDelegateTest<I, R extends Message, S extends RecordStorageDelegate<I, R>> {
+
+    protected abstract S storage();
+
 }
