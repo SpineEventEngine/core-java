@@ -21,6 +21,7 @@
 package io.spine.server.storage;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -43,7 +44,7 @@ import static io.spine.client.ResponseFormats.formatWith;
  * @param <I>
  *         the type of the record identifiers
  * @param <R>
- *         the type of the message record
+ *         the type of the stored message records
  */
 @SPI
 public abstract class RecordStorage<I, R extends Message> extends AbstractStorage<I, R> {
@@ -58,7 +59,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param multitenant
      *         whether this storage should support multi-tenancy
      */
-    public RecordStorage(Columns<R> columns, boolean multitenant) {
+    protected RecordStorage(Columns<R> columns, boolean multitenant) {
         super(multitenant);
         this.columns = columns;
     }
@@ -237,6 +238,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @return {@code true} if the record was deleted,
      *         or {@code false} if the record with the specified identifier was not found
      */
+    @CanIgnoreReturnValue
     public boolean delete(I id) {
         checkNotClosed();
         return deleteRecord(id);
@@ -299,6 +301,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @return {@code true} if the record was deleted,
      *         or {@code false} if the record with the specified identifier was not found
      */
+    @CanIgnoreReturnValue
     protected abstract boolean deleteRecord(I id);
 
     /**
