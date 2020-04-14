@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.spine.base.EntityState;
 import io.spine.core.TenantId;
-import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 
@@ -46,7 +46,7 @@ public abstract class TenantStorage<T extends EntityState>
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
 
     protected TenantStorage(StorageFactory factory, Class<T> stateClass) {
-        super(factory.createRecordStorage(RecordColumns.emptyOf(stateClass), false));
+        super(factory.createRecordStorage(MessageRecordSpec.emptyOf(stateClass), false));
     }
 
     /**

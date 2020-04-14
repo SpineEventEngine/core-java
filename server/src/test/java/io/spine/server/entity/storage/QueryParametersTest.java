@@ -205,7 +205,7 @@ class QueryParametersTest {
         ContextSpec spec = ContextSpec.multitenant("random name");
         EntityRecordStorage<ProjectId> storage =
                 factory.createEntityRecordStorage(spec, ProjectProjection.class);
-        QueryParameters parameters = QueryParameters.activeEntityQueryParams(storage.columns());
+        QueryParameters parameters = QueryParameters.activeEntityQueryParams(storage.recordSpec());
 
         assertTrue(parameters.isLifecycleAttributesSet());
 

@@ -61,13 +61,13 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with other instances")
     void mergeWithOtherInstances() {
-        EntityColumns columns = EntityColumns.of(TestEntity.class);
+        EntityRecordSpec spec = EntityRecordSpec.of(TestEntity.class);
 
         ColumnName archivedColumnName = archived.columnName();
         ColumnName deletedColumnName = deleted.columnName();
 
-        Column archivedColumn = columns.get(archivedColumnName);
-        Column deletedColumn = columns.get(deletedColumnName);
+        Column archivedColumn = spec.get(archivedColumnName);
+        Column deletedColumn = spec.get(deletedColumnName);
 
         Filter archived = eq(archivedColumnName.value(), true);
         Filter deleted = eq(deletedColumnName.value(), false);
@@ -90,13 +90,13 @@ class CompositeQueryParameterTest {
     @Test
     @DisplayName("merge with single filter")
     void mergeWithSingleFilter() {
-        EntityColumns columns = EntityColumns.of(TestEntity.class);
+        EntityRecordSpec spec = EntityRecordSpec.of(TestEntity.class);
 
         ColumnName archivedColumnName = archived.columnName();
         ColumnName deletedColumnName = deleted.columnName();
 
-        Column archivedColumn = columns.get(archivedColumnName);
-        Column deletedColumn = columns.get(deletedColumnName);
+        Column archivedColumn = spec.get(archivedColumnName);
+        Column deletedColumn = spec.get(deletedColumnName);
 
         Filter archived = eq(archivedColumnName.value(), false);
         Filter deleted = eq(deletedColumnName.value(), false);

@@ -21,7 +21,7 @@
 package io.spine.server.projection;
 
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.GivenEntityColumns;
 import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.projection.given.SavingProjection;
@@ -53,8 +53,8 @@ class ProjectionColumnTest {
 
     private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
                                         ColumnName columnName) {
-        EntityColumns columns = EntityColumns.of(projectionType);
-        Optional<Column> result = columns.find(columnName);
+        EntityRecordSpec spec = EntityRecordSpec.of(projectionType);
+        Optional<Column> result = spec.find(columnName);
         assertThat(result).isPresent();
     }
 }

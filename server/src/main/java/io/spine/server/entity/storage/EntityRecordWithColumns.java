@@ -54,8 +54,8 @@ public final class EntityRecordWithColumns<I>
      *
      * @param entity
      *         the entity to use as a provider of the record identifier and the column values
-     * @param columns
-     *         the definitions of the columns
+     * @param recordSpec
+     *         the specification of the stored record format
      * @param record
      *         the record prepared for storage
      * @param <I>
@@ -65,8 +65,8 @@ public final class EntityRecordWithColumns<I>
      * @return a new instance of {@code EntityRecordWithColumns}
      */
     public static <I, E extends Entity<I, ?>> EntityRecordWithColumns<I>
-    create(E entity, EntityColumns columns, EntityRecord record) {
-        Map<ColumnName, @Nullable Object> storageFields = columns.valuesIn(entity);
+    create(E entity, EntityRecordSpec recordSpec, EntityRecord record) {
+        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(entity);
         return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
     }
 
@@ -88,7 +88,7 @@ public final class EntityRecordWithColumns<I>
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
         checkNotNull(id);
         checkNotNull(record);
-        ImmutableMap<ColumnName, Object> lifecycleValues = EntityColumns.lifecycleValuesIn(record);
+        ImmutableMap<ColumnName, Object> lifecycleValues = EntityRecordSpec.lifecycleValuesIn(record);
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 

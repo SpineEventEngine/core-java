@@ -38,7 +38,7 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Scans and extracts the {@link EntityColumns columns}
+ * Scans and extracts the {@link EntityRecordSpec specification} of the stored record
  * from the passed {@link io.spine.server.entity.Entity Entity}.
  */
 final class Scanner {

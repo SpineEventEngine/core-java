@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage.given;
 
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.storage.Column;
 
 @SuppressWarnings("DuplicateStringLiteralInspection")
@@ -48,9 +48,9 @@ public final class AColumn {
     }
 
     private static Column column(String name) {
-        EntityColumns columns = EntityColumns.of(TaskViewProjection.class);
+        EntityRecordSpec spec = EntityRecordSpec.of(TaskViewProjection.class);
         ColumnName columnName = ColumnName.of(name);
-        Column column = columns.get(columnName);
+        Column column = spec.get(columnName);
         return column;
     }
 }

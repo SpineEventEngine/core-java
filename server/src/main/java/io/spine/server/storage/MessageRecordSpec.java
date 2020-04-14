@@ -38,14 +38,17 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A message record to store, along with the additional columns to store for further querying.
+ * A specification of a message record to store.
+ *
+ * <p>Defines the collection of the columns to store along with the message record
+ * for further querying.
  *
  * @param <R>
- *         the class of the record
+ *         the type of the record
  */
 @Immutable
 @Internal
-public class RecordColumns<R extends Message> extends Columns<R> {
+public class MessageRecordSpec<R extends Message> extends RecordSpec<R> {
 
     /**
      * The columns to store along with the record itself.
@@ -54,18 +57,18 @@ public class RecordColumns<R extends Message> extends Columns<R> {
 
     private final Class<R> recordClass;
 
-    public RecordColumns(Class<R> recordClass, Iterable<RecordColumn<?, R>> columns) {
+    public MessageRecordSpec(Class<R> recordClass, Iterable<RecordColumn<?, R>> columns) {
         super(recordClass);
         this.columns = stream(columns).collect(toImmutableMap(AbstractColumn::name, (c) -> c));
         this.recordClass = recordClass;
     }
 
-    private RecordColumns(Class<R> aClass) {
+    private MessageRecordSpec(Class<R> aClass) {
         this(aClass, ImmutableList.of());
     }
 
-    public static <M extends Message> RecordColumns<M> emptyOf(Class<M> recordClass) {
-        return new RecordColumns<>(recordClass);
+    public static <M extends Message> MessageRecordSpec<M> emptyOf(Class<M> recordClass) {
+        return new MessageRecordSpec<>(recordClass);
     }
 
     @Override
@@ -77,12 +80,6 @@ public class RecordColumns<R extends Message> extends Columns<R> {
                 (name, column) -> result.put(name, column.valueIn(message))
         );
         return result;
-    }
-
-    @SuppressWarnings("unchecked")  /* It's cheaper to attempt to cast,
-                                       than verify that the object is of type `R`.*/
-    private R asMessage(Object record) {
-        return (R) record;
     }
 
     /**
@@ -109,5 +106,11 @@ public class RecordColumns<R extends Message> extends Columns<R> {
         throw newIllegalArgumentException(
                 "A column with name '%s' not found in the `Message` class `%s`.",
                 columnName, recordClass.getCanonicalName());
+    }
+
+    @SuppressWarnings("unchecked")  /* It's cheaper to attempt to cast,
+                                       than verify that the object is of type `R`.*/
+    private R asMessage(Object record) {
+        return (R) record;
     }
 }

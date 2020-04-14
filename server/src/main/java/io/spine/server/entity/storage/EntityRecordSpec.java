@@ -29,7 +29,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.Column;
-import io.spine.server.storage.Columns;
+import io.spine.server.storage.RecordSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
@@ -41,11 +41,15 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * The collection of declared columns of the {@link Entity}.
+ * The specification of the {@link EntityRecord} in which {@link Entity} instances are stored.
+ *
+ * <p>Lists the columns defined for the {@code Entity}, including the system columns,
+ * interface-based columns and the columns defined in the Protobuf message
+ * of the {@code Entity} state.
  */
 @Immutable
 @Internal
-public final class EntityColumns extends Columns<EntityRecord> {
+public final class EntityRecordSpec extends RecordSpec<EntityRecord> {
 
     /**
      * The {@linkplain SystemColumn system columns} of the entity.
@@ -64,7 +68,7 @@ public final class EntityColumns extends Columns<EntityRecord> {
 
     private final EntityClass<?> entityClass;
 
-    private EntityColumns(
+    private EntityRecordSpec(
             ImmutableMap<ColumnName, SysColumn> systemColumns,
             ImmutableMap<ColumnName, SimpleColumn> simpleColumns,
             ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns,
@@ -79,19 +83,19 @@ public final class EntityColumns extends Columns<EntityRecord> {
     /**
      * Gathers columns of the entity class.
      */
-    public static EntityColumns of(EntityClass<?> entityClass) {
+    public static EntityRecordSpec of(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
         Scanner scanner = new Scanner(entityClass);
-        return new EntityColumns(scanner.systemColumns(),
-                                 scanner.simpleColumns(),
-                                 scanner.interfaceBasedColumns(),
-                                 entityClass);
+        return new EntityRecordSpec(scanner.systemColumns(),
+                                    scanner.simpleColumns(),
+                                    scanner.interfaceBasedColumns(),
+                                    entityClass);
     }
 
     /**
      * Gathers columns of the entity class.
      */
-    public static EntityColumns of(Class<? extends Entity<?, ?>> cls) {
+    public static EntityRecordSpec of(Class<? extends Entity<?, ?>> cls) {
         return of(asEntityClass(cls));
     }
 
@@ -102,19 +106,6 @@ public final class EntityColumns extends Columns<EntityRecord> {
             builder.put(column.columnName(), value);
         }
         return builder.build();
-    }
-
-    @Override
-    public Optional<Column> find(ColumnName columnName) {
-        checkNotNull(columnName);
-        Column column = systemColumns.get(columnName);
-        if (column == null) {
-            column = simpleColumns.get(columnName);
-        }
-        if (column == null) {
-            column = interfaceBasedColumns.get(columnName);
-        }
-        return Optional.ofNullable(column);
     }
 
     /**
@@ -160,6 +151,27 @@ public final class EntityColumns extends Columns<EntityRecord> {
         return builder.build();
     }
 
+    @Override
+    public Optional<Column> find(ColumnName columnName) {
+        checkNotNull(columnName);
+        Column column = systemColumns.get(columnName);
+        if (column == null) {
+            column = simpleColumns.get(columnName);
+        }
+        if (column == null) {
+            column = interfaceBasedColumns.get(columnName);
+        }
+        return Optional.ofNullable(column);
+    }
+
+    @Override
+    protected IllegalArgumentException columnNotFound(ColumnName columnName) {
+        throw newIllegalArgumentException(
+                "A column with name '%s' not found in the `Entity` class `%s`.",
+                columnName, entityClass.stateClass()
+                                       .getCanonicalName());
+    }
+
     /**
      * Returns a subset of columns corresponding to the lifecycle of the entity.
      */
@@ -181,13 +193,5 @@ public final class EntityColumns extends Columns<EntityRecord> {
      */
     public ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
         return interfaceBasedColumns;
-    }
-
-    @Override
-    protected IllegalArgumentException columnNotFound(ColumnName columnName) {
-        throw newIllegalArgumentException(
-                "A column with name '%s' not found in the `Entity` class `%s`.",
-                columnName, entityClass.stateClass()
-                                       .getCanonicalName());
     }
 }

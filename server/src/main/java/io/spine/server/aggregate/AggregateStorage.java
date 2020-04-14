@@ -33,7 +33,7 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.AbstractStorage;
@@ -70,12 +70,12 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     private final Truncate<Object> truncation;
     private final HistoryBackward<I> historyBackward;
 
-    public AggregateStorage(ContextSpec spec,
+    public AggregateStorage(ContextSpec context,
                             Class<? extends Aggregate<I, ?, ?>> aggregateClass,
                             StorageFactory factory) {
-        super(spec.isMultitenant());
-        eventStorage = factory.createAggregateEventStorage(spec.isMultitenant());
-        stateStorage = factory.createEntityRecordStorage(spec, aggregateClass);
+        super(context.isMultitenant());
+        eventStorage = factory.createAggregateEventStorage(context.isMultitenant());
+        stateStorage = factory.createEntityRecordStorage(context, aggregateClass);
         truncation = new Truncate<>(eventStorage);
         historyBackward = new HistoryBackward<>(eventStorage);
     }
@@ -216,15 +216,15 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     }
 
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
-        RecordQuery<I> query = RecordQueries.from(filters, stateStorage.columns());
+        RecordQuery<I> query = RecordQueries.from(filters, stateStorage.recordSpec());
         return stateStorage.readAll(query, format);
     }
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
         EntityRecord record = AggregateRecords.newStateRecord(aggregate, mirrorEnabled);
-        EntityColumns columns = EntityColumns.of(aggregate.modelClass());
+        EntityRecordSpec recordSpec = EntityRecordSpec.of(aggregate.modelClass());
         EntityRecordWithColumns<I> result =
-                EntityRecordWithColumns.create(aggregate, columns, record);
+                EntityRecordWithColumns.create(aggregate, recordSpec, record);
         stateStorage.write(result);
     }
 

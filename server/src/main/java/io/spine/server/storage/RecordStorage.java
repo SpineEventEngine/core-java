@@ -49,33 +49,19 @@ import static io.spine.client.ResponseFormats.formatWith;
 @SPI
 public abstract class RecordStorage<I, R extends Message> extends AbstractStorage<I, R> {
 
-    private final Columns<R> columns;
+    private final RecordSpec<R> recordSpec;
 
     /**
      * Creates the new storage instance.
      *
-     * @param columns
+     * @param recordSpec
      *         definitions of the columns to store along with each record
      * @param multitenant
      *         whether this storage should support multi-tenancy
      */
-    protected RecordStorage(Columns<R> columns, boolean multitenant) {
+    protected RecordStorage(RecordSpec<R> recordSpec, boolean multitenant) {
         super(multitenant);
-        this.columns = columns;
-    }
-
-    /**
-     * Writes the record as the storage record by the given identifier.
-     *
-     * @param id
-     *         the ID for the record
-     * @param record
-     *         the record to store
-     */
-    @Override
-    public synchronized void write(I id, R record) {
-        RecordWithColumns<I, R> withCols = RecordWithColumns.create(id, record, this.columns);
-        write(withCols);
+        this.recordSpec = recordSpec;
     }
 
     /**
@@ -111,6 +97,20 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
         RecordQuery<I> query = RecordQueries.of(ImmutableList.of(id));
         Optional<R> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
         return result;
+    }
+
+    /**
+     * Writes the record as the storage record by the given identifier.
+     *
+     * @param id
+     *         the ID for the record
+     * @param record
+     *         the record to store
+     */
+    @Override
+    public synchronized void write(I id, R record) {
+        RecordWithColumns<I, R> withCols = RecordWithColumns.create(id, record, this.recordSpec);
+        write(withCols);
     }
 
     /**
@@ -305,11 +305,10 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     protected abstract boolean deleteRecord(I id);
 
     /**
-     * Returns the definition of the columns to store along with each message record
-     * in this storage.
+     * Returns the specification of the record format, in which the message record should be stored.
      */
     @Internal
-    protected Columns<R> columns() {
-        return columns;
+    protected RecordSpec<R> recordSpec() {
+        return recordSpec;
     }
 }

@@ -43,7 +43,7 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     private final RecordStorage<I, R> delegate;
 
     protected RecordStorageDelegate(RecordStorage<I, R> delegate) {
-        super(delegate.columns(), delegate.isMultitenant());
+        super(delegate.recordSpec(), delegate.isMultitenant());
         this.delegate = delegate;
     }
 
@@ -119,8 +119,8 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
 
     @Override
     @Internal
-    protected Columns<R> columns() {
-        return delegate.columns();
+    protected RecordSpec<R> recordSpec() {
+        return delegate.recordSpec();
     }
 
     @Override

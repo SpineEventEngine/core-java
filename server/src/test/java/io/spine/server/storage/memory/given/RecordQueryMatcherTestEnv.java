@@ -26,7 +26,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.projection.Projection;
 import io.spine.server.storage.Column;
 import io.spine.server.storage.RecordColumn;
@@ -80,9 +80,9 @@ public final class RecordQueryMatcherTestEnv {
     }
 
     private static Column column(String name) {
-        EntityColumns columns = EntityColumns.of(ProjectView.class);
+        EntityRecordSpec spec = EntityRecordSpec.of(ProjectView.class);
         ColumnName columnName = ColumnName.of(name);
-        Column column = columns.get(columnName);
+        Column column = spec.get(columnName);
         return column;
     }
 

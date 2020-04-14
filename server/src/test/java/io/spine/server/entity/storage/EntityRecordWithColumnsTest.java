@@ -123,7 +123,7 @@ class EntityRecordWithColumnsTest {
     void supportEmptyColumns() {
         EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(SAMPLE_ID);
 
-        EntityColumns columns = EntityColumns.of(entity.getClass());
+        EntityRecordSpec columns = EntityRecordSpec.of(entity.getClass());
         Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
 
         EntityRecordWithColumns<?> record =

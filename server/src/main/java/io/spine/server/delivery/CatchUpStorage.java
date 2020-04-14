@@ -21,7 +21,7 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
-import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
@@ -44,9 +44,9 @@ public class CatchUpStorage extends RecordStorageDelegate<CatchUpId, CatchUp> {
 
     private static RecordStorage<CatchUpId, CatchUp>
     createStorage(StorageFactory factory, boolean multitenant) {
-        RecordColumns<CatchUp> columns =
-                new RecordColumns<>(CatchUp.class, CatchUpColumn.definitions());
-        return factory.createRecordStorage(columns, multitenant);
+        MessageRecordSpec<CatchUp> spec =
+                new MessageRecordSpec<>(CatchUp.class, CatchUpColumn.definitions());
+        return factory.createRecordStorage(spec, multitenant);
     }
 
     public void write(CatchUp record) {

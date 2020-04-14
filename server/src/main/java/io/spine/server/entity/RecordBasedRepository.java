@@ -37,7 +37,7 @@ import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.core.Event;
 import io.spine.core.Signal;
-import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordQueries;
@@ -78,7 +78,6 @@ import static io.spine.validate.Validate.checkValid;
  * @param <S>
  *         the type of entity state messages
  */
-@SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends EntityState>
         extends Repository<I, E> implements QueryableRepository {
 
@@ -414,8 +413,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(format);
 
         EntityRecordStorage<I> storage = recordStorage();
-        EntityColumns entityColumns = storage.columns();
-        RecordQuery<I> entityQuery = RecordQueries.from(filters, entityColumns);
+        EntityRecordSpec entityRecordSpec = storage.recordSpec();
+        RecordQuery<I> entityQuery = RecordQueries.from(filters, entityRecordSpec);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
     }
@@ -468,11 +467,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @VisibleForTesting
     RecordWithColumns<I, EntityRecord> toRecord(E entity) {
-        EntityColumns columns = EntityColumns.of(entity.modelClass());
+        EntityRecordSpec spec = EntityRecordSpec.of(entity.modelClass());
         EntityRecord record = storageConverter().convert(entity);
         checkNotNull(record);
         RecordWithColumns<I, EntityRecord> result =
-                EntityRecordWithColumns.create(entity, columns, record);
+                EntityRecordWithColumns.create(entity, spec, record);
         return result;
     }
 

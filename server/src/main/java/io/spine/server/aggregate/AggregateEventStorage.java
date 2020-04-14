@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 
@@ -30,12 +30,12 @@ import io.spine.server.storage.StorageFactory;
 public class AggregateEventStorage
         extends RecordStorageDelegate<AggregateEventRecordId, AggregateEventRecord> {
 
-    private static final RecordColumns<AggregateEventRecord> eventColumns =
-            new RecordColumns<>(
+    private static final MessageRecordSpec<AggregateEventRecord> spec =
+            new MessageRecordSpec<>(
                     AggregateEventRecord.class, AggregateEventRecordColumn.definitions()
             );
 
     public AggregateEventStorage(StorageFactory factory, boolean multitenant) {
-        super(factory.createRecordStorage(eventColumns, multitenant));
+        super(factory.createRecordStorage(spec, multitenant));
     }
 }

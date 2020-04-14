@@ -29,7 +29,7 @@ import io.spine.annotation.SPI;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityRecordSpec;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -77,11 +77,11 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                 .addAll(parameters);
     }
 
-    public static QueryParameters activeEntityQueryParams(EntityColumns columns) {
+    public static QueryParameters activeEntityQueryParams(EntityRecordSpec recordSpec) {
         ColumnName archivedColumnName = archived.columnName();
         ColumnName deletedColumnName = deleted.columnName();
-        Optional<Column> archivedColumn = columns.find(archivedColumnName);
-        Optional<Column> deletedColumn = columns.find(deletedColumnName);
+        Optional<Column> archivedColumn = recordSpec.find(archivedColumnName);
+        Optional<Column> deletedColumn = recordSpec.find(deletedColumnName);
         boolean entityHasLifecycle = archivedColumn.isPresent() && deletedColumn.isPresent();
         if (!entityHasLifecycle) {
             return newBuilder().build();
@@ -97,7 +97,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                            .build();
     }
 
-    public static <V> QueryParameters eq(QueryableField field, V value) {
+    public static <V> QueryParameters eq(QueryableField<?> field, V value) {
         return forSingleField(field, Filters.eq(field.columnName().value(), value));
     }
 
@@ -106,7 +106,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                                                         .value(), value));
     }
 
-    public static <V> QueryParameters gt(QueryableField field, V value) {
+    public static <V> QueryParameters gt(QueryableField<?> field, V value) {
         return forSingleField(field, Filters.gt(field.columnName().value(), value));
     }
 
@@ -115,7 +115,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                                                         .value(), value));
     }
 
-    public static <V> QueryParameters ge(QueryableField field, V value) {
+    public static <V> QueryParameters ge(QueryableField<?> field, V value) {
         return forSingleField(field, Filters.ge(field.columnName().value(), value));
     }
 
@@ -124,7 +124,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                                                         .value(), value));
     }
 
-    public static <V> QueryParameters lt(QueryableField field, V value) {
+    public static <V> QueryParameters lt(QueryableField<?> field, V value) {
         return forSingleField(field, Filters.lt(field.columnName().value(), value));
     }
 
@@ -133,7 +133,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                                                         .value(), value));
     }
 
-    public static <V> QueryParameters le(QueryableField field, V value) {
+    public static <V> QueryParameters le(QueryableField<?> field, V value) {
         return forSingleField(field, Filters.le(field.columnName().value(), value));
     }
 

@@ -31,17 +31,19 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Columns of a stored record.
+ * Defines the specification of a record in a storage.
+ *
+ * <p>Enumerates the record columns to store along with the record itself.
  *
  * @param <R>
  *         the type of the stored record
  */
 @Internal
-public abstract class Columns<R> {
+public abstract class RecordSpec<R> {
 
     private final Class<R> recordType;
 
-    protected Columns(Class<R> recordType) {
+    protected RecordSpec(Class<R> recordType) {
         this.recordType = recordType;
     }
 

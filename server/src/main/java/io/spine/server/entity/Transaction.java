@@ -461,7 +461,7 @@ public abstract class Transaction<I,
     @SuppressWarnings("unchecked") // Logically correct.
     private S stateWithColumns() {
         ImmutableMap<ColumnName, InterfaceBasedColumn> columns = entity.thisClass()
-                                                                       .columns()
+                                                                       .recordSpec()
                                                                        .interfaceBasedColumns();
         if (columns.isEmpty()) {
             return entity.state();

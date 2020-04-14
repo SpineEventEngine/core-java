@@ -34,7 +34,7 @@ import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.storage.RecordColumns;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordQueries;
 import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorage;
@@ -83,8 +83,32 @@ public final class DefaultEventStore
 
     private static RecordStorage<EventId, Event>
     storageForEvents(StorageFactory factory, boolean multitenant) {
-        RecordColumns<Event> columns = new RecordColumns<>(Event.class, EventColumn.definitions());
-        return factory.createRecordStorage(columns, multitenant);
+        MessageRecordSpec<Event> spec =
+                new MessageRecordSpec<>(Event.class, EventColumn.definitions());
+        return factory.createRecordStorage(spec, multitenant);
+    }
+
+    private static void ensureSameTenant(ImmutableList<Event> events) {
+        checkNotNull(events);
+        Set<TenantId> tenants = events.stream()
+                                      .map(Event::tenant)
+                                      .collect(toSet());
+        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
+    }
+
+    private static ResponseFormat formatFrom(EventStreamQuery query) {
+        ResponseFormat.Builder formatBuilder = ResponseFormat.newBuilder();
+        OrderBy ascendingByCreated = OrderBy
+                .newBuilder()
+                .setColumn(created.name())
+                .setDirection(OrderBy.Direction.ASCENDING)
+                .vBuild();
+        formatBuilder.addOrderBy(ascendingByCreated);
+        if (query.hasLimit()) {
+            formatBuilder.setLimit(query.getLimit()
+                                        .getValue());
+        }
+        return formatBuilder.build();
     }
 
     @Override
@@ -123,14 +147,6 @@ public final class DefaultEventStore
         op.execute();
 
         log.stored(events);
-    }
-
-    private static void ensureSameTenant(ImmutableList<Event> events) {
-        checkNotNull(events);
-        Set<TenantId> tenants = events.stream()
-                                      .map(Event::tenant)
-                                      .collect(toSet());
-        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }
 
     @Override
@@ -176,25 +192,10 @@ public final class DefaultEventStore
             return readAll(format);
         } else {
             TargetFilters filters = QueryToFilters.convert(query);
-            RecordQuery<EventId> recordQuery = RecordQueries.from(filters, columns());
+            RecordQuery<EventId> recordQuery = RecordQueries.from(filters, recordSpec());
 
             return readAll(recordQuery, format);
         }
-    }
-
-    private static ResponseFormat formatFrom(EventStreamQuery query) {
-        ResponseFormat.Builder formatBuilder = ResponseFormat.newBuilder();
-        OrderBy ascendingByCreated = OrderBy
-                .newBuilder()
-                .setColumn(created.name())
-                .setDirection(OrderBy.Direction.ASCENDING)
-                .vBuild();
-        formatBuilder.addOrderBy(ascendingByCreated);
-        if (query.hasLimit()) {
-            formatBuilder.setLimit(query.getLimit()
-                                        .getValue());
-        }
-        return formatBuilder.build();
     }
 
     private void store(Event event) {
@@ -206,7 +207,7 @@ public final class DefaultEventStore
         ImmutableList<RecordWithColumns<EventId, Event>> records =
                 Streams.stream(events)
                        .map(Event::clearEnrichments)
-                       .map((e) -> RecordWithColumns.create(e.getId(), e, columns()))
+                       .map((e) -> RecordWithColumns.create(e.getId(), e, recordSpec()))
                        .collect(toImmutableList());
         writeAll(records);
     }

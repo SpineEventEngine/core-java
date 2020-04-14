@@ -38,26 +38,26 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("DuplicateStringLiteralInspection")
-@DisplayName("`EntityColumns` should")
-class EntityColumnsTest {
+@DisplayName("`EntityRecordSpec` should")
+class EntityRecordSpecTest {
 
-    private final EntityColumns columns = EntityColumns.of(TaskViewProjection.class);
+    private final EntityRecordSpec spec = EntityRecordSpec.of(TaskViewProjection.class);
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(EntityColumns.class);
+                .testAllPublicStaticMethods(EntityRecordSpec.class);
         new NullPointerTester()
-                .testAllPublicInstanceMethods(columns);
+                .testAllPublicInstanceMethods(spec);
     }
 
     @Test
     @DisplayName("be extracted from an entity class")
     void beExtractedFromEntityClass() {
-        EntityColumns columns = EntityColumns.of(TaskListViewProjection.class);
+        EntityRecordSpec projectionSpec = EntityRecordSpec.of(TaskListViewProjection.class);
         ColumnName columnName = ColumnName.of("description");
-        Optional<Column> descriptionColumn = columns.find(columnName);
+        Optional<Column> descriptionColumn = projectionSpec.find(columnName);
 
         assertThat(descriptionColumn.isPresent()).isTrue();
     }
@@ -66,7 +66,7 @@ class EntityColumnsTest {
     @DisplayName("obtain a column by name")
     void obtainByName() {
         ColumnName columName = ColumnName.of("estimate_in_days");
-        Column column = columns.get(columName);
+        Column column = spec.get(columName);
 
         assertThat(column.type()).isEqualTo(int.class);
     }
@@ -78,14 +78,14 @@ class EntityColumnsTest {
     void throwOnColumnNotFound() {
         ColumnName nonExistent = ColumnName.of("non-existent-column");
 
-        assertThrows(IllegalArgumentException.class, () -> columns.get(nonExistent));
+        assertThrows(IllegalArgumentException.class, () -> spec.get(nonExistent));
     }
 
     @Test
     @DisplayName("search for a column by name")
     void searchByName() {
         ColumnName existent = ColumnName.of("name");
-        Optional<Column> column = columns.find(existent);
+        Optional<Column> column = spec.find(existent);
 
         assertThat(column.isPresent()).isTrue();
     }
@@ -94,7 +94,7 @@ class EntityColumnsTest {
     @DisplayName("return empty `Optional` when searching for a non-existent column")
     void returnEmptyOptionalForNonExistent() {
         ColumnName nonExistent = ColumnName.of("non-existent-column");
-        Optional<Column> result = columns.find(nonExistent);
+        Optional<Column> result = spec.find(nonExistent);
 
         assertThat(result.isPresent()).isFalse();
     }
@@ -106,7 +106,7 @@ class EntityColumnsTest {
         int protoColumnCount = 4;
 
         int expectedSize = systemColumnCount + protoColumnCount;
-        assertThat(columns.columnList()).hasSize(expectedSize);
+        assertThat(spec.columnList()).hasSize(expectedSize);
 
     }
 
@@ -114,7 +114,7 @@ class EntityColumnsTest {
     @DisplayName("extract values from entity")
     void extractColumnValues() {
         TaskViewProjection projection = new TaskViewProjection();
-        Map<ColumnName, Object> values = columns.valuesIn(projection);
+        Map<ColumnName, Object> values = spec.valuesIn(projection);
 
         assertThat(values).containsExactly(
                 ColumnName.of("archived"), projection.isArchived(),
@@ -134,7 +134,7 @@ class EntityColumnsTest {
     @Test
     @DisplayName("return a map of interface-based columns")
     void extractInterfaceBasedValues() {
-        ImmutableMap<ColumnName, InterfaceBasedColumn> values = columns.interfaceBasedColumns();
+        ImmutableMap<ColumnName, InterfaceBasedColumn> values = spec.interfaceBasedColumns();
 
         assertThat(values).containsKey(ColumnName.of("name"));
         assertThat(values).containsKey(ColumnName.of("estimate_in_days"));
@@ -145,7 +145,7 @@ class EntityColumnsTest {
     @Test
     @DisplayName("return a map of lifecycle columns of the entity")
     void returnLifecycleColumns() {
-        ImmutableMap<ColumnName, Column> columns = this.columns.lifecycleColumns();
+        ImmutableMap<ColumnName, Column> columns = this.spec.lifecycleColumns();
 
         assertThat(columns).hasSize(2);
 

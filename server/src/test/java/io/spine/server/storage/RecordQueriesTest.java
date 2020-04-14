@@ -33,7 +33,7 @@ import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.entity.storage.given.TestProjection;
@@ -72,7 +72,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
               .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                 .build())
               .setDefault(RecordColumn.class, sampleColumn())
-              .setDefault(Columns.class, RecordColumns.emptyOf(Any.class))
+              .setDefault(RecordSpec.class, MessageRecordSpec.emptyOf(Any.class))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -91,7 +91,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .addFilter(compositeFilter)
                 .build();
 
-        EntityColumns columns = EntityColumns.of(TestEntity.class);
+        EntityRecordSpec columns = EntityRecordSpec.of(TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
                      () -> RecordQueries.from(filters, columns));
@@ -108,7 +108,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .addFilter(compositeFilter)
                 .build();
 
-        EntityColumns columns = EntityColumns.of(TestEntity.class);
+        EntityRecordSpec columns = EntityRecordSpec.of(TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
                      () -> RecordQueries.from(filters, columns));
@@ -139,7 +139,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .setIdFilter(idFilter)
                 .addFilter(aggregatingFilter)
                 .build();
-        EntityColumns columns = EntityColumns.of(TestProjection.class);
+        EntityRecordSpec columns = EntityRecordSpec.of(TestProjection.class);
         RecordQuery<?> query = RecordQueries.from(filters, columns);
         assertNotNull(query);
 

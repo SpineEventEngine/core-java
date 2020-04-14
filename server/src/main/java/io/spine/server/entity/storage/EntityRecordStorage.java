@@ -50,8 +50,8 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
     public EntityRecordStorage(StorageFactory factory,
                                Class<? extends Entity<I, ?>> entityClass,
                                boolean multitenant) {
-        super(factory.createRecordStorage(EntityColumns.of(entityClass), multitenant));
-        activeQueryParams = activeEntityQueryParams(columns());
+        super(factory.createRecordStorage(EntityRecordSpec.of(entityClass), multitenant));
+        activeQueryParams = activeEntityQueryParams(recordSpec());
         this.findActiveRecordsQuery = RecordQueries.of(ImmutableSet.of(), activeQueryParams);
     }
 
@@ -112,8 +112,8 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
      */
     @Internal
     @Override
-    public final EntityColumns columns() {
-        return (EntityColumns) super.columns();
+    public final EntityRecordSpec recordSpec() {
+        return (EntityRecordSpec) super.recordSpec();
     }
 
     /**

@@ -28,7 +28,7 @@ import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
-import io.spine.server.entity.storage.EntityColumns;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.system.server.EntityTypeName;
@@ -70,10 +70,10 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     private transient volatile @MonotonicNonNull EntityState defaultState;
 
     /**
-     * The entity columns of this class.
+     * The specification of the record format, in which the state of this entity is stored.
      */
     @LazyInit
-    private transient volatile @MonotonicNonNull EntityColumns columns;
+    private transient volatile @MonotonicNonNull EntityRecordSpec recordSpec;
 
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
@@ -150,16 +150,16 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     /**
-     * Obtains the entity columns of this class.
+     * Obtains the specification of the storage record for this class.
      */
-    public final EntityColumns columns() {
-        EntityColumns result = columns;
+    public final EntityRecordSpec recordSpec() {
+        EntityRecordSpec result = recordSpec;
         if (result == null) {
             synchronized (this) {
-                result = columns;
+                result = recordSpec;
                 if (result == null) {
-                    columns = EntityColumns.of(this);
-                    result = columns;
+                    recordSpec = EntityRecordSpec.of(this);
+                    result = recordSpec;
                 }
             }
         }

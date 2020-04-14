@@ -41,8 +41,8 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Creates a new {@link RecordStorage}.
      *
-     * @param columns
-     *         the definitions of the columns to store along with each record
+     * @param recordSpec
+     *         the specification of the record format in which the items are stored
      * @param multitenant
      *         whether the storage should be multi-tenant
      * @param <I>
@@ -51,7 +51,7 @@ public interface StorageFactory extends AutoCloseable {
      *         the type of the stored records
      */
     <I, R extends Message> RecordStorage<I, R>
-    createRecordStorage(Columns<R> columns, boolean multitenant);
+    createRecordStorage(RecordSpec<R> recordSpec, boolean multitenant);
 
     /**
      * Creates a new {@link AggregateStorage}.

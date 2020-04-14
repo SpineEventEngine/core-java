@@ -25,8 +25,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.QueryParameters;
-import io.spine.server.storage.RecordColumns;
 import io.spine.server.storage.RecordQueries;
 import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorage;
@@ -69,9 +69,9 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
 
     private static RecordStorage<InboxMessageId, InboxMessage>
     createStorage(StorageFactory factory, boolean multitenant) {
-        RecordColumns<InboxMessage> columns =
-                new RecordColumns<>(InboxMessage.class, InboxColumn.definitions());
-        return factory.createRecordStorage(columns, multitenant);
+        MessageRecordSpec<InboxMessage> spec =
+                new MessageRecordSpec<>(InboxMessage.class, InboxColumn.definitions());
+        return factory.createRecordStorage(spec, multitenant);
     }
 
     /**
@@ -156,7 +156,7 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
     public synchronized void writeBatch(Iterable<InboxMessage> messages) {
         List<RecordWithColumns<InboxMessageId, InboxMessage>> toStore =
                 stream(messages)
-                        .map(m -> RecordWithColumns.create(m.getId(), m, columns()))
+                        .map(m -> RecordWithColumns.create(m.getId(), m, recordSpec()))
                         .collect(toList());
         writeAll(toStore);
     }

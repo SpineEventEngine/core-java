@@ -67,11 +67,11 @@ public class RecordWithColumns<I, R extends Message> {
      * Creates a new record extracting the column values from the passed entity.
      */
     public static <I, R extends Message>
-    RecordWithColumns<I, R> create(I identifier, R record, Columns<R> columns) {
+    RecordWithColumns<I, R> create(I identifier, R record, RecordSpec<R> recordSpec) {
         checkNotNull(identifier);
         checkNotNull(record);
-        checkNotNull(columns);
-        Map<ColumnName, @Nullable Object> storageFields = columns.valuesIn(record);
+        checkNotNull(recordSpec);
+        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(record);
         return of(identifier, record, storageFields);
     }
 
