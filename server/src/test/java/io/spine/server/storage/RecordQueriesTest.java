@@ -71,13 +71,13 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
         tester.setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
               .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                 .build())
-              .setDefault(RecordColumn.class, sampleColumn())
+              .setDefault(CustomColumn.class, sampleColumn())
               .setDefault(RecordSpec.class, MessageRecordSpec.emptyOf(Any.class))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
-    private static RecordColumn<String, Any> sampleColumn() {
-        return new RecordColumn<>(ColumnName.of("sample"), String.class, (v) -> "");
+    private static CustomColumn<String, Any> sampleColumn() {
+        return new CustomColumn<>(ColumnName.of("sample"), String.class, (v) -> "");
     }
 
     @Test
@@ -205,7 +205,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
 
     @Test
     void createQueryByTheColumnValue() {
-        RecordColumn<String, Any> expectedColumn = sampleColumn();
+        CustomColumn<String, Any> expectedColumn = sampleColumn();
         Any expectedValue = pack(currentTime());
         RecordQuery<Object> actual = RecordQueries.byColumn(expectedColumn, expectedValue);
 
@@ -216,7 +216,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
 
     @Test
     void createQueryByTheFieldValue() {
-        RecordColumn<String, Any> columnUsed = sampleColumn();
+        CustomColumn<String, Any> columnUsed = sampleColumn();
         QueryableField<Any> expectedField = () -> columnUsed;
         Any expectedValue = pack(currentTime());
         RecordQuery<Object> actual = RecordQueries.byField(expectedField, expectedValue);

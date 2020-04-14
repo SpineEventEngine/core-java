@@ -23,9 +23,9 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.storage.CustomColumn;
+import io.spine.server.storage.CustomColumn.Getter;
 import io.spine.server.storage.QueryableField;
-import io.spine.server.storage.RecordColumn;
-import io.spine.server.storage.RecordColumn.Getter;
 
 /**
  * Columns stored along with each {@link InboxMessage}.
@@ -51,15 +51,15 @@ public enum InboxColumn implements QueryableField<InboxMessage> {
     version(Integer.class, InboxMessage::getVersion);
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final RecordColumn<?, InboxMessage> column;
+    private final CustomColumn<?, InboxMessage> column;
 
     <T> InboxColumn(Class<T> type, Getter<InboxMessage, T> getter) {
         ColumnName name = ColumnName.of(name());
-        this.column = new RecordColumn<>(name, type, getter);
+        this.column = new CustomColumn<>(name, type, getter);
     }
 
-    static ImmutableList<RecordColumn<?, InboxMessage>> definitions() {
-        ImmutableList.Builder<RecordColumn<?, InboxMessage>> list = ImmutableList.builder();
+    static ImmutableList<CustomColumn<?, InboxMessage>> definitions() {
+        ImmutableList.Builder<CustomColumn<?, InboxMessage>> list = ImmutableList.builder();
         for (InboxColumn value : InboxColumn.values()) {
             list.add(value.column);
         }
@@ -67,7 +67,7 @@ public enum InboxColumn implements QueryableField<InboxMessage> {
     }
 
     @Override
-    public RecordColumn<?, InboxMessage> column() {
+    public CustomColumn<?, InboxMessage> column() {
         return column;
     }
 }

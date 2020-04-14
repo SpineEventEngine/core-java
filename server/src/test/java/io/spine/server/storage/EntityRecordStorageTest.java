@@ -43,9 +43,9 @@ import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity;
+import io.spine.server.storage.given.GivenStorageProject;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
-import io.spine.test.storage.StgTask;
 import io.spine.testing.core.given.GivenVersion;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
@@ -87,8 +87,6 @@ import static io.spine.test.storage.StgProject.Status.CANCELLED;
 import static io.spine.test.storage.StgProject.Status.DONE;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;
-import static java.lang.String.format;
-import static java.lang.System.nanoTime;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -114,27 +112,6 @@ public class EntityRecordStorageTest
         return record;
     }
 
-    /**
-     * Creates an unique {@code EntityState} with the specified ID.
-     *
-     * <p>Two calls for the same ID should return messages, which are not equal.
-     *
-     * @param id
-     *         the ID for the message
-     * @return the unique {@code EntityState}
-     */
-    private static EntityState newState(StgProjectId id) {
-        String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
-        StgProject project = StgProject
-                .newBuilder()
-                .setId(id)
-                .setStatus(StgProject.Status.CREATED)
-                .setName(uniqueName)
-                .addTask(StgTask.getDefaultInstance())
-                .build();
-        return project;
-    }
-
     private static List<EntityRecordWithColumns<StgProjectId>>
     recordsWithColumnsFrom(Map<StgProjectId, EntityRecord> recordMap) {
         return recordMap.entrySet()
@@ -152,7 +129,7 @@ public class EntityRecordStorageTest
 
     @Override
     protected EntityRecord newStorageRecord(StgProjectId id) {
-        return newStorageRecord(id, newState(id));
+        return newStorageRecord(id, GivenStorageProject.newState(id));
     }
 
     @Override
@@ -221,7 +198,7 @@ public class EntityRecordStorageTest
         StgProjectId id = newId();
         Set<EntityState> states = newHashSet();
         for (int i = 0; i < checkCount; i++) {
-            EntityState newState = newState(id);
+            EntityState newState = GivenStorageProject.newState(id);
             if (states.contains(newState)) {
                 fail("RecordStorageTest.newState() should return unique messages.");
             }
@@ -240,7 +217,7 @@ public class EntityRecordStorageTest
             EntityRecordStorage<StgProjectId> storage = storage();
             storage.write(id, record);
 
-            EntityState state = newState(id);
+            EntityState state = GivenStorageProject.newState(id);
             FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
 
             Optional<EntityRecord> optional = storage.read(id, idMask);
@@ -262,7 +239,7 @@ public class EntityRecordStorageTest
 
             for (int i = 0; i < count; i++) {
                 StgProjectId id = newId();
-                EntityState state = newState(id);
+                EntityState state = GivenStorageProject.newState(id);
                 if (stateClass == null) {
                     stateClass = state.getClass();
                 }
@@ -290,9 +267,9 @@ public class EntityRecordStorageTest
             StgProjectId archivedRecordId = newId();
 
             EntityRecord activeRecord =
-                    buildStorageRecord(activeRecordId, newState(activeRecordId));
+                    buildStorageRecord(activeRecordId, GivenStorageProject.newState(activeRecordId));
             EntityRecord archivedRecord =
-                    buildStorageRecord(archivedRecordId, newState(archivedRecordId));
+                    buildStorageRecord(archivedRecordId, GivenStorageProject.newState(archivedRecordId));
             TransactionalEntity<StgProjectId, ?, ?> activeEntity = newEntity(activeRecordId);
             TransactionalEntity<StgProjectId, ?, ?> archivedEntity = newEntity(archivedRecordId);
 
@@ -368,9 +345,9 @@ public class EntityRecordStorageTest
 
             // After the mutation above the single matching record is the one under the `idMatching` ID
 
-            EntityRecord fineRecord = buildStorageRecord(idMatching, newState(idMatching));
-            EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
-            EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
+            EntityRecord fineRecord = buildStorageRecord(idMatching, GivenStorageProject.newState(idMatching));
+            EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, GivenStorageProject.newState(idWrong1));
+            EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, GivenStorageProject.newState(idWrong2));
 
             EntityRecordWithColumns<StgProjectId> recordRight =
                     create(matchingEntity, spec, fineRecord);
@@ -440,9 +417,9 @@ public class EntityRecordStorageTest
             Entity<StgProjectId, ?> nonMatchingEntity = newEntity(idWrong1);
             Entity<StgProjectId, ?> nonMatchingEntity2 = newEntity(idWrong2);
 
-            EntityRecord matchingRecord = buildStorageRecord(idMatching, newState(idMatching));
-            EntityRecord nonMatching1 = buildStorageRecord(idWrong1, newState(idWrong1));
-            EntityRecord nonMatching2 = buildStorageRecord(idWrong2, newState(idWrong2));
+            EntityRecord matchingRecord = buildStorageRecord(idMatching, GivenStorageProject.newState(idMatching));
+            EntityRecord nonMatching1 = buildStorageRecord(idWrong1, GivenStorageProject.newState(idWrong1));
+            EntityRecord nonMatching2 = buildStorageRecord(idWrong2, GivenStorageProject.newState(idWrong2));
 
             EntityRecordStorage<StgProjectId> storage = storage();
 
@@ -696,7 +673,7 @@ public class EntityRecordStorageTest
 
             entity.assignStatus(initialStatus);
 
-            EntityRecord record = buildStorageRecord(id, newState(id));
+            EntityRecord record = buildStorageRecord(id, GivenStorageProject.newState(id));
             EntityRecordWithColumns<StgProjectId> recordWithColumns = create(entity, spec, record);
 
             FieldMask fieldMask = FieldMask.getDefaultInstance();

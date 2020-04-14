@@ -23,9 +23,9 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.storage.CustomColumn;
+import io.spine.server.storage.CustomColumn.Getter;
 import io.spine.server.storage.QueryableField;
-import io.spine.server.storage.RecordColumn;
-import io.spine.server.storage.RecordColumn.Getter;
 
 /**
  * The columns stored for {@link CatchUp} statuses.
@@ -40,15 +40,15 @@ public enum CatchUpColumn implements QueryableField<CatchUp> {
                                           .getProjectionType());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final RecordColumn<?, CatchUp> column;
+    private final CustomColumn<?, CatchUp> column;
 
     <T> CatchUpColumn(Class<T> type, Getter<CatchUp, T> getter) {
         ColumnName name = ColumnName.of(name());
-        this.column = new RecordColumn<>(name, type, getter);
+        this.column = new CustomColumn<>(name, type, getter);
     }
 
-    static ImmutableList<RecordColumn<?, CatchUp>> definitions() {
-        ImmutableList.Builder<RecordColumn<?, CatchUp>> list = ImmutableList.builder();
+    static ImmutableList<CustomColumn<?, CatchUp>> definitions() {
+        ImmutableList.Builder<CustomColumn<?, CatchUp>> list = ImmutableList.builder();
         for (CatchUpColumn value : CatchUpColumn.values()) {
             list.add(value.column);
         }
@@ -56,7 +56,7 @@ public enum CatchUpColumn implements QueryableField<CatchUp> {
     }
 
     @Override
-    public RecordColumn<?, CatchUp> column() {
+    public CustomColumn<?, CatchUp> column() {
         return column;
     }
 }

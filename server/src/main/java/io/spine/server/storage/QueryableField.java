@@ -24,14 +24,18 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.storage.ColumnName;
 
 /**
- * A field of a record stored in the {@link RecordStorage} which may be used in a query.
+ * A field of a plain Protobuf {@code Message} record stored in the {@link RecordStorage}
+ * which may be used in a query.
+ *
+ * @param <R>
+ *         the type of the record, along with which the field is stored
  */
 public interface QueryableField<R extends Message> {
 
     /**
-     * Returns the definition of a {@link RecordColumn} for the field.
+     * Returns the definition of a {@link CustomColumn} for the field.
      */
-    RecordColumn<?, R> column();
+    CustomColumn<?, R> column();
 
     /**
      * Returns the name of the column.

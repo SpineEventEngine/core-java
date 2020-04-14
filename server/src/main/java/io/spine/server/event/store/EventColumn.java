@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.storage.CustomColumn;
+import io.spine.server.storage.CustomColumn.Getter;
 import io.spine.server.storage.QueryableField;
-import io.spine.server.storage.RecordColumn;
-import io.spine.server.storage.RecordColumn.Getter;
 
 /**
  * Columns stored along with {@link Event}.
@@ -51,15 +51,15 @@ enum EventColumn implements QueryableField<Event> {
                                      .getTimestamp());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final RecordColumn<?, Event> column;
+    private final CustomColumn<?, Event> column;
 
     <T> EventColumn(Class<T> type, Getter<Event, T> getter) {
         ColumnName name = ColumnName.of(name());
-        this.column = new RecordColumn<>(name, type, getter);
+        this.column = new CustomColumn<>(name, type, getter);
     }
 
-    static ImmutableList<RecordColumn<?, Event>> definitions() {
-        ImmutableList.Builder<RecordColumn<?, Event>> list = ImmutableList.builder();
+    static ImmutableList<CustomColumn<?, Event>> definitions() {
+        ImmutableList.Builder<CustomColumn<?, Event>> list = ImmutableList.builder();
         for (EventColumn value : values()) {
             list.add(value.column);
         }
@@ -67,7 +67,7 @@ enum EventColumn implements QueryableField<Event> {
     }
 
     @Override
-    public RecordColumn<?, Event> column() {
+    public CustomColumn<?, Event> column() {
         return column;
     }
 }

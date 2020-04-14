@@ -46,6 +46,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>Lists the columns defined for the {@code Entity}, including the system columns,
  * interface-based columns and the columns defined in the Protobuf message
  * of the {@code Entity} state.
+ *
+ * <p>In order to describe the specification of a plain Protobuf message stored,
+ * see {@link io.spine.server.storage.MessageRecordSpec MessageRecordSpec}.
+ *
+ * @see io.spine.server.storage.MessageRecordSpec
  */
 @Immutable
 @Internal

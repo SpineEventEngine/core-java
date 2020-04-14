@@ -33,14 +33,27 @@ import java.util.function.Function;
  *
  * <p>The value of the column is determined by a {@linkplain Getter getter} and should be extracted
  * from the record fields.
+ *
+ * <p>There are some other types of the columns are defined for the {@code Entity} state
+ * in a declarative way, e.g. in the Protobuf definition of the {@code Entity} state or via
+ * the {@code Entity}'s Java interface. The {@code CustomColumn}s are only intended to be used
+ * along with the message records which do not represent an {@code EntityState}.
+ *
+ * <p>{@code CustomColumn} is the only way to programmatically specify the columns to be stored
+ * along with a plain Protobuf message.
+ *
+ * @param <V>
+ *         the type of the column value
+ * @param <M>
+ *         the type of the message record, along with which this column should be stored
  */
 @Immutable
 @Internal
-public final class RecordColumn<V, M extends Message> extends AbstractColumn {
+public final class CustomColumn<V, M extends Message> extends AbstractColumn {
 
     private final Getter<M, V> getter;
 
-    public RecordColumn(ColumnName name, Class<V> type, Getter<M, V> getter) {
+    public CustomColumn(ColumnName name, Class<V> type, Getter<M, V> getter) {
         super(name, type);
         this.getter = getter;
     }
@@ -52,5 +65,6 @@ public final class RecordColumn<V, M extends Message> extends AbstractColumn {
     @Immutable
     @FunctionalInterface
     public interface Getter<M extends Message, V> extends Function<M, V> {
+
     }
 }

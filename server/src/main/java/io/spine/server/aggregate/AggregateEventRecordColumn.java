@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.storage.CustomColumn;
+import io.spine.server.storage.CustomColumn.Getter;
 import io.spine.server.storage.QueryableField;
-import io.spine.server.storage.RecordColumn;
-import io.spine.server.storage.RecordColumn.Getter;
 
 /**
  * Columns stored along with an {@link AggregateEventRecord}.
@@ -43,15 +43,15 @@ public enum AggregateEventRecordColumn implements QueryableField<AggregateEventR
     snapshot(Boolean.class, AggregateEventRecord::hasSnapshot);
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final RecordColumn<?, AggregateEventRecord> column;
+    private final CustomColumn<?, AggregateEventRecord> column;
 
     <T> AggregateEventRecordColumn(Class<T> type, Getter<AggregateEventRecord, T> getter) {
         ColumnName name = ColumnName.of(name());
-        this.column = new RecordColumn<>(name, type, getter);
+        this.column = new CustomColumn<>(name, type, getter);
     }
 
-    static ImmutableList<RecordColumn<?, AggregateEventRecord>> definitions() {
-        ImmutableList.Builder<RecordColumn<?, AggregateEventRecord>> list = ImmutableList.builder();
+    static ImmutableList<CustomColumn<?, AggregateEventRecord>> definitions() {
+        ImmutableList.Builder<CustomColumn<?, AggregateEventRecord>> list = ImmutableList.builder();
         for (AggregateEventRecordColumn value : values()) {
             list.add(value.column);
         }
@@ -59,7 +59,7 @@ public enum AggregateEventRecordColumn implements QueryableField<AggregateEventR
     }
 
     @Override
-    public RecordColumn<?, AggregateEventRecord> column() {
+    public CustomColumn<?, AggregateEventRecord> column() {
         return column;
     }
 

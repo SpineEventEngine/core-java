@@ -20,13 +20,41 @@
 
 package io.spine.server.storage;
 
-import com.google.protobuf.Message;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.storage.given.GivenStorageProject;
+import io.spine.server.storage.given.StgProjectStorage;
+import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
+
+import static io.spine.base.Identifier.newUuid;
 
 /**
- * An abstract base for the storage implementations which delegate the execution to the configured
- * {@link RecordStorage}.
+ * Tests of the API provided by {@link RecordStorageDelegate} to the descendant classes.
+ *
+ * <p>Sample storage implementation used in the test is {@link StgProjectStorage}.
+ *
+ * <p>The aim of this test is to ensure that any storage implementations built on top of
+ * the {@code RecordStorageDelegate} is able to utilize the API with the expected results.
  */
-public abstract
-class RecordStorageDelegateTest<I, R extends Message, S extends RecordStorageDelegate<I, R>>
-        extends AbstractStorageTest<I, R, S> {
+public class RecordStorageDelegateTest
+        extends AbstractStorageTest<StgProjectId, StgProject, StgProjectStorage> {
+
+    @Override
+    protected StgProjectStorage newStorage() {
+        StorageFactory factory = ServerEnvironment.instance()
+                                                  .storageFactory();
+        return new StgProjectStorage(factory, false);
+    }
+
+    @Override
+    protected StgProject newStorageRecord(StgProjectId id) {
+        return GivenStorageProject.newState(id);
+    }
+
+    @Override
+    protected StgProjectId newId() {
+        return StgProjectId.newBuilder()
+                           .setId(newUuid())
+                           .build();
+    }
 }

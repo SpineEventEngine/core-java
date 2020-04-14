@@ -29,7 +29,7 @@ import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.projection.Projection;
 import io.spine.server.storage.Column;
-import io.spine.server.storage.RecordColumn;
+import io.spine.server.storage.CustomColumn;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.StgProjectWithColumns;
@@ -38,7 +38,7 @@ import io.spine.testdata.Sample;
 /**
  * The test environment for {@link io.spine.server.storage.memory.RecordQueryMatcher} tests.
  *
- * <p>Provides various types of {@linkplain RecordColumn record columns}
+ * <p>Provides various types of {@linkplain CustomColumn record columns}
  * that can be used to emulate a client-side query.
  */
 public final class RecordQueryMatcherTestEnv {

@@ -21,9 +21,9 @@
 package io.spine.server.entity.storage;
 
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.CustomColumn;
+import io.spine.server.storage.CustomColumn.Getter;
 import io.spine.server.storage.QueryableField;
-import io.spine.server.storage.RecordColumn;
-import io.spine.server.storage.RecordColumn.Getter;
 
 /**
  * Columns storing the lifecycle attributes of an {@code Entity} within an {@link EntityRecord}.
@@ -37,11 +37,11 @@ public enum LifecycleColumn implements QueryableField<EntityRecord> {
                     .getDeleted());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final RecordColumn<Boolean, EntityRecord> column;
+    private final CustomColumn<Boolean, EntityRecord> column;
 
     <T> LifecycleColumn(Getter<EntityRecord, Boolean> getter) {
         ColumnName name = ColumnName.of(name());
-        this.column = new RecordColumn<>(name, Boolean.class, getter);
+        this.column = new CustomColumn<>(name, Boolean.class, getter);
     }
 
     Boolean valueIn(EntityRecord record) {
@@ -49,7 +49,7 @@ public enum LifecycleColumn implements QueryableField<EntityRecord> {
     }
 
     @Override
-    public RecordColumn<?, EntityRecord> column() {
+    public CustomColumn<?, EntityRecord> column() {
         return column;
     }
 }

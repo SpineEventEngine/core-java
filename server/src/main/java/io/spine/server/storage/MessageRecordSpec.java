@@ -38,13 +38,17 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A specification of a message record to store.
+ * A specification of a Protobuf message record to store.
  *
  * <p>Defines the collection of the columns to store along with the message record
  * for further querying.
  *
+ * <p>This specification does not describe the storage mechanism of entity records.
+ * See {@link io.spine.server.entity.storage.EntityRecordSpec EntityRecordSpec} for more details.
+ *
  * @param <R>
  *         the type of the record
+ * @see io.spine.server.entity.storage.EntityRecordSpec
  */
 @Immutable
 @Internal
@@ -53,11 +57,11 @@ public class MessageRecordSpec<R extends Message> extends RecordSpec<R> {
     /**
      * The columns to store along with the record itself.
      */
-    private final ImmutableMap<ColumnName, RecordColumn<?, R>> columns;
+    private final ImmutableMap<ColumnName, CustomColumn<?, R>> columns;
 
     private final Class<R> recordClass;
 
-    public MessageRecordSpec(Class<R> recordClass, Iterable<RecordColumn<?, R>> columns) {
+    public MessageRecordSpec(Class<R> recordClass, Iterable<CustomColumn<?, R>> columns) {
         super(recordClass);
         this.columns = stream(columns).collect(toImmutableMap(AbstractColumn::name, (c) -> c));
         this.recordClass = recordClass;
