@@ -25,6 +25,9 @@ import io.spine.server.storage.given.GivenStorageProject;
 import io.spine.server.storage.given.StgProjectStorage;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -36,6 +39,7 @@ import static io.spine.base.Identifier.newUuid;
  * <p>The aim of this test is to ensure that any storage implementations built on top of
  * the {@code RecordStorageDelegate} is able to utilize the API with the expected results.
  */
+@DisplayName("A `RecordStorageDelegate` descendant should")
 public class RecordStorageDelegateTest
         extends AbstractStorageTest<StgProjectId, StgProject, StgProjectStorage> {
 
@@ -56,5 +60,114 @@ public class RecordStorageDelegateTest
         return StgProjectId.newBuilder()
                            .setId(newUuid())
                            .build();
+    }
+
+    @Nested
+    @DisplayName("write")
+    class Write {
+
+        @Test
+        @DisplayName("many records")
+        void manyRecords() {}
+    }
+
+    @Nested
+    @DisplayName("read")
+    class Read {
+
+        @Test
+        @DisplayName("a single record with the particular `FieldMask`")
+        void singleRecordWithMask() {}
+
+        @Test
+        @DisplayName("all records in the storage")
+        void all() {}
+
+        @Test
+        @DisplayName("several records by their IDs")
+        void allByIds() {}
+
+        @Test
+        @DisplayName("several records by their IDs and the `FieldMask`")
+        void allByIdsAndMask() {}
+
+        @Test
+        @DisplayName("several records according to the `FieldMask`")
+        void allByMask() {}
+
+
+        @Test
+        @DisplayName("many records by the `RecordQuery` only")
+        void manyRecordsByQueryWithDefaultResponseFormat() {}
+
+        @Test
+        @DisplayName("many records by the `RecordQuery` and `ResponseFormat`")
+        void manyRecordsByQueryAndResponseFormat() {}
+    }
+
+    @Nested
+    @DisplayName("delete")
+    class Delete {
+
+        @Test
+        @DisplayName("a single record by its ID")
+        void recordById() {}
+
+        @Test
+        @DisplayName("several records by their IDs at once")
+        void manyRecordByIds() {}
+    }
+
+    @Nested
+    @DisplayName("throw an `IllegalStateException` if it is closed and the user invokes")
+    class ThrowIseIfClosed {
+
+        @Test
+        @DisplayName("`write(record)` method")
+        void write(){}
+
+        @Test
+        @DisplayName("`writeAll(Iterable)` method")
+        void writeAll(){}
+
+        @Test
+        @DisplayName("`write(id, record)` method")
+        void writeIdRecord(){}
+
+        @Test
+        @DisplayName("`read(id, FieldMask)` method")
+        void readIdFieldMask(){}
+
+        @Test
+        @DisplayName("`readAll()` method")
+        void readAll(){}
+
+        @Test
+        @DisplayName("`readAll(RecordQuery)` method")
+        void readAllByQuery(){}
+
+        @Test
+        @DisplayName("`readAll(IDs)` method")
+        void readAllByIds(){}
+
+        @Test
+        @DisplayName("`readAll(IDs, FieldMask)` method")
+        void readAllByIdsAndMask(){}
+
+        @Test
+        @DisplayName("`readAll(ResponseFormat)` method")
+        void readAllInFormat(){}
+
+        @Test
+        @DisplayName("`readAll(RecordQuery, ResponseFormat)` method")
+        void readAllByQueryAndFormat(){}
+
+        @Test
+        @DisplayName("`delete(ID)` method")
+        void delete(){}
+
+        @Test
+        @DisplayName("`deleteAll(IDs)` method")
+        void deleteAll(){}
     }
 }
