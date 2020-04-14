@@ -67,11 +67,10 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     /**
      * Writes the record along with its filled-in column values to the storage.
      *
-     * <p>If this storage is {@linkplain #isClosed() closed},
-     * throws an {@link IllegalStateException}.
-     *
      * @param record
      *         the record and additional columns with their values
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public void write(RecordWithColumns<I, R> record) {
         checkNotClosed();
@@ -81,11 +80,10 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     /**
      * Writes the batch of the records along with their filled-in columns to the storage.
      *
-     * <p>If this storage is {@linkplain #isClosed() closed},
-     * throws an {@link IllegalStateException}.
-     *
      * @param records
      *         records and their column values
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public void writeAll(Iterable<? extends RecordWithColumns<I, R>> records) {
         checkNotClosed();
@@ -106,6 +104,8 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         the ID for the record
      * @param record
      *         the record to store
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     @Override
     public synchronized void write(I id, R record) {
@@ -116,15 +116,14 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     /**
      * Reads the message record by the passed identifier and applies the given field mask to it.
      *
-     * <p>If this storage is {@linkplain #isClosed() closed},
-     * throws an {@link IllegalStateException}.
-     *
      * @param id
      *         the identifier of the message record to read
      * @param mask
      *         the field mask to apply
      * @return the record with the given identifier, after the field mask has been applied to it,
      *         or {@code Optional.empty()} if no record is found by the ID
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public Optional<R> read(I id, FieldMask mask) {
         RecordQuery<I> query = RecordQueries.of(ImmutableList.of(id));
@@ -141,6 +140,19 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     }
 
     /**
+     * Reads all message records in the storage.
+     *
+     * <p>This method should be used with the performance and memory considerations in mind.
+     *
+     * @return iterator over the records
+     * @throws IllegalStateException
+     *         if the storage was closed before
+     */
+    public Iterator<R> readAll() {
+        return readAll(RecordQueries.all());
+    }
+
+    /**
      * Reads all message records according to the passed query.
      *
      * <p>The default {@link ResponseFormat} is used.
@@ -148,18 +160,11 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param query
      *         the query to execute
      * @return iterator over the matching records
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public Iterator<R> readAll(RecordQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
-    }
-
-    /**
-     * Reads all message records in the storage.
-     *
-     * @return iterator over the records
-     */
-    public Iterator<R> readAll() {
-        return readAll(RecordQueries.all());
     }
 
     /**
@@ -170,6 +175,8 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param ids
      *         the identifiers of the records to read
      * @return iterator over the records with the passed IDs
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public Iterator<R> readAll(Iterable<I> ids) {
         RecordQuery<I> query = RecordQueries.of(ids);
@@ -187,6 +194,8 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param mask
      *         the mask to apply to each record
      * @return the iterator over the records
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
         RecordQuery<I> query = RecordQueries.of(ids);
@@ -197,9 +206,14 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     /**
      * Reads all message records in this storage according to the passed response format.
      *
+     * <p>The callers of this method should consider performance and memory impact of reading
+     * the potentially huge number of records from the storage at a time.
+     *
      * @param format
      *         the format of the response
      * @return iterator over the message records
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public Iterator<R> readAll(ResponseFormat format) {
         RecordQuery<I> query = RecordQueries.all();
@@ -210,14 +224,13 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * Reads the message records which match the passed query and returns the result
      * in the specified response format.
      *
-     * <p>If this storage is {@linkplain #isClosed() closed},
-     * throws an {@link IllegalStateException}.
-     *
      * @param query
      *         the query to execute
      * @param format
      *         format of the expected response
      * @return iterator over the matching message records
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
         checkNotClosed();
@@ -230,13 +243,12 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * <p>In case the record with the specified identifier is not found in the storage,
      * this method does nothing and returns {@code false}.
      *
-     * <p>If this storage is {@linkplain #isClosed() closed},
-     * throws an {@link IllegalStateException}.
-     *
      * @param id
      *         identifier of the record to delete
      * @return {@code true} if the record was deleted,
      *         or {@code false} if the record with the specified identifier was not found
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     @CanIgnoreReturnValue
     public boolean delete(I id) {
@@ -252,6 +264,8 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *
      * @param ids
      *         identifiers of the records to delete
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     public void deleteAll(Iterable<I> ids) {
         for (I id : ids) {
