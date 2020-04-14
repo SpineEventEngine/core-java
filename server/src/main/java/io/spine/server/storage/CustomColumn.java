@@ -34,13 +34,13 @@ import java.util.function.Function;
  * <p>The value of the column is determined by a {@linkplain Getter getter} and should be extracted
  * from the record fields.
  *
- * <p>There are some other types of the columns are defined for the {@code Entity} state
- * in a declarative way, e.g. in the Protobuf definition of the {@code Entity} state or via
- * the {@code Entity}'s Java interface. The {@code CustomColumn}s are only intended to be used
- * along with the message records which do not represent an {@code EntityState}.
+ * <p>There are some other types of the columns defined for the stored state of an {@code Entity}
+ * in a declarative way. They may be defined  in the Protobuf definition of the {@code Entity} state
+ * or via the {@code Entity}'s Java interface.
  *
- * <p>{@code CustomColumn} is the only way to programmatically specify the columns to be stored
- * along with a plain Protobuf message.
+ * <p>Unlike them, the {@code CustomColumn}s are only intended to be used along with the plain
+ * {@code Message} records and not for storing the {@code Entity} state. The columns of this type
+ * is the only way to programmatically specify the columns to be stored with such records.
  *
  * @param <V>
  *         the type of the column value
@@ -53,18 +53,41 @@ public final class CustomColumn<V, M extends Message> extends AbstractColumn {
 
     private final Getter<M, V> getter;
 
+    /**
+     * Creates a new instance of a {@code CustomColumn}.
+     *
+     * @param name
+     *         the name of the column
+     * @param type
+     *         the type of the column value
+     * @param getter
+     *         the getter for the column value
+     */
     public CustomColumn(ColumnName name, Class<V> type, Getter<M, V> getter) {
         super(name, type);
         this.getter = getter;
     }
 
+    /**
+     * Obtains the value of this column for the passed message record.
+     *
+     * @see Getter
+     */
     public @Nullable V valueIn(M record) {
         return getter.apply(record);
     }
 
+    /**
+     * A method object serving to obtain the value of the column for some particular record of the
+     * matching type.
+     *
+     * @param <M>
+     *         the type of the message record
+     * @param <V>
+     *         the type of the column value
+     */
     @Immutable
     @FunctionalInterface
     public interface Getter<M extends Message, V> extends Function<M, V> {
-
     }
 }
