@@ -22,7 +22,6 @@ package io.spine.server.storage;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.server.entity.storage.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -48,7 +47,6 @@ import java.util.function.Function;
  *         the type of the message record, along with which this column should be stored
  */
 @Immutable
-@Internal
 public final class CustomColumn<V, M extends Message> extends AbstractColumn {
 
     private final Getter<M, V> getter;
