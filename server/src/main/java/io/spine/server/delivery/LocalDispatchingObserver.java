@@ -22,20 +22,62 @@ package io.spine.server.delivery;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.tenant.TenantAwareRunner;
 
 /**
  * An observer of changes to the shard contents, which triggers immediate delivery of the
  * sharded messages.
+ *
+ * <p>Depending on the configuration, the delivery may be triggered either synchronously
+ * or asynchronously.
  *
  * <p>Suitable for the local and development environment.
  */
 @VisibleForTesting
 public final class LocalDispatchingObserver implements ShardObserver {
 
+    private final boolean async;
+
+    /**
+     * Creates a new observer performing the delivery in either synchronous manner or in
+     * a new {@code Thread} for each received {@code InboxMessage}.
+     *
+     * @param asynchronous
+     *         whether the delivery should be performed synchronously
+     */
+    LocalDispatchingObserver(boolean asynchronous) {
+        this.async = asynchronous;
+    }
+
+    /**
+     * Creates a new observer instance which performs the delivery synchronously.
+     */
+    public LocalDispatchingObserver() {
+        this(false);
+    }
+
     @Override
     public void onMessage(InboxMessage update) {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
-        delivery.deliverMessagesFrom(update.shardIndex());
+        ShardIndex index = update.shardIndex();
+        if (async) {
+            new Thread(() -> runDelivery(update, delivery, index)).start();
+        } else {
+            runDelivery(update, delivery, index);
+        }
+    }
+
+    private static void runDelivery(InboxMessage message, Delivery delivery, ShardIndex index) {
+        TenantAwareRunner.with(message.tenant())
+                         .run(() -> delivery.deliverMessagesFrom(index));
+    }
+
+    /**
+     * Tells whether this observer runs in an asynchronous mode.
+     */
+    @VisibleForTesting
+    boolean isAsync() {
+        return async;
     }
 }
