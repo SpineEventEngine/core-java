@@ -413,7 +413,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(format);
 
         EntityRecordStorage<I> storage = recordStorage();
-        EntityRecordSpec entityRecordSpec = storage.recordSpec();
+        EntityRecordSpec<I> entityRecordSpec = storage.recordSpec();
         RecordQuery<I> entityQuery = RecordQueries.from(filters, entityRecordSpec);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
@@ -467,7 +467,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @VisibleForTesting
     RecordWithColumns<I, EntityRecord> toRecord(E entity) {
-        EntityRecordSpec spec = EntityRecordSpec.of(entity.modelClass());
+        EntityRecordSpec<I> spec = EntityRecordSpec.of(entity.modelClass());
         EntityRecord record = storageConverter().convert(entity);
         checkNotNull(record);
         RecordWithColumns<I, EntityRecord> result =

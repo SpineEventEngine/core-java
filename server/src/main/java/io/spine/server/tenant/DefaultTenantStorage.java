@@ -22,15 +22,28 @@ package io.spine.server.tenant;
 
 import io.spine.base.Time;
 import io.spine.core.TenantId;
+import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
 /**
  * Default implementation of {@code TenantStorage} that stores timestamps of tenant ID registration.
+ *
+ * <p>This storage is not multi-tenant, as it stores the data across all tenants.
  */
 final class DefaultTenantStorage extends TenantStorage<Tenant> {
 
     DefaultTenantStorage(StorageFactory factory) {
-        super(factory, Tenant.class);
+        super(configureStorage(factory));
+    }
+
+    private static RecordStorage<TenantId, Tenant> configureStorage(StorageFactory factory) {
+        return factory.createRecordStorage(getSpec(), false);
+    }
+
+    @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.
+    private static MessageRecordSpec<TenantId, Tenant> getSpec() {
+        return new MessageRecordSpec<>(Tenant.class, Tenant::getId);
     }
 
     @Override

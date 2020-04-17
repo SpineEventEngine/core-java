@@ -103,7 +103,7 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Enti
         S state = FieldMasks.applyMask(fieldMask(), unpacked);
         I id = (I) Identifier.unpack(entityRecord.getEntityId());
         E entity = entityFactory.create(id);
-        checkState(entity != null, "EntityFactory produced null entity.");
+        checkState(entity != null, "`EntityFactory` produced `null` entity.");
         injectState(entity, state, entityRecord);
         return entity;
     }
@@ -148,7 +148,7 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Enti
         if (!(obj instanceof StorageConverter)) {
             return false;
         }
-        StorageConverter other = (StorageConverter) obj;
+        StorageConverter<?, ?, ?> other = (StorageConverter<?, ?, ?>) obj;
         return Objects.equals(this.entityStateType, other.entityStateType)
                 && Objects.equals(this.entityFactory, other.entityFactory)
                 && Objects.equals(this.fieldMask, other.fieldMask);

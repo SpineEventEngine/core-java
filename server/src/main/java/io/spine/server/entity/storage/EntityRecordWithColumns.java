@@ -65,7 +65,7 @@ public final class EntityRecordWithColumns<I>
      * @return a new instance of {@code EntityRecordWithColumns}
      */
     public static <I, E extends Entity<I, ?>> EntityRecordWithColumns<I>
-    create(E entity, EntityRecordSpec recordSpec, EntityRecord record) {
+    create(E entity, EntityRecordSpec<I> recordSpec, EntityRecord record) {
         Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(entity);
         return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
     }

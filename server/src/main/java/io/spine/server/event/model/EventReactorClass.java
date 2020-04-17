@@ -64,7 +64,7 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
     }
 
     @Override
-    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
         return reactors.handlerOf(eventClass, originClass);
     }
 

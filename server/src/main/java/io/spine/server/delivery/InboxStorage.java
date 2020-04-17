@@ -26,12 +26,11 @@ import io.spine.annotation.SPI;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.RecordQueries;
 import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.RecordStorageDelegate;
-import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -61,7 +60,7 @@ import static java.util.stream.Collectors.toList;
  * {@code BoundedContext}s to store the delivered messages.
  */
 @SPI
-public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMessage> {
+public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
 
     public InboxStorage(StorageFactory factory, boolean multitenant) {
         super(createStorage(factory, multitenant));
@@ -69,9 +68,32 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
 
     private static RecordStorage<InboxMessageId, InboxMessage>
     createStorage(StorageFactory factory, boolean multitenant) {
-        MessageRecordSpec<InboxMessage> spec =
-                new MessageRecordSpec<>(InboxMessage.class, InboxColumn.definitions());
+        @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.
+        MessageRecordSpec<InboxMessageId, InboxMessage> spec =
+                new MessageRecordSpec<>(InboxMessage.class,
+                                        InboxMessage::getId,
+                                        InboxColumn.definitions());
         return factory.createRecordStorage(spec, multitenant);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose this method to this package.
+     */
+    @Override
+    protected synchronized void write(InboxMessage message) {
+        super.write(message);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose this method to this package.
+     */
+    @Override
+    protected synchronized void writeBatch(Iterable<InboxMessage> messages) {
+        super.writeBatch(messages);
     }
 
     /**
@@ -141,24 +163,6 @@ public class InboxStorage extends RecordStorageDelegate<InboxMessageId, InboxMes
         Optional<InboxMessage> result = iterator.hasNext() ? Optional.of(iterator.next())
                                                            : Optional.empty();
         return result;
-    }
-
-    public synchronized void write(InboxMessage message) {
-        write(message.getId(), message);
-    }
-
-    /**
-     * Writes several messages to the storage.
-     *
-     * @param messages
-     *         messages to write
-     */
-    public synchronized void writeBatch(Iterable<InboxMessage> messages) {
-        List<RecordWithColumns<InboxMessageId, InboxMessage>> toStore =
-                stream(messages)
-                        .map(m -> RecordWithColumns.create(m.getId(), m, recordSpec()))
-                        .collect(toList());
-        writeAll(toStore);
     }
 
     /**

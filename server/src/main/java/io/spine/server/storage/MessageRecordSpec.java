@@ -20,11 +20,11 @@
 
 package io.spine.server.storage;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.server.entity.storage.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -51,8 +51,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @see io.spine.server.entity.storage.EntityRecordSpec
  */
 @Immutable
-@Internal
-public class MessageRecordSpec<R extends Message> extends RecordSpec<R> {
+public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I, R, R> {
 
     /**
      * The columns to store along with the record itself.
@@ -61,29 +60,35 @@ public class MessageRecordSpec<R extends Message> extends RecordSpec<R> {
 
     private final Class<R> recordClass;
 
-    public MessageRecordSpec(Class<R> recordClass, Iterable<CustomColumn<?, R>> columns) {
+    private final ExtractId<R, I> extractId;
+
+    public MessageRecordSpec(Class<R> recordClass,
+                             ExtractId<R, I> extractId,
+                             Iterable<CustomColumn<?, R>> columns) {
         super(recordClass);
         this.columns = stream(columns).collect(toImmutableMap(AbstractColumn::name, (c) -> c));
         this.recordClass = recordClass;
+        this.extractId = extractId;
     }
 
-    private MessageRecordSpec(Class<R> aClass) {
-        this(aClass, ImmutableList.of());
-    }
-
-    public static <M extends Message> MessageRecordSpec<M> emptyOf(Class<M> recordClass) {
-        return new MessageRecordSpec<>(recordClass);
+    public MessageRecordSpec(Class<R> aClass, ExtractId<R, I> extractId) {
+        this(aClass, extractId, ImmutableList.of());
     }
 
     @Override
-    public Map<ColumnName, @Nullable Object> valuesIn(Object record) {
+    public Map<ColumnName, @Nullable Object> valuesIn(R record) {
         checkNotNull(record);
-        R message = asMessage(record);
         Map<ColumnName, @Nullable Object> result = new HashMap<>();
         columns.forEach(
-                (name, column) -> result.put(name, column.valueIn(message))
+                (name, column) -> result.put(name, column.valueIn(record))
         );
         return result;
+    }
+
+    @Override
+    protected I idValueIn(R source) {
+        checkNotNull(source);
+        return extractId.apply(source);
     }
 
     /**
@@ -112,9 +117,8 @@ public class MessageRecordSpec<R extends Message> extends RecordSpec<R> {
                 columnName, recordClass.getCanonicalName());
     }
 
-    @SuppressWarnings("unchecked")  /* It's cheaper to attempt to cast,
-                                       than verify that the object is of type `R`.*/
-    private R asMessage(Object record) {
-        return (R) record;
+    @Immutable
+    @FunctionalInterface
+    public interface ExtractId<R extends Message, I> extends Function<R, I> {
     }
 }

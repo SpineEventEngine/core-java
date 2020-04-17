@@ -38,23 +38,24 @@ import static com.google.common.truth.Truth8.assertThat;
 @DisplayName("Projection should have columns")
 class ProjectionColumnTest {
 
+    private static final EntityRecordSpec<String> recordSpec =
+            EntityRecordSpec.of(SavingProjection.class);
+
     @Test
     @DisplayName("`version`")
     void version() {
-        assertHasColumn(SavingProjection.class, GivenEntityColumns.version);
+        assertHasColumn(GivenEntityColumns.version);
     }
 
     @Test
     @DisplayName("`archived` and `deleted`")
     void lifecycleColumns() {
-        assertHasColumn(SavingProjection.class, LifecycleColumn.archived.columnName());
-        assertHasColumn(SavingProjection.class, LifecycleColumn.deleted.columnName());
+        assertHasColumn(LifecycleColumn.archived.columnName());
+        assertHasColumn(LifecycleColumn.deleted.columnName());
     }
 
-    private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
-                                        ColumnName columnName) {
-        EntityRecordSpec spec = EntityRecordSpec.of(projectionType);
-        Optional<Column> result = spec.find(columnName);
+    private static void assertHasColumn(ColumnName columnName) {
+        Optional<Column> result = recordSpec.find(columnName);
         assertThat(result).isPresent();
     }
 }

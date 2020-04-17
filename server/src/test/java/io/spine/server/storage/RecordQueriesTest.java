@@ -52,6 +52,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.testing.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,8 +73,13 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
               .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                 .build())
               .setDefault(CustomColumn.class, sampleColumn())
-              .setDefault(RecordSpec.class, MessageRecordSpec.emptyOf(Any.class))
+              .setDefault(RecordSpec.class, new MessageRecordSpec<>(Any.class, someId()))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @SuppressWarnings("UnnecessaryLambda")  // for better readability.
+    private static MessageRecordSpec.ExtractId<Any, Any> someId() {
+        return input -> nullRef();
     }
 
     private static CustomColumn<String, Any> sampleColumn() {
@@ -91,7 +97,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .addFilter(compositeFilter)
                 .build();
 
-        EntityRecordSpec columns = EntityRecordSpec.of(TestEntity.class);
+        EntityRecordSpec<String> columns = EntityRecordSpec.of(TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
                      () -> RecordQueries.from(filters, columns));
@@ -108,7 +114,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .addFilter(compositeFilter)
                 .build();
 
-        EntityRecordSpec columns = EntityRecordSpec.of(TestEntity.class);
+        EntityRecordSpec<String> columns = EntityRecordSpec.of(TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
                      () -> RecordQueries.from(filters, columns));
@@ -139,8 +145,8 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .setIdFilter(idFilter)
                 .addFilter(aggregatingFilter)
                 .build();
-        EntityRecordSpec columns = EntityRecordSpec.of(TestProjection.class);
-        RecordQuery<?> query = RecordQueries.from(filters, columns);
+        EntityRecordSpec<String> spec = EntityRecordSpec.of(TestProjection.class);
+        RecordQuery<?> query = RecordQueries.from(filters, spec);
         assertNotNull(query);
 
         Collection<?> ids = query.getIds();
@@ -239,6 +245,8 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
     }
 
     private static void assertParametersEmpty(RecordQuery<?> actual) {
-        assertThat(actual.getParameters().iterator().hasNext()).isFalse();
+        assertThat(actual.getParameters()
+                         .iterator()
+                         .hasNext()).isFalse();
     }
 }

@@ -110,7 +110,7 @@ public abstract class AggregatePart<I,
     /**
      * Enumeration of generic type parameters of this class.
      */
-    public enum GenericParameter implements GenericTypeIndex<AggregatePart> {
+    public enum GenericParameter implements GenericTypeIndex<AggregatePart<?, ?, ?, ?>> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),

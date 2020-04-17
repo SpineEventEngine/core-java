@@ -109,7 +109,7 @@ public final class SystemAwareStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> RecordStorage<I, M>
-    createRecordStorage(RecordSpec<M> recordSpec, boolean multitenant) {
+    createRecordStorage(RecordSpec<I, M, ?> recordSpec, boolean multitenant) {
         return delegate.createRecordStorage(recordSpec, multitenant);
     }
 

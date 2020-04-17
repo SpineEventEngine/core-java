@@ -54,7 +54,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 @Immutable
 @Internal
-public final class EntityRecordSpec extends RecordSpec<EntityRecord> {
+public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entity<I, ?>> {
 
     /**
      * The {@linkplain SystemColumn system columns} of the entity.
@@ -88,20 +88,21 @@ public final class EntityRecordSpec extends RecordSpec<EntityRecord> {
     /**
      * Gathers columns of the entity class.
      */
-    public static EntityRecordSpec of(EntityClass<?> entityClass) {
+    public static <I> EntityRecordSpec<I> of(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
         Scanner scanner = new Scanner(entityClass);
-        return new EntityRecordSpec(scanner.systemColumns(),
-                                    scanner.simpleColumns(),
-                                    scanner.interfaceBasedColumns(),
-                                    entityClass);
+        return new EntityRecordSpec<I>(scanner.systemColumns(),
+                                      scanner.simpleColumns(),
+                                      scanner.interfaceBasedColumns(),
+                                      entityClass);
     }
 
     /**
      * Gathers columns of the entity class.
      */
-    public static EntityRecordSpec of(Class<? extends Entity<?, ?>> cls) {
-        return of(asEntityClass(cls));
+    public static <I> EntityRecordSpec<I> of(Class<? extends Entity<I, ?>> cls) {
+        EntityClass<?> aClass = asEntityClass(cls);
+        return of(aClass);
     }
 
     static ImmutableMap<ColumnName, Object> lifecycleValuesIn(EntityRecord record) {
@@ -128,9 +129,8 @@ public final class EntityRecordSpec extends RecordSpec<EntityRecord> {
      *         as well as performance drops.
      */
     @Override
-    public Map<ColumnName, @Nullable Object> valuesIn(Object source) {
-        checkNotNull(source);
-        Entity<?, ?> entity = (Entity<?, ?>) source;
+    public Map<ColumnName, @Nullable Object> valuesIn(Entity<I, ?> entity) {
+        checkNotNull(entity);
         Map<ColumnName, @Nullable Object> result = new HashMap<>();
         systemColumns.forEach(
                 (name, column) -> result.put(name, column.valueIn(entity))
@@ -154,6 +154,11 @@ public final class EntityRecordSpec extends RecordSpec<EntityRecord> {
         builder.addAll(simpleColumns.values());
         builder.addAll(interfaceBasedColumns.values());
         return builder.build();
+    }
+
+    @Override
+    protected I idValueIn(Entity<I, ?> source) {
+        return (I) source.id();
     }
 
     @Override

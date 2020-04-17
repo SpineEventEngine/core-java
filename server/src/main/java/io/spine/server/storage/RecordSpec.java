@@ -35,11 +35,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>Enumerates the record columns to store along with the record itself.
  *
+ * @param <I>
+ *         the type of the record identifier
  * @param <R>
  *         the type of the stored record
+ * @param <S>
+ *         the type of the source object on top of which the values of the columns are extracted
  */
 @Internal
-public abstract class RecordSpec<R> {
+public abstract class RecordSpec<I, R, S> {
 
     private final Class<R> recordType;
 
@@ -51,7 +55,9 @@ public abstract class RecordSpec<R> {
         return recordType;
     }
 
-    protected abstract Map<ColumnName, @Nullable Object> valuesIn(Object source);
+    protected abstract Map<ColumnName, @Nullable Object> valuesIn(S source);
+
+    protected abstract I idValueIn(S source);
 
     /**
      * Returns all columns of the record.

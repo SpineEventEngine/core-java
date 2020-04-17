@@ -20,22 +20,60 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.client.ResponseFormat;
 import io.spine.server.storage.MessageRecordSpec;
-import io.spine.server.storage.RecordStorageDelegate;
+import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.StorageFactory;
+
+import java.util.Iterator;
 
 /**
  * Storage of events for each {@link Aggregate}.
  */
 public class AggregateEventStorage
-        extends RecordStorageDelegate<AggregateEventRecordId, AggregateEventRecord> {
+        extends MessageStorage<AggregateEventRecordId, AggregateEventRecord> {
 
-    private static final MessageRecordSpec<AggregateEventRecord> spec =
+    @SuppressWarnings("ConstantConditions")     // Protobuf getters return non-{@code null} values.
+    private static final MessageRecordSpec<AggregateEventRecordId, AggregateEventRecord> spec =
             new MessageRecordSpec<>(
-                    AggregateEventRecord.class, AggregateEventRecordColumn.definitions()
+                    AggregateEventRecord.class,
+                    AggregateEventRecord::getId,
+                    AggregateEventRecordColumn.definitions()
             );
 
     public AggregateEventStorage(StorageFactory factory, boolean multitenant) {
         super(factory.createRecordStorage(spec, multitenant));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose this method as a part of storage's package-level API.
+     */
+    @Override
+    protected Iterator<AggregateEventRecord> readAll(ResponseFormat format) {
+        return super.readAll(format);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose this method as a part of storage's package-level API.
+     */
+    @Override
+    protected Iterator<AggregateEventRecord> readAll(RecordQuery<AggregateEventRecordId> query,
+                                                     ResponseFormat format) {
+        return super.readAll(query, format);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose this method as a part of storage's package-level API.
+     */
+    @Override
+    protected boolean delete(AggregateEventRecordId id) {
+        return super.delete(id);
     }
 }

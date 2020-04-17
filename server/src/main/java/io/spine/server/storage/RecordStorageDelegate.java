@@ -37,6 +37,7 @@ import java.util.Optional;
  * @param <R>
  *         the type of the message records
  */
+//TODO:2020-04-17:alex.tymchenko: describe the `protected` level of the API.
 @Internal
 public abstract class RecordStorageDelegate<I, R extends Message> extends RecordStorage<I, R> {
 
@@ -53,62 +54,57 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    public Optional<R> read(I id, FieldMask mask) {
+    protected Optional<R> read(I id, FieldMask mask) {
         return delegate.read(id, mask);
     }
 
     @Override
-    public Iterator<R> readAll(RecordQuery<I> query) {
+    protected Iterator<R> readAll(RecordQuery<I> query) {
         return delegate.readAll(query);
     }
 
     @Override
-    public Iterator<R> readAll() {
+    protected Iterator<R> readAll() {
         return delegate.readAll();
     }
 
     @Override
-    public Iterator<R> readAll(Iterable<I> ids) {
+    protected Iterator<R> readAll(Iterable<I> ids) {
         return delegate.readAll(ids);
     }
 
     @Override
-    public Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
+    protected Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
         return delegate.readAll(ids, mask);
     }
 
     @Override
-    public Iterator<R> readAll(ResponseFormat format) {
+    protected Iterator<R> readAll(ResponseFormat format) {
         return delegate.readAll(format);
     }
 
     @Override
-    public Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
         return delegate.readAll(query, format);
     }
 
     @Override
-    public void write(RecordWithColumns<I, R> record) {
+    protected void write(RecordWithColumns<I, R> record) {
         delegate.write(record);
     }
 
     @Override
-    public synchronized void write(I id, R record) {
-        delegate.write(id, record);
-    }
-
-    @Override
-    public void writeAll(Iterable<? extends RecordWithColumns<I, R>> records) {
+    protected void writeAll(Iterable<? extends RecordWithColumns<I, R>> records) {
         delegate.writeAll(records);
     }
 
     @Override
-    public boolean delete(I id) {
+    protected boolean delete(I id) {
         return delegate.delete(id);
     }
 
     @Override
-    public void deleteAll(Iterable<I> ids) {
+    protected void deleteAll(Iterable<I> ids) {
         delegate.deleteAll(ids);
     }
 
@@ -119,7 +115,7 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
 
     @Override
     @Internal
-    protected RecordSpec<R> recordSpec() {
+    protected RecordSpec<I, R, ?> recordSpec() {
         return delegate.recordSpec();
     }
 

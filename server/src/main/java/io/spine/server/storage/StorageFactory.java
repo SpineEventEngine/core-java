@@ -51,7 +51,7 @@ public interface StorageFactory extends AutoCloseable {
      *         the type of the stored records
      */
     <I, R extends Message> RecordStorage<I, R>
-    createRecordStorage(RecordSpec<R> recordSpec, boolean multitenant);
+    createRecordStorage(RecordSpec<I, R, ?> recordSpec, boolean multitenant);
 
     /**
      * Creates a new {@link AggregateStorage}.

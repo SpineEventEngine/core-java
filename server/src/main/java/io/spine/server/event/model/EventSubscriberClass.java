@@ -75,7 +75,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
 
     @Override
     public ImmutableSet<SubscriberMethod>
-    subscribersOf(EventClass eventClass, MessageClass originClass) {
+    subscribersOf(EventClass eventClass, MessageClass<?> originClass) {
         return delegate.handlersOf(eventClass, originClass);
     }
 }

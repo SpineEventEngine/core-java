@@ -49,7 +49,7 @@ import static io.spine.client.ResponseFormats.formatWith;
 @SPI
 public abstract class RecordStorage<I, R extends Message> extends AbstractStorage<I, R> {
 
-    private final RecordSpec<R> recordSpec;
+    private final RecordSpec<I, R, ?> recordSpec;
 
     /**
      * Creates the new storage instance.
@@ -59,7 +59,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param multitenant
      *         whether this storage should support multi-tenancy
      */
-    protected RecordStorage(RecordSpec<R> recordSpec, boolean multitenant) {
+    protected RecordStorage(RecordSpec<I, R, ?> recordSpec, boolean multitenant) {
         super(multitenant);
         this.recordSpec = recordSpec;
     }
@@ -72,7 +72,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public void write(RecordWithColumns<I, R> record) {
+    protected void write(RecordWithColumns<I, R> record) {
         checkNotClosed();
         writeRecord(record);
     }
@@ -85,7 +85,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public void writeAll(Iterable<? extends RecordWithColumns<I, R>> records) {
+    protected void writeAll(Iterable<? extends RecordWithColumns<I, R>> records) {
         checkNotClosed();
         writeAllRecords(records);
     }
@@ -95,22 +95,6 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
         RecordQuery<I> query = RecordQueries.of(ImmutableList.of(id));
         Optional<R> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
         return result;
-    }
-
-    /**
-     * Writes the record as the storage record by the given identifier.
-     *
-     * @param id
-     *         the ID for the record
-     * @param record
-     *         the record to store
-     * @throws IllegalStateException
-     *         if the storage was closed before
-     */
-    @Override
-    public synchronized void write(I id, R record) {
-        RecordWithColumns<I, R> withCols = RecordWithColumns.create(id, record, this.recordSpec);
-        write(withCols);
     }
 
     /**
@@ -125,7 +109,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public Optional<R> read(I id, FieldMask mask) {
+    protected Optional<R> read(I id, FieldMask mask) {
         RecordQuery<I> query = RecordQueries.of(ImmutableList.of(id));
         ResponseFormat format = formatWith(mask);
         Optional<R> result = readSingleRecord(query, format);
@@ -148,7 +132,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public Iterator<R> readAll() {
+    protected Iterator<R> readAll() {
         return readAll(RecordQueries.all());
     }
 
@@ -163,7 +147,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public Iterator<R> readAll(RecordQuery<I> query) {
+    protected Iterator<R> readAll(RecordQuery<I> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
@@ -178,7 +162,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public Iterator<R> readAll(Iterable<I> ids) {
+    protected Iterator<R> readAll(Iterable<I> ids) {
         RecordQuery<I> query = RecordQueries.of(ids);
         return readAll(query);
     }
@@ -197,7 +181,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
+    protected Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
         RecordQuery<I> query = RecordQueries.of(ids);
         ResponseFormat format = formatWith(mask);
         return readAll(query, format);
@@ -215,7 +199,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public Iterator<R> readAll(ResponseFormat format) {
+    protected Iterator<R> readAll(ResponseFormat format) {
         RecordQuery<I> query = RecordQueries.all();
         return readAll(query, format);
     }
@@ -232,7 +216,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
         checkNotClosed();
         return readAllRecords(query, format);
     }
@@ -251,7 +235,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     @CanIgnoreReturnValue
-    public boolean delete(I id) {
+    protected boolean delete(I id) {
         checkNotClosed();
         return deleteRecord(id);
     }
@@ -267,7 +251,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public void deleteAll(Iterable<I> ids) {
+    protected void deleteAll(Iterable<I> ids) {
         for (I id : ids) {
             delete(id);
         }
@@ -322,7 +306,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * Returns the specification of the record format, in which the message record should be stored.
      */
     @Internal
-    protected RecordSpec<R> recordSpec() {
+    protected RecordSpec<I, R, ?> recordSpec() {
         return recordSpec;
     }
 }

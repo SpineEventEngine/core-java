@@ -77,7 +77,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
                 .addAll(parameters);
     }
 
-    public static QueryParameters activeEntityQueryParams(EntityRecordSpec recordSpec) {
+    public static QueryParameters activeEntityQueryParams(EntityRecordSpec<?> recordSpec) {
         ColumnName archivedColumnName = archived.columnName();
         ColumnName deletedColumnName = deleted.columnName();
         Optional<Column> archivedColumn = recordSpec.find(archivedColumnName);

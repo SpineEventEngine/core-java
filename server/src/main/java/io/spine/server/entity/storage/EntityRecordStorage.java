@@ -31,6 +31,7 @@ import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.RecordQueries;
 import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorageDelegate;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
@@ -50,24 +51,25 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
     public EntityRecordStorage(StorageFactory factory,
                                Class<? extends Entity<I, ?>> entityClass,
                                boolean multitenant) {
-        super(factory.createRecordStorage(EntityRecordSpec.of(entityClass), multitenant));
+        super(factory.createRecordStorage(spec(entityClass), multitenant));
         activeQueryParams = activeEntityQueryParams(recordSpec());
         this.findActiveRecordsQuery = RecordQueries.of(ImmutableSet.of(), activeQueryParams);
     }
 
+    private static <I> EntityRecordSpec<I> spec(Class<? extends Entity<I, ?>> entityClass) {
+        return EntityRecordSpec.of(entityClass);
+    }
+
     /**
      * Returns the iterator over all non-archived and non-deleted entity records.
+     *
+     * @throws IllegalStateException
+     *         if the storage is already closed
      */
     @Override
     public Iterator<I> index() {
         Iterator<EntityRecord> iterator = readAll(findActiveRecordsQuery);
         return asIdStream(iterator);
-    }
-
-    @Override
-    public synchronized void write(I id, EntityRecord record) {
-        EntityRecordWithColumns<I> withLifecycleCols = EntityRecordWithColumns.create(id, record);
-        write(withLifecycleCols);
     }
 
     /**
@@ -77,10 +79,22 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
      * @param format
      *         the format of the expected response
      * @return iterator over the matching entity records
+     * @throws IllegalStateException
+     *         if the storage is already closed
      */
     @Override
     public Iterator<EntityRecord> readAll(ResponseFormat format) {
         return readAll(findActiveRecordsQuery, format);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose as a part of the public API.
+     */
+    @Override
+    public Iterator<EntityRecord> readAll(RecordQuery<I> query, ResponseFormat format) {
+        return super.readAll(query, format);
     }
 
     /**
@@ -90,19 +104,75 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
      * @param ids
      *         identifiers of the records of interest
      * @return iterator over the matching entity records
+     * @throws IllegalStateException
+     *         if the storage is already closed
      */
     @Override
     public Iterator<EntityRecord> readAll(Iterable<I> ids) {
+        //TODO:2020-04-17:alex.tymchenko: do we need to append the params?
         RecordQuery<I> query = RecordQueries.of(ids, activeQueryParams);
+//        RecordQuery<I> query = RecordQueries.of(ids);
         return readAll(query);
     }
 
     /**
      * Returns the iterator over all stored non-archived and non-deleted entity records.
+     *
+     * @throws IllegalStateException
+     *         if the storage is already closed
      */
     @Override
     public Iterator<EntityRecord> readAll() {
         return readAll(findActiveRecordsQuery);
+    }
+
+    /**
+     * Writes the given entity record under the given identifier.
+     *
+     * <p>Completely ignores the entity columns. Use {@link #write(RecordWithColumns)
+     * write(RecordWithColumns)} to write the value with the columns.
+     *
+     * @param id
+     *         the ID for the record
+     * @param record
+     *         the record to store
+     * @throws IllegalStateException
+     *         if the storage is already closed
+     */
+    @Override
+    public synchronized void write(I id, EntityRecord record) {
+        EntityRecordWithColumns<I> wrapped = EntityRecordWithColumns.create(id, record);
+        write(wrapped);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose as a part of the public API.
+     */
+    @Override
+    public void write(RecordWithColumns<I, EntityRecord> record) {
+        super.write(record);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose as a part of the public API.
+     */
+    @Override
+    public void writeAll(Iterable<? extends RecordWithColumns<I, EntityRecord>> records) {
+        super.writeAll(records);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose as a part of the public API.
+     */
+    @Override
+    public boolean delete(I id) {
+        return super.delete(id);
     }
 
     /**
@@ -112,8 +182,9 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
      */
     @Internal
     @Override
-    public final EntityRecordSpec recordSpec() {
-        return (EntityRecordSpec) super.recordSpec();
+    @SuppressWarnings("unchecked")  // Guaranteed by the generic declaration of `EntityRecordSpec`.
+    public final EntityRecordSpec<I> recordSpec() {
+        return (EntityRecordSpec<I>) super.recordSpec();
     }
 
     /**

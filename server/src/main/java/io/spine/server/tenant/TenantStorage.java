@@ -23,11 +23,11 @@ package io.spine.server.tenant;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import io.spine.base.EntityState;
+import com.google.protobuf.Message;
+import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
-import io.spine.server.storage.MessageRecordSpec;
-import io.spine.server.storage.RecordStorageDelegate;
-import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordStorage;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -39,14 +39,15 @@ import java.util.Set;
  * @param <T>
  *         the type of data associated with the tenant ID
  */
-public abstract class TenantStorage<T extends EntityState>
-        extends RecordStorageDelegate<TenantId, T>
+@SPI
+public abstract class TenantStorage<T extends Message>
+        extends MessageStorage<TenantId, T>
         implements TenantIndex {
 
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
 
-    protected TenantStorage(StorageFactory factory, Class<T> stateClass) {
-        super(factory.createRecordStorage(MessageRecordSpec.emptyOf(stateClass), false));
+    protected TenantStorage(RecordStorage<TenantId, T> delegate) {
+        super(delegate);
     }
 
     /**

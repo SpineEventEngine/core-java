@@ -20,15 +20,9 @@
 
 package io.spine.server.storage.given;
 
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Timestamp;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.CustomColumn;
-import io.spine.server.storage.CustomColumn.Getter;
 import io.spine.server.storage.MessageRecordSpec;
-import io.spine.server.storage.QueryableField;
+import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -42,8 +36,9 @@ import io.spine.test.storage.StgProjectId;
  * <p>This storage defines several {@linkplain StgColumn custom columns} to use in tests.
  *
  * @see RecordStorageDelegateTest
+ * @see StgColumn
  */
-public class StgProjectStorage extends RecordStorageDelegate<StgProjectId, StgProject> {
+public class StgProjectStorage extends MessageStorage<StgProjectId, StgProject> {
 
     public StgProjectStorage(StorageFactory factory, boolean multitenant) {
         super(newStorage(factory, multitenant));
@@ -51,38 +46,10 @@ public class StgProjectStorage extends RecordStorageDelegate<StgProjectId, StgPr
 
     private static RecordStorage<StgProjectId, StgProject>
     newStorage(StorageFactory factory, boolean multitenant) {
-        MessageRecordSpec<StgProject> spec = new MessageRecordSpec<>(StgProject.class,
-                                                                     StgColumn.definitions());
+        MessageRecordSpec<StgProjectId, StgProject> spec =
+                new MessageRecordSpec<>(StgProject.class,
+                                        StgProject::getId,
+                                        StgColumn.definitions());
         return factory.createRecordStorage(spec, multitenant);
     }
-
-    public enum StgColumn implements QueryableField<StgProject> {
-
-        project_version(Integer.class, (m) -> m.getProjectVersion()
-                                               .getNumber()),
-
-        due_date(Timestamp.class, StgProject::getDueDate);
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final CustomColumn<?, StgProject> column;
-
-        <T> StgColumn(Class<T> type, Getter<StgProject, T> getter) {
-            ColumnName name = ColumnName.of(name());
-            this.column = new CustomColumn<>(name, type, getter);
-        }
-
-        static ImmutableList<CustomColumn<?, StgProject>> definitions() {
-            ImmutableList.Builder<CustomColumn<?, StgProject>> list = ImmutableList.builder();
-            for (StgColumn value : values()) {
-                list.add(value.column);
-            }
-            return list.build();
-        }
-
-        @Override
-        public CustomColumn<?, StgProject> column() {
-            return column;
-        }
-    }
-
 }

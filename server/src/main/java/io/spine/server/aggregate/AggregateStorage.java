@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
@@ -48,8 +47,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static com.google.common.collect.Streams.stream;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 
 /**
@@ -222,7 +219,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
         EntityRecord record = AggregateRecords.newStateRecord(aggregate, mirrorEnabled);
-        EntityRecordSpec recordSpec = EntityRecordSpec.of(aggregate.modelClass());
+        EntityRecordSpec<I> recordSpec = EntityRecordSpec.of(aggregate.modelClass());
         EntityRecordWithColumns<I> result =
                 EntityRecordWithColumns.create(aggregate, recordSpec, record);
         stateStorage.write(result);
@@ -310,16 +307,6 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     protected void truncate(int snapshotIndex, Timestamp date) {
         truncation.performWith(snapshotIndex,
                                (r) -> Timestamps.compare(r.getTimestamp(), date) < 0);
-    }
-
-    /**
-     * Obtains distinct aggregate IDs from the stored event records.
-     */
-    protected Iterator<I> distinctAggregateIds() {
-        Iterator<AggregateEventRecord> iterator = eventStorage.readAll();
-        ImmutableSet<I> distictIds = stream(iterator).map(this::aggregateIdOf)
-                                                     .collect(toImmutableSet());
-        return distictIds.iterator();
     }
 
     @SuppressWarnings("unchecked")

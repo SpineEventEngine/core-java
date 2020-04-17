@@ -140,11 +140,6 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId> {
         delegate.truncate(snapshotIndex, date);
     }
 
-    @Override
-    public Iterator<ProjectId> distinctAggregateIds() {
-        return delegate.distinctAggregateIds();
-    }
-
     ProjectId memoizedId() {
         return memoizedId;
     }

@@ -39,6 +39,7 @@ import static io.spine.base.Identifier.newUuid;
  * <p>The aim of this test is to ensure that any storage implementations built on top of
  * the {@code RecordStorageDelegate} is able to utilize the API with the expected results.
  */
+//TODO:2020-04-17:alex.tymchenko: complete the test case.
 @DisplayName("A `RecordStorageDelegate` descendant should")
 public class RecordStorageDelegateTest
         extends AbstractStorageTest<StgProjectId, StgProject, StgProjectStorage> {
@@ -68,7 +69,8 @@ public class RecordStorageDelegateTest
 
         @Test
         @DisplayName("many records")
-        void manyRecords() {}
+        void manyRecords() {
+        }
     }
 
     @Nested

@@ -46,8 +46,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public class RecordWithColumns<I, R extends Message> {
 
-    private final R record;
     private final I id;
+    private final R record;
 
     /**
      * A map of column names to the corresponding column values.
@@ -67,7 +67,7 @@ public class RecordWithColumns<I, R extends Message> {
      * Creates a new record extracting the column values from the passed entity.
      */
     public static <I, R extends Message>
-    RecordWithColumns<I, R> create(I identifier, R record, RecordSpec<R> recordSpec) {
+    RecordWithColumns<I, R> create(I identifier, R record, RecordSpec<I, R, R> recordSpec) {
         checkNotNull(identifier);
         checkNotNull(record);
         checkNotNull(recordSpec);
@@ -75,14 +75,16 @@ public class RecordWithColumns<I, R extends Message> {
         return of(identifier, record, storageFields);
     }
 
+    /**
+     * Creates a new record extracting the column values from the passed entity.
+     */
     public static <I, R extends Message>
-    RecordWithColumns<I, R> create(I identifier,
-                                   R record,
-                                   Map<ColumnName, @Nullable Object> fields) {
-        checkNotNull(identifier);
+    RecordWithColumns<I, R> create(R record, RecordSpec<I, R, R> recordSpec) {
         checkNotNull(record);
-        checkNotNull(fields);
-        return of(identifier, record, fields);
+        checkNotNull(recordSpec);
+        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(record);
+        I identifier = recordSpec.idValueIn(record);
+        return of(identifier, record, storageFields);
     }
 
     /**
@@ -90,7 +92,7 @@ public class RecordWithColumns<I, R extends Message> {
      *
      * <p>Such instance of {@code EntityRecordWithColumns} will contain no storage fields.
      */
-    public static <I, R extends Message> RecordWithColumns of(I id, R record) {
+    public static <I, R extends Message> RecordWithColumns<I, R> of(I id, R record) {
         return new RecordWithColumns<>(id, record, Collections.emptyMap());
     }
 

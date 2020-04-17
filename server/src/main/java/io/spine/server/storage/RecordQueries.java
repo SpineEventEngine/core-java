@@ -163,7 +163,7 @@ public final class RecordQueries {
      * @param <I>
      *         the type of the record identifiers
      */
-    public static <I> RecordQuery<I> from(TargetFilters filters, RecordSpec<?> recordSpec) {
+    public static <I> RecordQuery<I> from(TargetFilters filters, RecordSpec<?, ?, ?> recordSpec) {
         checkNotNull(filters);
         checkNotNull(recordSpec);
 
@@ -174,8 +174,8 @@ public final class RecordQueries {
         return result;
     }
 
-    private static QueryParameters toQueryParams(TargetFilters filters, RecordSpec<?> recordSpec) {
-        List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, recordSpec);
+    private static QueryParameters toQueryParams(TargetFilters filters, RecordSpec<?, ?, ?> spec) {
+        List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, spec);
         return newQueryParameters(parameters);
     }
 
@@ -192,7 +192,7 @@ public final class RecordQueries {
     }
 
     private static List<CompositeQueryParameter>
-    getFiltersQueryParams(TargetFilters filters, RecordSpec<?> recordSpec) {
+    getFiltersQueryParams(TargetFilters filters, RecordSpec<?, ?, ?> recordSpec) {
         return filters.getFilterList()
                       .stream()
                       .map(filter -> queryParameterFromFilter(filter, recordSpec))
@@ -206,14 +206,14 @@ public final class RecordQueries {
     }
 
     private static CompositeQueryParameter
-    queryParameterFromFilter(CompositeFilter filter, RecordSpec<?> recordSpec) {
+    queryParameterFromFilter(CompositeFilter filter, RecordSpec<?, ?, ?> recordSpec) {
         Multimap<Column, Filter> filters = splitFilters(filter, recordSpec);
         CompositeFilter.CompositeOperator operator = filter.getOperator();
         return CompositeQueryParameter.from(filters, operator);
     }
 
     private static Multimap<Column, Filter>
-    splitFilters(CompositeFilter filter, RecordSpec<?> recordSpec) {
+    splitFilters(CompositeFilter filter, RecordSpec<?, ?, ?> recordSpec) {
         Multimap<Column, Filter> filters = create(filter.getFilterCount(), 1);
         for (Filter columnFilter : filter.getFilterList()) {
             Column column = findMatchingColumn(columnFilter, recordSpec);
@@ -223,7 +223,7 @@ public final class RecordQueries {
         return filters;
     }
 
-    private static Column findMatchingColumn(Filter filter, RecordSpec<?> recordSpec) {
+    private static Column findMatchingColumn(Filter filter, RecordSpec<?, ?, ?> recordSpec) {
         FieldPath fieldPath = filter.getFieldPath();
         checkArgument(fieldPath.getFieldNameCount() == 1,
                       "Incorrect column name in the passed `Filter`: %s",

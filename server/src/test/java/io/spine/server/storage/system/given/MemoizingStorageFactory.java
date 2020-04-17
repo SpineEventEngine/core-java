@@ -77,7 +77,7 @@ public final class MemoizingStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> RecordStorage<I, M>
-    createRecordStorage(RecordSpec<M> recordSpec, boolean multitenant) {
+    createRecordStorage(RecordSpec<I, M, ?> recordSpec, boolean multitenant) {
         requestedStorages.add(recordSpec.recordType());
         return nullRef();
     }

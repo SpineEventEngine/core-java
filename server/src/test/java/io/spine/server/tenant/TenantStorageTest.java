@@ -43,7 +43,7 @@ class TenantStorageTest {
     @BeforeEach
     void setUp() {
         StorageFactory storageFactory = ServerEnvironment.instance().storageFactory();
-        storage = new TenantStorageImpl(storageFactory);
+        storage = new DefaultTenantStorage(storageFactory);
         BoundedContextBuilder
                 .assumingTests(true)
                 .setTenantIndex(storage)
@@ -81,19 +81,5 @@ class TenantStorageTest {
         storage.clearCache();
 
         assertFalse(storage.unCache(tenantId));
-    }
-
-    private static class TenantStorageImpl extends TenantStorage<Tenant> {
-
-        private TenantStorageImpl(StorageFactory factory) {
-            super(factory, Tenant.class);
-        }
-
-        @Override
-        protected Tenant create(TenantId id) {
-            return Tenant.newBuilder()
-                         .setId(id)
-                         .build();
-        }
     }
 }

@@ -41,7 +41,7 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
 
     private final MultitenantStorage<TenantRecords<I, R>> multitenantStorage;
 
-    InMemoryRecordStorage(RecordSpec<R> recordSpec, boolean multitenant) {
+    InMemoryRecordStorage(RecordSpec<I, R, ?> recordSpec, boolean multitenant) {
         super(recordSpec, multitenant);
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I, R>>(multitenant) {
             @Override
@@ -58,6 +58,11 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
     @Override
     public Iterator<I> index() {
         return records().index();
+    }
+
+    @Override
+    public void write(I id, R record) {
+        writeRecord(RecordWithColumns.of(id, record));
     }
 
     @Override

@@ -30,15 +30,16 @@ import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.Signal;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordQueries;
 import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -62,8 +63,7 @@ import static java.util.stream.Collectors.toSet;
  * Default implementation of {@link EventStore}.
  */
 //TODO:2020-04-01:alex.tymchenko: review for the compatibility with the legacy storage principle.
-public final class DefaultEventStore
-        extends RecordStorageDelegate<EventId, Event>
+public final class DefaultEventStore extends MessageStorage<EventId, Event>
         implements EventStore, Logging {
 
     private static final String TENANT_MISMATCH_ERROR_MSG =
@@ -83,8 +83,8 @@ public final class DefaultEventStore
 
     private static RecordStorage<EventId, Event>
     storageForEvents(StorageFactory factory, boolean multitenant) {
-        MessageRecordSpec<Event> spec =
-                new MessageRecordSpec<>(Event.class, EventColumn.definitions());
+        MessageRecordSpec<EventId, Event> spec =
+                new MessageRecordSpec<>(Event.class, Signal::id, EventColumn.definitions());
         return factory.createRecordStorage(spec, multitenant);
     }
 

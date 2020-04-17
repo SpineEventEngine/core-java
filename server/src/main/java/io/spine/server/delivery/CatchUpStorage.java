@@ -22,8 +22,8 @@ package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
 import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
@@ -36,7 +36,7 @@ import static io.spine.server.storage.RecordQueries.byField;
  * A storage for the state of the ongoing catch-up processes.
  */
 @SPI
-public class CatchUpStorage extends RecordStorageDelegate<CatchUpId, CatchUp> {
+public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
 
     public CatchUpStorage(StorageFactory factory, boolean multitenant) {
         super(createStorage(factory, multitenant));
@@ -44,13 +44,12 @@ public class CatchUpStorage extends RecordStorageDelegate<CatchUpId, CatchUp> {
 
     private static RecordStorage<CatchUpId, CatchUp>
     createStorage(StorageFactory factory, boolean multitenant) {
-        MessageRecordSpec<CatchUp> spec =
-                new MessageRecordSpec<>(CatchUp.class, CatchUpColumn.definitions());
-        return factory.createRecordStorage(spec, multitenant);
+        return factory.createRecordStorage(getSpec(), multitenant);
     }
 
-    public void write(CatchUp record) {
-        write(record.getId(), record);
+    @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}.
+    private static MessageRecordSpec<CatchUpId, CatchUp> getSpec() {
+        return new MessageRecordSpec<>(CatchUp.class, CatchUp::getId, CatchUpColumn.definitions());
     }
 
     /**
@@ -62,5 +61,25 @@ public class CatchUpStorage extends RecordStorageDelegate<CatchUpId, CatchUp> {
     public Iterator<CatchUp> readByType(TypeUrl projectionType) {
         Iterator<CatchUp> result = readAll(byField(projection_type, projectionType.value()));
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to open as a part of the public API.
+     */
+    @Override
+    protected Iterator<CatchUp> readAll() {
+        return super.readAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to open as a part of the public API.
+     */
+    @Override
+    public void write(CatchUp message) {
+        super.write(message);
     }
 }
