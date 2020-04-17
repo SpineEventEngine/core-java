@@ -90,25 +90,25 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.8</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.8</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-model-compiler</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.8</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-plugin-base</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.8</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -150,25 +150,25 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testlib</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.8</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testutil-time</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.8</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mute-logging</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.8</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-plugin-testlib</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.8</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -220,22 +220,22 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.protobuf</groupId>
     <artifactId>protoc</artifactId>
-    <version>3.11.3</version>
+    <version>3.11.4</version>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
-    <version>1.26.0</version>
+    <version>1.28.1</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-javadoc-filter</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.8</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-protoc-plugin</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.8</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
