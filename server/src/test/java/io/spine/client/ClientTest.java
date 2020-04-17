@@ -96,7 +96,7 @@ class ClientTest extends AbstractClientTest {
 
     @Nested
     @DisplayName("manage subscriptions")
-    class Subscriptions {
+    class ActiveSubscriptions {
 
         private List<Subscription> subscriptions;
 
@@ -134,13 +134,13 @@ class ClientTest extends AbstractClientTest {
         @DisplayName("remembering them until canceled")
         void remembering() {
             Client client = client();
-            ActiveSubscriptions remembered = client.subscriptions();
+            Subscriptions remembered = client.subscriptions();
             subscriptions.forEach(
                     (s) -> assertTrue(remembered.contains(s))
             );
             subscriptions.forEach(
                     (s) -> {
-                        client.cancel(s);
+                        remembered.cancel(s);
                         assertFalse(remembered.contains(s));
                     }
             );
@@ -150,7 +150,7 @@ class ClientTest extends AbstractClientTest {
         @DisplayName("clear subscriptions when closing")
         void clearing() {
             Client client = client();
-            ActiveSubscriptions subscriptions = client.subscriptions();
+            Subscriptions subscriptions = client.subscriptions();
             this.subscriptions.forEach(
                     (s) -> assertTrue(subscriptions.contains(s))
             );

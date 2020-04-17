@@ -19,15 +19,34 @@
  */
 package io.spine.client;
 
-import io.spine.annotation.Internal;
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Identifier;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static java.util.Collections.synchronizedSet;
 
 /**
- * Utility class for working with {@linkplain Subscription subscriptions}.
+ * Maintains the list of the <strong>active</strong> subscriptions created by the {@link Client}.
+ *
+ * <p>Subscriptions are created when a client application:
+ * <ul>
+ *     <li>{@linkplain ClientRequest#subscribeToEvent(Class) subscribes to events};
+ *     <li>{@linkplain ClientRequest#subscribeTo(Class) subscribes to entity states};
+ *     <li>{@linkplain CommandRequest#post() posts a command}.
+ * </ul>
+ *
+ * <p>The subscriptions should be {@linkplain Subscriptions#cancel(Subscription) cancelled} after
+ * an update is delivered to the client and no further updates are expected.
+ *
+ * <p>All remaining subscriptions are {@linkplain #cancelAll() cancelled} by the {@code Client}
+ * when it {@linkplain Client#close() closes}.
  */
-@Internal
 public final class Subscriptions {
 
     /**
@@ -40,8 +59,12 @@ public final class Subscriptions {
      */
     static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
 
-    /** Prevents the utility class instantiation. */
-    private Subscriptions() {
+    private final Client client;
+    private final Set<Subscription> subscriptions;
+
+    Subscriptions(Client client) {
+        this.client = client;
+        this.subscriptions = synchronizedSet(new HashSet<>());
     }
 
     /**
@@ -82,5 +105,54 @@ public final class Subscriptions {
     @Deprecated
     public static String toShortString(Subscription subscription) {
         return subscription.toShortString();
+    }
+
+    /** Adds all the passed subscriptions. */
+    void addAll(Collection<Subscription> newSubscriptions) {
+        newSubscriptions.forEach(this::add);
+    }
+
+    /** Remembers the passed subscription for future use. */
+    void add(Subscription s) {
+        subscriptions.add(checkNotNull(s));
+    }
+
+    /**
+     * Cancels the passed subscription.
+     *
+     * @return {@code true} if the subscription was previously made
+     */
+    public boolean cancel(Subscription subscription) {
+        checkNotNull(subscription);
+        requestCancellation(subscription);
+        return subscriptions.remove(subscription);
+    }
+
+    @SuppressWarnings("deprecation")
+    /* Hide the Client#cancel() from the public API during next cycle of deprecation handling */
+    private void requestCancellation(Subscription subscription) {
+        client.cancel(subscription);
+    }
+
+    /** Cancels all the subscriptions. */
+    public void cancelAll() {
+        Iterator<Subscription> iterator = subscriptions.iterator();
+        while (iterator.hasNext()) {
+            Subscription subscription = iterator.next();
+            requestCancellation(subscription);
+            iterator.remove();
+        }
+    }
+
+    @VisibleForTesting
+    boolean contains(Subscription s) {
+        return subscriptions.contains(s);
+    }
+
+    /**
+     * Verifies if there are any active subscriptions.
+     */
+    public boolean isEmpty() {
+        return subscriptions.isEmpty();
     }
 }

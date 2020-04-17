@@ -96,7 +96,7 @@ public class Client implements AutoCloseable {
     private final SubscriptionServiceBlockingStub blockingSubscriptionService;
 
     /** Subscriptions created by the client which are not cancelled yet. */
-    private final ActiveSubscriptions subscriptions;
+    private final Subscriptions subscriptions;
 
     /**
      * Creates a builder for a client connected to the specified address.
@@ -145,6 +145,7 @@ public class Client implements AutoCloseable {
      * Creates a new client which uses the passed channel for communications
      * with the backend services.
      */
+    @SuppressWarnings("ThisEscapedInObjectConstruction")
     private Client(Builder builder) {
         this.tenant = builder.tenant;
         this.guestUser = builder.guestUser;
@@ -154,7 +155,7 @@ public class Client implements AutoCloseable {
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
         this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
         this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
-        this.subscriptions = new ActiveSubscriptions();
+        this.subscriptions = new Subscriptions(this);
     }
 
     /**
@@ -180,7 +181,7 @@ public class Client implements AutoCloseable {
         if (!isOpen()) {
             return;
         }
-        subscriptions.cancelAll(this);
+        subscriptions.cancelAll();
         try {
             channel.shutdown()
                    .awaitTermination(shutdownTimeout.value(), shutdownTimeout.unit());
@@ -229,10 +230,12 @@ public class Client implements AutoCloseable {
      *
      * @see ClientRequest#subscribeTo(Class)
      * @see ClientRequest#subscribeToEvent(Class)
+     * @deprecated please call {@link Subscriptions#cancel(Subscription)}
      */
+    @Deprecated // Make this method package-access during next deprecation cycle.
     public void cancel(Subscription s) {
+        //TODO:2020-04-17:alexander.yevsyukov: Check response and report the error.
         blockingSubscriptionService.cancel(s);
-        subscriptions.forget(s);
     }
 
     @VisibleForTesting
@@ -245,8 +248,10 @@ public class Client implements AutoCloseable {
         return shutdownTimeout;
     }
 
-    @VisibleForTesting
-    ActiveSubscriptions subscriptions() {
+    /**
+     * Obtains subscriptions created by this client.
+     */
+    public Subscriptions subscriptions() {
         return subscriptions;
     }
 
@@ -294,7 +299,7 @@ public class Client implements AutoCloseable {
     <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
         Subscription subscription = blockingSubscriptionService.subscribe(topic);
         subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
-        subscriptions.remember(subscription);
+        subscriptions.add(subscription);
         return subscription;
     }
 
