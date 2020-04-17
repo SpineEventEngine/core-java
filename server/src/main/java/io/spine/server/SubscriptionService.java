@@ -42,7 +42,6 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
-import static io.spine.client.Subscriptions.toShortString;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
 
@@ -130,7 +129,7 @@ public final class SubscriptionService
         Optional<BoundedContext> selected = findContextOf(subscription);
         if (!selected.isPresent()) {
             _warn().log("Trying to cancel a subscription `%s` which could not be found.",
-                        lazy(() -> toShortString(subscription)));
+                        lazy(subscription::toShortString));
             responseObserver.onCompleted();
             return;
         }

@@ -38,7 +38,7 @@ public final class Subscriptions {
     /**
      * The format for convenient subscription printing in logs and error messages.
      */
-    private static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
+    static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
 
     /** Prevents the utility class instantiation. */
     private Subscriptions() {
@@ -77,14 +77,10 @@ public final class Subscriptions {
      * output is too huge to use in short log messages and stack traces.
      *
      * @return a printable {@code String} with core subscription data
+     * @deprecated please use {@link Subscription#toShortString()}
      */
+    @Deprecated
     public static String toShortString(Subscription subscription) {
-        String id = subscription.getId()
-                                .getValue();
-        String type = subscription.getTopic()
-                                  .getTarget()
-                                  .getType();
-        String result = format(SUBSCRIPTION_PRINT_FORMAT, id, type);
-        return result;
+        return subscription.toShortString();
     }
 }

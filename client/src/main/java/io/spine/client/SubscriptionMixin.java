@@ -24,6 +24,9 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.type.TypeUrl;
 
+import static io.spine.client.Subscriptions.SUBSCRIPTION_PRINT_FORMAT;
+import static java.lang.String.format;
+
 /**
  * Useful methods for {@link Subscription}.
  */
@@ -48,6 +51,22 @@ public interface SubscriptionMixin extends SubscriptionOrBuilder {
         TypeUrl target = targetType();
         Class<?> javaClass = target.toJavaClass();
         boolean result = EventMessage.class.isAssignableFrom(javaClass);
+        return result;
+    }
+
+    /**
+     * Obtains a short printable form of subscription.
+     *
+     * <p>Standard {@link Subscription#toString()} includes all subscription data and thus its
+     * output is too huge to use in short log messages and stack traces.
+     *
+     * @return a printable {@code String} with core subscription data
+     */
+    default String toShortString() {
+        String id = getId().getValue();
+        String type = getTopic().getTarget()
+                                .getType();
+        String result = format(SUBSCRIPTION_PRINT_FORMAT, id, type);
         return result;
     }
 }
