@@ -109,7 +109,9 @@ SubscribingRequest<M extends Message,
     }
 
     private Subscription subscribe(Topic topic, StreamObserver<W> observer) {
-        Subscription subscription = client().subscribeTo(topic, observer);
+        Subscription subscription =
+                client().subscriptions()
+                        .subscribeTo(topic, observer);
         return subscription;
     }
 }

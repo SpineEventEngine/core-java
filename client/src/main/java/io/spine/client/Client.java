@@ -22,19 +22,14 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.EntityState;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.client.grpc.QueryServiceGrpc.QueryServiceBlockingStub;
-import io.spine.client.grpc.SubscriptionServiceGrpc;
-import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceBlockingStub;
-import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceStub;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
@@ -80,22 +75,31 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class Client implements AutoCloseable {
 
-    /** The number of seconds to wait when {@linkplain #close() closing} the client. */
+    /** The default amount of time to wait when {@linkplain #close() closing} the client. */
     public static final Timeout DEFAULT_SHUTDOWN_TIMEOUT = Timeout.of(5, SECONDS);
 
     /** Default ID for a guest user. */
     public static final UserId DEFAULT_GUEST_ID = user("guest");
 
+    /** The ID of the tenant in a multi-tenant application, or {@code null} if single-tenant. */
     private final @Nullable TenantId tenant;
-    private final UserId guestUser;
-    private final ManagedChannel channel;
-    private final Timeout shutdownTimeout;
-    private final QueryServiceBlockingStub queryService;
-    private final CommandServiceBlockingStub commandService;
-    private final SubscriptionServiceStub subscriptionService;
-    private final SubscriptionServiceBlockingStub blockingSubscriptionService;
 
-    /** Subscriptions created by the client which are not cancelled yet. */
+    /** The ID of a user to be used for performing {@linkplain #asGuest() guest requests}. */
+    private final UserId guestUser;
+
+    /** The channel for gRPC requests. */
+    private final ManagedChannel channel;
+
+    /** The amount of time to wait before {@linkplain #close() closing} the client. */
+    private final Timeout shutdownTimeout;
+
+    /** The stub for communicating with the {@code QueryService}. */
+    private final QueryServiceBlockingStub queryService;
+
+    /** The stub for communicating with the {@code CommandService}. */
+    private final CommandServiceBlockingStub commandService;
+
+    /** Active subscriptions maintained by the client. */
     private final Subscriptions subscriptions;
 
     /**
@@ -145,7 +149,6 @@ public class Client implements AutoCloseable {
      * Creates a new client which uses the passed channel for communications
      * with the backend services.
      */
-    @SuppressWarnings("ThisEscapedInObjectConstruction")
     private Client(Builder builder) {
         this.tenant = builder.tenant;
         this.guestUser = builder.guestUser;
@@ -153,9 +156,7 @@ public class Client implements AutoCloseable {
         this.shutdownTimeout = checkNotNull(builder.shutdownTimeout);
         this.commandService = CommandServiceGrpc.newBlockingStub(channel);
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
-        this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
-        this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
-        this.subscriptions = new Subscriptions(this);
+        this.subscriptions = new Subscriptions(channel);
     }
 
     /**
@@ -234,8 +235,7 @@ public class Client implements AutoCloseable {
      */
     @Deprecated // Make this method package-access during next deprecation cycle.
     public void cancel(Subscription s) {
-        //TODO:2020-04-17:alexander.yevsyukov: Check response and report the error.
-        blockingSubscriptionService.cancel(s);
+        subscriptions.cancel(s);
     }
 
     @VisibleForTesting
@@ -281,26 +281,6 @@ public class Client implements AutoCloseable {
                 .read(query)
                 .states(stateType);
         return result;
-    }
-
-    /**
-     * Subscribes the given {@link StreamObserver} to the given topic and activates
-     * the subscription.
-     *
-     * @param topic
-     *         the topic to subscribe to
-     * @param observer
-     *         the observer to subscribe
-     * @param <M>
-     *         the type of the result messages
-     * @return the activated subscription
-     * @see #cancel(Subscription)
-     */
-    <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
-        Subscription subscription = blockingSubscriptionService.subscribe(topic);
-        subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
-        subscriptions.add(subscription);
-        return subscription;
     }
 
     private static UserId user(String value) {

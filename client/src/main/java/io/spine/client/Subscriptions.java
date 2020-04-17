@@ -20,7 +20,13 @@
 package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
+import io.grpc.ManagedChannel;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
+import io.spine.client.grpc.SubscriptionServiceGrpc;
+import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceBlockingStub;
+import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceStub;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -46,6 +52,10 @@ import static java.util.Collections.synchronizedSet;
  *
  * <p>All remaining subscriptions are {@linkplain #cancelAll() cancelled} by the {@code Client}
  * when it {@linkplain Client#close() closes}.
+ *
+ * @see ClientRequest#subscribeTo(Class)
+ * @see ClientRequest#subscribeToEvent(Class)
+ * @see CommandRequest#post()
  */
 public final class Subscriptions {
 
@@ -59,11 +69,13 @@ public final class Subscriptions {
      */
     static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
 
-    private final Client client;
+    private final SubscriptionServiceStub subscriptionService;
+    private final SubscriptionServiceBlockingStub blockingSubscriptionService;
     private final Set<Subscription> subscriptions;
 
-    Subscriptions(Client client) {
-        this.client = client;
+    Subscriptions(ManagedChannel channel) {
+        this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
+        this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
         this.subscriptions = synchronizedSet(new HashSet<>());
     }
 
@@ -107,13 +119,33 @@ public final class Subscriptions {
         return subscription.toShortString();
     }
 
+    /**
+     * Subscribes the given {@link StreamObserver} to the given topic and activates
+     * the subscription.
+     *
+     * @param topic
+     *         the topic to subscribe to
+     * @param observer
+     *         the observer to subscribe
+     * @param <M>
+     *         the type of the result messages
+     * @return the activated subscription
+     * @see #cancel(Subscription)
+     */
+    <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
+        Subscription subscription = blockingSubscriptionService.subscribe(topic);
+        subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
+        add(subscription);
+        return subscription;
+    }
+
     /** Adds all the passed subscriptions. */
     void addAll(Collection<Subscription> newSubscriptions) {
         newSubscriptions.forEach(this::add);
     }
 
     /** Remembers the passed subscription for future use. */
-    void add(Subscription s) {
+    private void add(Subscription s) {
         subscriptions.add(checkNotNull(s));
     }
 
@@ -128,10 +160,9 @@ public final class Subscriptions {
         return subscriptions.remove(subscription);
     }
 
-    @SuppressWarnings("deprecation")
-    /* Hide the Client#cancel() from the public API during next cycle of deprecation handling */
     private void requestCancellation(Subscription subscription) {
-        client.cancel(subscription);
+        //TODO:2020-04-17:alexander.yevsyukov: Check response and report the error.
+        blockingSubscriptionService.cancel(subscription);
     }
 
     /** Cancels all the subscriptions. */
