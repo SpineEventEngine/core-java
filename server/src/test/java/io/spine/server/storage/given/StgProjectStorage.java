@@ -46,6 +46,7 @@ public class StgProjectStorage extends MessageStorage<StgProjectId, StgProject> 
 
     private static RecordStorage<StgProjectId, StgProject>
     newStorage(StorageFactory factory, boolean multitenant) {
+        @SuppressWarnings("ConstantConditions")     // Proto getters are non-{@code null}.
         MessageRecordSpec<StgProjectId, StgProject> spec =
                 new MessageRecordSpec<>(StgProject.class,
                                         StgProject::getId,

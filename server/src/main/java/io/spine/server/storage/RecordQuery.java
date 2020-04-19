@@ -80,7 +80,6 @@ public final class RecordQuery<I> {
     /**
      * Obtains an immutable set of accepted ID values.
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public Set<I> getIds() {
         return ids;
     }

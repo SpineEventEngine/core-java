@@ -20,10 +20,15 @@
 
 package io.spine.server.storage.given;
 
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Durations;
+import com.google.protobuf.util.Timestamps;
 import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProject.Status;
 import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.StgTask;
 
+import static io.spine.base.Time.currentTime;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 
@@ -36,21 +41,44 @@ public final class GivenStorageProject {
     }
 
     /**
-     * Creates an unique {@code EntityState} with the specified ID.
+     * Creates a unique {@code EntityState} with the specified ID.
      *
-     * <p>Two calls for the same ID should return messages, which are not equal.
+     * <p>Two calls for the same ID should return messages, which are not equal, as the project
+     * name is generated using the {@link System#nanoTime() System.nanoTime()}.
+     *
+     * <p>The status of the returned project is set to {@code CREATED}.
+     *
+     * <p>The due date for the returned project is set to one day ahead of the current time.
      *
      * @param id
      *         the ID for the message
      * @return the unique {@code EntityState}
      */
     public static StgProject newState(StgProjectId id) {
+        Status status = Status.CREATED;
+        Timestamp dueDate = Timestamps.add(currentTime(), Durations.fromDays(1));
+        return newState(id, status, dueDate);
+    }
+
+    /**
+     * Creates an {@code StgProject} state with the specified ID, project status and due date.
+     *
+     * @param id
+     *         the ID for the message
+     * @param status
+     *         the status for the created project
+     * @param dueDate
+     *         the due date of the project
+     * @return a new instance of {@code StgProject}
+     */
+    public static StgProject newState(StgProjectId id, Status status, Timestamp dueDate) {
         String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
         StgProject project = StgProject
                 .newBuilder()
                 .setId(id)
-                .setStatus(StgProject.Status.CREATED)
+                .setStatus(status)
                 .setName(uniqueName)
+                .setDueDate(dueDate)
                 .addTask(StgTask.getDefaultInstance())
                 .build();
         return project;

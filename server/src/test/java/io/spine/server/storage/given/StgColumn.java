@@ -41,7 +41,13 @@ public enum StgColumn implements QueryableField<StgProject> {
     /**
      * When the project is due; stored as {@link Timestamp}.
      */
-    due_date(Timestamp.class, StgProject::getDueDate);
+    due_date(Timestamp.class, StgProject::getDueDate),
+
+    /**
+     * The status of the project; stored as a {@code String} with the status name.
+     */
+    status(String.class, (r) -> r.getStatus()
+                                 .name());
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private final CustomColumn<?, StgProject> column;

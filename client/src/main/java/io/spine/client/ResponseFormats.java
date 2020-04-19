@@ -40,8 +40,8 @@ public final class ResponseFormats {
     /**
      * Creates a new {@code ResponseFormat} with just the field mask.
      *
-     * <p>{@linkplain ResponseFormat#getLimit() Limit} and
-     * {@linkplain ResponseFormat#getOrderByList() ordering} is not set for the resulting instance.
+     * <p>The {@linkplain ResponseFormat#getLimit() limit} and
+     * {@linkplain ResponseFormat#getOrderByList() ordering} are not set for the resulting instance.
      *
      * @param mask
      *         the field mask to apply to each item in the response
@@ -49,6 +49,22 @@ public final class ResponseFormats {
     public static ResponseFormat formatWith(FieldMask mask) {
         checkNotNull(mask);
         return responseFormat(mask, null, null);
+    }
+
+    /**
+     * Creates a new {@code ResponseFormat} with the ordering and the limit
+     *
+     * <p>The {@linkplain ResponseFormat#getFieldMask() field mask} is not set.
+     *
+     * @param orderBy
+     *         the ordering to apply
+     * @param limit
+     *         the maximum number of records set to be returned
+     */
+    public static ResponseFormat formatWith(OrderBy orderBy, Integer limit) {
+        checkNotNull(orderBy);
+        checkNotNull(limit);
+        return responseFormat(null, orderBy, limit);
     }
 
     /**
