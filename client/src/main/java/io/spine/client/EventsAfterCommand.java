@@ -71,7 +71,8 @@ final class EventsAfterCommand implements Logging {
         StreamObserver<Event> observer = consumers.toObserver(errorHandler);
         ImmutableSet<Subscription> subscriptions =
                 topics.stream()
-                      .map((topic) -> client.subscribeTo(topic, observer))
+                      .map((topic) -> client.subscriptions()
+                                            .subscribeTo(topic, observer))
                       .collect(toImmutableSet());
         return subscriptions;
     }

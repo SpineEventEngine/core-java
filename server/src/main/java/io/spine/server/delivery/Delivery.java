@@ -316,10 +316,32 @@ public final class Delivery implements Logging {
     /**
      * Creates a new instance of {@code Delivery} suitable for local and development environment.
      *
+     * <p>In this setup, the {@code InboxMessage}s are delivered to their targets synchronously.
+     *
      * <p>Uses a {@linkplain UniformAcrossAllShards#singleShard() single-shard} splitting.
+     *
+     * @see #localAsync() to create an asynchronous version of the local {@code Delivery}
      */
     public static Delivery local() {
         return localWithShardsAndWindow(1, LOCAL_DEDUPLICATION_WINDOW);
+    }
+
+    /**
+     * Creates a new instance of {@code Delivery} for local and development environment.
+     *
+     * <p>The {@code InboxMessage}s are delivered to their targets asynchronously.
+     *
+     * <p>The returned instance of {@code Delivery} is configured to use
+     * {@linkplain UniformAcrossAllShards#singleShard() the single shard}.
+     *
+     * @see #local() to create a syncrhonous version of the local {@code Delivery}
+     */
+    public static Delivery localAsync() {
+        Delivery delivery = newBuilder()
+                .setStrategy(UniformAcrossAllShards.singleShard())
+                .build();
+        delivery.subscribe(new LocalDispatchingObserver(true));
+        return delivery;
     }
 
     /**
@@ -617,6 +639,11 @@ public final class Delivery implements Logging {
 
     int shardCount() {
         return strategy.shardCount();
+    }
+
+    @VisibleForTesting
+    ImmutableList<ShardObserver> shardObservers() {
+        return ImmutableList.copyOf(shardObservers);
     }
 
     private InboxWriter inboxWriter() {

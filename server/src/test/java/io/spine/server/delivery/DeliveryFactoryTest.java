@@ -17,21 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.client;
 
-import com.google.common.testing.NullPointerTester;
+package io.spine.server.delivery;
+
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static com.google.common.truth.Truth.assertThat;
 
-@DisplayName("Subscriptions utility should")
-class SubscriptionsTest {
+@DisplayName("`Delivery` factory methods should")
+class DeliveryFactoryTest {
 
     @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Subscriptions.class);
+    @DisplayName("create an instance of `Delivery` " +
+            "which delivers the messages from their shards asynchronously")
+    void createLocalAsync(){
+        Delivery delivery = Delivery.localAsync();
+
+        ImmutableList<ShardObserver> observers = delivery.shardObservers();
+        assertThat(observers).hasSize(1);
+
+        ShardObserver observer = observers.get(0);
+        assertThat(observer).isInstanceOf(LocalDispatchingObserver.class);
+
+        LocalDispatchingObserver localObserver = (LocalDispatchingObserver) observer;
+        assertThat(localObserver.isAsync()).isTrue();
     }
 }

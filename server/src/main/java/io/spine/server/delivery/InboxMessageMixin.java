@@ -22,6 +22,7 @@ package io.spine.server.delivery;
 
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
+import io.spine.core.TenantId;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -35,6 +36,15 @@ public interface InboxMessageMixin extends ShardedRecord, InboxMessageOrBuilder 
     @Override
     default ShardIndex shardIndex() {
         return getId().getIndex();
+    }
+
+    /**
+     * Returns the {@link TenantId} for the original {@linkplain #getPayloadCase() signal payload}.
+     */
+    default TenantId tenant() {
+        return hasCommand()
+                       ? getCommand().tenant()
+                       : getEvent().tenant();
     }
 
     /**

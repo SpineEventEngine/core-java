@@ -47,8 +47,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *           .post();
  * }</pre>
  *
- * <p>The subscription obtained from the {@link #post()} should must be cancelled to preserve
- * both client-side and server-side resources. The moment of cancelling the subscriptions
+ * <p>The subscription obtained from the {@link #post()} should be cancelled
+ * to preserve both client-side and server-side resources. The moment of cancelling the subscriptions
  * depends on the nature of the posted command and the outcome expected by the client application.
  */
 public final class CommandRequest extends ClientRequest {
@@ -116,7 +116,7 @@ public final class CommandRequest extends ClientRequest {
      * they happen, then sends the command to the server.
      *
      * <p>The returned {@code Subscription} instances should be
-     * {@linkplain Client#cancel(Subscription) canceled} after the requesting code receives
+     * {@linkplain Subscriptions#cancel(Subscription) canceled} after the requesting code receives
      * expected events, or after a reasonable timeout.
      *
      * @return subscription to the events
@@ -129,7 +129,15 @@ public final class CommandRequest extends ClientRequest {
      *         because of communication or business logic reasons. That's why the returned
      *         subscriptions should be cancelled by the client code when it no longer needs it.
      */
+    @CanIgnoreReturnValue
     public ImmutableSet<Subscription> post() {
+        ImmutableSet<Subscription> newSubscriptions = doPost();
+        client().subscriptions()
+                .addAll(newSubscriptions);
+        return newSubscriptions;
+    }
+
+    private ImmutableSet<Subscription> doPost() {
         MultiEventConsumers consumers = builder.build();
         Client client = client();
         Command command =
@@ -138,6 +146,9 @@ public final class CommandRequest extends ClientRequest {
                       .create(message);
         ImmutableSet<Subscription> result =
                 EventsAfterCommand.subscribe(client, command, consumers, streamingErrorHandler);
+
+        //TODO:2020-04-17:alexander.yevsyukov: Check the returned Ack and throw an exception
+        // in case of problems.
         client().post(command);
         return result;
     }
