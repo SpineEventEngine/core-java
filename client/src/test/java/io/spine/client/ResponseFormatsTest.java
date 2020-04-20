@@ -40,7 +40,8 @@ class ResponseFormatsTest extends UtilityClassTest<ResponseFormats> {
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
-        tester.setDefault(FieldMask.class, FieldMask.getDefaultInstance());
+        tester.setDefault(FieldMask.class, FieldMask.getDefaultInstance())
+              .setDefault(OrderBy.class, OrderBy.getDefaultInstance());
     }
 
     @Test
