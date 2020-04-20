@@ -25,7 +25,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
@@ -307,11 +306,6 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     protected void truncate(int snapshotIndex, Timestamp date) {
         truncation.performWith(snapshotIndex,
                                (r) -> Timestamps.compare(r.getTimestamp(), date) < 0);
-    }
-
-    @SuppressWarnings("unchecked")
-    private I aggregateIdOf(AggregateEventRecord record) {
-        return (I) Identifier.unpack(record.getAggregateId());
     }
 
     private void checkNotClosedAndArguments(I id, Object argument) {
