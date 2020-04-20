@@ -68,6 +68,23 @@ public final class ResponseFormats {
     }
 
     /**
+     * Creates a new {@code ResponseFormat} with the ordering, limit and the field mask.
+     *
+     * @param orderBy
+     *         the ordering to apply
+     * @param limit
+     *         the maximum number of records set to be returned
+     * @param fieldMask
+     *         the field mask to apply to each item in the response
+     */
+    public static ResponseFormat formatWith(FieldMask fieldMask, OrderBy orderBy, Integer limit) {
+        checkNotNull(fieldMask);
+        checkNotNull(orderBy);
+        checkNotNull(limit);
+        return responseFormat(fieldMask, orderBy, limit);
+    }
+
+    /**
      * Creates a new {@code ResponseFormat}.
      *
      * <p>A caller of this method may choose which parts of the format are set. {@code null} value

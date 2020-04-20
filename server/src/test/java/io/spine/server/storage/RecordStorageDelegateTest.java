@@ -25,10 +25,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
-import io.spine.client.OrderBy;
+import com.google.protobuf.util.Timestamps;
+import io.spine.client.ResponseFormat;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.storage.given.RecordStorageDelegateTestEnv;
 import io.spine.server.storage.given.StgProjectStorage;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -37,12 +38,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -50,15 +49,14 @@ import static com.google.protobuf.util.Durations.fromDays;
 import static com.google.protobuf.util.Durations.fromMinutes;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
-import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.ResponseFormats.formatWith;
-import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.storage.QueryParameters.le;
+import static io.spine.server.storage.QueryParameters.lt;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.server.storage.given.StgColumn.due_date;
 import static io.spine.server.storage.given.StgColumn.status;
+import static io.spine.test.storage.StgProject.Status.CREATED;
 import static io.spine.test.storage.StgProject.Status.DONE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -70,7 +68,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * <p>The aim of this test is to ensure that any storage implementations built on top of
  * the {@code RecordStorageDelegate} is able to utilize the API with the expected results.
  */
-//TODO:2020-04-17:alex.tymchenko: complete the test case.
 @DisplayName("A `RecordStorageDelegate` descendant should")
 public class RecordStorageDelegateTest
         extends AbstractStorageTest<StgProjectId, StgProject, StgProjectStorage> {
@@ -89,9 +86,7 @@ public class RecordStorageDelegateTest
 
     @Override
     protected StgProjectId newId() {
-        return StgProjectId.newBuilder()
-                           .setId(newUuid())
-                           .build();
+        return RecordStorageDelegateTestEnv.generateId();
     }
 
     @Nested
@@ -101,7 +96,8 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("batch of records")
         void manyRecords() {
-            Iterable<StgProject> records = dozenOfRecords().values();
+            Iterable<StgProject> records = RecordStorageDelegateTestEnv.dozenOfRecords()
+                                                                       .values();
             storage().writeBatch(records);
 
             Iterator<StgProject> actualIterator = storage().readAll();
@@ -112,14 +108,14 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("batch of records, recalling them by their IDs")
         void allByIds() {
-            ImmutableMap<StgProjectId, StgProject> recordMap = dozenOfRecords();
+            ImmutableMap<StgProjectId, StgProject> recordMap = RecordStorageDelegateTestEnv.dozenOfRecords();
             storage().writeBatch(recordMap.values());
 
             ImmutableSet<StgProjectId> ids = recordMap.keySet();
-            ImmutableList<StgProjectId> partOfIds = halfDozenOf(ids);
+            ImmutableList<StgProjectId> partOfIds = RecordStorageDelegateTestEnv.halfDozenOf(ids);
             Iterator<StgProject> actualIterator = storage().readAll(partOfIds);
             ImmutableList<StgProject> actualRecords = ImmutableList.copyOf(actualIterator);
-            assertHaveIds(actualRecords, partOfIds);
+            RecordStorageDelegateTestEnv.assertHaveIds(actualRecords, partOfIds);
         }
     }
 
@@ -133,23 +129,25 @@ public class RecordStorageDelegateTest
             StgProject record = newState(newId());
             storage().write(record);
 
-            Optional<StgProject> result = storage().read(record.getId(), idAndDueDate());
+            Optional<StgProject> result = storage().read(record.getId(),
+                                                         RecordStorageDelegateTestEnv.idAndDueDate());
             assertThat(result).isPresent();
             StgProject actual = result.get();
-            assertOnlyIdAndDueDate(actual);
+            RecordStorageDelegateTestEnv.assertOnlyIdAndDueDate(actual);
         }
 
         @Test
         @DisplayName("several records according to the `FieldMask`")
         void allByMask() {
-            ImmutableCollection<StgProject> records = dozenOfRecords().values();
+            ImmutableCollection<StgProject> records = RecordStorageDelegateTestEnv.dozenOfRecords()
+                                                                                  .values();
             storage().writeBatch(records);
 
             Iterator<StgProject> iterator =
-                    storage().readAll(formatWith(idAndDueDate()));
+                    storage().readAll(formatWith(RecordStorageDelegateTestEnv.idAndDueDate()));
             ImmutableList<StgProject> actualResults = ImmutableList.copyOf(iterator);
             for (StgProject result : actualResults) {
-                assertOnlyIdAndDueDate(result);
+                RecordStorageDelegateTestEnv.assertOnlyIdAndDueDate(result);
             }
         }
 
@@ -164,7 +162,8 @@ public class RecordStorageDelegateTest
             storage().writeBatch(ImmutableList.of(newest, older, oldest, almostNew));
 
             int limit = 2;
-            Iterator<StgProject> iterator = storage().readAll(formatWith(dueDateAsc(), limit));
+            Iterator<StgProject> iterator = storage().readAll(formatWith(
+                    RecordStorageDelegateTestEnv.dueDateAsc(), limit));
             ImmutableList<StgProject> actualRecords = ImmutableList.copyOf(iterator);
             assertThat(actualRecords).hasSize(limit);
             assertThat(actualRecords.get(0)).isEqualTo(oldest);
@@ -174,24 +173,26 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("several records by their IDs and the `FieldMask`")
         void allByIdsAndMask() {
-            ImmutableMap<StgProjectId, StgProject> recordMap = dozenOfRecords();
+            ImmutableMap<StgProjectId, StgProject> recordMap = RecordStorageDelegateTestEnv.dozenOfRecords();
             storage().writeBatch(recordMap.values());
 
-            Iterator<StgProject> iterator = storage().readAll(recordMap.keySet(), idAndDueDate());
+            Iterator<StgProject> iterator = storage().readAll(recordMap.keySet(),
+                                                              RecordStorageDelegateTestEnv.idAndDueDate());
             ImmutableList<StgProject> actualResults = ImmutableList.copyOf(iterator);
             for (StgProject result : actualResults) {
-                assertOnlyIdAndDueDate(result);
+                RecordStorageDelegateTestEnv.assertOnlyIdAndDueDate(result);
             }
         }
 
         @Test
         @DisplayName("many records by a single column value only")
         void manyRecordsBySingleColumnWithDefaultResponseFormat() {
-            ImmutableCollection<StgProject> createdProjects = dozenOfRecords().values();
+            ImmutableCollection<StgProject> createdProjects = RecordStorageDelegateTestEnv.dozenOfRecords()
+                                                                                          .values();
             storage().writeBatch(createdProjects);
 
             ImmutableList<StgProject> doneProjects =
-                    coupleOfDone(currentTime());
+                    RecordStorageDelegateTestEnv.coupleOfDone(currentTime());
             storage().writeBatch(doneProjects);
 
             RecordQuery<StgProjectId> queryForDone =
@@ -205,14 +206,16 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("many records by several columns only")
         void manyRecordsBySeveralColumnsWithDefaultResponseFormat() {
-            ImmutableCollection<StgProject> createdProjects = dozenOfRecords().values();
+            ImmutableCollection<StgProject> createdProjects = RecordStorageDelegateTestEnv.dozenOfRecords()
+                                                                                          .values();
             storage().writeBatch(createdProjects);
 
             Timestamp now = currentTime();
-            ImmutableList<StgProject> doneDueToday = coupleOfDone(now);
+            ImmutableList<StgProject> doneDueToday = RecordStorageDelegateTestEnv.coupleOfDone(now);
             storage().writeBatch(doneDueToday);
 
-            ImmutableList<StgProject> doneDueYesterday = coupleOfDone(subtract(now, fromDays(1)));
+            ImmutableList<StgProject> doneDueYesterday = RecordStorageDelegateTestEnv.coupleOfDone(
+                    subtract(now, fromDays(1)));
             storage().writeBatch(doneDueYesterday);
 
             Timestamp aMinuteAgo = subtract(now, fromMinutes(1));
@@ -227,18 +230,91 @@ public class RecordStorageDelegateTest
         }
 
         @Test
-        @DisplayName("many records by a single columns with the limit and ordering")
+        @DisplayName("many records by a single column with the limit and ordering")
         void manyRecordsBySingleColumnAndLimit() {
+            ImmutableCollection<StgProject> createdProjects = RecordStorageDelegateTestEnv.dozenOfRecords()
+                                                                                          .values();
+            storage().writeBatch(createdProjects);
+
+            RecordQuery<StgProjectId> queryForDone = RecordQueries.byField(status, DONE.name());
+            Iterator<StgProject> iterator = storage().readAll(queryForDone,
+                                                              formatWith(
+                                                                      RecordStorageDelegateTestEnv.dueDateAsc(),
+                                                                      10));
+            assertThat(iterator.hasNext()).isFalse();
+
+            List<StgProject> sortedByDueDate = new ArrayList<>(createdProjects);
+            sortedByDueDate.sort((r1, r2) -> Timestamps.compare(r1.getDueDate(), r2.getDueDate()));
+            int limit = 2;
+            List<StgProject> expected = sortedByDueDate.subList(0, limit);
+
+            RecordQuery<StgProjectId> queryForCreated =
+                    RecordQueries.byField(status, CREATED.name());
+            Iterator<StgProject> limitedIterator =
+                    storage().readAll(queryForCreated, formatWith(
+                            RecordStorageDelegateTestEnv.dueDateAsc(), limit));
+            ImmutableList<StgProject> actual = ImmutableList.copyOf(limitedIterator);
+            assertThat(actual).containsExactlyElementsIn(expected);
         }
 
         @Test
         @DisplayName("many records by several columns with the limit and ordering")
         void manyRecordsBySeveralColumnsAndLimit() {
+            Timestamp now = currentTime();
+
+            ImmutableList<StgProject> doneLongAgo = RecordStorageDelegateTestEnv.coupleOfDone(
+                    subtract(now, fromDays(10)));
+            ImmutableList<StgProject> records =
+                    ImmutableList.<StgProject>builder()
+                            .addAll(doneLongAgo)
+                            .addAll(RecordStorageDelegateTestEnv.coupleOfDone(
+                                    subtract(now, fromDays(1))))
+                            .addAll(RecordStorageDelegateTestEnv.coupleOfDone(now))
+                            .addAll(RecordStorageDelegateTestEnv.dozenOfRecords()
+                                                                .values())  // in `CREATED` status.
+                            .build();
+            storage().writeBatch(records);
+
+            RecordQuery<StgProjectId> inDoneStatus = RecordQueries.byField(status, DONE.name());
+            RecordQuery<StgProjectId> doneAndDueBeforeNow = inDoneStatus.append(le(due_date, now));
+            Iterator<StgProject> iterator =
+                    storage().readAll(doneAndDueBeforeNow, formatWith(
+                            RecordStorageDelegateTestEnv.dueDateAsc(), 2));
+            ImmutableList<StgProject> actual = ImmutableList.copyOf(iterator);
+            assertThat(actual).containsExactlyElementsIn(doneLongAgo);
         }
 
         @Test
-        @DisplayName("many records by the column with the limit and the field mask")
+        @DisplayName("many records by several columns with the limit and the field mask")
         void manyRecordsBySeveralColumnsWithLimitAndMask() {
+            Timestamp now = currentTime();
+
+            ImmutableList<StgProject> doneDueYesterday = RecordStorageDelegateTestEnv.coupleOfDone(
+                    subtract(now, fromDays(1)));
+            ImmutableList<StgProject> records =
+                    ImmutableList.<StgProject>builder()
+                            .addAll(RecordStorageDelegateTestEnv.coupleOfDone(
+                                    subtract(now, fromDays(10))))
+                            .addAll(doneDueYesterday)
+                            .addAll(RecordStorageDelegateTestEnv.coupleOfDone(now))
+                            .addAll(RecordStorageDelegateTestEnv.dozenOfRecords()
+                                                                .values())  // in `CREATED` status.
+                            .build();
+            storage().writeBatch(records);
+
+            RecordQuery<StgProjectId> inDoneStatus = RecordQueries.byField(status, DONE.name());
+            RecordQuery<StgProjectId> doneAndDueBeforeNow = inDoneStatus.append(lt(due_date, now));
+            ResponseFormat format = formatWith(RecordStorageDelegateTestEnv.idAndDueDate(),
+                                               RecordStorageDelegateTestEnv.dueDateDesc(), 2);
+
+            Iterator<StgProject> iterator = storage().readAll(doneAndDueBeforeNow, format);
+            ImmutableList<StgProject> actual = ImmutableList.copyOf(iterator);
+            RecordStorageDelegateTestEnv.assertHaveIds(actual, RecordStorageDelegateTestEnv.toIds(
+                    doneDueYesterday));
+
+            for (StgProject readResult : actual) {
+                RecordStorageDelegateTestEnv.assertOnlyIdAndDueDate(readResult);
+            }
         }
     }
 
@@ -266,15 +342,15 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("several records by their IDs at once")
         void manyRecordByIds() {
-            ImmutableMap<StgProjectId, StgProject> recordMap = dozenOfRecords();
+            ImmutableMap<StgProjectId, StgProject> recordMap = RecordStorageDelegateTestEnv.dozenOfRecords();
             storage().writeBatch(recordMap.values());
 
             ImmutableSet<StgProjectId> ids = recordMap.keySet();
-            ImmutableList<StgProjectId> partOfIds = halfDozenOf(ids);
+            ImmutableList<StgProjectId> partOfIds = RecordStorageDelegateTestEnv.halfDozenOf(ids);
             Iterator<StgProject> actualIterator = storage().readAll(partOfIds);
             ImmutableList<StgProject> actualRecords = ImmutableList.copyOf(actualIterator);
 
-            assertHaveIds(actualRecords, partOfIds);
+            RecordStorageDelegateTestEnv.assertHaveIds(actualRecords, partOfIds);
 
             storage().deleteAll(partOfIds);
             Iterator<StgProject> afterDeletion = storage().readAll(partOfIds);
@@ -284,14 +360,14 @@ public class RecordStorageDelegateTest
             ImmutableList<StgProject> remainder = ImmutableList.copyOf(iterator);
             Sets.SetView<StgProjectId> expectedRemainedIds =
                     Sets.symmetricDifference(ids, ImmutableSet.copyOf(partOfIds));
-            assertHaveIds(remainder, expectedRemainedIds);
+            RecordStorageDelegateTestEnv.assertHaveIds(remainder, expectedRemainedIds);
         }
     }
 
-
     @Nested
     @DisplayName("throw an `IllegalStateException` if it is closed and the user invokes")
-    @SuppressWarnings("ResultOfMethodCallIgnored")  // as we just call the method!
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+            // as we just call the method!
     class ThrowIseIfClosed {
 
         @BeforeEach
@@ -326,7 +402,7 @@ public class RecordStorageDelegateTest
         @DisplayName("`read(id, FieldMask)` method")
         void readIdFieldMask() {
             assertThrows(IllegalStateException.class,
-                         () -> storage().read(newId(), idAndDueDate())
+                         () -> storage().read(newId(), RecordStorageDelegateTestEnv.idAndDueDate())
             );
         }
 
@@ -358,7 +434,8 @@ public class RecordStorageDelegateTest
         @DisplayName("`readAll(IDs, FieldMask)` method")
         void readAllByIdsAndMask() {
             assertThrows(IllegalStateException.class,
-                         () -> storage().readAll(ImmutableSet.of(newId()), idAndDueDate())
+                         () -> storage().readAll(ImmutableSet.of(newId()),
+                                                 RecordStorageDelegateTestEnv.idAndDueDate())
             );
         }
 
@@ -366,7 +443,8 @@ public class RecordStorageDelegateTest
         @DisplayName("`readAll(ResponseFormat)` method")
         void readAllInFormat() {
             assertThrows(IllegalStateException.class,
-                         () -> storage().readAll(formatWith(idAndDueDate()))
+                         () -> storage().readAll(formatWith(
+                                 RecordStorageDelegateTestEnv.idAndDueDate()))
             );
         }
 
@@ -374,7 +452,8 @@ public class RecordStorageDelegateTest
         @DisplayName("`readAll(RecordQuery, ResponseFormat)` method")
         void readAllByQueryAndFormat() {
             assertThrows(IllegalStateException.class,
-                         () -> storage().readAll(RecordQueries.all(), formatWith(idAndDueDate()))
+                         () -> storage().readAll(RecordQueries.all(), formatWith(
+                                 RecordStorageDelegateTestEnv.idAndDueDate()))
             );
         }
 
@@ -396,93 +475,6 @@ public class RecordStorageDelegateTest
     }
 
     private StgProject randomRecord() {
-        return newStorageRecord(newId());
+        return newStorageRecord(RecordStorageDelegateTestEnv.generateId());
     }
-
-    /**
-     * Creates the field mask which only has {@code ID} and {@code due_date} fields.
-     */
-    private static FieldMask idAndDueDate() {
-        return FieldMask.newBuilder()
-                        .addPaths("id")
-                        .addPaths(due_date.name())
-                        .build();
-    }
-
-    /**
-     * Asserts that the given record has only its ID and due date set.
-     *
-     * <p>The rest of the fields are asserted to have a default value.
-     *
-     * @param actual
-     *         the record to check
-     */
-    private static void assertOnlyIdAndDueDate(StgProject actual) {
-        assertThat(isDefault(actual.getId())).isFalse();
-        assertThat(isDefault(actual.getDueDate())).isFalse();
-
-        assertThat(actual.getName()).isEmpty();
-        assertThat(actual.getTaskList()).isEmpty();
-        assertThat(isDefault(actual.getStatus())).isTrue();
-        assertThat(actual.getIdString()).isEmpty();
-        assertThat(actual.getInternal()).isFalse();
-        assertThat(isDefault(actual.getWrappedState())).isTrue();
-        assertThat(isDefault(actual.getProjectVersion())).isTrue();
-    }
-
-    /**
-     * Creates twelve records with random IDs and names.
-     *
-     * <p>Each record has the due date set to the be a day ahead of the current time and
-     * the {@code CREATED} project status.
-     */
-    private ImmutableMap<StgProjectId, StgProject> dozenOfRecords() {
-        ImmutableMap.Builder<StgProjectId, StgProject> builder = ImmutableMap.builder();
-        IntStream.range(0, 11)
-                 .forEach((i) -> {
-                     StgProjectId id = newId();
-                     builder.put(id, newStorageRecord(id));
-                 });
-        return builder.build();
-    }
-
-    /**
-     * Strips the given set of identifiers to six.
-     */
-    private static ImmutableList<StgProjectId> halfDozenOf(ImmutableSet<StgProjectId> ids) {
-        return ids.asList()
-                  .subList(0, 6);
-    }
-
-    /**
-     * Creates an ordering by the due date in ascending order.
-     */
-    private static OrderBy dueDateAsc() {
-        return OrderBy.newBuilder()
-                      .setColumn(due_date.name())
-                      .setDirection(ASCENDING)
-                      .build();
-    }
-
-    /**
-     * Creates two {@code StgProject} instances in the {@code DONE} state with the given due date.
-     *
-     * @param dueDate
-     *         the due date to set
-     */
-    private ImmutableList<StgProject> coupleOfDone(Timestamp dueDate) {
-        return ImmutableList.of(
-                newState(newId(), DONE, dueDate),
-                newState(newId(), DONE, dueDate)
-        );
-    }
-
-    private static void assertHaveIds(Collection<StgProject> items, Collection<StgProjectId> ids) {
-        assertThat(items).hasSize(ids.size());
-        List<StgProjectId> actualIds = items.stream()
-                                            .map(StgProject::getId)
-                                            .collect(Collectors.toList());
-        assertThat(actualIds).containsExactlyElementsIn(ids);
-    }
-
 }
