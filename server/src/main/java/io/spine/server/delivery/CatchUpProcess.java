@@ -22,6 +22,7 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -40,6 +41,7 @@ import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.delivery.event.HistoryEventsRecalled;
 import io.spine.server.delivery.event.HistoryFullyRecalled;
 import io.spine.server.delivery.event.LiveEventsPickedUp;
+import io.spine.server.delivery.event.ProjectionStateCleared;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.event.AbstractStatefulReactor;
 import io.spine.server.event.EventFactory;
@@ -48,8 +50,10 @@ import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.EventStreamQuery.Limit;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tuple.EitherOf2;
+import io.spine.server.tuple.EitherOf3;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -60,9 +64,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static com.google.protobuf.util.Durations.fromMillis;
 import static com.google.protobuf.util.Durations.fromNanos;
 import static com.google.protobuf.util.Timestamps.subtract;
@@ -261,11 +267,34 @@ public final class CatchUpProcess<I>
     /**
      * Moves the process from {@code Not Started} to {@code IN_PROGRESS} state.
      *
-     * <p>The same {@code CatchUpStarted} event is returned to be dispatched to this very
-     * process via its inbox and move it to the next phase.
+     * Two important things happen at this stage:
+     * <ul>
+     *
+     *      <li>The reading timestamp of the process is set to the one specified in the request.
+     *      However, people are used to say "I want to catch-up since 1 PM" meaning "counting
+     *      the events happened at 1 PM sharp". Therefore process always subtracts a single
+     *      nanosecond from the specified catch-up start time and then treats this interval as
+     *      exclusive.
+     *
+     *      <li>{@link CatchUpStarted} event is dispatched directly to the inboxes of the
+     *      catching-up targets based on the original catch-up request.
+     *
+     *      <li>The identifiers of the catch-up targets are defined. They are set according to
+     *      the actual IDs of the projections to which the {@code CatchUpStarted} has been
+     *      dispatched.
+     *      It is important to know the target IDs, since their state has to be reset to default
+     *      before the dispatching of the first historical event.
+     *
+     *      <p>The number of the projection instances to catch-up is remembered. The process
+     *      then waits for {@link ProjectionStateCleared} events to arrive for each of
+     *      the instances before reading the events from the history.
+     * </ul>
+     *
+     * <p>The event handler returns {@code Nothing}, as the results of its work are dispatched
+     * directly to the inboxes of the catching-up projections.
      */
     @React
-    CatchUpStarted handle(CatchUpRequested e, EventContext ctx) {
+    Nothing handle(CatchUpRequested e, EventContext ctx) {
         CatchUpId id = e.getId();
 
         CatchUp.Request request = e.getRequest();
@@ -277,46 +306,45 @@ public final class CatchUpProcess<I>
         CatchUpStarted started = started(id);
         builder().setStatus(CatchUpStatus.IN_PROGRESS);
         flushState();
-        return started;
+
+        dispatchCatchUpStarted(started, ctx);
+
+        return nothing();
+    }
+
+    private void dispatchCatchUpStarted(CatchUpStarted started, EventContext ctx) {
+        Event event = wrapAsEvent(started, ctx);
+        Set<I> ids = targetsForCatchUpSignals(builder().getRequest());
+        Set<I> targetIds = dispatchAll(ImmutableList.of(event), ids);
+        builder().setInstancesToClear(targetIds.size());
     }
 
     /**
-     * Performs the first read from the event history and dispatches the results to the inboxes
-     * of respective projections.
+     * Waits until all the projection instances report their state has been cleared and they
+     * are ready for the historical events to be dispatched.
      *
-     * <p>There are several key actions performed at this stage.
-     *
-     * <ul>
-     *      <li>The reading timestamp of the process is set to the one specified in the request.
-     *      However, people are used to say "I want to catch-up since 1 PM" meaning "counting
-     *      the events happened at 1 PM sharp". Therefore process always subtracts a single
-     *      nanosecond from the specified catch-up start time and then treats this interval as
-     *      exclusive.
-     *
-     *      <li>The identifiers of the catch-up targets are defined. They are either specified
-     *      in the original request, or, if all projections are to be caught-up, they are the
-     *      {@linkplain io.spine.server.entity.Repository#index() ID index} of the selected
-     *      repository.
-     *      It is important to know the target IDs, since their state has to be reset to default
-     *      before the dispatching of the first historical event.
-     *
-     *      <li>{@link CatchUpStarted} event is dispatched directly to the inboxes of the catching-up
-     *      targets.
-     * </ul>
+     * <p>Once all the instances are ready, performs the first reading from the event history
+     * and dispatches the results to the inboxes of respective projections.
      *
      * <p>If the history has been read fully (i.e. until the start of the {@linkplain Turbulence
      * turbulence period}), emits {@code HistoryFullyRecalled} event. Otherwise, emits
      * {@code HistoryEventsRecalled} by which it triggers the next round of history reading.
      */
     @React
-    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled>
-    handle(CatchUpStarted started, EventContext ctx) {
+    EitherOf3<HistoryEventsRecalled, HistoryFullyRecalled, Nothing>
+    handle(ProjectionStateCleared event) {
+        int leftToClear = builder().getInstancesToClear() - 1;
+        builder().setInstancesToClear(leftToClear);
+        if (leftToClear > 0) {
+            return EitherOf3.withC(nothing());
+        }
 
-        Event event = wrapAsEvent(started, ctx);
-        Set<I> ids = targetsForCatchUpSignals(builder().getRequest());
-        dispatchAll(ImmutableList.of(event), ids);
-
-        return recallMoreEvents();
+        EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> result = recallMoreEvents();
+        if(result.hasA()) {
+            return EitherOf3.withA(result.getA());
+        } else {
+           return EitherOf3.withB(result.getB());
+        }
     }
 
     /**
@@ -386,12 +414,37 @@ public final class CatchUpProcess<I>
         flushState();
 
         CatchUp.Request request = builder().getRequest();
+        return dispatchUntilEmpty(id, request);
+    }
+
+    private EitherOf2<LiveEventsPickedUp, CatchUpCompleted>
+    dispatchUntilEmpty(CatchUpId id, CatchUp.Request request) {
         List<Event> events = readMore(request, null, null);
 
         if (events.isEmpty()) {
             return EitherOf2.withB(completeProcess(id));
         }
-        dispatchAll(events);
+
+        while (!events.isEmpty()) {
+            Timestamp lastEventTimestamp;
+            if (events.size() == 1) {
+                lastEventTimestamp = events.get(0)
+                                           .time();
+                dispatchAll(events);
+            } else {
+
+                List<Event> stripped = stripLastTimestamp(events);
+                Event lastEvent = stripped.get(stripped.size() - 1);
+                lastEventTimestamp = lastEvent.time();
+                dispatchAll(stripped);
+            }
+            builder().setWhenLastRead(lastEventTimestamp);
+
+            // Waits for the storage to accumulate more events, that may have been missed.
+            sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+            events = readMore(request, null, null);
+        }
+
         return EitherOf2.withA(liveEventsPickedUp(id));
     }
 
@@ -509,9 +562,22 @@ public final class CatchUpProcess<I>
         }
     }
 
-    private void dispatchAll(List<Event> events, Set<I> targets) {
+    /**
+     * Dispatches the given list of events to the passed targets and returns the actual set of
+     * entity identifiers to which the dispatching has been performed.
+     *
+     * @param events
+     *         the events to dispatch
+     * @param targets
+     *         the set of identifiers of the targets to dispatch the events to;
+     *         if empty, no particular targets are selected, so the target repository will
+     *         decide on its own
+     * @return the list of the identifiers to which the dispatching has been made in fact
+     */
+    @CanIgnoreReturnValue
+    private Set<I> dispatchAll(List<Event> events, Set<I> targets) {
         if (events.isEmpty()) {
-            return;
+            return ImmutableSet.of();
         }
         Set<I> actualTargets = new HashSet<>();
         @Nullable Set<I> targetsForDispatch = targets.isEmpty()
@@ -524,6 +590,7 @@ public final class CatchUpProcess<I>
         if (!actualTargets.isEmpty()) {
             recordAffectedShards(actualTargets);
         }
+        return actualTargets;
     }
 
     private List<Event> readMore(CatchUp.Request request,

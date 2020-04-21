@@ -86,8 +86,7 @@ public class CounterCatchUp {
         }
     }
 
-    public void dispatch(List<NumberAdded> events, int threads)
-            throws InterruptedException {
+    public void dispatch(List<NumberAdded> events, int threads) throws InterruptedException {
         post(asPostEventJobs(ctx, events), threads);
     }
 

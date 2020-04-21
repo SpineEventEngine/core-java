@@ -28,7 +28,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 
 /**
- * @author Alex Tymchenko
+ * A single page of the messages read from the {@link InboxStorage}.
+ *
+ * <p>Provides the navigation to the next page basing on the time of the last message read in the
+ * scope of current page.
  */
 public class InboxPage implements Page<InboxMessage> {
 

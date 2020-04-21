@@ -58,8 +58,11 @@ final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
         TypeName actualTypeName = envelope().messageTypeName();
         if (CATCH_UP_STARTED.equals(actualTypeName)) {
             ProjectionRepository<I, P, ?> repository = repository();
+            CatchUpStarted started = (CatchUpStarted) envelope().message();
             repository.recordStorage()
                       .delete(entityId);
+            repository.lifecycleOf(entityId)
+                      .onProjectionStateCleared(started.getId());
         } else {
             super.dispatchTo(entityId);
         }

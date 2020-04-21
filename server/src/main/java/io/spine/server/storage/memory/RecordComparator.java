@@ -119,11 +119,12 @@ public class RecordComparator<I, R extends Message>
         }
 
         if (aValue instanceof Timestamp) {
-            @SuppressWarnings("rawtypes") // For convenience.
-                    int result = Timestamps.compare((Timestamp) aValue, (Timestamp) bValue);
+            int result = Timestamps.compare((Timestamp) aValue, (Timestamp) bValue);
             return result;
         }
-        throw newIllegalStateException("The message record value is not a `Comparable`.");
+        throw newIllegalStateException(
+                "The message record value is neither a `Comparable` nor a `Timestamp`."
+        );
     }
 
 }

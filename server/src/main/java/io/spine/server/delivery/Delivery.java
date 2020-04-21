@@ -36,7 +36,6 @@ import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -420,7 +419,7 @@ public final class Delivery implements Logging {
 
         boolean continueAllowed = true;
         List<DeliveryStage> stages = new ArrayList<>();
-        Iterator<CatchUp> catchUpJobs = catchUpStorage.readAll();
+        Iterable<CatchUp> catchUpJobs = ImmutableList.copyOf(catchUpStorage.readAll());
         while (continueAllowed && maybePage.isPresent()) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
@@ -428,9 +427,7 @@ public final class Delivery implements Logging {
             if (!messages.isEmpty()) {
                 DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
                 Conveyor conveyor = new Conveyor(messages, deliveredMessages);
-                List<Station> stations = conveyorStationsFor(
-                        ImmutableList.copyOf(catchUpJobs), action
-                );
+                List<Station> stations = conveyorStationsFor(catchUpJobs, action);
                 DeliveryStage stage = launch(conveyor, stations, index);
                 continueAllowed = monitorTellsToContinue(stage);
                 stages.add(stage);

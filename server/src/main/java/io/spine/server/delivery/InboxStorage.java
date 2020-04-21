@@ -62,6 +62,23 @@ import static java.util.stream.Collectors.toList;
 @SPI
 public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
 
+    /**
+     * Ordering for the {@code InboxMessage} queries which puts the messages
+     * received earlier first.
+     */
+    private static final OrderBy OLDER_FIRST = OrderBy.newBuilder()
+                                                      .setColumn(received_at.name())
+                                                      .setDirection(ASCENDING)
+                                                      .vBuild();
+    /**
+     * Ordering for the {@code InboxMessage} queries which puts the messages
+     * with smaller version numbers first.
+     */
+    private static final OrderBy BY_VERSION = OrderBy.newBuilder()
+                                                     .setColumn(version.name())
+                                                     .setDirection(ASCENDING)
+                                                     .vBuild();
+
     public InboxStorage(StorageFactory factory, boolean multitenant) {
         super(createStorage(factory, multitenant));
     }
@@ -127,18 +144,9 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
     }
 
     private static ResponseFormat queryResponse(int pageSize) {
-        OrderBy olderFirst = OrderBy.newBuilder()
-                                    .setColumn(received_at.name())
-                                    .setDirection(ASCENDING)
-                                    .vBuild();
-        OrderBy byVersion = OrderBy.newBuilder()
-                                   .setColumn(version.name())
-                                   .setDirection(ASCENDING)
-                                   .vBuild();
-
         return ResponseFormat.newBuilder()
-                             .addOrderBy(olderFirst)
-                             .addOrderBy(byVersion)
+                             .addOrderBy(OLDER_FIRST)
+                             .addOrderBy(BY_VERSION)
                              .setLimit(pageSize)
                              .vBuild();
     }

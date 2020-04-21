@@ -13,6 +13,8 @@ option java_package = "io.spine.server.delivery.event";
 option java_outer_classname = "CatchUpEventsProto";
 option java_multiple_files = true;
 
+import "google/protobuf/any.proto";
+
 import "spine/server/catchup/catch_up.proto";
 
 // The catch-up has been requested.
@@ -28,6 +30,15 @@ message CatchUpRequested {
 message CatchUpStarted {
 
     CatchUpId id = 1;
+}
+
+// The state of the projection instance has been cleared at the start of the catch-up.
+message ProjectionStateCleared {
+
+    CatchUpId id = 1;
+
+    // The identifier of the projection instance.
+    google.protobuf.Any instance_id = 2;
 }
 
 // The next portion of the historical events was read and dispatched to the respective entities.
