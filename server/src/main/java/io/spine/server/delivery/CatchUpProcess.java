@@ -59,12 +59,12 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -193,7 +193,7 @@ import static java.util.stream.Collectors.toSet;
  *         impossible to register the process managers with the same state in
  *         a multi-{@code BoundedContext} application.
  */
-@SuppressWarnings("OverlyCoupledClass")    // It does a lot.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})    // It does a lot.
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
@@ -208,6 +208,12 @@ public final class CatchUpProcess<I>
      * The duration of the turbulence period, counting back from the current time.
      */
     private static final Turbulence TURBULENCE = Turbulence.of(fromMillis(500));
+
+    /**
+     * How long the pause between the read operations is held, when the process
+     * is in its {@link CatchUpStatus#FINALIZING FINALIZING} state.
+     */
+    private static final Duration FINALIZATION_PAUSE = Duration.ofMillis(500);
 
     private final ProjectionRepository<I, ?, ?> repository;
     private final DispatchCatchingUp<I> dispatchOperation;
@@ -441,7 +447,7 @@ public final class CatchUpProcess<I>
             builder().setWhenLastRead(lastEventTimestamp);
 
             // Waits for the storage to accumulate more events, that may have been missed.
-            sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+            sleepUninterruptibly(FINALIZATION_PAUSE);
             events = readMore(request, null, null);
         }
 
