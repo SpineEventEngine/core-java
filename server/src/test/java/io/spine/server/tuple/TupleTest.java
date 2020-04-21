@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
+import static io.spine.server.tuple.Values.isOptionalPresent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -100,8 +101,19 @@ class TupleTest {
         }
 
         @Override
+        public boolean hasA() {
+            return isOptionalPresent(getA());
+        }
+
+        @Override
         public B getB() {
             return (B) get(1);
         }
+
+        @Override
+        public boolean hasB() {
+            return isOptionalPresent(getB());
+        }
+
     }
 }

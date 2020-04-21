@@ -111,7 +111,8 @@ public class EitherOf5<A extends Message,
      * Obtains the value of the first alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasA()
      */
     @Override
     public A getA() {
@@ -119,10 +120,21 @@ public class EitherOf5<A extends Message,
     }
 
     /**
+     * Tells whether {@code <A>} value is stored.
+     *
+     * @return {@code true} if the first alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasA() {
+        return index() == 0;
+    }
+
+    /**
      * Obtains the value of the second alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasB()
      */
     @Override
     public B getB() {
@@ -130,10 +142,21 @@ public class EitherOf5<A extends Message,
     }
 
     /**
+     * Tells whether {@code <B>} value is stored.
+     *
+     * @return {@code true} if the second alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasB() {
+        return index() == 1;
+    }
+
+    /**
      * Obtains the value of the third alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasC()
      */
     @Override
     public C getC() {
@@ -141,18 +164,56 @@ public class EitherOf5<A extends Message,
     }
 
     /**
+     * Tells whether {@code <C>} value is stored.
+     *
+     * @return {@code true} if the third alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasC() {
+        return index() == 2;
+    }
+
+    /**
      * Obtains the value of the third alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasD()
      */
     @Override
     public D getD() {
         return get(this, 3);
     }
 
+    /**
+     * Tells whether {@code <D>} value is stored.
+     *
+     * @return {@code true} if the fourth alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasD() {
+        return index() == 3;
+    }
+
+    /**
+     * Obtains the value of the fifth alternative.
+     *
+     * @throws IllegalStateException if a value of another type is stored instead.
+     * @return the stored value
+     * @see #hasE()
+     */
     @Override
     public E getE() {
         return get(this, 4);
+    }
+
+    /**
+     * Tells whether {@code <E>} value is stored.
+     *
+     * @return {@code true} if the fifth alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasE() {
+        return index() == 4;
     }
 }

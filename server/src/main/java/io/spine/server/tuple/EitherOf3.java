@@ -78,7 +78,8 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
      * Obtains the value of the first alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasA()
      */
     @Override
     public A getA() {
@@ -86,10 +87,20 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
     }
 
     /**
+     * Tells whether {@code <A>} value is stored.
+     *
+     * @return {@code true} if the first alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasA() {
+        return index() == 0;
+    }
+
+    /**
      * Obtains the value of the second alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
      */
     @Override
     public B getB() {
@@ -97,13 +108,34 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
     }
 
     /**
+     * Tells whether {@code <B>} value is stored.
+     *
+     * @return {@code true} if the second alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasB() {
+        return index() == 1;
+    }
+
+    /**
      * Obtains the value of the third alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasC()
      */
     @Override
     public C getC() {
         return get(this, 2);
+    }
+
+    /**
+     * Tells whether {@code <C>} value is stored.
+     *
+     * @return {@code true} if the third alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasC() {
+        return index() == 2;
     }
 }

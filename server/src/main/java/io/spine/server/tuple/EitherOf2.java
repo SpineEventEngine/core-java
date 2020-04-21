@@ -64,7 +64,8 @@ public final class EitherOf2<A extends Message, B extends Message>
      * Obtains the value of the first alternative.
      *
      * @throws IllegalStateException if the {@code <B>} value is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasA()
      */
     @Override
     public A getA() {
@@ -72,13 +73,34 @@ public final class EitherOf2<A extends Message, B extends Message>
     }
 
     /**
+     * Tells whether {@code <A>} value is stored.
+     *
+     * @return {@code true} if the first alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasA() {
+        return index() == 0;
+    }
+
+    /**
      * Obtains the value of the second alternative.
      *
      * @throws IllegalStateException if the {@code <A>} value is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasB()
      */
     @Override
     public B getB() {
         return get(this, 1);
+    }
+
+    /**
+     * Tells whether {@code <B>} value is stored.
+     *
+     * @return {@code true} if the second alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasB() {
+        return index() == 1;
     }
 }
