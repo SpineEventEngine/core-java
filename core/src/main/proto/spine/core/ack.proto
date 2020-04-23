@@ -32,7 +32,7 @@ import "google/protobuf/any.proto";
 
 import "spine/core/response.proto";
 
-// An acknowledgement of posting a message to a bus.
+// An acknowledgement of posting a message for the asynchronous processing at the server-side.
 //
 // This response means that a message was either accepted for further processing, or rejected
 // (e.g. because of a validation error).
