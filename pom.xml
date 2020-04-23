@@ -32,7 +32,7 @@ all modules and does not describe the project structure per-subproject.
 
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>1.5.8</version>
+<version>1.5.9</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -66,25 +66,25 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.guava</groupId>
     <artifactId>guava</artifactId>
-    <version>28.1-jre</version>
+    <version>29.0-jre</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-core</artifactId>
-    <version>1.26.0</version>
+    <version>1.28.1</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-protobuf</artifactId>
-    <version>1.26.0</version>
+    <version>1.28.1</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-stub</artifactId>
-    <version>1.26.0</version>
+    <version>1.28.1</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -114,7 +114,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.checkerframework</groupId>
     <artifactId>checker-qual</artifactId>
-    <version>3.0.1</version>
+    <version>3.3.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -132,19 +132,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.guava</groupId>
     <artifactId>guava-testlib</artifactId>
-    <version>28.1-jre</version>
+    <version>29.0-jre</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty</artifactId>
-    <version>1.26.0</version>
+    <version>1.28.1</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty-shaded</artifactId>
-    <version>1.26.0</version>
+    <version>1.28.1</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -174,7 +174,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.apiguardian</groupId>
     <artifactId>apiguardian-api</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -192,19 +192,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-api</artifactId>
-    <version>5.5.2</version>
+    <version>5.6.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-engine</artifactId>
-    <version>5.5.2</version>
+    <version>5.6.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-params</artifactId>
-    <version>5.5.2</version>
+    <version>5.6.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
