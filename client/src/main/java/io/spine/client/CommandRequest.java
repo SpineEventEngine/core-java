@@ -25,12 +25,17 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.core.Ack;
 import io.spine.core.Command;
+import io.spine.core.Status;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.TextFormat.shortDebugString;
+import static io.spine.client.EventsAfterCommand.subscribe;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Allows to post a command optionally subscribing to events that are immediate results
@@ -54,13 +59,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class CommandRequest extends ClientRequest {
 
     private final CommandMessage message;
-    private final MultiEventConsumers.Builder builder;
+    private final MultiEventConsumers.Builder eventConsumers;
     private @Nullable ErrorHandler streamingErrorHandler;
 
     CommandRequest(ClientRequest parent, CommandMessage c) {
         super(parent);
         this.message = c;
-        this.builder = MultiEventConsumers.newBuilder();
+        this.eventConsumers = MultiEventConsumers.newBuilder();
     }
 
     /**
@@ -77,7 +82,7 @@ public final class CommandRequest extends ClientRequest {
     public <E extends EventMessage> CommandRequest
     observe(Class<E> type, Consumer<E> consumer) {
         checkNotNull(consumer);
-        builder.observe(type, consumer);
+        eventConsumers.observe(type, consumer);
         return this;
     }
 
@@ -95,7 +100,7 @@ public final class CommandRequest extends ClientRequest {
     public <E extends EventMessage> CommandRequest
     observe(Class<E> type, EventConsumer<E> consumer) {
         checkNotNull(consumer);
-        builder.observe(type, consumer);
+        eventConsumers.observe(type, consumer);
         return this;
     }
 
@@ -119,8 +124,16 @@ public final class CommandRequest extends ClientRequest {
      * {@linkplain Subscriptions#cancel(Subscription) canceled} after the requesting code receives
      * expected events, or after a reasonable timeout.
      *
-     * @return subscription to the events
-     * @implNote Subscriptions should be cancelled to free up client and server resources
+     * <p>The method returns subscriptions to {@linkplain #observe(Class, EventConsumer) events}
+     * that the handling of the command <em>may</em> produce. A command <em>may</em> not be accepted
+     * for processing by the server, e.g. because of a validation error. In such a case, the
+     * method would report the error to the configured {@linkplain #onStreamingError(ErrorHandler)
+     * error handler}, and return an empty set.
+     *
+     * @return subscription to the {@linkplain #observe(Class, EventConsumer) observed events}
+     *         if the command was successfully posted, or
+     *         an empty set if posting caused an error
+     * @apiNote Subscriptions should be cancelled to free up client and server resources
      *         required for their maintenance. It is not possible to cancel the returned
      *         subscription in an automatic way because of the following.
      *         Subscriptions by nature are asynchronous and infinite requests.
@@ -131,30 +144,81 @@ public final class CommandRequest extends ClientRequest {
      */
     @CanIgnoreReturnValue
     public ImmutableSet<Subscription> post() {
-        ImmutableSet<Subscription> newSubscriptions = doPost();
-        client().subscriptions()
-                .addAll(newSubscriptions);
-        return newSubscriptions;
-    }
-
-    private ImmutableSet<Subscription> doPost() {
-        MultiEventConsumers consumers = builder.build();
-        Client client = client();
-        Command command =
-                client.requestOf(user())
-                      .command()
-                      .create(message);
-        ImmutableSet<Subscription> result =
-                EventsAfterCommand.subscribe(client, command, consumers, streamingErrorHandler);
-
-        //TODO:2020-04-17:alexander.yevsyukov: Check the returned Ack and throw an exception
-        // in case of problems.
-        client().post(command);
-        return result;
+        PostOperation op = new PostOperation();
+        return op.perform();
     }
 
     @VisibleForTesting
     CommandMessage message() {
         return message;
+    }
+
+    /**
+     * Method object for posting a command.
+     */
+    private class PostOperation {
+
+        private final Command command;
+        private final MultiEventConsumers consumers;
+        private @Nullable ImmutableSet<Subscription> subscriptions;
+
+        private PostOperation() {
+            this.command =
+                    client().requestOf(user())
+                            .command()
+                            .create(message);
+            this.consumers = eventConsumers.build();
+        }
+
+        private ImmutableSet<Subscription> perform() {
+            subscribeToEvents();
+            Ack ack = client().post(command);
+            Status status = ack.getStatus();
+            switch (status.getStatusCase()) {
+                case OK:
+                    return subscriptions;
+                case ERROR:
+                    cancelVoidSubscriptions(status);
+                    return ImmutableSet.of();
+                case REJECTION:
+                case STATUS_NOT_SET:
+                default:
+                    throw newIllegalStateException(
+                            "Cannot handle ack status `%s` when posting the command `%s`.",
+                            shortDebugString(command));
+            }
+        }
+
+        private void subscribeToEvents() {
+            Client client = client();
+            this.subscriptions = subscribe(client, command, consumers, streamingErrorHandler);
+            checkNotNull(subscriptions);
+            client.subscriptions()
+                  .addAll(subscriptions);
+        }
+
+        /**
+         * Cancels the passed subscriptions to events because the command could not be posted.
+         *
+         * @param status
+         *          provides error information
+         */
+        private void cancelVoidSubscriptions(Status status) {
+            Subscriptions activeSubscriptions = client().subscriptions();
+            if (subscriptions != null) {
+                subscriptions.forEach(activeSubscriptions::cancel);
+            }
+            reportErrorWhenPosting(status);
+        }
+
+        private void reportErrorWhenPosting(Status status) {
+            IllegalStateException exception = newIllegalStateException(
+                    "Unable to post the command `%s`. Returned error: `%s`.",
+                    shortDebugString(command), shortDebugString(status.getError())
+            );
+            if (streamingErrorHandler != null) {
+                streamingErrorHandler.accept(exception);
+            }
+        }
     }
 }
