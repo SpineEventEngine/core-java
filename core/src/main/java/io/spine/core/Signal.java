@@ -79,7 +79,6 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains the context of the enclosed message.
      */
-    @SuppressWarnings("override") // Overridden in generated code.
     C getContext();
 
     /**
@@ -87,6 +86,16 @@ public interface Signal<I extends SignalId,
      */
     default I id() {
         return getId();
+    }
+
+    /**
+     * Obtains the type of the signal as the type of the {@linkplain #enclosedMessage()
+     * enclosed} {@code Message}.
+     */
+    default Class<? extends M> type() {
+        @SuppressWarnings("unchecked") // Safe as we obtain it from an instance of <M>.
+        Class<? extends M> type = (Class<? extends M>) enclosedMessage().getClass();
+        return type;
     }
 
     /**
@@ -110,7 +119,9 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains the ID of the tenant under which the message was created.
      */
-    TenantId tenant();
+    default TenantId tenant() {
+        return actorContext().getTenantId();
+    }
 
     /**
      * Obtains the time when the message was created.

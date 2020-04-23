@@ -43,14 +43,6 @@ interface CommandMixin
                 CommandOrBuilder,
                 FieldAwareMessage {
 
-    /**
-     * Obtains the ID of the tenant of the command.
-     */
-    @Override
-    default TenantId tenant() {
-        return actorContext().getTenantId();
-    }
-
     @Override
     default Timestamp time() {
         return actorContext().getTimestamp();
