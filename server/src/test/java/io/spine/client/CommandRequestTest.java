@@ -32,16 +32,20 @@ import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`CommandRequest` should")
 class CommandRequestTest extends AbstractClientTest {
 
+    /** The object under the test. */
+    private CommandRequest commandRequest;
+
     /** Registers which event consumers were called. */
     private final ConsumerCallCounter counter = new ConsumerCallCounter();
-    private CommandRequest commandRequest;
 
     @BeforeEach
     void createCommandRequest() {
@@ -95,5 +99,16 @@ class CommandRequestTest extends AbstractClientTest {
 
         assertThat(counter.contains(UserAlreadyLoggedIn.class))
                 .isTrue();
+    }
+
+    @Nested
+    @DisplayName("Allow setting custom streaming error handler")
+    class CustomStreamingErrorHandler {
+
+        @Test
+        @DisplayName("rejecting `null`")
+        void rejectingNull() {
+            assertThrows(NullPointerException.class, () -> commandRequest.onStreamingError(null));
+        }
     }
 }
