@@ -82,12 +82,14 @@ final class EventsAfterCommand implements Logging {
      * as the origin.
      */
     private ImmutableSet<Topic> eventsOf(Command c) {
-        Field pastMessage = EventContext.Field.pastMessage()
-                                              .getField();
-        String fieldName = Event.Field.context()
-                                      .getField()
-                                      .nested(pastMessage)
-                                      .toString();
+        Field pastMessage =
+                EventContext.Field.pastMessage()
+                                  .getField();
+        String fieldName =
+                Event.Field.context()
+                           .getField()
+                           .nested(pastMessage)
+                           .toString();
         ImmutableSet<Class<? extends EventMessage>> eventTypes = consumers.eventTypes();
         TopicFactory topic = client.requestOf(user)
                                    .topic();
