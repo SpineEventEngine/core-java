@@ -77,42 +77,6 @@ final class MultiEventConsumers implements Logging {
     }
 
     /**
-     * Delivers the event to all the subscribed consumers.
-     *
-     * <p>If one of the consumers would cause an error when handling the event, the error will
-     * be logged, and the event will be passed to remaining consumers.
-     */
-    void deliver(Event event) {
-        EventMessage message = event.enclosedMessage();
-        EventContext context = event.getContext();
-        Class<? extends EventMessage> type = message.getClass();
-        ImmutableCollection<EventConsumer<? extends EventMessage>> consumers = map.get(type);
-        consumers.forEach(c -> {
-            try {
-                @SuppressWarnings("unchecked") // Safe as we match the type when adding consumers.
-                        EventConsumer<EventMessage> consumer = (EventConsumer<EventMessage>) c;
-                consumer.accept(message, context);
-            } catch (Throwable throwable) {
-                logError(c, event, throwable);
-            }
-        });
-    }
-
-    /**
-     * Logs the fact that the passed event consumer cased the error.
-     *
-     * <p>If the passed consumer is an instance of {@code DelegatingEventConsumer}
-     * the real consumer will be reported in the log.
-     */
-    private void logError(EventConsumer<?> consumer, Event event, Throwable throwable) {
-        String eventDiags = shortDebugString(event);
-        Object consumerToReport = toRealConsumer(consumer);
-        _error().withCause(throwable)
-                .log("The consumer `%s` could not handle the event `%s`.",
-                     consumerToReport, eventDiags);
-    }
-
-    /**
      * The builder for {@link MultiEventConsumers}.
      */
     static final class Builder {
@@ -137,7 +101,7 @@ final class MultiEventConsumers implements Logging {
          * Adds the consumer of the event message and its context.
          */
         @CanIgnoreReturnValue
-        public <E extends EventMessage>
+        <E extends EventMessage>
         Builder observe(Class<E> eventType, EventConsumer<E> consumer) {
             checkNotNull(eventType);
             checkNotNull(consumer);
@@ -154,7 +118,7 @@ final class MultiEventConsumers implements Logging {
     }
 
     /**
-     * Passes the event to listener once the subscription is updated, then cancels the subscription.
+     * Passes the event to all consumers subscribed to events of this type.
      */
     private final class EventObserver implements StreamObserver<Event> {
 
@@ -176,6 +140,48 @@ final class MultiEventConsumers implements Logging {
             deliver(e);
         }
 
+        /**
+         * Delivers the event to all the subscribed consumers.
+         *
+         * <p>If one of the consumers would cause an error when handling the event, the error will
+         * be logged, and the event will be passed to remaining consumers.
+         */
+        private void deliver(Event event) {
+            consumersOf(event.type()).forEach(c -> deliver(event, c));
+        }
+
+        private ImmutableCollection<EventConsumer<? extends EventMessage>>
+        consumersOf(Class<? extends EventMessage> type) {
+            return map.get(type);
+        }
+
+        private void deliver(Event event, EventConsumer<? extends EventMessage> c) {
+            EventMessage msg = event.enclosedMessage();
+            EventContext ctx = event.getContext();
+            try {
+                @SuppressWarnings("unchecked")
+                // Safe as we match the type when adding consumers.
+                EventConsumer<EventMessage> consumer = (EventConsumer<EventMessage>) c;
+                consumer.accept(msg, ctx);
+            } catch (Throwable throwable) {
+                logError(c, event, throwable);
+            }
+        }
+
+        private void logError(EventConsumer<?> consumer, Event event, Throwable throwable) {
+            String eventDiags = shortDebugString(event);
+            Object consumerToReport = toRealConsumer(consumer);
+            _error().withCause(throwable)
+                    .log("The consumer `%s` could not handle the event `%s`.",
+                         consumerToReport, eventDiags);
+        }
+
+        /**
+         * Logs the fact that the passed event consumer cased the error.
+         *
+         * <p>If the passed consumer is an instance of {@code DelegatingEventConsumer}
+         * the real consumer will be reported in the log.
+         */
         @Override
         public void onError(Throwable t) {
             errorHandler.accept(t);
