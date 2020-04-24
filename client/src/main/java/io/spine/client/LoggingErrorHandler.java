@@ -26,11 +26,8 @@ import com.google.protobuf.Message;
 /**
  * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() severe} level
  * of the passed logger.
- *
- * @param <M>
- *         the type of the messages delivered to the consumer
  */
-final class LoggingErrorHandler<M extends Message>
+final class LoggingErrorHandler
         extends LoggingHandler
         implements ErrorHandler {
 
