@@ -93,6 +93,7 @@ final class MultiEventConsumers implements Logging {
 
         /** The handler for streaming errors that may occur during gRPC calls. */
         private @Nullable ErrorHandler streamingErrorHandler;
+
         /** The common handler for errors of all consumed event types that may occur. */
         private @Nullable ConsumerErrorHandler<EventMessage> consumingErrorHandler;
 
@@ -121,7 +122,7 @@ final class MultiEventConsumers implements Logging {
             if (map.containsKey(eventType)) {
                 @SuppressWarnings("unchecked")
                 // The cast is protected by generic params of this method.
-                        EventConsumers.Builder<E> builder = (EventConsumers.Builder<E>) map.get(eventType);
+                EventConsumers.Builder<E> builder = (EventConsumers.Builder<E>) map.get(eventType);
                 builder.add(ec);
             } else {
                 map.put(eventType, EventConsumers.<E>newBuilder().add(ec));
