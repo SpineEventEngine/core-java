@@ -21,7 +21,6 @@
 package io.spine.client;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
@@ -29,15 +28,12 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.TextFormat.shortDebugString;
-import static io.spine.client.DelegatingConsumer.toRealConsumer;
 
 /**
  * An association of event types to their consumers which also delivers events.
@@ -65,6 +61,11 @@ final class MultiEventConsumers implements Logging {
         return map.keySet();
     }
 
+    /** Obtains all the consumers grouped by type of consumed events. */
+    ImmutableMultimap<Class<? extends EventMessage>, EventConsumer<? extends EventMessage>> map() {
+        return map;
+    }
+
     /**
      * Creates an observer that would deliver events to all the consumers.
      *
@@ -73,7 +74,7 @@ final class MultiEventConsumers implements Logging {
      *         If null the error will be simply logged.
      */
     StreamObserver<Event> toObserver(@Nullable ErrorHandler handler) {
-        return new EventObserver(handler);
+        return new MultiEventDelivery(this, handler);
     }
 
     /**
@@ -114,82 +115,6 @@ final class MultiEventConsumers implements Logging {
          */
         MultiEventConsumers build() {
             return new MultiEventConsumers(this);
-        }
-    }
-
-    /**
-     * Passes the event to all consumers subscribed to events of this type.
-     */
-    private final class EventObserver implements StreamObserver<Event> {
-
-        private final ErrorHandler errorHandler;
-
-        private EventObserver(@Nullable ErrorHandler handler) {
-            this.errorHandler = nullToDefault(handler);
-        }
-
-        private ErrorHandler nullToDefault(@Nullable ErrorHandler handler) {
-            if (handler != null) {
-                return handler;
-            }
-            return throwable -> _error().withCause(throwable).log("Error receiving event.");
-        }
-
-        @Override
-        public void onNext(Event e) {
-            deliver(e);
-        }
-
-        /**
-         * Delivers the event to all the subscribed consumers.
-         *
-         * <p>If one of the consumers would cause an error when handling the event, the error will
-         * be logged, and the event will be passed to remaining consumers.
-         */
-        private void deliver(Event event) {
-            consumersOf(event.type()).forEach(c -> deliver(event, c));
-        }
-
-        private ImmutableCollection<EventConsumer<? extends EventMessage>>
-        consumersOf(Class<? extends EventMessage> type) {
-            return map.get(type);
-        }
-
-        private void deliver(Event event, EventConsumer<? extends EventMessage> c) {
-            EventMessage msg = event.enclosedMessage();
-            EventContext ctx = event.getContext();
-            try {
-                @SuppressWarnings("unchecked")
-                // Safe as we match the type when adding consumers.
-                EventConsumer<EventMessage> consumer = (EventConsumer<EventMessage>) c;
-                consumer.accept(msg, ctx);
-            } catch (Throwable throwable) {
-                logError(c, event, throwable);
-            }
-        }
-
-        private void logError(EventConsumer<?> consumer, Event event, Throwable throwable) {
-            String eventDiags = shortDebugString(event);
-            Object consumerToReport = toRealConsumer(consumer);
-            _error().withCause(throwable)
-                    .log("The consumer `%s` could not handle the event `%s`.",
-                         consumerToReport, eventDiags);
-        }
-
-        /**
-         * Logs the fact that the passed event consumer cased the error.
-         *
-         * <p>If the passed consumer is an instance of {@code DelegatingEventConsumer}
-         * the real consumer will be reported in the log.
-         */
-        @Override
-        public void onError(Throwable t) {
-            errorHandler.accept(t);
-        }
-
-        @Override
-        public void onCompleted() {
-            // Do nothing.
         }
     }
 }
