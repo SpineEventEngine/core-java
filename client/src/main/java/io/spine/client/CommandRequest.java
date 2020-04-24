@@ -156,7 +156,7 @@ public final class CommandRequest extends ClientRequest {
     /**
      * Method object for posting a command.
      */
-    private class PostOperation {
+    private final class PostOperation {
 
         private final Command command;
         private final MultiEventConsumers consumers;
@@ -216,6 +216,7 @@ public final class CommandRequest extends ClientRequest {
                     "Unable to post the command `%s`. Returned error: `%s`.",
                     shortDebugString(command), shortDebugString(status.getError())
             );
+            //TODO:2020-04-24:alexander.yevsyukov: Use another handler!
             if (streamingErrorHandler != null) {
                 streamingErrorHandler.accept(exception);
             }
