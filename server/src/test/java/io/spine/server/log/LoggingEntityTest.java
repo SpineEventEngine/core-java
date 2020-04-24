@@ -21,8 +21,6 @@
 package io.spine.server.log;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.common.flogger.LoggerConfig;
-import com.google.common.testing.TestLogHandler;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContextBuilder;
@@ -30,25 +28,21 @@ import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.LogRecordSubject;
+import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxContext;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.function.Function;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.log.given.Books.THE_HOBBIT;
-import static io.spine.testing.logging.LogTruth.assertThat;
+import static io.spine.server.log.given.Books.implementingDdd;
 import static java.util.logging.Level.ALL;
 import static java.util.logging.Level.CONFIG;
 import static java.util.logging.Level.FINE;
@@ -60,36 +54,20 @@ import static java.util.logging.Level.WARNING;
 
 @MuteLogging
 @DisplayName("`LoggingEntity` should")
-class LoggingEntityTest {
+class LoggingEntityTest extends LoggingTest {
 
-    private FluentLogger logger;
-    private TestLogHandler handler;
-    private Handler[] defaultHandlers;
-    private @Nullable Level defaultLevel;
+    LoggingEntityTest() {
+        super(CardAggregate.class, ALL);
+    }
 
     @BeforeEach
-    void setUpLog() {
-        logger = Logging.loggerFor(CardAggregate.class);
-        handler = new TestLogHandler();
-        LoggerConfig config = LoggerConfig.of(logger);
-        defaultHandlers = config.getHandlers();
-        for (Handler defaultHandler : defaultHandlers) {
-            config.removeHandler(defaultHandler);
-        }
-        config.addHandler(handler);
-        defaultLevel = config.getLevel();
-        config.setLevel(ALL);
+    void startIntercepting() {
+        interceptLogging();
     }
 
     @AfterEach
-    void resetLog() {
-        LoggerConfig config = LoggerConfig.of(logger);
-        config.removeHandler(handler);
-        handler.close();
-        for (Handler defaultHandler : defaultHandlers) {
-            config.addHandler(defaultHandler);
-        }
-        config.setLevel(defaultLevel);
+    void stopIntercepting() {
+        restoreLogging();
     }
 
     @Test
@@ -98,30 +76,16 @@ class LoggingEntityTest {
         UserId user = GivenUserId.generated();
         BorrowBooks command = borrowBooks(user);
         context().receivesCommand(command);
-        List<LogRecord> records = handler.getStoredLogRecords();
-
-        assertThat(records)
-                .hasSize(2);
-
-        LogRecordSubject assertFirstLog = assertThat(records.get(0));
-        assertFirstLog.hasLevelThat()
-                      .isEqualTo(FINE);
-        assertFirstLog.hasMessageThat()
-                      .contains(Books.implementingDdd()
-                                     .getTitle());
-        assertFirstLog.hasMethodNameThat()
-                      .contains(command.getClass()
-                                       .getSimpleName());
-
-        LogRecordSubject assertSecondLog = assertThat(records.get(1));
-        assertSecondLog.hasLevelThat()
-                       .isEqualTo(FINE);
-        assertSecondLog.hasMessageThat()
-                       .contains(Books.domainDrivenDesign()
-                                      .getTitle());
-        assertSecondLog.hasMethodNameThat()
-                       .contains(command.getClass()
-                                        .getSimpleName());
+        LogRecordSubject assertLog = assertLog().record();
+        assertLog
+                .hasLevelThat()
+                .isEqualTo(FINE);
+        assertLog
+                .hasMessageThat()
+                .containsMatch(implementingDdd().getTitle());
+        assertLog
+                .hasMethodNameThat()
+                .contains(command.getClass().getSimpleName());
     }
 
     @Test
@@ -130,14 +94,10 @@ class LoggingEntityTest {
         UserId user = GivenUserId.generated();
         BorrowBooks command = borrowBooks(user);
         context().receivesCommand(command);
-        List<LogRecord> records = handler.getStoredLogRecords();
-
-        assertThat(records)
-                .hasSize(2);
-        for (LogRecord record : records) {
-            assertThat(record).hasClassNameThat()
-                              .isEqualTo(CardAggregate.class.getName());
-        }
+        assertLog()
+                .record()
+                .hasClassNameThat()
+                .isEqualTo(CardAggregate.class.getName());
     }
 
     @Test
@@ -150,11 +110,7 @@ class LoggingEntityTest {
                 .setBook(THE_HOBBIT)
                 .vBuild();
         context().receivesCommand(command);
-        List<LogRecord> records = handler.getStoredLogRecords();
-        assertThat(records)
-                .hasSize(1);
-        LogRecord record = records.get(0);
-        LogRecordSubject assertRecord = assertThat(record);
+        LogRecordSubject assertRecord = assertLog().record();
         assertRecord.isError();
         assertRecord.hasThrowableThat()
                     .isInstanceOf(UnknownBook.class);
@@ -173,7 +129,6 @@ class LoggingEntityTest {
                 .newBuilder()
                 .setCard(id)
                 .addBookId(Books.BIG_RED_BOOK)
-                .addBookId(Books.BIG_BLUE_BOOK)
                 .vBuild();
         return command;
     }
@@ -260,10 +215,8 @@ class LoggingEntityTest {
                                Level expectedLevel) {
             CardAggregate aggregate = new CardAggregate();
             underscoreFunc.apply(aggregate).log(message);
-            List<LogRecord> records = handler.getStoredLogRecords();
-            assertThat(records)
-                    .hasSize(1);
-            LogRecordSubject assertLog = assertThat(records.get(0));
+            LogRecordSubject assertLog = assertLog()
+                    .record();
             assertLog.hasLevelThat()
                      .isEqualTo(expectedLevel);
             assertLog.hasMessageThat()
