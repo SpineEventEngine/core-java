@@ -78,7 +78,7 @@ final class EventConsumers<E extends EventMessage> extends Consumers<E, EventCon
         }
 
         @Override
-        Consumers<E, EventContext, Event> build() {
+        EventConsumers<E> build() {
             return new EventConsumers<>(this);
         }
     }

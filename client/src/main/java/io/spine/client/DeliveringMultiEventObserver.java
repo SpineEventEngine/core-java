@@ -20,27 +20,21 @@
 
 package io.spine.client;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableMap;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import static com.google.protobuf.TextFormat.shortDebugString;
-import static io.spine.client.DelegatingConsumer.toRealConsumer;
 
 /**
  * Delivers an event to all consumers subscribed to events of this type.
  *
  * @see #onNext(Event)
  */
-final class MultiEventDelivery implements StreamObserver<Event>, Logging {
+final class DeliveringMultiEventObserver implements StreamObserver<Event>, Logging {
 
-    private final
-    ImmutableMultimap<Class<? extends EventMessage>, EventConsumer<? extends EventMessage>> map;
+    private final ImmutableMap<Class<? extends EventMessage>, StreamObserver<Event>> observers;
     private final ErrorHandler streamingErrorHandler;
 
     /**
@@ -54,9 +48,9 @@ final class MultiEventDelivery implements StreamObserver<Event>, Logging {
      *         events is expected. If {@code null} is passed, default implementation would
      *         log the error.
      */
-    MultiEventDelivery(MultiEventConsumers consumers,
-                       @Nullable ErrorHandler streamingErrorHandler) {
-        this.map = ImmutableMultimap.copyOf(consumers.map());
+    DeliveringMultiEventObserver(MultiEventConsumers consumers,
+                                 @Nullable ErrorHandler streamingErrorHandler) {
+        this.observers = consumers.toObservers();
         this.streamingErrorHandler = nullToDefault(streamingErrorHandler);
     }
 
@@ -69,48 +63,8 @@ final class MultiEventDelivery implements StreamObserver<Event>, Logging {
 
     @Override
     public void onNext(Event e) {
-        deliver(e);
-    }
-
-    /**
-     * Delivers the event to all the subscribed consumers.
-     *
-     * <p>If one of the consumers would cause an error when handling the event, the error will
-     * be logged, and the event will be passed to remaining consumers.
-     */
-    private void deliver(Event event) {
-        consumersOf(event.type()).forEach(c -> deliver(event, c));
-    }
-
-    private ImmutableCollection<EventConsumer<? extends EventMessage>>
-    consumersOf(Class<? extends EventMessage> type) {
-        return map.get(type);
-    }
-
-    /**
-     * Delivers the event to the consumer.
-     *
-     * <p>If the consumer causes an error it will be logged and not rethrown.
-     */
-    private void deliver(Event event, EventConsumer<? extends EventMessage> c) {
-        EventMessage msg = event.enclosedMessage();
-        EventContext ctx = event.getContext();
-        try {
-            @SuppressWarnings("unchecked")
-            // Safe as we match the type when adding consumers.
-            EventConsumer<EventMessage> consumer = (EventConsumer<EventMessage>) c;
-            consumer.accept(msg, ctx);
-        } catch (Throwable throwable) {
-            logError(c, event, throwable);
-        }
-    }
-
-    private void logError(EventConsumer<?> consumer, Event event, Throwable throwable) {
-        String eventDiags = shortDebugString(event);
-        Object consumerToReport = toRealConsumer(consumer);
-        _error().withCause(throwable)
-                .log("The consumer `%s` could not handle the event `%s`.",
-                     consumerToReport, eventDiags);
+        StreamObserver<Event> observer = observers.get(e.type());
+        observer.onNext(e);
     }
 
     /** Passes the {@code Throwable} to the configured error handler. */

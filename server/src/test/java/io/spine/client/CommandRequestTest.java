@@ -111,4 +111,15 @@ class CommandRequestTest extends AbstractClientTest {
             assertThrows(NullPointerException.class, () -> commandRequest.onStreamingError(null));
         }
     }
+
+    @Nested
+    @DisplayName("Allow setting custom consumer error handler")
+    class CustomConsumerErrorHandler {
+
+        @Test
+        @DisplayName("rejecting `null`")
+        void rejectingNull() {
+            assertThrows(NullPointerException.class, () -> commandRequest.onConsumingError(null));
+        }
+    }
 }

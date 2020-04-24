@@ -113,6 +113,20 @@ public final class CommandRequest extends ClientRequest {
     @CanIgnoreReturnValue
     public CommandRequest onStreamingError(ErrorHandler handler) {
         this.streamingErrorHandler = checkNotNull(handler);
+        eventConsumers.onStreamingError(handler);
+        return this;
+    }
+
+    /**
+     * Assigns a handler for errors occurred in consumers of events.
+     *
+     * <p>After the passed handler is called, remaining event consumers will get the messages
+     * as usually. If not specified, the default implementation simply logs the error.
+     */
+    @CanIgnoreReturnValue
+    public CommandRequest onConsumingError(ConsumerErrorHandler<EventMessage> handler) {
+        checkNotNull(handler);
+        eventConsumers.onConsumingError(handler);
         return this;
     }
 
