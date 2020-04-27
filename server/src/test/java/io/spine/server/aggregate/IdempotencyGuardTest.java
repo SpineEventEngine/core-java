@@ -78,6 +78,7 @@ class IdempotencyGuardTest {
     void tearDown() throws Exception {
         repository.close();
         boundedContext.close();
+        ModelTests.dropAllModels();
     }
 
     @Nested
