@@ -34,7 +34,8 @@ import io.spine.type.TypeName;
 final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
         extends ProjectionEndpoint<I, P> {
 
-    private static final TypeName CATCH_UP_STARTED = TypeName.from(CatchUpStarted.getDescriptor());
+    private static final TypeName CATCH_UP_STARTED =
+            TypeName.from(CatchUpStarted.getDescriptor());
 
     private CatchUpEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
@@ -56,15 +57,19 @@ final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
     @Override
     public void dispatchTo(I entityId) {
         TypeName actualTypeName = envelope().messageTypeName();
-        if (CATCH_UP_STARTED.equals(actualTypeName)) {
-            ProjectionRepository<I, P, ?> repository = repository();
-            CatchUpStarted started = (CatchUpStarted) envelope().message();
-            repository.recordStorage()
-                      .delete(entityId);
-            repository.lifecycleOf(entityId)
-                      .onProjectionStateCleared(started.getId());
+        if (actualTypeName.equals(CATCH_UP_STARTED)) {
+            onCatchUpStarted(entityId);
         } else {
             super.dispatchTo(entityId);
         }
+    }
+
+    private void onCatchUpStarted(I entityId) {
+        ProjectionRepository<I, P, ?> repository = repository();
+        CatchUpStarted event = (CatchUpStarted) envelope().message();
+        repository.recordStorage()
+                  .delete(entityId);
+        repository.lifecycleOf(entityId)
+                  .onProjectionStateCleared(event.getId());
     }
 }

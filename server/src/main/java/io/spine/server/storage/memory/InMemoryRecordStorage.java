@@ -61,13 +61,13 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
     }
 
     @Override
-    public void write(I id, R record) {
-        writeRecord(RecordWithColumns.of(id, record));
+    protected Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format) {
+        return records().readAll(query, format);
     }
 
     @Override
-    protected Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format) {
-        return records().readAll(query, format);
+    public void write(I id, R record) {
+        writeRecord(RecordWithColumns.of(id, record));
     }
 
     @Override

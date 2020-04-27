@@ -21,21 +21,15 @@
 package io.spine.server.delivery;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
-import io.spine.base.EventMessage;
 
 /**
- * An event which is always delivered via the shard, which index is determined by the identifier
- * of this message.
+ * An interface for events operated by {@link CatchUpProcess} and which are delivered via
+ * the specific shard.
  */
-@Immutable
+@GeneratedMixin
 @Internal
-public interface ShardEvent extends EventMessage {
-
-    /**
-     * Returns an identifier of the message.
-     *
-     * <p>Determines the shard through which this message is delivered.
-     */
-    ShardIndex getIndex();
+@Immutable
+public interface CatchUpShardEvent extends CatchUpSignal, ShardEvent {
 }

@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
-import com.google.common.truth.Truth8;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
@@ -55,6 +54,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
@@ -102,7 +102,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
     @Test
     @DisplayName("given the time is provided with nanosecond resolution, " +
-            "catch up all of projection instances" +
+            "catch up all of projection instances " +
             "and respect the order of the delivered events")
     public void withNanosAllInOrder() throws InterruptedException {
         testCatchUpAll();
@@ -122,6 +122,12 @@ public class CatchUpTest extends AbstractDeliveryTest {
     public void withMillisAllInOrder() throws InterruptedException {
         setupMillis();
         testCatchUpAll();
+    }
+
+    @Test
+    @DisplayName("do nothing if the event store is empty")
+    public void onAnEmptyStorage() {
+        testCatchUpEmpty();
     }
 
     @Nested
@@ -196,6 +202,18 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
     private static CounterCatchUp catchUpForCounter() {
         return new CounterCatchUp("first", "second", "third", "fourth");
+    }
+
+    private static void testCatchUpEmpty() {
+        changeShardCountTo(17);
+
+        CounterCatchUp counterCatchUp = catchUpForCounter();
+        Timestamp aWhileAgo = subtract(currentTime(), Durations.fromHours(1));
+        String someTarget = "some-target";
+        counterCatchUp.catchUp(WhatToCatchUp.catchUpOf(someTarget, aWhileAgo));
+
+        Optional<CounterView> actual = counterCatchUp.find(someTarget);
+        assertThat(actual).isEmpty();
     }
 
     private static void testCatchUpByIds() throws InterruptedException {
@@ -286,13 +304,11 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
         int negativeExpected = -1 * positiveExpected * 2;
 
-        Truth8.assertThat(projectionRepo.find(excludedTarget))
-              .isEmpty();
+        assertThat(projectionRepo.find(excludedTarget)).isEmpty();
         for (int idIndex = 1; idIndex < ids.length; idIndex++) {
             String identifier = ids[idIndex];
             Optional<ConsecutiveProjection> maybeState = projectionRepo.find(identifier);
-            Truth8.assertThat(maybeState)
-                  .isPresent();
+            assertThat(maybeState).isPresent();
 
             ConsecutiveNumberView state = maybeState.get()
                                                     .state();

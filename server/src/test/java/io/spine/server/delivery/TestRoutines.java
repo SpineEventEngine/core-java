@@ -20,7 +20,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.truth.Truth8;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 
@@ -28,9 +27,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * Test-only routines to use when testing the catch-up and delivery API.
@@ -43,13 +43,12 @@ public final class TestRoutines {
     public static <P extends Projection<String, ?, ?>> P
     findView(ProjectionRepository<String, P, ?> repo, String id) {
         Optional<P> view = repo.find(id);
-        Truth8.assertThat(view)
-              .isPresent();
+        assertThat(view).isPresent();
         return view.get();
     }
 
     public static void post(List<Callable<Object>> jobs, int threads) throws InterruptedException {
-        ExecutorService service = Executors.newFixedThreadPool(threads);
+        ExecutorService service = newFixedThreadPool(threads);
         service.invokeAll(jobs);
         List<Runnable> leftovers = service.shutdownNow();
         assertThat(leftovers).isEmpty();

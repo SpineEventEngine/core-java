@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -95,6 +96,10 @@ public class CounterCatchUp {
                      .map((id) -> findView(repo, id).state()
                                                     .getTotal())
                      .collect(toList());
+    }
+
+    public Optional<CounterView> find(String id) {
+        return repo.find(id);
     }
 
     public String[] targets() {

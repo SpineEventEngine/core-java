@@ -134,6 +134,18 @@ final class Conveyor implements Iterable<InboxMessage> {
         changeStatus(message, TO_CATCH_UP);
     }
 
+    /**
+     * Updates the message residing on this conveyor by the identifier of the message.
+     *
+     * <p>If there is no such message on the conveyor, does nothing.
+     */
+    void update(InboxMessage message) {
+        InboxMessageId id = message.getId();
+        if (messages.containsKey(id)) {
+            messages.put(id, message);
+        }
+    }
+
     private void changeStatus(InboxMessage message, InboxMessageStatus status) {
         InboxMessage modified = mutableMessage(message.getId())
                 .setStatus(status)

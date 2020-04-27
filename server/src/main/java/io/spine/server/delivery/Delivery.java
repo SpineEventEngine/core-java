@@ -423,7 +423,6 @@ public final class Delivery implements Logging {
         while (continueAllowed && maybePage.isPresent()) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
-            int messagesRead = messages.size();
             if (!messages.isEmpty()) {
                 DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
                 Conveyor conveyor = new Conveyor(messages, deliveredMessages);
@@ -433,6 +432,9 @@ public final class Delivery implements Logging {
                 stages.add(stage);
             }
             if (continueAllowed) {
+                if(messages.size() < pageSize) {
+                    catchUpJobs = ImmutableList.copyOf(catchUpStorage.readAll());
+                }
                 maybePage = currentPage.next();
             }
         }
@@ -555,6 +557,7 @@ public final class Delivery implements Logging {
     @Internal
     public void registerDispatchersIn(BoundedContext context) {
         context.registerEventDispatcher(new ShardMaintenanceProcess(this));
+
     }
 
     /**

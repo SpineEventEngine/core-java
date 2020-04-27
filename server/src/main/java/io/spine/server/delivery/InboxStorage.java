@@ -40,6 +40,7 @@ import java.util.Optional;
 
 import static com.google.common.collect.Streams.stream;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
+import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.server.delivery.InboxColumn.inbox_shard;
 import static io.spine.server.delivery.InboxColumn.received_at;
 import static io.spine.server.delivery.InboxColumn.status;
@@ -69,6 +70,15 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
     private static final OrderBy OLDER_FIRST = OrderBy.newBuilder()
                                                       .setColumn(received_at.name())
                                                       .setDirection(ASCENDING)
+                                                      .vBuild();
+
+    /**
+     * Ordering for the {@code InboxMessage} queries which puts the messages
+     * received later first.
+     */
+    private static final OrderBy NEWEST_FIRST = OrderBy.newBuilder()
+                                                      .setColumn(received_at.name())
+                                                      .setDirection(DESCENDING)
                                                       .vBuild();
     /**
      * Ordering for the {@code InboxMessage} queries which puts the messages
@@ -165,6 +175,7 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
         RecordQuery<InboxMessageId> query = RecordQueries.of(byIndex);
         query = query.append(eq(status, TO_DELIVER));
         ResponseFormat limitToOne = ResponseFormat.newBuilder()
+                                                  .addOrderBy(NEWEST_FIRST)
                                                   .setLimit(1)
                                                   .vBuild();
         Iterator<InboxMessage> iterator = readAll(query, limitToOne);

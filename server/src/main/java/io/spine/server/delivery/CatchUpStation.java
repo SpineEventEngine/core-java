@@ -23,7 +23,10 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
+import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.server.delivery.event.CatchUpStarted;
+import io.spine.server.delivery.event.ShardProcessingRequested;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,9 +35,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Streams.stream;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.delivery.InboxMessageStatus.TO_CATCH_UP;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A station that performs the delivery of messages to the catching-up targets.
@@ -154,6 +160,44 @@ final class CatchUpStation extends Station {
         }
 
         /**
+         * Processes the message if the matching job is in {@link CatchUpStatus#STARTED
+         * STARTED} status.
+         *
+         * <p>All the matched live messages (i.e. in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER}
+         * status) are ignored and removed from the conveyor.
+         *
+         * <p>The matched messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status
+         * are not yet dispatched to their targets.
+         *
+         * @param message
+         *         the message to process
+         */
+        private void started(InboxMessage message) {
+            boolean dispatched = dispatchAsCatchUpSignal(message, CatchUpStarted.class);
+            if(dispatched) {
+                return;
+            }
+            if (message.getStatus() == TO_DELIVER) {
+                conveyor.remove(message);
+            }
+        }
+
+        private boolean dispatchAsCatchUpSignal(InboxMessage message,
+                                                Class<? extends CatchUpSignal> signalType) {
+            if(message.hasEvent()) {
+                Event event = message.getEvent();
+                Class<? extends EventMessage> eventType = event.enclosedMessage()
+                                                               .getClass();
+                if (eventType.equals(signalType)) {
+                    DispatchingId dispatchingId = new DispatchingId(message);
+                    dispatchToCatchUp.put(dispatchingId, message);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
          * Processes the message if the matching job is in {@link CatchUpStatus#IN_PROGRESS
          * IN_PROGRESS} status.
          *
@@ -244,6 +288,35 @@ final class CatchUpStation extends Station {
          *         the message to run through the filter
          */
         private void accept(InboxMessage message) {
+            //TODO:2020-04-26:alex.tymchenko: extract to a separate station.
+            if (message.hasEvent()) {
+                Event event = message.getEvent();
+                EventMessage eventMessage = event.enclosedMessage();
+                if (eventMessage instanceof ShardProcessingRequested) {
+                    ShardProcessingRequested signal = (ShardProcessingRequested) eventMessage;
+                    List<CatchUp> finalizingJobs =
+                            stream(jobs).filter(
+                                    (job) -> job.getStatus() == CatchUpStatus.FINALIZING)
+                                        .collect(toList());
+                    if(finalizingJobs.isEmpty()) {
+                        return;
+                    }
+                    DeliveryContext context = DeliveryContext.newBuilder()
+                                                             .addAllCatchUpJob(finalizingJobs)
+                                                             .vBuild();
+                    ShardProcessingRequested modifiedSignal = signal.toBuilder()
+                                                                    .setContext(context)
+                                                                    .vBuild();
+                    Event modifiedEvent = event.toBuilder()
+                                               .setMessage(pack(modifiedSignal))
+                                               .vBuild();
+                    InboxMessage modifiedMessage = message.toBuilder()
+                                                          .setEvent(modifiedEvent)
+                                                          .vBuild();
+                    conveyor.update(modifiedMessage);
+                    return;
+                }
+            }
             for (CatchUp job : jobs) {
                 if (!job.matches(message)) {
                     continue;
@@ -251,6 +324,9 @@ final class CatchUpStation extends Station {
                 CatchUpStatus jobStatus = job.getStatus();
 
                 switch (jobStatus) {
+                    case STARTED:
+                        started(message); break;
+
                     case IN_PROGRESS:
                         inProgress(message); break;
 

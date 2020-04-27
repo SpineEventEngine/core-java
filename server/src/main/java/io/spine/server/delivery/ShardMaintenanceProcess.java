@@ -20,11 +20,13 @@
 
 package io.spine.server.delivery;
 
+import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
+import io.spine.server.delivery.event.ShardProcessed;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
@@ -55,20 +57,27 @@ final class ShardMaintenanceProcess extends AbstractEventReactor {
 
     /**
      * By handling this event, guarantees that the messages in the
-     * {@linkplain ShardProcessingRequested#getId() specified shard} have been processed
+     * {@linkplain ShardProcessingRequested#getIndex() specified shard} have been processed
      * by the {@link Delivery}.
      */
     @SuppressWarnings("unused")     // see the Javadoc.
     @React
-    Nothing on(ShardProcessingRequested event) {
-        return nothing();
+    ShardProcessed on(ShardProcessingRequested event) {
+        Timestamp now = Time.currentTime();
+        ShardProcessed processed = ShardProcessed
+                .newBuilder()
+                .setIndex(event.getIndex())
+                .setIdOfRequester(event.getIdOfRequester())
+                .setContext(event.getContext())
+                .vBuild();
+        return processed;
     }
 
     @Override
     public void dispatch(EventEnvelope event) {
         ShardEvent message = (ShardEvent) event.message();
         inbox.send(event)
-             .toReactor(message.getId());
+             .toReactor(message.getIndex());
     }
 
     /**
