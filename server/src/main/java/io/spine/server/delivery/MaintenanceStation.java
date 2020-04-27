@@ -41,6 +41,7 @@ final class MaintenanceStation extends Station {
     private final ImmutableList<CatchUp> finalizingJobs;
 
     MaintenanceStation(DeliveryContext context) {
+        super();
         this.context = context;
         this.finalizingJobs = findFinalizingJobs(context);
     }
