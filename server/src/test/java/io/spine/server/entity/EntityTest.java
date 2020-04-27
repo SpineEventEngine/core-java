@@ -209,13 +209,7 @@ class EntityTest {
                 .from(context)
                 .receivesCommand(signUpUser)
                 .receivesCommand(chooseInitial);
-//        bbc.assertEvents()
-//           .withType(ConstraintViolated.class)
-//           .isEmpty();
         bbc.receivesCommand(chooseAgain);
-//        bbc.assertEvents()
-//           .withType(ConstraintViolated.class)
-//           .hasSize(1);
         bbc.assertEntity(id, UserAggregate.class)
            .hasStateThat()
            .comparingExpectedFieldsOnly()
