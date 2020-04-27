@@ -85,6 +85,13 @@ final class Conveyor implements Iterable<InboxMessage> {
         return new ArrayList<>(messages.values()).iterator();
     }
 
+    /**
+     * Creates a new stream from the contents.
+     */
+    public Stream<InboxMessage> stream() {
+        return messages.values().stream();
+    }
+
     private void markDelivered(InboxMessage message) {
         changeStatus(message, DELIVERED);
         deliveredMessages.recordDelivered(message);
