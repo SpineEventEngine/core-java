@@ -23,19 +23,28 @@ package io.spine.server.entity;
 import com.google.common.collect.Range;
 import com.google.common.truth.LongSubject;
 import com.google.protobuf.StringValue;
+import io.spine.core.UserId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.given.entity.EntityWithMessageId;
 import io.spine.server.entity.given.entity.TestAggregate;
 import io.spine.server.entity.given.entity.TestEntityWithIdInteger;
 import io.spine.server.entity.given.entity.TestEntityWithIdLong;
 import io.spine.server.entity.given.entity.TestEntityWithIdMessage;
 import io.spine.server.entity.given.entity.TestEntityWithIdString;
+import io.spine.server.entity.given.entity.UserAggregate;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.test.entity.Project;
+import io.spine.test.user.ChooseDayOfBirth;
+import io.spine.test.user.SignUpUser;
+import io.spine.test.user.User;
 import io.spine.testdata.Sample;
 import io.spine.testing.Tests;
+import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.time.LocalDates;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +55,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.testing.Tests.nullRef;
+import static io.spine.time.Month.FEBRUARY;
+import static io.spine.time.Month.JANUARY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -168,6 +179,49 @@ class EntityTest {
         entityNew.incrementState(state);
 
         assertEquals(state, entityNew.state());
+    }
+
+    @MuteLogging
+    @Test
+    @DisplayName("check `(set_once)` on state update")
+    void setOnce() {
+        BoundedContextBuilder context = BoundedContextBuilder
+                .assumingTests()
+                .add(UserAggregate.class);
+        UserId id = UserId.newBuilder()
+                             .setValue(newUuid())
+                             .build();
+        SignUpUser signUpUser = SignUpUser
+                .newBuilder()
+                .setId(id)
+                .vBuild();
+        ChooseDayOfBirth chooseInitial = ChooseDayOfBirth
+                .newBuilder()
+                .setId(id)
+                .setDayOfBirth(LocalDates.of(2000, JANUARY, 1))
+                .vBuild();
+        ChooseDayOfBirth chooseAgain = ChooseDayOfBirth
+                .newBuilder()
+                .setId(id)
+                .setDayOfBirth(LocalDates.of(1988, FEBRUARY, 29))
+                .vBuild();
+        BlackBoxContext bbc = BlackBoxContext
+                .from(context)
+                .receivesCommand(signUpUser)
+                .receivesCommand(chooseInitial);
+//        bbc.assertEvents()
+//           .withType(ConstraintViolated.class)
+//           .isEmpty();
+        bbc.receivesCommand(chooseAgain);
+//        bbc.assertEvents()
+//           .withType(ConstraintViolated.class)
+//           .hasSize(1);
+        bbc.assertEntity(id, UserAggregate.class)
+           .hasStateThat()
+           .comparingExpectedFieldsOnly()
+           .isEqualTo(User.newBuilder()
+                          .setDateOfBirth(chooseInitial.getDayOfBirth())
+                          .buildPartial());
     }
 
     @Test
