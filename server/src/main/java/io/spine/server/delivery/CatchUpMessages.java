@@ -125,7 +125,7 @@ final class CatchUpMessages {
         return ShardProcessingRequested
                 .newBuilder()
                 .setIndex(shardIndex)
-                .setIdOfRequester(Identifier.pack(id))
+                .setRequesterId(Identifier.pack(id))
                 .vBuild();
     }
 }

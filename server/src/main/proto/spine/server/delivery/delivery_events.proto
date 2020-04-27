@@ -24,9 +24,8 @@ message ShardProcessingRequested {
     // The context of the delivery at the moment when this event has been dispatched.
     DeliveryContext context = 2;
 
-    //TODO:2020-04-27:alex.tymchenko: rename?
     // An identifier of an entity which originally requested the shard processing.
-    google.protobuf.Any id_of_requester = 3 [(required) = true];
+    google.protobuf.Any requester_id = 3 [(required) = true];
 }
 
 // The processing of the messages in the particular shard was performed
@@ -38,5 +37,5 @@ message ShardProcessed {
     DeliveryContext context = 2;
 
     // An identifier of an entity which originally requested the shard processing.
-    google.protobuf.Any id_of_requester = 3 [(required) = true];
+    google.protobuf.Any requester_id = 3 [(required) = true];
 }

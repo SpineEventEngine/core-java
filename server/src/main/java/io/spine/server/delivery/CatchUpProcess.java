@@ -476,7 +476,7 @@ public final class CatchUpProcess<I>
         ShardProcessingRequested stillRequested =
                 ShardProcessingRequested.newBuilder()
                                         .setIndex(event.getIndex())
-                                        .setIdOfRequester(Identifier.pack(id))
+                                        .setRequesterId(Identifier.pack(id))
                                         .vBuild();
         return EitherOf3.withB(stillRequested);
     }
@@ -697,7 +697,7 @@ public final class CatchUpProcess<I>
     }
 
     private static ImmutableSet<CatchUpId> routeShardProcessed(ShardProcessed message) {
-        Any requester = message.getIdOfRequester();
+        Any requester = message.getRequesterId();
         CatchUpId id = Identifier.unpack(requester, CatchUpId.class);
         return ImmutableSet.of(id);
     }
