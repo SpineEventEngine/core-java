@@ -177,7 +177,6 @@ final class Element implements Serializable {
          */
         T getA();
 
-        //TODO:2020-04-21:alex.tymchenko: cover with tests.
         /**
          * Tells whether the first element of the tuple is set.
          */

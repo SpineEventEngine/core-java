@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -100,6 +101,40 @@ class EitherOf5Test {
         assertEquals(c, eitherWithC.getC());
         assertEquals(d, eitherWithD.getD());
         assertEquals(e, eitherWithE.getE());
+    }
+
+    @Test
+    @DisplayName("tell if the values are set")
+    void reportHasValues() {
+        assertThat(eitherWithA.hasA()).isTrue();
+        assertThat(eitherWithA.hasB()).isFalse();
+        assertThat(eitherWithA.hasC()).isFalse();
+        assertThat(eitherWithA.hasD()).isFalse();
+        assertThat(eitherWithA.hasE()).isFalse();
+
+        assertThat(eitherWithB.hasB()).isTrue();
+        assertThat(eitherWithB.hasA()).isFalse();
+        assertThat(eitherWithB.hasC()).isFalse();
+        assertThat(eitherWithB.hasD()).isFalse();
+        assertThat(eitherWithB.hasE()).isFalse();
+
+        assertThat(eitherWithC.hasC()).isTrue();
+        assertThat(eitherWithC.hasA()).isFalse();
+        assertThat(eitherWithC.hasB()).isFalse();
+        assertThat(eitherWithC.hasD()).isFalse();
+        assertThat(eitherWithC.hasE()).isFalse();
+
+        assertThat(eitherWithD.hasD()).isTrue();
+        assertThat(eitherWithD.hasA()).isFalse();
+        assertThat(eitherWithD.hasB()).isFalse();
+        assertThat(eitherWithD.hasC()).isFalse();
+        assertThat(eitherWithD.hasE()).isFalse();
+
+        assertThat(eitherWithE.hasE()).isTrue();
+        assertThat(eitherWithE.hasA()).isFalse();
+        assertThat(eitherWithE.hasB()).isFalse();
+        assertThat(eitherWithE.hasC()).isFalse();
+        assertThat(eitherWithE.hasD()).isFalse();
     }
 
     @Test

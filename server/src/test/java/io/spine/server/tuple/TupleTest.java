@@ -114,6 +114,5 @@ class TupleTest {
         public boolean hasB() {
             return isOptionalPresent(getB());
         }
-
     }
 }

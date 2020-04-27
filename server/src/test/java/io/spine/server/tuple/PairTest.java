@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -120,8 +121,20 @@ class PairTest {
         assertEquals(b, pair.getB());
     }
 
+    @Test
+    @DisplayName("tell both values are present, if B isn't `Optional`")
+    void tellBothValuesPresent() {
+        StringValue a = TestValues.newUuidValue();
+        BoolValue b = BoolValue.of(true);
+
+        Pair<StringValue, BoolValue> pair = Pair.of(a, b);
+
+        assertThat(pair.hasA()).isTrue();
+        assertThat(pair.hasB()).isTrue();
+    }
+
     @Nested
-    @DisplayName("allow optional B")
+    @DisplayName("allow `Optional` B")
     class AllowOptionalB {
 
         @Test
@@ -134,6 +147,8 @@ class PairTest {
 
             assertEquals(a, pair.getA());
             assertEquals(b, pair.getB());
+
+            assertThat(pair.hasB()).isFalse();
         }
 
         @Test
@@ -146,6 +161,8 @@ class PairTest {
 
             assertEquals(a, pair.getA());
             assertEquals(b, pair.getB());
+
+            assertThat(pair.hasB()).isTrue();
         }
     }
 
