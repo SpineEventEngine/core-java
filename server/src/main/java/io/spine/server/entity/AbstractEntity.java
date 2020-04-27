@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
@@ -55,6 +56,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.logging.Logging.loggerFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkValid;
+import static io.spine.validate.Validate.validateChange;
+import static io.spine.validate.Validate.violationsOf;
 
 /**
  * Abstract base for entities.
@@ -265,7 +268,10 @@ public abstract class AbstractEntity<I, S extends EntityState>
      */
     protected final List<ConstraintViolation> checkEntityState(S newState) {
         checkNotNull(newState);
-        return Validate.violationsOf(newState);
+        ImmutableList.Builder<ConstraintViolation> violations = ImmutableList.builder();
+        violations.addAll(violationsOf(newState));
+        violations.addAll(validateChange(state(), newState));
+        return violations.build();
     }
 
     /**
