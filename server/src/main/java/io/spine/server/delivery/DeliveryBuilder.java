@@ -277,11 +277,11 @@ public final class DeliveryBuilder {
         StorageFactory factory = ServerEnvironment.instance()
                                                   .storageFactory();
         if (this.inboxStorage == null) {
-            this.inboxStorage = factory.createInboxStorage(true);
+            this.inboxStorage = factory.createInboxStorage(false);
         }
 
         if (this.catchUpStorage == null) {
-            this.catchUpStorage = factory.createCatchUpStorage(true);
+            this.catchUpStorage = factory.createCatchUpStorage(false);
         }
 
         if (workRegistry == null) {
