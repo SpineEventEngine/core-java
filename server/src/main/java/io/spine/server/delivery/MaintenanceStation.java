@@ -26,7 +26,6 @@ import io.spine.core.Event;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -104,12 +103,8 @@ final class MaintenanceStation extends Station {
         List<CatchUp> jobs = context.getCatchUpJobList();
         ImmutableList<CatchUp> finalizingJobs =
                 jobs.stream()
-                    .filter(isFinalizing())
+                    .filter((job) -> job.getStatus() == CatchUpStatus.FINALIZING)
                     .collect(toImmutableList());
         return finalizingJobs;
-    }
-
-    private static Predicate<CatchUp> isFinalizing() {
-        return (job) -> job.getStatus() == CatchUpStatus.FINALIZING;
     }
 }
