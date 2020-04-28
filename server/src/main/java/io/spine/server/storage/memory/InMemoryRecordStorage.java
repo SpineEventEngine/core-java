@@ -61,6 +61,11 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
     }
 
     @Override
+    protected Iterator<I> index(RecordQuery<I> query) {
+        return records().index(query);
+    }
+
+    @Override
     protected Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format) {
         return records().readAll(query, format);
     }

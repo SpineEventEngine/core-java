@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -59,6 +60,16 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
     public Iterator<I> index() {
         Iterator<I> result = records.keySet()
                                     .iterator();
+        return result;
+    }
+
+    /**
+     * Obtains the iterator over the identifiers of the records which match the passed query.
+     */
+    public Iterator<I> index(RecordQuery<I> query) {
+        List<RecordWithColumns<I, R>> subset =
+                findRecords(query, ResponseFormat.getDefaultInstance());
+        Iterator<I> result = Iterators.transform(subset.iterator(), RecordWithColumns::id);
         return result;
     }
 

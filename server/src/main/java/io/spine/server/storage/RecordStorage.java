@@ -65,6 +65,15 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     }
 
     /**
+     * Reads the identifiers of the records selected by the passed query.
+     *
+     * @param query
+     *         the query to execute
+     * @return an iterator over the matching record identifiers
+     */
+    protected abstract Iterator<I> index(RecordQuery<I> query);
+
+    /**
      * Writes the record along with its filled-in column values to the storage.
      *
      * @param record

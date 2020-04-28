@@ -47,17 +47,37 @@ public abstract class RecordSpec<I, R, S> {
 
     private final Class<R> recordType;
 
+    /**
+     * Creates a new {@code RecordSpec} instance for the record of the passed type
+     */
     protected RecordSpec(Class<R> recordType) {
         this.recordType = recordType;
     }
 
+    /**
+     * Returns the type of the stored record.
+     */
     public final Class<R> recordType() {
         return recordType;
     }
 
+    /**
+     * Reads the values of all columns specified for the record from the passed source.
+     *
+     * @param source
+     *         the object from which the column values are read
+     * @return {@code Map} of column names and their respective values
+     */
     protected abstract Map<ColumnName, @Nullable Object> valuesIn(S source);
 
-    protected abstract I idValueIn(S source);
+    /**
+     * Reads the identifier value of the record.
+     *
+     * @param source
+     *         the object providing the ID value
+     * @return the value of the identifier
+     */
+    public abstract I idValueIn(S source);
 
     /**
      * Returns all columns of the record.
