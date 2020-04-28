@@ -122,4 +122,15 @@ class CommandRequestTest extends AbstractClientTest {
             assertThrows(NullPointerException.class, () -> commandRequest.onConsumingError(null));
         }
     }
+
+    @Nested
+    @DisplayName("Allow setting custom posting error handler")
+    class CustomPostingErrorHandler {
+
+        @Test
+        @DisplayName("rejecting `null`")
+        void rejectingNull() {
+            assertThrows(NullPointerException.class, () -> commandRequest.onPostingError(null));
+        }
+    }
 }

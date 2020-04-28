@@ -28,8 +28,10 @@ import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Status;
+import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,11 +58,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * to preserve both client-side and server-side resources. The moment of cancelling the subscriptions
  * depends on the nature of the posted command and the outcome expected by the client application.
  */
-public final class CommandRequest extends ClientRequest {
+public final class CommandRequest extends ClientRequest implements Logging {
 
     private final CommandMessage message;
     private final MultiEventConsumers.Builder eventConsumers;
     private @Nullable ErrorHandler streamingErrorHandler;
+    private @Nullable PostingErrorHandler postingErrorHandler;
 
     CommandRequest(ClientRequest parent, CommandMessage c) {
         super(parent);
@@ -131,6 +134,17 @@ public final class CommandRequest extends ClientRequest {
     }
 
     /**
+     * Assigns a handler for an error occurred on the server-side (such as validation error)
+     * in response to posting a command.
+     */
+    @CanIgnoreReturnValue
+    public CommandRequest onPostingError(PostingErrorHandler handler) {
+        checkNotNull(handler);
+        this.postingErrorHandler = handler;
+        return this;
+    }
+
+    /**
      * Subscribes the consumers to events to receive events resulting from the command as
      * they happen, then sends the command to the server.
      *
@@ -192,7 +206,8 @@ public final class CommandRequest extends ClientRequest {
                 case OK:
                     return subscriptions;
                 case ERROR:
-                    cancelVoidSubscriptions(status);
+                    cancelVoidSubscriptions();
+                    reportErrorWhenPosting(status);
                     return ImmutableSet.of();
                 case REJECTION:
                 case STATUS_NOT_SET:
@@ -214,26 +229,24 @@ public final class CommandRequest extends ClientRequest {
         /**
          * Cancels the passed subscriptions to events because the command could not be posted.
          *
-         * @param status
-         *          provides error information
          */
-        private void cancelVoidSubscriptions(Status status) {
+        private void cancelVoidSubscriptions() {
             Subscriptions activeSubscriptions = client().subscriptions();
             if (subscriptions != null) {
                 subscriptions.forEach(activeSubscriptions::cancel);
             }
-            reportErrorWhenPosting(status);
         }
 
         private void reportErrorWhenPosting(Status status) {
-            IllegalStateException exception = newIllegalStateException(
-                    "Unable to post the command `%s`. Returned error: `%s`.",
-                    shortDebugString(command), shortDebugString(status.getError())
-            );
-            //TODO:2020-04-24:alexander.yevsyukov: Use another handler!
-            if (streamingErrorHandler != null) {
-                streamingErrorHandler.accept(exception);
-            }
+            errorHandler().accept(command, status.getError());
+        }
+
+        private PostingErrorHandler errorHandler() {
+            return Optional.ofNullable(CommandRequest.this.postingErrorHandler)
+                           .orElse(new LoggingPostingErrorHandler(
+                                   CommandRequest.this.logger(),
+                                   "Unable to post the command `%s`. Returned error: `%s`.")
+                           );
         }
     }
 }
