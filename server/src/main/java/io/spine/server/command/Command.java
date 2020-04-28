@@ -266,6 +266,10 @@ public @interface Command {
      *
      * <p>If applied to a command receiving method, the Model
      * {@linkplain io.spine.server.model.ExternalCommandReceiverMethodError error} is produced.
+     *
+     * @deprecated please use {@link io.spine.core.External @External} annotation for the first
+     *         method parameter.
      */
+    @Deprecated
     boolean external() default false;
 }
