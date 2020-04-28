@@ -34,17 +34,14 @@ import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumerat
  *
  * <p>Although technically it's possible for entities like
  * {@linkplain io.spine.server.command.Command commanders} to declare their command substitution
- * methods as {@linkplain io.spine.server.command.Command#external() external}, there is no notion
+ * methods as {@linkplain io.spine.core.External external}, there is no notion
  * of "external" commands in the system, and, to avoid confusion, such declarations should be
  * avoided.
  *
  * <p>Example of a faulty method:
  * <pre>
- *     {@code
- *     \@Command(external = true)
- *     public StartProject on(CreateProject command) {
- *     }
- *     }
+ *{@literal @Command}
+ * public StartProject on(@External CreateProject command) { ... }
  * </pre>
  */
 public final class ExternalCommandReceiverMethodError extends ModelError {

@@ -20,6 +20,7 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.integration.event.ItgProjectStarted;
@@ -29,8 +30,8 @@ public class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
 
     private static ItgProjectStarted externalEvent = null;
 
-    @Subscribe(external = true)
-    void on(ItgProjectStarted msg) {
+    @Subscribe
+    void on(@External ItgProjectStarted msg) {
         externalEvent = msg;
     }
 

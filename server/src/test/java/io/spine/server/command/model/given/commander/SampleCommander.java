@@ -21,6 +21,7 @@
 package io.spine.server.command.model.given.commander;
 
 import com.google.common.collect.ImmutableList;
+import io.spine.core.External;
 import io.spine.model.contexts.projects.command.SigAddTaskToProject;
 import io.spine.model.contexts.projects.command.SigAssignTask;
 import io.spine.model.contexts.projects.command.SigCreateProject;
@@ -84,13 +85,13 @@ public final class SampleCommander extends AbstractCommander {
         return EitherOf2.withA(SigStopTask.getDefaultInstance());
     }
 
-    @Command(external = true)
-    SigRemoveTaskFromProject byExternalEvent(SigTaskDeleted event) {
+    @Command
+    SigRemoveTaskFromProject byExternalEvent(@External SigTaskDeleted event) {
         return SigRemoveTaskFromProject.newBuilder().build();
     }
 
-    @Command(external = true)
-    SigRemoveTaskFromProject byExternalEvent(SigTaskMoved event) {
+    @Command
+    SigRemoveTaskFromProject byExternalEvent(@External SigTaskMoved event) {
         return SigRemoveTaskFromProject.newBuilder().build();
     }
 }

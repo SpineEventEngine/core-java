@@ -21,6 +21,7 @@
 package io.spine.server.integration.given;
 
 import io.spine.base.EventMessage;
+import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.Int32Aggregate;
@@ -40,8 +41,8 @@ public class ProjectCountAggregate
         super(id);
     }
 
-    @React(external = true)
-    List<EventMessage> on(ItgProjectCreated event) {
+    @React
+    List<EventMessage> on(@External ItgProjectCreated event) {
         externalEvent = event;
         return Collections.emptyList();
     }

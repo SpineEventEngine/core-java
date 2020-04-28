@@ -65,7 +65,7 @@ public final class CommandReactionMethod
      * Ensures that the domestic events are dispatched to the domestic-event handlers
      * and the external events are dispatched to the external-event handlers.
      *
-     * @see io.spine.server.command.Command#external()
+     * @see io.spine.core.External
      */
     @Override
     protected void checkAttributesMatch(EventEnvelope envelope) {
