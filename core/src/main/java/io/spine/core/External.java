@@ -36,5 +36,4 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target(PARAMETER)
 @Documented
 public @interface External {
-
 }

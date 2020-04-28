@@ -36,5 +36,4 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Target(ANNOTATION_TYPE)
 @Documented
 public @interface AcceptsExternal {
-
 }
