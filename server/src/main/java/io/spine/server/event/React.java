@@ -20,6 +20,8 @@
 
 package io.spine.server.event;
 
+import io.spine.core.AcceptsExternal;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -151,11 +153,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
+@AcceptsExternal
 public @interface React {
 
     /**
      * When {@code true}, the annotated method of the entity reacts on the event generated from
      * outside of the Bounded Context to which this entity belongs.
+     *
+     * @deprecated please use {@link io.spine.core.External @External} annotation for the first
+     *         method parameter.
      */
+    @Deprecated
     boolean external() default false;
 }
