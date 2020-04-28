@@ -83,50 +83,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *         parameter.
  * </ul>
  *
- * <h1>Filtering Events by a Field Value</h1>
- * <p>If a {@linkplain ByField field filter} is defined, only the events matching this filter are
- * passed to the subscriber.
- *
- * <p>Any combination of {@code external} and {@code filter} is valid, i.e. it is possible
- * to filter external event subscriptions. Though, it is not possible to filter entity state
- * updates.
- *
- * <p>A single subscribing class may define a number of subscriber methods with different field
- * filters. Though, all the field filters must target the same field. For example, this event
- * handling is valid:
- * <pre>
- *
- *    {@literal @Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))}
- *     void onExpired(UserLoggedIn event) {
- *         // Handle expired subscription.
- *     }
- *
- *    {@literal @Subscribe(filter = @ByField(path = "subscription.status", value = "INACTIVE"))}
- *     void onInactive(UserLoggedIn event) {
- *         // Handle inactive subscription.
- *     }
- *
- *    {@literal @Subscribe}
- *     void on(UserLoggedIn event) {
- *         // Handle other cases.
- *     }
- *
- * </pre>
- * <p>And this one is not:
- * <pre>
- *    {@literal @Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))}
- *     void onExpired(UserLoggedIn event) {
- *     }
- *
- *    {@literal @Subscribe(filter = @ByField(path = "payment_method.status", value = "UNSET"))}
- *     void onUnknownBilling(UserLoggedIn event) {
- *         // Error, different field paths used in the same class for the same event type.
- *     }
- * </pre>
- *
  * <p>If the annotation is applied to a method which doesn't satisfy either of these requirements,
- * this method is not considered as a subscriber and is not registered for the command output
- * delivery.
+ * this method is not considered a subscriber and is not registered for the command output delivery.
  *
  * <p>Event subscriber methods are designed to be called by the framework only.
  * Therefore, it is recommended to declare a them as package-private.
@@ -135,16 +93,23 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>Package-private access level still declares that an event reactor method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
  * BoundedContext} description on how the packages and Bounded Contexts relate.
+ *
+ * <p>When subscribing to events, {@linkplain Where field filtering} is supported.
  */
 @Retention(RUNTIME)
 @Target(METHOD)
 @Documented
+@AcceptsFilters
+@AcceptsExternal
 public @interface Subscribe {
 
     /**
      * When {@code true}, the annotated method receives an event generated from outside of the
      * Bounded Context to which the annotated method's class belongs.
+     *
+     * @deprecated please use {@link External @External} annotation for the first method parameter.
      */
+    @Deprecated
     boolean external() default false;
 
     /**

@@ -28,18 +28,57 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Filters events delivered to the {@linkplain Subscribe subscriber method} the first
- * parameter of which has this annotation.
+ * Filters events delivered to a handler method.
+ *
+ * <p>To apply filtering to an event handler method, annotate the first parameter of the method.
  *
  * <p>For example, the following method would be invoked only if the owner of the created
  * project is {@code mary@ackme.net}:
- * <pre>{@code
- * \@Subscribe
+ * <pre>
+ *{@literal @Subscribe }
  * void on(@Where(field = "owner.email", equals = "mary@ackme.net") ProjectCreated e) { ... }
- * }</pre>
+ * </pre>
  *
- * <p><em>NOTE:</em> This syntax applies only to events. Filtering state subscriptions
- * is not supported.
+ * <p>Annotations for handler methods which support {@code @Where} should be marked with
+ * {@link AcceptsFilters}.
+ *
+ * <h1>Filtering Events by a Field Value</h1>
+ * <p>If a field filter is defined, only the events matching this filter are passed to the handler
+ * method.
+ *
+ * <p>A single class may define a number of handler methods with different field filters. Though,
+ * all the field filters must target the same field. For example, this event handling is valid:
+ * <pre>
+ *    {@literal @Subscribe}
+ *     void{@literal onExpired(@Where(field = "subscription.status", equals = "EXPIRED")
+ *                      UserLoggedIn event)} {
+ *         // Handle expired subscription.
+ *     }
+ *
+ *    {@literal @Subscribe}
+ *     void{@literal onInactive(@Where(field = "subscription.status", equals = "INACTIVE")
+ *                       UserLoggedIn event)} {
+ *         // Handle inactive subscription.
+ *     }
+ *
+ *    {@literal @Subscribe}
+ *     void on(UserLoggedIn event) {
+ *         // Handle other cases.
+ *     }
+ * </pre>
+ * <p>And this one is not:
+ * <pre>
+ *    {@literal @Subscribe}
+ *     void{@literal onExpired(@Where(field = "subscription.status", equals = "EXPIRED")
+ *                      UserLoggedIn event)} {
+ *     }
+ *
+ *    {@literal @Subscribe}
+ *     void{@literal onUnknownBilling(@Where(field = "payment_method.status", equals = "UNSET")
+ *                             UserLoggedIn event)} {
+ *         // Error, different field paths used in the same class for the same event type.
+ *     }
+ * </pre>
  */
 @Retention(RUNTIME)
 @Target(PARAMETER)
