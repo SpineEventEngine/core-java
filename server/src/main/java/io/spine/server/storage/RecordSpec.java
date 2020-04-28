@@ -48,7 +48,7 @@ public abstract class RecordSpec<I, R, S> {
     private final Class<R> recordType;
 
     /**
-     * Creates a new {@code RecordSpec} instance for the record of the passed type
+     * Creates a new {@code RecordSpec} instance for the record of the passed type.
      */
     protected RecordSpec(Class<R> recordType) {
         this.recordType = recordType;
@@ -77,7 +77,7 @@ public abstract class RecordSpec<I, R, S> {
      *         the object providing the ID value
      * @return the value of the identifier
      */
-    public abstract I idValueIn(S source);
+    protected abstract I idValueIn(S source);
 
     /**
      * Returns all columns of the record.
