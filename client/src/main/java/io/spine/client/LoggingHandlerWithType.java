@@ -23,28 +23,23 @@ package io.spine.client;
 import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 
-/**
- * Logs the fact of an error caused by handling a message of the passed type.
- */
-final class LoggingErrorHandler extends LoggingHandlerWithType implements ErrorHandler {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    /**
-     * Creates a new instance of the logging handler.
-     *
-     * @param logger
-     *         the instance of the logger to use for reporting the error
-     * @param messageFormat
-     *         the formatting message with one string parameter is the name of the message type
-     *         which caused the error
-     * @param type
-     *         the type of the message which caused the error
-     */
-    LoggingErrorHandler(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
-        super(logger, messageFormat, type);
+/**
+ * Abstract base for logging handlers that contain information about a type.
+ */
+abstract class LoggingHandlerWithType extends LoggingHandler {
+
+    private final Class<? extends Message> type;
+
+    LoggingHandlerWithType(FluentLogger logger,
+                           String messageFormat,
+                           Class<? extends Message> type) {
+        super(logger, messageFormat);
+        this.type = checkNotNull(type);
     }
 
-    @Override
-    public void accept(Throwable throwable) {
-        error(throwable).log(messageFormat(), typeName());
+    final String typeName() {
+        return type.getName();
     }
 }

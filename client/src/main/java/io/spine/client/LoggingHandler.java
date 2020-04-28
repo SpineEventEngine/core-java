@@ -21,27 +21,27 @@
 package io.spine.client;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.protobuf.Message;
 
+/**
+ * Abstract base for error handlers that write a message to the associated logger.
+ *
+ * <p>The handler always uses {@linkplain FluentLogger#atSevere() severe} level.
+ */
 abstract class LoggingHandler {
 
     private final FluentLogger logger;
     private final String messageFormat;
-    private final Class<? extends Message> type;
 
     /**
      * Creates new instance of the logging handler.
      *  @param logger
      *         the instance of the logger to use for reporting the error
      * @param messageFormat
-     *         the formatting message where the first parameter is the consumer which caused
-     * @param type
-     *         the type of messages obtained by a consumer
+     *         the formatting message for an error text
      */
-    LoggingHandler(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
+    LoggingHandler(FluentLogger logger, String messageFormat) {
         this.logger = logger;
         this.messageFormat = messageFormat;
-        this.type = type;
     }
 
     final FluentLogger logger() {
@@ -52,7 +52,13 @@ abstract class LoggingHandler {
         return messageFormat;
     }
 
-    final Class<? extends Message> type() {
-        return type;
+    /** Obtains logging API at {@code sever} level. */
+    protected final FluentLogger.Api error() {
+        return logger().atSevere();
+    }
+
+    /** Obtains logging API at {@code sever} level and initializes it with the passed cause. */
+    protected final FluentLogger.Api error(Throwable cause) {
+        return error().withCause(cause);
     }
 }
