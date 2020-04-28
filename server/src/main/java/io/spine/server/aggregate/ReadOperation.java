@@ -48,6 +48,17 @@ final class ReadOperation<I> {
 
     private @MonotonicNonNull Snapshot snapshot = null;
 
+    /**
+     * Creates a new history read operation for the {@code Aggregate} history
+     * with the given identifier.
+     *
+     * @param storage
+     *         the storage to use for reading
+     * @param id
+     *         the identifier of the {@code Aggregate} instance
+     * @param batchSize
+     *         how many records to read from the storage at a time
+     */
     ReadOperation(AggregateStorage<I> storage, I id, int batchSize) {
         storage.checkNotClosed();
         this.storage = storage;
@@ -57,7 +68,21 @@ final class ReadOperation<I> {
         this.history = newLinkedList();
     }
 
-    //TODO:2020-04-02:alex.tymchenko: simplify this one.
+    /**
+     * Reads the history of the {@code Aggregate} starting from the most recent events until
+     * either the snapshot is read or the bottom of the history is reached.
+     *
+     * <p>The reading is performed in batches, which size is determined by
+     * the {@linkplain ReadOperation#ReadOperation(AggregateStorage, Object, int) pre-configured}
+     * batch size.
+     *
+     * <p>If neither snapshot nor the bottom of the history is reached when the batch
+     * is read, a new batch of records is read from the storage starting from the version of
+     * the last record read in the previous batch.
+     *
+     * @return the {@code Aggregate} history,
+     *         or {@code Optional.empty()} if this {@code Aggregate} has no history
+     */
     Optional<AggregateHistory> perform() {
         Iterator<AggregateEventRecord> historyBackward = storage.historyBackward(id, batchSize);
         if (!historyBackward.hasNext()) {
@@ -66,22 +91,34 @@ final class ReadOperation<I> {
 
         boolean historyBottomReached = false;
         while(snapshot == null && !historyBottomReached) {
-            Version lastHandledVersion = null;
-            while(historyBackward.hasNext() && snapshot == null) {
-                AggregateEventRecord record = historyBackward.next();
-                lastHandledVersion = handleRecord(record);
-            }
+            Optional<Version> lastVersion = process(historyBackward);
             if(snapshot == null) {
-                if(lastHandledVersion == null) {
+                if(!lastVersion.isPresent()) {
                     historyBottomReached = true;
                 } else {
-                    historyBackward = storage.historyBackward(id, batchSize, lastHandledVersion);
+                    historyBackward = storage.historyBackward(id, batchSize, lastVersion.get());
                 }
             }
         }
 
         AggregateHistory result = buildRecord();
         return Optional.of(result);
+    }
+
+    /**
+     * Handle the records provided by the history-backward iterator and return the version
+     * of the last record handled.
+     *
+     * @return the version of the last handled event or snapshot, whichever is the last;
+     * or {@code Optional.empty} if no records were handled
+     */
+    private Optional<Version> process(Iterator<AggregateEventRecord> historyBackward) {
+        Version lastHandledVersion = null;
+        while(historyBackward.hasNext() && snapshot == null) {
+            AggregateEventRecord record = historyBackward.next();
+            lastHandledVersion = handleRecord(record);
+        }
+        return Optional.ofNullable(lastHandledVersion);
     }
 
     private Version handleRecord(AggregateEventRecord record) {
