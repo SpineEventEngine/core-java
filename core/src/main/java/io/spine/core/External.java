@@ -30,7 +30,14 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Marks a handler method parameter to be of an external origin.
  *
+ * <p>External messages are messages originated in a different Bounded Context.
  *
+ * <p>Events (including Rejections) and entity states may be external.
+ *
+ * <p>Annotate the first parameter of the handler method with {@code @External} to make the handler
+ * accept external messages. By default, any message handler accepts domestic messages.
+ *
+ * @see AcceptsExternal
  */
 @Retention(RUNTIME)
 @Target(PARAMETER)
