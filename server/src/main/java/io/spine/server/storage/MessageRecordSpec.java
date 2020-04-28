@@ -38,7 +38,7 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A specification of a Protobuf message record to store.
+ * Instructs storage implementations on how to store a plain Protobuf message record.
  *
  * <p>Defines the collection of the columns to store along with the message record
  * for further querying.

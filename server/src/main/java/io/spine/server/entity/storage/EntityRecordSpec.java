@@ -41,7 +41,8 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * The specification of the {@link EntityRecord} in which {@link Entity} instances are stored.
+ * Instructs the storage on how to handle {@link EntityRecord}s storing the information about
+ * {@link Entity} instances.
  *
  * <p>Lists the columns defined for the {@code Entity}, including the system columns,
  * interface-based columns and the columns defined in the Protobuf message
@@ -162,7 +163,7 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
 
     @Override
     protected I idValueIn(Entity<I, ?> source) {
-        return (I) source.id();
+        return source.id();
     }
 
     @Override
