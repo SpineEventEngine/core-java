@@ -54,13 +54,20 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I, R, R> {
 
     /**
+     * The class of the record which storage is configured by this spec.
+     */
+    private final Class<R> recordClass;
+
+    /**
+     * A method object to extract the record identifier, once such a record is passed.
+     */
+    private final ExtractId<R, I> extractId;
+
+    /**
      * The columns to store along with the record itself.
      */
     private final ImmutableMap<ColumnName, CustomColumn<?, R>> columns;
 
-    private final Class<R> recordClass;
-
-    private final ExtractId<R, I> extractId;
 
     public MessageRecordSpec(Class<R> recordClass,
                              ExtractId<R, I> extractId,

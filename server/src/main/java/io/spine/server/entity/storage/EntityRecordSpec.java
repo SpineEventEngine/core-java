@@ -57,6 +57,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entity<I, ?>> {
 
     /**
+     * The class of {@code Entity} which storage is configured.
+     */
+    private final EntityClass<?> entityClass;
+
+    /**
      * The {@linkplain SystemColumn system columns} of the entity.
      */
     private final ImmutableMap<ColumnName, SysColumn> systemColumns;
@@ -71,7 +76,6 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
      */
     private final ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns;
 
-    private final EntityClass<?> entityClass;
 
     private EntityRecordSpec(
             ImmutableMap<ColumnName, SysColumn> systemColumns,
@@ -91,7 +95,7 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
     public static <I> EntityRecordSpec<I> of(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
         Scanner scanner = new Scanner(entityClass);
-        return new EntityRecordSpec<I>(scanner.systemColumns(),
+        return new EntityRecordSpec<>(scanner.systemColumns(),
                                       scanner.simpleColumns(),
                                       scanner.interfaceBasedColumns(),
                                       entityClass);
