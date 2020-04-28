@@ -114,6 +114,11 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
+    protected Iterator<I> index(RecordQuery<I> query) {
+        return delegate.index(query);
+    }
+
+    @Override
     @Internal
     protected RecordSpec<I, R, ?> recordSpec() {
         return delegate.recordSpec();
