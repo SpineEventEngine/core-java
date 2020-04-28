@@ -125,7 +125,7 @@ public final class RecordQueries {
      * @param <V>
      *         the type of the values stored in the column
      */
-    public static <I, V> RecordQuery<I> byColumn(CustomColumn<?, ?> column, V value) {
+    public static <I, V> RecordQuery<I> byColumn(Column column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         QueryParameters queryParams = QueryParameters.eq(column, value);
