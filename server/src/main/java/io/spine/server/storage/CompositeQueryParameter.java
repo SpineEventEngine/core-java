@@ -63,7 +63,7 @@ public final class CompositeQueryParameter {
      * @return new instance of {@code CompositeQueryParameter}
      */
     public static CompositeQueryParameter from(Multimap<Column, Filter> filters,
-                                        CompositeOperator operator) {
+                                               CompositeOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
         checkArgument(operator.getNumber() > 0, "Invalid aggregating operator %s.", operator);
