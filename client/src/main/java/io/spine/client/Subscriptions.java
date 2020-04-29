@@ -176,7 +176,6 @@ public final class Subscriptions {
     }
 
     private void requestCancellation(Subscription subscription) {
-        //TODO:2020-04-17:alexander.yevsyukov: Check response and report the error.
         Response response = blockingSubscriptionService.cancel(subscription);
         Status status = response.getStatus();
         checkNoError(status);
