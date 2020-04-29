@@ -27,6 +27,8 @@ import io.spine.base.Identifier;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceBlockingStub;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceStub;
+import io.spine.core.Response;
+import io.spine.core.Status;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -34,6 +36,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.ClientException.checkNoError;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedSet;
 
@@ -162,7 +165,9 @@ public final class Subscriptions {
 
     private void requestCancellation(Subscription subscription) {
         //TODO:2020-04-17:alexander.yevsyukov: Check response and report the error.
-        blockingSubscriptionService.cancel(subscription);
+        Response response = blockingSubscriptionService.cancel(subscription);
+        Status status = response.getStatus();
+        checkNoError(status);
     }
 
     /** Cancels all the subscriptions. */

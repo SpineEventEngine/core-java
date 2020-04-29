@@ -25,7 +25,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.core.Ack;
 import io.spine.core.Command;
+import io.spine.core.Status;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
@@ -48,7 +50,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * }</pre>
  *
  * <p>The subscription obtained from the {@link #post()} should be cancelled
- * to preserve both client-side and server-side resources. The moment of cancelling the subscriptions
+ * to preserve both client-side and server-side resources. The moment of cancelling the
+ * subscriptions
  * depends on the nature of the posted command and the outcome expected by the client application.
  */
 public final class CommandRequest extends ClientRequest {
@@ -102,7 +105,7 @@ public final class CommandRequest extends ClientRequest {
     /**
      * Assigns a handler for errors occurred when delivering events.
      *
-     * <p>If such an error occur, no more events resulting from the posted command will be
+     * <p>If such an error occurs, no more events resulting from the posted command will be
      * delivered to the consumers.
      */
     @CanIgnoreReturnValue
@@ -140,17 +143,25 @@ public final class CommandRequest extends ClientRequest {
     private ImmutableSet<Subscription> doPost() {
         MultiEventConsumers consumers = builder.build();
         Client client = client();
-        Command command =
-                client.requestOf(user())
-                      .command()
-                      .create(message);
+        Command command = client.requestOf(user())
+                                .command()
+                                .create(message);
         ImmutableSet<Subscription> result =
                 EventsAfterCommand.subscribe(client, command, consumers, streamingErrorHandler);
-
-        //TODO:2020-04-17:alexander.yevsyukov: Check the returned Ack and throw an exception
-        // in case of problems.
-        client().post(command);
+        Ack ack = client.post(command);
+        checkNoError(ack.getStatus());
         return result;
+    }
+
+    private void checkNoError(Status status) {
+        if (status.hasError()) {
+            ClientException exception = new ClientException(status.getError());
+            if (streamingErrorHandler != null) {
+                streamingErrorHandler.accept(exception);
+            } else {
+                throw exception;
+            }
+        }
     }
 
     @VisibleForTesting
