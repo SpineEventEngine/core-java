@@ -18,28 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
-
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.command.ItgStartProject;
-import io.spine.test.integration.rejection.IntegrationRejections;
-
 /**
- * A subscriber for testing of external attribute mismatch check.
+ * Environment for testing external message handler methods.
  */
-@SuppressWarnings("unused") // OK to have unused params in this test env. class
-public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
 
-    @Subscribe
-    void on(@External IntegrationRejections.ItgCannotStartArchivedProject rejection,
-            ItgStartProject command) {
-        // do nothing.
-    }
 
-    @Subscribe
-    void on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
-        // do nothing.
-    }
-}
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given.external;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

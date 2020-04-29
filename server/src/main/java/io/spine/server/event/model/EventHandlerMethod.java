@@ -83,8 +83,7 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
      * <p>And vice versa, if the event handling method is designed for domestic events,
      * it does not accept external events.
      *
-     * @see io.spine.core.Subscribe#external()
-     * @see io.spine.server.event.React#external()
+     * @see io.spine.core.External
      */
     @Override
     protected void checkAttributesMatch(EventEnvelope event) {

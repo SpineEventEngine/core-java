@@ -17,29 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.integration.given;
+package spine.test.model.external;
 
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.command.ItgStartProject;
-import io.spine.test.integration.rejection.IntegrationRejections;
+import "spine/options.proto";
 
-/**
- * A subscriber for testing of external attribute mismatch check.
- */
-@SuppressWarnings("unused") // OK to have unused params in this test env. class
-public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.model.external";
+option java_multiple_files = true;
+option java_outer_classname = "EventsProto";
 
-    @Subscribe
-    void on(@External IntegrationRejections.ItgCannotStartArchivedProject rejection,
-            ItgStartProject command) {
-        // do nothing.
-    }
+message ExtProjectCreated {
+    string id = 1;
+}
 
-    @Subscribe
-    void on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
-        // do nothing.
-    }
+message ExtProjectStarted {
+    string id = 1;
 }

@@ -18,28 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.model.given.external;
 
 import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.command.ItgStartProject;
-import io.spine.test.integration.rejection.IntegrationRejections;
+import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
+import io.spine.test.model.external.ExtProjectCreated;
+import io.spine.test.model.external.ExtProjectStarted;
 
-/**
- * A subscriber for testing of external attribute mismatch check.
- */
-@SuppressWarnings("unused") // OK to have unused params in this test env. class
-public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
+public final class TestReactor extends AbstractEventReactor {
 
-    @Subscribe
-    void on(@External IntegrationRejections.ItgCannotStartArchivedProject rejection,
-            ItgStartProject command) {
-        // do nothing.
+    @React
+    Nothing on(@External ExtProjectCreated event) {
+        return nothing();
     }
 
-    @Subscribe
-    void on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
-        // do nothing.
+    @SuppressWarnings("deprecation") // For testing legacy `external` attribute.
+    @React(external = true)
+    Nothing on(ExtProjectStarted event) {
+        return nothing();
     }
 }

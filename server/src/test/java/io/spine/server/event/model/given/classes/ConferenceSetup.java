@@ -23,6 +23,7 @@ package io.spine.server.event.model.given.classes;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.EventContext;
+import io.spine.core.External;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.event.EventReactor;
@@ -49,8 +50,8 @@ public class ConferenceSetup implements EventReactor {
 
     private static final Any id = Identifier.pack(ConferenceSetup.class.getName());
 
-    @React(external = true) // Just pretend that the event is external.
-    SpeakersInvited invitationPolicy(ConferenceAnnounced event) {
+    @React // Just pretend that the event is external.
+    SpeakersInvited invitationPolicy(@External ConferenceAnnounced event) {
         LocalDate speakerSubmissionDeadline =
                 toJavaTime(event.getDate()).plusWeeks(3);
         return SpeakersInvited

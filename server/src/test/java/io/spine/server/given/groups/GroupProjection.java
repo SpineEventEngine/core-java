@@ -22,6 +22,7 @@ package io.spine.server.given.groups;
 
 import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.given.organizations.Organization;
 import io.spine.server.projection.Projection;
@@ -32,8 +33,8 @@ import static io.spine.server.route.EventRoute.withId;
 
 public final class GroupProjection extends Projection<GroupId, Group, Group.Builder> {
 
-    @Subscribe(external = true) // `Organization` belongs to another Context called `Organizations`.
-    void on(Organization organization, EventContext systemContext) {
+    @Subscribe // `Organization` belongs to another Context called `Organizations`.
+    void on(@External Organization organization, EventContext systemContext) {
         Timestamp updateTime = systemContext.getTimestamp();
         builder().setId(id())
                  .setName(organization.getName() + updateTime)

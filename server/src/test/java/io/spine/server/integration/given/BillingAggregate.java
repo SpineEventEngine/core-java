@@ -20,6 +20,7 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
@@ -29,8 +30,8 @@ import io.spine.server.integration.PhotosUploaded;
 
 public class BillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 
-    @React(external = true)
-    CreditsHeld on(PhotosUploaded event) {
+    @React
+    CreditsHeld on(@External PhotosUploaded event) {
         return CreditsHeld.newBuilder()
                           .setUuid(event.getUuid())
                           .vBuild();

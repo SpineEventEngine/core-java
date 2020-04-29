@@ -20,6 +20,7 @@
 
 package io.spine.model.verify.given;
 
+import io.spine.core.External;
 import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.model.verify.command.RestorePhoto;
@@ -36,8 +37,8 @@ public class InvalidCommander extends ProcessManager<String, EditState, EditStat
         super(id);
     }
 
-    @Command(external = true)
-    UploadPhoto handle(RestorePhoto command) {
+    @Command
+    UploadPhoto handle(@External RestorePhoto command) {
         return UploadPhoto.getDefaultInstance();
     }
 }

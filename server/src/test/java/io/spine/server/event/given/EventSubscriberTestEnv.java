@@ -21,6 +21,7 @@
 package io.spine.server.event.given;
 
 import io.spine.core.EventContext;
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
 import io.spine.server.event.AbstractEventSubscriber;
@@ -58,8 +59,8 @@ public final class EventSubscriberTestEnv {
             // Do nothing. Just expose the method.
         }
 
-        @Subscribe(external = true)
-        void on(TaskAdded message) {
+        @Subscribe
+        void on(@External TaskAdded message) {
             // Do nothing. Just expose the method.
         }
 

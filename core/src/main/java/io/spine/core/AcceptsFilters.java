@@ -18,28 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.core;
 
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.command.ItgStartProject;
-import io.spine.test.integration.rejection.IntegrationRejections;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * A subscriber for testing of external attribute mismatch check.
+ * Marks a handler method annotation which supports filtering events by fields using {@link Where}.
  */
-@SuppressWarnings("unused") // OK to have unused params in this test env. class
-public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
-
-    @Subscribe
-    void on(@External IntegrationRejections.ItgCannotStartArchivedProject rejection,
-            ItgStartProject command) {
-        // do nothing.
-    }
-
-    @Subscribe
-    void on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
-        // do nothing.
-    }
+@Retention(SOURCE)
+@Target(ANNOTATION_TYPE)
+@Documented
+public @interface AcceptsFilters {
 }

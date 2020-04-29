@@ -20,6 +20,7 @@
 
 package io.spine.server.given.groups;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.given.organizations.Organization;
 import io.spine.server.projection.Projection;
@@ -35,8 +36,8 @@ public final class GroupNameProjection
         super(id);
     }
 
-    @Subscribe(external = true)
-    void onUpdate(Organization organization) {
+    @Subscribe
+    void onUpdate(@External Organization organization) {
         builder().setName(organization.getName());
     }
 

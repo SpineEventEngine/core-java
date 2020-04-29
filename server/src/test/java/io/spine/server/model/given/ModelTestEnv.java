@@ -20,6 +20,7 @@
 
 package io.spine.server.model.given;
 
+import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.AbstractCommandHandler;
@@ -106,8 +107,8 @@ public class ModelTestEnv {
             super(id);
         }
 
-        @Command(external = true)
-        RefStartProject handle(RefCreateProject cmd) {
+        @Command
+        RefStartProject handle(@External RefCreateProject cmd) {
             return RefStartProject.getDefaultInstance();
         }
     }

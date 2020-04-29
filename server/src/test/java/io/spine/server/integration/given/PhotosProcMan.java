@@ -20,6 +20,7 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.core.External;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
 import io.spine.server.integration.CreditsHeld;
@@ -39,8 +40,8 @@ public class PhotosProcMan extends ProcessManager<String, PhotosPm, PhotosPm.Bui
                 .vBuild();
     }
 
-    @React(external = true)
-    PhotosProcessed on(CreditsHeld event) {
+    @React
+    PhotosProcessed on(@External CreditsHeld event) {
         return PhotosProcessed
                 .newBuilder()
                 .setUuid(event.getUuid())

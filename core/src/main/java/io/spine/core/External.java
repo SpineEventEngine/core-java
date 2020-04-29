@@ -18,28 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.core;
 
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.command.ItgStartProject;
-import io.spine.test.integration.rejection.IntegrationRejections;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * A subscriber for testing of external attribute mismatch check.
+ * Marks a handler method parameter to be of an external origin.
+ *
+ * <p>External messages are messages originated in a different Bounded Context.
+ *
+ * <p>Events (including Rejections) and entity states may be external.
+ *
+ * <p>Annotate the first parameter of the handler method with {@code @External} to make the handler
+ * accept external messages. By default, any message handler accepts domestic messages.
+ *
+ * @see AcceptsExternal
  */
-@SuppressWarnings("unused") // OK to have unused params in this test env. class
-public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
-
-    @Subscribe
-    void on(@External IntegrationRejections.ItgCannotStartArchivedProject rejection,
-            ItgStartProject command) {
-        // do nothing.
-    }
-
-    @Subscribe
-    void on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
-        // do nothing.
-    }
+@Retention(RUNTIME)
+@Target(PARAMETER)
+@Documented
+public @interface External {
 }

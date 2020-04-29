@@ -23,6 +23,7 @@ package io.spine.server.procman.given.pm;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.core.External;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
@@ -244,13 +245,13 @@ public class TestProcessManager
      * Reactions (including commanders) on external events
      **********************************************/
 
-    @Command(external = true)
-    PmCreateProject on(PmQuizStarted event) {
+    @Command
+    PmCreateProject on(@External PmQuizStarted event) {
         return messageOfType(PmCreateProject.class);
     }
 
-    @React(external = true)
-    Nothing on(PmQuestionAnswered event) {
+    @React
+    Nothing on(@External PmQuestionAnswered event) {
         return nothing();
     }
 

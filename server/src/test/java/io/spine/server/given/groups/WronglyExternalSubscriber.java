@@ -20,6 +20,7 @@
 
 package io.spine.server.given.groups;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 
@@ -27,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class WronglyExternalSubscriber extends AbstractEventSubscriber {
 
-    @Subscribe(external = true) // <-- Error here. Should be domestic.
-    void on(Group group) {
+    @Subscribe
+    void on(@External Group group) { // <- Error here. Should be domestic.
         fail(WronglyExternalSubscriber.class.getSimpleName() +
                      " should not be able to receive domestic updates.");
     }
