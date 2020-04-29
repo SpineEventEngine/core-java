@@ -44,7 +44,7 @@ final class EventTap implements Listener<EventEnvelope> {
     @Override
     public void accept(EventEnvelope event) {
         TypeUrl typeUrl = event.typeUrl();
-        if (subscriptionRegistry.hasType(typeUrl)) {
+        if (!event.isExternal() && subscriptionRegistry.hasType(typeUrl)) {
             subscriptionRegistry.byType(typeUrl)
                                 .stream()
                                 .filter(SubscriptionRecord::isActive)
