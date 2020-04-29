@@ -73,6 +73,21 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
     }
 
     /**
+     * Returns the iterator over identifiers of the records which match the passed query.
+     *
+     * <p>Unless the query specifies otherwise, only non-archived and non-deleted entity records
+     * are queried.
+     *
+     * @throws IllegalStateException
+     *         if the storage is already closed
+     */
+    @Override
+    public Iterator<I> index(RecordQuery<I> query) {
+        RecordQuery<I> onlyActive = query.append(findActiveRecordsQuery.getParameters());
+        return super.index(onlyActive);
+    }
+
+    /**
      * Reads all non-archived and non-deleted entity records according
      * to the response format specified.
      *
@@ -95,6 +110,16 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
     @Override
     public Iterator<EntityRecord> readAll(RecordQuery<I> query, ResponseFormat format) {
         return super.readAll(query, format);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose as a part of the public API.
+     */
+    @Override
+    public Iterator<EntityRecord> readAll(RecordQuery<I> query) {
+        return super.readAll(query);
     }
 
     /**
