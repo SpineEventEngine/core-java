@@ -62,19 +62,19 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
 
     @Override
     public Subscription add(Topic topic) {
-        SubscriptionId subscriptionId = Subscriptions.generateId();
-        Subscription subscription = Subscription
-                .newBuilder()
-                .setId(subscriptionId)
-                .setTopic(topic)
-                .build();
+        Subscription subscription = Subscriptions.from(topic);
+        add(subscription);
+        return subscription;
+    }
+
+    @Override
+    public void add(Subscription subscription) {
         SubscriptionRecord record = SubscriptionRecord.of(subscription);
         TypeUrl type = record.targetType();
         lockAndRun(() -> {
             typeToRecord.put(type, record);
             subscriptionToAttrs.put(subscription, record);
         });
-        return subscription;
     }
 
     @Override
@@ -84,14 +84,14 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
                 return;
             }
             SubscriptionRecord record = subscriptionToAttrs.get(subscription);
-            typeToRecord.get(record.targetType()).remove(record);
+            typeToRecord.remove(record.targetType(), record);
             subscriptionToAttrs.remove(subscription);
         });
     }
 
     @Override
     public Set<SubscriptionRecord> byType(TypeUrl type) {
-        return lockAndGet(() -> ImmutableSet.copyOf(typeToRecord.get(type)));
+        return ImmutableSet.copyOf(lockAndGet(() -> typeToRecord.get(type)));
     }
 
     @Override

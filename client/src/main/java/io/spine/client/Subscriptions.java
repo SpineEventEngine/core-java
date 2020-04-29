@@ -107,6 +107,18 @@ public final class Subscriptions {
                              .setValue(value)
                              .build();
     }
+    
+    public static Subscription from(Topic topic) {
+        checkNotNull(topic);
+
+        SubscriptionId id = generateId();
+        Subscription subscription = Subscription
+                .newBuilder()
+                .setId(id)
+                .setTopic(topic)
+                .vBuild();
+        return subscription;
+    }
 
     /**
      * Obtains a short printable form of subscription.

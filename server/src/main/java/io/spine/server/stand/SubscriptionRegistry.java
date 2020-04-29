@@ -56,6 +56,8 @@ interface SubscriptionRegistry {
      */
     Subscription add(Topic topic);
 
+    void add(Subscription subscription);
+
     /**
      * Remove the subscription from this registry.
      *

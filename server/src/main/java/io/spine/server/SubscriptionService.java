@@ -20,13 +20,14 @@
 package io.spine.server;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
+import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
@@ -87,15 +88,18 @@ public final class SubscriptionService
             Stand stand = foundContext.get().stand();
             stand.subscribe(topic, responseObserver);
         } else {
-            ImmutableCollection<BoundedContext> contexts = typeToContextMap.values();
+            Set<BoundedContext> contexts = ImmutableSet.copyOf(typeToContextMap.values());
             _warn().log("Unable to find a Bounded Context for type `%s`." +
                                 " Creating a subscription in contexts: %s.",
                         topic.getTarget().type(),
                         LIST_JOINER.join(contexts));
+            Subscription subscription = Subscriptions.from(topic);
             for (BoundedContext context : contexts) {
                 Stand stand = context.stand();
-                stand.subscribe(topic, responseObserver);
+                stand.subscribe(subscription);
             }
+            responseObserver.onNext(subscription);
+            responseObserver.onCompleted();
         }
     }
 

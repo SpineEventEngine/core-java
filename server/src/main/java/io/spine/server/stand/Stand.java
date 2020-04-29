@@ -197,6 +197,21 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
+    public void subscribe(Subscription subscription) throws InvalidRequestException {
+        Topic topic = subscription.getTopic();
+        topicValidator.validate(topic);
+
+        TenantId tenantId = topic.getContext()
+                                 .getTenantId();
+        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                subscriptionRegistry.add(subscription);
+            }
+        };
+        op.execute();
+    }
+
     /**
      * Activates the subscription created via {@link #subscribe(Topic, StreamObserver)
      * subscribe()} method.
