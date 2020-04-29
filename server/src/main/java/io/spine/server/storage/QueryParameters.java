@@ -47,7 +47,7 @@ import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 @SPI // Available to SPI users providing own `Storage` implementations.
 public final class QueryParameters implements Iterable<CompositeQueryParameter> {
 
-    public static final String FIELD_PARAMETERS = "parameters";
+    static final String FIELD_PARAMETERS = "parameters";
 
     private final ImmutableList<CompositeQueryParameter> parameters;
 
