@@ -152,6 +152,7 @@ public final class RecordQueries {
     public static <I, V> RecordQuery<I> byColumn(RecordSpec<I, ?, ?> recordSpec,
                                                  EntityColumn column,
                                                  V value) {
+        checkNotNull(recordSpec);
         checkNotNull(column);
         checkNotNull(value);
         Filter eq = Filters.eq(column, value);

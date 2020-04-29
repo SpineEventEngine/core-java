@@ -26,6 +26,7 @@ import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
+import io.spine.base.EntityColumn;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
@@ -74,6 +75,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                                                                 .build())
               .setDefault(CustomColumn.class, sampleColumn())
               .setDefault(RecordSpec.class, new MessageRecordSpec<>(Any.class, someId()))
+              .setDefault(EntityColumn.class, new EntityColumn("some_column"))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
