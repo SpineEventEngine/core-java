@@ -34,11 +34,11 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 
-@DisplayName("`External` attribute can be declared")
+@DisplayName("External method handler can be declared")
 class ExternalAttributeTest {
 
     @Nested
-    @DisplayName("for `@Subscribe` methods")
+    @DisplayName("with `@Subscribe`")
     class Subscribe extends Suite {
 
         Subscribe() {
@@ -47,7 +47,7 @@ class ExternalAttributeTest {
     }
 
     @Nested
-    @DisplayName("for `@React` methods")
+    @DisplayName("with `@React`")
     class React extends Suite {
 
         React() {
@@ -56,7 +56,7 @@ class ExternalAttributeTest {
     }
 
     @Nested
-    @DisplayName("for `@Command` methods")
+    @DisplayName("with `@Command`")
     class Command extends Suite {
 
         Command() {
