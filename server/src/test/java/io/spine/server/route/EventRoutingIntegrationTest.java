@@ -21,10 +21,9 @@
 package io.spine.server.route;
 
 import io.spine.core.UserId;
-import io.spine.server.DefaultRepository;
 import io.spine.server.route.given.user.SessionProjection;
 import io.spine.server.route.given.user.SessionRepository;
-import io.spine.server.route.given.user.UserAggregate;
+import io.spine.server.route.given.user.UserRepository;
 import io.spine.server.route.given.user.event.RUserSignedIn;
 import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
@@ -64,7 +63,7 @@ class EventRoutingIntegrationTest {
                 .build();
 
         BlackBoxBoundedContext.singleTenant()
-                              .with(DefaultRepository.of(UserAggregate.class))
+                              .with(new UserRepository())
                               .with(new SessionRepository())
                               .receivesEvent(event)
                               .assertEntity(SessionProjection.class, sessionId)

@@ -23,18 +23,19 @@ package io.spine.server.route.given.user;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.UserId;
+import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.given.user.event.RUserConsentRequested;
 import io.spine.server.route.given.user.event.RUserSignedIn;
+import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.RecordQuery;
 import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
 
 import java.util.Iterator;
 import java.util.Set;
-
-import static com.google.common.collect.Streams.stream;
-import static java.util.stream.Collectors.toSet;
 
 public class SessionRepository
         extends ProjectionRepository<RSessionId, SessionProjection, RSession> {
@@ -50,13 +51,11 @@ public class SessionRepository
     }
 
     private Set<RSessionId> findByUserId(UserId id) {
-        Iterator<SessionProjection> iterator =
-                iterator(projection -> projection.state()
-                                                 .getUserId()
-                                                 .equals(id));
-        Set<RSessionId> ids = stream(iterator)
-                .map(SessionProjection::id)
-                .collect(toSet());
-        return ids;
+        EntityRecordStorage<RSessionId> storage = recordStorage();
+        EntityRecordSpec<RSessionId> spec = storage.recordSpec();
+        RecordQuery<RSessionId> query = RecordQueries.byColumn(spec, RSession.Column.userId(), id);
+        Iterator<RSessionId> identifiers = storage.index(query);
+        ImmutableSet<RSessionId> result = ImmutableSet.copyOf(identifiers);
+        return result;
     }
 }

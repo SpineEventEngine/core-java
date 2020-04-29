@@ -17,36 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.route.user;
+package io.spine.server.route.given.user;
 
-import "spine/options.proto";
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.UserId;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.route.EventRouting;
+import io.spine.server.route.given.user.event.RUserConsentRequested;
+import io.spine.server.route.given.user.event.RUserSignedIn;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.event";
-option java_multiple_files = true;
+public final class UserRepository extends AggregateRepository<UserId, UserAggregate> {
 
-import "spine/core/user_id.proto";
-
-message RUser {
-    option (entity).kind = AGGREGATE;
-
-    core.UserId id = 1;
-
-    bool user_consent_requested = 2;
-}
-
-message RSessionId {
-    string uuid = 1;
-}
-
-message RSession {
-    option (entity).kind = PROJECTION;
-
-    RSessionId id = 1;
-
-    core.UserId user_id = 2 [(required) = true, (column) = true];
-
-    bool user_consent_requested = 3;
+    @Override
+    protected void setupEventRouting(EventRouting<UserId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(RUserSignedIn.class, (e, ctx) -> ImmutableSet.of(e.getUserId()));
+        routing.route(RUserConsentRequested.class, (e, ctx) -> ImmutableSet.of(e.getUserId()));
+    }
 }

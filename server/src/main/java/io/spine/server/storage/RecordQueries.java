@@ -25,10 +25,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityColumn;
 import io.spine.base.FieldPath;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
+import io.spine.client.Filters;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.storage.ColumnName;
 
@@ -129,6 +131,32 @@ public final class RecordQueries {
         checkNotNull(column);
         checkNotNull(value);
         QueryParameters queryParams = QueryParameters.eq(column, value);
+        return of(queryParams);
+    }
+
+    /**
+     * Creates a new {@code RecordQuery} targeting the records which specific column matches the
+     * passed column value.
+     *
+     * @param recordSpec
+     *         the specification of the storage record
+     * @param column
+     *         the column generated for the entity state in Protobuf
+     * @param value
+     *         the expected value to which the actual column value of the record should match
+     * @param <I>
+     *         the type of the record identifiers
+     * @param <V>
+     *         the type of the values stored in the column
+     */
+    public static <I, V> RecordQuery<I> byColumn(RecordSpec<I, ?, ?> recordSpec,
+                                                 EntityColumn column,
+                                                 V value) {
+        checkNotNull(column);
+        checkNotNull(value);
+        Filter eq = Filters.eq(column, value);
+        Column match = findMatchingColumn(eq, recordSpec);
+        QueryParameters queryParams = QueryParameters.eq(match, value);
         return of(queryParams);
     }
 
