@@ -20,11 +20,8 @@
 
 package io.spine.test.client;
 
-import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.test.client.command.LogInUser;
-import io.spine.testing.core.given.GivenUserId;
 
 /**
  * Configures Bounded Context for the purpose of {@link io.spine.client.ClientTest}.
@@ -32,13 +29,6 @@ import io.spine.testing.core.given.GivenUserId;
 public final class ClientTestContext {
 
     static final String NAME = "ClientTest";
-
-    /**
-     * The ID of the user which causes error when posting {@link LogInUser} command.
-     *
-     * @see #rejectingFilter()
-     */
-    public static final UserId INVALID_USER = GivenUserId.of("invalid-user");
 
     /** Prevents instantiation of this configuration class. */
     private ClientTestContext() {
