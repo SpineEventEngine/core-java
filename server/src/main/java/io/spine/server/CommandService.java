@@ -86,6 +86,9 @@ public final class CommandService
         responseObserver.onCompleted();
     }
 
+    /**
+     * The builder for a {@code CommandService}.
+     */
     public static class Builder {
 
         private final Set<BoundedContext> contexts = Sets.newHashSet();
