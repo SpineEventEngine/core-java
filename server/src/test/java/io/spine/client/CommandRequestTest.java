@@ -29,6 +29,7 @@ import io.spine.core.Command;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.command.LogInUser;
+import io.spine.test.client.command.UnsupportedCommand;
 import io.spine.test.client.event.UserAccountCreated;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.rejection.Rejections.UserAlreadyLoggedIn;
@@ -185,13 +186,12 @@ class CommandRequestTest extends AbstractClientTest {
                 returnedError = error;
             };
 
-            LogInUser commandMessage = LogInUser
-                    .newBuilder()
-                    .setUser(ClientTestContext.INVALID_USER)
-                    .vBuild();
             CommandRequest request =
                     client().asGuest()
-                            .command(commandMessage)
+                            .command(UnsupportedCommand
+                                             .newBuilder()
+                                             .setUser(GivenUserId.generated())
+                                             .build())
                             .onPostingError(handler);
             request.post();
 
