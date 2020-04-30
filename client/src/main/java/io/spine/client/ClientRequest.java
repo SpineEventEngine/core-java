@@ -61,6 +61,7 @@ public class ClientRequest {
      * Creates a builder for customizing command request.
      */
     public CommandRequest command(CommandMessage c) {
+        checkNotNull(c);
         return new CommandRequest(this, c);
     }
 

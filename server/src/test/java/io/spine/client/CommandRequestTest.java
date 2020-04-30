@@ -21,8 +21,11 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.base.Error;
 import io.spine.base.EventMessage;
+import io.spine.core.Command;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.command.LogInUser;
@@ -139,7 +142,8 @@ class CommandRequestTest extends AbstractClientTest {
         @DisplayName("invoking the handler when a consumer fails")
         void invocation() {
             ConsumerErrorHandler<EventMessage> handler = (c, th) -> {
-                handlerInvoked = true; passedThrowable = th;
+                handlerInvoked = true;
+                passedThrowable = th;
             };
             RuntimeException exception = new RuntimeException("Consumer-generated error.");
 
@@ -158,10 +162,43 @@ class CommandRequestTest extends AbstractClientTest {
     @DisplayName("Allow setting custom posting error handler")
     class CustomPostingErrorHandler {
 
+        private @Nullable Message postedMessage;
+        private @Nullable Error returnedError;
+
+        @BeforeEach
+        void setup() {
+            postedMessage = null;
+            returnedError = null;
+        }
+
         @Test
         @DisplayName("rejecting `null`")
         void rejectingNull() {
             assertThrows(NullPointerException.class, () -> commandRequest.onPostingError(null));
+        }
+
+        @Test
+        @DisplayName("invoking handler when an invalid command posted")
+        void invocation() {
+            PostingErrorHandler handler = (message, error) -> {
+                postedMessage = message;
+                returnedError = error;
+            };
+
+            LogInUser commandMessage = LogInUser
+                    .newBuilder()
+                    .setUser(ClientTestContext.INVALID_USER)
+                    .vBuild();
+            CommandRequest request =
+                    client().asGuest()
+                            .command(commandMessage)
+                            .onPostingError(handler);
+            request.post();
+
+            assertThat(returnedError)
+                    .isNotNull();
+            assertThat(postedMessage)
+                    .isInstanceOf(Command.class);
         }
     }
 }
