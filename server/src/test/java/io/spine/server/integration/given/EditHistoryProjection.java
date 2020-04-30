@@ -20,6 +20,7 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.integration.DocumentId;
 import io.spine.server.integration.Edit;
@@ -40,8 +41,8 @@ public class EditHistoryProjection
                 .addEdit(event.getEdit());
     }
 
-    @Subscribe(external = true)
-    void on(UserDeleted event) {
+    @Subscribe
+    void on(@External UserDeleted event) {
         List<Edit> list = new ArrayList<>(builder().getEditList());
         list.removeIf(edit -> edit.getEditor().equals(event.getUser()));
         builder()

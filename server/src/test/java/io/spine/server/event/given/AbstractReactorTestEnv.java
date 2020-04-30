@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.core.External;
 import io.spine.protobuf.Durations2;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.CustomerNotified;
@@ -36,7 +37,6 @@ import io.spine.server.event.OrderServed;
 import io.spine.server.event.OrderServedLate;
 import io.spine.server.event.React;
 import io.spine.server.tuple.Pair;
-import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.Order;
 import io.spine.time.InstantConverter;
 
@@ -118,8 +118,8 @@ public class AbstractReactorTestEnv {
         /** Total USDs donated by this donor. */
         private double totalDonated = 0.0d;
 
-        @React(external = true)
-        DonationMade donateToCharity(OrderPaidFor orderPaidFor) {
+        @React
+        DonationMade donateToCharity(@External OrderPaidFor orderPaidFor) {
             Order order = orderPaidFor.getOrder();
             double orderPrice = order.getPriceInUsd();
             double donationAmount = orderPrice * DONATION_PERCENTAGE;
@@ -242,9 +242,6 @@ public class AbstractReactorTestEnv {
 
     /**
      * Obtains an event that signifies that some order is ready to be served.
-     *
-     * <p>An exception thrown by this method should be picked up by
-     * {@linkplain AbstractEventReactor#onError(EventEnvelope, RuntimeException)}.
      */
     public static OrderReadyToBeServed someOrderReady() {
         OrderReadyToBeServed result = OrderReadyToBeServed

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package spine.test.entity;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.user";
+option java_outer_classname = "UserProto";
+option java_multiple_files = true;
+
+import "spine/core/user_id.proto";
+import "spine/time/time.proto";
+
+message User {
+    option (.entity).kind = AGGREGATE;
+
+    core.UserId id = 1;
+
+    time.LocalDate date_of_birth = 2 [(set_once) = true];
+}

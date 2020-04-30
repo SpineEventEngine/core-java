@@ -20,10 +20,13 @@
 
 package io.spine.server.command;
 
-import java.lang.annotation.ElementType;
+import io.spine.core.AcceptsExternal;
+
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks a commanding method.
@@ -172,7 +175,7 @@ import java.lang.annotation.Target;
  *
  * {@literal @}Command
  *  CreateProject on(Rejections.CannotCreateProject rejection) {
- *  {@literal // Change the parameters and try again.}
+ *      // Change the parameters and try again.
  *  }
  * </pre>
  *
@@ -184,6 +187,10 @@ import java.lang.annotation.Target;
  * </pre>
  *
  * </ul>
+ *
+ * <p>It is possible to receive external Events and Rejections. For that, mark the message parameter
+ * with the {@link io.spine.core.External @External} annotation. External Commands do not travel
+ * this way.
  *
  * <h2>Returning Values</h2>
  *
@@ -245,8 +252,9 @@ import java.lang.annotation.Target;
  * @see io.spine.server.tuple.Either Returning One of Command Messages
  * @see io.spine.server.command.Assign Handling Commands
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target(METHOD)
+@AcceptsExternal
 public @interface Command {
 
     /**
@@ -258,6 +266,10 @@ public @interface Command {
      *
      * <p>If applied to a command receiving method, the Model
      * {@linkplain io.spine.server.model.ExternalCommandReceiverMethodError error} is produced.
+     *
+     * @deprecated please use {@link io.spine.core.External @External} annotation for the first
+     *         method parameter.
      */
+    @Deprecated
     boolean external() default false;
 }

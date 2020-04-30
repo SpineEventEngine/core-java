@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine:spine-client:1.5.9`
+# Dependencies of `io.spine:spine-client:1.5.10`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -24,13 +24,13 @@
 1. **Group:** com.google.errorprone **Name:** error_prone_type_annotations **Version:** 2.3.4
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -82,6 +82,11 @@
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.19.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
+     * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
+     * **POM License: GNU General Public License, version 2 (GPL2), with the classpath exception** - [http://www.gnu.org/software/classpath/license.html](http://www.gnu.org/software/classpath/license.html)
+     * **POM License: The MIT License** - [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT)
 
 1. **Group:** org.checkerframework **Name:** checker-qual **Version:** 3.3.0
      * **Manifest License:** MIT (Not packaged)
@@ -149,13 +154,13 @@
      * **POM Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
      * **POM License: GNU General Public License, version 2, with the Classpath Exception** - [http://openjdk.java.net/legal/gplv2+ce.html](http://openjdk.java.net/legal/gplv2+ce.html)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -400,12 +405,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Apr 28 16:44:10 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-core:1.5.9`
+# Dependencies of `io.spine:spine-core:1.5.10`
 
 ## Runtime
 1. **Group:** com.google.code.findbugs **Name:** jsr305 **Version:** 3.0.2
@@ -421,13 +426,13 @@ This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-Lic
 1. **Group:** com.google.errorprone **Name:** error_prone_type_annotations **Version:** 2.3.4
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -451,6 +456,11 @@ This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-Lic
 1. **Group:** com.google.protobuf **Name:** protobuf-java-util **Version:** 3.11.4
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
+
+1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
+     * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
+     * **POM License: GNU General Public License, version 2 (GPL2), with the classpath exception** - [http://www.gnu.org/software/classpath/license.html](http://www.gnu.org/software/classpath/license.html)
+     * **POM License: The MIT License** - [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT)
 
 1. **Group:** org.checkerframework **Name:** checker-qual **Version:** 3.3.0
      * **Manifest License:** MIT (Not packaged)
@@ -514,13 +524,13 @@ This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
      * **POM License: GNU General Public License, version 2, with the Classpath Exception** - [http://openjdk.java.net/legal/gplv2+ce.html](http://openjdk.java.net/legal/gplv2+ce.html)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -765,12 +775,12 @@ This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Apr 28 16:44:11 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-model-assembler:1.5.9`
+# Dependencies of `io.spine.tools:spine-model-assembler:1.5.10`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -794,13 +804,13 @@ This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-Lic
 1. **Group:** com.google.errorprone **Name:** error_prone_type_annotations **Version:** 2.3.4
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -852,6 +862,11 @@ This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-Lic
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.19.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
+     * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
+     * **POM License: GNU General Public License, version 2 (GPL2), with the classpath exception** - [http://www.gnu.org/software/classpath/license.html](http://www.gnu.org/software/classpath/license.html)
+     * **POM License: The MIT License** - [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT)
 
 1. **Group:** org.checkerframework **Name:** checker-qual **Version:** 3.3.0
      * **Manifest License:** MIT (Not packaged)
@@ -919,13 +934,13 @@ This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
      * **POM License: GNU General Public License, version 2, with the Classpath Exception** - [http://openjdk.java.net/legal/gplv2+ce.html](http://openjdk.java.net/legal/gplv2+ce.html)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -1165,12 +1180,12 @@ This report was generated on **Thu Apr 23 21:08:09 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Apr 28 16:44:11 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-model-verifier:1.5.9`
+# Dependencies of `io.spine.tools:spine-model-verifier:1.5.10`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -1194,13 +1209,13 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
 1. **Group:** com.google.errorprone **Name:** error_prone_type_annotations **Version:** 2.3.4
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.6.2
      * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
@@ -1233,7 +1248,7 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.squareup **Name:** javapoet **Version:** 1.11.1
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.12.1
      * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1273,6 +1288,11 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
+1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
+     * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
+     * **POM License: GNU General Public License, version 2 (GPL2), with the classpath exception** - [http://www.gnu.org/software/classpath/license.html](http://www.gnu.org/software/classpath/license.html)
+     * **POM License: The MIT License** - [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT)
+
 1. **Group:** org.checkerframework **Name:** checker-qual **Version:** 3.3.0
      * **Manifest License:** MIT (Not packaged)
      * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
@@ -1282,11 +1302,11 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
      * **POM License: MIT license** - [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.jboss.forge.roaster **Name:** roaster-api **Version:** 2.21.1.Final
+1. **Group:** org.jboss.forge.roaster **Name:** roaster-api **Version:** 2.21.2.Final
      * **POM License: Eclipse Public License version 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Public Domain** - [http://repository.jboss.org/licenses/cc0-1.0.txt](http://repository.jboss.org/licenses/cc0-1.0.txt)
 
-1. **Group:** org.jboss.forge.roaster **Name:** roaster-jdt **Version:** 2.21.1.Final
+1. **Group:** org.jboss.forge.roaster **Name:** roaster-jdt **Version:** 2.21.2.Final
      * **POM License: Eclipse Public License version 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Public Domain** - [http://repository.jboss.org/licenses/cc0-1.0.txt](http://repository.jboss.org/licenses/cc0-1.0.txt)
 
@@ -1347,13 +1367,13 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
      * **POM License: GNU General Public License, version 2, with the Classpath Exception** - [http://openjdk.java.net/legal/gplv2+ce.html](http://openjdk.java.net/legal/gplv2+ce.html)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.6.2
      * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
@@ -1410,7 +1430,7 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [http://code.google.com/p/java-diff-utils/](http://code.google.com/p/java-diff-utils/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.squareup **Name:** javapoet **Version:** 1.11.1
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.12.1
      * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1532,11 +1552,11 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
 1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jboss.forge.roaster **Name:** roaster-api **Version:** 2.21.1.Final
+1. **Group:** org.jboss.forge.roaster **Name:** roaster-api **Version:** 2.21.2.Final
      * **POM License: Eclipse Public License version 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Public Domain** - [http://repository.jboss.org/licenses/cc0-1.0.txt](http://repository.jboss.org/licenses/cc0-1.0.txt)
 
-1. **Group:** org.jboss.forge.roaster **Name:** roaster-jdt **Version:** 2.21.1.Final
+1. **Group:** org.jboss.forge.roaster **Name:** roaster-jdt **Version:** 2.21.2.Final
      * **POM License: Eclipse Public License version 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Public Domain** - [http://repository.jboss.org/licenses/cc0-1.0.txt](http://repository.jboss.org/licenses/cc0-1.0.txt)
 
@@ -1625,12 +1645,12 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Apr 28 16:44:12 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-server:1.5.9`
+# Dependencies of `io.spine:spine-server:1.5.10`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -1654,13 +1674,13 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
 1. **Group:** com.google.errorprone **Name:** error_prone_type_annotations **Version:** 2.3.4
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -1712,6 +1732,11 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.19.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
+     * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
+     * **POM License: GNU General Public License, version 2 (GPL2), with the classpath exception** - [http://www.gnu.org/software/classpath/license.html](http://www.gnu.org/software/classpath/license.html)
+     * **POM License: The MIT License** - [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT)
 
 1. **Group:** org.checkerframework **Name:** checker-qual **Version:** 3.3.0
      * **Manifest License:** MIT (Not packaged)
@@ -1787,13 +1812,13 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
      * **POM License: GNU General Public License, version 2, with the Classpath Exception** - [http://openjdk.java.net/legal/gplv2+ce.html](http://openjdk.java.net/legal/gplv2+ce.html)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -2042,12 +2067,12 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Apr 28 16:44:13 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-testutil-client:1.5.9`
+# Dependencies of `io.spine:spine-testutil-client:1.5.10`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2074,13 +2099,13 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
 1. **Group:** com.google.errorprone **Name:** error_prone_type_annotations **Version:** 2.3.4
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -2255,13 +2280,13 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
      * **POM License: GNU General Public License, version 2, with the Classpath Exception** - [http://openjdk.java.net/legal/gplv2+ce.html](http://openjdk.java.net/legal/gplv2+ce.html)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -2501,12 +2526,12 @@ This report was generated on **Thu Apr 23 21:08:10 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 23 21:08:12 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Apr 28 16:44:15 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-testutil-core:1.5.9`
+# Dependencies of `io.spine:spine-testutil-core:1.5.10`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2533,13 +2558,13 @@ This report was generated on **Thu Apr 23 21:08:12 EEST 2020** using [Gradle-Lic
 1. **Group:** com.google.errorprone **Name:** error_prone_type_annotations **Version:** 2.3.4
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -2722,13 +2747,13 @@ This report was generated on **Thu Apr 23 21:08:12 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
      * **POM License: GNU General Public License, version 2, with the Classpath Exception** - [http://openjdk.java.net/legal/gplv2+ce.html](http://openjdk.java.net/legal/gplv2+ce.html)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -2968,12 +2993,12 @@ This report was generated on **Thu Apr 23 21:08:12 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 23 21:08:13 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Apr 28 16:44:16 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-testutil-server:1.5.9`
+# Dependencies of `io.spine:spine-testutil-server:1.5.10`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -3000,13 +3025,13 @@ This report was generated on **Thu Apr 23 21:08:13 EEST 2020** using [Gradle-Lic
 1. **Group:** com.google.errorprone **Name:** error_prone_type_annotations **Version:** 2.3.4
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -3181,13 +3206,13 @@ This report was generated on **Thu Apr 23 21:08:13 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
      * **POM License: GNU General Public License, version 2, with the Classpath Exception** - [http://openjdk.java.net/legal/gplv2+ce.html](http://openjdk.java.net/legal/gplv2+ce.html)
 
-1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.4
+1. **Group:** com.google.flogger **Name:** flogger-system-backend **Version:** 0.5.1
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -3471,4 +3496,4 @@ This report was generated on **Thu Apr 23 21:08:13 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 23 21:08:16 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Apr 28 16:44:19 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).

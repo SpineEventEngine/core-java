@@ -20,11 +20,13 @@
 package io.spine.server.model;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.command.Command;
 import io.spine.server.event.React;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -32,9 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A meta-attribute of the {@code Method}, telling whether this method handles the objects,
  * produced outside of the current bounded context.
  *
- * @see Subscribe#external()
- * @see React#external()
- * @see Command#external()
+ * @see External
  */
 @Immutable
 enum ExternalAttribute implements Attribute<Boolean> {
@@ -53,7 +53,7 @@ enum ExternalAttribute implements Attribute<Boolean> {
 
     @Override
     public String parameter() {
-        return "external";
+        return External.class.getSimpleName();
     }
 
     @Override
@@ -70,6 +70,14 @@ enum ExternalAttribute implements Attribute<Boolean> {
      */
     public static ExternalAttribute of(Method method) {
         checkNotNull(method);
+        if (isExternal(method)) {
+            return EXTERNAL;
+        } else {
+            return isLegacyExternal(method);
+        }
+    }
+
+    private static ExternalAttribute isLegacyExternal(Method method) {
         boolean isExternal =
                 isExternalReactor(method)
                         || isExternalSubscriber(method)
@@ -77,20 +85,33 @@ enum ExternalAttribute implements Attribute<Boolean> {
         return isExternal ? EXTERNAL : DOMESTIC;
     }
 
+    private static boolean isExternal(Method method) {
+        Parameter[] params = method.getParameters();
+        if (params.length == 0) {
+            return false;
+        }
+        Parameter firstParam = params[0];
+        boolean hasAnnotation = firstParam.getAnnotation(External.class) != null;
+        return hasAnnotation;
+    }
+
     private static boolean isExternalReactor(Method method) {
         React reactAnnotation = method.getAnnotation(React.class);
+        @SuppressWarnings("deprecation") // To be deleted when `external` is deleted.
         boolean result = (reactAnnotation != null && reactAnnotation.external());
         return result;
     }
 
     private static boolean isExternalSubscriber(Method method) {
         Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
+        @SuppressWarnings("deprecation") // To be deleted when `external` is deleted.
         boolean result = (subscribeAnnotation != null && subscribeAnnotation.external());
         return result;
     }
 
     private static boolean isExternalCommander(Method method) {
         Command commandAnnotation = method.getAnnotation(Command.class);
+        @SuppressWarnings("deprecation") // To be deleted when `external` is deleted.
         boolean result = (commandAnnotation != null && commandAnnotation.external());
         return result;
     }

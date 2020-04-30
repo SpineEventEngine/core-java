@@ -29,6 +29,7 @@ import io.spine.test.client.event.UserAccountCreated;
 import io.spine.test.client.event.UserLoggedIn;
 import io.spine.test.client.rejection.Rejections.UserAlreadyLoggedIn;
 import io.spine.testing.core.given.GivenUserId;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@MuteLogging
 @DisplayName("`CommandRequest` should")
 class CommandRequestTest extends AbstractClientTest {
 

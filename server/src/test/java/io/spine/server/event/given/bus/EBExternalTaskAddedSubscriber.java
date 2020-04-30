@@ -21,6 +21,7 @@
 package io.spine.server.event.given.bus;
 
 import io.spine.core.EventContext;
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.json.Json;
 import io.spine.server.event.AbstractEventSubscriber;
@@ -36,8 +37,8 @@ public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
     public static EBTaskAdded taskAddedEvent = null;
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
-    @Subscribe(external = true)
-    void on(EBTaskAdded message, EventContext context) {
+    @Subscribe
+    void on(@External EBTaskAdded message, EventContext context) {
         taskAddedEvent = message;
         if (!context.getExternal()) {
             fail(format(

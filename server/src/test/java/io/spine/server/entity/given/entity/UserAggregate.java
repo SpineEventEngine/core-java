@@ -18,40 +18,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.entity.given.entity;
 
-import io.spine.base.EventMessage;
-import io.spine.core.External;
+import io.spine.core.UserId;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.event.React;
-import io.spine.server.test.shared.Int32Aggregate;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.test.user.ChooseDayOfBirth;
+import io.spine.test.user.DayOfBirthChosen;
+import io.spine.test.user.SignUpUser;
+import io.spine.test.user.User;
+import io.spine.test.user.UserSignedUp;
 
-import java.util.Collections;
-import java.util.List;
+public final class UserAggregate extends Aggregate<UserId, User, User.Builder> {
 
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectCountAggregate
-        extends Aggregate<ProjectId, Int32Aggregate, Int32Aggregate.Builder> {
-
-    private static ItgProjectCreated externalEvent = null;
-
-    protected ProjectCountAggregate(ProjectId id) {
-        super(id);
+    @Assign
+    UserSignedUp handle(SignUpUser command) {
+        return UserSignedUp
+                .newBuilder()
+                .setId(command.getId())
+                .vBuild();
     }
 
-    @React
-    List<EventMessage> on(@External ItgProjectCreated event) {
-        externalEvent = event;
-        return Collections.emptyList();
+    @Assign
+    DayOfBirthChosen handle(ChooseDayOfBirth command) {
+        return DayOfBirthChosen
+                .newBuilder()
+                .setId(command.getId())
+                .setDayOfBirth(command.getDayOfBirth())
+                .vBuild();
     }
 
-    public static ItgProjectCreated externalEvent() {
-        return externalEvent;
+    @Apply
+    private void on(UserSignedUp event) {
+        builder().setId(event.getId());
     }
 
-    public static void clear() {
-        externalEvent = null;
+    @Apply
+    private void on(DayOfBirthChosen event) {
+        builder().setDateOfBirth(event.getDayOfBirth());
     }
 }

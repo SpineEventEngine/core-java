@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate.given.klasse;
 
+import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
@@ -100,13 +101,13 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
      * External event reactions
      ****************************/
 
-    @React(external = true)
-    Nothing on(EmissionTestStarted event) {
+    @React
+    Nothing on(@External EmissionTestStarted event) {
         return nothing();
     }
 
-    @React(external = true)
-    Nothing on(EmissionTestStopped event) {
+    @React
+    Nothing on(@External EmissionTestStopped event) {
         return nothing();
     }
 
@@ -133,8 +134,8 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
      * External rejection reactions
      *************************************/
 
-    @React(external = true)
-    Nothing on(Rejections.CannotStartEmissionTest rejection) {
+    @React
+    Nothing on(@External Rejections.CannotStartEmissionTest rejection) {
         return nothing();
     }
 

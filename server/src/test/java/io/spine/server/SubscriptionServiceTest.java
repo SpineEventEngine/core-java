@@ -239,6 +239,7 @@ class SubscriptionServiceTest {
             checkSubscribesTo(AggProjectCreated.class);
         }
 
+        @MuteLogging
         @Test
         @DisplayName("events from abstract reactors")
         void eventsFromReactors() {

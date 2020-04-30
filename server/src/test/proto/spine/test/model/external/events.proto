@@ -19,60 +19,19 @@
  */
 syntax = "proto3";
 
-package spine.test.projection;
+package spine.test.model.external;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.projection";
+option java_package = "io.spine.test.model.external";
 option java_multiple_files = true;
+option java_outer_classname = "EventsProto";
 
-message ProjectId {
+message ExtProjectCreated {
     string id = 1;
 }
 
-message Project {
-
-    // Keep the message generic. It is used both as an aggregate and a projection state.
-    option (entity).kind = ENTITY;
-    option (entity).visibility = FULL;
-
-    ProjectId id = 1 [(required) = false];
-
-    string name = 2 [(column) = true];
-
-    repeated Task task = 3;
-
-    enum Status {
-        UNDEFINED = 0;
-        CREATED = 1;
-        STARTED = 2;
-        DONE = 3;
-        CANCELLED = 4;
-    }
-
-    Status status = 4;
-
-    string id_string = 5 [(column) = true];
-}
-
-message TaskId {
-    int32 id = 1;
-}
-
-message Task {
-    TaskId task_id = 1;
-    string title = 2;
-    string description = 3;
-}
-
-// A projection of all `Task` names for a certain `Project`.
-message ProjectTaskNames {
-    option (entity).kind = PROJECTION;
-
-    ProjectId project_id = 1 [(required) = false];
-
-    string project_name = 2;
-
-    repeated string task_name = 3;
+message ExtProjectStarted {
+    string id = 1;
 }

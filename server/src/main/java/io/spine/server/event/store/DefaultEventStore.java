@@ -22,7 +22,6 @@ package io.spine.server.event.store;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
-import com.google.common.flogger.LoggerConfig;
 import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.OrderBy;
@@ -42,7 +41,6 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -224,13 +222,7 @@ public final class DefaultEventStore
     final class Log {
 
         private final FluentLogger.Api debug = logger().atFine();
-        private final boolean debugEnabled = debugEnabled();
-
-        private boolean debugEnabled() {
-            Level level = LoggerConfig.getConfig(getClass())
-                                      .getLevel();
-            return level != null && level.intValue() <= Level.FINE.intValue();
-        }
+        private final boolean debugEnabled = debug.isEnabled();
 
         private void stored(Event event) {
             debug.log("Stored: %s.", lazy(() -> TextFormat.shortDebugString(event)));
