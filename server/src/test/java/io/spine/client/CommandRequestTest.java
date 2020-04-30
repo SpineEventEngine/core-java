@@ -21,11 +21,13 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.command.LogInUser;
@@ -186,12 +188,13 @@ class CommandRequestTest extends AbstractClientTest {
                 returnedError = error;
             };
 
+            UnsupportedCommand commandMessage = UnsupportedCommand
+                    .newBuilder()
+                    .setUser(GivenUserId.generated())
+                    .build();
             CommandRequest request =
                     client().asGuest()
-                            .command(UnsupportedCommand
-                                             .newBuilder()
-                                             .setUser(GivenUserId.generated())
-                                             .build())
+                            .command(commandMessage)
                             .onPostingError(handler);
             request.post();
 
@@ -199,6 +202,13 @@ class CommandRequestTest extends AbstractClientTest {
                     .isNotNull();
             assertThat(postedMessage)
                     .isInstanceOf(Command.class);
+            Command expected = Command
+                    .newBuilder()
+                    .setMessage(AnyPacker.pack(commandMessage))
+                    .build();
+            ProtoTruth.assertThat(postedMessage)
+                      .comparingExpectedFieldsOnly()
+                      .isEqualTo(expected);
         }
     }
 }
