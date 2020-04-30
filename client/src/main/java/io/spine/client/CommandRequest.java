@@ -210,7 +210,10 @@ public final class CommandRequest extends ClientRequest implements Logging {
                     reportErrorWhenPosting(status);
                     return ImmutableSet.of();
                 case REJECTION:
+                    /* This should not happen as a rejection can be raised when the command is
+                       already dispatched. We include this case for the sake of completeness. */
                 case STATUS_NOT_SET:
+                    /* The server sent an ack with invalid status. */
                 default:
                     throw newIllegalStateException(
                             "Cannot handle ack status `%s` when posting the command `%s`.",
