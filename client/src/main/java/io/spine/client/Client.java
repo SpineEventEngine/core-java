@@ -30,7 +30,6 @@ import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.client.grpc.QueryServiceGrpc.QueryServiceBlockingStub;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
@@ -270,8 +269,8 @@ public class Client implements AutoCloseable {
     /**
      * Posts the command to the {@code CommandService}.
      */
-    Ack post(Command c) {
-        return commandService.post(c);
+    void post(Command c) {
+        commandService.post(c);
     }
 
     /**

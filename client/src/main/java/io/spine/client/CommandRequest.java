@@ -25,9 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.Status;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
@@ -148,20 +146,10 @@ public final class CommandRequest extends ClientRequest {
                                 .create(message);
         ImmutableSet<Subscription> result =
                 EventsAfterCommand.subscribe(client, command, consumers, streamingErrorHandler);
-        Ack ack = client.post(command);
-        checkNoError(ack.getStatus());
+        //TODO:2020-04-17:alexander.yevsyukov: Check the returned Ack and throw an exception
+        // in case of problems.
+        client.post(command);
         return result;
-    }
-
-    private void checkNoError(Status status) {
-        if (status.hasError()) {
-            ClientException exception = new ClientException(status.getError());
-            if (streamingErrorHandler != null) {
-                streamingErrorHandler.accept(exception);
-            } else {
-                throw exception;
-            }
-        }
     }
 
     @VisibleForTesting
