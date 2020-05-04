@@ -28,15 +28,20 @@ import io.spine.server.BoundedContextBuilder;
  */
 public final class ClientTestContext {
 
-    static final String NAME = "ClientTest";
+    static final String USERS_NAME = "Test Users";
+    private static final String TASKS_NAME = "Test Tasks";
 
     /** Prevents instantiation of this configuration class. */
     private ClientTestContext() {
     }
 
-    public static BoundedContextBuilder builder() {
-        return BoundedContext.singleTenant(NAME)
+    public static BoundedContextBuilder users() {
+        return BoundedContext.singleTenant(USERS_NAME)
                              .add(LoginProcess.class)
                              .add(new ActiveUsersProjection.Repository());
+    }
+
+    public static BoundedContextBuilder tasks() {
+        return BoundedContext.singleTenant(TASKS_NAME);
     }
 }

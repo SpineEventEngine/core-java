@@ -24,10 +24,10 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
-import io.spine.test.client.command.LogInUser;
-import io.spine.test.client.event.UserAccountCreated;
-import io.spine.test.client.event.UserLoggedIn;
-import io.spine.test.client.rejection.Rejections.UserAlreadyLoggedIn;
+import io.spine.test.client.users.command.LogInUser;
+import io.spine.test.client.users.event.UserAccountCreated;
+import io.spine.test.client.users.event.UserLoggedIn;
+import io.spine.test.client.users.rejection.Rejections.UserAlreadyLoggedIn;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
@@ -63,7 +63,7 @@ class CommandRequestTest extends AbstractClientTest {
 
     @Override
     protected ImmutableList<BoundedContextBuilder> contexts() {
-        return ImmutableList.of(ClientTestContext.builder());
+        return ImmutableList.of(ClientTestContext.users());
     }
 
     @Test

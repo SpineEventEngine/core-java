@@ -25,8 +25,10 @@ import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
-import io.spine.test.client.event.UserLoggedIn;
-import io.spine.test.client.event.UserLoggedOut;
+import io.spine.test.client.users.ActiveUsers;
+import io.spine.test.client.users.ActiveUsersId;
+import io.spine.test.client.users.event.UserLoggedIn;
+import io.spine.test.client.users.event.UserLoggedOut;
 
 import static io.spine.server.route.EventRoute.withId;
 

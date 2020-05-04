@@ -19,17 +19,28 @@
  */
 syntax = "proto3";
 
-package spine.test.client;
+package spine.test.client.users;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.client.rejection";
-option java_outer_classname = "Rejections";
-option java_multiple_files = false;
+option java_package = "io.spine.test.client.users.event";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
+import "spine/test/client/users/user_account.proto";
 
-message UserAlreadyLoggedIn {
+message UserLoggedIn {
     core.UserId user = 1;
+    UserAccount account = 2;
+}
+
+message UserLoggedOut {
+    core.UserId user = 1;
+}
+
+message UserAccountCreated {
+    core.UserId user = 1;
+    UserAccount account = 2;
 }
