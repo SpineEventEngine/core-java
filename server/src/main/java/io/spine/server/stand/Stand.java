@@ -197,6 +197,14 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
+    /**
+     * Registers this inactive subscription is this {@code Stand}.
+     *
+     * <p>The given subscription is shared between different Bounded Contexts.
+     *
+     * @param subscription
+     *         an existing subscription
+     */
     public void subscribe(Subscription subscription) throws InvalidRequestException {
         Topic topic = subscription.getTopic();
         topicValidator.validate(topic);

@@ -56,6 +56,15 @@ interface SubscriptionRegistry {
      */
     Subscription add(Topic topic);
 
+    /**
+     * Registers an existing subscription.
+     *
+     * <p>Some subscriptions may be present in many registries at the same time since Bounded
+     * Contexts may share subscriptions.
+     *
+     * @param subscription
+     *         the existing subscription
+     */
     void add(Subscription subscription);
 
     /**
