@@ -104,7 +104,14 @@ public final class Subscriptions {
                              .setValue(value)
                              .build();
     }
-    
+
+    /**
+     * Creates a new subscription with the given {@link Topic} and a random ID.
+     *
+     * @param topic
+     *         subscription topic
+     * @return new subscription
+     */
     public static Subscription from(Topic topic) {
         checkNotNull(topic);
 
