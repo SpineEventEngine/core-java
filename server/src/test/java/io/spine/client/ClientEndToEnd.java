@@ -24,6 +24,7 @@ import io.grpc.ManagedChannel;
 import io.spine.server.Server;
 import io.spine.test.client.billing.PaymentReceived;
 import io.spine.testing.SlowTest;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +41,7 @@ import static io.spine.test.client.ClientTestContext.users;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SlowTest
-// @MuteLogging // TODO:2020-04-30:dmytro.dashenkov: Re-enable when tests succeed.
+@MuteLogging
 @DisplayName("Real gRPC-based `Client` should")
 class ClientEndToEnd {
 
