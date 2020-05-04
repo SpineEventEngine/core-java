@@ -17,33 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.test.client;
+package spine.test.client.tasks;
 
-import io.spine.client.TaskAggregate;
-import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
+import "spine/options.proto";
 
-/**
- * Configures Bounded Context for the purpose of {@link io.spine.client.ClientTest}.
- */
-public final class ClientTestContext {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.client.tasks";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
 
-    static final String USERS_NAME = "Test Users";
-    private static final String TASKS_NAME = "Test Tasks";
+import "spine/core/user_id.proto";
+import "spine/test/client/tasks/task.proto";
 
-    /** Prevents instantiation of this configuration class. */
-    private ClientTestContext() {
-    }
-
-    public static BoundedContextBuilder users() {
-        return BoundedContext.singleTenant(USERS_NAME)
-                             .add(LoginProcess.class)
-                             .add(new ActiveUsersProjection.Repository());
-    }
-
-    public static BoundedContextBuilder tasks() {
-        return BoundedContext.singleTenant(TASKS_NAME)
-                             .add(TaskAggregate.class);
-    }
+message CreateTask {
+    TaskId id = 1;
+    string name = 2;
+    core.UserId author = 3;
 }

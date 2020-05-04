@@ -24,7 +24,11 @@ import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import io.spine.server.Server;
 import io.spine.test.client.billing.PaymentReceived;
+import io.spine.test.client.tasks.CreateTask;
+import io.spine.test.client.tasks.TaskCreated;
+import io.spine.test.client.tasks.TaskId;
 import io.spine.testing.SlowTest;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -33,13 +37,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.grpc.ManagedChannelBuilder.forAddress;
 import static io.grpc.Status.CANCELLED;
 import static io.spine.client.Client.usingChannel;
 import static io.spine.server.Server.atPort;
 import static io.spine.test.client.ClientTestContext.tasks;
 import static io.spine.test.client.ClientTestContext.users;
+import static java.time.Duration.ofSeconds;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -94,5 +102,24 @@ class ClientEndToEnd {
                   // Do nothing.
               })
               .post();
+    }
+
+    @Test
+    @DisplayName("subscribe to Event which is not declared ")
+    void subscribeToEvent() {
+        AtomicBoolean fired = new AtomicBoolean(false);
+        CreateTask task = CreateTask
+                .newBuilder()
+                .setId(TaskId.generate())
+                .setName("My task")
+                .setAuthor(GivenUserId.generated())
+                .vBuild();
+        client.asGuest()
+              .command(task)
+              .observe(TaskCreated.class, event -> fired.set(true))
+              .post();
+        sleepUninterruptibly(ofSeconds(1));
+        assertThat(fired.get())
+                .isTrue();
     }
 }
