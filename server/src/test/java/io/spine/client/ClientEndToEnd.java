@@ -21,6 +21,7 @@
 package io.spine.client;
 
 import io.grpc.ManagedChannel;
+import io.grpc.StatusRuntimeException;
 import io.spine.server.Server;
 import io.spine.test.client.billing.PaymentReceived;
 import io.spine.testing.SlowTest;
@@ -34,10 +35,12 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static io.grpc.ManagedChannelBuilder.forAddress;
+import static io.grpc.Status.CANCELLED;
 import static io.spine.client.Client.usingChannel;
 import static io.spine.server.Server.atPort;
 import static io.spine.test.client.ClientTestContext.tasks;
 import static io.spine.test.client.ClientTestContext.users;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SlowTest
@@ -51,10 +54,11 @@ class ClientEndToEnd {
 
     private Client client;
     private Server server;
+    private ManagedChannel channel;
 
     @BeforeEach
     void startAndConnect() throws IOException {
-        ManagedChannel channel = forAddress(ADDRESS, PORT)
+        channel = forAddress(ADDRESS, PORT)
                 .usePlaintext()
                 .build();
         server = atPort(PORT)
@@ -66,9 +70,17 @@ class ClientEndToEnd {
     }
 
     @AfterEach
-    void stopAndDisconnect() {
+    void stopAndDisconnect() throws InterruptedException {
+        try {
+            client.close();
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().equals(CANCELLED)) {
+                fail(e);
+            }
+        }
         server.shutdown();
-        client.close();
+        channel.shutdown();
+        channel.awaitTermination(1, SECONDS);
     }
 
     @Test
@@ -79,7 +91,8 @@ class ClientEndToEnd {
               .onStreamingError(Assertions::fail)
               .onConsumingError((consumer, throwable) -> fail(throwable))
               .observe(event -> {
-                 // Do nothing.
-              });
+                  // Do nothing.
+              })
+              .post();
     }
 }
