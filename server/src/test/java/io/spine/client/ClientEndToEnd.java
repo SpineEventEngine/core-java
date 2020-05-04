@@ -105,7 +105,7 @@ class ClientEndToEnd {
     }
 
     @Test
-    @DisplayName("subscribe to Event which is not declared ")
+    @DisplayName("post Command and subscribe to Event which is not declared explicitly")
     void subscribeToEvent() {
         AtomicBoolean fired = new AtomicBoolean(false);
         CreateTask task = CreateTask
