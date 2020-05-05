@@ -133,6 +133,18 @@ message EntityStateUpdate {
 
         // The state of the entity has been changed, so that previously it matched the subscription
         // `Target` filters, and now it does not.
+        //
+        // For example, consider a subscription to all `UserSession`s in which user has sent at most
+        // `N` requests:
+        // ```
+        // WHERE REQUEST_COUNT <= N
+        // ```
+        //
+        // Suppose a `UserSession` with ID 42 matches the subscription. After some time, the user
+        // makes their N + 1-th request and the `UserSession` with ID 42 stops matching
+        // the subscription. Hence, the next update brings the `no_longer_matching` option instead
+        // of an entity state.
+        //
         bool no_longer_matching = 3;
     }
 }

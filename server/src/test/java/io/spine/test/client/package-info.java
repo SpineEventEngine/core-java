@@ -23,7 +23,7 @@
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-@BoundedContext(ClientTestContext.NAME)
+@BoundedContext(ClientTestContext.USERS_NAME)
 package io.spine.test.client;
 
 import com.google.errorprone.annotations.CheckReturnValue;

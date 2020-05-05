@@ -106,6 +106,25 @@ public final class Subscriptions {
     }
 
     /**
+     * Creates a new subscription with the given {@link Topic} and a random ID.
+     *
+     * @param topic
+     *         subscription topic
+     * @return new subscription
+     */
+    public static Subscription from(Topic topic) {
+        checkNotNull(topic);
+
+        SubscriptionId id = generateId();
+        Subscription subscription = Subscription
+                .newBuilder()
+                .setId(id)
+                .setTopic(topic)
+                .vBuild();
+        return subscription;
+    }
+
+    /**
      * Obtains a short printable form of subscription.
      *
      * <p>Standard {@link Subscription#toString()} includes all subscription data and thus its

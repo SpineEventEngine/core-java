@@ -24,12 +24,13 @@ import io.spine.core.UserId;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
-import io.spine.test.client.command.LogInUser;
-import io.spine.test.client.command.LogOutUser;
-import io.spine.test.client.event.UserAccountCreated;
-import io.spine.test.client.event.UserLoggedIn;
-import io.spine.test.client.event.UserLoggedOut;
-import io.spine.test.client.rejection.UserAlreadyLoggedIn;
+import io.spine.test.client.users.LoginStatus;
+import io.spine.test.client.users.command.LogInUser;
+import io.spine.test.client.users.command.LogOutUser;
+import io.spine.test.client.users.event.UserAccountCreated;
+import io.spine.test.client.users.event.UserLoggedIn;
+import io.spine.test.client.users.event.UserLoggedOut;
+import io.spine.test.client.users.rejection.UserAlreadyLoggedIn;
 
 /**
  * Performs login/logout operations and keeps the login status of the user.

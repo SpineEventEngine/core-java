@@ -19,21 +19,33 @@
  */
 syntax = "proto3";
 
-package spine.test.client;
+package spine.test.client.users;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.client";
-option java_outer_classname = "LoginProto";
+option java_package = "io.spine.test.client.users.command";
+option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
+import "spine/test/client/users/user_account.proto";
 
-message LoginStatus {
-    option (entity) = { kind: PROCESS_MANAGER visibility: SUBSCRIBE };
+message LogInUser {
     core.UserId user = 1;
-    bool logged_in = 2;
-    // The column field used for subscribing to the login status from the client.
-    string user_id = 3 [(required) = true, (column) = true];
+}
+
+message LogOutUser {
+    core.UserId user = 1;
+}
+
+message CreateUserAccount {
+    core.UserId user = 1;
+    UserAccount account = 2 [(validate) = true, (required) = true];
+}
+
+// A command which is not supported by the backend, and as such should
+// generate an error when posted.
+message UnsupportedCommand {
+    core.UserId user = 1;
 }

@@ -55,8 +55,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * }</pre>
  *
  * <p>The subscription obtained from the {@link #post()} should be cancelled
- * to preserve both client-side and server-side resources. The moment of cancelling the subscriptions
- * depends on the nature of the posted command and the outcome expected by the client application.
+ * to preserve both client-side and server-side resources. The moment of cancelling
+ * the subscriptions depends on the nature of the posted command and the outcome
+ * expected by the client application.
  */
 public final class CommandRequest extends ClientRequest implements Logging {
 
@@ -110,7 +111,7 @@ public final class CommandRequest extends ClientRequest implements Logging {
     /**
      * Assigns a handler for errors occurred when delivering events.
      *
-     * <p>If such an error occur, no more events resulting from the posted command will be
+     * <p>If such an error occurs, no more events resulting from the posted command will be
      * delivered to the consumers.
      */
     @CanIgnoreReturnValue
