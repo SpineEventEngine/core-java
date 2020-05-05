@@ -62,6 +62,11 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     }
 
     @Override
+    public void add(Subscription subscription) {
+        registrySlice().add(subscription);
+    }
+
+    @Override
     public void remove(Subscription subscription) {
         registrySlice().remove(subscription);
     }

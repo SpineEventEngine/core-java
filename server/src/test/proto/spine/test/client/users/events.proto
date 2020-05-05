@@ -17,23 +17,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+package spine.test.client.users;
 
-final def spineVersion = '1.5.11'
+import "spine/options.proto";
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.client.users.event";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.5.11'
+import "spine/core/user_id.proto";
+import "spine/test/client/users/user_account.proto";
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.5.8'
+message UserLoggedIn {
+    core.UserId user = 1;
+    UserAccount account = 2;
+}
+
+message UserLoggedOut {
+    core.UserId user = 1;
+}
+
+message UserAccountCreated {
+    core.UserId user = 1;
+    UserAccount account = 2;
 }

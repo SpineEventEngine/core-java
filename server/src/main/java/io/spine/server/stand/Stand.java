@@ -198,6 +198,29 @@ public class Stand implements AutoCloseable {
     }
 
     /**
+     * Registers this inactive subscription is this {@code Stand}.
+     *
+     * <p>The given subscription is shared between different Bounded Contexts.
+     *
+     * @param subscription
+     *         an existing subscription
+     */
+    public void subscribe(Subscription subscription) throws InvalidRequestException {
+        Topic topic = subscription.getTopic();
+        topicValidator.validate(topic);
+
+        TenantId tenantId = topic.getContext()
+                                 .getTenantId();
+        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                subscriptionRegistry.add(subscription);
+            }
+        };
+        op.execute();
+    }
+
+    /**
      * Activates the subscription created via {@link #subscribe(Topic, StreamObserver)
      * subscribe()} method.
      *
