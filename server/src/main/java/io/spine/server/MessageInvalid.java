@@ -18,15 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server;
 
 import io.spine.annotation.Internal;
 
 /**
- * An interface for the {@link MessageRejection} types which report a message being invalid.
+ * An interface for the {@link MessageError} types which report a message being invalid.
  *
- * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
+ * <p>Except the methods declared in {@link MessageError}, this type is a marker interface.
  */
 @Internal
-public interface MessageInvalid extends MessageRejection {
+public interface MessageInvalid extends MessageError {
 }

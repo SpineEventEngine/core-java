@@ -22,13 +22,13 @@ package io.spine.server.stand;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.core.MessageRejection;
+import io.spine.server.MessageError;
 
 /**
  * A base class for exceptions fired in case an invalid request
  * has been submitted to {@linkplain Stand}.
  */
-public class InvalidRequestException extends RuntimeException implements MessageRejection {
+public class InvalidRequestException extends RuntimeException implements MessageError {
 
     private static final long serialVersionUID = 0L;
 

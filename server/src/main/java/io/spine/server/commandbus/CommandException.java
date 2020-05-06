@@ -27,7 +27,7 @@ import io.spine.base.Error;
 import io.spine.code.java.ClassName;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
-import io.spine.core.MessageRejection;
+import io.spine.server.MessageError;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 
@@ -38,7 +38,7 @@ import static java.lang.String.format;
 /**
  * Abstract base for exceptions related to commands.
  */
-public abstract class CommandException extends RuntimeException implements MessageRejection {
+public abstract class CommandException extends RuntimeException implements MessageError {
 
     /**
      * The name of the attribute of the command type reported in an error.

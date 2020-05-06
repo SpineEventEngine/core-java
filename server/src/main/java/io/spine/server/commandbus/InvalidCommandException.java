@@ -27,7 +27,7 @@ import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
-import io.spine.core.MessageInvalid;
+import io.spine.server.MessageInvalid;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;

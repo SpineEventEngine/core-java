@@ -20,7 +20,7 @@
 
 package io.spine.server.bus;
 
-import io.spine.core.MessageInvalid;
+import io.spine.server.MessageInvalid;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;

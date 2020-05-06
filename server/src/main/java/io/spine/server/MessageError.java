@@ -18,31 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server;
 
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 
 /**
- * The report about a message being rejected from processing.
- *
- * <p>Such message could be:
- * <ul>
- *     <li>an event;
- *     <li>a command;
- *     <li>an actor request (query, topic or subscription).
- * </ul>
+ * A common interface for errors that prevent a message from being processed by the server.
  */
 @Internal
-public interface MessageRejection {
+public interface MessageError {
 
     /**
-     * Converts this {@code MessageRejection} into an {@link Error io.spine.base.Error}.
+     * Converts this instance into an {@link Error io.spine.base.Error}.
      */
     Error asError();
 
     /**
-     * Converts this {@code MessageRejection} into a {@link Throwable java.lang.Throwable}.
+     * Converts this instance into a {@link Throwable java.lang.Throwable}.
      */
     Throwable asThrowable();
 }
