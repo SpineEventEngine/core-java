@@ -56,10 +56,10 @@ public final class Responses {
      *
      * @return {@code true} if the passed response represents `ok` status,
      * {@code false} otherwise
+     * @deprecated please use {@link Response#isOk()}
      */
+    @Deprecated
     public static boolean isOk(Response response) {
-        boolean result = response.getStatus()
-                                 .getStatusCase() == Status.StatusCase.OK;
-        return result;
+        return response.isOk();
     }
 }

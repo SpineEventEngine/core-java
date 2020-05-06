@@ -48,7 +48,9 @@ class ResponsesTest {
     @Test
     @DisplayName("recognize OK response")
     void recognizeOkResponse() {
-        assertTrue(Responses.isOk(Responses.ok()));
+        Response ok = Responses.ok();
+        assertTrue(ok.isOk());
+        assertFalse(ok.isError());
     }
 
     @Test
@@ -60,6 +62,7 @@ class ResponsesTest {
         Response error = Response.newBuilder()
                                  .setStatus(status)
                                  .build();
-        assertFalse(Responses.isOk(error));
+        assertFalse(error.isOk());
+        assertTrue(error.isError());
     }
 }

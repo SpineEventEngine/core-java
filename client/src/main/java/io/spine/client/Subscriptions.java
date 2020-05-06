@@ -27,6 +27,7 @@ import io.spine.base.Identifier;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceBlockingStub;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceStub;
+import io.spine.core.Response;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -180,8 +181,10 @@ public final class Subscriptions {
     }
 
     private void requestCancellation(Subscription subscription) {
-        //TODO:2020-04-17:alexander.yevsyukov: Check response and report the error.
-        blockingSubscriptionService.cancel(subscription);
+        Response response = blockingSubscriptionService.cancel(subscription);
+        if (response.isError()) {
+            //TODO:2020-04-17:alexander.yevsyukov: Report the error.
+        }
     }
 
     /** Cancels all the subscriptions. */
