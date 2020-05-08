@@ -53,8 +53,14 @@ SubscribingRequest<M extends Message,
         super(parent, type);
     }
 
+    /**
+     * Obtains the builder for collecting consumers of the subscribed messages.
+     */
     abstract Consumers.Builder<M, C, W, ?> consumers();
 
+    /**
+     * Adapts the passed instance to the specific type of {@link MessageConsumer}.
+     */
     abstract MessageConsumer<M, C> toMessageConsumer(Consumer<M> consumer);
 
     /**
