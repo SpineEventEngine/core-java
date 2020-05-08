@@ -48,6 +48,6 @@ public interface ErrorHandler extends Consumer<Throwable> {
      */
     static ErrorHandler
     logError(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
-        return new LoggingErrorHandler(logger, messageFormat, type);
+        return new LoggingTypeErrorHandler(logger, messageFormat, type);
     }
 }

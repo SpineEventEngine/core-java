@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 /**
  * Logs the fact of an error caused by handling a message of the passed type.
  */
-final class LoggingErrorHandler extends LoggingHandlerWithType implements ErrorHandler {
+final class LoggingTypeErrorHandler extends LoggingHandlerWithType implements ErrorHandler {
 
     /**
      * Creates a new instance of the logging handler.
@@ -39,7 +39,9 @@ final class LoggingErrorHandler extends LoggingHandlerWithType implements ErrorH
      * @param type
      *         the type of the message which caused the error
      */
-    LoggingErrorHandler(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
+    LoggingTypeErrorHandler(FluentLogger logger,
+                            String messageFormat,
+                            Class<? extends Message> type) {
         super(logger, messageFormat, type);
     }
 
