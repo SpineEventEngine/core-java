@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.protobuf.Messages;
@@ -37,15 +38,29 @@ import static io.spine.protobuf.Messages.isNotDefault;
 /**
  * Mixin interface for command objects.
  */
+@GeneratedMixin
 @Immutable
 interface CommandMixin
         extends Signal<CommandId, CommandMessage, CommandContext>,
                 CommandOrBuilder,
                 FieldAwareMessage {
 
+    /**
+     * Obtains the time when the command was created.
+     */
     @Override
-    default Timestamp time() {
+    default Timestamp timestamp() {
         return actorContext().getTimestamp();
+    }
+
+    /**
+     * Obtains the time when the command was created.
+     *
+     * @deprecated please use {@link #timestamp()}
+     */
+    @Deprecated
+    default Timestamp time() {
+        return timestamp();
     }
 
     @Override
