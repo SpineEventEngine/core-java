@@ -28,7 +28,10 @@ import java.lang.annotation.Target;
  * <p>This annotation should not be used directly to mark anything.
  * Instead, use the annotation instances as
  * a {@link io.spine.core.Subscribe#filter() @Subscribe.filter)} parameter.
+ *
+ * @deprecated Please use please use {@link Where @Where} annotation for the first method parameter.
  */
+@Deprecated
 @Target({})
 public @interface ByField {
 
