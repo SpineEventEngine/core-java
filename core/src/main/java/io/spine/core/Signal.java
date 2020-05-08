@@ -23,14 +23,12 @@ package io.spine.core;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.SPI;
 import io.spine.base.KnownMessage;
 import io.spine.base.MessageContext;
 import io.spine.base.SerializableMessage;
 import io.spine.protobuf.AnyPacker;
-import io.spine.time.TimestampTemporal;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
@@ -62,7 +60,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 public interface Signal<I extends SignalId,
                         M extends KnownMessage,
                         C extends MessageContext>
-        extends SerializableMessage {
+        extends SerializableMessage, WithActor, WithTime {
 
     /**
      * Obtains the identifier of the message.
@@ -117,23 +115,6 @@ public interface Signal<I extends SignalId,
     }
 
     /**
-     * Obtains the ID of the tenant under which the message was created.
-     */
-    default TenantId tenant() {
-        return actorContext().getTenantId();
-    }
-
-    /**
-     * Obtains the time when the message was created.
-     */
-    Timestamp time();
-
-    /**
-     * Obtains the data about the actor who started the message chain.
-     */
-    ActorContext actorContext();
-
-    /**
      * Obtains the type URL of the enclosed message.
      */
     default TypeUrl enclosedTypeUrl() {
@@ -149,44 +130,6 @@ public interface Signal<I extends SignalId,
         Message enclosed = enclosedMessage();
         boolean result = enclosedMessageClass.isAssignableFrom(enclosed.getClass());
         return result;
-    }
-
-    /**
-     * Verifies if the message was created after the point in time.
-     */
-    default boolean isAfter(Timestamp bound) {
-        checkNotNull(bound);
-        TimestampTemporal timeTemporal = TimestampTemporal.from(time());
-        TimestampTemporal boundTemporal = TimestampTemporal.from(bound);
-        return timeTemporal.isLaterThan(boundTemporal);
-    }
-
-    /**
-     * Verifies if the message was created before the point in time.
-     */
-    default boolean isBefore(Timestamp bound) {
-        checkNotNull(bound);
-        TimestampTemporal timeTemporal = TimestampTemporal.from(time());
-        TimestampTemporal boundTemporal = TimestampTemporal.from(bound);
-        return timeTemporal.isEarlierThan(boundTemporal);
-    }
-
-    /**
-     * Verifies if the message was created within the passed period of time.
-     *
-     * @param periodStart
-     *         lower bound, exclusive
-     * @param periodEnd
-     *         higher bound, inclusive
-     * @return {@code true} if the time point of the command creation lies in between the given two
-     */
-    default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
-        checkNotNull(periodStart);
-        checkNotNull(periodEnd);
-        TimestampTemporal timeTemporal = TimestampTemporal.from(time());
-        TimestampTemporal start = TimestampTemporal.from(periodStart);
-        TimestampTemporal end = TimestampTemporal.from(periodEnd);
-        return timeTemporal.isBetween(start, end);
     }
 
     /**

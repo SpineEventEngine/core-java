@@ -60,9 +60,7 @@ final class EventsAfterCommand implements Logging {
     private EventsAfterCommand(Client client, Command cmd, MultiEventConsumers consumers) {
         this.client = checkNotNull(client);
         this.command = checkNotDefaultArg(cmd);
-        this.user = cmd.getContext()
-                       .getActorContext()
-                       .getActor();
+        this.user = cmd.actor();
         this.consumers = checkNotNull(consumers);
     }
 

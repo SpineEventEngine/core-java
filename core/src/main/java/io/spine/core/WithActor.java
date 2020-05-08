@@ -21,41 +21,29 @@
 package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
-import io.spine.base.MessageContext;
-import io.spine.core.Enrichment.Container;
-
-import java.util.Optional;
-
-import static io.spine.core.Enrichments.containerIn;
 
 /**
- * A common interface for message contexts that hold enrichments.
+ * An object associated with an acting user.
  */
 @Immutable
-public interface EnrichableMessageContext extends MessageContext {
+public interface WithActor {
 
     /**
-     * Obtains an instance of {@link Enrichment} from the context of the message.
+     * The context of the associated user.
      */
-    @SuppressWarnings("override") // in generated code.
-    Enrichment getEnrichment();
+    ActorContext actorContext();
 
-    default <E extends Message> Optional<E> find(Class<E> cls) {
-        Optional<Container> container = containerIn(this);
-        Optional<E> result = container.flatMap(c -> Enrichments.find(cls, c));
-        return result;
+    /**
+     * The ID of the associated user.
+     */
+    default UserId actor() {
+        return actorContext().getActor();
     }
 
     /**
-     * Obtains enrichment of the passed class.
-     *
-     * @throws IllegalStateException if the enrichment is not found
+     * Obtains the ID of the tenant under which the message was created.
      */
-    default <E extends Message> E get(Class<E> cls) {
-        Container container = containerIn(this).orElse(Container.getDefaultInstance());
-        E result = Enrichments.get(cls, container);
-        return result;
+    default TenantId tenant() {
+        return actorContext().getTenantId();
     }
 }
-

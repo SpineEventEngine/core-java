@@ -44,7 +44,7 @@ interface EventMixin
         extends Signal<EventId, EventMessage, EventContext>, FieldAwareMessage, EntityState {
 
     @Override
-    default Timestamp time() {
+    default Timestamp timestamp() {
         return context().getTimestamp();
     }
 
