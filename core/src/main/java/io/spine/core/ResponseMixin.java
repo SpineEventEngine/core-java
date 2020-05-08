@@ -20,6 +20,8 @@
 
 package io.spine.core;
 
+import io.spine.base.Error;
+
 /**
  * Mixin interface for the {@link Response} objects.
  */
@@ -37,5 +39,13 @@ public interface ResponseMixin extends ResponseOrBuilder {
      */
     default boolean isError() {
         return getStatus().getStatusCase() == Status.StatusCase.ERROR;
+    }
+
+    /**
+     * Obtains the error associated with the response or default instance is the response is not
+     * an error.
+     */
+    default Error error() {
+        return getStatus().getError();
     }
 }
