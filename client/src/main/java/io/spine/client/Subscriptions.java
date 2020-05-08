@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedSet;
 
@@ -75,17 +76,20 @@ public final class Subscriptions implements Logging {
      */
     static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
 
-    private final SubscriptionServiceStub subscriptionService;
-    private final SubscriptionServiceBlockingStub blockingSubscriptionService;
-    private final Set<Subscription> subscriptions;
+    private final SubscriptionServiceStub service;
+    private final SubscriptionServiceBlockingStub blockingServiceStub;
+    private final Set<Subscription> items;
+    private final @Nullable ErrorHandler streamingErrorHandler;
     private final @Nullable PostingErrorHandler postingErrorHandler;
 
     Subscriptions(ManagedChannel channel,
+                  @Nullable ErrorHandler streamingErrorHandler,
                   @Nullable PostingErrorHandler postingErrorHandler) {
-        this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
-        this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
+        this.service = SubscriptionServiceGrpc.newStub(channel);
+        this.blockingServiceStub = SubscriptionServiceGrpc.newBlockingStub(channel);
+        this.streamingErrorHandler = streamingErrorHandler;
         this.postingErrorHandler = postingErrorHandler;
-        this.subscriptions = synchronizedSet(new HashSet<>());
+        this.items = synchronizedSet(new HashSet<>());
     }
 
     /**
@@ -161,8 +165,8 @@ public final class Subscriptions implements Logging {
      * @see #cancel(Subscription)
      */
     <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
-        Subscription subscription = blockingSubscriptionService.subscribe(topic);
-        subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
+        Subscription subscription = blockingServiceStub.subscribe(topic);
+        service.activate(subscription, new SubscriptionObserver<>(observer));
         add(subscription);
         return subscription;
     }
@@ -174,7 +178,7 @@ public final class Subscriptions implements Logging {
 
     /** Remembers the passed subscription for future use. */
     private void add(Subscription s) {
-        subscriptions.add(checkNotNull(s));
+        items.add(checkNotNull(s));
     }
 
     /**
@@ -186,7 +190,7 @@ public final class Subscriptions implements Logging {
      */
     public boolean cancel(Subscription s) {
         checkNotNull(s);
-        boolean isActive = subscriptions.contains(s);
+        boolean isActive = items.contains(s);
         if (isActive) {
             requestCancellation(s);
         }
@@ -194,7 +198,7 @@ public final class Subscriptions implements Logging {
     }
 
     private void requestCancellation(Subscription s) {
-        subscriptionService.cancel(s, new CancellationObserver(s));
+        service.cancel(s, new CancellationObserver(s));
     }
 
     /**
@@ -202,20 +206,20 @@ public final class Subscriptions implements Logging {
      */
     public void cancelAll() {
         // Create the copy for iterating to avoid `ConcurrentModificationException` on removal.
-        ImmutableSet.copyOf(subscriptions)
+        ImmutableSet.copyOf(items)
                     .forEach(this::requestCancellation);
     }
 
     @VisibleForTesting
     boolean contains(Subscription s) {
-        return subscriptions.contains(s);
+        return items.contains(s);
     }
 
     /**
      * Verifies if there are any active subscriptions.
      */
     public boolean isEmpty() {
-        return subscriptions.isEmpty();
+        return items.isEmpty();
     }
 
     /**
@@ -240,20 +244,26 @@ public final class Subscriptions implements Logging {
 
         @Override
         public void onError(Throwable t) {
-            //TODO:2020-05-08:alexander.yevsyukov: Pass to streaming error handler.
+            streamingErrorHandler().accept(t);
         }
 
         @Override
         public void onCompleted() {
-            subscriptions.remove(subscription);
+            items.remove(subscription);
+        }
+
+        private ErrorHandler streamingErrorHandler() {
+            return Optional.ofNullable(Subscriptions.this.streamingErrorHandler)
+                           .orElse(new LoggingErrorHandler(
+                                   logger(), UNABLE_TO_CANCEL, shortDebugString(subscription)
+                           ));
         }
 
         private PostingErrorHandler postingErrorHandler() {
             return Optional.ofNullable(Subscriptions.this.postingErrorHandler)
                            .orElse(new LoggingPostingErrorHandler(
-                                   logger(),
-                                   UNABLE_TO_CANCEL + " Returned error: `%s`.")
-                           );
+                                   logger(), UNABLE_TO_CANCEL + " Returned error: `%s`."
+                           ));
         }
 
         private FluentLogger logger() {

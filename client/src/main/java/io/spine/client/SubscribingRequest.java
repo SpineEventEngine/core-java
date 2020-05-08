@@ -21,6 +21,7 @@
 package io.spine.client;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.MessageContext;
@@ -82,8 +83,11 @@ SubscribingRequest<M extends Message,
      *
      * @see #onConsumingError(ConsumerErrorHandler)
      */
+    @Override
     @CanIgnoreReturnValue
+    @OverridingMethodsMustInvokeSuper
     public B onStreamingError(ErrorHandler handler) {
+        super.onStreamingError(handler);
         consumers().onStreamingError(handler);
         return self();
     }

@@ -23,6 +23,7 @@ package io.spine.client;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Ack;
@@ -63,8 +64,6 @@ public final class CommandRequest extends ClientRequest implements Logging {
 
     private final CommandMessage message;
     private final MultiEventConsumers.Builder eventConsumers;
-    private @Nullable ErrorHandler streamingErrorHandler;
-    private @Nullable PostingErrorHandler postingErrorHandler;
 
     CommandRequest(ClientRequest parent, CommandMessage c) {
         super(parent);
@@ -114,9 +113,10 @@ public final class CommandRequest extends ClientRequest implements Logging {
      * <p>If such an error occurs, no more events resulting from the posted command will be
      * delivered to the consumers.
      */
+    @Override
     @CanIgnoreReturnValue
     public CommandRequest onStreamingError(ErrorHandler handler) {
-        this.streamingErrorHandler = checkNotNull(handler);
+        super.onStreamingError(handler);
         eventConsumers.onStreamingError(handler);
         return this;
     }
@@ -137,11 +137,11 @@ public final class CommandRequest extends ClientRequest implements Logging {
     /**
      * Assigns a handler for an error occurred on the server-side (such as validation error)
      * in response to posting a command.
-     */
+     */    @OverridingMethodsMustInvokeSuper
     @CanIgnoreReturnValue
+    @Override
     public CommandRequest onPostingError(PostingErrorHandler handler) {
-        checkNotNull(handler);
-        this.postingErrorHandler = handler;
+        super.onPostingError(handler);
         return this;
     }
 
@@ -205,7 +205,8 @@ public final class CommandRequest extends ClientRequest implements Logging {
             Status status = ack.getStatus();
             switch (status.getStatusCase()) {
                 case OK:
-                    return subscriptions;
+                    return Optional.ofNullable(subscriptions)
+                                   .orElse(ImmutableSet.of());
                 case ERROR:
                     cancelVoidSubscriptions();
                     reportErrorWhenPosting(status);
@@ -224,7 +225,7 @@ public final class CommandRequest extends ClientRequest implements Logging {
 
         private void subscribeToEvents() {
             Client client = client();
-            this.subscriptions = subscribe(client, command, consumers, streamingErrorHandler);
+            this.subscriptions = subscribe(client, command, consumers, streamingErrorHandler());
             checkNotNull(subscriptions);
             client.subscriptions()
                   .addAll(subscriptions);
@@ -246,7 +247,7 @@ public final class CommandRequest extends ClientRequest implements Logging {
         }
 
         private PostingErrorHandler errorHandler() {
-            return Optional.ofNullable(CommandRequest.this.postingErrorHandler)
+            return Optional.ofNullable(postingErrorHandler())
                            .orElse(new LoggingPostingErrorHandler(
                                    CommandRequest.this.logger(),
                                    "Unable to post the command `%s`. Returned error: `%s`.")

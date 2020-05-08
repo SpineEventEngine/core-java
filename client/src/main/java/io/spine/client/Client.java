@@ -22,6 +22,7 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -104,6 +105,16 @@ public class Client implements AutoCloseable {
     private final Subscriptions subscriptions;
 
     /**
+     * The handler for errors that may occur during asynchronous requests initiated by this client.
+     */
+    private final @Nullable ErrorHandler streamingErrorHandler;
+
+    /**
+     * The handler for errors returned from server side in response to posted messages.
+     */
+    private final @Nullable PostingErrorHandler postingErrorHandler;
+
+    /**
      * Creates a builder for a client connected to the specified address.
      *
      * <p>The returned builder will create {@code ManagedChannel} with the default configuration.
@@ -157,7 +168,9 @@ public class Client implements AutoCloseable {
         this.shutdownTimeout = checkNotNull(builder.shutdownTimeout);
         this.commandService = CommandServiceGrpc.newBlockingStub(channel);
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
-        this.subscriptions = new Subscriptions(channel);
+        this.streamingErrorHandler = builder.streamingErrorHandler;
+        this.postingErrorHandler = builder.postingErrorHandler;
+        this.subscriptions = new Subscriptions(channel, streamingErrorHandler, postingErrorHandler);
     }
 
     /**
@@ -215,7 +228,14 @@ public class Client implements AutoCloseable {
      */
     public ClientRequest onBehalfOf(UserId user) {
         checkNotDefaultArg(user);
-        return new ClientRequest(user, this);
+        ClientRequest request = new ClientRequest(user, this);
+        if (streamingErrorHandler != null) {
+            request.onStreamingError(streamingErrorHandler);
+        }
+        if (postingErrorHandler != null) {
+            request.onPostingError(postingErrorHandler);
+        }
+        return request;
     }
 
     /**
@@ -326,6 +346,9 @@ public class Client implements AutoCloseable {
         /** The ID of the user for performing requests on behalf of a non-logged in user. */
         private UserId guestUser = DEFAULT_GUEST_ID;
 
+        private @Nullable ErrorHandler streamingErrorHandler;
+        private @Nullable PostingErrorHandler postingErrorHandler;
+
         private Builder(ManagedChannel channel) {
             this.channel = checkNotNull(channel);
         }
@@ -403,6 +426,27 @@ public class Client implements AutoCloseable {
         public Builder shutdownTimout(long timeout, TimeUnit timeUnit) {
             checkNotNull(timeUnit);
             this.shutdownTimeout = Timeout.of(timeout, timeUnit);
+            return this;
+        }
+
+        /**
+         * Assigns a default handler for streaming errors for the asynchronous requests
+         * initiated by the client.
+         */
+        @CanIgnoreReturnValue
+        public Builder onStreamingError(ErrorHandler handler) {
+            this.streamingErrorHandler = checkNotNull(handler);
+            return this;
+        }
+
+        /**
+         * Assigns a default handler for an error occurred on the server-side (such as
+         * validation error) in response to a message posted by the client.
+         */
+        @CanIgnoreReturnValue
+        public Builder onPostingError(PostingErrorHandler handler) {
+            checkNotNull(handler);
+            this.postingErrorHandler = handler;
             return this;
         }
 
