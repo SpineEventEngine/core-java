@@ -54,8 +54,6 @@ public final class Responses {
     /**
      * Checks if the response is OK.
      *
-     * @return {@code true} if the passed response represents `ok` status,
-     * {@code false} otherwise
      * @deprecated please use {@link Response#isOk()}
      */
     @Deprecated
