@@ -39,7 +39,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @GeneratedMixin
 @Immutable
 interface EventContextMixin extends EventContextOrBuilder,
-                                    ContextWithActor,
+                                    SignalContext,
                                     WithTime,
                                     EnrichableMessageContext,
                                     FieldAwareMessage,

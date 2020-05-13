@@ -27,5 +27,5 @@ import io.spine.base.MessageContext;
  * A context of a message initiated by a user.
  */
 @Immutable
-public interface ContextWithActor extends MessageContext, WithActor {
+public interface SignalContext extends MessageContext, WithActor {
 }

@@ -20,12 +20,16 @@
 
 package io.spine.core;
 
+import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.GeneratedMixin;
 import io.spine.base.Error;
 
 /**
  * Mixin interface for the {@link Response} objects.
  */
-public interface ResponseMixin extends ResponseOrBuilder {
+@GeneratedMixin
+@Immutable
+interface ResponseMixin extends ResponseOrBuilder {
 
     /**
      * Verifies if this response has the {@link Status.StatusCase#OK OK} status.
