@@ -49,6 +49,16 @@ interface EventMixin
     }
 
     /**
+     * Obtains the time of the event.
+     *
+     * @deprecated please use {@link #timestamp()}
+     */
+    @Deprecated
+    default Timestamp time() {
+        return timestamp();
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Attempts to obtain the ID from the {@code EventContext}. If not successful, assumes that
