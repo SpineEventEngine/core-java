@@ -82,11 +82,11 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
      * <p>If the method is not annotated for filtering, the returned instance
      * {@linkplain ArgumentFilter#acceptsAll() accepts all} arguments.
      */
-    @SuppressWarnings("deprecation") // still need to support `ByField` when building older models.
     public static ArgumentFilter createFilter(Method method) {
         Subscribe annotation = method.getAnnotation(Subscribe.class);
         checkAnnotated(method, annotation);
         @Nullable Where where = filterAnnotationOf(method);
+        @SuppressWarnings("deprecation") // still need `ByField` when building older models.
         io.spine.core.ByField byField = annotation.filter();
         boolean byFieldEmpty = byField.path().isEmpty();
         String fieldPath;
@@ -111,7 +111,7 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
      */
     private static void checkNoByFieldAnnotation(boolean byFieldEmpty, Method method) {
         String where = Where.class.getName();
-        @SuppressWarnings("deprecation")
+        @SuppressWarnings("deprecation") // still need `ByField` when building older models.
         String byField = io.spine.core.ByField.class.getName();
         checkState(
                 byFieldEmpty,
