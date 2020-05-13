@@ -28,7 +28,7 @@ import io.spine.annotation.GeneratedMixin;
  */
 @GeneratedMixin
 @Immutable
-public interface CommandContextMixin extends CommandContextOrBuilder, ContextWithActor {
+interface CommandContextMixin extends CommandContextOrBuilder, ContextWithActor {
 
     @Override
     default ActorContext actorContext() {
