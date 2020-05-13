@@ -84,6 +84,6 @@ public interface WithTime {
     default Instant instant() {
         Instant result = InstantConverter.reversed()
                                          .convert(timestamp());
-        return result;
+        return checkNotNull(result);
     }
 }
