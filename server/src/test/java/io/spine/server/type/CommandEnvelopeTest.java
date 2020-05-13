@@ -73,8 +73,7 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
         CommandEnvelope envelope = toEnvelope(command);
 
         assertThat(envelope.actorContext())
-                .isEqualTo(command.context()
-                                  .getActorContext());
+                .isEqualTo(command.actorContext());
     }
 
     @Test

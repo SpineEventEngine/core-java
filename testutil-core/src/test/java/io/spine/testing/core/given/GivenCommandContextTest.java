@@ -63,8 +63,8 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
         checkValid(first);
         checkValid(second);
 
-        ActorContext firstActorContext = first.getActorContext();
-        ActorContext secondActorContext = second.getActorContext();
+        ActorContext firstActorContext = first.actorContext();
+        ActorContext secondActorContext = second.actorContext();
         assertNotEquals(firstActorContext.getActor(), secondActorContext.getActor());
     }
 

@@ -56,8 +56,7 @@ public final class MagazineAggregate extends Aggregate<String, Magazine, Magazin
         }
 
         return ArtistName.newBuilder()
-                         .setValue(ctx.getActorContext()
-                                      .getActor()
+                         .setValue(ctx.actor()
                                       .getValue())
                          .vBuild();
     }
