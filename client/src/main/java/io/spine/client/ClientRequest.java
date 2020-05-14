@@ -51,7 +51,7 @@ public class ClientRequest {
     private final Client client;
 
     private @Nullable ErrorHandler streamingErrorHandler;
-    private @Nullable PostingErrorHandler postingErrorHandler;
+    private @Nullable ServerErrorHandler serverErrorHandler;
 
     ClientRequest(UserId user, Client client) {
         checkNotDefaultArg(user);
@@ -62,7 +62,7 @@ public class ClientRequest {
     ClientRequest(ClientRequest parent) {
         this(parent.user, parent.client);
         this.streamingErrorHandler = parent.streamingErrorHandler;
-        this.postingErrorHandler = parent.postingErrorHandler;
+        this.serverErrorHandler = parent.serverErrorHandler;
     }
 
     /**
@@ -128,9 +128,9 @@ public class ClientRequest {
      */
     @CanIgnoreReturnValue
     @OverridingMethodsMustInvokeSuper
-    public ClientRequest onPostingError(PostingErrorHandler handler) {
+    public ClientRequest onServerError(ServerErrorHandler handler) {
         checkNotNull(handler);
-        this.postingErrorHandler = handler;
+        this.serverErrorHandler = handler;
         return this;
     }
 
@@ -138,7 +138,7 @@ public class ClientRequest {
         return streamingErrorHandler;
     }
 
-    final @Nullable PostingErrorHandler postingErrorHandler() {
-        return postingErrorHandler;
+    final @Nullable ServerErrorHandler serverErrorHandler() {
+        return serverErrorHandler;
     }
 }

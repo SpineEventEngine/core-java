@@ -141,8 +141,8 @@ public final class CommandRequest extends ClientRequest implements Logging {
     @OverridingMethodsMustInvokeSuper
     @CanIgnoreReturnValue
     @Override
-    public CommandRequest onPostingError(PostingErrorHandler handler) {
-        super.onPostingError(handler);
+    public CommandRequest onServerError(ServerErrorHandler handler) {
+        super.onServerError(handler);
         return this;
     }
 
@@ -247,9 +247,9 @@ public final class CommandRequest extends ClientRequest implements Logging {
             errorHandler().accept(command, status.getError());
         }
 
-        private PostingErrorHandler errorHandler() {
-            return Optional.ofNullable(postingErrorHandler())
-                           .orElse(new LoggingPostingErrorHandler(
+        private ServerErrorHandler errorHandler() {
+            return Optional.ofNullable(serverErrorHandler())
+                           .orElse(new LoggingServerErrorHandler(
                                    CommandRequest.this.logger(),
                                    "Unable to post the command `%s`. Returned error: `%s`.")
                            );

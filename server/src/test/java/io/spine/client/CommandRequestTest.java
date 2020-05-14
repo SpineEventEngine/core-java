@@ -165,7 +165,7 @@ class CommandRequestTest extends AbstractClientTest {
 
     @Nested
     @DisplayName("Allow setting custom posting error handler")
-    class CustomPostingErrorHandler {
+    class CustomServerErrorHandler {
 
         private @Nullable Message postedMessage;
         private @Nullable Error returnedError;
@@ -179,13 +179,13 @@ class CommandRequestTest extends AbstractClientTest {
         @Test
         @DisplayName("rejecting `null`")
         void rejectingNull() {
-            assertThrows(NullPointerException.class, () -> commandRequest.onPostingError(null));
+            assertThrows(NullPointerException.class, () -> commandRequest.onServerError(null));
         }
 
         @Test
         @DisplayName("invoking handler when an invalid command posted")
         void invocation() {
-            PostingErrorHandler handler = (message, error) -> {
+            ServerErrorHandler handler = (message, error) -> {
                 postedMessage = message;
                 returnedError = error;
             };
@@ -197,7 +197,7 @@ class CommandRequestTest extends AbstractClientTest {
             CommandRequest request =
                     client().asGuest()
                             .command(commandMessage)
-                            .onPostingError(handler);
+                            .onServerError(handler);
             request.post();
 
             assertThat(returnedError)

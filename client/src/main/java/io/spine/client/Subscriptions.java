@@ -80,15 +80,15 @@ public final class Subscriptions implements Logging {
     private final SubscriptionServiceBlockingStub blockingServiceStub;
     private final Set<Subscription> items;
     private final @Nullable ErrorHandler streamingErrorHandler;
-    private final @Nullable PostingErrorHandler postingErrorHandler;
+    private final @Nullable ServerErrorHandler serverErrorHandler;
 
     Subscriptions(ManagedChannel channel,
                   @Nullable ErrorHandler streamingErrorHandler,
-                  @Nullable PostingErrorHandler postingErrorHandler) {
+                  @Nullable ServerErrorHandler serverErrorHandler) {
         this.service = SubscriptionServiceGrpc.newStub(channel);
         this.blockingServiceStub = SubscriptionServiceGrpc.newBlockingStub(channel);
         this.streamingErrorHandler = streamingErrorHandler;
-        this.postingErrorHandler = postingErrorHandler;
+        this.serverErrorHandler = serverErrorHandler;
         this.items = synchronizedSet(new HashSet<>());
     }
 
@@ -238,7 +238,7 @@ public final class Subscriptions implements Logging {
         public void onNext(Response response) {
             if (response.isError()) {
                 Error err = response.error();
-                postingErrorHandler().accept(subscription, err);
+                serverErrorHandler().accept(subscription, err);
             }
         }
 
@@ -259,9 +259,9 @@ public final class Subscriptions implements Logging {
                            ));
         }
 
-        private PostingErrorHandler postingErrorHandler() {
-            return Optional.ofNullable(Subscriptions.this.postingErrorHandler)
-                           .orElse(new LoggingPostingErrorHandler(
+        private ServerErrorHandler serverErrorHandler() {
+            return Optional.ofNullable(Subscriptions.this.serverErrorHandler)
+                           .orElse(new LoggingServerErrorHandler(
                                    logger(), UNABLE_TO_CANCEL + " Returned error: `%s`."
                            ));
         }

@@ -112,7 +112,7 @@ public class Client implements AutoCloseable {
     /**
      * The handler for errors returned from server side in response to posted messages.
      */
-    private final @Nullable PostingErrorHandler postingErrorHandler;
+    private final @Nullable ServerErrorHandler serverErrorHandler;
 
     /**
      * Creates a builder for a client connected to the specified address.
@@ -169,8 +169,8 @@ public class Client implements AutoCloseable {
         this.commandService = CommandServiceGrpc.newBlockingStub(channel);
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
         this.streamingErrorHandler = builder.streamingErrorHandler;
-        this.postingErrorHandler = builder.postingErrorHandler;
-        this.subscriptions = new Subscriptions(channel, streamingErrorHandler, postingErrorHandler);
+        this.serverErrorHandler = builder.serverErrorHandler;
+        this.subscriptions = new Subscriptions(channel, streamingErrorHandler, serverErrorHandler);
     }
 
     /**
@@ -232,8 +232,8 @@ public class Client implements AutoCloseable {
         if (streamingErrorHandler != null) {
             request.onStreamingError(streamingErrorHandler);
         }
-        if (postingErrorHandler != null) {
-            request.onPostingError(postingErrorHandler);
+        if (serverErrorHandler != null) {
+            request.onServerError(serverErrorHandler);
         }
         return request;
     }
@@ -347,7 +347,7 @@ public class Client implements AutoCloseable {
         private UserId guestUser = DEFAULT_GUEST_ID;
 
         private @Nullable ErrorHandler streamingErrorHandler;
-        private @Nullable PostingErrorHandler postingErrorHandler;
+        private @Nullable ServerErrorHandler serverErrorHandler;
 
         private Builder(ManagedChannel channel) {
             this.channel = checkNotNull(channel);
@@ -444,9 +444,9 @@ public class Client implements AutoCloseable {
          * validation error) in response to a message posted by the client.
          */
         @CanIgnoreReturnValue
-        public Builder onPostingError(PostingErrorHandler handler) {
+        public Builder onServerError(ServerErrorHandler handler) {
             checkNotNull(handler);
-            this.postingErrorHandler = handler;
+            this.serverErrorHandler = handler;
             return this;
         }
 

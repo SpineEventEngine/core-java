@@ -20,23 +20,17 @@
 
 package io.spine.client;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 
-import static com.google.protobuf.TextFormat.shortDebugString;
+import java.util.function.BiConsumer;
 
 /**
- * A posting handler which logs the error.
+ * A handler for an error occurred when posting a message for asynchronous processing
+ * at the server side.
+ *
+ * <p>The handler accepts a message which caused an error, and an {@link io.spine.base.Error Error}
+ * obtained from the server.
  */
-final class LoggingPostingErrorHandler extends LoggingHandler implements PostingErrorHandler {
-
-    LoggingPostingErrorHandler(FluentLogger logger, String messageFormat) {
-        super(logger, messageFormat);
-    }
-
-    @Override
-    public void accept(Message message, Error error) {
-        error().log(messageFormat(), shortDebugString(message), shortDebugString(error));
-    }
+public interface ServerErrorHandler extends BiConsumer<Message, Error> {
 }
