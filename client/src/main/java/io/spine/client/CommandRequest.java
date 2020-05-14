@@ -137,7 +137,8 @@ public final class CommandRequest extends ClientRequest implements Logging {
     /**
      * Assigns a handler for an error occurred on the server-side (such as validation error)
      * in response to posting a command.
-     */    @OverridingMethodsMustInvokeSuper
+     */
+    @OverridingMethodsMustInvokeSuper
     @CanIgnoreReturnValue
     @Override
     public CommandRequest onPostingError(PostingErrorHandler handler) {
