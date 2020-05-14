@@ -28,9 +28,10 @@ import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Delivers an event to all consumers subscribed to events of this type.
+ * Delivers events to their consumers.
  *
  * @see #onNext(Event)
+ * @see MultiEventConsumers
  */
 final class DeliveringMultiEventObserver implements StreamObserver<Event>, Logging {
 
