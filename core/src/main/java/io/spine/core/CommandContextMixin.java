@@ -20,13 +20,18 @@
 
 package io.spine.core;
 
-import io.spine.annotation.Internal;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.GeneratedMixin;
 
 /**
- * An interface for the {@link MessageRejection} types which report a message being invalid.
- *
- * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
+ * Mix-in interface extending {@link CommandContext}.
  */
-@Internal
-public interface MessageInvalid extends MessageRejection {
+@GeneratedMixin
+@Immutable
+interface CommandContextMixin extends CommandContextOrBuilder, SignalContext {
+
+    @Override
+    default ActorContext actorContext() {
+        return getActorContext();
+    }
 }

@@ -41,6 +41,7 @@ import "spine/core/event.proto";
 // only upon receiving the `ok` status.
 //
 message Response {
+    option (is).java_type = "ResponseMixin";
 
     // The response status.
     Status status = 1 [(required) = true];
@@ -49,6 +50,8 @@ message Response {
 // The response status.
 message Status {
     oneof status {
+        option (is_required) = true;
+
         // The request was accepted to execution.
         google.protobuf.Empty ok = 1;
 

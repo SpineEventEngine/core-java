@@ -106,7 +106,7 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
 
     @Assign
     BbAssigneeAdded handle(BbAssignSelf command, CommandContext context) {
-        UserId assignee = context.getActorContext().getActor();
+        UserId assignee = context.actor();
         return BbAssigneeAdded
                 .newBuilder()
                 .setId(id())

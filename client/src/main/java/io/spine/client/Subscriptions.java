@@ -20,20 +20,27 @@
 package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceBlockingStub;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceStub;
+import io.spine.core.Response;
+import io.spine.logging.Logging;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedSet;
 
@@ -57,7 +64,7 @@ import static java.util.Collections.synchronizedSet;
  * @see ClientRequest#subscribeToEvent(Class)
  * @see CommandRequest#post()
  */
-public final class Subscriptions {
+public final class Subscriptions implements Logging {
 
     /**
      * The format of all {@linkplain SubscriptionId Subscription identifiers}.
@@ -69,14 +76,20 @@ public final class Subscriptions {
      */
     static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
 
-    private final SubscriptionServiceStub subscriptionService;
-    private final SubscriptionServiceBlockingStub blockingSubscriptionService;
-    private final Set<Subscription> subscriptions;
+    private final SubscriptionServiceStub service;
+    private final SubscriptionServiceBlockingStub blockingServiceStub;
+    private final Set<Subscription> items;
+    private final @Nullable ErrorHandler streamingErrorHandler;
+    private final @Nullable ServerErrorHandler serverErrorHandler;
 
-    Subscriptions(ManagedChannel channel) {
-        this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
-        this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
-        this.subscriptions = synchronizedSet(new HashSet<>());
+    Subscriptions(ManagedChannel channel,
+                  @Nullable ErrorHandler streamingErrorHandler,
+                  @Nullable ServerErrorHandler serverErrorHandler) {
+        this.service = SubscriptionServiceGrpc.newStub(channel);
+        this.blockingServiceStub = SubscriptionServiceGrpc.newBlockingStub(channel);
+        this.streamingErrorHandler = streamingErrorHandler;
+        this.serverErrorHandler = serverErrorHandler;
+        this.items = synchronizedSet(new HashSet<>());
     }
 
     /**
@@ -134,8 +147,8 @@ public final class Subscriptions {
      * @deprecated please use {@link Subscription#toShortString()}
      */
     @Deprecated
-    public static String toShortString(Subscription subscription) {
-        return subscription.toShortString();
+    public static String toShortString(Subscription s) {
+        return s.toShortString();
     }
 
     /**
@@ -152,8 +165,8 @@ public final class Subscriptions {
      * @see #cancel(Subscription)
      */
     <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
-        Subscription subscription = blockingSubscriptionService.subscribe(topic);
-        subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
+        Subscription subscription = blockingServiceStub.subscribe(topic);
+        service.activate(subscription, new SubscriptionObserver<>(observer));
         add(subscription);
         return subscription;
     }
@@ -165,44 +178,96 @@ public final class Subscriptions {
 
     /** Remembers the passed subscription for future use. */
     private void add(Subscription s) {
-        subscriptions.add(checkNotNull(s));
+        items.add(checkNotNull(s));
     }
 
     /**
-     * Cancels the passed subscription.
+     * Requests cancellation the passed subscription.
+     *
+     * <p>The cancellation of the subscription is done asynchronously.
      *
      * @return {@code true} if the subscription was previously made
      */
-    public boolean cancel(Subscription subscription) {
-        checkNotNull(subscription);
-        requestCancellation(subscription);
-        return subscriptions.remove(subscription);
-    }
-
-    private void requestCancellation(Subscription subscription) {
-        //TODO:2020-04-17:alexander.yevsyukov: Check response and report the error.
-        blockingSubscriptionService.cancel(subscription);
-    }
-
-    /** Cancels all the subscriptions. */
-    public void cancelAll() {
-        Iterator<Subscription> iterator = subscriptions.iterator();
-        while (iterator.hasNext()) {
-            Subscription subscription = iterator.next();
-            requestCancellation(subscription);
-            iterator.remove();
+    public boolean cancel(Subscription s) {
+        checkNotNull(s);
+        boolean isActive = items.contains(s);
+        if (isActive) {
+            requestCancellation(s);
         }
+        return isActive;
+    }
+
+    private void requestCancellation(Subscription s) {
+        service.cancel(s, new CancellationObserver(s));
+    }
+
+    /**
+     * Requests cancellation of all subscriptions.
+     */
+    public void cancelAll() {
+        // Create the copy for iterating to avoid `ConcurrentModificationException` on removal.
+        ImmutableSet.copyOf(items)
+                    .forEach(this::requestCancellation);
     }
 
     @VisibleForTesting
     boolean contains(Subscription s) {
-        return subscriptions.contains(s);
+        return items.contains(s);
     }
 
     /**
      * Verifies if there are any active subscriptions.
      */
     public boolean isEmpty() {
-        return subscriptions.isEmpty();
+        return items.isEmpty();
+    }
+
+    /**
+     * Handles responses of cancellation requests.
+     */
+    private final class CancellationObserver implements StreamObserver<Response> {
+
+        private static final String UNABLE_TO_CANCEL = "Unable to cancel the subscription `%s`.";
+        private final Subscription subscription;
+
+        private CancellationObserver(Subscription subscription) {
+            this.subscription = checkNotNull(subscription);
+        }
+
+        @Override
+        public void onNext(Response response) {
+            if (response.isError()) {
+                Error err = response.error();
+                serverErrorHandler().accept(subscription, err);
+            }
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            streamingErrorHandler().accept(t);
+        }
+
+        @Override
+        public void onCompleted() {
+            items.remove(subscription);
+        }
+
+        private ErrorHandler streamingErrorHandler() {
+            return Optional.ofNullable(Subscriptions.this.streamingErrorHandler)
+                           .orElse(new LoggingErrorHandler(
+                                   logger(), UNABLE_TO_CANCEL, shortDebugString(subscription)
+                           ));
+        }
+
+        private ServerErrorHandler serverErrorHandler() {
+            return Optional.ofNullable(Subscriptions.this.serverErrorHandler)
+                           .orElse(new LoggingServerErrorHandler(
+                                   logger(), UNABLE_TO_CANCEL + " Returned error: `%s`."
+                           ));
+        }
+
+        private FluentLogger logger() {
+            return Subscriptions.this.logger();
+        }
     }
 }

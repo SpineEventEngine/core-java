@@ -18,17 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.client;
 
-import io.spine.annotation.Internal;
-import io.spine.server.MessageError;
+import com.google.protobuf.Message;
+import io.spine.base.Error;
+
+import java.util.function.BiConsumer;
 
 /**
- * An interface for the {@link MessageError} types which report an unhandled message being
- * posted into a {@link Bus}.
+ * A handler for an error occurred when posting a message for asynchronous processing
+ * at the server side.
  *
- * <p>Except the methods declared in {@link MessageError}, this type is a marker interface.
+ * <p>The handler accepts a message which caused an error, and an {@link io.spine.base.Error Error}
+ * obtained from the server.
  */
-@Internal
-public interface MessageUnhandled extends MessageError {
+public interface ServerErrorHandler extends BiConsumer<Message, Error> {
 }

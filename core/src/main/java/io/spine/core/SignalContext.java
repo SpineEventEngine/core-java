@@ -20,29 +20,12 @@
 
 package io.spine.core;
 
-import io.spine.annotation.Internal;
-import io.spine.base.Error;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.base.MessageContext;
 
 /**
- * The report about a message being rejected from processing.
- *
- * <p>Such message could be:
- * <ul>
- *     <li>an event;
- *     <li>a command;
- *     <li>an actor request (query, topic or subscription).
- * </ul>
+ * A context of a message initiated by a user.
  */
-@Internal
-public interface MessageRejection {
-
-    /**
-     * Converts this {@code MessageRejection} into an {@link Error io.spine.base.Error}.
-     */
-    Error asError();
-
-    /**
-     * Converts this {@code MessageRejection} into a {@link Throwable java.lang.Throwable}.
-     */
-    Throwable asThrowable();
+@Immutable
+public interface SignalContext extends MessageContext, WithActor {
 }

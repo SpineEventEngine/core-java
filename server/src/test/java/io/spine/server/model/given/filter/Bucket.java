@@ -20,7 +20,6 @@
 
 package io.spine.server.model.given.filter;
 
-import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.core.Where;
 
@@ -57,7 +56,7 @@ public class Bucket {
     }
 
     @SuppressWarnings("deprecation") // to be migrated during removal of `@ByField`.
-    @Subscribe(filter = @ByField(path = "kind", value = "BEAN"))
+    @Subscribe(filter = @io.spine.core.ByField(path = "kind", value = "BEAN"))
     void onlyBeans(BeanAdded e) {
         beans = beans + e.getNumber();
     }

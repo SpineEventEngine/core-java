@@ -18,17 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.client;
 
-import io.spine.annotation.Internal;
-import io.spine.server.MessageError;
+import com.google.common.flogger.FluentLogger;
+import com.google.protobuf.Message;
+import io.spine.base.Error;
+
+import static com.google.protobuf.TextFormat.shortDebugString;
 
 /**
- * An interface for the {@link MessageError} types which report an unhandled message being
- * posted into a {@link Bus}.
- *
- * <p>Except the methods declared in {@link MessageError}, this type is a marker interface.
+ * A posting handler which logs the error.
  */
-@Internal
-public interface MessageUnhandled extends MessageError {
+final class LoggingServerErrorHandler extends LoggingHandler implements ServerErrorHandler {
+
+    LoggingServerErrorHandler(FluentLogger logger, String messageFormat) {
+        super(logger, messageFormat);
+    }
+
+    @Override
+    public void accept(Message message, Error error) {
+        error().log(messageFormat(), shortDebugString(message), shortDebugString(error));
+    }
 }

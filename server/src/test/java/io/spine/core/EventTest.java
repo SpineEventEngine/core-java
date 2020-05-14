@@ -116,7 +116,7 @@ public class EventTest extends UtilityClassTest<Events> {
         void timestamp() {
             Event event = GivenEvent.occurredMinutesAgo(1);
 
-            assertThat(event.time())
+            assertThat(event.timestamp())
                     .isEqualTo(event.context()
                                     .getTimestamp());
         }

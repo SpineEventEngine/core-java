@@ -22,11 +22,12 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
+import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
-import io.spine.core.MessageInvalid;
+import io.spine.server.MessageInvalid;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
@@ -35,6 +36,7 @@ import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static java.lang.String.format;
 
 /**
@@ -78,7 +80,7 @@ public class InvalidCommandException extends CommandException implements Message
         Message commandMessage = envelope.message();
         String errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to " +
-                "multitenant Command Bus, but has no `tenant_id` attribute in the context.",
+                "multi-tenant Bounded Context, but has no `tenant_id` attribute in the context.",
                 CommandClass.of(commandMessage)
                             .value()
                             .getName(),
@@ -103,21 +105,24 @@ public class InvalidCommandException extends CommandException implements Message
         return error;
     }
 
+    /**
+     * Creates an exception for the command which specifies a tenant in a single-tenant context.
+     */
     public static InvalidCommandException inapplicableTenantId(Command command) {
         CommandEnvelope cmd = CommandEnvelope.of(command);
         TypeName typeName = TypeName.of(cmd.message());
         String errMsg = format(
-                "The command (class: %s, type: %s, id: %s) was posted to single-tenant " +
-                "CommandBus, but has tenant_id: %s attribute set in the command context.",
+                "The command (class: `%s`, type: `%s`, id: `%s`) was posted to a single-tenant " +
+                "Bounded Context, but has `tenant_id` (`%s`) attribute set in the command context.",
                 cmd.messageClass(),
                 typeName,
-                cmd.id(),
-                cmd.tenantId());
+                shortDebugString(cmd.id()),
+                shortDebugString(cmd.tenantId()));
         Error error = inapplicableTenantError(cmd.message(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 
-    private static Error inapplicableTenantError(Message commandMessage, String errMsg) {
+    private static Error inapplicableTenantError(CommandMessage commandMessage, String errMsg) {
         Error error = Error
                 .newBuilder()
                 .setType(InvalidCommandException.class.getCanonicalName())

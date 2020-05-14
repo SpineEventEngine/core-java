@@ -62,12 +62,12 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
      */
     static Object toRealConsumer(MessageConsumer<?, ?> consumer) {
         return consumer instanceof DelegatingConsumer
-               ? ((DelegatingConsumer) consumer).delegate()
+               ? ((DelegatingConsumer<?, ?>) consumer).delegate()
                : consumer;
     }
 
     /** Obtains the consumer of the event message to which this consumer delegates. */
-    final Consumer<M> delegate() {
+    private Consumer<M> delegate() {
         return delegate;
     }
 
@@ -89,6 +89,9 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
         }
     }
 
+    /**
+     * Adapts a {@code Consumer} of an {@code EntityState} to the {@link StateConsumer} interface.
+     */
     private static final class DelegatingStateConsumer<S extends EntityState>
             extends DelegatingConsumer<S, EmptyContext>
             implements StateConsumer<S> {

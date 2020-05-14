@@ -66,11 +66,14 @@ abstract class AbstractClientTest {
         server = serverBuilder.build();
         server.start();
 
-        client = Client.inProcess(serverName)
-                       // When shutting down, terminate the client immediately since all
-                       // the requests made in tests are going to be complete by that time.
-                       .shutdownTimout(0, TimeUnit.SECONDS)
-                       .build();
+        client = newClientBuilder(serverName).build();
+    }
+
+    protected Client.Builder newClientBuilder(String serverName) {
+        return Client.inProcess(serverName)
+                     // When shutting down, terminate the client immediately since all
+                     // the requests made in tests are going to be complete by that time.
+                     .shutdownTimout(0, TimeUnit.SECONDS);
     }
 
     @AfterEach

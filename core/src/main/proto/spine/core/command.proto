@@ -37,7 +37,7 @@ import "spine/core/diagnostics.proto";
 
 // Command identifier.
 message CommandId {
-    option (is).java_type = "io.spine.core.CommandIdMixin";
+    option (is).java_type = "CommandIdMixin";
     option (SPI_type) = true;
 
     string uuid = 1;
@@ -59,7 +59,7 @@ message CommandId {
 // There should be one and only one command handler associated with the type of the command.
 //
 message Command {
-    option (is).java_type = "io.spine.core.CommandMixin";
+    option (is).java_type = "CommandMixin";
     option (SPI_type) = true;
 
     // The ID of the command.
@@ -97,7 +97,7 @@ message Command {
 
 // Meta-information about the command and the environment, which generated the command.
 message CommandContext {
-    option (is).java_type = "io.spine.base.MessageContext";
+    option (is).java_type = "CommandContextMixin";
     option (SPI_type) = true;
 
     // Information about the environment of the user who created the command.

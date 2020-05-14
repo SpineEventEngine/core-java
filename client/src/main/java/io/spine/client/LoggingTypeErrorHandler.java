@@ -18,29 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.given.groups;
+package io.spine.client;
 
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.given.organizations.Organization;
-
-import static io.spine.testing.Tests.halt;
+import com.google.common.flogger.FluentLogger;
+import com.google.protobuf.Message;
 
 /**
- * This class declares invalid subscriber because filtering of states is not allowed.
- *
- * <p>{@code ByField}, which is deprecated, is still used to cover the negative case using
- * this annotation.
- *
- * @see FilteredStateSubscriberWhere
+ * Logs the fact of an error caused by handling a message of the passed type.
  */
-@SuppressWarnings("deprecation") // see Javadoc
-public class FilteredStateSubscriber extends AbstractEventSubscriber {
+final class LoggingTypeErrorHandler extends LoggingHandlerWithType implements ErrorHandler {
 
-    @Subscribe(
-            filter = @io.spine.core.ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
-    )
-    void on(Organization organization) {
-        halt();
+    /**
+     * Creates a new instance of the logging handler.
+     *
+     * @param logger
+     *         the instance of the logger to use for reporting the error
+     * @param messageFormat
+     *         the formatting message with one string parameter is the name of the message type
+     *         which caused the error
+     * @param type
+     *         the type of the message which caused the error
+     */
+    LoggingTypeErrorHandler(FluentLogger logger,
+                            String messageFormat,
+                            Class<? extends Message> type) {
+        super(logger, messageFormat, type);
+    }
+
+    @Override
+    public void accept(Throwable throwable) {
+        error(throwable).log(messageFormat(), typeName());
     }
 }

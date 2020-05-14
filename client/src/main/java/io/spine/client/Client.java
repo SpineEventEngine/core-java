@@ -22,6 +22,7 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -30,6 +31,7 @@ import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.client.grpc.QueryServiceGrpc.QueryServiceBlockingStub;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
@@ -103,6 +105,16 @@ public class Client implements AutoCloseable {
     private final Subscriptions subscriptions;
 
     /**
+     * The handler for errors that may occur during asynchronous requests initiated by this client.
+     */
+    private final @Nullable ErrorHandler streamingErrorHandler;
+
+    /**
+     * The handler for errors returned from server side in response to posted messages.
+     */
+    private final @Nullable ServerErrorHandler serverErrorHandler;
+
+    /**
      * Creates a builder for a client connected to the specified address.
      *
      * <p>The returned builder will create {@code ManagedChannel} with the default configuration.
@@ -156,7 +168,9 @@ public class Client implements AutoCloseable {
         this.shutdownTimeout = checkNotNull(builder.shutdownTimeout);
         this.commandService = CommandServiceGrpc.newBlockingStub(channel);
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
-        this.subscriptions = new Subscriptions(channel);
+        this.streamingErrorHandler = builder.streamingErrorHandler;
+        this.serverErrorHandler = builder.serverErrorHandler;
+        this.subscriptions = new Subscriptions(channel, streamingErrorHandler, serverErrorHandler);
     }
 
     /**
@@ -214,7 +228,14 @@ public class Client implements AutoCloseable {
      */
     public ClientRequest onBehalfOf(UserId user) {
         checkNotDefaultArg(user);
-        return new ClientRequest(user, this);
+        ClientRequest request = new ClientRequest(user, this);
+        if (streamingErrorHandler != null) {
+            request.onStreamingError(streamingErrorHandler);
+        }
+        if (serverErrorHandler != null) {
+            request.onServerError(serverErrorHandler);
+        }
+        return request;
     }
 
     /**
@@ -269,8 +290,9 @@ public class Client implements AutoCloseable {
     /**
      * Posts the command to the {@code CommandService}.
      */
-    void post(Command c) {
-        commandService.post(c);
+    Ack post(Command c) {
+        Ack ack = commandService.post(c);
+        return ack;
     }
 
     /**
@@ -323,6 +345,9 @@ public class Client implements AutoCloseable {
 
         /** The ID of the user for performing requests on behalf of a non-logged in user. */
         private UserId guestUser = DEFAULT_GUEST_ID;
+
+        private @Nullable ErrorHandler streamingErrorHandler;
+        private @Nullable ServerErrorHandler serverErrorHandler;
 
         private Builder(ManagedChannel channel) {
             this.channel = checkNotNull(channel);
@@ -401,6 +426,27 @@ public class Client implements AutoCloseable {
         public Builder shutdownTimout(long timeout, TimeUnit timeUnit) {
             checkNotNull(timeUnit);
             this.shutdownTimeout = Timeout.of(timeout, timeUnit);
+            return this;
+        }
+
+        /**
+         * Assigns a default handler for streaming errors for the asynchronous requests
+         * initiated by the client.
+         */
+        @CanIgnoreReturnValue
+        public Builder onStreamingError(ErrorHandler handler) {
+            this.streamingErrorHandler = checkNotNull(handler);
+            return this;
+        }
+
+        /**
+         * Assigns a default handler for an error occurred on the server-side (such as
+         * validation error) in response to a message posted by the client.
+         */
+        @CanIgnoreReturnValue
+        public Builder onServerError(ServerErrorHandler handler) {
+            checkNotNull(handler);
+            this.serverErrorHandler = handler;
             return this;
         }
 

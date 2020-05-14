@@ -54,7 +54,7 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
         return DocumentCreated
                 .newBuilder()
                 .setId(command.getId())
-                .setOwner(context.getActorContext().getActor())
+                .setOwner(context.actor())
                 .setWhenCreated(Now.get().asLocalDateTime())
                 .vBuild();
     }
@@ -63,7 +63,7 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
     TextEdited handle(EditText command, CommandContext context) {
         Edit edit = Edit
                 .newBuilder()
-                .setEditor(context.getActorContext().getActor())
+                .setEditor(context.actor())
                 .setPosition(command.getPosition())
                 .setTextAdded(command.getNewText())
                 .setCharsDeleted(command.getCharsToDelete())

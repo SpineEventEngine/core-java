@@ -18,17 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.core;
 
-import io.spine.annotation.Internal;
-import io.spine.server.MessageError;
+import com.google.errorprone.annotations.Immutable;
 
 /**
- * An interface for the {@link MessageError} types which report an unhandled message being
- * posted into a {@link Bus}.
- *
- * <p>Except the methods declared in {@link MessageError}, this type is a marker interface.
+ * An object associated with an acting user.
  */
-@Internal
-public interface MessageUnhandled extends MessageError {
+@Immutable
+public interface WithActor {
+
+    /**
+     * The context of the associated user.
+     */
+    ActorContext actorContext();
+
+    /**
+     * The ID of the associated user.
+     */
+    default UserId actor() {
+        return actorContext().getActor();
+    }
+
+    /**
+     * Obtains the ID of the tenant under which the message was created.
+     */
+    default TenantId tenant() {
+        return actorContext().getTenantId();
+    }
 }

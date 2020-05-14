@@ -33,7 +33,7 @@ import static io.spine.client.DelegatingConsumer.toRealConsumer;
  *         the type of the messages delivered to the consumer
  */
 final class LoggingConsumerErrorHandler<M extends Message>
-        extends LoggingHandler
+        extends LoggingHandlerWithType
         implements ConsumerErrorHandler<M> {
 
     /**
@@ -44,6 +44,8 @@ final class LoggingConsumerErrorHandler<M extends Message>
      * @param messageFormat
      *         the formatting message where the first parameter is the consumer which caused
      *         the error, and the second parameter is the type of the message which caused the error
+     * @param type
+     *         the type of the message which caused the error
      */
     LoggingConsumerErrorHandler(FluentLogger logger,
                                 String messageFormat,
@@ -54,8 +56,6 @@ final class LoggingConsumerErrorHandler<M extends Message>
     @Override
     public void accept(MessageConsumer<M, ?> consumer, Throwable throwable) {
         Object consumerToReport = toRealConsumer(consumer);
-        logger().atSevere()
-                .withCause(throwable)
-                .log(messageFormat(), consumerToReport, type());
+        error(throwable).log(messageFormat(), consumerToReport, typeName());
     }
 }

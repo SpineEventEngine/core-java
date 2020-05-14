@@ -23,13 +23,12 @@ package io.spine.core;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.logging.Logging;
-import io.spine.time.InstantConverter;
 import io.spine.validate.FieldAwareMessage;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -37,9 +36,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Mixin interface for {@link EventContext}s.
  */
+@GeneratedMixin
 @Immutable
-interface EventContextMixin extends EnrichableMessageContext,
-                                    EventContextOrBuilder,
+interface EventContextMixin extends EventContextOrBuilder,
+                                    SignalContext,
+                                    WithTime,
+                                    EnrichableMessageContext,
                                     FieldAwareMessage,
                                     Logging {
 
@@ -58,6 +60,7 @@ interface EventContextMixin extends EnrichableMessageContext,
      * thrown as it contradicts the Spine validation rules. See {@link EventContext} proto
      * declaration.
      */
+    @Override
     @SuppressWarnings({
             "ClassReferencesSubclass", // which is the only impl.
             "deprecation" // For backward compatibility.
@@ -133,27 +136,6 @@ interface EventContextMixin extends EnrichableMessageContext,
     }
 
     /**
-     * Obtains the actor user ID.
-     *
-     * <p>The 'actor' is the user responsible for producing the given event.
-     *
-     * <p>It is obtained as follows:
-     * <ul>
-     *     <li>For the events generated from commands, the actor context is taken from the
-     *         enclosing command context.
-     *     <li>For the event react chain, the command context of the topmost event is used.
-     *     <li>For the imported events, the separate import context contains information about an
-     *         actor.
-     * </ul>
-     *
-     * <p>If the given event context contains no origin, an {@link IllegalArgumentException} is
-     * thrown as it contradicts the Spine validation rules.
-     */
-    default UserId actor() {
-        return actorContext().getActor();
-    }
-
-    /**
      * Obtains the ID of the entity which produced the event.
      */
     default Object producer() {
@@ -167,19 +149,9 @@ interface EventContextMixin extends EnrichableMessageContext,
      *
      * @see #instant()
      */
+    @Override
     default Timestamp timestamp() {
         return getTimestamp();
-    }
-
-    /**
-     * Obtains the time of the event as {@link Instant}.
-     *
-     * @see #timestamp()
-     */
-    default Instant instant() {
-        Instant result = InstantConverter.reversed()
-                                         .convert(getTimestamp());
-        return result;
     }
 
     /**

@@ -46,7 +46,7 @@ public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
         implements Logging {
 
-    private final ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
+    private final ImmutableMap<CommandClass, BoundedContext> commandToContext;
 
     /**
      * Constructs new instance using the map from a {@code CommandClass} to
@@ -54,7 +54,7 @@ public final class CommandService
      */
     private CommandService(Map<CommandClass, BoundedContext> map) {
         super();
-        this.boundedContextMap = ImmutableMap.copyOf(map);
+        this.commandToContext = ImmutableMap.copyOf(map);
     }
 
     /**
@@ -67,11 +67,11 @@ public final class CommandService
     @Override
     public void post(Command request, StreamObserver<Ack> responseObserver) {
         CommandClass commandClass = CommandClass.of(request);
-        BoundedContext boundedContext = boundedContextMap.get(commandClass);
-        if (boundedContext == null) {
+        BoundedContext context = commandToContext.get(commandClass);
+        if (context == null) {
             handleUnsupported(request, responseObserver);
         } else {
-            CommandBus commandBus = boundedContext.commandBus();
+            CommandBus commandBus = context.commandBus();
             commandBus.post(request, responseObserver);
         }
     }
@@ -86,17 +86,20 @@ public final class CommandService
         responseObserver.onCompleted();
     }
 
+    /**
+     * The builder for a {@code CommandService}.
+     */
     public static class Builder {
 
-        private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
+        private final Set<BoundedContext> contexts = Sets.newHashSet();
 
         /**
          * Adds the {@code BoundedContext} to the builder.
          */
         @CanIgnoreReturnValue
-        public Builder add(BoundedContext boundedContext) {
+        public Builder add(BoundedContext context) {
             // Saves it to a temporary set so that it is easy to remove it if needed.
-            boundedContexts.add(boundedContext);
+            contexts.add(context);
             return this;
         }
 
@@ -104,19 +107,19 @@ public final class CommandService
          * Removes the {@code BoundedContext} from the builder.
          */
         @CanIgnoreReturnValue
-        public Builder remove(BoundedContext boundedContext) {
-            boundedContexts.remove(boundedContext);
+        public Builder remove(BoundedContext context) {
+            contexts.remove(context);
             return this;
         }
 
         /**
          * Verifies if the passed {@code BoundedContext} was previously added to the builder.
          *
-         * @param boundedContext the instance to check
+         * @param context the instance to check
          * @return {@code true} if the instance was added to the builder, {@code false} otherwise
          */
-        public boolean contains(BoundedContext boundedContext) {
-            boolean contains = boundedContexts.contains(boundedContext);
+        public boolean contains(BoundedContext context) {
+            boolean contains = contexts.contains(context);
             return contains;
         }
 
@@ -135,7 +138,7 @@ public final class CommandService
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
             ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
-            for (BoundedContext boundedContext : boundedContexts) {
+            for (BoundedContext boundedContext : contexts) {
                 putIntoMap(boundedContext, builder);
             }
             return builder.build();
@@ -145,12 +148,12 @@ public final class CommandService
          * Associates {@code CommandClass}es with the instance of {@code BoundedContext}
          * that handles such commands.
          */
-        private static void putIntoMap(BoundedContext boundedContext,
+        private static void putIntoMap(BoundedContext context,
                                        ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
-            CommandBus commandBus = boundedContext.commandBus();
+            CommandBus commandBus = context.commandBus();
             Set<CommandClass> cmdClasses = commandBus.registeredCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
-                builder.put(commandClass, boundedContext);
+                builder.put(commandClass, context);
             }
         }
     }

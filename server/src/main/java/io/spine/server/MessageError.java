@@ -18,17 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server;
 
 import io.spine.annotation.Internal;
-import io.spine.server.MessageError;
+import io.spine.base.Error;
 
 /**
- * An interface for the {@link MessageError} types which report an unhandled message being
- * posted into a {@link Bus}.
- *
- * <p>Except the methods declared in {@link MessageError}, this type is a marker interface.
+ * A common interface for errors that prevent a message from being processed by the server.
  */
 @Internal
-public interface MessageUnhandled extends MessageError {
+public interface MessageError {
+
+    /**
+     * Converts this instance into an {@link Error io.spine.base.Error}.
+     */
+    Error asError();
+
+    /**
+     * Converts this instance into a {@link Throwable java.lang.Throwable}.
+     */
+    Throwable asThrowable();
 }

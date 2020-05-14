@@ -47,7 +47,7 @@ public final class Acks {
         Message unpacked = AnyPacker.unpack(ack.getMessageId());
         if (!(unpacked instanceof CommandId)) {
             throw newIllegalArgumentException(
-                    "The acknowledgement does not contain a command ID: `%s`.",
+                    "Unable to get a command ID from the acknowledgement: `%s`.",
                     shortDebugString(ack)
             );
         }

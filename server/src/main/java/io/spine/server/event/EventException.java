@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
-import io.spine.core.MessageRejection;
+import io.spine.server.MessageError;
 import io.spine.type.TypeName;
 
 import java.util.Map;
@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * A base for exceptions related to events.
  */
-public abstract class EventException extends RuntimeException implements MessageRejection {
+public abstract class EventException extends RuntimeException implements MessageError {
 
     private static final long serialVersionUID = 0L;
 

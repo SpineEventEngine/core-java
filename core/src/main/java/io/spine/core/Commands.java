@@ -69,7 +69,7 @@ public final class Commands {
      */
     public static void sort(List<Command> commands) {
         checkNotNull(commands);
-        commands.sort((c1, c2) -> Timestamps.compare(c1.time(), c2.time()));
+        commands.sort((c1, c2) -> Timestamps.compare(c1.timestamp(), c2.timestamp()));
     }
 
     /**

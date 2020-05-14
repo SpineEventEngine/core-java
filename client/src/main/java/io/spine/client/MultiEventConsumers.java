@@ -20,11 +20,9 @@
 
 package io.spine.client;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Maps;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
@@ -33,11 +31,11 @@ import io.spine.core.EventContext;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.TextFormat.shortDebugString;
-import static io.spine.client.DelegatingConsumer.toRealConsumer;
 
 /**
  * An association of event types to their consumers which also delivers events.
@@ -48,14 +46,14 @@ import static io.spine.client.DelegatingConsumer.toRealConsumer;
 final class MultiEventConsumers implements Logging {
 
     private final
-    ImmutableMultimap<Class<? extends EventMessage>, EventConsumer<? extends EventMessage>> map;
+    ImmutableMap<Class<? extends EventMessage>, EventConsumers<? extends EventMessage>> map;
 
     static Builder newBuilder() {
         return new Builder();
     }
 
     private MultiEventConsumers(Builder builder) {
-        this.map = ImmutableMultimap.copyOf(builder.map);
+        this.map = ImmutableMap.copyOf(builder.toMap());
     }
 
     /**
@@ -63,6 +61,13 @@ final class MultiEventConsumers implements Logging {
      */
     ImmutableSet<Class<? extends EventMessage>> eventTypes() {
         return map.keySet();
+    }
+
+    /** Obtains all the consumers grouped by type of consumed events. */
+    ImmutableMap<Class<? extends EventMessage>, StreamObserver<Event>> toObservers() {
+        Map<Class<? extends EventMessage>, StreamObserver<Event>> observers =
+                Maps.transformValues(map, EventConsumers::toObserver);
+        return ImmutableMap.copyOf(observers);
     }
 
     /**
@@ -73,43 +78,7 @@ final class MultiEventConsumers implements Logging {
      *         If null the error will be simply logged.
      */
     StreamObserver<Event> toObserver(@Nullable ErrorHandler handler) {
-        return new EventObserver(handler);
-    }
-
-    /**
-     * Delivers the event to all the subscribed consumers.
-     *
-     * <p>If one of the consumers would cause an error when handling the event, the error will
-     * be logged, and the event will be passed to remaining consumers.
-     */
-    void deliver(Event event) {
-        EventMessage message = event.enclosedMessage();
-        EventContext context = event.getContext();
-        Class<? extends EventMessage> type = message.getClass();
-        ImmutableCollection<EventConsumer<? extends EventMessage>> consumers = map.get(type);
-        consumers.forEach(c -> {
-            try {
-                @SuppressWarnings("unchecked") // Safe as we match the type when adding consumers.
-                        EventConsumer<EventMessage> consumer = (EventConsumer<EventMessage>) c;
-                consumer.accept(message, context);
-            } catch (Throwable throwable) {
-                logError(c, event, throwable);
-            }
-        });
-    }
-
-    /**
-     * Logs the fact that the passed event consumer cased the error.
-     *
-     * <p>If the passed consumer is an instance of {@code DelegatingEventConsumer}
-     * the real consumer will be reported in the log.
-     */
-    private void logError(EventConsumer<?> consumer, Event event, Throwable throwable) {
-        String eventDiags = shortDebugString(event);
-        Object consumerToReport = toRealConsumer(consumer);
-        _error().withCause(throwable)
-                .log("The consumer `%s` could not handle the event `%s`.",
-                     consumerToReport, eventDiags);
+        return new DeliveringMultiEventObserver(this, handler);
     }
 
     /**
@@ -117,34 +86,99 @@ final class MultiEventConsumers implements Logging {
      */
     static final class Builder {
 
+        /** Maps a type of an event to the builder of {@code EventConsumers} of such events. */
         private final
-        Multimap<Class<? extends EventMessage>, EventConsumer<? extends EventMessage>>
-                map = HashMultimap.create();
+        Map<Class<? extends EventMessage>, EventConsumers.Builder<? extends EventMessage>> map =
+                new HashMap<>();
 
-        /**
-         * Adds the consumer of the events message.
-         */
+        /** The handler for streaming errors that may occur during gRPC calls. */
+        private @Nullable ErrorHandler streamingErrorHandler;
+
+        /** The common handler for errors of all consumed event types that may occur. */
+        private @Nullable ConsumerErrorHandler<EventMessage> consumingErrorHandler;
+
         @CanIgnoreReturnValue
-        public <E extends EventMessage>
+        <E extends EventMessage>
         Builder observe(Class<E> eventType, Consumer<E> consumer) {
             checkNotNull(eventType);
             checkNotNull(consumer);
-            map.put(eventType, EventConsumer.from(consumer));
-            return this;
+            EventConsumer<E> ec = EventConsumer.from(consumer);
+            return doPut(eventType, ec);
         }
 
         /**
          * Adds the consumer of the event message and its context.
          */
         @CanIgnoreReturnValue
-        public <E extends EventMessage>
+        <E extends EventMessage>
         Builder observe(Class<E> eventType, EventConsumer<E> consumer) {
             checkNotNull(eventType);
             checkNotNull(consumer);
-            map.put(eventType, consumer);
+            return doPut(eventType, consumer);
+        }
+
+        private <E extends EventMessage>
+        Builder doPut(Class<E> eventType, EventConsumer<E> ec) {
+            if (map.containsKey(eventType)) {
+                @SuppressWarnings("unchecked")
+                // The cast is protected by generic params of this method.
+                EventConsumers.Builder<E> builder = (EventConsumers.Builder<E>) map.get(eventType);
+                builder.add(ec);
+            } else {
+                map.put(eventType, EventConsumers.<E>newBuilder().add(ec));
+            }
             return this;
         }
 
+        /**
+         * Produces a map from an event type to consumers of those events.
+         */
+        private ImmutableMap<Class<? extends EventMessage>, EventConsumers<? extends EventMessage>>
+        toMap() {
+            ImmutableMap.Builder<Class<? extends EventMessage>,
+                                 EventConsumers<? extends EventMessage>>
+            builder = ImmutableMap.builder();
+            for (Class<? extends EventMessage> eventType : map.keySet()) {
+                EventConsumers.Builder<? extends EventMessage> consumers = map.get(eventType);
+                if (streamingErrorHandler != null) {
+                    consumers.onStreamingError(streamingErrorHandler);
+                }
+                if (consumingErrorHandler != null) {
+                    consumers.onConsumingError(
+                            new DelegatingEventConsumerHandler<>(consumingErrorHandler)
+                    );
+                }
+                builder.put(eventType, consumers.build());
+            }
+            return builder.build();
+        }
+
+        /**
+         * Assigns a handler for the error reported to
+         * {@link StreamObserver#onError(Throwable)}.
+         *
+         * <p>Once this handler is called, no more messages will be delivered to consumers.
+         *
+         * @see #onConsumingError(ConsumerErrorHandler)
+         */
+        @CanIgnoreReturnValue
+        Builder onStreamingError(ErrorHandler handler) {
+            streamingErrorHandler = checkNotNull(handler);
+            return this;
+        }
+
+        /**
+         * Assigns a handler for an error that may occur in the code of one of the consumers.
+         *
+         * <p>After this handler called, remaining consumers will get the message as usually.
+         *
+         * @see #onStreamingError(ErrorHandler)
+         */
+        @CanIgnoreReturnValue
+        Builder onConsumingError(ConsumerErrorHandler<EventMessage> handler) {
+            consumingErrorHandler = checkNotNull(handler);
+            return this;
+        }
         /**
          * Creates the new instance.
          */
@@ -154,36 +188,29 @@ final class MultiEventConsumers implements Logging {
     }
 
     /**
-     * Passes the event to listener once the subscription is updated, then cancels the subscription.
+     * Adapts generified {@code ConsumerErrorHandler<E>} API to non-generified
+     * so that a common error handler can be used for all the consumers.
+     *
+     * @param <E>
+     *         the type of events observed by an instance of {@code EventConsumers}
+     * @see Builder#toMap()
      */
-    private final class EventObserver implements StreamObserver<Event> {
+    private static final class DelegatingEventConsumerHandler<E extends EventMessage>
+            implements ConsumerErrorHandler<E> {
 
-        private final ErrorHandler errorHandler;
+        private final ConsumerErrorHandler<EventMessage> delegate;
 
-        private EventObserver(@Nullable ErrorHandler handler) {
-            this.errorHandler = nullToDefault(handler);
-        }
-
-        private ErrorHandler nullToDefault(@Nullable ErrorHandler handler) {
-            if (handler != null) {
-                return handler;
-            }
-            return throwable -> _error().withCause(throwable).log("Error receiving event.");
+        private DelegatingEventConsumerHandler(ConsumerErrorHandler<EventMessage> delegate) {
+            this.delegate = checkNotNull(delegate);
         }
 
         @Override
-        public void onNext(Event e) {
-            deliver(e);
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            errorHandler.accept(t);
-        }
-
-        @Override
-        public void onCompleted() {
-            // Do nothing.
+        public void accept(MessageConsumer<E, ?> consumer, Throwable throwable) {
+            @SuppressWarnings("unchecked")
+            // The cast is protected by generic params of `EventConsumers`.
+                    MessageConsumer<EventMessage, EventContext> cast =
+                    (MessageConsumer<EventMessage, EventContext>) consumer;
+            delegate.accept(cast, throwable);
         }
     }
 }

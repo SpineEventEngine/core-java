@@ -18,17 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server;
 
 import io.spine.annotation.Internal;
-import io.spine.server.MessageError;
 
 /**
- * An interface for the {@link MessageError} types which report an unhandled message being
- * posted into a {@link Bus}.
+ * An interface for the {@link MessageError} types which report a message being invalid.
  *
  * <p>Except the methods declared in {@link MessageError}, this type is a marker interface.
  */
 @Internal
-public interface MessageUnhandled extends MessageError {
+public interface MessageInvalid extends MessageError {
 }
