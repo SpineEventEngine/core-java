@@ -21,7 +21,6 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Error;
@@ -45,6 +44,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @MuteLogging
@@ -151,7 +151,9 @@ class CommandRequestTest extends AbstractClientTest {
             RuntimeException exception = new RuntimeException("Consumer-generated error.");
 
             commandRequest.onConsumingError(handler)
-                          .observe(UserLoggedIn.class, e -> { throw exception; })
+                          .observe(UserLoggedIn.class, e -> {
+                              throw exception;
+                          })
                           .post();
 
             assertThat(handlerInvoked)
@@ -206,9 +208,9 @@ class CommandRequestTest extends AbstractClientTest {
                     .newBuilder()
                     .setMessage(AnyPacker.pack(commandMessage))
                     .build();
-            ProtoTruth.assertThat(postedMessage)
-                      .comparingExpectedFieldsOnly()
-                      .isEqualTo(expected);
+            assertThat(postedMessage)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(expected);
         }
     }
 }
