@@ -32,8 +32,13 @@ import static com.google.common.truth.Truth.assertThat;
 @DisplayName("`Client` should pass error handlers to `ClientRequest` for")
 public class ClientErrorHandlersTest extends AbstractClientTest {
 
+    @SuppressWarnings("UnnecessaryLambda") /* We need the reference for later checking.
+     Using a method reference as advised by Error Prone is not practical for the purpose of
+     these tests. */
     private final ErrorHandler errorHandler = (throwable) -> {};
-    private final PostingErrorHandler postingErrorHandler = (message, error) -> {};
+
+    @SuppressWarnings("UnnecessaryLambda")
+    private final ServerErrorHandler serverErrorHandler = (message, error) -> {};
 
     private ClientRequest request;
 
@@ -49,7 +54,7 @@ public class ClientErrorHandlersTest extends AbstractClientTest {
     protected Client.Builder newClientBuilder(String serverName) {
         Client.Builder builder = super.newClientBuilder(serverName);
         builder.onStreamingError(errorHandler)
-               .onPostingError(postingErrorHandler);
+               .onServerError(serverErrorHandler);
         return builder;
     }
 
@@ -68,7 +73,7 @@ public class ClientErrorHandlersTest extends AbstractClientTest {
     @Test
     @DisplayName("a posting error handler")
     void postingHandler() {
-        assertThat(request.postingErrorHandler())
-                .isEqualTo(postingErrorHandler);
+        assertThat(request.serverErrorHandler())
+                .isEqualTo(serverErrorHandler);
     }
 }
