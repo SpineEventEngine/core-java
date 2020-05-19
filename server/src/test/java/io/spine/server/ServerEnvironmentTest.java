@@ -235,7 +235,7 @@ class ServerEnvironmentTest {
         @DisplayName("return configured instance in Production")
         void productionValue() {
             TransportFactory factory = new StubTransportFactory();
-            serverEnvironment.configureTransport(factory);
+            serverEnvironment.configureTransport().production(factory);
             assertThat(serverEnvironment.transportFactory())
                     .isEqualTo(factory);
         }

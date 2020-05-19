@@ -68,7 +68,7 @@ class EnvironmentDependantValueTest {
                 .<String>newBuilder()
                 .wrappingTests(config -> testPrefix + config)
                 .build();
-        configString.production(CONFIG_STRING);
+        configString.tests(CONFIG_STRING);
         assertThat(configString.tests()).isEqualTo(testPrefix + CONFIG_STRING);
 
     }
