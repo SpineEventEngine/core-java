@@ -207,7 +207,7 @@ class ServerEnvironmentTest {
     }
 
     @Nested
-    @DisplayName("configure `TransportFactory`")
+    @DisplayName("configure `TransportFactory` in production")
     class TransportFactoryConfig {
 
         private final Environment environment = Environment.instance();
@@ -235,9 +235,40 @@ class ServerEnvironmentTest {
         @DisplayName("return configured instance in Production")
         void productionValue() {
             TransportFactory factory = new StubTransportFactory();
-            serverEnvironment.configureTransport().production(factory);
+            serverEnvironment.configureTransport()
+                             .production(factory);
             assertThat(serverEnvironment.transportFactory())
                     .isEqualTo(factory);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `TransportFactory` for tests")
+    class TestTransportFactoryConfig {
+
+        @AfterEach
+        void resetEnvironment() {
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("returning one when explicitly set")
+        void setExplicitly() {
+            TransportFactory factory = new StubTransportFactory();
+
+            serverEnvironment.configureTransport()
+                             .tests(factory);
+            assertThat(serverEnvironment.transportFactory()).isEqualTo(factory);
+        }
+
+        @Test
+        @DisplayName("returning an `InMemoryTransportFactory` when not set")
+        void notSet() {
+            Environment.instance()
+                       .setToTests();
+            assertThat(serverEnvironment.transportFactory())
+                    .isInstanceOf(InMemoryTransportFactory.class);
+
         }
     }
 

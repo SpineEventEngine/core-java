@@ -91,9 +91,12 @@ public final class ServerEnvironment implements AutoCloseable {
     private @Nullable TracerFactory tracerFactory;
 
     /**
-     * The production factory for channel-based transport.
+     * The production and testing factories for channel-based transport.
      */
-    private @Nullable TransportFactory transportFactory;
+    private final EnvironmentDependantValue<TransportFactory> transportFactories =
+            EnvironmentDependantValue
+                    .<TransportFactory>newBuilder()
+                    .build();
 
     /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
@@ -195,6 +198,15 @@ public final class ServerEnvironment implements AutoCloseable {
         deploymentDetector = supplier;
     }
 
+    /**
+     * Returns the configuration object to change the storage factory.
+     *
+     * <p>Callers may configure the testing factory via
+     * {@code configureStorage().tests(testFactory)} and the production factory via
+     * {@code configureStorage().production(productionFactory)}.
+     *
+     * @return the storage factory configuration object
+     */
     public EnvironmentDependantValue<StorageFactory> configureStorage() {
         return this.storages;
     }
@@ -213,6 +225,17 @@ public final class ServerEnvironment implements AutoCloseable {
         return Optional.ofNullable(tracerFactory);
     }
 
+    /**
+     * Obtains the storage factory for the current environment.
+     *
+     * <p>For tests, if the value was not set, defaults to a new {@code InMemoryStorageFactory}.
+     * <p>For production, if the value was not set, throws a {@code NullPointerException}.
+     *
+     * @return {@code StorageFactory} instance for the storage for the current environment
+     * @throws NullPointerException
+     *         if the production {@code StorageFactory} was not
+     *         {@linkplain #configureStorage() configured} prior to the call
+     */
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
             if (storages.tests() == null) {
@@ -233,37 +256,41 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Assigns {@code TransportFactory} for the production mode of the application.
+     * Returns the configuration object to change the transport factory.
+     *
+     * <p>Callers may configure the testing factory via
+     * {@code configureTransport().tests(testFactory)} and the production factory via
+     * {@code configureTransport().production(productionFactory)}.
+     *
+     * @return the transport factory configuration object
      */
-    public void configureTransport(TransportFactory transportFactory) {
-        this.transportFactory = checkNotNull(transportFactory);
+    public EnvironmentDependantValue<TransportFactory> configureTransport() {
+        return transportFactories;
     }
 
     /**
-     * Obtains {@code TransportFactory} associated with this server environment.
-     *
+     * Obtains the transport factory for the current environment.
      * <p>If the factory is not assigned in the Production mode, throws
      * {@code NullPointerException} with the instruction to call
-     * {@link #configureTransport(TransportFactory)}.
+     * {@link #configureTransport()}.
      *
      * <p>If the factory is not assigned in the Tests mode, assigns the instance of
      * {@link InMemoryTransportFactory} and returns it.
      */
     public TransportFactory transportFactory() {
-        boolean production = environment().isProduction();
-        if (production) {
-            checkNotNull(
-                    transportFactory,
-                    "`%s` is not assigned. Please call `configureTransport()`.",
-                    TransportFactory.class.getName()
-            );
-            return transportFactory;
+        if (environment().isTests()) {
+            if (transportFactories.tests() == null) {
+                this.transportFactories.tests(InMemoryTransportFactory.newInstance());
+            }
+            return transportFactories.tests();
         }
 
-        if (transportFactory == null) {
-            this.transportFactory = InMemoryTransportFactory.newInstance();
-        }
-        return transportFactory;
+        checkNotNull(
+                transportFactories.production(),
+                "`%s` is not assigned. Please call `configureTransport()`.",
+                TransportFactory.class.getName()
+        );
+        return transportFactories.production();
     }
 
     /**
@@ -271,7 +298,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @VisibleForTesting
     public void reset() {
-        this.transportFactory = null;
+        this.transportFactories.nullifyBoth();
         this.tracerFactory = null;
         this.storages.nullifyBoth();
         this.delivery = Delivery.local();
@@ -287,8 +314,9 @@ public final class ServerEnvironment implements AutoCloseable {
         if (tracerFactory != null) {
             tracerFactory.close();
         }
-        if (transportFactory != null) {
-            transportFactory.close();
+        if (transportFactories.production() != null) {
+            transportFactories.production()
+                              .close();
         }
         if (storages.production() != null) {
             storages.production()
