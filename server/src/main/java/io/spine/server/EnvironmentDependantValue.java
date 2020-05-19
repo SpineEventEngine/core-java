@@ -58,10 +58,9 @@ public class EnvironmentDependantValue<P> {
     private @Nullable P testsValue;
     private final UnaryOperator<P> testsWrappingFunction;
 
-    private EnvironmentDependantValue(UnaryOperator<P> productionWrappingFunction,
-                                      UnaryOperator<P> testsWrappingFunction) {
-        this.productionWrappingFunction = productionWrappingFunction;
-        this.testsWrappingFunction = testsWrappingFunction;
+    private EnvironmentDependantValue(Builder<P> builder) {
+        this.productionWrappingFunction = builder.productionWrappingFunction;
+        this.testsWrappingFunction = builder.testsWrappingFunction;
     }
 
     /** Returns the value for the production environment. */
@@ -159,8 +158,8 @@ public class EnvironmentDependantValue<P> {
      */
     public static class Builder<P> {
 
-        private @Nullable UnaryOperator<P> productionWrappingFunction;
-        private @Nullable UnaryOperator<P> testsWrappingFunction;
+        private UnaryOperator<P> productionWrappingFunction;
+        private UnaryOperator<P> testsWrappingFunction;
 
         /**
          * Configures the wrapping function for the production environment.
@@ -198,14 +197,13 @@ public class EnvironmentDependantValue<P> {
          * @return a new instance of {@code EnvironmentDependantValue}
          */
         EnvironmentDependantValue<P> build() {
-            UnaryOperator<P> prodWrappingFunction = this.productionWrappingFunction == null
-                                                    ? UnaryOperator.identity()
-                                                    : this.productionWrappingFunction;
-            UnaryOperator<P> testsWrappingFunction = this.testsWrappingFunction == null
-                                                     ? UnaryOperator.identity()
-                                                     : this.testsWrappingFunction;
-            return new EnvironmentDependantValue<>(prodWrappingFunction,
-                                                   testsWrappingFunction);
+            this.productionWrappingFunction = this.productionWrappingFunction == null
+                                              ? UnaryOperator.identity()
+                                              : this.productionWrappingFunction;
+            this.testsWrappingFunction = this.testsWrappingFunction == null
+                                         ? UnaryOperator.identity()
+                                         : this.testsWrappingFunction;
+            return new EnvironmentDependantValue<>(this);
         }
     }
 }
