@@ -166,7 +166,8 @@ class ServerEnvironmentTest {
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
             StorageFactory factory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.configureStorage(factory);
+            serverEnvironment.configureStorage()
+                             .production(factory);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -198,7 +199,8 @@ class ServerEnvironmentTest {
         void getSet() {
             StorageFactory factory = new MemoizingStorageFactory();
 
-            serverEnvironment.configureStorageForTests(factory);
+            serverEnvironment.configureStorage()
+                             .tests(factory);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
