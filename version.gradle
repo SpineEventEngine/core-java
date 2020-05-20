@@ -34,7 +34,7 @@ ext {
     // Depend on `base` for the general definitions and a model compiler.
 
     /* TODO: 2020-05-20:serhii.lekariev: this version is not the most recent one.
-        bump to the freshest one, once `base` is done migrating to Gradle scripts on Kotlin. */
+        Bump to the freshest one, once `base` is done migrating to Gradle scripts on Kotlin. */
     spineBaseVersion = '1.5.10'
 
     // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.

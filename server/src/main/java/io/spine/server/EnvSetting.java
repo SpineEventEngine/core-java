@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * }
  * </pre>
  *
- * <p>{@code EnvironmentDependantValues} do not determine the environment themselves: it's up to the
+ * <p>{@code EnvSetting} values do not determine the environment themselves: it's up to the
  * caller to ask for the appropriate one.
  *
  * @param <P>
@@ -77,8 +77,7 @@ public final class EnvSetting<P> {
     /**
      * Returns the value for the production environment if it's present.
      *
-     * <p>If it's not present, assigns the specified default value while following the wrapping
-     * rules, and returns it.
+     * <p>If it's not present, assigns the specified default value and returns it
      */
     P productionOrAssignDefault(P defaultValue) {
         if (productionValue == null) {
@@ -98,8 +97,7 @@ public final class EnvSetting<P> {
     /**
      * Returns the value for the testing environment if it's present.
      *
-     * <p>If it's not present, assigns the specified default value while following the wrapping
-     * rules, and returns it.
+     * <p>If it's not present, assigns the specified default value and returns it.
      */
     P testsOrAssignDefault(P defaultValue) {
         if (testsValue == null) {

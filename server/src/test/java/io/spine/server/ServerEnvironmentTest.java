@@ -268,7 +268,6 @@ class ServerEnvironmentTest {
                        .setToTests();
             assertThat(serverEnvironment.transportFactory())
                     .isInstanceOf(InMemoryTransportFactory.class);
-
         }
     }
 
