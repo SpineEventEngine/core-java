@@ -273,7 +273,7 @@ class ServerEnvironmentTest {
     }
 
     @Nested
-    @DisplayName("close the resources")
+    @DisplayName("while closing resources")
     class TestClosesResources {
 
         private InMemoryTransportFactory transportFactory;
@@ -291,7 +291,7 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("close the transport and the storage factories")
+        @DisplayName("close the production transport and storage factories")
         void testCloses() throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
             serverEnv.useTransportFactory(transportFactory)
@@ -303,6 +303,22 @@ class ServerEnvironmentTest {
 
             assertThat(transportFactory.isOpen()).isFalse();
             assertThat(storageFactory.isClosed()).isTrue();
+        }
+
+        @Test
+        @DisplayName("leave the testing transport and storage factories open")
+        void testDoesNotClose() throws Exception {
+
+            ServerEnvironment serverEnv = ServerEnvironment.instance();
+            serverEnv.useTransportFactory(transportFactory)
+                     .forTests();
+            serverEnv.useStorageFactory(storageFactory)
+                     .forTests();
+
+            serverEnv.close();
+
+            assertThat(transportFactory.isOpen()).isTrue();
+            assertThat(storageFactory.isClosed()).isFalse();
         }
     }
 
