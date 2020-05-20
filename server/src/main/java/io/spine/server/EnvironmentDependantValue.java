@@ -39,8 +39,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *                          .build();
  * storages.configure(InMemoryStorageFactory.newInstance()).forProduction();
  *
+ * // As it was set.
+ * assertThat(storages.production()).isPresent();
+ *
  * // As it was wrapped.
- * assertThat(storages.production()).isInstanceOf(SystemAwareStorageFactory.class);
+ * assertThat(storages.production().get()).isInstanceOf(SystemAwareStorageFactory.class);
  * }
  * </pre>
  * <p>If no wrapping function is specified, the value is never wrapped.
@@ -161,7 +164,7 @@ public final class EnvironmentDependantValue<P> {
      *                      .build();
      *
      * value.configure(productionValue).forProduction();
-     * assertThat(config.production()).isEqualTo(productionValue);
+     * assertThat(config.production().get()).isEqualTo(productionValue);
      * }
      * </pre>
      *
@@ -176,7 +179,7 @@ public final class EnvironmentDependantValue<P> {
      *                      .build();
      *
      * value.configure(productionValue).forProduction();
-     * assertThat(config.production()).isEqualTo(someFunction.apply(productionValue));
+     * assertThat(config.production().get()).isEqualTo(someFunction.apply(productionValue));
      * }
      * </pre>
      *
