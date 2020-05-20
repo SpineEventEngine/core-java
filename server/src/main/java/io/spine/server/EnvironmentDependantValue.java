@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@code
  * EnvironmentDependantValue<StorageFactory> storages = EnvironmentDependantValue
  *                          .<StorageFactory>newBuilder()
- *                          .wrappingProduction(SystemAwareStorageFactory::wrap)
+ *                          .wrapProductionValue(SystemAwareStorageFactory::wrap)
  *                          .build();
  * storages.production(InMemoryStorageFactory.newInstance());
  *
@@ -51,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <P>
  *         the type of value
  */
-public class EnvironmentDependantValue<P> {
+public final class EnvironmentDependantValue<P> {
 
     private @Nullable P productionValue;
     private final UnaryOperator<P> productionWrappingFunction;
@@ -60,8 +60,8 @@ public class EnvironmentDependantValue<P> {
     private final UnaryOperator<P> testsWrappingFunction;
 
     private EnvironmentDependantValue(Builder<P> builder) {
-        this.productionWrappingFunction = builder.productionWrappingFunction;
-        this.testsWrappingFunction = builder.testsWrappingFunction;
+        this.productionWrappingFunction = builder.wrapProduction;
+        this.testsWrappingFunction = builder.wrapTests;
     }
 
     /**
@@ -172,7 +172,7 @@ public class EnvironmentDependantValue<P> {
      * {@code
      * EnvironmentDependantValue<?> config = EnvironmentDependantValue
      *                      .<?>newBuilder()
-     *                      .wrappingProduction(someFunction)
+     *                      .wrapProductionValue(someFunction)
      *                      .build();
      *
      * config.production(productionValue);
@@ -187,8 +187,8 @@ public class EnvironmentDependantValue<P> {
      */
     public static class Builder<P> {
 
-        private UnaryOperator<P> productionWrappingFunction;
-        private UnaryOperator<P> testsWrappingFunction;
+        private UnaryOperator<P> wrapProduction;
+        private UnaryOperator<P> wrapTests;
 
         /**
          * Configures the wrapping function for the production environment.
@@ -199,9 +199,9 @@ public class EnvironmentDependantValue<P> {
          * @param fn
          *         a wrapping function
          */
-        public Builder<P> wrappingProduction(UnaryOperator<P> fn) {
+        public Builder<P> wrapProductionValue(UnaryOperator<P> fn) {
             checkNotNull(fn);
-            this.productionWrappingFunction = fn;
+            this.wrapProduction = fn;
             return this;
         }
 
@@ -214,9 +214,9 @@ public class EnvironmentDependantValue<P> {
          * @param fn
          *         a wrapping function
          */
-        public Builder<P> wrappingTests(UnaryOperator<P> fn) {
+        public Builder<P> wrapTestValue(UnaryOperator<P> fn) {
             checkNotNull(fn);
-            this.testsWrappingFunction = fn;
+            this.wrapTests = fn;
             return this;
         }
 
@@ -226,12 +226,12 @@ public class EnvironmentDependantValue<P> {
          * @return a new instance of {@code EnvironmentDependantValue}
          */
         EnvironmentDependantValue<P> build() {
-            this.productionWrappingFunction = this.productionWrappingFunction == null
-                                              ? UnaryOperator.identity()
-                                              : this.productionWrappingFunction;
-            this.testsWrappingFunction = this.testsWrappingFunction == null
-                                         ? UnaryOperator.identity()
-                                         : this.testsWrappingFunction;
+            this.wrapProduction = this.wrapProduction == null
+                                  ? UnaryOperator.identity()
+                                  : this.wrapProduction;
+            this.wrapTests = this.wrapTests == null
+                             ? UnaryOperator.identity()
+                             : this.wrapTests;
             return new EnvironmentDependantValue<>(this);
         }
     }

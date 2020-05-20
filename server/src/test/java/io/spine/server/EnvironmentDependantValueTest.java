@@ -46,7 +46,7 @@ class EnvironmentDependantValueTest {
         String productionPrefix = "Production_";
         EnvironmentDependantValue<String> configString = EnvironmentDependantValue
                 .<String>newBuilder()
-                .wrappingProduction(config -> productionPrefix + config)
+                .wrapProductionValue(config -> productionPrefix + config)
                 .build();
         configString.configure(CONFIG_STRING)
                     .forProduction();
@@ -60,7 +60,7 @@ class EnvironmentDependantValueTest {
         String testPrefix = "Test_";
         EnvironmentDependantValue<String> configString = EnvironmentDependantValue
                 .<String>newBuilder()
-                .wrappingTests(config -> testPrefix + config)
+                .wrapTestValue(config -> testPrefix + config)
                 .build();
         configString.configure(CONFIG_STRING)
                     .forTests();

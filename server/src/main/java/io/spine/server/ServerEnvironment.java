@@ -83,8 +83,8 @@ public final class ServerEnvironment implements AutoCloseable {
     private final EnvironmentDependantValue<StorageFactory> storages =
             EnvironmentDependantValue
                     .<StorageFactory>newBuilder()
-                    .wrappingTests(SystemAwareStorageFactory::wrap)
-                    .wrappingProduction(SystemAwareStorageFactory::wrap)
+                    .wrapTestValue(SystemAwareStorageFactory::wrap)
+                    .wrapProductionValue(SystemAwareStorageFactory::wrap)
                     .build();
 
     /**
