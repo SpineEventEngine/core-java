@@ -77,7 +77,7 @@ public final class EnvSetting<P> {
     /**
      * Returns the value for the production environment if it's present.
      *
-     * <p>If it's not present, assigns the specified default value and returns it
+     * <p>If it's not present, assigns the specified default value and returns it.
      */
     P productionOrAssignDefault(P defaultValue) {
         if (productionValue == null) {

@@ -44,7 +44,7 @@ class EnvSettingTest {
 
     @Test
     @DisplayName("return the production value")
-    void returnWhenNotWrappedProduction() {
+    void returnProdValue() {
         InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
         storageFactory.configure(factory)
@@ -54,7 +54,7 @@ class EnvSettingTest {
 
     @Test
     @DisplayName("return the value for tests")
-    void returnWhenNotWrappedTests() {
+    void returnTestValue() {
         InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
         storageFactory.configure(factory)
