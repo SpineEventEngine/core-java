@@ -22,6 +22,7 @@ package io.spine.server;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -63,14 +64,20 @@ public class EnvironmentDependantValue<P> {
         this.testsWrappingFunction = builder.testsWrappingFunction;
     }
 
-    /** Returns the value for the production environment. */
-    @Nullable P production() {
-        return productionValue;
+    /**
+     * Returns the value for the production environment if it was set, an empty {@code Optional}
+     * otherwise.
+     */
+    Optional<P> production() {
+        return Optional.ofNullable(productionValue);
     }
 
-    /** Returns the value for the testing environment. */
-    @Nullable P tests() {
-        return testsValue;
+    /**
+     * Returns the value for the testing environment if it was set, an empty {@code Optional}
+     * otherwise.
+     */
+    Optional<P> tests() {
+        return Optional.ofNullable(testsValue);
     }
 
     /** Changes the production and the testing values to {@code null}. */
@@ -80,31 +87,16 @@ public class EnvironmentDependantValue<P> {
     }
 
     /**
-     * Changes the production value to the specified one, such that later calls to
-     * {@link EnvironmentDependantValue#production()} return either {@code value} if no wrapping
-     * function was specified, or {@code wrappingFunction.apply(value)} if wrapping function was
-     * specified.
+     * Allows to configure the specified value for testing or production as follows:
+     *
+     * {@code value.configure(testingValue).forTests();}
      *
      * @param value
-     *         a new value for the production environment
+     *         value to assign to one of environments
      */
-    public void production(P value) {
+    public Configurator configure(P value) {
         checkNotNull(value);
-        this.productionValue = productionWrappingFunction.apply(value);
-    }
-
-    /**
-     * Changes the test environment  value to the specified one, such that later calls to
-     * {@link EnvironmentDependantValue#tests()} ()} return either {@code value} if no wrapping
-     * function was specified, or {@code wrappingFunction.apply(value)} if wrapping function was
-     * specified.
-     *
-     * @param value
-     *         a new value for the testing environment
-     */
-    public void tests(P value) {
-        checkNotNull(value);
-        this.testsValue = testsWrappingFunction.apply(value);
+        return new Configurator(value);
     }
 
     /**
@@ -116,6 +108,43 @@ public class EnvironmentDependantValue<P> {
      */
     public static <P> Builder<P> newBuilder() {
         return new Builder<>();
+    }
+
+    /**
+     * A intermediate object that facilitates the following API:
+     *
+     * {@code value.configure(prodValue).forProduction();}.
+     *
+     * @implNote note the private constructor. {@code Configurator} objects are not meant to
+     *         be instantiated by anyone other than the class that nests it.
+     */
+    public class Configurator {
+
+        private final P value;
+
+        private Configurator(P value) {
+            this.value = value;
+        }
+
+        /**
+         * Changes the test environment value to the one specified by {@code configure},
+         * such that later calls to {@link EnvironmentDependantValue#tests()} return
+         * either {@code value} if no wrapping function was specified, or
+         * {@code wrappingFunction.apply(value)} if wrapping function was specified.
+         */
+        public void forTests() {
+            testsValue = testsWrappingFunction.apply(value);
+        }
+
+        /**
+         * Changes the production value to the one specified by {@code configure},
+         * such that later calls to {@link EnvironmentDependantValue#production()} return
+         * either {@code value} if no wrapping function was specified, or
+         * {@code wrappingFunction.apply(value)} if wrapping function was specified.
+         */
+        public void forProduction() {
+            productionValue = productionWrappingFunction.apply(value);
+        }
     }
 
     /**
@@ -165,7 +194,7 @@ public class EnvironmentDependantValue<P> {
          * Configures the wrapping function for the production environment.
          *
          * <p>If no function is specified, {@link EnvironmentDependantValue#tests()}
-         * returns whatever was specified to the {@link EnvironmentDependantValue#tests(Object)}.
+         * returns whatever was specified to the {@link EnvironmentDependantValue#configure(Object)}.
          *
          * @param fn
          *         a wrapping function
@@ -180,7 +209,7 @@ public class EnvironmentDependantValue<P> {
          * Configures the wrapping function for the testing environment.
          *
          * If no function is specified, {@link EnvironmentDependantValue#production()} returns
-         * whatever was specified to the {@link EnvironmentDependantValue#production(Object)}.
+         * whatever was specified to the {@link EnvironmentDependantValue#configure(Object)}.
          *
          * @param fn
          *         a wrapping function

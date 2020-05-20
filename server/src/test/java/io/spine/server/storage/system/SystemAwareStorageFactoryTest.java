@@ -70,7 +70,7 @@ class SystemAwareStorageFactoryTest {
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
-        serverEnv.configureStorage().production(productionStorage);
+        serverEnv.useStorageFactory(productionStorage).forProduction();
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
@@ -85,7 +85,7 @@ class SystemAwareStorageFactoryTest {
     void wrapTestStorage() {
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory testStorage = InMemoryStorageFactory.newInstance();
-        serverEnv.configureStorage().tests(testStorage);
+        serverEnv.useStorageFactory(testStorage).forTests();
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;

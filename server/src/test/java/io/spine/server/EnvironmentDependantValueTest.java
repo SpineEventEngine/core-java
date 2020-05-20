@@ -23,31 +23,23 @@ package io.spine.server;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("EnvironmentDependantValue should")
+@DisplayName("`EnvironmentDependantValue` should")
 class EnvironmentDependantValueTest {
 
     private static final String CONFIG_STRING = "config_string";
 
     @Test
-    @DisplayName("not allow to set a null production value")
+    @DisplayName("not allows to configure a `null` value")
     void nullsForProductionForbidden() {
         EnvironmentDependantValue<String> configString = EnvironmentDependantValue
                 .<String>newBuilder()
                 .build();
-        assertThrows(NullPointerException.class, () -> configString.production(null));
+        assertThrows(NullPointerException.class, () -> configString.configure(null));
     }
 
-    @Test
-    @DisplayName("not allow to set a null testing value")
-    void nullsForTestsForbidden() {
-        EnvironmentDependantValue<String> configString = EnvironmentDependantValue
-                .<String>newBuilder()
-                .build();
-        assertThrows(NullPointerException.class, () -> configString.tests(null));
-    }
     @Test
     @DisplayName("return a wrapped production value")
     void wrapProduction() {
@@ -56,8 +48,10 @@ class EnvironmentDependantValueTest {
                 .<String>newBuilder()
                 .wrappingProduction(config -> productionPrefix + config)
                 .build();
-        configString.production(CONFIG_STRING);
-        assertThat(configString.production()).isEqualTo(productionPrefix + CONFIG_STRING);
+        configString.configure(CONFIG_STRING)
+                    .forProduction();
+        assertThat(configString.production())
+                .hasValue(productionPrefix + CONFIG_STRING);
     }
 
     @Test
@@ -68,8 +62,10 @@ class EnvironmentDependantValueTest {
                 .<String>newBuilder()
                 .wrappingTests(config -> testPrefix + config)
                 .build();
-        configString.tests(CONFIG_STRING);
-        assertThat(configString.tests()).isEqualTo(testPrefix + CONFIG_STRING);
+        configString.configure(CONFIG_STRING)
+                    .forTests();
+        assertThat(configString.tests())
+                .hasValue(testPrefix + CONFIG_STRING);
 
     }
 
@@ -79,8 +75,9 @@ class EnvironmentDependantValueTest {
         EnvironmentDependantValue<String> configString = EnvironmentDependantValue
                 .<String>newBuilder()
                 .build();
-        configString.production(CONFIG_STRING);
-        assertThat(configString.production()).isEqualTo(CONFIG_STRING);
+        configString.configure(CONFIG_STRING)
+                    .forProduction();
+        assertThat(configString.production()).hasValue(CONFIG_STRING);
     }
 
     @Test
@@ -89,7 +86,8 @@ class EnvironmentDependantValueTest {
         EnvironmentDependantValue<String> configString = EnvironmentDependantValue
                 .<String>newBuilder()
                 .build();
-        configString.tests(CONFIG_STRING);
-        assertThat(configString.tests()).isEqualTo(CONFIG_STRING);
+        configString.configure(CONFIG_STRING)
+                    .forTests();
+        assertThat(configString.tests()).hasValue(CONFIG_STRING);
     }
 }

@@ -23,6 +23,7 @@ package io.spine.server;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Environment;
 import io.spine.base.Identifier;
+import io.spine.server.EnvironmentDependantValue.Configurator;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -39,6 +40,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * The server conditions and configuration under which the application operates.
@@ -202,13 +204,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * Returns the configuration object to change the storage factory.
      *
      * <p>Callers may configure the testing factory via
-     * {@code configureStorage().tests(testFactory)} and the production factory via
-     * {@code configureStorage().production(productionFactory)}.
+     * {@code useStorageFactory(testFactory).forTests()} and the production factory via
+     * {@code useStorageFactory(productionFactory).forProduction()}.
      *
      * @return the storage factory configuration object
      */
-    public EnvironmentDependantValue<StorageFactory> configureStorage() {
-        return this.storages;
+    public Configurator useStorageFactory(StorageFactory storage) {
+        return this.storages.configure(storage);
     }
 
     /**
@@ -234,21 +236,28 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return {@code StorageFactory} instance for the storage for the current environment
      * @throws NullPointerException
      *         if the production {@code StorageFactory} was not
-     *         {@linkplain #configureStorage() configured} prior to the call
+     *         {@linkplain #useStorageFactory(StorageFactory)} configured} prior to the call
      */
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
-            if (storages.tests() == null) {
-                storages.tests(InMemoryStorageFactory.newInstance());
+            if (!storages.tests()
+                         .isPresent()) {
+                storages.configure(InMemoryStorageFactory.newInstance())
+                        .forTests();
             }
-            return storages.tests();
+            return storages.tests()
+                           .get();
+
         }
-        checkNotNull(storages.production(),
-                     "Production `%s` is not configured." +
-                             " Please call `configureStorage()`.",
-                     StorageFactory.class.getSimpleName()
-        );
-        return storages.production();
+
+        StorageFactory result = storages
+                .production()
+                .orElseThrow(() -> new NullPointerException(format(
+                        "Production `%s` is not configured." +
+                                " Please call `configureStorage()`.",
+                        StorageFactory.class.getSimpleName())));
+
+        return result;
     }
 
     private static Environment environment() {
@@ -264,33 +273,37 @@ public final class ServerEnvironment implements AutoCloseable {
      *
      * @return the transport factory configuration object
      */
-    public EnvironmentDependantValue<TransportFactory> configureTransport() {
-        return transportFactories;
+    public Configurator useTransportFactory(TransportFactory transportFactory) {
+        return transportFactories.configure(transportFactory);
     }
 
     /**
      * Obtains the transport factory for the current environment.
      * <p>If the factory is not assigned in the Production mode, throws
      * {@code NullPointerException} with the instruction to call
-     * {@link #configureTransport()}.
+     * {@link #useTransportFactory(TransportFactory)}.
      *
      * <p>If the factory is not assigned in the Tests mode, assigns the instance of
      * {@link InMemoryTransportFactory} and returns it.
      */
     public TransportFactory transportFactory() {
         if (environment().isTests()) {
-            if (transportFactories.tests() == null) {
-                this.transportFactories.tests(InMemoryTransportFactory.newInstance());
+            if (!transportFactories.tests()
+                                   .isPresent()) {
+                this.transportFactories.configure(InMemoryTransportFactory.newInstance())
+                                       .forTests();
             }
-            return transportFactories.tests();
+            return transportFactories.tests()
+                                     .get();
         }
 
-        checkNotNull(
-                transportFactories.production(),
-                "`%s` is not assigned. Please call `configureTransport()`.",
-                TransportFactory.class.getName()
-        );
-        return transportFactories.production();
+        TransportFactory result = transportFactories
+                .production()
+                .orElseThrow(() -> new NullPointerException(format(
+                        "`%s` is not assigned. Please call `configureTransport()`.",
+                        TransportFactory.class.getName())));
+
+        return result;
     }
 
     /**
@@ -309,17 +322,20 @@ public final class ServerEnvironment implements AutoCloseable {
      * Releases resources associated with this instance.
      */
     @Override
-    @SuppressWarnings("ConstantConditions" /* ensured by a check */)
     public void close() throws Exception {
         if (tracerFactory != null) {
             tracerFactory.close();
         }
-        if (transportFactories.production() != null) {
+        if (transportFactories.production()
+                              .isPresent()) {
             transportFactories.production()
+                              .get()
                               .close();
         }
-        if (storages.production() != null) {
+        if (storages.production()
+                    .isPresent()) {
             storages.production()
+                    .get()
                     .close();
         }
     }

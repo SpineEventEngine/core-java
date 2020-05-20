@@ -166,8 +166,8 @@ class ServerEnvironmentTest {
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
             StorageFactory factory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.configureStorage()
-                             .production(factory);
+            serverEnvironment.useStorageFactory(factory)
+                             .forProduction();
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -199,8 +199,8 @@ class ServerEnvironmentTest {
         void getSet() {
             StorageFactory factory = new MemoizingStorageFactory();
 
-            serverEnvironment.configureStorage()
-                             .tests(factory);
+            serverEnvironment.useStorageFactory(factory)
+                             .forTests();
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -235,8 +235,8 @@ class ServerEnvironmentTest {
         @DisplayName("return configured instance in Production")
         void productionValue() {
             TransportFactory factory = new StubTransportFactory();
-            serverEnvironment.configureTransport()
-                             .production(factory);
+            serverEnvironment.useTransportFactory(factory)
+                             .forProduction();
             assertThat(serverEnvironment.transportFactory())
                     .isEqualTo(factory);
         }
@@ -256,8 +256,8 @@ class ServerEnvironmentTest {
         void setExplicitly() {
             TransportFactory factory = new StubTransportFactory();
 
-            serverEnvironment.configureTransport()
-                             .tests(factory);
+            serverEnvironment.useTransportFactory(factory)
+                             .forTests();
             assertThat(serverEnvironment.transportFactory()).isEqualTo(factory);
         }
 
