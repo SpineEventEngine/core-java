@@ -23,7 +23,7 @@ package io.spine.server;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Environment;
 import io.spine.base.Identifier;
-import io.spine.server.EnvironmentDependantValue.Configurator;
+import io.spine.server.EnvSetting.Configurator;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -80,12 +80,11 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Storage factories for both the production and the testing environments.
      */
-    private final EnvironmentDependantValue<StorageFactory> storages =
-            EnvironmentDependantValue
-                    .<StorageFactory>newBuilder()
-                    .wrapTestValue(SystemAwareStorageFactory::wrap)
-                    .wrapProductionValue(SystemAwareStorageFactory::wrap)
-                    .build();
+    private final EnvSetting<StorageFactory> storages = EnvSetting
+            .<StorageFactory>newBuilder()
+            .wrapTestValue(SystemAwareStorageFactory::wrap)
+            .wrapProductionValue(SystemAwareStorageFactory::wrap)
+            .build();
 
     /**
      * The factory of {@code Tracer}s used in this environment.
@@ -95,10 +94,9 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * The production and testing factories for channel-based transport.
      */
-    private final EnvironmentDependantValue<TransportFactory> transportFactories =
-            EnvironmentDependantValue
-                    .<TransportFactory>newBuilder()
-                    .build();
+    private final EnvSetting<TransportFactory> transportFactories = EnvSetting
+            .<TransportFactory>newBuilder()
+            .build();
 
     /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
@@ -254,7 +252,7 @@ public final class ServerEnvironment implements AutoCloseable {
                 .production()
                 .orElseThrow(() -> newIllegalStateException(
                         "Production `%s` is not configured." +
-                                " Please call `configureStorage()`.",
+                                " Please call `useStorage(...).forProduction()`.",
                         StorageFactory.class.getSimpleName()));
 
         return result;
@@ -268,8 +266,8 @@ public final class ServerEnvironment implements AutoCloseable {
      * Returns the configuration object to change the transport factory.
      *
      * <p>Callers may configure the testing factory via
-     * {@code configureTransport().tests(testFactory)} and the production factory via
-     * {@code configureTransport().production(productionFactory)}.
+     * {@code useTransportFactory(testFactory).forTests()} and the production factory via
+     * {@code useTransportFactory(productionFactory).production()}.
      *
      * @return the transport factory configuration object
      */
@@ -300,7 +298,7 @@ public final class ServerEnvironment implements AutoCloseable {
         TransportFactory result = transportFactories
                 .production()
                 .orElseThrow(() -> newIllegalStateException(
-                        "`%s` is not assigned. Please call `configureTransport()`.",
+                        "`%s` is not assigned. Please call `useTransport(...).forProduction()`.",
                         TransportFactory.class.getName()));
 
         return result;

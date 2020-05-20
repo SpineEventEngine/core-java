@@ -33,17 +33,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Allows configuring a wrapping function to adjust mutations as such:
  * <pre>
  * {@code
- * EnvironmentDependantValue<StorageFactory> storages = EnvironmentDependantValue
+ * EnvSetting<StorageFactory> storageFactory = EnvSetting
  *                          .<StorageFactory>newBuilder()
  *                          .wrapProductionValue(SystemAwareStorageFactory::wrap)
  *                          .build();
- * storages.configure(InMemoryStorageFactory.newInstance()).forProduction();
+ * storageFactory.configure(InMemoryStorageFactory.newInstance()).forProduction();
  *
  * // As it was set.
- * assertThat(storages.production()).isPresent();
+ * assertThat(storageFactory.production()).isPresent();
  *
  * // As it was wrapped.
- * assertThat(storages.production().get()).isInstanceOf(SystemAwareStorageFactory.class);
+ * assertThat(storageFactory.production().get()).isInstanceOf(SystemAwareStorageFactory.class);
  * }
  * </pre>
  * <p>If no wrapping function is specified, the value is never wrapped.
@@ -54,7 +54,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <P>
  *         the type of value
  */
-public final class EnvironmentDependantValue<P> {
+public final class EnvSetting<P> {
 
     private @Nullable P productionValue;
     private final UnaryOperator<P> productionWrappingFunction;
@@ -62,7 +62,7 @@ public final class EnvironmentDependantValue<P> {
     private @Nullable P testsValue;
     private final UnaryOperator<P> testsWrappingFunction;
 
-    private EnvironmentDependantValue(Builder<P> builder) {
+    private EnvSetting(Builder<P> builder) {
         this.productionWrappingFunction = builder.wrapProduction;
         this.testsWrappingFunction = builder.wrapTests;
     }
@@ -131,7 +131,7 @@ public final class EnvironmentDependantValue<P> {
 
         /**
          * Changes the test environment value to the one specified by {@code configure},
-         * such that later calls to {@link EnvironmentDependantValue#tests()} return
+         * such that later calls to {@link EnvSetting#tests()} return
          * either {@code value} if no wrapping function was specified, or
          * {@code wrappingFunction.apply(value)} if wrapping function was specified.
          */
@@ -141,7 +141,7 @@ public final class EnvironmentDependantValue<P> {
 
         /**
          * Changes the production value to the one specified by {@code configure},
-         * such that later calls to {@link EnvironmentDependantValue#production()} return
+         * such that later calls to {@link EnvSetting#production()} return
          * either {@code value} if no wrapping function was specified, or
          * {@code wrappingFunction.apply(value)} if wrapping function was specified.
          */
@@ -159,7 +159,7 @@ public final class EnvironmentDependantValue<P> {
      * returns whatever was specified through the mutation method, e.g.
      * <pre>
      * {@code
-     * EnvironmentDependantValue<?> value = EnvironmentDependantValue
+     * EnvSetting<?> value = EnvSetting
      *                      .<?>newBuilder()
      *                      .build();
      *
@@ -173,7 +173,7 @@ public final class EnvironmentDependantValue<P> {
      *
      * <pre>
      * {@code
-     * EnvironmentDependantValue<?> value = EnvironmentDependantValue
+     * EnvSetting<?> value = EnvSetting
      *                      .<?>newBuilder()
      *                      .wrapProductionValue(someFunction)
      *                      .build();
@@ -196,8 +196,8 @@ public final class EnvironmentDependantValue<P> {
         /**
          * Configures the wrapping function for the production environment.
          *
-         * <p>If no function is specified, {@link EnvironmentDependantValue#tests()}
-         * returns whatever was specified to the {@link EnvironmentDependantValue#configure(Object)}.
+         * <p>If no function is specified, {@link EnvSetting#tests()}
+         * returns whatever was specified to the {@link EnvSetting#configure(Object)}.
          *
          * @param fn
          *         a wrapping function
@@ -211,8 +211,8 @@ public final class EnvironmentDependantValue<P> {
         /**
          * Configures the wrapping function for the testing environment.
          *
-         * If no function is specified, {@link EnvironmentDependantValue#production()} returns
-         * whatever was specified to the {@link EnvironmentDependantValue#configure(Object)}.
+         * If no function is specified, {@link EnvSetting#production()} returns
+         * whatever was specified to the {@link EnvSetting#configure(Object)}.
          *
          * @param fn
          *         a wrapping function
@@ -224,18 +224,18 @@ public final class EnvironmentDependantValue<P> {
         }
 
         /**
-         * Returns a new instance of the {@code EnvironmentDependantValue}.
+         * Returns a new instance of the {@code EnvSetting}.
          *
-         * @return a new instance of {@code EnvironmentDependantValue}
+         * @return a new instance of {@code EnvSetting}
          */
-        EnvironmentDependantValue<P> build() {
+        EnvSetting<P> build() {
             this.wrapProduction = this.wrapProduction == null
                                   ? UnaryOperator.identity()
                                   : this.wrapProduction;
             this.wrapTests = this.wrapTests == null
                              ? UnaryOperator.identity()
                              : this.wrapTests;
-            return new EnvironmentDependantValue<>(this);
+            return new EnvSetting<>(this);
         }
     }
 }
