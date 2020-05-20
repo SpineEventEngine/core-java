@@ -29,7 +29,6 @@ import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -234,7 +233,7 @@ public final class ServerEnvironment implements AutoCloseable {
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-            return storageFactory.testsOrAssignDefault(SystemAwareStorageFactory.wrap(factory));
+            return storageFactory.testsOrAssignDefault(wrap(factory));
         }
 
         StorageFactory result = storageFactory
