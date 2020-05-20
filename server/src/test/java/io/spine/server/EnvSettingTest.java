@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("`EnvSetting` should")
 class EnvSettingTest {
 
-    private static final UnaryOperator<StorageFactory> WRAPPER_FUNCTION = SystemAwareStorageFactory::wrap;
+    private static final UnaryOperator<StorageFactory> WRAPPER_FN = SystemAwareStorageFactory::wrap;
 
     @Test
     @DisplayName("not allows to configure a `null` value")
@@ -53,7 +53,7 @@ class EnvSettingTest {
     void wrapProduction() {
         EnvSetting<StorageFactory> storageFactory = EnvSetting
                 .<StorageFactory>newBuilder()
-                .wrapProductionValue(WRAPPER_FUNCTION)
+                .wrapProductionValue(WRAPPER_FN)
                 .build();
         storageFactory.configure(InMemoryStorageFactory.newInstance())
                       .forProduction();
@@ -65,7 +65,7 @@ class EnvSettingTest {
     void wrapTests() {
         EnvSetting<StorageFactory> storageFactory = EnvSetting
                 .<StorageFactory>newBuilder()
-                .wrapTestValue(WRAPPER_FUNCTION)
+                .wrapTestValue(WRAPPER_FN)
                 .build();
         storageFactory.configure(InMemoryStorageFactory.newInstance())
                       .forTests();

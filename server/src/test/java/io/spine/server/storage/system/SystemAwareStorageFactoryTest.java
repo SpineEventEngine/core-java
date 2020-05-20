@@ -65,8 +65,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap production storage")
     void wrapProdStorage() {
-        Environment.instance()
-                   .setToProduction();
+        Environment.instance().setToProduction();
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
@@ -76,8 +75,7 @@ class SystemAwareStorageFactoryTest {
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
         assertThat(systemAware.delegate()).isEqualTo(productionStorage);
 
-        Environment.instance()
-                   .reset();
+        Environment.instance().reset();
     }
 
     @Test
@@ -163,8 +161,7 @@ class SystemAwareStorageFactoryTest {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         BoundedContextBuilder contextBuilder =
-                BoundedContext.multitenant(CONTEXT.name()
-                                                  .getValue());
+                BoundedContext.multitenant(CONTEXT.name().getValue());
         BoundedContext context = contextBuilder.build();
         BoundedContext systemContext = systemOf(context);
         ContextSpec systemSpec = systemContext.spec();

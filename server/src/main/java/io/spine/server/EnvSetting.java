@@ -60,11 +60,11 @@ public final class EnvSetting<P> {
     private final UnaryOperator<P> wrapProductionValue;
 
     private @Nullable P testsValue;
-    private final UnaryOperator<P> wrapTestValue;
+    private final UnaryOperator<P> wrapTestsValue;
 
     private EnvSetting(Builder<P> builder) {
         this.wrapProductionValue = builder.wrapProduction;
-        this.wrapTestValue = builder.wrapTests;
+        this.wrapTestsValue = builder.wrapTests;
     }
 
     /**
@@ -176,7 +176,7 @@ public final class EnvSetting<P> {
          * {@code wrappingFunction.apply(value)} if wrapping function was specified.
          */
         public void forTests() {
-            testsValue = wrapTestValue.apply(value);
+            testsValue = wrapTestsValue.apply(value);
         }
 
         /**

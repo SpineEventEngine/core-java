@@ -308,7 +308,6 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("leave the testing transport and storage factories open")
         void testDoesNotClose() throws Exception {
-
             ServerEnvironment serverEnv = ServerEnvironment.instance();
             serverEnv.useTransportFactory(transportFactory)
                      .forTests();
