@@ -43,7 +43,7 @@ class EnvSettingTest {
     }
 
     @Test
-    @DisplayName("return an unwrapped production value if no wrapping function was specified")
+    @DisplayName("return the production value")
     void returnWhenNotWrappedProduction() {
         InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
@@ -53,13 +53,33 @@ class EnvSettingTest {
     }
 
     @Test
-    @DisplayName("return an unwrapped test value if no wrapping function was specified")
+    @DisplayName("return the value for tests")
     void returnWhenNotWrappedTests() {
         InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
         storageFactory.configure(factory)
                       .forTests();
         assertTestsMatches(storageFactory, s -> s == factory);
+    }
+
+    @Test
+    @DisplayName("should mutate the setting when using `testsOrAssignDefault`")
+    void testOrAssignDefault() {
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
+        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+
+        assertThat(storageFactory.testsOrAssignDefault(factory)).isSameInstanceAs(factory);
+        assertThat(storageFactory.tests()).hasValue(factory);
+    }
+
+    @Test
+    @DisplayName("should mutate the setting when using `productionOrAssignDefault`")
+    void prodOrAssignDefault() {
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
+        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+
+        assertThat(storageFactory.productionOrAssignDefault(factory)).isSameInstanceAs(factory);
+        assertThat(storageFactory.production()).hasValue(factory);
     }
 
     @Test

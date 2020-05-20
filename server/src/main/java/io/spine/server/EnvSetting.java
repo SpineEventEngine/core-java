@@ -29,14 +29,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A mutable value that may differ for the production and testing environments.
  *
- * E.g.
+ * <p>For example:
  * <pre>
  * {@code
  * EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
  * storageFactory.configure(InMemoryStorageFactory.newInstance()).forProduction();
  *
  * assertThat(storageFactory.production()).isPresent();
- * assertThat(stroageFactory.tests()).isEmpty();
+ * assertThat(storageFactory.tests()).isEmpty();
  * }
  * </pre>
  *
