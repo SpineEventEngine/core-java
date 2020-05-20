@@ -40,7 +40,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The server conditions and configuration under which the application operates.
@@ -231,10 +231,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * Obtains the storage factory for the current environment.
      *
      * <p>For tests, if the value was not set, defaults to a new {@code InMemoryStorageFactory}.
-     * <p>For production, if the value was not set, throws a {@code NullPointerException}.
+     * <p>For production, if the value was not set, throws a {@code IllegalStateException}.
      *
      * @return {@code StorageFactory} instance for the storage for the current environment
-     * @throws NullPointerException
+     * @throws IllegalStateException
      *         if the production {@code StorageFactory} was not
      *         {@linkplain #useStorageFactory(StorageFactory)} configured} prior to the call
      */
@@ -252,10 +252,10 @@ public final class ServerEnvironment implements AutoCloseable {
 
         StorageFactory result = storages
                 .production()
-                .orElseThrow(() -> new NullPointerException(format(
+                .orElseThrow(() -> newIllegalStateException(
                         "Production `%s` is not configured." +
                                 " Please call `configureStorage()`.",
-                        StorageFactory.class.getSimpleName())));
+                        StorageFactory.class.getSimpleName()));
 
         return result;
     }
@@ -280,7 +280,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Obtains the transport factory for the current environment.
      * <p>If the factory is not assigned in the Production mode, throws
-     * {@code NullPointerException} with the instruction to call
+     * {@code IllegalStateException} with the instruction to call
      * {@link #useTransportFactory(TransportFactory)}.
      *
      * <p>If the factory is not assigned in the Tests mode, assigns the instance of
@@ -299,9 +299,9 @@ public final class ServerEnvironment implements AutoCloseable {
 
         TransportFactory result = transportFactories
                 .production()
-                .orElseThrow(() -> new NullPointerException(format(
+                .orElseThrow(() -> newIllegalStateException(
                         "`%s` is not assigned. Please call `configureTransport()`.",
-                        TransportFactory.class.getName())));
+                        TransportFactory.class.getName()));
 
         return result;
     }

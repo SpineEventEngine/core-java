@@ -157,9 +157,9 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("throwing NPE if not configured in the Production mode")
+        @DisplayName("throwing an `IllegalStateException` if not configured in the Production mode")
         void throwsIfNotConfigured() {
-            assertThrows(NullPointerException.class, serverEnvironment::storageFactory);
+            assertThrows(IllegalStateException.class, serverEnvironment::storageFactory);
         }
 
         @Test
@@ -226,9 +226,9 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("throw NPE if not configured")
+        @DisplayName("throw an `IllegalStateException` if not configured")
         void throwsIfNotConfigured() {
-            assertThrows(NullPointerException.class, serverEnvironment::transportFactory);
+            assertThrows(IllegalStateException.class, serverEnvironment::transportFactory);
         }
 
         @Test
