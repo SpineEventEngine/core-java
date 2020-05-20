@@ -22,13 +22,11 @@ package io.spine.server;
 
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -37,48 +35,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("`EnvSetting` should")
 class EnvSettingTest {
 
-    private static final UnaryOperator<StorageFactory> WRAPPER_FN = SystemAwareStorageFactory::wrap;
-
     @Test
     @DisplayName("not allows to configure a `null` value")
     void nullsForProductionForbidden() {
-        EnvSetting<?> config = EnvSetting
-                .<String>newBuilder()
-                .build();
+        EnvSetting<?> config = new EnvSetting();
         assertThrows(NullPointerException.class, () -> config.configure(null));
-    }
-
-    @Test
-    @DisplayName("return a wrapped production value")
-    void wrapProduction() {
-        EnvSetting<StorageFactory> storageFactory = EnvSetting
-                .<StorageFactory>newBuilder()
-                .wrapProductionValue(WRAPPER_FN)
-                .build();
-        storageFactory.configure(InMemoryStorageFactory.newInstance())
-                      .forProduction();
-        assertProductionMatches(storageFactory, s -> s instanceof SystemAwareStorageFactory);
-    }
-
-    @Test
-    @DisplayName("return a wrapped test value")
-    void wrapTests() {
-        EnvSetting<StorageFactory> storageFactory = EnvSetting
-                .<StorageFactory>newBuilder()
-                .wrapTestValue(WRAPPER_FN)
-                .build();
-        storageFactory.configure(InMemoryStorageFactory.newInstance())
-                      .forTests();
-        assertTestsMatches(storageFactory, s -> s instanceof SystemAwareStorageFactory);
     }
 
     @Test
     @DisplayName("return an unwrapped production value if no wrapping function was specified")
     void returnWhenNotWrappedProduction() {
         InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-        EnvSetting<StorageFactory> storageFactory = EnvSetting
-                .<StorageFactory>newBuilder()
-                .build();
+        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
         storageFactory.configure(factory)
                       .forProduction();
         assertProductionMatches(storageFactory, s -> s == factory);
@@ -88,9 +56,7 @@ class EnvSettingTest {
     @DisplayName("return an unwrapped test value if no wrapping function was specified")
     void returnWhenNotWrappedTests() {
         InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-        EnvSetting<StorageFactory> storageFactory = EnvSetting
-                .<StorageFactory>newBuilder()
-                .build();
+        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
         storageFactory.configure(factory)
                       .forTests();
         assertTestsMatches(storageFactory, s -> s == factory);
@@ -103,9 +69,7 @@ class EnvSettingTest {
         InMemoryStorageFactory factoryForProduction = InMemoryStorageFactory.newInstance();
         MemoizingStorageFactory factoryForTests = new MemoizingStorageFactory();
 
-        EnvSetting<StorageFactory> storageFactory = EnvSetting
-                .<StorageFactory>newBuilder()
-                .build();
+        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
 
         storageFactory.configure(factoryForProduction)
                       .forProduction();
@@ -122,43 +86,11 @@ class EnvSettingTest {
     }
 
     @Test
-    @DisplayName("should wrap the production value when assigning with `productionOrAssignDefault`")
-    void wrapProdIfUsingAssignOrDefault() {
-        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
-
-        EnvSetting<StorageFactory> storageSetting = EnvSetting
-                .<StorageFactory>newBuilder()
-                .wrapProductionValue(SystemAwareStorageFactory::wrap)
-                .build();
-
-        StorageFactory factory = storageSetting.productionOrAssignDefault(storageFactory);
-        assertThat(factory).isNotSameInstanceAs(storageFactory);
-        assertThat(factory).isInstanceOf(SystemAwareStorageFactory.class);
-    }
-
-    @Test
-    @DisplayName("should wrap the testing value when assigning with `productionOrAssignDefault`")
-    void wrapTestsIfUsingAssignOrDefault() {
-        MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
-
-        EnvSetting<StorageFactory> storageSetting = EnvSetting
-                .<StorageFactory>newBuilder()
-                .wrapTestValue(SystemAwareStorageFactory::wrap)
-                .build();
-
-        StorageFactory factory = storageSetting.testsOrAssignDefault(storageFactory);
-        assertThat(factory).isNotSameInstanceAs(storageFactory);
-        assertThat(factory).isInstanceOf(SystemAwareStorageFactory.class);
-    }
-
-    @Test
     @DisplayName("should run an operation against a production value if it's present")
     void runThrowableConsumer() throws Exception {
         MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
 
-        EnvSetting<StorageFactory> storageSetting = EnvSetting
-                .<StorageFactory>newBuilder()
-                .build();
+        EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
         storageSetting.configure(storageFactory)
                       .forProduction();

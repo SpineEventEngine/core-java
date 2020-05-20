@@ -23,30 +23,22 @@ package io.spine.server;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
-import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A mutable value that may differ for the production and testing environments.
  *
- * <p>Allows configuring a wrapping function to adjust mutations as such:
+ * E.g.
  * <pre>
  * {@code
- * EnvSetting<StorageFactory> storageFactory = EnvSetting
- *                          .<StorageFactory>newBuilder()
- *                          .wrapProductionValue(SystemAwareStorageFactory::wrap)
- *                          .build();
+ * EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
  * storageFactory.configure(InMemoryStorageFactory.newInstance()).forProduction();
  *
- * // As it was set.
  * assertThat(storageFactory.production()).isPresent();
- *
- * // As it was wrapped.
- * assertThat(storageFactory.production().get()).isInstanceOf(SystemAwareStorageFactory.class);
+ * assertThat(stroageFactory.tests()).isEmpty();
  * }
  * </pre>
- * <p>If no wrapping function is specified, the value is never wrapped.
  *
  * <p>{@code EnvironmentDependantValues} do not determine the environment themselves: it's up to the
  * caller to ask for the appropriate one.
@@ -57,15 +49,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EnvSetting<P> {
 
     private @Nullable P productionValue;
-    private final UnaryOperator<P> wrapProductionValue;
 
     private @Nullable P testsValue;
-    private final UnaryOperator<P> wrapTestsValue;
-
-    private EnvSetting(Builder<P> builder) {
-        this.wrapProductionValue = builder.wrapProduction;
-        this.wrapTestsValue = builder.wrapTests;
-    }
 
     /**
      * Returns the value for the production environment if it was set, an empty {@code Optional}
@@ -143,17 +128,6 @@ public final class EnvSetting<P> {
     }
 
     /**
-     * Returns a new builder for the environment dependant values.
-     *
-     * @param <P>
-     *         the type of the value
-     * @return a new builder
-     */
-    public static <P> Builder<P> newBuilder() {
-        return new Builder<>();
-    }
-
-    /**
      * A intermediate object that facilitates the following API:
      *
      * {@code value.configure(prodValue).forProduction();}.
@@ -170,112 +144,17 @@ public final class EnvSetting<P> {
         }
 
         /**
-         * Changes the test environment value to the one specified by {@code configure},
-         * such that later calls to {@link EnvSetting#tests()} return
-         * either {@code value} if no wrapping function was specified, or
-         * {@code wrappingFunction.apply(value)} if wrapping function was specified.
+         * Changes the test environment value to the one specified by the {@code configure} method.
          */
         public void forTests() {
-            testsValue = wrapTestsValue.apply(value);
+            testsValue = value;
         }
 
         /**
-         * Changes the production value to the one specified by {@code configure},
-         * such that later calls to {@link EnvSetting#production()} return
-         * either {@code value} if no wrapping function was specified, or
-         * {@code wrappingFunction.apply(value)} if wrapping function was specified.
+         * Changes the production value to the one specified by {@code configure} method.
          */
         public void forProduction() {
-            productionValue = wrapProductionValue.apply(value);
-        }
-    }
-
-    /**
-     * A builder of environment dependant values.
-     *
-     * <p>Allows to configure the wrapping functions.
-     *
-     * <p>If no wrapping functions were specified, the instance from this builder
-     * returns whatever was specified through the mutation method, e.g.
-     * <pre>
-     * {@code
-     * EnvSetting<?> value = EnvSetting
-     *                      .<?>newBuilder()
-     *                      .build();
-     *
-     * value.configure(productionValue).forProduction();
-     * assertThat(config.production().get()).isEqualTo(productionValue);
-     * }
-     * </pre>
-     *
-     * <p>On the other hand, if the wrapping function was specified, then the behaviour is as
-     * follows:
-     *
-     * <pre>
-     * {@code
-     * EnvSetting<?> value = EnvSetting
-     *                      .<?>newBuilder()
-     *                      .wrapProductionValue(someFunction)
-     *                      .build();
-     *
-     * value.configure(productionValue).forProduction();
-     * assertThat(config.production().get()).isEqualTo(someFunction.apply(productionValue));
-     * }
-     * </pre>
-     *
-     * <p>Same goes for the values for the testing environment.
-     *
-     * @param <P>
-     *         the type of the value
-     */
-    public static class Builder<P> {
-
-        private UnaryOperator<P> wrapProduction;
-        private UnaryOperator<P> wrapTests;
-
-        /**
-         * Configures the wrapping function for the production environment.
-         *
-         * <p>If no function is specified, {@link EnvSetting#tests()}
-         * returns whatever was specified to the {@link EnvSetting#configure(Object)}.
-         *
-         * @param fn
-         *         a wrapping function
-         */
-        public Builder<P> wrapProductionValue(UnaryOperator<P> fn) {
-            checkNotNull(fn);
-            this.wrapProduction = fn;
-            return this;
-        }
-
-        /**
-         * Configures the wrapping function for the testing environment.
-         *
-         * If no function is specified, {@link EnvSetting#production()} returns
-         * whatever was specified to the {@link EnvSetting#configure(Object)}.
-         *
-         * @param fn
-         *         a wrapping function
-         */
-        public Builder<P> wrapTestValue(UnaryOperator<P> fn) {
-            checkNotNull(fn);
-            this.wrapTests = fn;
-            return this;
-        }
-
-        /**
-         * Returns a new instance of the {@code EnvSetting}.
-         *
-         * @return a new instance of {@code EnvSetting}
-         */
-        EnvSetting<P> build() {
-            this.wrapProduction = this.wrapProduction == null
-                                  ? UnaryOperator.identity()
-                                  : this.wrapProduction;
-            this.wrapTests = this.wrapTests == null
-                             ? UnaryOperator.identity()
-                             : this.wrapTests;
-            return new EnvSetting<>(this);
+            productionValue = value;
         }
     }
 

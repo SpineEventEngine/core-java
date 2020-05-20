@@ -29,7 +29,6 @@ import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -40,6 +39,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.storage.system.SystemAwareStorageFactory.wrap;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -80,11 +80,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Storage factories for both the production and the testing environments.
      */
-    private final EnvSetting<StorageFactory> storageFactory = EnvSetting
-            .<StorageFactory>newBuilder()
-            .wrapTestValue(SystemAwareStorageFactory::wrap)
-            .wrapProductionValue(SystemAwareStorageFactory::wrap)
-            .build();
+    private final EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
 
     /**
      * The factory of {@code Tracer}s used in this environment.
@@ -94,9 +90,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * The production and testing factories for channel-based transport.
      */
-    private final EnvSetting<TransportFactory> transportFactory = EnvSetting
-            .<TransportFactory>newBuilder()
-            .build();
+    private final EnvSetting<TransportFactory> transportFactory = new EnvSetting<>();
 
     /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
@@ -208,7 +202,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return the storage factory configuration object
      */
     public Configurator useStorageFactory(StorageFactory storage) {
-        return this.storageFactory.configure(storage);
+        return this.storageFactory.configure(wrap(storage));
     }
 
     /**
