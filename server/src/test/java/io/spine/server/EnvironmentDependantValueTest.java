@@ -20,74 +20,94 @@
 
 package io.spine.server;
 
+import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.storage.system.SystemAwareStorageFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth8.assertThat;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`EnvironmentDependantValue` should")
 class EnvironmentDependantValueTest {
 
-    private static final String CONFIG_STRING = "config_string";
+    private static final UnaryOperator<StorageFactory> WRAPPER_FUNCTION = SystemAwareStorageFactory::wrap;
 
     @Test
     @DisplayName("not allows to configure a `null` value")
     void nullsForProductionForbidden() {
-        EnvironmentDependantValue<String> configString = EnvironmentDependantValue
+        EnvironmentDependantValue<?> config = EnvironmentDependantValue
                 .<String>newBuilder()
                 .build();
-        assertThrows(NullPointerException.class, () -> configString.configure(null));
+        assertThrows(NullPointerException.class, () -> config.configure(null));
     }
 
     @Test
     @DisplayName("return a wrapped production value")
     void wrapProduction() {
-        String productionPrefix = "Production_";
-        EnvironmentDependantValue<String> configString = EnvironmentDependantValue
-                .<String>newBuilder()
-                .wrapProductionValue(config -> productionPrefix + config)
+        EnvironmentDependantValue<StorageFactory> storageFactory = EnvironmentDependantValue
+                .<StorageFactory>newBuilder()
+                .wrapProductionValue(WRAPPER_FUNCTION)
                 .build();
-        configString.configure(CONFIG_STRING)
-                    .forProduction();
-        assertThat(configString.production())
-                .hasValue(productionPrefix + CONFIG_STRING);
+        storageFactory.configure(InMemoryStorageFactory.newInstance())
+                      .forProduction();
+        assertProductionMatches(storageFactory, s -> s instanceof SystemAwareStorageFactory);
     }
 
     @Test
     @DisplayName("return a wrapped test value")
     void wrapTests() {
-        String testPrefix = "Test_";
-        EnvironmentDependantValue<String> configString = EnvironmentDependantValue
-                .<String>newBuilder()
-                .wrapTestValue(config -> testPrefix + config)
+        EnvironmentDependantValue<StorageFactory> storageFactory = EnvironmentDependantValue
+                .<StorageFactory>newBuilder()
+                .wrapTestValue(WRAPPER_FUNCTION)
                 .build();
-        configString.configure(CONFIG_STRING)
-                    .forTests();
-        assertThat(configString.tests())
-                .hasValue(testPrefix + CONFIG_STRING);
-
+        storageFactory.configure(InMemoryStorageFactory.newInstance())
+                      .forTests();
+        assertTestsMatches(storageFactory, s -> s instanceof SystemAwareStorageFactory);
     }
 
     @Test
     @DisplayName("return an unwrapped production value if no wrapping function was specified")
     void returnWhenNotWrappedProduction() {
-        EnvironmentDependantValue<String> configString = EnvironmentDependantValue
-                .<String>newBuilder()
+        InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
+        EnvironmentDependantValue<StorageFactory> storageFactory = EnvironmentDependantValue
+                .<StorageFactory>newBuilder()
                 .build();
-        configString.configure(CONFIG_STRING)
-                    .forProduction();
-        assertThat(configString.production()).hasValue(CONFIG_STRING);
+        storageFactory.configure(factory)
+                      .forProduction();
+        assertProductionMatches(storageFactory, s -> s == factory);
     }
 
     @Test
     @DisplayName("return an unwrapped test value if no wrapping function was specified")
     void returnWhenNotWrappedTests() {
-        EnvironmentDependantValue<String> configString = EnvironmentDependantValue
-                .<String>newBuilder()
+        InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
+        EnvironmentDependantValue<StorageFactory> storageFactory = EnvironmentDependantValue
+                .<StorageFactory>newBuilder()
                 .build();
-        configString.configure(CONFIG_STRING)
-                    .forTests();
-        assertThat(configString.tests()).hasValue(CONFIG_STRING);
+        storageFactory.configure(factory)
+                      .forTests();
+        assertTestsMatches(storageFactory, s -> s == factory);
+    }
+
+    private static <P> void assertProductionMatches(EnvironmentDependantValue<P> value,
+                                                    Predicate<P> assertion) {
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        P prodValue = value.production()
+                           .get();
+        assertThat(assertion.test(prodValue)).isTrue();
+
+    }
+
+    private static <P> void assertTestsMatches(EnvironmentDependantValue<P> value,
+                                               Predicate<P> assertion) {
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        P prodValue = value.tests()
+                           .get();
+        assertThat(assertion.test(prodValue)).isTrue();
     }
 }
