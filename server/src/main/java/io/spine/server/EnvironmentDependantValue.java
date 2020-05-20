@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *                          .<StorageFactory>newBuilder()
  *                          .wrapProductionValue(SystemAwareStorageFactory::wrap)
  *                          .build();
- * storages.production(InMemoryStorageFactory.newInstance());
+ * storages.configure(InMemoryStorageFactory.newInstance()).forProduction();
  *
  * // As it was wrapped.
  * assertThat(storages.production()).isInstanceOf(SystemAwareStorageFactory.class);
@@ -156,11 +156,11 @@ public final class EnvironmentDependantValue<P> {
      * returns whatever was specified through the mutation method, e.g.
      * <pre>
      * {@code
-     * EnvironmentDependantValue<?> config = EnvironmentDependantValue
+     * EnvironmentDependantValue<?> value = EnvironmentDependantValue
      *                      .<?>newBuilder()
      *                      .build();
      *
-     * config.production(productionValue);
+     * value.configure(productionValue).forProduction();
      * assertThat(config.production()).isEqualTo(productionValue);
      * }
      * </pre>
@@ -170,12 +170,12 @@ public final class EnvironmentDependantValue<P> {
      *
      * <pre>
      * {@code
-     * EnvironmentDependantValue<?> config = EnvironmentDependantValue
+     * EnvironmentDependantValue<?> value = EnvironmentDependantValue
      *                      .<?>newBuilder()
      *                      .wrapProductionValue(someFunction)
      *                      .build();
      *
-     * config.production(productionValue);
+     * value.configure(productionValue).forProduction();
      * assertThat(config.production()).isEqualTo(someFunction.apply(productionValue));
      * }
      * </pre>
