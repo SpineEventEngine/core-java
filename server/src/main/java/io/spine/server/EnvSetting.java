@@ -57,14 +57,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EnvSetting<P> {
 
     private @Nullable P productionValue;
-    private final UnaryOperator<P> productionWrappingFunction;
+    private final UnaryOperator<P> wrapProductionValue;
 
     private @Nullable P testsValue;
-    private final UnaryOperator<P> testsWrappingFunction;
+    private final UnaryOperator<P> wrapTestValue;
 
     private EnvSetting(Builder<P> builder) {
-        this.productionWrappingFunction = builder.wrapProduction;
-        this.testsWrappingFunction = builder.wrapTests;
+        this.wrapProductionValue = builder.wrapProduction;
+        this.wrapTestValue = builder.wrapTests;
     }
 
     /**
@@ -162,7 +162,7 @@ public final class EnvSetting<P> {
          * {@code wrappingFunction.apply(value)} if wrapping function was specified.
          */
         public void forTests() {
-            testsValue = testsWrappingFunction.apply(value);
+            testsValue = wrapTestValue.apply(value);
         }
 
         /**
@@ -172,7 +172,7 @@ public final class EnvSetting<P> {
          * {@code wrappingFunction.apply(value)} if wrapping function was specified.
          */
         public void forProduction() {
-            productionValue = productionWrappingFunction.apply(value);
+            productionValue = wrapProductionValue.apply(value);
         }
     }
 
