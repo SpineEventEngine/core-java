@@ -309,9 +309,9 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @VisibleForTesting
     public void reset() {
-        this.transportFactories.nullifyBoth();
+        this.transportFactories.reset();
         this.tracerFactory = null;
-        this.storages.nullifyBoth();
+        this.storages.reset();
         this.delivery = Delivery.local();
         resetDeploymentType();
     }

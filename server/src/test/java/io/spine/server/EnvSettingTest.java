@@ -23,6 +23,7 @@ package io.spine.server;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.SystemAwareStorageFactory;
+import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`EnvSetting` should")
@@ -92,6 +94,31 @@ class EnvSettingTest {
         storageFactory.configure(factory)
                       .forTests();
         assertTestsMatches(storageFactory, s -> s == factory);
+    }
+
+    @Test
+    @DisplayName("reset the production and testing values")
+    @SuppressWarnings("ObjectEquality" /* a check for sameness is correct here.*/)
+    void resetTheValues() {
+        InMemoryStorageFactory factoryForProduction = InMemoryStorageFactory.newInstance();
+        MemoizingStorageFactory factoryForTests = new MemoizingStorageFactory();
+
+        EnvSetting<StorageFactory> storageFactory = EnvSetting
+                .<StorageFactory>newBuilder()
+                .build();
+
+        storageFactory.configure(factoryForProduction)
+                      .forProduction();
+        storageFactory.configure(factoryForTests)
+                      .forTests();
+
+        assertProductionMatches(storageFactory, s -> s == factoryForProduction);
+        assertTestsMatches(storageFactory, s -> s == factoryForTests);
+
+        storageFactory.reset();
+
+        assertThat(storageFactory.production()).isEmpty();
+        assertThat(storageFactory.tests()).isEmpty();
     }
 
     private static <P> void assertProductionMatches(EnvSetting<P> value,

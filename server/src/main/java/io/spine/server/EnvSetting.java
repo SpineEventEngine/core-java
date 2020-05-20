@@ -84,7 +84,7 @@ public final class EnvSetting<P> {
     }
 
     /** Changes the production and the testing values to {@code null}. */
-    void nullifyBoth() {
+    void reset() {
         this.productionValue = null;
         this.testsValue = null;
     }
