@@ -151,6 +151,23 @@ class EnvSettingTest {
         assertThat(factory).isInstanceOf(SystemAwareStorageFactory.class);
     }
 
+    @Test
+    @DisplayName("should run an operation against a production value if it's present")
+    void runThrowableConsumer() throws Exception {
+        MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
+
+        EnvSetting<StorageFactory> storageSetting = EnvSetting
+                .<StorageFactory>newBuilder()
+                .build();
+
+        storageSetting.configure(storageFactory)
+                      .forProduction();
+        storageSetting.ifProductionPresent(AutoCloseable::close);
+
+        assertThat(storageFactory.isClosed()).isTrue();
+
+    }
+
     private static <P> void assertProductionMatches(EnvSetting<P> value,
                                                     Predicate<P> assertion) {
         @SuppressWarnings("OptionalGetWithoutIsPresent")

@@ -311,17 +311,8 @@ public final class ServerEnvironment implements AutoCloseable {
         if (tracerFactory != null) {
             tracerFactory.close();
         }
-        if (transportFactory.production()
-                            .isPresent()) {
-            transportFactory.production()
-                            .get()
-                            .close();
-        }
-        if (storageFactory.production()
-                          .isPresent()) {
-            storageFactory.production()
-                          .get()
-                          .close();
-        }
+
+        transportFactory.ifProductionPresent(AutoCloseable::close);
+        storageFactory.ifProductionPresent(AutoCloseable::close);
     }
 }

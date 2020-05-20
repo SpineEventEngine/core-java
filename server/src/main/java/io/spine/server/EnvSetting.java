@@ -76,6 +76,20 @@ public final class EnvSetting<P> {
     }
 
     /**
+     * Runs the specified operations against the production if it's present, otherwise does nothing.
+     *
+     * <p>If you wish to run an operation that doesn't throw, use {@code production().ifPresent()}.
+     *
+     * @param operation
+     *         operation to run
+     */
+    void ifProductionPresent(ThrowingConsumer<P> operation) throws Exception {
+        if (productionValue != null) {
+            operation.accept(productionValue);
+        }
+    }
+
+    /**
      * Returns the value for the production environment if it's present.
      *
      * <p>If it's not present, assigns the specified default value while following the wrapping
@@ -263,5 +277,17 @@ public final class EnvSetting<P> {
                              : this.wrapTests;
             return new EnvSetting<>(this);
         }
+    }
+
+    /**
+     * Represents an operation over a value that returns no result and may finish with an error.
+     *
+     * @param <V>
+     *         the type of the input to the operation
+     */
+    public interface ThrowingConsumer<V> {
+
+        /** Performs this operation on the specified value. */
+        void accept(V value) throws Exception;
     }
 }
