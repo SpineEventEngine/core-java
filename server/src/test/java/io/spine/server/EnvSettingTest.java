@@ -121,6 +121,36 @@ class EnvSettingTest {
         assertThat(storageFactory.tests()).isEmpty();
     }
 
+    @Test
+    @DisplayName("should wrap the production value when assigning with `productionOrAssignDefault`")
+    void wrapProdIfUsingAssignOrDefault() {
+        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
+
+        EnvSetting<StorageFactory> storageSetting = EnvSetting
+                .<StorageFactory>newBuilder()
+                .wrapProductionValue(SystemAwareStorageFactory::wrap)
+                .build();
+
+        StorageFactory factory = storageSetting.productionOrAssignDefault(storageFactory);
+        assertThat(factory).isNotSameInstanceAs(storageFactory);
+        assertThat(factory).isInstanceOf(SystemAwareStorageFactory.class);
+    }
+
+    @Test
+    @DisplayName("should wrap the testing value when assigning with `productionOrAssignDefault`")
+    void wrapTestsIfUsingAssignOrDefault() {
+        MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
+
+        EnvSetting<StorageFactory> storageSetting = EnvSetting
+                .<StorageFactory>newBuilder()
+                .wrapTestValue(SystemAwareStorageFactory::wrap)
+                .build();
+
+        StorageFactory factory = storageSetting.testsOrAssignDefault(storageFactory);
+        assertThat(factory).isNotSameInstanceAs(storageFactory);
+        assertThat(factory).isInstanceOf(SystemAwareStorageFactory.class);
+    }
+
     private static <P> void assertProductionMatches(EnvSetting<P> value,
                                                     Predicate<P> assertion) {
         @SuppressWarnings("OptionalGetWithoutIsPresent")

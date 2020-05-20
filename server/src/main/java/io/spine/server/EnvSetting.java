@@ -76,11 +76,37 @@ public final class EnvSetting<P> {
     }
 
     /**
+     * Returns the value for the production environment if it's present.
+     *
+     * <p>If it's not present, assigns the specified default value while following the wrapping
+     * rules, and returns it.
+     */
+    P productionOrAssignDefault(P defaultValue) {
+        if (productionValue == null) {
+            configure(defaultValue).forProduction();
+        }
+        return productionValue;
+    }
+
+    /**
      * Returns the value for the testing environment if it was set, an empty {@code Optional}
      * otherwise.
      */
     Optional<P> tests() {
         return Optional.ofNullable(testsValue);
+    }
+
+    /**
+     * Returns the value for the testing environment if it's present.
+     *
+     * <p>If it's not present, assigns the specified default value while following the wrapping
+     * rules, and returns it.
+     */
+    P testsOrAssignDefault(P defaultValue) {
+        if (testsValue == null) {
+            configure(defaultValue).forTests();
+        }
+        return testsValue;
     }
 
     /** Changes the production and the testing values to {@code null}. */

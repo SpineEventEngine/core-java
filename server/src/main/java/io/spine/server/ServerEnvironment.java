@@ -80,7 +80,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Storage factories for both the production and the testing environments.
      */
-    private final EnvSetting<StorageFactory> storages = EnvSetting
+    private final EnvSetting<StorageFactory> storageFactory = EnvSetting
             .<StorageFactory>newBuilder()
             .wrapTestValue(SystemAwareStorageFactory::wrap)
             .wrapProductionValue(SystemAwareStorageFactory::wrap)
@@ -94,7 +94,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * The production and testing factories for channel-based transport.
      */
-    private final EnvSetting<TransportFactory> transportFactories = EnvSetting
+    private final EnvSetting<TransportFactory> transportFactory = EnvSetting
             .<TransportFactory>newBuilder()
             .build();
 
@@ -208,7 +208,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return the storage factory configuration object
      */
     public Configurator useStorageFactory(StorageFactory storage) {
-        return this.storages.configure(storage);
+        return this.storageFactory.configure(storage);
     }
 
     /**
@@ -238,17 +238,10 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
-            if (!storages.tests()
-                         .isPresent()) {
-                storages.configure(InMemoryStorageFactory.newInstance())
-                        .forTests();
-            }
-            return storages.tests()
-                           .get();
-
+            return storageFactory.testsOrAssignDefault(InMemoryStorageFactory.newInstance());
         }
 
-        StorageFactory result = storages
+        StorageFactory result = storageFactory
                 .production()
                 .orElseThrow(() -> newIllegalStateException(
                         "Production `%s` is not configured." +
@@ -272,7 +265,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return the transport factory configuration object
      */
     public Configurator useTransportFactory(TransportFactory transportFactory) {
-        return transportFactories.configure(transportFactory);
+        return this.transportFactory.configure(transportFactory);
     }
 
     /**
@@ -286,16 +279,10 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public TransportFactory transportFactory() {
         if (environment().isTests()) {
-            if (!transportFactories.tests()
-                                   .isPresent()) {
-                this.transportFactories.configure(InMemoryTransportFactory.newInstance())
-                                       .forTests();
-            }
-            return transportFactories.tests()
-                                     .get();
+            return transportFactory.testsOrAssignDefault(InMemoryTransportFactory.newInstance());
         }
 
-        TransportFactory result = transportFactories
+        TransportFactory result = transportFactory
                 .production()
                 .orElseThrow(() -> newIllegalStateException(
                         "`%s` is not assigned. Please call `useTransport(...).forProduction()`.",
@@ -309,9 +296,9 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @VisibleForTesting
     public void reset() {
-        this.transportFactories.reset();
+        this.transportFactory.reset();
         this.tracerFactory = null;
-        this.storages.reset();
+        this.storageFactory.reset();
         this.delivery = Delivery.local();
         resetDeploymentType();
     }
@@ -324,17 +311,17 @@ public final class ServerEnvironment implements AutoCloseable {
         if (tracerFactory != null) {
             tracerFactory.close();
         }
-        if (transportFactories.production()
-                              .isPresent()) {
-            transportFactories.production()
-                              .get()
-                              .close();
+        if (transportFactory.production()
+                            .isPresent()) {
+            transportFactory.production()
+                            .get()
+                            .close();
         }
-        if (storages.production()
-                    .isPresent()) {
-            storages.production()
-                    .get()
-                    .close();
+        if (storageFactory.production()
+                          .isPresent()) {
+            storageFactory.production()
+                          .get()
+                          .close();
         }
     }
 }
