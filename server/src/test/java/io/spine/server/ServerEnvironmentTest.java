@@ -272,6 +272,40 @@ class ServerEnvironmentTest {
         }
     }
 
+    @Nested
+    @DisplayName("close the resources")
+    class TestClosesResources {
+
+        private InMemoryTransportFactory transportFactory;
+        private MemoizingStorageFactory storageFactory;
+
+        @BeforeEach
+        void setup() {
+            transportFactory = InMemoryTransportFactory.newInstance();
+            storageFactory = new MemoizingStorageFactory();
+        }
+
+        @AfterEach
+        void resetEnvironment() {
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("close the transport and the storage factories")
+        void testCloses() throws Exception {
+            ServerEnvironment serverEnv = ServerEnvironment.instance();
+            serverEnv.useTransportFactory(transportFactory)
+                     .forProduction();
+            serverEnv.useStorageFactory(storageFactory)
+                     .forProduction();
+
+            serverEnv.close();
+
+            assertThat(transportFactory.isOpen()).isFalse();
+            assertThat(storageFactory.isClosed()).isTrue();
+        }
+    }
+
     @SuppressWarnings({
             "AccessOfSystemProperties" /* Testing the configuration loaded from System properties. */,
             "AbstractClassWithoutAbstractMethods" /* A test base with setUp and tearDown. */
