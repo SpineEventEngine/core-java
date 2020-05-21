@@ -29,18 +29,18 @@
  *
  * <p>The return value of the below method does not say much about the number and types
  * of returned event messages.
- * <pre>{@code
+ * <pre>
  *     {@literal @}Assign
- *     List<Message> on(CreateTask cmd) { ... }
- * }</pre>
+ *     {@literal List<Message>} on(CreateTask cmd) { ... }
+ * </pre>
  *
  * The below declaration gives both number and types of the events:
- * <pre>{@code
+ * <pre>
  *     {@literal @}Assign
- *     Pair<TaskCreated, TaskAssigned> on(CreateTask cmd) { ... }
- * }</pre>
+ *     {@literal Pair<TaskCreated, TaskAssigned>} on(CreateTask cmd) { ... }
+ * </pre>
  *
- * <p>It should re-iterated that the purpose of this package is limited to the scenarios
+ * <p>It should be re-iterated that the purpose of this package is limited to the scenarios
  * described above. Programmers are strongly discouraged from applying tuples for other purposes.
  *
  * <h1>Generic Types</h1>
