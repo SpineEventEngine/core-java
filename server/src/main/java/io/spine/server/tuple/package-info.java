@@ -31,28 +31,28 @@
  * of returned event messages.
  * <pre>
  *     {@literal @}Assign
- *     {@literal List<Message>} on(CreateTask cmd) { ... }
+ *     List&lt;Message&gt; on(CreateTask cmd) { ... }
  * </pre>
  *
- * The below declaration gives both number and types of the events:
+ * The below declaration gives both the number and types of the returned events:
  * <pre>
  *     {@literal @}Assign
- *     {@literal Pair<TaskCreated, TaskAssigned>} on(CreateTask cmd) { ... }
+ *     Pair&lt;TaskCreated, TaskAssigned&gt; on(CreateTask cmd) { ... }
  * </pre>
  *
  * <p>It should be re-iterated that the purpose of this package is limited to the scenarios
- * described above. Programmers are strongly discouraged from applying tuples for other purposes.
+ * described above. Programmers are strongly discouraged from using tuples for other purposes.
  *
  * <h1>Generic Types</h1>
  *
- * <p>Classes provided by this package can support up to 5 generic parameters. They are named from
- * {@code <A>} through {@code <E>}.
+ * <p>Classes provided by this package can support up to 5 generic parameters.
+ * These parameters are named from {@code <A>} through {@code <E>}.
  *
  * <p>The first generic parameter {@code <A>} must always be a specific
  * {@link com.google.protobuf.Message Message} class.
  *
- * <p>Types from {@code <B>} through {@code <E>} can be either {@code Message} or
- * {@link java.util.Optional Optional}. See sections below for details.
+ * <p>Types from {@code <B>} through {@code <E>} can be either a {@code Message} or
+ * an {@link java.util.Optional Optional}. See sections below for details.
  *
  * <h1>Basic Tuples</h1>
  *
@@ -77,7 +77,8 @@
  *     <li>{@link io.spine.server.tuple.EitherOf5 EitherOf5&lt;A, B, C, D, E&gt;}
  * </ul>
  *
- * <p>Generic parameters for alternatives can be only {@link com.google.protobuf.Message Message}.
+ * <p>Generic parameters for alternatives accept only {@link com.google.protobuf.Message Message}
+ * classes.
  *
  * <p>We believe that a list of alternatives longer than five is hard to understand.
  * If you face a such a need, consider splitting a command into two or more independent commands
