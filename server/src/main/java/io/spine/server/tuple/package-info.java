@@ -19,42 +19,57 @@
  */
 
 /**
- * This package provides tuples for return values from
- * {@linkplain io.spine.server.command.Assign command handling} or
- * {@linkplain io.spine.server.command.Command commanding} methods.
+ * This package provides classes for return values from message handling methods.
  *
+ * <h1>Overview</h1>
+ * 
  * <p>Although tuples are <a href="https://github.com/google/guava/wiki/IdeaGraveyard#tuples-for-n--2">
  * considered harmful</a> in general, they are useful for describing types of several messages
  * returned by a method. Consider the following example.
  *
  * <p>The return value of the below method does not say much about the number and types
- * of returned event messages.
+ * of returned event messages. We just know that there may be more than one of them.
  * <pre>
- *     {@literal @}Assign
- *     List&lt;Message&gt; on(CreateTask cmd) { ... }
+ *    {@literal @}Assign
+ *     List&lt;EventMessage&gt; on(CreateTask cmd) { ... }
  * </pre>
  *
  * The below declaration gives both the number and types of the returned events:
  * <pre>
- *     {@literal @}Assign
- *     Pair&lt;TaskCreated, TaskAssigned&gt; on(CreateTask cmd) { ... }
+ *    {@literal @}Assign
+ *     Pair&lt;TaskCreated, Optional&lt;TaskAssigned&gt;&gt; on(CreateTask cmd) { ... }
  * </pre>
  *
- * <p>It should be re-iterated that the purpose of this package is limited to the scenarios
- * described above. Programmers are strongly discouraged from using tuples for other purposes.
+ * <p>Why do we suggest returning a tuple (a {@code Pair} in the example above) instead of creating
+ * a message type which would aggregate those of interest as our colleagues from the Guava team
+ * <a href="https://github.com/google/guava/wiki/IdeaGraveyard#tuples-for-n--2">suggest</a>?
  *
- * <h1>Generic Types</h1>
+ * <p>Messages returned from a handling method are loosely coupled. They may not
+ * be created together all the time. The example above tells that {@code TaskAssigned}
+ * may not happen upon the creation of the task. It's possible that a task can be assigned
+ * sometime later. In this case combining returned messages does not reflect the domain language.
+ * Returning a tuple tells a part of the story in terms of the domain language right in the method
+ * signature. Details of this story are obtained from the method body.
+ *
+ * <p>It should be re-iterated that the purpose of this package is limited to the scenarios
+ * of handling messages. Programmers are strongly discouraged from using this package for
+ * other purposes.
+ *
+ * <h1>Two groups of classes</h1>
+ * This package provides two groups of classes:
+ * <ol>
+ *     <li>{@link io.spine.server.tuple.Tuple Tuple} classes are for returning more than one message.
+ *     <li>Alternatives -- classes derived from {@link io.spine.server.tuple.Either Either} -- are
+ *     for returning only one message belonging the known set of types.
+ * </ol>
+ *
+ * <h2>Generic Parameters</h2>
  *
  * <p>Classes provided by this package can support up to 5 generic parameters.
- * These parameters are named from {@code <A>} through {@code <E>}.
+ * These parameters are named from {@code <A>} through {@code <E>}. Types that can be passed to
+ * these parameters are described in the sections below.
  *
- * <p>The first generic parameter {@code <A>} must always be a specific
- * {@link com.google.protobuf.Message Message} class.
- *
- * <p>Types from {@code <B>} through {@code <E>} can be either a {@code Message} or
- * an {@link java.util.Optional Optional}. See sections below for details.
- *
- * <h1>Basic Tuples</h1>
+ * <h1>Tuples</h1>
  *
  * <p>The following tuple classes are provided:
  * <ul>
@@ -64,10 +79,27 @@
  *    <li>{@link io.spine.server.tuple.Quintet Quintet&lt;A, B, C, D, E&gt;}
  * </ul>
  *
- * <p>Basic tuple classes allow {@link java.util.Optional Optional} starting from
- * the second generic argument.
+ * <p>The first generic parameter {@code <A>} must always be a specific
+ * {@link com.google.protobuf.Message Message} class.
+ *
+ * <p>Tuple classes allow {@link java.util.Optional Optional} starting from
+ * the second generic argument. The example below shows the method which always returns
+ * the {@code TaskCreated} event, and returns the {@code TaskAssigned} event only if
+ * the {@code CreateTask} command instructs to assign the task to a person.
+ * <pre>
+ *    {@literal @}Assign
+ *     Pair&lt;TaskCreated, Optional&lt;TaskAssigned&gt;&gt; on(CreateTask cmd) { ... }
+ * </pre>
  *
  * <h1>Alternatives</h1>
+ *
+ * <p>In some cases it is needed to return one message from a limited set of possible options.
+ * For example, the following method issues a command {@code MoveToTrash} if no work
+ * was reported on the task, and {@code CancelTask} if some work has been already logged.
+ * <pre>
+ *    {@literal @}Command
+ *     EitherOf2&lt;MoveToTrash, CancelTask&gt; handle(RemoveTask cmd) { ... }
+ * </pre>
  *
  * <p>In order to define alternatively returned values, please use the following classes:
  * <ul>
@@ -81,7 +113,7 @@
  * classes.
  *
  * <p>We believe that a list of alternatives longer than five is hard to understand.
- * If you face a such a need, consider splitting a command into two or more independent commands
+ * If you face a such a need, consider splitting incoming message into two or more independent ones
  * so that their outcome is more obvious.
  *
  * <h1>Using Tuples with Alternatives</h1>
