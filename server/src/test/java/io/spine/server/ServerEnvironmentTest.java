@@ -137,7 +137,7 @@ class ServerEnvironmentTest {
     }
 
     @Nested
-    @DisplayName("configure production `StorageFactory`")
+    @DisplayName("configure value `StorageFactory`")
     class StorageFactoryConfig {
 
         private final Environment environment = Environment.instance();
@@ -207,7 +207,7 @@ class ServerEnvironmentTest {
     }
 
     @Nested
-    @DisplayName("configure `TransportFactory` in production")
+    @DisplayName("configure `TransportFactory` in value")
     class TransportFactoryConfig {
 
         private final Environment environment = Environment.instance();
@@ -290,7 +290,7 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("close the production transport and storage factories")
+        @DisplayName("close the value transport and storage factories")
         void testCloses() throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
             serverEnv.useTransportFactory(transportFactory)

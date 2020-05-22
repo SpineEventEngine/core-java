@@ -23,7 +23,7 @@ package io.spine.server;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Environment;
 import io.spine.base.Identifier;
-import io.spine.server.EnvSetting.Configurator;
+import io.spine.server.EnvSetting.EnvironmentType;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -39,6 +39,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.EnvSetting.EnvType.PRODUCTION;
+import static io.spine.server.EnvSetting.EnvType.TESTS;
 import static io.spine.server.storage.system.SystemAwareStorageFactory.wrap;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -78,7 +80,7 @@ public final class ServerEnvironment implements AutoCloseable {
     private @MonotonicNonNull Delivery delivery;
 
     /**
-     * Storage factories for both the production and the testing environments.
+     * Storage factories for both the value and the testing environments.
      */
     private final EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
 
@@ -88,7 +90,7 @@ public final class ServerEnvironment implements AutoCloseable {
     private @Nullable TracerFactory tracerFactory;
 
     /**
-     * The production and testing factories for channel-based transport.
+     * The value and testing factories for channel-based transport.
      */
     private final EnvSetting<TransportFactory> transportFactory = new EnvSetting<>();
 
@@ -196,13 +198,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * Returns the configuration object to change the storage factory.
      *
      * <p>Callers may configure the testing factory via
-     * {@code useStorageFactory(testFactory).forTests()} and the production factory via
+     * {@code useStorageFactory(testFactory).forTests()} and the value factory via
      * {@code useStorageFactory(productionFactory).forProduction()}.
      *
      * @return the storage factory configuration object
      */
-    public Configurator useStorageFactory(StorageFactory storage) {
-        return this.storageFactory.configure(wrap(storage));
+    public void useStorageFactory(StorageFactory storage, EnvironmentType environmentType) {
+        this.storageFactory.configure(wrap(storage), environmentType);
     }
 
     /**
@@ -223,21 +225,21 @@ public final class ServerEnvironment implements AutoCloseable {
      * Obtains the storage factory for the current environment.
      *
      * <p>For tests, if the value was not set, defaults to a new {@code InMemoryStorageFactory}.
-     * <p>For production, if the value was not set, throws a {@code IllegalStateException}.
+     * <p>For value, if the value was not set, throws a {@code IllegalStateException}.
      *
      * @return {@code StorageFactory} instance for the storage for the current environment
      * @throws IllegalStateException
-     *         if the production {@code StorageFactory} was not
+     *         if the value {@code StorageFactory} was not
      *         {@linkplain #useStorageFactory(StorageFactory)} configured} prior to the call
      */
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-            return storageFactory.testsOrAssignDefault(wrap(factory));
+            return storageFactory.assignOrDefault(TESTS, wrap(factory));
         }
 
         StorageFactory result = storageFactory
-                .production()
+                .value(PRODUCTION)
                 .orElseThrow(() -> newIllegalStateException(
                         "Production `%s` is not configured." +
                                 " Please call `useStorage(...).forProduction()`.",
@@ -254,13 +256,11 @@ public final class ServerEnvironment implements AutoCloseable {
      * Returns the configuration object to change the transport factory.
      *
      * <p>Callers may configure the testing factory via
-     * {@code useTransportFactory(testFactory).forTests()} and the production factory via
-     * {@code useTransportFactory(productionFactory).production()}.
-     *
-     * @return the transport factory configuration object
+     * {@code useTransportFactory(testFactory).forTests()} and the value factory via
+     * {@code useTransportFactory(productionFactory).value()}.
      */
-    public Configurator useTransportFactory(TransportFactory transportFactory) {
-        return this.transportFactory.configure(transportFactory);
+    public void useTransportFactory(TransportFactory transportFactory, EnvironmentType envType) {
+        this.transportFactory.configure(transportFactory, envType);
     }
 
     /**
@@ -274,11 +274,11 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public TransportFactory transportFactory() {
         if (environment().isTests()) {
-            return transportFactory.testsOrAssignDefault(InMemoryTransportFactory.newInstance());
+            return transportFactory.assignOrDefault(TESTS, InMemoryTransportFactory.newInstance());
         }
 
         TransportFactory result = transportFactory
-                .production()
+                .value(PRODUCTION)
                 .orElseThrow(() -> newIllegalStateException(
                         "`%s` is not assigned. Please call `useTransport(...).forProduction()`.",
                         TransportFactory.class.getName()));
@@ -307,7 +307,7 @@ public final class ServerEnvironment implements AutoCloseable {
             tracerFactory.close();
         }
 
-        transportFactory.ifProductionPresent(AutoCloseable::close);
-        storageFactory.ifProductionPresent(AutoCloseable::close);
+        transportFactory.ifPresentForEnvironment(PRODUCTION, AutoCloseable::close);
+        storageFactory.ifPresentForEnvironment(PRODUCTION, AutoCloseable::close);
     }
 }

@@ -20,14 +20,14 @@
 
 package io.spine.server;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A mutable value that may differ for the production and testing environments.
+ * A mutable value that may differ for the value and testing environments.
  *
  * <p>For example:
  * <pre>
@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
  * storageFactory.configure(InMemoryStorageFactory.newInstance()).forProduction();
  *
- * assertThat(storageFactory.production()).isPresent();
+ * assertThat(storageFactory.value()).isPresent();
  * assertThat(storageFactory.tests()).isEmpty();
  * }
  * </pre>
@@ -48,112 +48,65 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EnvSetting<P> {
 
-    private @Nullable P productionValue;
-
-    private @Nullable P testsValue;
+    private final Map<EnvironmentType, P> settingValue = new HashMap<>();
 
     /**
-     * Returns the value for the production environment if it was set, an empty {@code Optional}
+     * Returns the value for the value environment if it was set, an empty {@code Optional}
      * otherwise.
      */
-    Optional<P> production() {
-        return Optional.ofNullable(productionValue);
+    Optional<P> value(EnvironmentType type) {
+        return Optional.ofNullable(settingValue.get(type));
     }
 
     /**
-     * Runs the specified operations against the production if it's present, otherwise does nothing.
+     * Runs the specified operations against the value if it's present, otherwise does nothing.
      *
-     * <p>If you wish to run an operation that doesn't throw, use {@code production().ifPresent()}.
+     * <p>If you wish to run an operation that doesn't throw, use {@code value().ifPresent()}.
      *
      * @param operation
      *         operation to run
      */
-    void ifProductionPresent(ThrowingConsumer<P> operation) throws Exception {
-        if (productionValue != null) {
-            operation.accept(productionValue);
+    void ifPresentForEnvironment(EnvironmentType type, ThrowingConsumer<P> operation)
+            throws Exception {
+        P settingValue = this.settingValue.get(type);
+        if (settingValue != null) {
+            operation.accept(settingValue);
         }
     }
 
     /**
-     * Returns the value for the production environment if it's present.
+     * Returns the value for the value environment if it's present.
      *
      * <p>If it's not present, assigns the specified default value and returns it.
      */
-    P productionOrAssignDefault(P defaultValue) {
-        if (productionValue == null) {
-            configure(defaultValue).forProduction();
-        }
-        return productionValue;
+    P assignOrDefault(P defaultValue, EnvironmentType type) {
+        return settingValue.putIfAbsent(type, defaultValue);
     }
 
-    /**
-     * Returns the value for the testing environment if it was set, an empty {@code Optional}
-     * otherwise.
-     */
-    Optional<P> tests() {
-        return Optional.ofNullable(testsValue);
-    }
-
-    /**
-     * Returns the value for the testing environment if it's present.
-     *
-     * <p>If it's not present, assigns the specified default value and returns it.
-     */
-    P testsOrAssignDefault(P defaultValue) {
-        if (testsValue == null) {
-            configure(defaultValue).forTests();
-        }
-        return testsValue;
-    }
-
-    /** Changes the production and the testing values to {@code null}. */
+    /** Changes the value and the testing values to {@code null}. */
     void reset() {
-        this.productionValue = null;
-        this.testsValue = null;
+        this.settingValue.clear();
     }
 
     /**
-     * Allows to configure the specified value for testing or production as follows:
+     * Allows to configure the specified value for testing or value as follows:
      *
      * {@code value.configure(testingValue).forTests();}
      *
      * @param value
      *         value to assign to one of environments
      */
-    public Configurator configure(P value) {
+    public void configure(P value, EnvironmentType type) {
         checkNotNull(value);
-        return new Configurator(value);
+        this.settingValue.put(type, value);
     }
 
-    /**
-     * A intermediate object that facilitates the following API:
-     *
-     * {@code value.configure(prodValue).forProduction();}.
-     *
-     * @implNote note the private constructor. {@code Configurator} objects are not meant to
-     *         be instantiated by anyone other than the class that nests it.
-     */
-    public class Configurator {
+    public interface EnvironmentType {
 
-        private final P value;
+    }
 
-        private Configurator(P value) {
-            this.value = value;
-        }
-
-        /**
-         * Changes the test environment value to the one specified by the {@code configure} method.
-         */
-        public void forTests() {
-            testsValue = value;
-        }
-
-        /**
-         * Changes the production value to the one specified by {@code configure} method.
-         */
-        public void forProduction() {
-            productionValue = value;
-        }
+    public enum EnvType implements EnvironmentType {
+        PRODUCTION, TESTS
     }
 
     /**

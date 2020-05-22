@@ -24,116 +24,178 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.server.EnvSetting.EnvType.PRODUCTION;
+import static io.spine.server.EnvSetting.EnvType.TESTS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`EnvSetting` should")
+@SuppressWarnings("DuplicateStringLiteralInspection")
 class EnvSettingTest {
 
-    @Test
-    @DisplayName("not allows to configure a `null` value")
-    void nullsForProductionForbidden() {
-        EnvSetting<?> config = new EnvSetting();
-        assertThrows(NullPointerException.class, () -> config.configure(null));
+    enum UserDefinedEnv implements EnvSetting.EnvironmentType {
+        STAGING
+    }
+
+    @Nested
+    @DisplayName("not allow to configure a `null` value ")
+    class NoNulls {
+
+        @Test
+        @DisplayName("for the `PRODUCTION` environment")
+        void forProd() {
+            testNoNullsForEnv(PRODUCTION);
+        }
+
+        @Test
+        @DisplayName("for the `TESTS` environment")
+        void forTests() {
+            testNoNullsForEnv(TESTS);
+        }
+
+        @Test
+        @DisplayName("for a user-defined environment")
+        void forUserDefinedEnv() {
+            testNoNullsForEnv(UserDefinedEnv.STAGING);
+
+        }
+
+        private void testNoNullsForEnv(EnvSetting.EnvironmentType tests) {
+            EnvSetting<?> config = new EnvSetting();
+            assertThrows(NullPointerException.class,
+                         () -> config.configure(null, tests));
+        }
+    }
+
+    @Nested
+    @DisplayName("return a value")
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    class ReturnValue {
+
+        @Test
+        @DisplayName("for the `PRODUCTION` environment")
+        void forProduction() {
+            testReturnsForEnv(PRODUCTION);
+        }
+
+        @Test
+        @DisplayName("for the `TESTS` environment")
+        void forTests() {
+            testReturnsForEnv(TESTS);
+        }
+
+        @Test
+        @DisplayName("for a user-defined environment")
+        void forUserDefinedEnv() {
+            testReturnsForEnv(UserDefinedEnv.STAGING);
+
+        }
+
+        private void testReturnsForEnv(EnvSetting.EnvironmentType type) {
+            InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
+            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+            storageFactory.configure(factory, type);
+            assertThat(storageFactory.value(type))
+                    .isPresent();
+            assertThat(storageFactory.value(type)
+                                     .get()).isSameInstanceAs(factory);
+        }
+    }
+
+    @Nested
+    @DisplayName("when trying to assign a default value")
+    class AssignDefault {
+
+        @Test
+        @DisplayName("assign for a missing `PRODUCTION` environment")
+        void assignDefaultForProd() {
+            testAssignsDefaultForEnv(PRODUCTION);
+        }
+
+        @Test
+        @DisplayName("retain the original `PRODUCTION` env value")
+        void retainForProd() {
+            testRetainsDefaultForEnv(PRODUCTION);
+        }
+
+        @Test
+        @DisplayName("assign for a missing `TESTS` env value")
+        void assignDefaultForTests() {
+            testRetainsDefaultForEnv(TESTS);
+        }
+
+        @Test
+        @DisplayName("retain the original `TESTS` env value")
+        void retainForTests() {
+            testRetainsDefaultForEnv(TESTS);
+        }
+
+        @Test
+        @DisplayName("assign for a missing user-defined env")
+        void assignDefaultForUserDefined() {
+            testRetainsDefaultForEnv(UserDefinedEnv.STAGING);
+        }
+
+        @Test
+        @DisplayName("retain the original for a user-defined env")
+        void retainForUserDefined() {
+            testRetainsDefaultForEnv(UserDefinedEnv.STAGING);
+        }
+
+        void testAssignsDefaultForEnv(EnvSetting.EnvironmentType type) {
+            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+            MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
+            assertThat(storageFactory.assignOrDefault(memoizingFactory, type))
+                    .isSameInstanceAs(memoizingFactory);
+        }
+
+        void testRetainsDefaultForEnv(EnvSetting.EnvironmentType type) {
+            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+            MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
+            storageFactory.configure(memoizingFactory, type);
+
+            InMemoryStorageFactory inMemoryFactory = InMemoryStorageFactory.newInstance();
+            assertThat(storageFactory.assignOrDefault(inMemoryFactory, type))
+                    .isSameInstanceAs(memoizingFactory);
+
+        }
     }
 
     @Test
-    @DisplayName("return the production value")
-    void returnProdValue() {
-        InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-        storageFactory.configure(factory)
-                      .forProduction();
-        assertProductionMatches(storageFactory, s -> s == factory);
-    }
-
-    @Test
-    @DisplayName("return the value for tests")
-    void returnTestValue() {
-        InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-        storageFactory.configure(factory)
-                      .forTests();
-        assertTestsMatches(storageFactory, s -> s == factory);
-    }
-
-    @Test
-    @DisplayName("should mutate the setting when using `testsOrAssignDefault`")
-    void testOrAssignDefault() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-
-        assertThat(storageFactory.testsOrAssignDefault(factory)).isSameInstanceAs(factory);
-        assertThat(storageFactory.tests()).hasValue(factory);
-    }
-
-    @Test
-    @DisplayName("should mutate the setting when using `productionOrAssignDefault`")
-    void prodOrAssignDefault() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-
-        assertThat(storageFactory.productionOrAssignDefault(factory)).isSameInstanceAs(factory);
-        assertThat(storageFactory.production()).hasValue(factory);
-    }
-
-    @Test
-    @DisplayName("reset the production and testing values")
-    @SuppressWarnings("ObjectEquality" /* a check for sameness is correct here.*/)
+    @DisplayName("reset the value for all environments")
     void resetTheValues() {
-        InMemoryStorageFactory factoryForProduction = InMemoryStorageFactory.newInstance();
-        MemoizingStorageFactory factoryForTests = new MemoizingStorageFactory();
+        InMemoryStorageFactory prodStorageFactory = InMemoryStorageFactory.newInstance();
+        MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
+        InMemoryStorageFactory stagingStorageFactory = InMemoryStorageFactory.newInstance();
 
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-
-        storageFactory.configure(factoryForProduction)
-                      .forProduction();
-        storageFactory.configure(factoryForTests)
-                      .forTests();
-
-        assertProductionMatches(storageFactory, s -> s == factoryForProduction);
-        assertTestsMatches(storageFactory, s -> s == factoryForTests);
+        storageFactory.configure(prodStorageFactory, PRODUCTION);
+        storageFactory.configure(testingStorageFactory, TESTS);
+        storageFactory.configure(stagingStorageFactory, UserDefinedEnv.STAGING);
 
         storageFactory.reset();
 
-        assertThat(storageFactory.production()).isEmpty();
-        assertThat(storageFactory.tests()).isEmpty();
+        Stream.of(PRODUCTION, TESTS, UserDefinedEnv.STAGING)
+              .map(storageFactory::value)
+              .forEach(s -> assertThat(s).isEmpty());
     }
 
     @Test
-    @DisplayName("should run an operation against a production value if it's present")
+    @DisplayName("should run an operation against a value value if it's present")
     void runThrowableConsumer() throws Exception {
         MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
 
         EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
-        storageSetting.configure(storageFactory)
-                      .forProduction();
-        storageSetting.ifProductionPresent(AutoCloseable::close);
+        storageSetting.configure(storageFactory, PRODUCTION);
+        storageSetting.ifPresentForEnvironment(PRODUCTION, AutoCloseable::close);
 
         assertThat(storageFactory.isClosed()).isTrue();
-
-    }
-
-    private static <P> void assertProductionMatches(EnvSetting<P> value,
-                                                    Predicate<P> assertion) {
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
-        P prodValue = value.production()
-                           .get();
-        assertThat(assertion.test(prodValue)).isTrue();
-
-    }
-
-    private static <P> void assertTestsMatches(EnvSetting<P> value,
-                                               Predicate<P> assertion) {
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
-        P prodValue = value.tests()
-                           .get();
-        assertThat(assertion.test(prodValue)).isTrue();
     }
 }
