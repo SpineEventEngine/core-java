@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides classes for return values from message handling methods.
+ * This package provides classes for return values from message-handling methods.
  *
  * <h1>Overview</h1>
  * 
@@ -56,6 +56,7 @@
  * other purposes.
  *
  * <h1>Two groups of classes</h1>
+ * 
  * This package provides two groups of classes:
  * <ol>
  *     <li>{@link io.spine.server.tuple.Tuple Tuple} classes are for returning more than one message.
