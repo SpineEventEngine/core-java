@@ -139,7 +139,7 @@ class ServerEnvironmentTest {
     }
 
     @Nested
-    @DisplayName("configure value `StorageFactory`")
+    @DisplayName("configure production `StorageFactory`")
     class StorageFactoryConfig {
 
         private final Environment environment = Environment.instance();
@@ -207,7 +207,7 @@ class ServerEnvironmentTest {
     }
 
     @Nested
-    @DisplayName("configure `TransportFactory` in value")
+    @DisplayName("configure `TransportFactory` for the production environment")
     class TransportFactoryConfig {
 
         private final Environment environment = Environment.instance();

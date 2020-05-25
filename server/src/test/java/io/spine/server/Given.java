@@ -118,7 +118,7 @@ public class Given {
         private static final ProjectId PROJECT_ID = newProjectId();
 
         /* This hack is just for the testing purposes.
-        The value code should use more sane approach to generating the IDs. */
+        The production code should use more sane approach to generating the IDs. */
         private static final AtomicInteger customerNumber = new AtomicInteger(1);
 
         private ACommand() {
