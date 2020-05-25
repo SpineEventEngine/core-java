@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * storageFactory.configure(InMemoryStorageFactory.newInstance(), PRODUCTION);
  *
  * assertThat(storageFactory.value(PRODUCTION)).isPresent();
- * assertThat(storageFactory.value(PRODUCTION)).isEmpty();
+ * assertThat(storageFactory.value(TESTS)).isEmpty();
  * }
  * </pre>
  *
@@ -51,7 +51,7 @@ public final class EnvSetting<P> {
     private final Map<EnvironmentType, P> settingValue = new EnumMap<>(EnvironmentType.class);
 
     /**
-     * Returns the value for the value environment if it was set, an empty {@code Optional}
+     * Returns the value for the specified environment if it was set, an empty {@code Optional}
      * otherwise.
      */
     Optional<P> value(EnvironmentType type) {
@@ -59,9 +59,12 @@ public final class EnvSetting<P> {
     }
 
     /**
-     * Runs the specified operations against the value if it's present, otherwise does nothing.
+     * Runs the specified operations against the value of the specified environment if it's
+     * present,
+     * does nothing otherwise.
      *
-     * <p>If you wish to run an operation that doesn't throw, use {@code value().ifPresent()}.
+     * <p>If you wish to run an operation that doesn't throw, use {@code
+     * value(envType).ifPresent()}.
      *
      * @param operation
      *         operation to run
@@ -75,9 +78,9 @@ public final class EnvSetting<P> {
     }
 
     /**
-     * Returns the value for the value environment if it's present.
+     * If the value for the specified environment is set, just returns it.
      *
-     * <p>If it's not present, assigns the specified default value and returns it.
+     * <p>If it is not set, sets the specified {@code defaultValue} and returns it.
      */
     P assignOrDefault(P defaultValue, EnvironmentType type) {
         checkNotNull(defaultValue);
@@ -85,26 +88,25 @@ public final class EnvSetting<P> {
         if (settingValue.containsKey(type)) {
             return settingValue.get(type);
         } else {
-            settingValue.put(type, defaultValue);
+            this.configure(defaultValue, type);
             return defaultValue;
         }
     }
 
-    /** Changes the value and the testing values to {@code null}. */
+    /** Changes the value for all environments to {@code null}. */
     void reset() {
         this.settingValue.clear();
     }
 
     /**
-     * Allows to configure the specified value for testing or value as follows:
-     *
-     * {@code value.configure(testingValue).forTests();}
+     * Sets the specified value for the specified environment.
      *
      * @param value
      *         value to assign to one of environments
      */
     public void configure(P value, EnvironmentType type) {
         checkNotNull(value);
+        checkNotNull(type);
         this.settingValue.put(type, value);
     }
 

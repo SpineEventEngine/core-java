@@ -55,6 +55,14 @@ class EnvSettingTest {
             testNoNullsForEnv(TESTS);
         }
 
+        @Test
+        @DisplayName("using the `null` as the env value")
+        void forEnv() {
+            EnvSetting<StorageFactory> setting = new EnvSetting<>();
+            assertThrows(NullPointerException.class,
+                         () -> setting.configure(InMemoryStorageFactory.newInstance(), null));
+        }
+
         private void testNoNullsForEnv(EnvSetting.EnvironmentType tests) {
             EnvSetting<?> config = new EnvSetting();
             assertThrows(NullPointerException.class,
