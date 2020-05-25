@@ -20,23 +20,23 @@
 
 package io.spine.server;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A mutable value that may differ for the value and testing environments.
+ * A mutable value that may differ for the production and testing environments.
  *
  * <p>For example:
  * <pre>
  * {@code
  * EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
- * storageFactory.configure(InMemoryStorageFactory.newInstance()).forProduction();
+ * storageFactory.configure(InMemoryStorageFactory.newInstance(), PRODUCTION);
  *
- * assertThat(storageFactory.value()).isPresent();
- * assertThat(storageFactory.tests()).isEmpty();
+ * assertThat(storageFactory.value(PRODUCTION)).isPresent();
+ * assertThat(storageFactory.value(PRODUCTION)).isEmpty();
  * }
  * </pre>
  *
@@ -48,7 +48,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EnvSetting<P> {
 
-    private final Map<EnvironmentType, P> settingValue = new HashMap<>();
+    private final Map<EnvironmentType, P> settingValue = new EnumMap<>(EnvironmentType.class);
 
     /**
      * Returns the value for the value environment if it was set, an empty {@code Optional}
@@ -80,7 +80,14 @@ public final class EnvSetting<P> {
      * <p>If it's not present, assigns the specified default value and returns it.
      */
     P assignOrDefault(P defaultValue, EnvironmentType type) {
-        return settingValue.putIfAbsent(type, defaultValue);
+        checkNotNull(defaultValue);
+        checkNotNull(type);
+        if (settingValue.containsKey(type)) {
+            return settingValue.get(type);
+        } else {
+            settingValue.put(type, defaultValue);
+            return defaultValue;
+        }
     }
 
     /** Changes the value and the testing values to {@code null}. */
@@ -101,12 +108,12 @@ public final class EnvSetting<P> {
         this.settingValue.put(type, value);
     }
 
-    public interface EnvironmentType {
-
-    }
-
-    public enum EnvType implements EnvironmentType {
-        PRODUCTION, TESTS
+    /**
+     * A type of the environment between which an application configuration may vary.
+     */
+    public enum EnvironmentType {
+        PRODUCTION,
+        TESTS
     }
 
     /**

@@ -45,6 +45,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.EnvSetting.EnvironmentType.PRODUCTION;
+import static io.spine.server.EnvSetting.EnvironmentType.TESTS;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -69,7 +71,7 @@ class SystemAwareStorageFactoryTest {
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
-        serverEnv.useStorageFactory(productionStorage).forProduction();
+        serverEnv.useStorageFactory(productionStorage, PRODUCTION);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
@@ -83,7 +85,7 @@ class SystemAwareStorageFactoryTest {
     void wrapTestStorage() {
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory testStorage = InMemoryStorageFactory.newInstance();
-        serverEnv.useStorageFactory(testStorage).forTests();
+        serverEnv.useStorageFactory(testStorage, TESTS);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;

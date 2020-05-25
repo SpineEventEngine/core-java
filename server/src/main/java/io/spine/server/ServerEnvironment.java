@@ -39,8 +39,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.EnvSetting.EnvType.PRODUCTION;
-import static io.spine.server.EnvSetting.EnvType.TESTS;
+import static io.spine.server.EnvSetting.EnvironmentType.PRODUCTION;
+import static io.spine.server.EnvSetting.EnvironmentType.TESTS;
 import static io.spine.server.storage.system.SystemAwareStorageFactory.wrap;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -195,13 +195,7 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Returns the configuration object to change the storage factory.
-     *
-     * <p>Callers may configure the testing factory via
-     * {@code useStorageFactory(testFactory).forTests()} and the value factory via
-     * {@code useStorageFactory(productionFactory).forProduction()}.
-     *
-     * @return the storage factory configuration object
+     * Assigns the specified {@code TransportFactory} for the specified application environment.
      */
     public void useStorageFactory(StorageFactory storage, EnvironmentType environmentType) {
         this.storageFactory.configure(wrap(storage), environmentType);
@@ -230,12 +224,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return {@code StorageFactory} instance for the storage for the current environment
      * @throws IllegalStateException
      *         if the value {@code StorageFactory} was not
-     *         {@linkplain #useStorageFactory(StorageFactory)} configured} prior to the call
+     *         {@linkplain #useStorageFactory(StorageFactory, EnvironmentType)} configured}
+     *         prior to the call
      */
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-            return storageFactory.assignOrDefault(TESTS, wrap(factory));
+            return storageFactory.assignOrDefault(wrap(factory), TESTS);
         }
 
         StorageFactory result = storageFactory
@@ -254,10 +249,6 @@ public final class ServerEnvironment implements AutoCloseable {
 
     /**
      * Returns the configuration object to change the transport factory.
-     *
-     * <p>Callers may configure the testing factory via
-     * {@code useTransportFactory(testFactory).forTests()} and the value factory via
-     * {@code useTransportFactory(productionFactory).value()}.
      */
     public void useTransportFactory(TransportFactory transportFactory, EnvironmentType envType) {
         this.transportFactory.configure(transportFactory, envType);
@@ -265,16 +256,21 @@ public final class ServerEnvironment implements AutoCloseable {
 
     /**
      * Obtains the transport factory for the current environment.
+     *
      * <p>If the factory is not assigned in the Production mode, throws
      * {@code IllegalStateException} with the instruction to call
-     * {@link #useTransportFactory(TransportFactory)}.
+     * {@link #useTransportFactory(TransportFactory, EnvironmentType)}.
+     *
+     * <p>In the testing environment, if the factory was not assigned, assigns
+     * a new {@code InMemoryTransportFactory} and returns it.
+     *
      *
      * <p>If the factory is not assigned in the Tests mode, assigns the instance of
      * {@link InMemoryTransportFactory} and returns it.
      */
     public TransportFactory transportFactory() {
         if (environment().isTests()) {
-            return transportFactory.assignOrDefault(TESTS, InMemoryTransportFactory.newInstance());
+            return transportFactory.assignOrDefault(InMemoryTransportFactory.newInstance(), TESTS);
         }
 
         TransportFactory result = transportFactory

@@ -31,17 +31,13 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.server.EnvSetting.EnvType.PRODUCTION;
-import static io.spine.server.EnvSetting.EnvType.TESTS;
+import static io.spine.server.EnvSetting.EnvironmentType.PRODUCTION;
+import static io.spine.server.EnvSetting.EnvironmentType.TESTS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`EnvSetting` should")
 @SuppressWarnings("DuplicateStringLiteralInspection")
 class EnvSettingTest {
-
-    enum UserDefinedEnv implements EnvSetting.EnvironmentType {
-        STAGING
-    }
 
     @Nested
     @DisplayName("not allow to configure a `null` value ")
@@ -57,13 +53,6 @@ class EnvSettingTest {
         @DisplayName("for the `TESTS` environment")
         void forTests() {
             testNoNullsForEnv(TESTS);
-        }
-
-        @Test
-        @DisplayName("for a user-defined environment")
-        void forUserDefinedEnv() {
-            testNoNullsForEnv(UserDefinedEnv.STAGING);
-
         }
 
         private void testNoNullsForEnv(EnvSetting.EnvironmentType tests) {
@@ -88,13 +77,6 @@ class EnvSettingTest {
         @DisplayName("for the `TESTS` environment")
         void forTests() {
             testReturnsForEnv(TESTS);
-        }
-
-        @Test
-        @DisplayName("for a user-defined environment")
-        void forUserDefinedEnv() {
-            testReturnsForEnv(UserDefinedEnv.STAGING);
-
         }
 
         private void testReturnsForEnv(EnvSetting.EnvironmentType type) {
@@ -136,18 +118,6 @@ class EnvSettingTest {
             testRetainsDefaultForEnv(TESTS);
         }
 
-        @Test
-        @DisplayName("assign for a missing user-defined env")
-        void assignDefaultForUserDefined() {
-            testRetainsDefaultForEnv(UserDefinedEnv.STAGING);
-        }
-
-        @Test
-        @DisplayName("retain the original for a user-defined env")
-        void retainForUserDefined() {
-            testRetainsDefaultForEnv(UserDefinedEnv.STAGING);
-        }
-
         void testAssignsDefaultForEnv(EnvSetting.EnvironmentType type) {
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
@@ -172,16 +142,14 @@ class EnvSettingTest {
     void resetTheValues() {
         InMemoryStorageFactory prodStorageFactory = InMemoryStorageFactory.newInstance();
         MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
-        InMemoryStorageFactory stagingStorageFactory = InMemoryStorageFactory.newInstance();
 
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
         storageFactory.configure(prodStorageFactory, PRODUCTION);
         storageFactory.configure(testingStorageFactory, TESTS);
-        storageFactory.configure(stagingStorageFactory, UserDefinedEnv.STAGING);
 
         storageFactory.reset();
 
-        Stream.of(PRODUCTION, TESTS, UserDefinedEnv.STAGING)
+        Stream.of(PRODUCTION, TESTS)
               .map(storageFactory::value)
               .forEach(s -> assertThat(s).isEmpty());
     }
