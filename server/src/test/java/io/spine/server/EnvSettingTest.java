@@ -129,7 +129,7 @@ class EnvSettingTest {
         void testAssignsDefaultForEnv(EnvSetting.EnvironmentType type) {
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
-            assertThat(storageFactory.assignOrDefault(memoizingFactory, type))
+            assertThat(storageFactory.assignOrDefault(() -> memoizingFactory, type))
                     .isSameInstanceAs(memoizingFactory);
         }
 
@@ -139,7 +139,7 @@ class EnvSettingTest {
             storageFactory.configure(memoizingFactory, type);
 
             InMemoryStorageFactory inMemoryFactory = InMemoryStorageFactory.newInstance();
-            assertThat(storageFactory.assignOrDefault(inMemoryFactory, type))
+            assertThat(storageFactory.assignOrDefault(() -> inMemoryFactory, type))
                     .isSameInstanceAs(memoizingFactory);
 
         }

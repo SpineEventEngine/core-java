@@ -23,6 +23,7 @@ package io.spine.server;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -60,11 +61,10 @@ public final class EnvSetting<P> {
 
     /**
      * Runs the specified operations against the value of the specified environment if it's
-     * present,
-     * does nothing otherwise.
+     * present, does nothing otherwise.
      *
      * <p>If you wish to run an operation that doesn't throw, use {@code
-     * value(envType).ifPresent()}.
+     * value(envType).ifPresent(operation)}.
      *
      * @param operation
      *         operation to run
@@ -80,16 +80,17 @@ public final class EnvSetting<P> {
     /**
      * If the value for the specified environment is set, just returns it.
      *
-     * <p>If it is not set, sets the specified {@code defaultValue} and returns it.
+     * <p>If it is not set, runs the specified supplier, configures and returns the supplied value.
      */
-    P assignOrDefault(P defaultValue, EnvironmentType type) {
+    P assignOrDefault(Supplier<P> defaultValue, EnvironmentType type) {
         checkNotNull(defaultValue);
         checkNotNull(type);
         if (settingValue.containsKey(type)) {
             return settingValue.get(type);
         } else {
-            this.configure(defaultValue, type);
-            return defaultValue;
+            P value = defaultValue.get();
+            this.configure(value, type);
+            return value;
         }
     }
 

@@ -80,7 +80,7 @@ public final class ServerEnvironment implements AutoCloseable {
     private @MonotonicNonNull Delivery delivery;
 
     /**
-     * Storage factories for both the value and the testing environments.
+     * Storage factories for both the production and the testing environments.
      */
     private final EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
 
@@ -90,7 +90,7 @@ public final class ServerEnvironment implements AutoCloseable {
     private @Nullable TracerFactory tracerFactory;
 
     /**
-     * The value and testing factories for channel-based transport.
+     * The production and testing factories for channel-based transport.
      */
     private final EnvSetting<TransportFactory> transportFactory = new EnvSetting<>();
 
@@ -229,8 +229,8 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
-            InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-            return storageFactory.assignOrDefault(wrap(factory), TESTS);
+            return storageFactory.assignOrDefault(() -> wrap(InMemoryStorageFactory.newInstance()),
+                                                  TESTS);
         }
 
         StorageFactory result = storageFactory
@@ -270,7 +270,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public TransportFactory transportFactory() {
         if (environment().isTests()) {
-            return transportFactory.assignOrDefault(InMemoryTransportFactory.newInstance(), TESTS);
+            return transportFactory.assignOrDefault(InMemoryTransportFactory::newInstance, TESTS);
         }
 
         TransportFactory result = transportFactory
