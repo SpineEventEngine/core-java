@@ -18,19 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    // Use Kotlin for `buildSrc`.
-    // https://kotlinlang.org/docs/reference/using-gradle.html#targeting-the-jvm
-    kotlin("jvm").version("1.3.72")
-}
+package io.spine.gradle.internal
 
-repositories {
-    mavenLocal()
-    jcenter()
-}
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 
-val jacksonVersion = "2.11.0"
+/**
+ * Gradle plugin which adds a [CheckVersionIncrement] task.
+ *
+ * The task is called `checkVersionIncrement` inserted before the `check` task.
+ */
+class IncrementGuard : Plugin<Project> {
 
-dependencies {
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
+    companion object {
+        const val taskName = "checkVersionIncrement"
+    }
+
+    override fun apply(target: Project) {
+        val tasks = target.tasks
+        tasks.register(taskName, CheckVersionIncrement::class.java) {
+            it.repository = PublishingRepos.cloudRepo
+            tasks.getByName("check").dependsOn(it)
+
+            it.shouldRunAfter("test")
+        }
+    }
 }
