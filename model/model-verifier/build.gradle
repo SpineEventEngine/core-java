@@ -19,19 +19,10 @@
  */
 
 buildscript {
-    apply from: "$rootDir/version.gradle"
+    apply from: "$rootDir/version.gradle.kts"
 }
 
 group 'io.spine.tools'
-
-sourceSets {
-    main {
-        resources.srcDirs "$sourcesRootDir/main/resources"
-    }
-    test {
-        resources.srcDirs "$sourcesRootDir/test/resources"
-    }
-}
 
 dependencies {
     implementation gradleApi()

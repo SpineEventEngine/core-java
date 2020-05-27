@@ -18,17 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-core-java'
+/**
+ * The versions of the libraries used.
+ *
+ * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
+ * as we want to manage the versions in a single source.
+ */
 
-include 'core'
-include 'client'
-include 'server'
-include 'testutil-core'
-include 'testutil-client'
-include 'testutil-server'
-
-include 'model-assembler'
-include 'model-verifier'
-
-project(':model-assembler').projectDir = './model/model-assembler' as File
-project(':model-verifier').projectDir = './model/model-verifier' as File
+project.extra.apply {
+    this["spineBaseVersion"] = "1.5.12"
+    this["spineTimeVersion"] = "1.5.12"
+    this["versionToPublish"] = "1.5.13"
+}

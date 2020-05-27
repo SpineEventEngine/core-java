@@ -18,22 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+rootProject.name = "spine-core-java"
 
-final def spineVersion = '1.5.13'
+include("core")
+include("client")
+include("server")
+include("testutil-core")
+include("testutil-client")
+include("testutil-server")
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
+include("model-assembler")
+include("model-verifier")
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.5.10'
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.5.8'
-}
+project(":model-assembler").projectDir = File("./model/model-assembler")
+project(":model-verifier").projectDir = File("./model/model-verifier")
