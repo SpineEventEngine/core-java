@@ -18,14 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.gradle.internal.Deps
+
+val spineTimeVersion: String by extra
+
 dependencies {
-    api project(path: ':client')
+    api(project(":client"))
+    api(project(":testutil-core"))
+    api("io.spine:spine-testutil-time:$spineTimeVersion")
 
-    // Depend on JUnit in the production part of the code, as this module exposes testing utilities
-    // that are based on JUnit.
-    api deps.test.junit5Api
-    runtimeClasspath deps.test.junit5Runner
-
-    // General purpose test utilities.
-    api "io.spine:spine-testlib:$spineBaseVersion"
+    implementation(Deps.grpc.grpcProtobuf)
 }
+
+apply(from = Deps.scripts.testArtifacts(project))

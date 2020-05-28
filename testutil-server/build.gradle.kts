@@ -17,12 +17,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    api project(path: ':server')
 
-    api project(path: ':testutil-client')
-    testImplementation deps.grpc.grpcNetty
-    testImplementation project(path: ':testutil-client', configuration: 'testArtifacts')
+import io.spine.gradle.internal.Deps
+
+dependencies {
+    api(project(":server"))
+    api(project(":testutil-client"))
+    testImplementation(Deps.grpc.netty)
+    testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
 }
 
-apply from: deps.scripts.testArtifacts
+apply(from = Deps.scripts.testArtifacts(project))
