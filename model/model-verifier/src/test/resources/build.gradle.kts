@@ -20,6 +20,7 @@
 
 import io.spine.gradle.internal.DependencyResolution
 import io.spine.gradle.internal.Deps
+import org.gradle.api.file.SourceDirectorySet
 
 buildscript {
 
@@ -52,7 +53,6 @@ buildscript {
     val deps = io.spine.gradle.internal.Deps
 
     dependencies {
-        classpath(deps.build.protobuf)
         classpath(deps.build.gradlePlugins.protobuf)
         classpath("io.spine.tools:spine-model-compiler:${spineBaseVersion}")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
@@ -64,9 +64,9 @@ plugins {
 }
 
 apply(from = "$rootDir/test-env.gradle")
-apply(from = "$enclosingRootDir/version.gradle.kts")
-
 val enclosingRootDir: String by extra
+
+apply(from = "$enclosingRootDir/version.gradle.kts")
 val spineBaseVersion: String by extra
 val versionToPublish: String by extra
 
@@ -78,7 +78,7 @@ apply {
     from("$enclosingRootDir/config/gradle/model-compiler.gradle")
 }
 
-dependencyResolution.defaultRepositories(repositories)
+DependencyResolution.defaultRepositories(repositories)
 
 tasks.compileJava {
     options.compilerArgs.addAll(listOf("-processor",
@@ -87,7 +87,7 @@ tasks.compileJava {
 }
 
 dependencies {
-    implementation(Deps.build.protobuf)
+    Deps.build.protobuf.forEach { implementation(it) }
     implementation("io.spine:spine-server:$versionToPublish")
 
     annotationProcessor("io.spine.tools:spine-model-assembler:$versionToPublish")
@@ -97,6 +97,6 @@ sourceSets {
     main {
         java.srcDirs("$projectDir/generated/main/java", "$projectDir/generated/main/spine")
         resources.srcDirs("$projectDir/generated/main/resources")
-        extensions["proto"].srcDirs("$projectDir/src/main/proto")
+        (extensions["proto"] as SourceDirectorySet).srcDirs("$projectDir/src/main/proto")
     }
 }
