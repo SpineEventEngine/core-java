@@ -18,33 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.gradle.internal.Deps
+
+val spineBaseVersion: String by extra
+val spineTimeVersion: String by extra
+
 dependencies {
-    api project(':client')
-    implementation(
-            deps.grpc.grpcProtobuf,
-            deps.grpc.grpcCore
-    )
-    testAnnotationProcessor deps.build.autoService.processor
-    testCompileOnly deps.build.autoService.annotations
-    testImplementation(
-            deps.grpc.grpcNettyShaded,
-            "io.spine:spine-testlib:$spineBaseVersion",
-            project(path: ':core', configuration: 'testArtifacts'),
-            project(path: ':client', configuration: 'testArtifacts'),
-            project(':testutil-server')
-    )
+    api("io.spine:spine-base:$spineBaseVersion")
+    api("io.spine:spine-time:$spineTimeVersion")
+
+    testImplementation(project(":testutil-core"))
+    testImplementation("io.spine:spine-testutil-time:$spineTimeVersion")
 }
 
-apply from: deps.scripts.testArtifacts
-apply from: deps.scripts.publishProto
+modelCompiler {
+    fields {
+        // Enable the strongly-typed fields generation for `spine.core.Event` as currently it's
+        // a subscribable entity state.
+        generateFor("spine.core.Event", markAs("io.spine.base.EntityStateField"))
 
-// Copies the documentation files to the Javadoc output folder.
-// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-javadoc {
-    doLast {
-        copy {
-            from "src/main/docs"
-            into "$buildDir/docs/javadoc"
-        }
+        // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
+        // creation of typed event filters based on event context.
+        generateFor("spine.core.EventContext", markAs("io.spine.core.EventContextField"))
     }
+}
+
+apply {
+    from(Deps.scripts.testArtifacts(project))
+    from(Deps.scripts.publishProto(project))
 }

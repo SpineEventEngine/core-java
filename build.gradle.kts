@@ -80,10 +80,12 @@ allprojects {
         plugin("jacoco")
         plugin("idea")
         plugin("project-report")
+
+        from("$rootDir/version.gradle.kts")
     }
 
     group = "io.spine"
-    version = rootProject.extra["versionToPublish"]!!
+    version = extra["versionToPublish"]!!
 }
 
 subprojects {
@@ -156,14 +158,14 @@ subprojects {
 
     sourceSets {
         main {
-            proto.srcDirs("$sourcesRootDir/main/proto")
             java.srcDirs(generatedJavaDir, "$sourcesRootDir/main/java", generatedSpineDir)
             resources.srcDirs("$sourcesRootDir/main/resources", "$generatedRootDir/main/resources")
+            proto.srcDirs("$sourcesRootDir/main/proto")
         }
         test {
-            proto.srcDirs("$sourcesRootDir/test/proto")
             java.srcDirs(generatedTestJavaDir, "$sourcesRootDir/test/java", generatedTestSpineDir)
             resources.srcDirs("$sourcesRootDir/test/resources", "$generatedRootDir/test/resources")
+            proto.srcDirs("$sourcesRootDir/test/proto")
         }
     }
 

@@ -18,25 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    api "io.spine:spine-base:$spineBaseVersion"
-    api "io.spine:spine-time:$spineTimeVersion"
+import io.spine.gradle.internal.Deps
 
-    testImplementation project(path: ":testutil-core")
-    testImplementation "io.spine:spine-testutil-time:$spineTimeVersion"
+val spineBaseVersion: String by extra
+
+dependencies {
+    api(project(":client"))
+
+    implementation(Deps.grpc.protobuf)
+    implementation(Deps.grpc.core)
+
+    testAnnotationProcessor(Deps.build.autoService.processor)
+    testCompileOnly(Deps.build.autoService.annotations)
+    testImplementation(Deps.grpc.nettyShaded)
+    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation(project(path = ":core", configuration = "testArtifacts"))
+    testImplementation(project(path = ":client", configuration = "testArtifacts"))
+    testImplementation(project(":testutil-server"))
 }
 
-modelCompiler {
-    fields {
-        // Enable the strongly-typed fields generation for `spine.core.Event` as currently it's
-        // a subscribable entity state.
-        generateFor "spine.core.Event", markAs("io.spine.base.EntityStateField")
+apply {
+    from(Deps.scripts.testArtifacts(project))
+    from(Deps.scripts.publishProto(project))
+}
 
-        // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
-        // creation of typed event filters based on event context.
-        generateFor "spine.core.EventContext", markAs("io.spine.core.EventContextField")
+// Copies the documentation files to the Javadoc output folder.
+// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
+tasks.javadoc {
+    doLast {
+        copy {
+            from("src/main/docs")
+            into("$buildDir/docs/javadoc")
+        }
     }
 }
-
-apply from: deps.scripts.testArtifacts
-apply from: deps.scripts.publishProto
