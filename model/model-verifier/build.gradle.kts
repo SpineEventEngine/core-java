@@ -18,14 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.gradle.internal.Deps
+
 buildscript {
-    apply from: "$rootDir/version.gradle.kts"
+    apply(from = "$rootDir/version.gradle.kts")
 }
 
-group 'io.spine.tools'
+group = "io.spine.tools"
+
+val spineBaseVersion: String by extra
 
 dependencies {
-    implementation project(':server')
+    implementation(gradleApi())
+    implementation("io.spine.tools:spine-plugin-base:$spineBaseVersion")
+    implementation("io.spine.tools:spine-model-compiler:$spineBaseVersion")
+    implementation(project(":server"))
+    implementation(project(":model-assembler"))
 
-    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
+    testImplementation(gradleTestKit())
+    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation("io.spine.tools:spine-plugin-testlib:$spineBaseVersion")
+    testImplementation(Deps.test.junitPioneer)
+    testImplementation(project(":testutil-server"))
+}
+
+tasks.test {
+    dependsOn("publishToMavenLocal",
+              ":core:publishToMavenLocal",
+              ":client:publishToMavenLocal",
+              ":server:publishToMavenLocal",
+              ":model-assembler:publishToMavenLocal")
 }
