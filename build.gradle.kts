@@ -195,7 +195,7 @@ subprojects {
         from("$projectDir/build/docs/javadoc")
         archiveClassifier.set("javadoc")
 
-        dependsOn("javadoc")
+        dependsOn(tasks.javadoc)
     }
 
     idea {
