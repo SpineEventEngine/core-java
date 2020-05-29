@@ -187,7 +187,7 @@ subprojects {
     }
 
     tasks.register("testOutputJar", Jar::class) {
-        from(sourceSets.test.get().allJava)
+        from(sourceSets.test.get().output)
         archiveClassifier.set("test")
     }
 
