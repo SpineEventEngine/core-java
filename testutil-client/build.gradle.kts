@@ -27,7 +27,7 @@ dependencies {
     api(project(":testutil-core"))
     api("io.spine:spine-testutil-time:$spineTimeVersion")
 
-    implementation(Deps.grpc.grpcProtobuf)
+    implementation(Deps.grpc.protobuf)
 }
 
 apply(from = Deps.scripts.testArtifacts(project))
