@@ -19,6 +19,7 @@
  */
 
 import io.spine.gradle.internal.Deps
+import io.spine.gradle.internal.IncrementGuard
 
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
@@ -46,4 +47,5 @@ modelCompiler {
 apply {
     from(Deps.scripts.testArtifacts(project))
     from(Deps.scripts.publishProto(project))
+    plugin(IncrementGuard::class)
 }
