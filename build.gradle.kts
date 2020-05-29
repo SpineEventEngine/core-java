@@ -102,6 +102,10 @@ subprojects {
         from(Deps.scripts.projectLicenseReport(project))
     }
 
+    extensions["modelCompiler"].withGroovyBuilder {
+        setProperty("generateValidation", true)
+    }
+
     val isTravis = System.getenv("TRAVIS") == "true"
     if (isTravis) {
         tasks.javadoc {
