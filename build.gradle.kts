@@ -204,12 +204,14 @@ subprojects {
 
     idea {
         module {
-            generatedSourceDirs.add(file(generatedJavaDir))
-            generatedSourceDirs.add(file(generatedGrpcDir))
-            generatedSourceDirs.add(file(generatedSpineDir))
-            generatedSourceDirs.add(file(generatedTestJavaDir))
-            generatedSourceDirs.add(file(generatedTestGrpcDir))
-            generatedSourceDirs.add(file(generatedTestSpineDir))
+            generatedSourceDirs.addAll(files(
+                    generatedJavaDir,
+                    generatedGrpcDir,
+                    generatedSpineDir,
+                    generatedTestJavaDir,
+                    generatedTestGrpcDir,
+                    generatedTestSpineDir
+            ))
 
             testSourceDirs.add(file(generatedTestJavaDir))
 
