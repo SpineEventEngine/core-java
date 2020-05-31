@@ -29,7 +29,6 @@ option java_multiple_files = true;
 option java_outer_classname = "ResponseProto";
 
 import "google/protobuf/empty.proto";
-import "google/protobuf/any.proto";
 
 import "spine/base/error.proto";
 import "spine/core/event.proto";

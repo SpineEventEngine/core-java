@@ -18,22 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+import io.spine.gradle.internal.Deps
 
-final def spineVersion = '1.5.13'
+val spineBaseVersion: String by extra
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = spineVersion
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.5.10'
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.5.8'
+dependencies {
+    api(project(":client"))
+    api("io.spine:spine-testlib:$spineBaseVersion")
+    Deps.test.junit5Api.forEach { api(it) }
+    runtimeClasspath(Deps.test.junit5Runner)
 }

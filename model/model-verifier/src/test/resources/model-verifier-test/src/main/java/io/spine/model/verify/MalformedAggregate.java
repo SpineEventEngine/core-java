@@ -40,7 +40,7 @@ public class MalformedAggregate extends Aggregate<String, VoidState, VoidState.B
     }
 
     @Assign
-    public List<UInt64Value> handle() {
+    List<UInt64Value> handle() {
         return Collections.emptyList();
     }
 }

@@ -34,7 +34,7 @@ import static java.util.Collections.singletonList;
 public class ValidCommandHandler extends AbstractCommandHandler {
 
     @Assign
-    public List<? extends EventMessage> handle(SendLink command) {
+    List<? extends EventMessage> handle(SendLink command) {
         return singletonList(LinkSent.newBuilder()
                                      .setLink(command.getLink())
                                      .build());

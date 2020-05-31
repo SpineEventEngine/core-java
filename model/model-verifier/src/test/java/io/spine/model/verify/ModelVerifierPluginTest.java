@@ -79,10 +79,11 @@ class ModelVerifierPluginTest {
     @MuteLogging
     @DisplayName("halt build on duplicate command handling methods")
     void rejectDuplicateHandlingMethods() {
-        BuildResult result = newProjectWithJava(
+        GradleProject project = newProjectWithJava(
                 "io/spine/model/verify/DuplicateAggregate.java",
-                "io/spine/model/verify/DuplicateCommandHandler.java")
-                .executeAndFail(verifyModel);
+                "io/spine/model/verify/DuplicateCommandHandler.java"
+        );
+        BuildResult result = project.executeAndFail(verifyModel);
         BuildTask task = result.task(toPath(verifyModel));
         assertNotNull(task, result.getOutput());
         TaskOutcome generationResult = task.getOutcome();

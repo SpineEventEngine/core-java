@@ -18,12 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    api project(path: ':client')
-    
-    implementation deps.grpc.grpcProtobuf
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+rootProject.name = "spine-core-java"
 
-apply from: deps.scripts.testArtifacts
+include("core")
+include("client")
+include("server")
+include("testutil-core")
+include("testutil-client")
+include("testutil-server")
+
+include("model-assembler")
+include("model-verifier")
+
+project(":model-assembler").projectDir = File("./model/model-assembler")
+project(":model-verifier").projectDir = File("./model/model-verifier")

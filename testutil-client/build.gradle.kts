@@ -18,19 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.gradle.internal.Deps
+
+val spineTimeVersion: String by extra
+
 dependencies {
-    api deps.grpc.grpcStub
-    api project(':core')
-    implementation(
-            deps.grpc.grpcProtobuf,
-            deps.grpc.grpcCore
-    )
-    testImplementation(
-            "io.spine:spine-testlib:$spineBaseVersion",
-            project(':testutil-client'),
-            project(path: ':core', configuration: 'testArtifacts')
-    )
+    api(project(":client"))
+    api(project(":testutil-core"))
+    api("io.spine:spine-testutil-time:$spineTimeVersion")
+
+    implementation(Deps.grpc.protobuf)
 }
 
-apply from: deps.scripts.testArtifacts
-apply from: deps.scripts.publishProto
+apply(from = Deps.scripts.testArtifacts(project))

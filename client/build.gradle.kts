@@ -18,14 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    apply from: "$rootDir/version.gradle"
-}
+import io.spine.gradle.internal.Deps
 
-group 'io.spine.tools'
+val spineBaseVersion: String by extra
 
 dependencies {
-    implementation project(':server')
+    api(Deps.grpc.stub)
+    api(project(":core"))
 
-    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
+    implementation(Deps.grpc.protobuf)
+    implementation(Deps.grpc.core)
+
+    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation(project(":testutil-client"))
+    testImplementation(project(path = ":core", configuration = "testArtifacts"))
+}
+
+apply {
+    from(Deps.scripts.testArtifacts(project))
+    from(Deps.scripts.publishProto(project))
 }

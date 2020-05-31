@@ -19,10 +19,18 @@
  */
 
 plugins {
+    // Use Kotlin for `buildSrc`.
+    // https://kotlinlang.org/docs/reference/using-gradle.html#targeting-the-jvm
     kotlin("jvm").version("1.3.72")
 }
 
 repositories {
     mavenLocal()
     jcenter()
+}
+
+val jacksonVersion = "2.11.0"
+
+dependencies {
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
 }

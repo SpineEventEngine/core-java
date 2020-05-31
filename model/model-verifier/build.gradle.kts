@@ -18,17 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-core-java'
+import io.spine.gradle.internal.Deps
 
-include 'core'
-include 'client'
-include 'server'
-include 'testutil-core'
-include 'testutil-client'
-include 'testutil-server'
+buildscript {
+    apply(from = "$rootDir/version.gradle.kts")
+}
 
-include 'model-assembler'
-include 'model-verifier'
+group = "io.spine.tools"
 
-project(':model-assembler').projectDir = './model/model-assembler' as File
-project(':model-verifier').projectDir = './model/model-verifier' as File
+val spineBaseVersion: String by extra
+
+dependencies {
+    implementation(gradleApi())
+    implementation("io.spine.tools:spine-plugin-base:$spineBaseVersion")
+    implementation("io.spine.tools:spine-model-compiler:$spineBaseVersion")
+    implementation(project(":server"))
+    implementation(project(":model-assembler"))
+
+    testImplementation(gradleTestKit())
+    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation("io.spine.tools:spine-plugin-testlib:$spineBaseVersion")
+    testImplementation(Deps.test.junitPioneer)
+    testImplementation(project(":testutil-server"))
+}
+
+tasks.test {
+    dependsOn("publishToMavenLocal",
+              ":core:publishToMavenLocal",
+              ":client:publishToMavenLocal",
+              ":server:publishToMavenLocal",
+              ":model-assembler:publishToMavenLocal")
+}
