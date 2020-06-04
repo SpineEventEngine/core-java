@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PATH;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE;
@@ -388,9 +389,9 @@ class ServerEnvironmentTest {
                                         .get()).isSameInstanceAs(memoizingTracer);
         }
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
         @Test
         @DisplayName("for a custom environment")
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
         void forCustom() {
             Environment.instance()
                        .setTo(Local.type());
@@ -400,6 +401,17 @@ class ServerEnvironmentTest {
 
             assertThat(serverEnvironment.tracing()
                                         .get()).isSameInstanceAs(memoizingTracer);
+        }
+
+        @Test
+        @DisplayName("for a custom environment, returning empty if it's disabled")
+        void forCustomEmpty() {
+            Local.disable();
+
+            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
+            serverEnvironment.use(memoizingTracer, Local.type());
+
+            assertThat(serverEnvironment.tracing()).isEmpty();
         }
     }
 

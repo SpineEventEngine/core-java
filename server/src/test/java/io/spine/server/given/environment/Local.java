@@ -31,7 +31,7 @@ public final class Local extends EnvironmentType {
 
     @Override
     protected boolean enabled() {
-        return true;
+        return Singleton.INSTANCE.enabled;
     }
 
     public static void enable() {
