@@ -23,6 +23,8 @@ package io.spine.server.storage.system;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
 import io.spine.base.Environment;
+import io.spine.base.Production;
+import io.spine.base.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
@@ -45,8 +47,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.EnvSetting.EnvironmentType.PRODUCTION;
-import static io.spine.server.EnvSetting.EnvironmentType.TESTS;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -67,25 +67,29 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap production storage")
     void wrapProdStorage() {
-        Environment.instance().setToProduction();
+        Production production = Production.type();
+        Environment.instance()
+                   .setTo(production);
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
-        serverEnv.useStorageFactory(productionStorage, PRODUCTION);
+        serverEnv.use(productionStorage, production);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
         assertThat(systemAware.delegate()).isEqualTo(productionStorage);
 
-        Environment.instance().reset();
+        Environment.instance()
+                   .reset();
     }
 
     @Test
     @DisplayName("wrap test storage")
     void wrapTestStorage() {
+        Tests tests = Tests.type();
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory testStorage = InMemoryStorageFactory.newInstance();
-        serverEnv.useStorageFactory(testStorage, TESTS);
+        serverEnv.use(testStorage, tests);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
@@ -163,7 +167,8 @@ class SystemAwareStorageFactoryTest {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         BoundedContextBuilder contextBuilder =
-                BoundedContext.multitenant(CONTEXT.name().getValue());
+                BoundedContext.multitenant(CONTEXT.name()
+                                                  .getValue());
         BoundedContext context = contextBuilder.build();
         BoundedContext systemContext = systemOf(context);
         ContextSpec systemSpec = systemContext.spec();

@@ -25,6 +25,7 @@ import io.spine.base.Environment;
 import io.spine.base.EnvironmentType;
 import io.spine.base.Identifier;
 import io.spine.base.Production;
+import io.spine.base.Tests;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -85,7 +86,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Factory of {@code Tracer}s. Differs between {@linkplain EnvironmentType environment types}.
      */
-    private EnvSetting<TracerFactory> tracerFactory = new EnvSetting<>();
+    private final EnvSetting<TracerFactory> tracerFactory = new EnvSetting<>();
 
     /**
      * Factory for channel-based transport. Differs between {@linkplain EnvironmentType environment
@@ -196,20 +197,27 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Assigns the specified {@code TransportFactory} for the specified application environment.
      */
-    public void useStorageFactory(StorageFactory storage, EnvironmentType environmentType) {
+    public void use(StorageFactory storage, EnvironmentType environmentType) {
         this.storageFactory.configure(wrap(storage), environmentType);
     }
 
     /**
      * Assigns {@code TracerFactory} for the specified application environment.
      */
-    public void configureTracing(TracerFactory tracerFactory, EnvironmentType environmentType) {
+    public void use(TracerFactory tracerFactory, EnvironmentType environmentType) {
         checkNotNull(tracerFactory);
         this.tracerFactory.configure(tracerFactory, environmentType);
     }
 
     /**
-     * Obtains {@link TracerFactory} associated with this server environment.
+     * Configures the specified transport factor to be used under the specified environment type.
+     */
+    public void use(TransportFactory transportFactory, EnvironmentType envType) {
+        this.transportFactory.configure(transportFactory, envType);
+    }
+
+    /**
+     * Obtains the {@link TracerFactory} associated with the current environment, if it was set.
      */
     public Optional<TracerFactory> tracing() {
         EnvironmentType currentType = environment().type();
@@ -220,67 +228,68 @@ public final class ServerEnvironment implements AutoCloseable {
      * Obtains the storage factory for the current environment.
      *
      * <p>For tests, if the value was not set, defaults to a new {@code InMemoryStorageFactory}.
-     * <p>For value, if the value was not set, throws a {@code IllegalStateException}.
+     * <p>For other environments, if the value was not set, throws a {@code IllegalStateException}.
      *
      * @return {@code StorageFactory} instance for the storage for the current environment
      * @throws IllegalStateException
      *         if the value {@code StorageFactory} was not
-     *         {@linkplain #useStorageFactory(StorageFactory, EnvironmentType)} configured}
+     *         {@linkplain #use(StorageFactory, EnvironmentType)} configured}
      *         prior to the call
      */
     public StorageFactory storageFactory() {
-        if (environment().isTests()) {
+        if (environment().is(tests())) {
             return storageFactory.assignOrDefault(() -> wrap(InMemoryStorageFactory.newInstance()),
-                                                  TESTS);
+                                                  tests());
         }
 
+        EnvironmentType type = environment().type();
         StorageFactory result = storageFactory
-                .value(PRODUCTION)
-                .orElseThrow(() -> newIllegalStateException(
-                        "Production `%s` is not configured." +
-                                " Please call `useStorage(...).forProduction()`.",
-                        StorageFactory.class.getSimpleName()));
+                .value(type)
+                .orElseThrow(() -> {
+                    String className = type.getClass()
+                                           .getSimpleName();
+                    return newIllegalStateException(
+                            "The storage factory for environment `%s` was not" +
+                                    "configured. Please call `use(storage, %s);`.",
+                            className, className);
+                });
+        return result;
+    }
+
+    /**
+     * Obtains the transport factory for the current environment.
+     *
+     * <p>In the {@linkplain Tests testing environment}, if the factory was not assigned, assigns
+     * a new {@code InMemoryTransportFactory} and returns it.
+     *
+     * <p>For all other environment types, throws an {@code IllegalStateException}.
+     *
+     * <p>If the factory is not assigned in the Tests mode, assigns the instance of
+     * {@link InMemoryTransportFactory} and returns it.
+     */
+    public TransportFactory transportFactory() {
+        if (environment().is(tests())) {
+            return transportFactory.assignOrDefault(InMemoryTransportFactory::newInstance, tests());
+        }
+
+        EnvironmentType type = environment().type();
+
+        TransportFactory result = transportFactory
+                .value(type)
+                .orElseThrow(() -> {
+                    String environmentName = type.getClass()
+                                                 .getSimpleName();
+                    return newIllegalStateException(
+                            "Transport factory is not assigned for the current environment `%s`. " +
+                                    "Please call `use(transportFactory, %s);`.",
+                            environmentName, environmentName);
+                });
 
         return result;
     }
 
     private static Environment environment() {
         return Environment.instance();
-    }
-
-    /**
-     * Returns the configuration object to change the transport factory.
-     */
-    public void useTransportFactory(TransportFactory transportFactory, EnvironmentType envType) {
-        this.transportFactory.configure(transportFactory, envType);
-    }
-
-    /**
-     * Obtains the transport factory for the current environment.
-     *
-     * <p>If the factory is not assigned in the Production mode, throws
-     * {@code IllegalStateException} with the instruction to call
-     * {@link #useTransportFactory(TransportFactory, EnvironmentType)}.
-     *
-     * <p>In the testing environment, if the factory was not assigned, assigns
-     * a new {@code InMemoryTransportFactory} and returns it.
-     *
-     *
-     * <p>If the factory is not assigned in the Tests mode, assigns the instance of
-     * {@link InMemoryTransportFactory} and returns it.
-     */
-    public TransportFactory transportFactory() {
-        if (environment().isTests()) {
-            return transportFactory.assignOrDefault(InMemoryTransportFactory::newInstance, TESTS);
-        }
-
-        TransportFactory result = transportFactory
-                .value(PRODUCTION)
-                .orElseThrow(() -> newIllegalStateException(
-                        "`%s` is not assigned. Please call `useTransport(...).forProduction()`.",
-                        TransportFactory.class.getName()));
-
-        return result;
     }
 
     /**
@@ -301,7 +310,11 @@ public final class ServerEnvironment implements AutoCloseable {
     @Override
     public void close() throws Exception {
         tracerFactory.ifPresentForEnvironment(Production.type(), AutoCloseable::close);
-        transportFactory.ifPresentForEnvironment(PRODUCTION, AutoCloseable::close);
-        storageFactory.ifPresentForEnvironment(PRODUCTION, AutoCloseable::close);
+        transportFactory.ifPresentForEnvironment(Production.type(), AutoCloseable::close);
+        storageFactory.ifPresentForEnvironment(Production.type(), AutoCloseable::close);
+    }
+
+    private static Tests tests() {
+        return Tests.type();
     }
 }

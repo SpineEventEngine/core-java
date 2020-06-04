@@ -20,7 +20,9 @@
 
 package io.spine.server;
 
-import java.util.EnumMap;
+import io.spine.base.EnvironmentType;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -49,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EnvSetting<P> {
 
-    private final Map<EnvironmentType, P> settingValue = new EnumMap<>(EnvironmentType.class);
+    private final Map<EnvironmentType, P> settingValue = new HashMap<>();
 
     /**
      * Returns the value for the specified environment if it was set, an empty {@code Optional}
@@ -109,14 +111,6 @@ public final class EnvSetting<P> {
         checkNotNull(value);
         checkNotNull(type);
         this.settingValue.put(type, value);
-    }
-
-    /**
-     * A type of the environment between which an application configuration may vary.
-     */
-    public enum EnvironmentType {
-        PRODUCTION,
-        TESTS
     }
 
     /**

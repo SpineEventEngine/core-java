@@ -21,6 +21,8 @@
 package io.spine.server;
 
 import io.spine.base.Environment;
+import io.spine.base.Production;
+import io.spine.base.Tests;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.storage.StorageFactory;
@@ -45,8 +47,6 @@ import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PRODUCTI
 import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
 import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
-import static io.spine.server.EnvSetting.EnvironmentType.PRODUCTION;
-import static io.spine.server.EnvSetting.EnvironmentType.TESTS;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -149,12 +149,12 @@ class ServerEnvironmentTest {
         void turnToProduction() {
             // Ensure the server environment is clear.
             serverEnvironment.reset();
-            environment.setToProduction();
+            environment.setTo(production());
         }
 
         @AfterEach
         void backToTests() {
-            environment.setToTests();
+            environment.setTo(tests());
             serverEnvironment.reset();
         }
 
@@ -168,7 +168,7 @@ class ServerEnvironmentTest {
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
             StorageFactory factory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.useStorageFactory(factory, PRODUCTION);
+            serverEnvironment.use(factory, production());
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -176,7 +176,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("return `InMemoryStorageFactory` under Tests")
         void testsFactory() {
-            environment.setToTests();
+            environment.setTo(tests());
 
             StorageFactory factory = serverEnvironment.storageFactory();
             assertThat(factory)
@@ -200,7 +200,7 @@ class ServerEnvironmentTest {
         void getSet() {
             StorageFactory factory = new MemoizingStorageFactory();
 
-            serverEnvironment.useStorageFactory(factory, TESTS);
+            serverEnvironment.use(factory, tests());
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -216,12 +216,12 @@ class ServerEnvironmentTest {
         void turnToProduction() {
             // Ensure the instance is clear.
             serverEnvironment.reset();
-            environment.setToProduction();
+            environment.setTo(production());
         }
 
         @AfterEach
         void backToTests() {
-            environment.setToTests();
+            environment.setTo(tests());
             serverEnvironment.reset();
         }
 
@@ -235,7 +235,7 @@ class ServerEnvironmentTest {
         @DisplayName("return configured instance in Production")
         void productionValue() {
             TransportFactory factory = new StubTransportFactory();
-            serverEnvironment.useTransportFactory(factory, PRODUCTION);
+            serverEnvironment.use(factory, production());
             assertThat(serverEnvironment.transportFactory())
                     .isEqualTo(factory);
         }
@@ -255,7 +255,7 @@ class ServerEnvironmentTest {
         void setExplicitly() {
             TransportFactory factory = new StubTransportFactory();
 
-            serverEnvironment.useTransportFactory(factory, TESTS);
+            serverEnvironment.use(factory, tests());
             assertThat(serverEnvironment.transportFactory()).isEqualTo(factory);
         }
 
@@ -263,7 +263,7 @@ class ServerEnvironmentTest {
         @DisplayName("returning an `InMemoryTransportFactory` when not set")
         void notSet() {
             Environment.instance()
-                       .setToTests();
+                       .setTo(tests());
             assertThat(serverEnvironment.transportFactory())
                     .isInstanceOf(InMemoryTransportFactory.class);
         }
@@ -291,8 +291,8 @@ class ServerEnvironmentTest {
         @DisplayName("close the value transport and storage factories")
         void testCloses() throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.useTransportFactory(transportFactory, PRODUCTION);
-            serverEnv.useStorageFactory(storageFactory, PRODUCTION);
+            serverEnv.use(transportFactory, production());
+            serverEnv.use(storageFactory, production());
 
             serverEnv.close();
 
@@ -304,8 +304,8 @@ class ServerEnvironmentTest {
         @DisplayName("leave the testing transport and storage factories open")
         void testDoesNotClose() throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.useTransportFactory(transportFactory, TESTS);
-            serverEnv.useStorageFactory(storageFactory, TESTS);
+            serverEnv.use(transportFactory, tests());
+            serverEnv.use(storageFactory, tests());
 
             serverEnv.close();
 
@@ -314,10 +314,19 @@ class ServerEnvironmentTest {
         }
     }
 
+    private static Tests tests() {
+        return Tests.type();
+    }
+
+    private static Production production() {
+        return Production.type();
+    }
+
     @SuppressWarnings({
             "AccessOfSystemProperties" /* Testing the configuration loaded from System properties. */,
             "AbstractClassWithoutAbstractMethods" /* A test base with setUp and tearDown. */
     })
+
     abstract class WithAppEngineEnvironment {
 
         private final String targetEnvironment;

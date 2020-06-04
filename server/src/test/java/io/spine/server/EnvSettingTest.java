@@ -20,6 +20,9 @@
 
 package io.spine.server;
 
+import io.spine.base.EnvironmentType;
+import io.spine.base.Production;
+import io.spine.base.Tests;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
@@ -31,8 +34,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.server.EnvSetting.EnvironmentType.PRODUCTION;
-import static io.spine.server.EnvSetting.EnvironmentType.TESTS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`EnvSetting` should")
@@ -44,15 +45,15 @@ class EnvSettingTest {
     class NoNulls {
 
         @Test
-        @DisplayName("for the `PRODUCTION` environment")
+        @DisplayName("for the `Production` environment")
         void forProd() {
-            testNoNullsForEnv(PRODUCTION);
+            testNoNullsForEnv(production());
         }
 
         @Test
-        @DisplayName("for the `TESTS` environment")
+        @DisplayName("for the `Tests` environment")
         void forTests() {
-            testNoNullsForEnv(TESTS);
+            testNoNullsForEnv(tests());
         }
 
         @Test
@@ -63,7 +64,7 @@ class EnvSettingTest {
                          () -> setting.configure(InMemoryStorageFactory.newInstance(), null));
         }
 
-        private void testNoNullsForEnv(EnvSetting.EnvironmentType tests) {
+        private void testNoNullsForEnv(EnvironmentType tests) {
             EnvSetting<?> config = new EnvSetting();
             assertThrows(NullPointerException.class,
                          () -> config.configure(null, tests));
@@ -76,18 +77,18 @@ class EnvSettingTest {
     class ReturnValue {
 
         @Test
-        @DisplayName("for the `PRODUCTION` environment")
+        @DisplayName("for the `Production` environment")
         void forProduction() {
-            testReturnsForEnv(PRODUCTION);
+            testReturnsForEnv(production());
         }
 
         @Test
-        @DisplayName("for the `TESTS` environment")
+        @DisplayName("for the `Tests` environment")
         void forTests() {
-            testReturnsForEnv(TESTS);
+            testReturnsForEnv(tests());
         }
 
-        private void testReturnsForEnv(EnvSetting.EnvironmentType type) {
+        private void testReturnsForEnv(EnvironmentType type) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             storageFactory.configure(factory, type);
@@ -103,37 +104,37 @@ class EnvSettingTest {
     class AssignDefault {
 
         @Test
-        @DisplayName("assign for a missing `PRODUCTION` environment")
+        @DisplayName("assign for a missing `Production` environment")
         void assignDefaultForProd() {
-            testAssignsDefaultForEnv(PRODUCTION);
+            testAssignsDefaultForEnv(production());
         }
 
         @Test
-        @DisplayName("retain the original `PRODUCTION` env value")
+        @DisplayName("retain the original `Production` env value")
         void retainForProd() {
-            testRetainsDefaultForEnv(PRODUCTION);
+            testRetainsDefaultForEnv(production());
         }
 
         @Test
-        @DisplayName("assign for a missing `TESTS` env value")
+        @DisplayName("assign for a missing `Tests` env value")
         void assignDefaultForTests() {
-            testRetainsDefaultForEnv(TESTS);
+            testRetainsDefaultForEnv(tests());
         }
 
         @Test
-        @DisplayName("retain the original `TESTS` env value")
+        @DisplayName("retain the original `Tests` env value")
         void retainForTests() {
-            testRetainsDefaultForEnv(TESTS);
+            testRetainsDefaultForEnv(tests());
         }
 
-        void testAssignsDefaultForEnv(EnvSetting.EnvironmentType type) {
+        void testAssignsDefaultForEnv(EnvironmentType type) {
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
             assertThat(storageFactory.assignOrDefault(() -> memoizingFactory, type))
                     .isSameInstanceAs(memoizingFactory);
         }
 
-        void testRetainsDefaultForEnv(EnvSetting.EnvironmentType type) {
+        void testRetainsDefaultForEnv(EnvironmentType type) {
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
             storageFactory.configure(memoizingFactory, type);
@@ -152,12 +153,12 @@ class EnvSettingTest {
         MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
 
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-        storageFactory.configure(prodStorageFactory, PRODUCTION);
-        storageFactory.configure(testingStorageFactory, TESTS);
+        storageFactory.configure(prodStorageFactory, tests());
+        storageFactory.configure(testingStorageFactory, tests());
 
         storageFactory.reset();
 
-        Stream.of(PRODUCTION, TESTS)
+        Stream.of(production(), tests())
               .map(storageFactory::value)
               .forEach(s -> assertThat(s).isEmpty());
     }
@@ -169,9 +170,17 @@ class EnvSettingTest {
 
         EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
-        storageSetting.configure(storageFactory, PRODUCTION);
-        storageSetting.ifPresentForEnvironment(PRODUCTION, AutoCloseable::close);
+        storageSetting.configure(storageFactory, production());
+        storageSetting.ifPresentForEnvironment(production(), AutoCloseable::close);
 
         assertThat(storageFactory.isClosed()).isTrue();
+    }
+
+    private static Production production() {
+        return Production.type();
+    }
+
+    private static Tests tests() {
+        return Tests.type();
     }
 }
