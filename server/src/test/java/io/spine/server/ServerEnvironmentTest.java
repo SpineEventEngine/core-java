@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import com.sun.tools.doclint.Env;
 import io.spine.base.Environment;
 import io.spine.base.Production;
 import io.spine.base.Tests;
@@ -413,6 +414,48 @@ class ServerEnvironmentTest {
 
             assertThat(serverEnvironment.tracing()).isEmpty();
         }
+    }
+
+    @Nested
+    @DisplayName("configure `Delivery`")
+    class DeliveryTest {
+
+        @BeforeEach
+        void reset() {
+            serverEnvironment.reset();
+            Environment.instance()
+                       .reset();
+        }
+
+        @AfterEach
+        void backToTests() {
+            Environment.instance()
+                       .setTo(tests());
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("to default back to `Local` if no delivery is set")
+        void backToLocal() {
+            Delivery delivery = serverEnvironment.delivery();
+            assertThat(delivery).isNotNull();
+        }
+
+        @Test
+        @DisplayName("to a custom mechanism")
+        void allowToCustomizeDeliveryStrategy() {
+            Delivery newDelivery = Delivery.newBuilder()
+                                           .setStrategy(UniformAcrossAllShards.forNumber(42))
+                                           .build();
+            ServerEnvironment environment = serverEnvironment;
+            Delivery defaultValue = environment.delivery();
+            environment.use(newDelivery, Environment.instance().type());
+            assertEquals(newDelivery, environment.delivery());
+
+            // Restore the default value.
+            environment.use(defaultValue, Environment.instance().type());
+        }
+
     }
 
     @Nested

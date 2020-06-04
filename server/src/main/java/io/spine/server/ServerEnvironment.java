@@ -36,7 +36,6 @@ import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -73,12 +72,12 @@ public final class ServerEnvironment implements AutoCloseable {
      * The strategy of delivering the messages received by entity repositories
      * to the entity instances.
      *
-     * <p>If not {@linkplain #configureDelivery(Delivery) configured by the end-user},
+     * <p>If not {@linkplain #use(Delivery, EnvironmentType)}) configured by the end-user},
      * initialized with the {@linkplain Delivery#local() local} delivery by default.
+     *
+     * <p>Differs between {@linkplain EnvironmentType environment types}.
      */
-    @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
-    // No synchronization in `reset()` as it is test-only.
-    private @MonotonicNonNull Delivery delivery;
+    private final EnvSetting<Delivery> delivery = new EnvSetting<>();
 
     /**
      * Storage factory. Differs between {@linkplain EnvironmentType environment types}.
@@ -123,28 +122,30 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Updates the delivery for this environment.
+     * Updates the delivery for the selected environment.
      *
      * <p>This method is most typically used upon an application start. It's very uncommon and
      * even dangerous to update the delivery mechanism later when the message delivery
      * process may have been already used by various {@code BoundedContext}s.
+     *
+     * @deprecated use {@link #use(Delivery, EnvironmentType)}
      */
+    @Deprecated
     public synchronized void configureDelivery(Delivery delivery) {
         checkNotNull(delivery);
-        this.delivery = delivery;
+        EnvironmentType currentEnv = environment().type();
+        this.delivery.use(delivery, currentEnv);
     }
 
     /**
      * Returns the delivery mechanism specific to this environment.
      *
-     * <p>Unless {@linkplain #configureDelivery(Delivery) updated manually}, returns
+     * <p>Unless {@linkplain #use(Delivery, EnvironmentType) updated manually}, returns
      * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
     public synchronized Delivery delivery() {
-        if (delivery == null) {
-            delivery = Delivery.local();
-        }
-        return delivery;
+        EnvironmentType currentEnv = environment().type();
+        return this.delivery.assignOrDefault(Delivery::local, currentEnv);
     }
 
     /**
@@ -206,6 +207,16 @@ public final class ServerEnvironment implements AutoCloseable {
         checkNotNull(factory);
         SystemAwareStorageFactory wrapped = wrap(factory);
         use(wrapped, storageFactory, envType);
+        return this;
+    }
+
+    /**
+     * Assigns the specified {@code Delivery} for the selected environment.
+     *
+     * @return this instance of {@code ServerEnvironment}
+     */
+    public ServerEnvironment use(Delivery delivery, EnvironmentType envType) {
+        use(delivery, this.delivery, envType);
         return this;
     }
 
@@ -315,7 +326,9 @@ public final class ServerEnvironment implements AutoCloseable {
         this.transportFactory.reset();
         this.tracerFactory.reset();
         this.storageFactory.reset();
-        this.delivery = Delivery.local();
+        this.delivery.reset();
+        EnvironmentType currentEnv = environment().type();
+        this.delivery.use(Delivery.local(), currentEnv);
         resetDeploymentType();
     }
 
