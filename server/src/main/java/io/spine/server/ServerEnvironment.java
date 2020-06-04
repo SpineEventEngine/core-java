@@ -201,8 +201,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
-    public ServerEnvironment use(StorageFactory storage, EnvironmentType environmentType) {
-        this.storageFactory.use(wrap(storage), environmentType);
+    public ServerEnvironment use(StorageFactory storage, EnvironmentType envType) {
+        checkNotNull(envType);
+        environment().register(envType);
+        this.storageFactory.use(wrap(storage), envType);
         return this;
     }
 
@@ -212,9 +214,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
-    public ServerEnvironment use(TracerFactory tracerFactory, EnvironmentType environmentType) {
-        checkNotNull(tracerFactory);
-        this.tracerFactory.use(tracerFactory, environmentType);
+    public ServerEnvironment use(TracerFactory tracerFactory, EnvironmentType envType) {
+        checkNotNull(envType);
+        environment().register(envType);
+        this.tracerFactory.use(tracerFactory, envType);
         return this;
     }
 
@@ -225,6 +228,8 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @CanIgnoreReturnValue
     public ServerEnvironment use(TransportFactory transportFactory, EnvironmentType envType) {
+        checkNotNull(envType);
+        environment().register(envType);
         this.transportFactory.use(transportFactory, envType);
         return this;
     }

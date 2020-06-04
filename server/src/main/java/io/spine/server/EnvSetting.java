@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <pre>
  * {@code
  * EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
- * storageFactory.configure(InMemoryStorageFactory.newInstance(), Production.type());
+ * storageFactory.use(InMemoryStorageFactory.newInstance(), Production.type());
  *
  * assertThat(storageFactory.value(Production.type())).isPresent();
  * assertThat(storageFactory.value(Tests.type())).isEmpty();

@@ -88,6 +88,12 @@ class EnvSettingTest {
             testReturnsForEnv(tests());
         }
 
+        @Test
+        @DisplayName("for a user-defined environment type")
+        void forUserDefinedType() {
+            testReturnsForEnv(Local.type());
+        }
+
         private void testReturnsForEnv(EnvironmentType type) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
@@ -97,83 +103,97 @@ class EnvSettingTest {
             assertThat(storageFactory.value(type)
                                      .get()).isSameInstanceAs(factory);
         }
-    }
 
-    @Nested
-    @DisplayName("when trying to assign a default value")
-    class AssignDefault {
+        @Nested
+        @DisplayName("when trying to assign a default value")
+        class AssignDefault {
 
-        @Test
-        @DisplayName("assign for a missing `Production` environment")
-        void assignDefaultForProd() {
-            testAssignsDefaultForEnv(production());
+            @Test
+            @DisplayName("assign for a missing `Production` environment")
+            void assignDefaultForProd() {
+                testAssignsDefaultForEnv(production());
+            }
+
+            @Test
+            @DisplayName("retain the original `Production` env value")
+            void retainForProd() {
+                testRetainsDefaultForEnv(production());
+            }
+
+            @Test
+            @DisplayName("assign for a missing custom environment")
+            void assignDefaultForCustom() {
+                testAssignsDefaultForEnv(Local.type());
+            }
+
+            @Test
+            @DisplayName("retain the original value for a custom environment")
+            void retainForCustom() {
+                testRetainsDefaultForEnv(Local.type());
+            }
+
+            @Test
+            @DisplayName("assign for a missing `Tests` env value")
+            void assignDefaultForTests() {
+                testRetainsDefaultForEnv(tests());
+            }
+
+            @Test
+            @DisplayName("retain the original `Tests` env value")
+            void retainForTests() {
+                testRetainsDefaultForEnv(tests());
+            }
+
+            void testAssignsDefaultForEnv(EnvironmentType type) {
+                EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+                MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
+                assertThat(storageFactory.assignOrDefault(() -> memoizingFactory, type))
+                        .isSameInstanceAs(memoizingFactory);
+            }
+
+            void testRetainsDefaultForEnv(EnvironmentType type) {
+                EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+                MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
+                storageFactory.use(memoizingFactory, type);
+
+                InMemoryStorageFactory inMemoryFactory = InMemoryStorageFactory.newInstance();
+                assertThat(storageFactory.assignOrDefault(() -> inMemoryFactory, type))
+                        .isSameInstanceAs(memoizingFactory);
+
+            }
         }
 
         @Test
-        @DisplayName("retain the original `Production` env value")
-        void retainForProd() {
-            testRetainsDefaultForEnv(production());
-        }
+        @DisplayName("reset the value for all environments")
+        void resetTheValues() {
+            InMemoryStorageFactory prodStorageFactory = InMemoryStorageFactory.newInstance();
+            MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
+            InMemoryStorageFactory localstorageFactory = InMemoryStorageFactory.newInstance();
 
-        @Test
-        @DisplayName("assign for a missing `Tests` env value")
-        void assignDefaultForTests() {
-            testRetainsDefaultForEnv(tests());
-        }
-
-        @Test
-        @DisplayName("retain the original `Tests` env value")
-        void retainForTests() {
-            testRetainsDefaultForEnv(tests());
-        }
-
-        void testAssignsDefaultForEnv(EnvironmentType type) {
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-            MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
-            assertThat(storageFactory.assignOrDefault(() -> memoizingFactory, type))
-                    .isSameInstanceAs(memoizingFactory);
+            storageFactory.use(prodStorageFactory, production());
+            storageFactory.use(testingStorageFactory, tests());
+            storageFactory.use(localstorageFactory, Local.type());
+
+            storageFactory.reset();
+
+            Stream.of(production(), tests(), Local.type())
+                  .map(storageFactory::value)
+                  .forEach(s -> assertThat(s).isEmpty());
         }
 
-        void testRetainsDefaultForEnv(EnvironmentType type) {
-            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-            MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
-            storageFactory.use(memoizingFactory, type);
+        @Test
+        @DisplayName("should run an operation against a value value if it's present")
+        void runThrowableConsumer() throws Exception {
+            MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
 
-            InMemoryStorageFactory inMemoryFactory = InMemoryStorageFactory.newInstance();
-            assertThat(storageFactory.assignOrDefault(() -> inMemoryFactory, type))
-                    .isSameInstanceAs(memoizingFactory);
+            EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
+            storageSetting.use(storageFactory, production());
+            storageSetting.ifPresentForEnvironment(production(), AutoCloseable::close);
+
+            assertThat(storageFactory.isClosed()).isTrue();
         }
-    }
-
-    @Test
-    @DisplayName("reset the value for all environments")
-    void resetTheValues() {
-        InMemoryStorageFactory prodStorageFactory = InMemoryStorageFactory.newInstance();
-        MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
-
-        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-        storageFactory.use(prodStorageFactory, tests());
-        storageFactory.use(testingStorageFactory, tests());
-
-        storageFactory.reset();
-
-        Stream.of(production(), tests())
-              .map(storageFactory::value)
-              .forEach(s -> assertThat(s).isEmpty());
-    }
-
-    @Test
-    @DisplayName("should run an operation against a value value if it's present")
-    void runThrowableConsumer() throws Exception {
-        MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
-
-        EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
-
-        storageSetting.use(storageFactory, production());
-        storageSetting.ifPresentForEnvironment(production(), AutoCloseable::close);
-
-        assertThat(storageFactory.isClosed()).isTrue();
     }
 
     private static Production production() {
@@ -182,5 +202,29 @@ class EnvSettingTest {
 
     private static Tests tests() {
         return Tests.type();
+    }
+
+    /**
+     * A local environment. One could argue any environment is local, it's a matter of the point
+     * of reference.
+     */
+    private static class Local extends EnvironmentType {
+
+        @Override
+        protected boolean enabled() {
+            return true;
+        }
+
+        public static Local type() {
+            return Singleton.INSTANCE.local;
+        }
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private enum Singleton {
+
+            INSTANCE;
+
+            private final Local local = new Local();
+        }
     }
 }
