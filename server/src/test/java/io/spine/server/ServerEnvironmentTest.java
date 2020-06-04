@@ -25,15 +25,18 @@ import io.spine.base.Production;
 import io.spine.base.Tests;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.UniformAcrossAllShards;
+import io.spine.server.given.environment.Local;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
+import io.spine.server.trace.given.MemoizingTracerFactory;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -207,6 +210,43 @@ class ServerEnvironmentTest {
     }
 
     @Nested
+    @DisplayName("configure `StorageFactory` for a custom environment")
+    class LocalStorageFactoryConfig {
+
+        @BeforeEach
+        void reset() {
+            serverEnvironment.reset();
+            Environment.instance()
+                       .register(Local.type());
+            Environment.instance()
+                       .setTo(Local.type());
+            Local.enable();
+        }
+
+        @AfterEach
+        void backToTests() {
+            Environment.instance()
+                       .setTo(tests());
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("throwing an `IllegalStateException` if not set")
+        void illegalState() {
+            assertThrows(IllegalStateException.class, serverEnvironment::storageFactory);
+        }
+
+        @Test
+        @DisplayName("returning a configured instance")
+        void returnConfiguredStorageFactory() {
+            InMemoryStorageFactory inMemory = InMemoryStorageFactory.newInstance();
+            serverEnvironment.use(inMemory, Local.type());
+
+            assertThat(serverEnvironment.storageFactory()).isSameInstanceAs(inMemory);
+        }
+    }
+
+    @Nested
     @DisplayName("configure `TransportFactory` for the production environment")
     class TransportFactoryConfig {
 
@@ -270,16 +310,60 @@ class ServerEnvironmentTest {
     }
 
     @Nested
+    @DisplayName("configure `TransportFactory` for a custom environment")
+    class LocalTransportFactory {
+
+        @BeforeEach
+        void reset() {
+            serverEnvironment.reset();
+            Environment.instance()
+                       .register(Local.type());
+            Environment.instance()
+                       .setTo(Local.type());
+            Local.enable();
+        }
+
+        @AfterEach
+        void backToTests() {
+            Environment.instance()
+                       .setTo(tests());
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("throwing an `IllegalStateException` if not set")
+        void illegalState() {
+            assertThrows(IllegalStateException.class, serverEnvironment::transportFactory);
+        }
+
+        @Test
+        @DisplayName("returning a configured instance")
+        void ok() {
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
+            serverEnvironment.use(transportFactory, Local.type());
+            assertThat(serverEnvironment.transportFactory()).isSameInstanceAs(transportFactory);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `TracerFactory`")
+    class TracerFactory {
+
+    }
+
+    @Nested
     @DisplayName("while closing resources")
     class TestClosesResources {
 
         private InMemoryTransportFactory transportFactory;
         private MemoizingStorageFactory storageFactory;
+        private MemoizingTracerFactory tracerFactory;
 
         @BeforeEach
         void setup() {
             transportFactory = InMemoryTransportFactory.newInstance();
             storageFactory = new MemoizingStorageFactory();
+            tracerFactory = new MemoizingTracerFactory();
         }
 
         @AfterEach
@@ -288,27 +372,31 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("close the value transport and storage factories")
+        @DisplayName("close the production transport, tracer and storage factories")
         void testCloses() throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.use(transportFactory, production());
-            serverEnv.use(storageFactory, production());
+            serverEnv.use(transportFactory, production())
+                     .use(storageFactory, production())
+                     .use(tracerFactory, production());
 
             serverEnv.close();
 
             assertThat(transportFactory.isOpen()).isFalse();
             assertThat(storageFactory.isClosed()).isTrue();
+            assertThat(tracerFactory.closed()).isTrue();
         }
 
         @Test
-        @DisplayName("leave the testing transport and storage factories open")
+        @DisplayName("leave the testing transport, tracer and storage factories open")
         void testDoesNotClose() throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.use(transportFactory, tests());
-            serverEnv.use(storageFactory, tests());
+            serverEnv.use(transportFactory, tests())
+                     .use(storageFactory, tests())
+                     .use(tracerFactory, tests());
 
             serverEnv.close();
 
+            assertThat(tracerFactory.closed()).isFalse();
             assertThat(transportFactory.isOpen()).isTrue();
             assertThat(storageFactory.isClosed()).isFalse();
         }

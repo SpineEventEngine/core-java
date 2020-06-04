@@ -23,6 +23,7 @@ package io.spine.server;
 import io.spine.base.EnvironmentType;
 import io.spine.base.Production;
 import io.spine.base.Tests;
+import io.spine.server.given.environment.Local;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
@@ -54,6 +55,12 @@ class EnvSettingTest {
         @DisplayName("for the `Tests` environment")
         void forTests() {
             testNoNullsForEnv(tests());
+        }
+
+        @Test
+        @DisplayName("for a user-defined environment")
+        void forUserDefined() {
+            testNoNullsForEnv(Local.type());
         }
 
         @Test
@@ -159,7 +166,6 @@ class EnvSettingTest {
                 InMemoryStorageFactory inMemoryFactory = InMemoryStorageFactory.newInstance();
                 assertThat(storageFactory.assignOrDefault(() -> inMemoryFactory, type))
                         .isSameInstanceAs(memoizingFactory);
-
             }
         }
 
@@ -202,29 +208,5 @@ class EnvSettingTest {
 
     private static Tests tests() {
         return Tests.type();
-    }
-
-    /**
-     * A local environment. One could argue any environment is local, it's a matter of the point
-     * of reference.
-     */
-    private static class Local extends EnvironmentType {
-
-        @Override
-        protected boolean enabled() {
-            return true;
-        }
-
-        public static Local type() {
-            return Singleton.INSTANCE.local;
-        }
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private enum Singleton {
-
-            INSTANCE;
-
-            private final Local local = new Local();
-        }
     }
 }

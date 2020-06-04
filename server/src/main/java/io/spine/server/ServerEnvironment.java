@@ -266,7 +266,7 @@ public final class ServerEnvironment implements AutoCloseable {
                     String className = type.getClass()
                                            .getSimpleName();
                     return newIllegalStateException(
-                            "The storage factory for environment `%s` was not" +
+                            "The storage factory for environment `%s` was not " +
                                     "configured. Please call `use(storage, %s);`.",
                             className, className);
                 });
