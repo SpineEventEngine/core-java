@@ -36,7 +36,6 @@ import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -237,12 +236,13 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("returning a configured instance")
+        @DisplayName("returning a configured wrapped instance")
         void returnConfiguredStorageFactory() {
             InMemoryStorageFactory inMemory = InMemoryStorageFactory.newInstance();
             serverEnvironment.use(inMemory, Local.type());
 
-            assertThat(serverEnvironment.storageFactory()).isSameInstanceAs(inMemory);
+            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
+                    .isEqualTo(inMemory);
         }
     }
 
@@ -349,6 +349,58 @@ class ServerEnvironmentTest {
     @DisplayName("configure `TracerFactory`")
     class TracerFactory {
 
+        @BeforeEach
+        void reset() {
+            serverEnvironment.reset();
+            Environment.instance()
+                       .reset();
+        }
+
+        @AfterEach
+        void backToTests() {
+            Environment.instance()
+                       .setTo(tests());
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("returning an instance for the production environment")
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        void forProduction() {
+            Environment.instance()
+                       .setTo(Production.type());
+
+            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
+            serverEnvironment.use(memoizingTracer, Production.type());
+
+            assertThat(serverEnvironment.tracing()
+                                        .get()).isSameInstanceAs(memoizingTracer);
+        }
+
+        @Test
+        @DisplayName("for the testing environment")
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        void forTesting() {
+            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
+            serverEnvironment.use(memoizingTracer, Tests.type());
+
+            assertThat(serverEnvironment.tracing()
+                                        .get()).isSameInstanceAs(memoizingTracer);
+        }
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        @Test
+        @DisplayName("for a custom environment")
+        void forCustom() {
+            Environment.instance()
+                       .setTo(Local.type());
+
+            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
+            serverEnvironment.use(memoizingTracer, Local.type());
+
+            assertThat(serverEnvironment.tracing()
+                                        .get()).isSameInstanceAs(memoizingTracer);
+        }
     }
 
     @Nested
