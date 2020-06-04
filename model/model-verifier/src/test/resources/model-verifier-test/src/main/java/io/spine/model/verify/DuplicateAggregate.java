@@ -30,21 +30,21 @@ import static java.util.Collections.singletonList;
 public class DuplicateAggregate extends Aggregate<String, CallState, CallState.Builder> {
 
     @Assign
-    public MessageSent handle(SendMessage command) {
+    MessageSent handle(SendMessage command) {
         return MessageSent.newBuilder()
                           .setMessage(command.getMessage())
                           .build();
     }
 
     @Assign
-    public List<VideoCallStarted> on(StartVideoCall command) {
+    List<VideoCallStarted> on(StartVideoCall command) {
         return singletonList(VideoCallStarted.newBuilder()
                                              .setIp(command.getIp())
                                              .build());
     }
 
     @Assign
-    public VideoCallStarted oneMore(StartVideoCall cmd) {
+    VideoCallStarted oneMore(StartVideoCall cmd) {
         // NoOp for test
         return VideoCallStarted.getDefaultInstance();
     }

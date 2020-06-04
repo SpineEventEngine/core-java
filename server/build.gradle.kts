@@ -18,33 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.gradle.internal.Deps
+
+val spineBaseVersion: String by extra
+
 dependencies {
-    api project(':client')
-    implementation(
-            deps.grpc.grpcProtobuf,
-            deps.grpc.grpcCore
-    )
-    testAnnotationProcessor deps.build.autoService.processor
-    testCompileOnly deps.build.autoService.annotations
-    testImplementation(
-            deps.grpc.grpcNettyShaded,
-            "io.spine:spine-testlib:$spineBaseVersion",
-            project(path: ':core', configuration: 'testArtifacts'),
-            project(path: ':client', configuration: 'testArtifacts'),
-            project(':testutil-server')
-    )
+    api(project(":client"))
+
+    implementation(Deps.grpc.protobuf)
+    implementation(Deps.grpc.core)
+
+    testAnnotationProcessor(Deps.build.autoService.processor)
+    testCompileOnly(Deps.build.autoService.annotations)
+    testImplementation(Deps.grpc.nettyShaded)
+    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation(project(path = ":core", configuration = "testArtifacts"))
+    testImplementation(project(path = ":client", configuration = "testArtifacts"))
+    testImplementation(project(":testutil-server"))
 }
 
-apply from: deps.scripts.testArtifacts
-apply from: deps.scripts.publishProto
+apply {
+    from(Deps.scripts.testArtifacts(project))
+    from(Deps.scripts.publishProto(project))
+}
 
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-javadoc {
+tasks.javadoc {
     doLast {
         copy {
-            from "src/main/docs"
-            into "$buildDir/docs/javadoc"
+            from("src/main/docs")
+            into("$buildDir/docs/javadoc")
         }
     }
 }

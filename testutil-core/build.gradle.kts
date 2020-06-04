@@ -18,12 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    api project(path: ':client')
-    
-    implementation deps.grpc.grpcProtobuf
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+import io.spine.gradle.internal.Deps
 
-apply from: deps.scripts.testArtifacts
+val spineBaseVersion: String by extra
+
+dependencies {
+    api(project(":client"))
+    api("io.spine:spine-testlib:$spineBaseVersion")
+    Deps.test.junit5Api.forEach { api(it) }
+    runtimeClasspath(Deps.test.junit5Runner)
+}

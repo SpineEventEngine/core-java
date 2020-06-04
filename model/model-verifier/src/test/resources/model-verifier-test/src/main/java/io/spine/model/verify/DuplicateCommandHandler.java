@@ -29,14 +29,14 @@ public class DuplicateCommandHandler
         extends Aggregate<String, ChatState, ChatState.Builder> {
 
     @Assign
-    public Iterable<LinkSent> handle(SendLink command) {
+    Iterable<LinkSent> handle(SendLink command) {
         return singletonList(LinkSent.newBuilder()
                                      .setLink(command.getLink())
                                      .build());
     }
 
     @Assign
-    public MessageSent onCommandAny(SendMessage command) {
+    MessageSent onCommandAny(SendMessage command) {
         return MessageSent.newBuilder()
                           .setMessage(command.getMessage())
                           .build();

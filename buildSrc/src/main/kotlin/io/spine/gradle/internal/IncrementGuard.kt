@@ -18,14 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    api project(path: ':client')
+package io.spine.gradle.internal
 
-    // Depend on JUnit in the production part of the code, as this module exposes testing utilities
-    // that are based on JUnit.
-    api deps.test.junit5Api
-    runtimeClasspath deps.test.junit5Runner
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 
-    // General purpose test utilities.
-    api "io.spine:spine-testlib:$spineBaseVersion"
+/**
+ * Gradle plugin which adds a [CheckVersionIncrement] task.
+ *
+ * The task is called `checkVersionIncrement` inserted before the `check` task.
+ */
+class IncrementGuard : Plugin<Project> {
+
+    companion object {
+        const val taskName = "checkVersionIncrement"
+    }
+
+    override fun apply(target: Project) {
+        val tasks = target.tasks
+        tasks.register(taskName, CheckVersionIncrement::class.java) {
+            it.repository = PublishingRepos.cloudRepo
+            tasks.getByName("check").dependsOn(it)
+
+            it.shouldRunAfter("test")
+        }
+    }
 }

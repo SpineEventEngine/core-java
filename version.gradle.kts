@@ -18,25 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    api "io.spine:spine-base:$spineBaseVersion"
-    api "io.spine:spine-time:$spineTimeVersion"
+/**
+ * The versions of the libraries used.
+ *
+ * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
+ * as we want to manage the versions in a single source.
+ */
 
-    testImplementation project(path: ":testutil-core")
-    testImplementation "io.spine:spine-testutil-time:$spineTimeVersion"
-}
-
-modelCompiler {
-    fields {
-        // Enable the strongly-typed fields generation for `spine.core.Event` as currently it's
-        // a subscribable entity state.
-        generateFor "spine.core.Event", markAs("io.spine.base.EntityStateField")
-
-        // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
-        // creation of typed event filters based on event context.
-        generateFor "spine.core.EventContext", markAs("io.spine.core.EventContextField")
-    }
-}
-
-apply from: deps.scripts.testArtifacts
-apply from: deps.scripts.publishProto
+val spineBaseVersion: String by extra("1.5.12")
+val spineTimeVersion: String by extra("1.5.12")
+val versionToPublish: String by extra("1.5.14")
