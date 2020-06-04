@@ -27,6 +27,7 @@ import io.spine.base.EnvironmentType;
  *
  * <p>Is a singleton. Controlled by static methods: {@link #enable()}, {@link #disable()}.
  */
+@SuppressWarnings("ImmutableEnumChecker")
 public final class Local extends EnvironmentType {
 
     @Override
