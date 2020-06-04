@@ -222,9 +222,9 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Configures the specified transport factor to be used under the specified environment type.
+     * Configures the specified transport factory for the selected type of environment.
      *
-     * @return this instance of {@code ServerEnvironment} this instance
+     * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
     public ServerEnvironment use(TransportFactory transportFactory, EnvironmentType envType) {
@@ -246,6 +246,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * Obtains the storage factory for the current environment.
      *
      * <p>For tests, if the value was not set, defaults to a new {@code InMemoryStorageFactory}.
+     *
      * <p>For other environments, if the value was not set, throws a {@code IllegalStateException}.
      *
      * @return {@code StorageFactory} instance for the storage for the current environment

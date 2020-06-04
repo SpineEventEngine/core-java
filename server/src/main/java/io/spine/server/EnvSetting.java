@@ -121,7 +121,7 @@ public final class EnvSetting<V> {
      * @param <V>
      *         the type of the input to the operation
      */
-    public interface ThrowingConsumer<V> {
+    interface ThrowingConsumer<V> {
 
         /** Performs this operation on the specified value. */
         void accept(V value) throws Exception;
