@@ -109,7 +109,7 @@ public final class EnvSetting<V> {
      * @param value
      *         value to assign to one of environments
      */
-    public void use(V value, EnvironmentType type) {
+    void use(V value, EnvironmentType type) {
         checkNotNull(value);
         checkNotNull(type);
         this.settingValue.put(type, value);
