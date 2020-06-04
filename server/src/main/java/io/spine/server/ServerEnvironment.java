@@ -22,8 +22,9 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Environment;
+import io.spine.base.EnvironmentType;
 import io.spine.base.Identifier;
-import io.spine.server.EnvSetting.EnvironmentType;
+import io.spine.base.Production;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -33,14 +34,11 @@ import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.EnvSetting.EnvironmentType.PRODUCTION;
-import static io.spine.server.EnvSetting.EnvironmentType.TESTS;
 import static io.spine.server.storage.system.SystemAwareStorageFactory.wrap;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -80,17 +78,18 @@ public final class ServerEnvironment implements AutoCloseable {
     private @MonotonicNonNull Delivery delivery;
 
     /**
-     * Storage factories for both the production and the testing environments.
+     * Storage factory. Differs between {@linkplain EnvironmentType environment types}.
      */
     private final EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
 
     /**
-     * The factory of {@code Tracer}s used in this environment.
+     * Factory of {@code Tracer}s. Differs between {@linkplain EnvironmentType environment types}.
      */
-    private @Nullable TracerFactory tracerFactory;
+    private EnvSetting<TracerFactory> tracerFactory = new EnvSetting<>();
 
     /**
-     * The production and testing factories for channel-based transport.
+     * Factory for channel-based transport. Differs between {@linkplain EnvironmentType environment
+     * types}.
      */
     private final EnvSetting<TransportFactory> transportFactory = new EnvSetting<>();
 
@@ -202,17 +201,19 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Assigns {@code TracerFactory} to this server environment.
+     * Assigns {@code TracerFactory} for the specified application environment.
      */
-    public void configureTracing(TracerFactory tracerFactory) {
-        this.tracerFactory = checkNotNull(tracerFactory);
+    public void configureTracing(TracerFactory tracerFactory, EnvironmentType environmentType) {
+        checkNotNull(tracerFactory);
+        this.tracerFactory.configure(tracerFactory, environmentType);
     }
 
     /**
      * Obtains {@link TracerFactory} associated with this server environment.
      */
     public Optional<TracerFactory> tracing() {
-        return Optional.ofNullable(tracerFactory);
+        EnvironmentType currentType = environment().type();
+        return this.tracerFactory.value(currentType);
     }
 
     /**
@@ -288,7 +289,7 @@ public final class ServerEnvironment implements AutoCloseable {
     @VisibleForTesting
     public void reset() {
         this.transportFactory.reset();
-        this.tracerFactory = null;
+        this.tracerFactory.reset();
         this.storageFactory.reset();
         this.delivery = Delivery.local();
         resetDeploymentType();
@@ -299,10 +300,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        if (tracerFactory != null) {
-            tracerFactory.close();
-        }
-
+        tracerFactory.ifPresentForEnvironment(Production.type(), AutoCloseable::close);
         transportFactory.ifPresentForEnvironment(PRODUCTION, AutoCloseable::close);
         storageFactory.ifPresentForEnvironment(PRODUCTION, AutoCloseable::close);
     }
