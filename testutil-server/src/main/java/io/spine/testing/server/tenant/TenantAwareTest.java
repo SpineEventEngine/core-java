@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Abstract base for test suites that test tenant-aware functionality.
  *
- * <p>This class must be used only from {@linkplain io.spine.base.Tests# test execution environment}.
+ * <p>This class must be used only from {@linkplain io.spine.base.Tests test execution environment}.
  */
 @Internal
 @VisibleForTesting

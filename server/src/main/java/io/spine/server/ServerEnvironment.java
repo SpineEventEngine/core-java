@@ -32,6 +32,7 @@ import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -201,10 +202,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
-    public ServerEnvironment use(StorageFactory storage, EnvironmentType envType) {
-        checkNotNull(envType);
-        environment().register(envType);
-        this.storageFactory.use(wrap(storage), envType);
+    public ServerEnvironment use(StorageFactory factory, EnvironmentType envType) {
+        checkNotNull(factory);
+        SystemAwareStorageFactory wrapped = wrap(factory);
+        use(wrapped, storageFactory, envType);
         return this;
     }
 
@@ -214,10 +215,8 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
-    public ServerEnvironment use(TracerFactory tracerFactory, EnvironmentType envType) {
-        checkNotNull(envType);
-        environment().register(envType);
-        this.tracerFactory.use(tracerFactory, envType);
+    public ServerEnvironment use(TracerFactory factory, EnvironmentType envType) {
+        use(factory, tracerFactory, envType);
         return this;
     }
 
@@ -227,10 +226,8 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
-    public ServerEnvironment use(TransportFactory transportFactory, EnvironmentType envType) {
-        checkNotNull(envType);
-        environment().register(envType);
-        this.transportFactory.use(transportFactory, envType);
+    public ServerEnvironment use(TransportFactory factory, EnvironmentType envType) {
+        use(factory, transportFactory, envType);
         return this;
     }
 
@@ -334,5 +331,13 @@ public final class ServerEnvironment implements AutoCloseable {
 
     private static Tests tests() {
         return Tests.type();
+    }
+
+    private static <V> void use(V value, EnvSetting<V> setting, EnvironmentType type) {
+        checkNotNull(value);
+        checkNotNull(type);
+        checkNotNull(setting);
+        environment().register(type);
+        setting.use(value, type);
     }
 }
