@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import io.spine.annotation.Internal;
 import io.spine.base.EnvironmentType;
 
 import java.util.HashMap;
@@ -34,30 +35,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>For example:
  * <pre>
- * {@code
- * EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+ *
+ * {@literal EnvSetting <StorageFactory>} storageFactory = new EnvSetting<>();
  * storageFactory.use(InMemoryStorageFactory.newInstance(), Production.type());
  *
  * assertThat(storageFactory.value(Production.type())).isPresent();
  * assertThat(storageFactory.value(Tests.type())).isEmpty();
- * }
+ *
  * </pre>
  *
  * <p>{@code EnvSetting} values do not determine the environment themselves: it's up to the
  * caller to ask for the appropriate one.
  *
- * @param <P>
+ * @param <V>
  *         the type of value
  */
-public final class EnvSetting<P> {
+@Internal
+public final class EnvSetting<V> {
 
-    private final Map<EnvironmentType, P> settingValue = new HashMap<>();
+    private final Map<EnvironmentType, V> settingValue = new HashMap<>();
 
     /**
      * Returns the value for the specified environment if it was set, an empty {@code Optional}
      * otherwise.
      */
-    Optional<P> value(EnvironmentType type) {
+    Optional<V> value(EnvironmentType type) {
         return Optional.ofNullable(settingValue.get(type));
     }
 
@@ -71,9 +73,9 @@ public final class EnvSetting<P> {
      * @param operation
      *         operation to run
      */
-    void ifPresentForEnvironment(EnvironmentType type, ThrowingConsumer<P> operation)
+    void ifPresentForEnvironment(EnvironmentType type, ThrowingConsumer<V> operation)
             throws Exception {
-        P settingValue = this.settingValue.get(type);
+        V settingValue = this.settingValue.get(type);
         if (settingValue != null) {
             operation.accept(settingValue);
         }
@@ -84,13 +86,13 @@ public final class EnvSetting<P> {
      *
      * <p>If it is not set, runs the specified supplier, configures and returns the supplied value.
      */
-    P assignOrDefault(Supplier<P> defaultValue, EnvironmentType type) {
+    V assignOrDefault(Supplier<V> defaultValue, EnvironmentType type) {
         checkNotNull(defaultValue);
         checkNotNull(type);
         if (settingValue.containsKey(type)) {
             return settingValue.get(type);
         } else {
-            P value = defaultValue.get();
+            V value = defaultValue.get();
             this.use(value, type);
             return value;
         }
@@ -107,7 +109,7 @@ public final class EnvSetting<P> {
      * @param value
      *         value to assign to one of environments
      */
-    public void use(P value, EnvironmentType type) {
+    public void use(V value, EnvironmentType type) {
         checkNotNull(value);
         checkNotNull(type);
         this.settingValue.put(type, value);
