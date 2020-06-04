@@ -23,6 +23,7 @@ package io.spine.testing.server.tenant;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.Environment;
+import io.spine.base.Tests;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareTestSupport;
 import io.spine.server.tenant.TenantFunction;
@@ -34,14 +35,13 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Abstract base for test suites that test tenant-aware functionality.
  *
- * <p>This class must be used only from {@linkplain Environment#isTests() test execution context}.
+ * <p>This class must be used only from {@linkplain io.spine.base.Tests# test execution environment}.
  */
 @Internal
 @VisibleForTesting
 public abstract class TenantAwareTest {
 
-    public static
-    TenantIndex createTenantIndex(boolean multitenant) {
+    public static TenantIndex createTenantIndex(boolean multitenant) {
         return multitenant
                ? TenantIndex.createDefault()
                : TenantIndex.singleTenant();
@@ -81,7 +81,7 @@ public abstract class TenantAwareTest {
 
     private static void checkInTests() {
         checkState(Environment.instance()
-                              .isTests());
+                              .is(Tests.type()));
     }
 
     private static TenantId currentTenant() {
