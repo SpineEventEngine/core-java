@@ -61,13 +61,13 @@ class EnvSettingTest {
         void forEnv() {
             EnvSetting<StorageFactory> setting = new EnvSetting<>();
             assertThrows(NullPointerException.class,
-                         () -> setting.configure(InMemoryStorageFactory.newInstance(), null));
+                         () -> setting.use(InMemoryStorageFactory.newInstance(), null));
         }
 
         private void testNoNullsForEnv(EnvironmentType tests) {
             EnvSetting<?> config = new EnvSetting();
             assertThrows(NullPointerException.class,
-                         () -> config.configure(null, tests));
+                         () -> config.use(null, tests));
         }
     }
 
@@ -91,7 +91,7 @@ class EnvSettingTest {
         private void testReturnsForEnv(EnvironmentType type) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-            storageFactory.configure(factory, type);
+            storageFactory.use(factory, type);
             assertThat(storageFactory.value(type))
                     .isPresent();
             assertThat(storageFactory.value(type)
@@ -137,7 +137,7 @@ class EnvSettingTest {
         void testRetainsDefaultForEnv(EnvironmentType type) {
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
-            storageFactory.configure(memoizingFactory, type);
+            storageFactory.use(memoizingFactory, type);
 
             InMemoryStorageFactory inMemoryFactory = InMemoryStorageFactory.newInstance();
             assertThat(storageFactory.assignOrDefault(() -> inMemoryFactory, type))
@@ -153,8 +153,8 @@ class EnvSettingTest {
         MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
 
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-        storageFactory.configure(prodStorageFactory, tests());
-        storageFactory.configure(testingStorageFactory, tests());
+        storageFactory.use(prodStorageFactory, tests());
+        storageFactory.use(testingStorageFactory, tests());
 
         storageFactory.reset();
 
@@ -170,7 +170,7 @@ class EnvSettingTest {
 
         EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
-        storageSetting.configure(storageFactory, production());
+        storageSetting.use(storageFactory, production());
         storageSetting.ifPresentForEnvironment(production(), AutoCloseable::close);
 
         assertThat(storageFactory.isClosed()).isTrue();

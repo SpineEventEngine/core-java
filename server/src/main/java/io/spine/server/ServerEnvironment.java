@@ -21,6 +21,7 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Environment;
 import io.spine.base.EnvironmentType;
 import io.spine.base.Identifier;
@@ -196,24 +197,36 @@ public final class ServerEnvironment implements AutoCloseable {
 
     /**
      * Assigns the specified {@code TransportFactory} for the specified application environment.
+     *
+     * @return this instance of {@code ServerEnvironment}
      */
-    public void use(StorageFactory storage, EnvironmentType environmentType) {
-        this.storageFactory.configure(wrap(storage), environmentType);
+    @CanIgnoreReturnValue
+    public ServerEnvironment use(StorageFactory storage, EnvironmentType environmentType) {
+        this.storageFactory.use(wrap(storage), environmentType);
+        return this;
     }
 
     /**
      * Assigns {@code TracerFactory} for the specified application environment.
+     *
+     * @return this instance of {@code ServerEnvironment}
      */
-    public void use(TracerFactory tracerFactory, EnvironmentType environmentType) {
+    @CanIgnoreReturnValue
+    public ServerEnvironment use(TracerFactory tracerFactory, EnvironmentType environmentType) {
         checkNotNull(tracerFactory);
-        this.tracerFactory.configure(tracerFactory, environmentType);
+        this.tracerFactory.use(tracerFactory, environmentType);
+        return this;
     }
 
     /**
      * Configures the specified transport factor to be used under the specified environment type.
+     *
+     * @return this instance of {@code ServerEnvironment} this instance
      */
-    public void use(TransportFactory transportFactory, EnvironmentType envType) {
-        this.transportFactory.configure(transportFactory, envType);
+    @CanIgnoreReturnValue
+    public ServerEnvironment use(TransportFactory transportFactory, EnvironmentType envType) {
+        this.transportFactory.use(transportFactory, envType);
+        return this;
     }
 
     /**
@@ -233,8 +246,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return {@code StorageFactory} instance for the storage for the current environment
      * @throws IllegalStateException
      *         if the value {@code StorageFactory} was not
-     *         {@linkplain #use(StorageFactory, EnvironmentType)} configured}
-     *         prior to the call
+     *         {@linkplain #use(StorageFactory, EnvironmentType)} configured} prior to the call
      */
     public StorageFactory storageFactory() {
         if (environment().is(tests())) {

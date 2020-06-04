@@ -30,16 +30,16 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A mutable value that may differ for the production and testing environments.
+ * A mutable value that may differ between {@linkplain EnvironmentType environment types}.
  *
  * <p>For example:
  * <pre>
  * {@code
  * EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
- * storageFactory.configure(InMemoryStorageFactory.newInstance(), PRODUCTION);
+ * storageFactory.configure(InMemoryStorageFactory.newInstance(), Production.type());
  *
- * assertThat(storageFactory.value(PRODUCTION)).isPresent();
- * assertThat(storageFactory.value(TESTS)).isEmpty();
+ * assertThat(storageFactory.value(Production.type())).isPresent();
+ * assertThat(storageFactory.value(Tests.type())).isEmpty();
  * }
  * </pre>
  *
@@ -91,7 +91,7 @@ public final class EnvSetting<P> {
             return settingValue.get(type);
         } else {
             P value = defaultValue.get();
-            this.configure(value, type);
+            this.use(value, type);
             return value;
         }
     }
@@ -107,7 +107,7 @@ public final class EnvSetting<P> {
      * @param value
      *         value to assign to one of environments
      */
-    public void configure(P value, EnvironmentType type) {
+    public void use(P value, EnvironmentType type) {
         checkNotNull(value);
         checkNotNull(type);
         this.settingValue.put(type, value);
