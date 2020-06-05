@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.sun.tools.doclint.Env;
 import io.spine.base.Environment;
 import io.spine.base.Production;
 import io.spine.base.Tests;
@@ -75,11 +74,11 @@ class ServerEnvironmentTest {
                                        .build();
         ServerEnvironment environment = serverEnvironment;
         Delivery defaultValue = environment.delivery();
-        environment.configureDelivery(newDelivery);
+        environment.use(newDelivery, tests());
         assertEquals(newDelivery, environment.delivery());
 
         // Restore the default value.
-        environment.configureDelivery(defaultValue);
+        environment.use(defaultValue, tests());
     }
 
     @Test
@@ -188,6 +187,21 @@ class ServerEnvironmentTest {
             SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) factory;
             assertThat(systemAware.delegate()).isInstanceOf(InMemoryStorageFactory.class);
         }
+
+        @Test
+        @DisplayName("using a deprecated method")
+        @SuppressWarnings("deprecation")
+        void deprecatedMethod() {
+            environment.setTo(production());
+
+            InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
+            serverEnvironment.configureStorage(storageFactory);
+            assertThat(serverEnvironment.storageFactory())
+                    .isInstanceOf(SystemAwareStorageFactory.class);
+            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
+                    .isSameInstanceAs(storageFactory);
+
+        }
     }
 
     @Nested
@@ -207,6 +221,19 @@ class ServerEnvironmentTest {
             serverEnvironment.use(factory, tests());
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
+        }
+
+        @Test
+        @DisplayName("using a deprecated method")
+        @SuppressWarnings("deprecation")
+        void deprecatedMethod() {
+            MemoizingStorageFactory factory = new MemoizingStorageFactory();
+
+            serverEnvironment.configureStorageForTests(factory);
+            StorageFactory configuredFactory = serverEnvironment.storageFactory();
+            assertThat(configuredFactory).isInstanceOf(SystemAwareStorageFactory.class);
+            assertThat(((SystemAwareStorageFactory) configuredFactory).delegate())
+                    .isSameInstanceAs(factory);
         }
     }
 
@@ -449,11 +476,13 @@ class ServerEnvironmentTest {
                                            .build();
             ServerEnvironment environment = serverEnvironment;
             Delivery defaultValue = environment.delivery();
-            environment.use(newDelivery, Environment.instance().type());
+            environment.use(newDelivery, Environment.instance()
+                                                    .type());
             assertEquals(newDelivery, environment.delivery());
 
             // Restore the default value.
-            environment.use(defaultValue, Environment.instance().type());
+            environment.use(defaultValue, Environment.instance()
+                                                     .type());
         }
 
     }

@@ -47,6 +47,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * The server conditions and configuration under which the application operates.
  */
+@SuppressWarnings("ClassWithTooManyMethods" /* there are some deprecated methods to be eliminated later. */)
 public final class ServerEnvironment implements AutoCloseable {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
@@ -240,6 +241,31 @@ public final class ServerEnvironment implements AutoCloseable {
     public ServerEnvironment use(TransportFactory factory, EnvironmentType envType) {
         use(factory, transportFactory, envType);
         return this;
+    }
+
+    /**
+     * Assigns the specified {@code StorageFactory} for tests.
+     *
+     * @deprecated use {@link #use(StorageFactory, EnvironmentType)}, specifying the
+     *         {@code Tests.type())
+     */
+    @Deprecated
+    public void configureStorageForTests(StorageFactory factory) {
+        checkNotNull(factory);
+        use(factory, Tests.type());
+    }
+
+    /**
+     * Assigns the specified {@code StorageFactory} for the {@link Production} application
+     * environment.
+     *
+     * @deprecated use {@link #use(StorageFactory, EnvironmentType)}, specifying the
+     *         {@code Production.type()} or any other environment type
+     */
+    @Deprecated
+    public void configureStorage(StorageFactory factory) {
+        checkNotNull(factory);
+        use(factory, Production.type());
     }
 
     /**
