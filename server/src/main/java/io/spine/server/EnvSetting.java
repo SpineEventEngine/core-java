@@ -53,14 +53,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class EnvSetting<V> {
 
-    private final Map<EnvironmentType, V> settingValue = new HashMap<>();
+    private final Map<EnvironmentType, V> environmentValues = new HashMap<>();
 
     /**
      * Returns the value for the specified environment if it was set, an empty {@code Optional}
      * otherwise.
      */
     Optional<V> value(EnvironmentType type) {
-        return Optional.ofNullable(settingValue.get(type));
+        return Optional.ofNullable(environmentValues.get(type));
     }
 
     /**
@@ -75,7 +75,7 @@ public final class EnvSetting<V> {
      */
     void ifPresentForEnvironment(EnvironmentType type, ThrowingConsumer<V> operation)
             throws Exception {
-        V settingValue = this.settingValue.get(type);
+        V settingValue = this.environmentValues.get(type);
         if (settingValue != null) {
             operation.accept(settingValue);
         }
@@ -89,8 +89,8 @@ public final class EnvSetting<V> {
     V assignOrDefault(Supplier<V> defaultValue, EnvironmentType type) {
         checkNotNull(defaultValue);
         checkNotNull(type);
-        if (settingValue.containsKey(type)) {
-            return settingValue.get(type);
+        if (environmentValues.containsKey(type)) {
+            return environmentValues.get(type);
         } else {
             V value = defaultValue.get();
             this.use(value, type);
@@ -100,7 +100,7 @@ public final class EnvSetting<V> {
 
     /** Changes the value for all environments to {@code null}. */
     void reset() {
-        this.settingValue.clear();
+        this.environmentValues.clear();
     }
 
     /**
@@ -112,7 +112,7 @@ public final class EnvSetting<V> {
     void use(V value, EnvironmentType type) {
         checkNotNull(value);
         checkNotNull(type);
-        this.settingValue.put(type, value);
+        this.environmentValues.put(type, value);
     }
 
     /**

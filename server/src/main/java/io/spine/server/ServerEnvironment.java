@@ -123,7 +123,7 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Updates the delivery for the selected environment.
+     * Updates the delivery for the current environment.
      *
      * <p>This method is most typically used upon an application start. It's very uncommon and
      * even dangerous to update the delivery mechanism later when the message delivery
