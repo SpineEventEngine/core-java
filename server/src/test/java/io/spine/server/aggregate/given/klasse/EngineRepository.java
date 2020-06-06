@@ -29,7 +29,7 @@ import io.spine.server.route.EventRouting;
  *
  * @see io.spine.server.aggregate.EventImportTest
  */
-public class EngineRepository extends AggregateRepository<EngineId, EngineAggregate> {
+public class EngineRepository extends AggregateRepository<EngineId, EngineAggregate, Engine> {
 
     private final boolean routeByFirstField;
 

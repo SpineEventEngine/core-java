@@ -22,5 +22,6 @@ package io.spine.server.enrich.given;
 
 import io.spine.server.aggregate.AggregateRepository;
 
-public class EitProjectRepository extends AggregateRepository<EitProjectId, EitProjectAggregate> {
+public class EitProjectRepository
+        extends AggregateRepository<EitProjectId, EitProjectAggregate, EitProject> {
 }

@@ -23,9 +23,10 @@ package io.spine.server.trace.given.airport;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.trace.Airport;
 import io.spine.test.trace.AirportId;
+import io.spine.test.trace.Flight;
 import io.spine.test.trace.FlightId;
 
-final class FlightRepository extends AggregateRepository<FlightId, FlightAggregate> {
+final class FlightRepository extends AggregateRepository<FlightId, FlightAggregate, Flight> {
 
     AirportId departureAirport(FlightId flight) {
         FlightAggregate aggregate = find(flight)

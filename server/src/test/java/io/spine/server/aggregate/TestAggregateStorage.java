@@ -27,6 +27,7 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityRecord;
+import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -37,13 +38,13 @@ import java.util.Optional;
  * An {@link AggregateStorage} which purpose is to intercept and remember
  * the parameter values of executed read operations.
  */
-final class TestAggregateStorage extends AggregateStorage<ProjectId> {
+final class TestAggregateStorage extends AggregateStorage<ProjectId, Project> {
 
-    private final AggregateStorage<ProjectId> delegate;
+    private final AggregateStorage<ProjectId, ?> delegate;
     private ProjectId memoizedId;
     private int memoizedBatchSize;
 
-    TestAggregateStorage(AggregateStorage<ProjectId> delegate) {
+    TestAggregateStorage(AggregateStorage<ProjectId, Project> delegate) {
         super(delegate);
         this.delegate = delegate;
     }
@@ -96,14 +97,12 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId> {
     }
 
     @Override
-    public Iterator<EntityRecord> readStates(
-            TargetFilters filters, ResponseFormat format) {
+    public Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
         return delegate.readStates(filters, format);
     }
 
     @Override
-    public void writeState(
-            Aggregate<ProjectId, ?, ?> aggregate) {
+    public void writeState(Aggregate<ProjectId, ?, ?> aggregate) {
         delegate.writeState(aggregate);
     }
 

@@ -63,7 +63,7 @@ abstract class AggregateEndpoint<I,
         extends EntityMessageEndpoint<I, A, M>
         implements Logging {
 
-    AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
+    AggregateEndpoint(AggregateRepository<I, A, ?> repository, M envelope) {
         super(repository, envelope);
     }
 
@@ -218,7 +218,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    public final AggregateRepository<I, A> repository() {
-        return (AggregateRepository<I, A>) super.repository();
+    public final AggregateRepository<I, A, ?> repository() {
+        return (AggregateRepository<I, A, ?>) super.repository();
     }
 }

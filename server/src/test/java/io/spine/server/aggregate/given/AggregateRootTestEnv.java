@@ -47,9 +47,9 @@ public class AggregateRootTestEnv {
     }
 
     static class ProjectDefinitionPart extends AggregatePart<ProjectId,
-            ProjectDefinition,
-            ProjectDefinition.Builder,
-            ProjectRoot> {
+                                                             ProjectDefinition,
+                                                             ProjectDefinition.Builder,
+                                                             ProjectRoot> {
 
         private ProjectDefinitionPart(ProjectRoot root) {
             super(root);
@@ -72,13 +72,16 @@ public class AggregateRootTestEnv {
     }
 
     public static class ProjectDefinitionRepository
-            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart, ProjectRoot> {
+            extends AggregatePartRepository<ProjectId,
+                                            ProjectDefinitionPart,
+                                            ProjectDefinition,
+                                            ProjectRoot> {
     }
 
     static class ProjectLifeCyclePart extends AggregatePart<ProjectId,
-            ProjectLifecycle,
-            ProjectLifecycle.Builder,
-            ProjectRoot> {
+                                                            ProjectLifecycle,
+                                                            ProjectLifecycle.Builder,
+                                                            ProjectRoot> {
 
         protected ProjectLifeCyclePart(ProjectRoot root) {
             super(root);
@@ -99,7 +102,10 @@ public class AggregateRootTestEnv {
     }
 
     public static class ProjectLifeCycleRepository
-            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart, ProjectRoot> {
+            extends AggregatePartRepository<ProjectId,
+                                            ProjectLifeCyclePart,
+                                            ProjectLifecycle,
+                                            ProjectRoot> {
     }
 
     public static class ProjectRoot extends AggregateRoot<ProjectId> {

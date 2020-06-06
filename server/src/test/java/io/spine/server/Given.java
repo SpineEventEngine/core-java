@@ -214,7 +214,7 @@ public class Given {
     }
 
     static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
+            extends AggregateRepository<ProjectId, ProjectAggregate, Project> {
 
         ProjectAggregateRepository() {
             super();
@@ -264,7 +264,7 @@ public class Given {
     }
 
     public static class CustomerAggregateRepository
-            extends AggregateRepository<CustomerId, CustomerAggregate> {
+            extends AggregateRepository<CustomerId, CustomerAggregate, Customer> {
 
         private @Nullable TargetFilters memoizedFilters;
         private @Nullable ResponseFormat memoizedFormat;

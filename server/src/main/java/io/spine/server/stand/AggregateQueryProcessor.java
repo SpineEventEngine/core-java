@@ -42,9 +42,9 @@ import static com.google.common.collect.Streams.stream;
  */
 class AggregateQueryProcessor implements QueryProcessor {
 
-    private final AggregateRepository<?, ?> repository;
+    private final AggregateRepository<?, ?, ?> repository;
 
-    AggregateQueryProcessor(AggregateRepository<?, ?> repository) {
+    AggregateQueryProcessor(AggregateRepository<?, ?, ?> repository) {
         this.repository = repository;
     }
 

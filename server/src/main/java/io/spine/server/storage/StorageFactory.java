@@ -21,6 +21,7 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventStorage;
@@ -58,14 +59,16 @@ public interface StorageFactory extends AutoCloseable {
      *
      * @param <I>
      *         the type of aggregate IDs
+     * @param <S>
+     *         the type of aggregate state
      * @param context
      *         specification of the Bounded Context {@code AggregateRepository} of which
      *         requests the creation of the storage
      * @param aggregateCls
      *         the class of {@code Aggregate}s to be stored
      */
-    default <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> aggregateCls) {
+    default <I, S extends EntityState> AggregateStorage<I, S>
+    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, S, ?>> aggregateCls) {
         return new AggregateStorage<>(context, aggregateCls, this);
     }
 
@@ -125,15 +128,17 @@ public interface StorageFactory extends AutoCloseable {
      *
      * @param <I>
      *         the type of entity IDs
+     * @param <S>
+     *         the type of the entity state
      * @param context
      *         specification of the Bounded Context {@code RecordBasedRepository} of which
      *         requests the creation of the storage
      * @param entityClass
      *         the class of entities to be stored
      */
-    default <I> EntityRecordStorage<I>
-    createEntityRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
-        EntityRecordStorage<I> result =
+    default <I, S extends EntityState> EntityRecordStorage<I, S>
+    createEntityRecordStorage(ContextSpec context, Class<? extends Entity<I, S>> entityClass) {
+        EntityRecordStorage<I, S> result =
                 new EntityRecordStorage<>(this, entityClass, context.isMultitenant());
         return result;
     }

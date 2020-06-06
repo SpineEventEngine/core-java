@@ -92,12 +92,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 //TODO:2020-04-01:alex.tymchenko: test the new Aggregate columns feature.
 public class AggregateStorageTest
-        extends AbstractStorageTest<ProjectId, AggregateHistory, AggregateStorage<ProjectId>> {
+        extends AbstractStorageTest<ProjectId,
+                                    AggregateHistory,
+                                    AggregateStorage<ProjectId, Project>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
 
     private final TestEventFactory eventFactory = newInstance(AggregateStorageTest.class);
-    private AggregateStorage<ProjectId> storage;
+    private AggregateStorage<ProjectId, Project> storage;
 
     private static Snapshot newSnapshot(Timestamp time) {
         return Snapshot.newBuilder()
@@ -148,7 +150,7 @@ public class AggregateStorageTest
     }
 
     @Override
-    protected AggregateStorage<ProjectId> newStorage() {
+    protected AggregateStorage<ProjectId, Project> newStorage() {
         return newStorage(TestAggregate.class);
     }
 
@@ -163,9 +165,10 @@ public class AggregateStorageTest
      *         the type of aggregate IDs
      * @return a new storage instance
      */
-    <I> AggregateStorage<I> newStorage(Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
+    <I, S extends EntityState> AggregateStorage<I, S>
+    newStorage(Class<? extends Aggregate<I, S, ?>> aggregateClass) {
         ContextSpec spec = ContextSpec.singleTenant("`AggregateStorage` tests");
-        AggregateStorage<I> result =
+        AggregateStorage<I, S> result =
                 ServerEnvironment.instance()
                                  .storageFactory()
                                  .createAggregateStorage(spec,aggregateClass);
@@ -247,7 +250,7 @@ public class AggregateStorageTest
         @Test
         @DisplayName("String")
         void byStringId() {
-            AggregateStorage<String> storage = newStorage(TestAggregateWithIdString.class);
+            AggregateStorage<String, ?> storage = newStorage(TestAggregateWithIdString.class);
             String id = newUuid();
             writeAndReadEventTest(id, storage);
         }
@@ -255,7 +258,7 @@ public class AggregateStorageTest
         @Test
         @DisplayName("Long")
         void byLongId() {
-            AggregateStorage<Long> storage = newStorage(TestAggregateWithIdLong.class);
+            AggregateStorage<Long, ?> storage = newStorage(TestAggregateWithIdLong.class);
             long id = 10L;
             writeAndReadEventTest(id, storage);
         }
@@ -263,12 +266,12 @@ public class AggregateStorageTest
         @Test
         @DisplayName("Integer")
         void byIntegerId() {
-            AggregateStorage<Integer> storage = newStorage(TestAggregateWithIdInteger.class);
+            AggregateStorage<Integer, ?> storage = newStorage(TestAggregateWithIdInteger.class);
             int id = 10;
             writeAndReadEventTest(id, storage);
         }
 
-        private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
+        private <I> void writeAndReadEventTest(I id, AggregateStorage<I, ?> storage) {
             Event expectedEvent = eventFactory.createEvent(event(Project.getDefaultInstance()));
 
             storage.writeEvent(id, expectedEvent);

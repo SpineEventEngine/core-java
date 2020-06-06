@@ -43,8 +43,8 @@ public final class ExternalMessageEnvelope
     /** An original message (e.g. instance of {@code io.spine.sample.TaskCreated}). */
     private final Message message;
 
-    /** A message class of the original message (for example, {@code io.spine.sample.TaskCreated} class). */
-    private final MessageClass messageClass;
+    /** A message class of the original message (e.g. {@code io.spine.sample.TaskCreated} class). */
+    private final MessageClass<?> messageClass;
 
     /** An actor context representing the environment in which the original message was created. */
     private final ActorContext actorContext;
@@ -105,7 +105,7 @@ public final class ExternalMessageEnvelope
      * @see #of(ExternalMessage, Message)
      */
     @Override
-    public MessageClass messageClass() {
+    public MessageClass<?> messageClass() {
         return messageClass;
     }
 
@@ -117,6 +117,7 @@ public final class ExternalMessageEnvelope
     /**
      * Converts this instance to an envelope of the external event.
      */
+    //TODO:2020-06-06:alex.tymchenko: remove this unused method
     public EventEnvelope toEventEnvelope() {
         ExternalMessage externalMessage = outerObject();
         Event event = unpack(externalMessage.getOriginalMessage(), Event.class);

@@ -24,6 +24,7 @@ import io.spine.base.CommandMessage;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
@@ -37,9 +38,9 @@ import static io.spine.testdata.Sample.builderForType;
 /** Utility factory for test aggregates. */
 public class GivenAggregate {
 
-    private final AggregateRepository<ProjectId, ProjectAggregate> repository;
+    private final AggregateRepository<ProjectId, ProjectAggregate, Project> repository;
 
-    public GivenAggregate(AggregateRepository<ProjectId, ProjectAggregate> repository) {
+    public GivenAggregate(AggregateRepository<ProjectId, ProjectAggregate, Project> repository) {
         this.repository = repository;
     }
 

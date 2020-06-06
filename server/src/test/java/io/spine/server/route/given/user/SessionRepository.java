@@ -51,7 +51,7 @@ public class SessionRepository
     }
 
     private Set<RSessionId> findByUserId(UserId id) {
-        EntityRecordStorage<RSessionId> storage = recordStorage();
+        EntityRecordStorage<RSessionId, RSession> storage = recordStorage();
         EntityRecordSpec<RSessionId> spec = storage.recordSpec();
         RecordQuery<RSessionId> query = RecordQueries.byColumn(spec, RSession.Column.userId(), id);
         Iterator<RSessionId> identifiers = storage.index(query);

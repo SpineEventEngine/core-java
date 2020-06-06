@@ -39,6 +39,7 @@ import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.entity.storage.given.TestProjection;
 import io.spine.test.entity.ProjectId;
+import io.spine.test.storage.StgProject;
 import io.spine.testdata.Sample;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
@@ -75,8 +76,12 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                                                                 .build())
               .setDefault(CustomColumn.class, sampleColumn())
               .setDefault(RecordSpec.class, new MessageRecordSpec<>(Any.class, someId()))
-              .setDefault(EntityColumn.class, new EntityColumn("some_column"))
+              .setDefault(EntityColumn.class, someEntityColumn())
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
+    }
+
+    private static EntityColumn<StgProject, Any> someEntityColumn() {
+        return new EntityColumn<>("some_column", StgProject.class, Any.class);
     }
 
     @SuppressWarnings("UnnecessaryLambda")  // for better readability.

@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.Iterators;
 import io.spine.server.aggregate.given.fibonacci.FibonacciRepository;
+import io.spine.server.aggregate.given.fibonacci.Sequence;
 import io.spine.server.aggregate.given.fibonacci.SequenceId;
 import io.spine.server.aggregate.given.fibonacci.command.MoveSequence;
 import io.spine.server.aggregate.given.fibonacci.command.SetStartingNumbers;
@@ -92,7 +93,7 @@ public abstract class AggregateStorageTruncationTest {
                 .isEqualTo(expectedNumberTwo);
 
         // Truncate the storage.
-        AggregateStorage<SequenceId> storage = repo.aggregateStorage();
+        AggregateStorage<SequenceId, Sequence> storage = repo.aggregateStorage();
         int countBeforeTruncate = recordCount(storage);
         assertThat(countBeforeTruncate)
                 .isGreaterThan(snapshotTrigger);
@@ -108,7 +109,7 @@ public abstract class AggregateStorageTruncationTest {
                 .isEqualTo(expectedNext);
     }
 
-    private static int recordCount(AggregateStorage<SequenceId> storage) {
+    private static int recordCount(AggregateStorage<SequenceId, Sequence> storage) {
         Iterator<AggregateEventRecord> iterator = storage.historyBackward(ID, Integer.MAX_VALUE);
         return Iterators.size(iterator);
     }

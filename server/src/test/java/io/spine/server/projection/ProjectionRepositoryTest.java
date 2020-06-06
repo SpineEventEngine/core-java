@@ -485,7 +485,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("entity storage")
         void entityStorage() {
-            EntityRecordStorage<ProjectId> recordStorage = repository().recordStorage();
+            EntityRecordStorage<ProjectId, ?> recordStorage = repository().recordStorage();
             assertNotNull(recordStorage);
         }
     }

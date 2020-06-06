@@ -22,6 +22,7 @@ package io.spine.server.storage.system.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
@@ -50,10 +51,9 @@ public final class MemoizingStorageFactory implements StorageFactory {
     private boolean closed = false;
 
     @Override
-    public <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context,
-                           Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
-        requestedStorages.add(aggregateClass);
+    public <I, S extends EntityState> AggregateStorage<I, S>
+    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, S, ?>> aggregateCls) {
+        requestedStorages.add(aggregateCls);
         return nullRef();
     }
 

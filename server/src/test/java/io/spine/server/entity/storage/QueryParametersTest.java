@@ -203,7 +203,7 @@ class QueryParametersTest {
     void createActiveParams() {
         StorageFactory factory = ServerEnvironment.instance().storageFactory();
         ContextSpec spec = ContextSpec.multitenant("random name");
-        EntityRecordStorage<ProjectId> storage =
+        EntityRecordStorage<ProjectId, ?> storage =
                 factory.createEntityRecordStorage(spec, ProjectProjection.class);
         QueryParameters parameters = QueryParameters.activeEntityQueryParams(storage.recordSpec());
 

@@ -75,7 +75,7 @@ public class AggregateRoot<I> {
      */
     protected <S extends EntityState, A extends AggregatePart<I, S, ?, ?>>
     S partState(Class<S> partStateClass) {
-        AggregatePartRepository<I, A, ?> repo = repositoryOf(partStateClass);
+        AggregatePartRepository<I, A, S, ?> repo = repositoryOf(partStateClass);
         AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(id());
         S partState = aggregatePart.state();
         return partState;
@@ -90,16 +90,17 @@ public class AggregateRoot<I> {
      */
     @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
     private <S extends EntityState, A extends AggregatePart<I, S, ?, ?>>
-    AggregatePartRepository<I, A, ?> repositoryOf(Class<S> stateClass) {
+    AggregatePartRepository<I, A, S, ?> repositoryOf(Class<S> stateClass) {
         Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
-        Optional<? extends AggregatePartRepository<?, ?, ?>> partRepository = boundedContext
+        Optional<? extends AggregatePartRepository<?, ?, ?, ?>> partRepository = boundedContext
                 .aggregateRootDirectory()
                 .findPart(thisType, stateClass);
-        AggregatePartRepository<?, ?, ?> repository = partRepository.orElseThrow(
+        AggregatePartRepository<?, ?, ?, ?> repository = partRepository.orElseThrow(
                 () -> newIllegalStateException("Could not find a repository for aggregate part %s",
                                                stateClass.getName())
         );
-        AggregatePartRepository<I, A, ?> result = (AggregatePartRepository<I, A, ?>) repository;
+        AggregatePartRepository<I, A, S, ?> result =
+                (AggregatePartRepository<I, A, S, ?>) repository;
         return result;
     }
 }

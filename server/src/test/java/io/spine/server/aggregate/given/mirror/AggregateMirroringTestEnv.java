@@ -102,10 +102,10 @@ public final class AggregateMirroringTestEnv {
         return events.createEvent(eventMessage);
     }
 
-    public static AggregateRepository<MRPhotoId, PhotoAggregate> newPhotosRepository() {
+    public static AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto> newPhotosRepository() {
         Repository<MRPhotoId, PhotoAggregate> repository =
                 DefaultRepository.of(PhotoAggregate.class);
-        return (AggregateRepository<MRPhotoId, PhotoAggregate>) repository;
+        return (AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto>) repository;
     }
 
     public static MRUploadPhoto upload(MRPhoto state) {

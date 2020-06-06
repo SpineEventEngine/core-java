@@ -152,7 +152,7 @@ class RepositoryTest {
     @Test
     @DisplayName("close storage on close")
     void closeStorageOnClose() {
-        EntityRecordStorage<?> storage = (EntityRecordStorage<?>) repository.storage();
+        EntityRecordStorage<?, ?> storage = (EntityRecordStorage<?, ?>) repository.storage();
         repository.close();
 
         assertTrue(storage.isClosed());

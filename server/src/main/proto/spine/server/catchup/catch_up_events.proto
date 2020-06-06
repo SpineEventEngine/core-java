@@ -3,7 +3,6 @@ syntax = "proto3";
 package spine.server.catchup;
 
 import "spine/options.proto";
-import "spine/time_options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;

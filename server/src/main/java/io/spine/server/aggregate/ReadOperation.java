@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -38,10 +39,11 @@ import static io.spine.util.Preconditions2.checkPositive;
  * Method object for reading {@link AggregateHistory}s.
  *
  * @param <I> the type of aggregate IDs
+ * @param <S> the type of aggregate state
  */
-final class ReadOperation<I> {
+final class ReadOperation<I, S extends EntityState> {
 
-    private final AggregateStorage<I> storage;
+    private final AggregateStorage<I, S> storage;
     private final Deque<Event> history;
     private final I id;
     private final int batchSize;
@@ -59,7 +61,7 @@ final class ReadOperation<I> {
      * @param batchSize
      *         how many records to read from the storage at a time
      */
-    ReadOperation(AggregateStorage<I> storage, I id, int batchSize) {
+    ReadOperation(AggregateStorage<I, S> storage, I id, int batchSize) {
         storage.checkNotClosed();
         this.storage = storage;
         this.id = checkNotNull(id);

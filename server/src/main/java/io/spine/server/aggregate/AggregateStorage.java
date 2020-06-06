@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
+import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
@@ -53,21 +54,24 @@ import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRI
  *
  * @param <I>
  *         the type of IDs of aggregates managed by this storage
+ * @param <S>
+ *         the type of states of aggregates managed by this storage
  */
 @SPI
-public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
+public class AggregateStorage<I, S extends EntityState>
+        extends AbstractStorage<I, AggregateHistory> {
 
     private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
             "The specified snapshot index is incorrect";
 
     private final AggregateEventStorage eventStorage;
-    private final EntityRecordStorage<I> stateStorage;
+    private final EntityRecordStorage<I, S> stateStorage;
     private boolean mirrorEnabled = false;
     private final Truncate<Object> truncation;
     private final HistoryBackward<I> historyBackward;
 
     public AggregateStorage(ContextSpec context,
-                            Class<? extends Aggregate<I, ?, ?>> aggregateClass,
+                            Class<? extends Aggregate<I, S, ?>> aggregateClass,
                             StorageFactory factory) {
         super(context.isMultitenant());
         eventStorage = factory.createAggregateEventStorage(context.isMultitenant());
@@ -76,7 +80,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
         historyBackward = new HistoryBackward<>(eventStorage);
     }
 
-    protected AggregateStorage(AggregateStorage<I> delegate) {
+    protected AggregateStorage(AggregateStorage<I, S> delegate) {
         super(delegate.isMultitenant());
         this.eventStorage = delegate.eventStorage;
         this.stateStorage = delegate.stateStorage;
@@ -129,7 +133,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<AggregateHistory> read(I id, int batchSize) {
-        ReadOperation<I> op = new ReadOperation<>(this, id, batchSize);
+        ReadOperation<I, S> op = new ReadOperation<>(this, id, batchSize);
         return op.perform();
     }
 
@@ -254,7 +258,7 @@ public class AggregateStorage<I> extends AbstractStorage<I, AggregateHistory> {
     }
 
     /**
-     * Truncates the storage, dropping all records which occur before the Nth snapshot for each
+     * Truncates the storage, dropping all records which occur before the N-th snapshot for each
      * entity.
      *
      * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing

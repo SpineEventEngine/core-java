@@ -23,5 +23,6 @@ package io.spine.server.enrich.given;
 import io.spine.core.UserId;
 import io.spine.server.aggregate.AggregateRepository;
 
-public class EitUserRepository extends AggregateRepository<UserId, EitUserAggregate> {
+public class EitUserRepository
+        extends AggregateRepository<UserId, EitUserAggregate, EitUserAccount> {
 }

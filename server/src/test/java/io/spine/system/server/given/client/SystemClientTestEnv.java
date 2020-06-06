@@ -46,10 +46,11 @@ public class SystemClientTestEnv {
         return context;
     }
 
+    //TODO:2020-06-06:alex.tymchenko: why this method is unused?
     public static ShoppingListAggregate findAggregate(ListId aggregateId, BoundedContext context) {
         @SuppressWarnings("unchecked")
-        AggregateRepository<ListId, ShoppingListAggregate> repository =
-                (AggregateRepository<ListId, ShoppingListAggregate>)
+        AggregateRepository<ListId, ShoppingListAggregate, ShoppingList> repository =
+                (AggregateRepository<ListId, ShoppingListAggregate, ShoppingList>)
                         context.findRepository(ShoppingList.class)
                                .orElseGet(() -> fail("Aggregate repository should be visible."));
         ShoppingListAggregate aggregate =

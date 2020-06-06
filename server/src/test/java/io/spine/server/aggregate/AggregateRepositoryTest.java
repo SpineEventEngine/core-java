@@ -48,6 +48,7 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.HandlerFailedUnexpectedly;
+import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -296,8 +297,8 @@ public class AggregateRepositoryTest {
         }
     }
 
-    private static void loadOrCreate(AggregateRepository<ProjectId, ProjectAggregate> repository,
-                                     ProjectId id) {
+    private static void loadOrCreate(
+            AggregateRepository<ProjectId, ProjectAggregate, Project> repository, ProjectId id) {
         repository.loadOrCreate(id);
     }
 
@@ -503,7 +504,7 @@ public class AggregateRepositoryTest {
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            AggregateRepository<?, ?> repository = repository();
+            AggregateRepository<?, ?, ?> repository = repository();
             context = BlackBoxBoundedContext
                     .singleTenant()
                     .with(repository);

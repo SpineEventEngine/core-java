@@ -25,6 +25,7 @@ import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.given.ReadOperationTestEnv.TestAggregate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.test.storage.StgProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ import static io.spine.server.aggregate.given.ReadOperationTestEnv.snapshot;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ReadOperation should")
+@DisplayName("`ReadOperation` should")
 class ReadOperationTest {
 
     private static final String ID = "test-aggregate-ID";
@@ -49,7 +50,7 @@ class ReadOperationTest {
 
     protected static final ContextSpec spec = singleTenant(assumingTestsValue());
 
-    private AggregateStorage<String> storage;
+    private AggregateStorage<String, StgProject> storage;
 
     @BeforeEach
     void setUp() {
@@ -61,7 +62,7 @@ class ReadOperationTest {
     void readAll() {
         int eventCount = 10;
         fillEvents(eventCount);
-        ReadOperation<String> operation = new ReadOperation<>(storage, ID, 100);
+        ReadOperation<String, StgProject> operation = new ReadOperation<>(storage, ID, 100);
         Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
         AggregateHistory stateRecord = record.get();
@@ -75,7 +76,7 @@ class ReadOperationTest {
     @DisplayName("read snapshot if present")
     void readSnapshot() {
         fillEventsWithSnapshot(5);
-        ReadOperation<String> operation = new ReadOperation<>(storage, ID, 100);
+        ReadOperation<String, StgProject> operation = new ReadOperation<>(storage, ID, 100);
         Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
         AggregateHistory stateRecord = record.get();
@@ -91,7 +92,7 @@ class ReadOperationTest {
         int expectedEventCount = 7;
         fillEvents(expectedEventCount);
 
-        ReadOperation<String> operation = new ReadOperation<>(storage, ID, BATCH_SIZE);
+        ReadOperation<String, StgProject> operation = new ReadOperation<>(storage, ID, BATCH_SIZE);
         Optional<AggregateHistory> record = operation.perform();
         assertTrue(record.isPresent());
         AggregateHistory stateRecord = record.get();

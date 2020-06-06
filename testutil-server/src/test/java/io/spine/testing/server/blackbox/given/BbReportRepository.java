@@ -25,6 +25,7 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.BbReport;
 import io.spine.testing.server.blackbox.BbReportId;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 
@@ -38,7 +39,8 @@ import static java.util.stream.Collectors.toSet;
  * A Report repository routing the {@link BbTaskAdded Task Added} events to all reports containing
  * corresponding project.
  */
-public final class BbReportRepository extends AggregateRepository<BbReportId, BbReportAggregate> {
+public final class BbReportRepository
+        extends AggregateRepository<BbReportId, BbReportAggregate, BbReport> {
 
     private final List<BbReportAggregate> aggregates = newArrayList();
 

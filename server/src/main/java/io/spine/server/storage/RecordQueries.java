@@ -30,14 +30,15 @@ import io.spine.base.FieldPath;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
-import io.spine.client.Filters;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.storage.ColumnName;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.primitives.Primitives.wrap;
@@ -140,8 +141,8 @@ public final class RecordQueries {
      *
      * @param recordSpec
      *         the specification of the storage record
-     * @param column
-     *         the column generated for the entity state in Protobuf
+     * @param declaredColumn
+     *         the column declared in the Protobuf entity state
      * @param value
      *         the expected value to which the actual column value of the record should match
      * @param <I>
@@ -150,14 +151,19 @@ public final class RecordQueries {
      *         the type of the values stored in the column
      */
     public static <I, V> RecordQuery<I> byColumn(RecordSpec<I, ?, ?> recordSpec,
-                                                 EntityColumn column,
+                                                 EntityColumn declaredColumn,
                                                  V value) {
         checkNotNull(recordSpec);
-        checkNotNull(column);
+        checkNotNull(declaredColumn);
         checkNotNull(value);
-        Filter eq = Filters.eq(column, value);
-        Column match = findMatchingColumn(eq, recordSpec);
-        QueryParameters queryParams = QueryParameters.eq(match, value);
+        String rawColumnName = declaredColumn.name()
+                                     .value();
+        Optional<Column> maybeColumn = recordSpec.find(ColumnName.of(rawColumnName));
+        checkState(maybeColumn.isPresent(),
+                   "The passed column `%s` is not found among the declared columns: `%s`",
+                   rawColumnName, recordSpec.columnList());
+        Column column = maybeColumn.get();
+        QueryParameters queryParams = QueryParameters.eq(column, value);
         return of(queryParams);
     }
 

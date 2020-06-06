@@ -24,12 +24,12 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateStorage;
 
 public final class FibonacciRepository
-        extends AggregateRepository<SequenceId, FibonacciAggregate> {
+        extends AggregateRepository<SequenceId, FibonacciAggregate, Sequence> {
 
     private static final int SNAPSHOT_TRIGGER = 5;
 
     @Override
-    public AggregateStorage<SequenceId> aggregateStorage() {
+    public AggregateStorage<SequenceId, Sequence> aggregateStorage() {
         return super.aggregateStorage();
     }
 

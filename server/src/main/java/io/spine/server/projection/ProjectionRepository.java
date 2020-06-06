@@ -310,7 +310,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * <p>Overrides the parent method to expose it to this package.
      */
     @Override
-    protected final EntityRecordStorage<I> recordStorage() {
+    protected final EntityRecordStorage<I, S> recordStorage() {
         return super.recordStorage();
     }
 

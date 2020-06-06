@@ -47,7 +47,7 @@ final class InMemoryTypeRegistry implements TypeRegistry {
     private final ConcurrentMap<TypeUrl, RecordBasedRepository<?, ?, ?>> recordRepositories =
             new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<TypeUrl, AggregateRepository<?, ?>> aggregateRepositories =
+    private final ConcurrentMap<TypeUrl, AggregateRepository<?, ?, ?>> aggregateRepositories =
             new ConcurrentHashMap<>();
 
     /** Prevents instantiation from the outside. */
@@ -69,8 +69,8 @@ final class InMemoryTypeRegistry implements TypeRegistry {
             recordRepositories.put(entityType, recordBasedRepository);
         }
         if (repository instanceof AggregateRepository) {
-            AggregateRepository<I, ?> aggregateRepository = (AggregateRepository<I, ?>) repository;
-            aggregateRepositories.put(entityType, aggregateRepository);
+            AggregateRepository<I, ?, ?> aggRepository = (AggregateRepository<I, ?, ?>) repository;
+            aggregateRepositories.put(entityType, aggRepository);
         }
     }
 
@@ -88,9 +88,9 @@ final class InMemoryTypeRegistry implements TypeRegistry {
     }
 
     @Override
-    public Optional<? extends AggregateRepository<?, ?>> aggregateRepositoryOf(TypeUrl type) {
-        AggregateRepository<?, ?> repo = aggregateRepositories.get(type);
-        Optional<? extends AggregateRepository<?, ?>> result = ofNullable(repo);
+    public Optional<? extends AggregateRepository<?, ?, ?>> aggregateRepositoryOf(TypeUrl type) {
+        AggregateRepository<?, ?, ?> repo = aggregateRepositories.get(type);
+        Optional<? extends AggregateRepository<?, ?, ?>> result = ofNullable(repo);
         return result;
     }
 

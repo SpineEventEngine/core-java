@@ -26,8 +26,9 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.given.user.event.RUserConsentRequested;
 import io.spine.server.route.given.user.event.RUserSignedIn;
+import io.spine.test.event.RUser;
 
-public final class UserRepository extends AggregateRepository<UserId, UserAggregate> {
+public final class UserRepository extends AggregateRepository<UserId, UserAggregate, RUser> {
 
     @Override
     protected void setupEventRouting(EventRouting<UserId> routing) {

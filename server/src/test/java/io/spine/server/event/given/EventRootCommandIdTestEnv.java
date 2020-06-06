@@ -174,7 +174,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
+            extends AggregateRepository<ProjectId, ProjectAggregate, Project> {
     }
 
     /**
@@ -183,7 +183,7 @@ public class EventRootCommandIdTestEnv {
      * {@linkplain EventRootMessageIdTest.MatchExternalEventHandledBy#aggregate()} test.
      */
     public static class TeamAggregateRepository
-            extends AggregateRepository<EvTeamId, TeamAggregate> {
+            extends AggregateRepository<EvTeamId, TeamAggregate, EvTeam> {
 
         @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
         @Override

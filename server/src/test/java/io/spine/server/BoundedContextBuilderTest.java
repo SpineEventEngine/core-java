@@ -219,13 +219,14 @@ class BoundedContextBuilderTest {
 
         private BoundedContextBuilder builder;
         private CommandDispatcher dispatcher;
-        private AggregateRepository<?, ?> repository;
+        private AggregateRepository<?, ?, ?> repository;
 
         @BeforeEach
         void setUp() {
             builder = BoundedContextBuilder.assumingTests();
             dispatcher = new NoOpCommandDispatcher();
-            repository = (AggregateRepository<?, ?>) DefaultRepository.of(ProjectAggregate.class);
+            repository =
+                    (AggregateRepository<?, ?, ?>) DefaultRepository.of(ProjectAggregate.class);
         }
 
         @Test

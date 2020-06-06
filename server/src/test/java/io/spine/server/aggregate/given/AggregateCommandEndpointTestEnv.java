@@ -42,8 +42,7 @@ public class AggregateCommandEndpointTestEnv {
     private AggregateCommandEndpointTestEnv() {
     }
 
-    public static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, Project.Builder> {
+    public static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
         private static final CommandHistory commandsHandled = new CommandHistory();
@@ -102,6 +101,6 @@ public class AggregateCommandEndpointTestEnv {
     }
 
     public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
+            extends AggregateRepository<ProjectId, ProjectAggregate, Project> {
     }
 }

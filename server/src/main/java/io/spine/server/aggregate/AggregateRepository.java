@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
@@ -79,10 +80,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the aggregate IDs
  * @param <A>
  *         the type of the aggregates managed by this repository
+ * @param <S>
+ *         the type of the state of aggregate managed by this repository
  * @see Aggregate
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
-public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
+public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository,
                    EventDispatcherDelegate, QueryableRepository {
@@ -307,9 +310,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return new storage
      */
     @Override
-    protected AggregateStorage<I> createStorage() {
+    protected AggregateStorage<I, S> createStorage() {
         StorageFactory sf = defaultStorageFactory();
-        AggregateStorage<I> result = sf.createAggregateStorage(context().spec(), entityClass());
+        AggregateStorage<I, S> result = sf.createAggregateStorage(context().spec(), entityClass());
         return result;
     }
 
@@ -514,9 +517,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @throws IllegalStateException
      *         if the storage is null
      */
-    protected AggregateStorage<I> aggregateStorage() {
+    protected AggregateStorage<I, S> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        AggregateStorage<I> result = (AggregateStorage<I>) storage();
+        AggregateStorage<I, S> result = (AggregateStorage<I, S>) storage();
         return result;
     }
 
@@ -578,7 +581,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         {@code Optional.empty()} if there is no record with the ID
      */
     private Optional<AggregateHistory> loadHistory(I id) {
-        AggregateStorage<I> storage = aggregateStorage();
+        AggregateStorage<I, S> storage = aggregateStorage();
         int batchSize = snapshotTrigger + 1;
         Optional<AggregateHistory> result = storage.read(id, batchSize);
         return result;

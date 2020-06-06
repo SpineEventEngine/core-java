@@ -69,7 +69,7 @@ interface TypeRegistry extends AutoCloseable {
      */
     ImmutableSet<TypeUrl> aggregateTypes();
 
-    Optional<? extends AggregateRepository<?, ?>> aggregateRepositoryOf(TypeUrl type);
+    Optional<? extends AggregateRepository<?, ?, ?>> aggregateRepositoryOf(TypeUrl type);
 
     /**
      * Reads all entity types, which repositories are registered in this instance of registry.

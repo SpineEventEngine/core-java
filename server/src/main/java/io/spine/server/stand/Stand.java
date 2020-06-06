@@ -432,10 +432,10 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             RecordBasedRepository<?, ?, ?> recordRepo = maybeRecordRepo.get();
             return new EntityQueryProcessor(recordRepo);
         }
-        Optional<? extends AggregateRepository<?, ?>> maybeAggregateRepo =
+        Optional<? extends AggregateRepository<?, ?, ?>> maybeAggregateRepo =
                 typeRegistry.aggregateRepositoryOf(type);
         if (maybeAggregateRepo.isPresent()) {
-            AggregateRepository<?, ?> aggregateRepo = maybeAggregateRepo.get();
+            AggregateRepository<?, ?, ?> aggregateRepo = maybeAggregateRepo.get();
             return new AggregateQueryProcessor(aggregateRepo);
         }
 
@@ -511,9 +511,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         @CheckReturnValue
         @Internal
         public Stand build() {
-            boolean multitenant = this.multitenant == null
-                                  ? false
-                                  : this.multitenant;
+            boolean multitenant = this.multitenant != null && this.multitenant;
             subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
             topicValidator = new TopicValidator(typeRegistry, eventRegistry);
             queryValidator = new QueryValidator(typeRegistry);

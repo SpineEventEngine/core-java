@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.Entity;
@@ -42,8 +43,12 @@ import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
 
 /**
  * A {@code MessageStorage} which stores {@link EntityRecord}s.
+ *
+ * @param <I> the type of the identifiers of stored entities
+ * @param <S> the type of {@code Entity} state
  */
-public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecord> {
+public class EntityRecordStorage<I, S extends EntityState>
+        extends RecordStorageDelegate<I, EntityRecord> {
 
     private final RecordQuery<I> findActiveRecordsQuery;
     private final QueryParameters activeQueryParams;
@@ -111,6 +116,11 @@ public class EntityRecordStorage<I> extends RecordStorageDelegate<I, EntityRecor
     public Iterator<EntityRecord> readAll(RecordQuery<I> query, ResponseFormat format) {
         return super.readAll(query, format);
     }
+
+//    //TODO:2020-06-06:alex.tymchenko: complete the implementation.
+//    public RecordQuery<I> query(EntityColumn<S, ?> column) {
+//        recordSpec().find(column.name())
+//    }
 
     /**
      * {@inheritDoc}

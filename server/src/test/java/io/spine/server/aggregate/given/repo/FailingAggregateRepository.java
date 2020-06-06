@@ -30,6 +30,7 @@ import io.spine.server.route.CommandRoute;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
+import io.spine.server.test.shared.StringAggregate;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeInt;
 
@@ -39,7 +40,7 @@ import java.util.Set;
  * The repository of {@link io.spine.server.aggregate.given.repo.FailingAggregate}s.
  */
 public final class FailingAggregateRepository
-        extends AggregateRepository<Long, FailingAggregate> {
+        extends AggregateRepository<Long, FailingAggregate, StringAggregate> {
 
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override

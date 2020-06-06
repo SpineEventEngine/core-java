@@ -51,7 +51,7 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
     /**
      * Obtains the message class.
      */
-    MessageClass messageClass();
+    MessageClass<?> messageClass();
 
     /**
      * Obtains the context of the message.

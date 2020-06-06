@@ -36,6 +36,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import io.spine.server.storage.system.given.TestAggregate;
+import io.spine.system.server.Company;
 import io.spine.system.server.CompanyId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -92,7 +93,7 @@ class SystemAwareStorageFactoryTest {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         Class<TestAggregate> aggregateClass = TestAggregate.class;
-        AggregateStorage<CompanyId> storage =
+        AggregateStorage<CompanyId, Company> storage =
                 systemAware.createAggregateStorage(CONTEXT, aggregateClass);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages()).containsExactly(aggregateClass);

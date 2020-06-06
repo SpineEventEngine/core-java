@@ -103,9 +103,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @throws IllegalStateException
      *         if the storage is null
      */
-    protected EntityRecordStorage<I> recordStorage() {
+    protected EntityRecordStorage<I, S> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-                EntityRecordStorage<I> storage = (EntityRecordStorage<I>) storage();
+                EntityRecordStorage<I, S> storage = (EntityRecordStorage<I, S>) storage();
         return storage;
     }
 
@@ -119,7 +119,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     public void store(E entity) {
         RecordWithColumns<I, EntityRecord> record = toRecord(entity);
-        EntityRecordStorage<I> storage = recordStorage();
+        EntityRecordStorage<I, S> storage = recordStorage();
         storage.write(record);
     }
 
@@ -215,10 +215,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     @Override
-    protected EntityRecordStorage<I> createStorage() {
+    protected EntityRecordStorage<I, S> createStorage() {
         StorageFactory sf = defaultStorageFactory();
-        EntityRecordStorage<I> result = sf.createEntityRecordStorage(context().spec(),
-                                                                     entityClass());
+        EntityRecordStorage<I, S> result =
+                sf.createEntityRecordStorage(context().spec(), entityClass());
         return result;
     }
 
@@ -272,7 +272,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * {@linkplain WithLifecycle#isActive() active}.
      */
     private Optional<EntityRecord> findRecord(I id) {
-        EntityRecordStorage<I> storage = recordStorage();
+        EntityRecordStorage<I, S> storage = recordStorage();
         Optional<EntityRecord> found = storage.read(id);
         if (!found.isPresent()) {
             return Optional.empty();
@@ -338,7 +338,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
-        EntityRecordStorage<I> storage = recordStorage();
+        EntityRecordStorage<I, S> storage = recordStorage();
         RecordQuery<I> query = RecordQueries.of(ids);
         ResponseFormat format = ResponseFormat.newBuilder()
                                               .setFieldMask(fieldMask)
@@ -368,7 +368,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Internal
     public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
         checkNotNull(format);
-        EntityRecordStorage<I> storage = recordStorage();
+        EntityRecordStorage<I, S> storage = recordStorage();
         Iterator<EntityRecord> records = storage.readAll(format);
         return records;
     }
@@ -412,7 +412,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkValid(filters);
         checkNotNull(format);
 
-        EntityRecordStorage<I> storage = recordStorage();
+        EntityRecordStorage<I, S> storage = recordStorage();
         EntityRecordSpec<I> entityRecordSpec = storage.recordSpec();
         RecordQuery<I> entityQuery = RecordQueries.from(filters, entityRecordSpec);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
