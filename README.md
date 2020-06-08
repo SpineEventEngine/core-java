@@ -28,12 +28,12 @@ For more advanced example including a Spine server, a console client, and a web 
 
 ## Building from Sources
 
-At the moment Spine modules require JDK 8 at build-time. 
+Building Spine modules and libraries requires JDK 8. 
 
-The support of recent JDK versions is planned for future releases.
+The support of JDK 11 is planned for v3 of the framework.
 
 ## Links
-* [Getting Started with Spine in Java](https://spine.io/docs/quickstart/java.html)
+* [Getting Started with Spine in Java](quick-start)
 * [The framework site][spine-site]
 
 If you plan to contribute to the project please visit these pages:
@@ -56,6 +56,6 @@ If you need to use API with one of these annotations, please [contact us][email-
 [wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
 [java-code-style]: https://github.com/SpineEventEngine/core-java/wiki/Java-Code-Style 
 [getting-started]: https://github.com/SpineEventEngine/documentation/blob/master/getting-started/index.md
-[server-quickstart]: https://github.com/spine-examples/server-quickstart
+[quickstart]: https://spine.io/doc/quick-start
 [spine-examples]: https://github.com/spine-examples
 [todo-list]: https://github.com/spine-examples/todo-list
