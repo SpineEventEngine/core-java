@@ -71,11 +71,11 @@ class SystemSettingsTest {
         void parallelism() {
             Environment env = Environment.instance();
 
-            assumeTrue(env.is(Tests.type()));
+            assumeTrue(env.is(Tests.class));
             assertFalse(SystemSettings.defaults()
                                       .postEventsInParallel());
 
-            env.setTo(Production.type());
+            env.setTo(new Production());
             assertTrue(SystemSettings.defaults()
                                      .postEventsInParallel());
         }

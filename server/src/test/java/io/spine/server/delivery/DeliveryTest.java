@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
+import io.spine.base.Tests;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.Messages;
@@ -150,7 +151,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
         newDelivery.subscribe(memoizer);
         ServerEnvironment.instance()
-                         .configureDelivery(newDelivery);
+                         .use(newDelivery, new Tests());
 
         ImmutableSet<String> targets = manyTargets(7);
         new NastyClient(5, false).runWith(targets);
@@ -170,7 +171,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                     .setStrategy(UniformAcrossAllShards.forNumber(7))
                                     .build();
         ServerEnvironment.instance()
-                         .configureDelivery(delivery);
+                         .use(delivery, new Tests());
         List<DeliveryStats> deliveryStats = synchronizedList(new ArrayList<>());
         delivery.subscribe(msg -> {
             Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(msg.shardIndex());
@@ -201,7 +202,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                     .setWorkRegistry(registry)
                                     .build();
         ServerEnvironment env = ServerEnvironment.instance();
-        env.configureDelivery(delivery);
+        env.use(delivery, new Tests());
 
         ShardIndex index = strategy.nonEmptyShard();
         TenantId tenantId = GivenTenantId.generate();
@@ -231,7 +232,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         delivery.subscribe(rawMessageMemoizer);
         delivery.subscribe(new LocalDispatchingObserver());
         ServerEnvironment.instance()
-                         .configureDelivery(delivery);
+                         .use(delivery, new Tests());
 
         ImmutableSet<String> aTarget = singleTarget();
         assertThat(monitor.stats()).isEmpty();
@@ -271,7 +272,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         RawMessageMemoizer memoizer = new RawMessageMemoizer();
         newDelivery.subscribe(memoizer);
         ServerEnvironment.instance()
-                         .configureDelivery(newDelivery);
+                         .use(newDelivery, new Tests());
 
         ImmutableSet<String> targets = manyTargets(6);
         new NastyClient(3, false).runWith(targets);
@@ -306,7 +307,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         deliverAfterPause(delivery);
 
         ServerEnvironment.instance()
-                         .configureDelivery(delivery);
+                         .use(delivery, new Tests());
         ImmutableSet<String> targets = singleTarget();
         NastyClient simulator = new NastyClient(7, false);
         simulator.runWith(targets);
@@ -366,6 +367,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
      ******************************************************************************/
 
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent"/* unchecked exception fails the test. */)
     private static void assertStatsMatch(Delivery delivery, ShardIndex index) {
         Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
         Truth8.assertThat(stats)

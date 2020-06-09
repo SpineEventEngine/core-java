@@ -68,7 +68,7 @@ class TracingTest {
     @BeforeEach
     void setUp() {
         tracing = new MemoizingTracerFactory();
-        serverEnvironment.use(tracing, Tests.type());
+        serverEnvironment.use(tracing, new Tests());
         context = AirportContext
                 .builder()
                 .build();

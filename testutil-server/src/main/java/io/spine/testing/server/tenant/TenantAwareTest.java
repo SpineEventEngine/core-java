@@ -81,7 +81,7 @@ public abstract class TenantAwareTest {
 
     private static void checkInTests() {
         checkState(Environment.instance()
-                              .is(Tests.type()));
+                              .is(Tests.class));
     }
 
     private static TenantId currentTenant() {

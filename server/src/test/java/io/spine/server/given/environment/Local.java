@@ -25,34 +25,23 @@ import io.spine.base.EnvironmentType;
 /**
  * A local environment.
  *
- * <p>Is a singleton. Controlled by static methods: {@link #enable()}, {@link #disable()}.
+ * <p>Controlled by static methods: {@link #enable()}, {@link #disable()}.
  */
 @SuppressWarnings("ImmutableEnumChecker")
 public final class Local extends EnvironmentType {
 
+    private static boolean enabled = false;
+
     @Override
     protected boolean enabled() {
-        return Singleton.INSTANCE.enabled;
+        return enabled;
     }
 
     public static void enable() {
-        Singleton.INSTANCE.enabled = true;
+        enabled = true;
     }
 
     public static void disable() {
-        Singleton.INSTANCE.enabled = false;
-    }
-
-    public static Local type() {
-        return Singleton.INSTANCE.local;
-    }
-
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private enum Singleton {
-
-        INSTANCE;
-
-        private final Local local = new Local();
-        private boolean enabled;
+        enabled = false;
     }
 }

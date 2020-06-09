@@ -48,19 +48,19 @@ class EnvSettingTest {
         @Test
         @DisplayName("for the `Production` environment")
         void forProd() {
-            testNoNullsForEnv(production());
+            testNoNullsForEnv(Production.class);
         }
 
         @Test
         @DisplayName("for the `Tests` environment")
         void forTests() {
-            testNoNullsForEnv(tests());
+            testNoNullsForEnv(Tests.class);
         }
 
         @Test
         @DisplayName("for a user-defined environment")
         void forUserDefined() {
-            testNoNullsForEnv(Local.type());
+            testNoNullsForEnv(Local.class);
         }
 
         @Test
@@ -71,10 +71,10 @@ class EnvSettingTest {
                          () -> setting.use(InMemoryStorageFactory.newInstance(), null));
         }
 
-        private void testNoNullsForEnv(EnvironmentType tests) {
+        private void testNoNullsForEnv(Class<? extends EnvironmentType> envType) {
             EnvSetting<?> config = new EnvSetting();
             assertThrows(NullPointerException.class,
-                         () -> config.use(null, tests));
+                         () -> config.use(null, envType));
         }
     }
 
@@ -86,22 +86,22 @@ class EnvSettingTest {
         @Test
         @DisplayName("for the `Production` environment")
         void forProduction() {
-            testReturnsForEnv(production());
+            testReturnsForEnv(Production.class);
         }
 
         @Test
         @DisplayName("for the `Tests` environment")
         void forTests() {
-            testReturnsForEnv(tests());
+            testReturnsForEnv(Tests.class);
         }
 
         @Test
         @DisplayName("for a user-defined environment type")
         void forUserDefinedType() {
-            testReturnsForEnv(Local.type());
+            testReturnsForEnv(Local.class);
         }
 
-        private void testReturnsForEnv(EnvironmentType type) {
+        private void testReturnsForEnv(Class<? extends EnvironmentType> type) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             storageFactory.use(factory, type);
@@ -118,47 +118,47 @@ class EnvSettingTest {
             @Test
             @DisplayName("assign for a missing `Production` environment")
             void assignDefaultForProd() {
-                testAssignsDefaultForEnv(production());
+                testAssignsDefaultForEnv(Production.class);
             }
 
             @Test
             @DisplayName("retain the original `Production` env value")
             void retainForProd() {
-                testRetainsDefaultForEnv(production());
+                testRetainsDefaultForEnv(Production.class);
             }
 
             @Test
             @DisplayName("assign for a missing custom environment")
             void assignDefaultForCustom() {
-                testAssignsDefaultForEnv(Local.type());
+                testAssignsDefaultForEnv(Local.class);
             }
 
             @Test
             @DisplayName("retain the original value for a custom environment")
             void retainForCustom() {
-                testRetainsDefaultForEnv(Local.type());
+                testRetainsDefaultForEnv(Local.class);
             }
 
             @Test
             @DisplayName("assign for a missing `Tests` env value")
             void assignDefaultForTests() {
-                testRetainsDefaultForEnv(tests());
+                testRetainsDefaultForEnv(Tests.class);
             }
 
             @Test
             @DisplayName("retain the original `Tests` env value")
             void retainForTests() {
-                testRetainsDefaultForEnv(tests());
+                testRetainsDefaultForEnv(Tests.class);
             }
 
-            void testAssignsDefaultForEnv(EnvironmentType type) {
+            void testAssignsDefaultForEnv(Class<? extends EnvironmentType> type) {
                 EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
                 MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
                 assertThat(storageFactory.assignOrDefault(() -> memoizingFactory, type))
                         .isSameInstanceAs(memoizingFactory);
             }
 
-            void testRetainsDefaultForEnv(EnvironmentType type) {
+            void testRetainsDefaultForEnv(Class<? extends EnvironmentType> type) {
                 EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
                 MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
                 storageFactory.use(memoizingFactory, type);
@@ -177,13 +177,13 @@ class EnvSettingTest {
             InMemoryStorageFactory localstorageFactory = InMemoryStorageFactory.newInstance();
 
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-            storageFactory.use(prodStorageFactory, production());
-            storageFactory.use(testingStorageFactory, tests());
-            storageFactory.use(localstorageFactory, Local.type());
+            storageFactory.use(prodStorageFactory, Production.class);
+            storageFactory.use(testingStorageFactory, Tests.class);
+            storageFactory.use(localstorageFactory, Local.class);
 
             storageFactory.reset();
 
-            Stream.of(production(), tests(), Local.type())
+            Stream.of(Production.class, Tests.class, Local.class)
                   .map(storageFactory::value)
                   .forEach(s -> assertThat(s).isEmpty());
         }
@@ -195,18 +195,10 @@ class EnvSettingTest {
 
             EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
-            storageSetting.use(storageFactory, production());
-            storageSetting.ifPresentForEnvironment(production(), AutoCloseable::close);
+            storageSetting.use(storageFactory, Production.class);
+            storageSetting.ifPresentForEnvironment(Production.class, AutoCloseable::close);
 
             assertThat(storageFactory.isClosed()).isTrue();
         }
-    }
-
-    private static Production production() {
-        return Production.type();
-    }
-
-    private static Tests tests() {
-        return Tests.type();
     }
 }

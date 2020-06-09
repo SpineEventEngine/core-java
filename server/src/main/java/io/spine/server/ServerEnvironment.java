@@ -134,8 +134,7 @@ public final class ServerEnvironment implements AutoCloseable {
     @Deprecated
     public synchronized void configureDelivery(Delivery delivery) {
         checkNotNull(delivery);
-        EnvironmentType currentEnv = environment().type();
-        this.delivery.use(delivery, currentEnv);
+        use(delivery, this.delivery, new Production());
     }
 
     /**
@@ -146,7 +145,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public synchronized Delivery delivery() {
         EnvironmentType currentEnv = environment().type();
-        return this.delivery.assignOrDefault(Delivery::local, currentEnv);
+        return this.delivery.assignOrDefault(Delivery::local, currentEnv.getClass());
     }
 
     /**
@@ -201,6 +200,9 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Assigns the specified {@code TransportFactory} for the specified application environment.
      *
+     * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
+     * defined by you.
+     *
      * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
@@ -214,6 +216,9 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Assigns the specified {@code Delivery} for the selected environment.
      *
+     * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
+     * defined by you.
+     *
      * @return this instance of {@code ServerEnvironment}
      */
     public ServerEnvironment use(Delivery delivery, EnvironmentType envType) {
@@ -223,6 +228,9 @@ public final class ServerEnvironment implements AutoCloseable {
 
     /**
      * Assigns {@code TracerFactory} for the specified application environment.
+     *
+     * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
+     * defined by you.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -234,6 +242,9 @@ public final class ServerEnvironment implements AutoCloseable {
 
     /**
      * Configures the specified transport factory for the selected type of environment.
+     *
+     * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
+     * defined by you.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -247,12 +258,12 @@ public final class ServerEnvironment implements AutoCloseable {
      * Assigns the specified {@code StorageFactory} for tests.
      *
      * @deprecated use {@link #use(StorageFactory, EnvironmentType)}, specifying the
-     *         {@code Tests.type())
+     *         {@code new Tests())}
      */
     @Deprecated
     public void configureStorageForTests(StorageFactory factory) {
         checkNotNull(factory);
-        use(factory, Tests.type());
+        use(factory, new Tests());
     }
 
     /**
@@ -260,12 +271,12 @@ public final class ServerEnvironment implements AutoCloseable {
      * environment.
      *
      * @deprecated use {@link #use(StorageFactory, EnvironmentType)}, specifying the
-     *         {@code Production.type()} or any other environment type
+     *         {@code new Production()} or any other environment type
      */
     @Deprecated
     public void configureStorage(StorageFactory factory) {
         checkNotNull(factory);
-        use(factory, Production.type());
+        use(factory, new Production());
     }
 
     /**
@@ -273,7 +284,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public Optional<TracerFactory> tracing() {
         EnvironmentType currentType = environment().type();
-        return this.tracerFactory.value(currentType);
+        return this.tracerFactory.value(currentType.getClass());
     }
 
     /**
@@ -289,14 +300,14 @@ public final class ServerEnvironment implements AutoCloseable {
      *         {@linkplain #use(StorageFactory, EnvironmentType)} configured} prior to the call
      */
     public StorageFactory storageFactory() {
-        if (environment().is(tests())) {
+        if (environment().is(Tests.class)) {
             return storageFactory.assignOrDefault(() -> wrap(InMemoryStorageFactory.newInstance()),
-                                                  tests());
+                                                  Tests.class);
         }
 
         EnvironmentType type = environment().type();
         StorageFactory result = storageFactory
-                .value(type)
+                .value(type.getClass())
                 .orElseThrow(() -> {
                     String className = type.getClass()
                                            .getSimpleName();
@@ -320,14 +331,15 @@ public final class ServerEnvironment implements AutoCloseable {
      * {@link InMemoryTransportFactory} and returns it.
      */
     public TransportFactory transportFactory() {
-        if (environment().is(tests())) {
-            return transportFactory.assignOrDefault(InMemoryTransportFactory::newInstance, tests());
+        if (environment().is(Tests.class)) {
+            return transportFactory.assignOrDefault(InMemoryTransportFactory::newInstance,
+                                                    Tests.class);
         }
 
         EnvironmentType type = environment().type();
 
         TransportFactory result = transportFactory
-                .value(type)
+                .value(type.getClass())
                 .orElseThrow(() -> {
                     String environmentName = type.getClass()
                                                  .getSimpleName();
@@ -354,7 +366,7 @@ public final class ServerEnvironment implements AutoCloseable {
         this.storageFactory.reset();
         this.delivery.reset();
         EnvironmentType currentEnv = environment().type();
-        this.delivery.use(Delivery.local(), currentEnv);
+        this.delivery.use(Delivery.local(), currentEnv.getClass());
         resetDeploymentType();
     }
 
@@ -363,13 +375,9 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        tracerFactory.ifPresentForEnvironment(Production.type(), AutoCloseable::close);
-        transportFactory.ifPresentForEnvironment(Production.type(), AutoCloseable::close);
-        storageFactory.ifPresentForEnvironment(Production.type(), AutoCloseable::close);
-    }
-
-    private static Tests tests() {
-        return Tests.type();
+        tracerFactory.ifPresentForEnvironment(Production.class, AutoCloseable::close);
+        transportFactory.ifPresentForEnvironment(Production.class, AutoCloseable::close);
+        storageFactory.ifPresentForEnvironment(Production.class, AutoCloseable::close);
     }
 
     private static <V> void use(V value, EnvSetting<V> setting, EnvironmentType type) {
@@ -377,6 +385,6 @@ public final class ServerEnvironment implements AutoCloseable {
         checkNotNull(type);
         checkNotNull(setting);
         environment().register(type);
-        setting.use(value, type);
+        setting.use(value, type.getClass());
     }
 }
