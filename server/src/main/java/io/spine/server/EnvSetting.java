@@ -37,10 +37,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <pre>
  *
  * {@literal EnvSetting <StorageFactory>} storageFactory = new EnvSetting<>();
- * storageFactory.use(InMemoryStorageFactory.newInstance(), Production.type());
+ * storageFactory.use(InMemoryStorageFactory.newInstance(), Production.class);
  *
- * assertThat(storageFactory.value(Production.type())).isPresent();
- * assertThat(storageFactory.value(Tests.type())).isEmpty();
+ * assertThat(storageFactory.value(Production.class)).isPresent();
+ * assertThat(storageFactory.value(Tests.class)).isEmpty();
  *
  * </pre>
  *
@@ -53,28 +53,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class EnvSetting<V> {
 
-    private final Map<EnvironmentType, V> environmentValues = new HashMap<>();
+    private final Map<Class<? extends EnvironmentType>, V> environmentValues = new HashMap<>();
 
     /**
-     * Returns the value for the specified environment if it was set, an empty {@code Optional}
-     * otherwise.
+     * Returns the value for the specified environment type if it was set, an
+     * empty {@code Optional} otherwise.
      */
-    Optional<V> value(EnvironmentType type) {
+    Optional<V> value(Class<? extends EnvironmentType> type) {
         return Optional.ofNullable(environmentValues.get(type));
     }
 
     /**
-     * Runs the specified operations against the value of the specified environment if it's
-     * present, does nothing otherwise.
+     * Runs the specified operations against the value corresponding to the specified environment
+     * type if it's present, does nothing otherwise.
      *
      * <p>If you wish to run an operation that doesn't throw, use {@code
-     * value(envType).ifPresent(operation)}.
+     * value(type).ifPresent(operation)}.
      *
      * @param operation
      *         operation to run
      */
-    void ifPresentForEnvironment(EnvironmentType type, ThrowingConsumer<V> operation)
-            throws Exception {
+    void ifPresentForEnvironment(Class<? extends EnvironmentType> type,
+                                 ThrowingConsumer<V> operation) throws Exception {
         V settingValue = this.environmentValues.get(type);
         if (settingValue != null) {
             operation.accept(settingValue);
@@ -82,11 +82,11 @@ public final class EnvSetting<V> {
     }
 
     /**
-     * If the value for the specified environment is set, just returns it.
+     * If the value corresponding to the specified environment type is set, just returns it.
      *
      * <p>If it is not set, runs the specified supplier, configures and returns the supplied value.
      */
-    V assignOrDefault(Supplier<V> defaultValue, EnvironmentType type) {
+    V assignOrDefault(Supplier<V> defaultValue, Class<? extends EnvironmentType> type) {
         checkNotNull(defaultValue);
         checkNotNull(type);
         if (environmentValues.containsKey(type)) {
@@ -98,18 +98,21 @@ public final class EnvSetting<V> {
         }
     }
 
-    /** Changes the value for all environments to {@code null}. */
+    /**
+     * Changes the value for all environments types, such that all of them return
+     * {@code Optional.empty()} when {@linkplain #value(Class) acessing the value}.
+     */
     void reset() {
         this.environmentValues.clear();
     }
 
     /**
-     * Sets the specified value for the specified environment.
+     * Sets the specified value for the specified environment type.
      *
      * @param value
      *         value to assign to one of environments
      */
-    void use(V value, EnvironmentType type) {
+    void use(V value, Class<? extends EnvironmentType> type) {
         checkNotNull(value);
         checkNotNull(type);
         this.environmentValues.put(type, value);
