@@ -26,6 +26,7 @@ import com.google.common.truth.Subject;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
+import io.spine.base.Tests;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
@@ -246,7 +247,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         @AfterEach
         void cleanInbox() {
             ServerEnvironment.instance()
-                             .configureDelivery(Delivery.local());
+                             .use(Delivery.local(), new Tests());
         }
 
         @Test

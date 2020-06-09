@@ -67,7 +67,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap production storage")
     void wrapProdStorage() {
-        Production production = Production.type();
+        Production production = new Production();
         Environment.instance()
                    .setTo(production);
 
@@ -86,7 +86,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap test storage")
     void wrapTestStorage() {
-        Tests tests = Tests.type();
+        Tests tests = new Tests();
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory testStorage = InMemoryStorageFactory.newInstance();
         serverEnv.use(testStorage, tests);
