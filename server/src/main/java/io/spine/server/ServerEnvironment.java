@@ -82,8 +82,11 @@ public final class ServerEnvironment implements AutoCloseable {
 
     /**
      * Storage factory. Differs between {@linkplain EnvironmentType environment types}.
+     *
+     * <p>Defaults to an {@code InMemoryStorageFactory} for tests.
      */
-    private final EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+    private final EnvSetting<StorageFactory> storageFactory =
+            new EnvSetting<>(Tests.class, () -> wrap(InMemoryStorageFactory.newInstance()));
 
     /**
      * Factory of {@code Tracer}s. Differs between {@linkplain EnvironmentType environment types}.
@@ -93,8 +96,11 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Factory for channel-based transport. Differs between {@linkplain EnvironmentType environment
      * types}.
+     *
+     * <p>Defaults to an {@code InMemoryTransportFactory} for tests.
      */
-    private final EnvSetting<TransportFactory> transportFactory = new EnvSetting<>();
+    private final EnvSetting<TransportFactory> transportFactory =
+            new EnvSetting<>(Tests.class, InMemoryTransportFactory::newInstance);
 
     /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
@@ -141,11 +147,32 @@ public final class ServerEnvironment implements AutoCloseable {
      * Returns the delivery mechanism specific to this environment.
      *
      * <p>Unless {@linkplain #use(Delivery, EnvironmentType) updated manually}, returns
-     * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
+     * a {@linkplain Delivery#local() local implementation} of {@code Delivery}. Also configures
+     * a new {@code InMemoryStorageFactory} for the current environment, as such:
+     *
+     * <pre>
+     *
+     *     ServerEnvironment serverEnvironment = ServerEnvironment.instance();
+     *
+     *     serverEnvironment.reset();
+     *
+     *     // This is a new local `Delivery`.
+     *     Delivery delivery = serverEnvironment.delivery();
+     *
+     *     // A new storage factory was assigned.
+     *     StorageFactory storageFactory = serverEnvironment.storageFactory();
+     *     assertThat(storageFactory).isInstanceOf(InMemoryStorageFactory.class);
+     * </pre>
      */
     public synchronized Delivery delivery() {
         EnvironmentType currentEnv = environment().type();
-        return this.delivery.assignOrDefault(Delivery::local, currentEnv.getClass());
+        Optional<Delivery> currentDelivery = this.delivery.optionalValue(currentEnv.getClass());
+        if (currentDelivery.isPresent()) {
+            return currentDelivery.get();
+        }
+        Delivery localDelivery = Delivery.local();
+        this.delivery.use(localDelivery, currentEnv.getClass());
+        return localDelivery;
     }
 
     /**
@@ -284,7 +311,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public Optional<TracerFactory> tracing() {
         EnvironmentType currentType = environment().type();
-        return this.tracerFactory.value(currentType.getClass());
+        return this.tracerFactory.optionalValue(currentType.getClass());
     }
 
     /**
@@ -300,14 +327,9 @@ public final class ServerEnvironment implements AutoCloseable {
      *         {@linkplain #use(StorageFactory, EnvironmentType)} configured} prior to the call
      */
     public StorageFactory storageFactory() {
-        if (environment().is(Tests.class)) {
-            return storageFactory.assignOrDefault(() -> wrap(InMemoryStorageFactory.newInstance()),
-                                                  Tests.class);
-        }
-
         EnvironmentType type = environment().type();
         StorageFactory result = storageFactory
-                .value(type.getClass())
+                .optionalValue(type.getClass())
                 .orElseThrow(() -> {
                     String className = type.getClass()
                                            .getSimpleName();
@@ -317,6 +339,11 @@ public final class ServerEnvironment implements AutoCloseable {
                             className, className);
                 });
         return result;
+    }
+
+    public Optional<StorageFactory> optionalStorageFactory() {
+        EnvironmentType type = environment().type();
+        return storageFactory.optionalValue(type.getClass());
     }
 
     /**
@@ -331,15 +358,9 @@ public final class ServerEnvironment implements AutoCloseable {
      * {@link InMemoryTransportFactory} and returns it.
      */
     public TransportFactory transportFactory() {
-        if (environment().is(Tests.class)) {
-            return transportFactory.assignOrDefault(InMemoryTransportFactory::newInstance,
-                                                    Tests.class);
-        }
-
         EnvironmentType type = environment().type();
-
         TransportFactory result = transportFactory
-                .value(type.getClass())
+                .optionalValue(type.getClass())
                 .orElseThrow(() -> {
                     String environmentName = type.getClass()
                                                  .getSimpleName();

@@ -105,9 +105,9 @@ class EnvSettingTest {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             storageFactory.use(factory, type);
-            assertThat(storageFactory.value(type))
+            assertThat(storageFactory.optionalValue(type))
                     .isPresent();
-            assertThat(storageFactory.value(type)
+            assertThat(storageFactory.optionalValue(type)
                                      .get()).isSameInstanceAs(factory);
         }
 
@@ -152,20 +152,22 @@ class EnvSettingTest {
             }
 
             void testAssignsDefaultForEnv(Class<? extends EnvironmentType> type) {
-                EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
                 MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
-                assertThat(storageFactory.assignOrDefault(() -> memoizingFactory, type))
+                EnvSetting<StorageFactory> storageFactory =
+                        new EnvSetting<>(type, () -> memoizingFactory);
+                assertThat(storageFactory.value(type))
                         .isSameInstanceAs(memoizingFactory);
             }
 
             void testRetainsDefaultForEnv(Class<? extends EnvironmentType> type) {
-                EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-                MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
-                storageFactory.use(memoizingFactory, type);
+                MemoizingStorageFactory defaultFactory = new MemoizingStorageFactory();
+                EnvSetting<StorageFactory> storageFactory =
+                        new EnvSetting<>(type, () -> defaultFactory);
 
-                InMemoryStorageFactory inMemoryFactory = InMemoryStorageFactory.newInstance();
-                assertThat(storageFactory.assignOrDefault(() -> inMemoryFactory, type))
-                        .isSameInstanceAs(memoizingFactory);
+                MemoizingStorageFactory actualFactory = new MemoizingStorageFactory();
+                storageFactory.use(actualFactory, type);
+
+                assertThat(storageFactory.value(type)).isSameInstanceAs(actualFactory);
             }
         }
 
@@ -184,7 +186,7 @@ class EnvSettingTest {
             storageFactory.reset();
 
             Stream.of(Production.class, Tests.class, Local.class)
-                  .map(storageFactory::value)
+                  .map(storageFactory::optionalValue)
                   .forEach(s -> assertThat(s).isEmpty());
         }
 
