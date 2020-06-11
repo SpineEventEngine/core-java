@@ -247,7 +247,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         @AfterEach
         void cleanInbox() {
             ServerEnvironment.instance()
-                             .use(Delivery.local(), new Tests());
+                             .use(Delivery.local(), Tests.class);
         }
 
         @Test

@@ -74,11 +74,11 @@ class ServerEnvironmentTest {
                                        .build();
         ServerEnvironment environment = serverEnvironment;
         Delivery defaultValue = environment.delivery();
-        environment.use(newDelivery, new Tests());
+        environment.use(newDelivery, Tests.class);
         assertEquals(newDelivery, environment.delivery());
 
         // Restore the default value.
-        environment.use(defaultValue, new Tests());
+        environment.use(defaultValue, Tests.class);
     }
 
     @Test
@@ -152,12 +152,12 @@ class ServerEnvironmentTest {
         void turnToProduction() {
             // Ensure the server environment is clear.
             serverEnvironment.reset();
-            environment.setTo(new Production());
+            environment.setTo(Production.class);
         }
 
         @AfterEach
         void backToTests() {
-            environment.setTo(new Tests());
+            environment.setTo(Tests.class);
             serverEnvironment.reset();
         }
 
@@ -171,7 +171,7 @@ class ServerEnvironmentTest {
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
             StorageFactory factory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.use(factory, new Production());
+            serverEnvironment.use(factory, Production.class);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -179,7 +179,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("return `InMemoryStorageFactory` under Tests")
         void testsFactory() {
-            environment.setTo(new Tests());
+            environment.setTo(Tests.class);
 
             StorageFactory factory = serverEnvironment.storageFactory();
             assertThat(factory)
@@ -192,7 +192,7 @@ class ServerEnvironmentTest {
         @DisplayName("using a deprecated method")
         @SuppressWarnings("deprecation")
         void deprecatedMethod() {
-            environment.setTo(new Production());
+            environment.setTo(Production.class);
 
             InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
             serverEnvironment.configureStorage(storageFactory);
@@ -218,7 +218,7 @@ class ServerEnvironmentTest {
         void getSet() {
             StorageFactory factory = new MemoizingStorageFactory();
 
-            serverEnvironment.use(factory, new Tests());
+            serverEnvironment.use(factory, Tests.class);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -254,7 +254,7 @@ class ServerEnvironmentTest {
         @AfterEach
         void backToTests() {
             Environment.instance()
-                       .setTo(new Tests());
+                       .setTo(Tests.class);
             serverEnvironment.reset();
         }
 
@@ -285,12 +285,12 @@ class ServerEnvironmentTest {
         void turnToProduction() {
             // Ensure the instance is clear.
             serverEnvironment.reset();
-            environment.setTo(new Production());
+            environment.setTo(Production.class);
         }
 
         @AfterEach
         void backToTests() {
-            environment.setTo(new Tests());
+            environment.setTo(Tests.class);
             serverEnvironment.reset();
         }
 
@@ -304,7 +304,7 @@ class ServerEnvironmentTest {
         @DisplayName("return configured instance in Production")
         void productionValue() {
             TransportFactory factory = new StubTransportFactory();
-            serverEnvironment.use(factory, new Production());
+            serverEnvironment.use(factory, Production.class);
             assertThat(serverEnvironment.transportFactory())
                     .isEqualTo(factory);
         }
@@ -324,7 +324,7 @@ class ServerEnvironmentTest {
         void setExplicitly() {
             TransportFactory factory = new StubTransportFactory();
 
-            serverEnvironment.use(factory, new Tests());
+            serverEnvironment.use(factory, Tests.class);
             assertThat(serverEnvironment.transportFactory()).isEqualTo(factory);
         }
 
@@ -332,7 +332,7 @@ class ServerEnvironmentTest {
         @DisplayName("returning an `InMemoryTransportFactory` when not set")
         void notSet() {
             Environment.instance()
-                       .setTo(new Tests());
+                       .setTo(Tests.class);
             assertThat(serverEnvironment.transportFactory())
                     .isInstanceOf(InMemoryTransportFactory.class);
         }
@@ -355,7 +355,7 @@ class ServerEnvironmentTest {
         @AfterEach
         void backToTests() {
             Environment.instance()
-                       .setTo(new Tests());
+                       .setTo(Tests.class);
             serverEnvironment.reset();
         }
 
@@ -388,7 +388,7 @@ class ServerEnvironmentTest {
         @AfterEach
         void backToTests() {
             Environment.instance()
-                       .setTo(new Tests());
+                       .setTo(Tests.class);
             serverEnvironment.reset();
         }
 
@@ -397,10 +397,10 @@ class ServerEnvironmentTest {
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         void forProduction() {
             Environment.instance()
-                       .setTo(new Production());
+                       .setTo(Production.class);
 
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            serverEnvironment.use(memoizingTracer, new Production());
+            serverEnvironment.use(memoizingTracer, Production.class);
 
             assertThat(serverEnvironment.tracing()
                                         .get()).isSameInstanceAs(memoizingTracer);
@@ -411,7 +411,7 @@ class ServerEnvironmentTest {
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         void forTesting() {
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            serverEnvironment.use(memoizingTracer, new Tests());
+            serverEnvironment.use(memoizingTracer, Tests.class);
 
             assertThat(serverEnvironment.tracing()
                                         .get()).isSameInstanceAs(memoizingTracer);
@@ -457,7 +457,7 @@ class ServerEnvironmentTest {
         @AfterEach
         void backToTests() {
             Environment.instance()
-                       .setTo(new Tests());
+                       .setTo(Tests.class);
             serverEnvironment.reset();
         }
 
@@ -511,9 +511,9 @@ class ServerEnvironmentTest {
         @DisplayName("close the production transport, tracer and storage factories")
         void testCloses() throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.use(transportFactory, new Production())
-                     .use(storageFactory, new Production())
-                     .use(tracerFactory, new Production());
+            serverEnv.use(transportFactory, Production.class)
+                     .use(storageFactory, Production.class)
+                     .use(tracerFactory, Production.class);
 
             serverEnv.close();
 
@@ -526,9 +526,9 @@ class ServerEnvironmentTest {
         @DisplayName("leave the testing transport, tracer and storage factories open")
         void testDoesNotClose() throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.use(transportFactory, new Tests())
-                     .use(storageFactory, new Tests())
-                     .use(tracerFactory, new Tests());
+            serverEnv.use(transportFactory, Tests.class)
+                     .use(storageFactory, Tests.class)
+                     .use(tracerFactory, Tests.class);
 
             serverEnv.close();
 

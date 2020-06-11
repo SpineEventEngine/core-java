@@ -67,13 +67,12 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap production storage")
     void wrapProdStorage() {
-        Production production = new Production();
         Environment.instance()
-                   .setTo(production);
+                   .setTo(Production.class);
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
-        serverEnv.use(productionStorage, production);
+        serverEnv.use(productionStorage, Production.class);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
@@ -86,10 +85,9 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap test storage")
     void wrapTestStorage() {
-        Tests tests = new Tests();
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory testStorage = InMemoryStorageFactory.newInstance();
-        serverEnv.use(testStorage, tests);
+        serverEnv.use(testStorage, Tests.class);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;

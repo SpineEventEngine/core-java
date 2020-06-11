@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.util.Durations;
-import io.spine.base.Environment;
 import io.spine.base.Tests;
 import io.spine.server.ServerEnvironment;
 import org.junit.jupiter.api.AfterEach;
@@ -36,7 +35,6 @@ abstract class AbstractDeliveryTest {
 
     @BeforeEach
     public void setUp() {
-        Environment.instance().setTo(new Tests());
         this.originalDelivery = ServerEnvironment.instance()
                                                  .delivery();
     }
@@ -44,12 +42,12 @@ abstract class AbstractDeliveryTest {
     @AfterEach
     public void tearDown() {
         ServerEnvironment.instance()
-                         .use(originalDelivery, new Tests());
+                         .use(originalDelivery, Tests.class);
     }
 
     static void changeShardCountTo(int shards) {
         Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
         ServerEnvironment.instance()
-                         .use(newDelivery, new Tests());
+                         .use(newDelivery, Tests.class);
     }
 }

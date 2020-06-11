@@ -151,7 +151,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
         newDelivery.subscribe(memoizer);
         ServerEnvironment.instance()
-                         .use(newDelivery, new Tests());
+                         .use(newDelivery, Tests.class);
 
         ImmutableSet<String> targets = manyTargets(7);
         new NastyClient(5, false).runWith(targets);
@@ -171,7 +171,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                     .setStrategy(UniformAcrossAllShards.forNumber(7))
                                     .build();
         ServerEnvironment.instance()
-                         .use(delivery, new Tests());
+                         .use(delivery, Tests.class);
         List<DeliveryStats> deliveryStats = synchronizedList(new ArrayList<>());
         delivery.subscribe(msg -> {
             Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(msg.shardIndex());
@@ -202,7 +202,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                     .setWorkRegistry(registry)
                                     .build();
         ServerEnvironment env = ServerEnvironment.instance();
-        env.use(delivery, new Tests());
+        env.use(delivery, Tests.class);
 
         ShardIndex index = strategy.nonEmptyShard();
         TenantId tenantId = GivenTenantId.generate();
@@ -232,7 +232,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         delivery.subscribe(rawMessageMemoizer);
         delivery.subscribe(new LocalDispatchingObserver());
         ServerEnvironment.instance()
-                         .use(delivery, new Tests());
+                         .use(delivery, Tests.class);
 
         ImmutableSet<String> aTarget = singleTarget();
         assertThat(monitor.stats()).isEmpty();
@@ -272,7 +272,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         RawMessageMemoizer memoizer = new RawMessageMemoizer();
         newDelivery.subscribe(memoizer);
         ServerEnvironment.instance()
-                         .use(newDelivery, new Tests());
+                         .use(newDelivery, Tests.class);
 
         ImmutableSet<String> targets = manyTargets(6);
         new NastyClient(3, false).runWith(targets);
@@ -307,7 +307,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         deliverAfterPause(delivery);
 
         ServerEnvironment.instance()
-                         .use(delivery, new Tests());
+                         .use(delivery, Tests.class);
         ImmutableSet<String> targets = singleTarget();
         NastyClient simulator = new NastyClient(7, false);
         simulator.runWith(targets);

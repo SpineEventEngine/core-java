@@ -169,6 +169,6 @@ public class CounterCatchUp {
                                     .build();
         delivery.subscribe(new LocalDispatchingObserver());
         ServerEnvironment.instance()
-                         .use(delivery, new Tests());
+                         .use(delivery, Tests.class);
     }
 }
