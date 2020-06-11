@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.base.EnvironmentType;
 import io.spine.base.Identifier;
@@ -140,38 +141,23 @@ public final class ServerEnvironment implements AutoCloseable {
     @Deprecated
     public synchronized void configureDelivery(Delivery delivery) {
         checkNotNull(delivery);
-        use(delivery, this.delivery, new Production());
+        use(delivery, this.delivery, environment().type());
     }
 
     /**
      * Returns the delivery mechanism specific to this environment.
      *
      * <p>Unless {@linkplain #use(Delivery, EnvironmentType) updated manually}, returns
-     * a {@linkplain Delivery#local() local implementation} of {@code Delivery}. Also configures
-     * a new {@code InMemoryStorageFactory} for the current environment, as such:
-     *
-     * <pre>
-     *
-     *     ServerEnvironment serverEnvironment = ServerEnvironment.instance();
-     *
-     *     serverEnvironment.reset();
-     *
-     *     // This is a new local `Delivery`.
-     *     Delivery delivery = serverEnvironment.delivery();
-     *
-     *     // A new storage factory was assigned.
-     *     StorageFactory storageFactory = serverEnvironment.storageFactory();
-     *     assertThat(storageFactory).isInstanceOf(InMemoryStorageFactory.class);
-     * </pre>
+     * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
     public synchronized Delivery delivery() {
-        EnvironmentType currentEnv = environment().type();
-        Optional<Delivery> currentDelivery = this.delivery.optionalValue(currentEnv.getClass());
+        Class<? extends EnvironmentType> currentEnv = environment().type();
+        Optional<Delivery> currentDelivery = this.delivery.optionalValue(currentEnv);
         if (currentDelivery.isPresent()) {
             return currentDelivery.get();
         }
         Delivery localDelivery = Delivery.local();
-        this.delivery.use(localDelivery, currentEnv.getClass());
+        this.delivery.use(localDelivery, currentEnv);
         return localDelivery;
     }
 
@@ -225,10 +211,7 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Assigns the specified {@code TransportFactory} for the specified application environment.
-     *
-     * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
-     * defined by you.
+     * Assigns the specified {@code TransportFactory} for the specified application environment..
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -241,6 +224,33 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
+     * Assigns the specified {@code TransportFactory} for the specified application environment.
+     *
+     * <p>You may use {@code Tests.class}, {@code Production.class} or an environment type instance
+     * defined by you.
+     *
+     * @return this instance of {@code ServerEnvironment}
+     */
+    @CanIgnoreReturnValue
+    public ServerEnvironment use(StorageFactory factory, Class<? extends EnvironmentType> type) {
+        checkNotNull(factory);
+        SystemAwareStorageFactory wrapped = wrap(factory);
+        use(wrapped, storageFactory, type);
+        return this;
+    }
+
+    /**
+     * Assigns the specified {@code Delivery} for the selected environment.
+     *
+     * @return this instance of {@code ServerEnvironment}
+     */
+    @CanIgnoreReturnValue
+    public ServerEnvironment use(Delivery delivery, EnvironmentType envType) {
+        use(delivery, this.delivery, envType);
+        return this;
+    }
+
+    /**
      * Assigns the specified {@code Delivery} for the selected environment.
      *
      * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
@@ -248,16 +258,14 @@ public final class ServerEnvironment implements AutoCloseable {
      *
      * @return this instance of {@code ServerEnvironment}
      */
-    public ServerEnvironment use(Delivery delivery, EnvironmentType envType) {
+    @CanIgnoreReturnValue
+    public ServerEnvironment use(Delivery delivery, Class<? extends EnvironmentType> envType) {
         use(delivery, this.delivery, envType);
         return this;
     }
 
     /**
      * Assigns {@code TracerFactory} for the specified application environment.
-     *
-     * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
-     * defined by you.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -266,12 +274,22 @@ public final class ServerEnvironment implements AutoCloseable {
         use(factory, tracerFactory, envType);
         return this;
     }
+    /**
+     * Assigns {@code TracerFactory} for the specified application environment.
+     *
+     * <p>You may use {@code Tests.class}, {@code Production.class} or an environment type
+     * defined by you.
+     *
+     * @return this instance of {@code ServerEnvironment}
+     */
+    @CanIgnoreReturnValue
+    public ServerEnvironment use(TracerFactory factory, Class<? extends EnvironmentType> envType) {
+        use(factory, tracerFactory, envType);
+        return this;
+    }
 
     /**
      * Configures the specified transport factory for the selected type of environment.
-     *
-     * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
-     * defined by you.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -282,36 +300,49 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
+     * Configures the specified transport factory for the selected type of environment.
+     *
+     * <p>You may use {@code Tests.class}, {@code Production.class} or an environment type
+     * defined by you.
+     *
+     * @return this instance of {@code ServerEnvironment}
+     */
+    @CanIgnoreReturnValue
+    public ServerEnvironment use(TransportFactory factory, Class<? extends EnvironmentType> type) {
+        use(factory, transportFactory, type);
+        return this;
+    }
+
+    /**
      * Assigns the specified {@code StorageFactory} for tests.
      *
-     * @deprecated use {@link #use(StorageFactory, EnvironmentType)}, specifying the
-     *         {@code new Tests())}
+     * @deprecated use {@link #use(StorageFactory, Class)}, specifying {@code Tests.class)}
      */
     @Deprecated
     public void configureStorageForTests(StorageFactory factory) {
         checkNotNull(factory);
-        use(factory, new Tests());
+        use(factory, Tests.class);
     }
 
     /**
      * Assigns the specified {@code StorageFactory} for the {@link Production} application
      * environment.
      *
-     * @deprecated use {@link #use(StorageFactory, EnvironmentType)}, specifying the
-     *         {@code new Production()} or any other environment type
+     * @deprecated use {@link #use(StorageFactory, Class)}, specifying the
+     *         {@code Production.class} or any other environment type
      */
     @Deprecated
     public void configureStorage(StorageFactory factory) {
         checkNotNull(factory);
-        use(factory, new Production());
+        use(factory, Production.class);
     }
 
     /**
      * Obtains the {@link TracerFactory} associated with the current environment, if it was set.
      */
     public Optional<TracerFactory> tracing() {
-        EnvironmentType currentType = environment().type();
-        return this.tracerFactory.optionalValue(currentType.getClass());
+        Class<? extends EnvironmentType> currentType = environment().type();
+        return this.tracerFactory.optionalValue(currentType);
     }
 
     /**
@@ -323,16 +354,15 @@ public final class ServerEnvironment implements AutoCloseable {
      *
      * @return {@code StorageFactory} instance for the storage for the current environment
      * @throws IllegalStateException
-     *         if the value {@code StorageFactory} was not
-     *         {@linkplain #use(StorageFactory, EnvironmentType)} configured} prior to the call
+     *         if the value {@code StorageFactory} was not {@linkplain #use(StorageFactory, Class)}
+     *         configured} prior to the call
      */
     public StorageFactory storageFactory() {
-        EnvironmentType type = environment().type();
+        Class<? extends EnvironmentType> type = environment().type();
         StorageFactory result = storageFactory
-                .optionalValue(type.getClass())
+                .optionalValue(type)
                 .orElseThrow(() -> {
-                    String className = type.getClass()
-                                           .getSimpleName();
+                    String className = type.getSimpleName();
                     return newIllegalStateException(
                             "The storage factory for environment `%s` was not " +
                                     "configured. Please call `use(storage, %s);`.",
@@ -341,9 +371,14 @@ public final class ServerEnvironment implements AutoCloseable {
         return result;
     }
 
+    /**
+     * Returns a storage factory for the current environment, or an empty {@code Optional} if it
+     * was not configured.
+     */
+    @Internal
     public Optional<StorageFactory> optionalStorageFactory() {
-        EnvironmentType type = environment().type();
-        return storageFactory.optionalValue(type.getClass());
+        Class<? extends EnvironmentType> type = environment().type();
+        return storageFactory.optionalValue(type);
     }
 
     /**
@@ -358,12 +393,11 @@ public final class ServerEnvironment implements AutoCloseable {
      * {@link InMemoryTransportFactory} and returns it.
      */
     public TransportFactory transportFactory() {
-        EnvironmentType type = environment().type();
+        Class<? extends EnvironmentType> type = environment().type();
         TransportFactory result = transportFactory
-                .optionalValue(type.getClass())
+                .optionalValue(type)
                 .orElseThrow(() -> {
-                    String environmentName = type.getClass()
-                                                 .getSimpleName();
+                    String environmentName = type.getSimpleName();
                     return newIllegalStateException(
                             "Transport factory is not assigned for the current environment `%s`. " +
                                     "Please call `use(transportFactory, %s);`.",
@@ -386,8 +420,8 @@ public final class ServerEnvironment implements AutoCloseable {
         this.tracerFactory.reset();
         this.storageFactory.reset();
         this.delivery.reset();
-        EnvironmentType currentEnv = environment().type();
-        this.delivery.use(Delivery.local(), currentEnv.getClass());
+        Class<? extends EnvironmentType> currentEnv = environment().type();
+        this.delivery.use(Delivery.local(), currentEnv);
         resetDeploymentType();
     }
 
@@ -407,5 +441,14 @@ public final class ServerEnvironment implements AutoCloseable {
         checkNotNull(setting);
         environment().register(type);
         setting.use(value, type.getClass());
+    }
+
+    private static <V> void use(V value,
+                                EnvSetting<V> setting,
+                                Class<? extends EnvironmentType> type) {
+        checkNotNull(value);
+        checkNotNull(type);
+        checkNotNull(setting);
+        setting.use(value, type);
     }
 }

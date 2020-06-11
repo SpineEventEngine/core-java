@@ -320,6 +320,10 @@ public final class Delivery implements Logging {
      *
      * <p>Uses a {@linkplain UniformAcrossAllShards#singleShard() single-shard} splitting.
      *
+     * <p>To construct a {@code Delivery} instance, a {@code StorageFactory} is needed.
+     * If it was not configured in the {@code ServerEnvironment}, uses a new {@code
+     * InMemoryStorage}.
+     *
      * @see #localAsync() to create an asynchronous version of the local {@code Delivery}
      */
     public static Delivery local() {
@@ -333,6 +337,10 @@ public final class Delivery implements Logging {
      *
      * <p>The returned instance of {@code Delivery} is configured to use
      * {@linkplain UniformAcrossAllShards#singleShard() the single shard}.
+     *
+     * <p>To construct a {@code Delivery} instance, a {@code StorageFactory} is needed.
+     * If it was not configured in the {@code ServerEnvironment}, uses a new {@code
+     * InMemoryStorage}.
      *
      * @see #local() to create a syncrhonous version of the local {@code Delivery}
      */
@@ -459,8 +467,8 @@ public final class Delivery implements Logging {
         }
 
         int totalMessagesDelivered = stages.stream()
-                                       .map(DeliveryStage::getMessagesDelivered)
-                                       .reduce(0, Integer::sum);
+                                           .map(DeliveryStage::getMessagesDelivered)
+                                           .reduce(0, Integer::sum);
         return new RunResult(totalMessagesDelivered, !continueAllowed);
     }
 
@@ -491,9 +499,9 @@ public final class Delivery implements Logging {
     private ImmutableList<Station> conveyorStationsFor(Iterable<CatchUp> catchUpJobs,
                                                        DeliveryAction action) {
         return ImmutableList.of(
-                    new CatchUpStation(action, catchUpJobs),
-                    new LiveDeliveryStation(action, deduplicationWindow),
-                    new CleanupStation()
+                new CatchUpStation(action, catchUpJobs),
+                new LiveDeliveryStation(action, deduplicationWindow),
+                new CleanupStation()
         );
     }
 
