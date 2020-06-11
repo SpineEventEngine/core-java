@@ -22,9 +22,9 @@ package io.spine.gradle.internal
 
 import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.internal.AbstractTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import java.net.URL
@@ -33,7 +33,7 @@ import java.net.URL
  * A task which verifies that the current version of the library has not been published to the given
  * Maven repository yet.
  */
-open class CheckVersionIncrement : AbstractTask() {
+open class CheckVersionIncrement : DefaultTask() {
 
     /**
      * The Maven repository in which to look for published artifacts.
@@ -45,7 +45,7 @@ open class CheckVersionIncrement : AbstractTask() {
     lateinit var repository: Repository
 
     @Input
-    private val version: String = project.version as String
+    val version: String = project.version as String
 
     @TaskAction
     private fun fetchAndCheck() {
