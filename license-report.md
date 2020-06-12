@@ -258,10 +258,10 @@
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -350,13 +350,14 @@
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
-     * **POM Project URL:** [http://asm.ow2.org/](http://asm.ow2.org/)
-     * **POM License: BSD** - [http://asm.ow2.org/license.html](http://asm.ow2.org/license.html)
+     * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
+     * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -405,7 +406,7 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 11 13:55:48 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jun 12 13:10:57 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -628,10 +629,10 @@ This report was generated on **Thu Jun 11 13:55:48 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -720,13 +721,14 @@ This report was generated on **Thu Jun 11 13:55:48 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
-     * **POM Project URL:** [http://asm.ow2.org/](http://asm.ow2.org/)
-     * **POM License: BSD** - [http://asm.ow2.org/license.html](http://asm.ow2.org/license.html)
+     * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
+     * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -775,7 +777,7 @@ This report was generated on **Thu Jun 11 13:55:48 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 11 13:55:49 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jun 12 13:10:57 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1033,10 +1035,10 @@ This report was generated on **Thu Jun 11 13:55:49 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -1125,13 +1127,14 @@ This report was generated on **Thu Jun 11 13:55:49 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
-     * **POM Project URL:** [http://asm.ow2.org/](http://asm.ow2.org/)
-     * **POM License: BSD** - [http://asm.ow2.org/license.html](http://asm.ow2.org/license.html)
+     * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
+     * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -1180,7 +1183,7 @@ This report was generated on **Thu Jun 11 13:55:49 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 11 13:55:49 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jun 12 13:10:58 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1486,10 +1489,10 @@ This report was generated on **Thu Jun 11 13:55:49 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -1590,13 +1593,14 @@ This report was generated on **Thu Jun 11 13:55:49 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
-     * **POM Project URL:** [http://asm.ow2.org/](http://asm.ow2.org/)
-     * **POM License: BSD** - [http://asm.ow2.org/license.html](http://asm.ow2.org/license.html)
+     * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
+     * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -1645,7 +1649,7 @@ This report was generated on **Thu Jun 11 13:55:49 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 11 13:55:50 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jun 12 13:10:58 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1920,10 +1924,10 @@ This report was generated on **Thu Jun 11 13:55:50 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -2012,13 +2016,14 @@ This report was generated on **Thu Jun 11 13:55:50 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
-     * **POM Project URL:** [http://asm.ow2.org/](http://asm.ow2.org/)
-     * **POM License: BSD** - [http://asm.ow2.org/license.html](http://asm.ow2.org/license.html)
+     * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
+     * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -2067,7 +2072,7 @@ This report was generated on **Thu Jun 11 13:55:50 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 11 13:55:50 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jun 12 13:10:59 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2379,10 +2384,10 @@ This report was generated on **Thu Jun 11 13:55:50 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -2471,13 +2476,14 @@ This report was generated on **Thu Jun 11 13:55:50 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
-     * **POM Project URL:** [http://asm.ow2.org/](http://asm.ow2.org/)
-     * **POM License: BSD** - [http://asm.ow2.org/license.html](http://asm.ow2.org/license.html)
+     * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
+     * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -2526,7 +2532,7 @@ This report was generated on **Thu Jun 11 13:55:50 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 11 13:55:51 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jun 12 13:11:00 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2846,10 +2852,10 @@ This report was generated on **Thu Jun 11 13:55:51 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -2938,13 +2944,14 @@ This report was generated on **Thu Jun 11 13:55:51 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
-     * **POM Project URL:** [http://asm.ow2.org/](http://asm.ow2.org/)
-     * **POM License: BSD** - [http://asm.ow2.org/license.html](http://asm.ow2.org/license.html)
+     * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
+     * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -2993,7 +3000,7 @@ This report was generated on **Thu Jun 11 13:55:51 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 11 13:55:52 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jun 12 13:11:01 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3349,10 +3356,10 @@ This report was generated on **Thu Jun 11 13:55:52 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.20.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.24.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -3441,13 +3448,14 @@ This report was generated on **Thu Jun 11 13:55:52 EEST 2020** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
-     * **POM Project URL:** [http://asm.ow2.org/](http://asm.ow2.org/)
-     * **POM License: BSD** - [http://asm.ow2.org/license.html](http://asm.ow2.org/license.html)
+     * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
+     * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -3496,4 +3504,4 @@ This report was generated on **Thu Jun 11 13:55:52 EEST 2020** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 11 13:55:54 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jun 12 13:11:03 EEST 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).

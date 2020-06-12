@@ -211,7 +211,7 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Assigns the specified {@code TransportFactory} for the specified application environment..
+     * Assigns the specified {@code TransportFactory} for the specified application environment.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -253,7 +253,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Assigns the specified {@code Delivery} for the selected environment.
      *
-     * <p>You may use {@code new Tests()}, {@code new Production()} or an environment type
+     * <p>You may use {@code Tests.class}, {@code Production.class} or an environment type
      * defined by you.
      *
      * @return this instance of {@code ServerEnvironment}
