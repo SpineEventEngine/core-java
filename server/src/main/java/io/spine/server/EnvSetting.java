@@ -38,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>For example:
  * <pre>
  *
- * {@literal EnvSetting <StorageFactory>} storageFactory = new EnvSetting<>();
+ * {@literal EnvSetting<StorageFactory>} storageFactory = new EnvSetting<>();
  * storageFactory.use(InMemoryStorageFactory.newInstance(), Production.class);
  *
  * assertThat(storageFactory.optionalValue(Production.class)).isPresent();
