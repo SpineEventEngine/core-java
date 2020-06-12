@@ -136,7 +136,7 @@ public final class EnvSetting<V> {
      *         operation to run
      */
     void ifPresentForEnvironment(Class<? extends EnvironmentType> type,
-                                 ThrowingConsumer<V> operation) throws Exception {
+                                 SettingOperation<V> operation) throws Exception {
         Optional<V> value = valueFor(type);
         if (value.isPresent()) {
             operation.accept(value.get());
@@ -196,12 +196,12 @@ public final class EnvSetting<V> {
     }
 
     /**
-     * Represents an operation over a value that returns no result and may finish with an error.
+     * Represents an operation over the setting that returns no result and may finish with an error.
      *
      * @param <V>
-     *         the type of the input to the operation
+     *         the type of setting to perform the operation over
      */
-    interface ThrowingConsumer<V> {
+    interface SettingOperation<V> {
 
         /** Performs this operation on the specified value. */
         void accept(V value) throws Exception;
