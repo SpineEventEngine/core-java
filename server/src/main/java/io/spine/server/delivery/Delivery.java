@@ -322,7 +322,7 @@ public final class Delivery implements Logging {
      *
      * <p>To construct a {@code Delivery} instance, a {@code StorageFactory} is needed.
      * If it was not configured in the {@code ServerEnvironment}, uses a new {@code
-     * InMemoryStorage}.
+     * InMemoryStorageFactory}.
      *
      * @see #localAsync() to create an asynchronous version of the local {@code Delivery}
      */
@@ -339,8 +339,8 @@ public final class Delivery implements Logging {
      * {@linkplain UniformAcrossAllShards#singleShard() the single shard}.
      *
      * <p>To construct a {@code Delivery} instance, a {@code StorageFactory} is needed.
-     * If it was not configured in the {@code ServerEnvironment}, uses a new {@code
-     * InMemoryStorage}.
+     * If it was not configured in the {@code ServerEnvironment}, a new {@code
+     * InMemoryStorageFactory} used.
      *
      * @see #local() to create a syncrhonous version of the local {@code Delivery}
      */
