@@ -110,9 +110,9 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
         if (Environment.instance().is(Production.class) && name.equals(assumingTests())) {
             _warn().log(
                     "The class `%s` belongs to the Bounded Context named `%s`," +
-                     " which is used for testing. As such, it should not be used in production." +
-                     " Please see the description of `%s` for instructions on" +
-                     " annotating packages with names of Bounded Contexts of your application.",
+                    " which is used for testing. As such, it should not be used in production." +
+                    " Please see the description of `%s` for instructions on" +
+                    " annotating packages with names of Bounded Contexts of your application.",
                     cls.getName(), assumingTests().getValue(), BoundedContext.class.getName()
             );
         }

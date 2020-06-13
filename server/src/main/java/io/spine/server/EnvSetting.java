@@ -37,20 +37,16 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>For example:
  * <pre>
- *
  * {@literal EnvSetting<StorageFactory>} storageFactory ={@literal new EnvSetting<>();}
  * storageFactory.use(InMemoryStorageFactory.newInstance(), Production.class);
  *
  * assertThat(storageFactory.optionalValue(Production.class)).isPresent();
  * assertThat(storageFactory.optionalValue(Tests.class)).isEmpty();
- *
  * </pre>
- *
  *
  * <h1>Fallback</h1>
  * <p>{@code EnvSetting} allows fallback value configuration:
  * <pre>
- *
  *      // Assuming the environment is `Tests`.
  *      StorageFactory fallbackStorageFactory = createStorageFactory();
  *     {@literal EnvSetting<StorageFactory>} setting =
@@ -66,7 +62,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * configured} internally.
  *
  * <pre>
- *
  *      // This `Supplier` is calculated only once.
  *     {@literal Supplier<StorageFactory>} fallbackStorage = InMemoryStorageFactory::newInstance;
  *
@@ -77,7 +72,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  *     // Fallback value is taken from cache.
  *     StorageFactory theSameFactory = setting.value();
- *
  * </pre>
  *
  * <p>{@code EnvSetting} values do not determine the environment themselves: it's up to the
@@ -108,16 +102,15 @@ final class EnvSetting<V> {
     /**
      * Creates a new instance, configuring the specified function to supply a fallback value.
      *
-     * <p>If a value was not configured for the type {@code type}, and an attempt to access it
-     * with {@code setting.value(type)} was made, {@code fallback} is calculated, cached and
-     * returned.
+     * <p>If a value for {@code type} was not configured, {@code setting.value(type)} caches and
+     * returns the {@code fallback} evaluation result.
      */
     EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
         this.fallbacks.put(type, fallback);
     }
 
     /**
-     * Returns the value for the specified environment type if it was set, an
+     * If the value for the specified environment has been configured, returns it. Returns an
      * empty {@code Optional} otherwise.
      */
     Optional<V> optionalValue(Class<? extends EnvironmentType> type) {
@@ -126,8 +119,8 @@ final class EnvSetting<V> {
     }
 
     /**
-     * Runs the specified operations against the value corresponding to the specified environment
-     * type if it's present, does nothing otherwise.
+     * If the value for the specified environment has been configured, runs the specified operation
+     * against it. Does nothing otherwise.
      *
      * <p>If you wish to run an operation that doesn't throw, use {@code
      * optionalValue(type).ifPresent(operation)}.
@@ -144,9 +137,9 @@ final class EnvSetting<V> {
     }
 
     /**
-     * If the value corresponding to the specified environment type is set, just returns it.
+     * If the value corresponding to the specified environment type is set, returns it.
      *
-     * <p>If it is not set, return a fallback value. If no fallback was configured, an
+     * <p>If it is not set, returns a fallback value. If no fallback was configured, an
      * {@code IllegalStateException} is thrown.
      */
     V value(Class<? extends EnvironmentType> type) {
@@ -158,7 +151,7 @@ final class EnvSetting<V> {
     }
 
     /**
-     * Cleans this setting, forgetting all configured values.
+     * Clears this setting, forgetting all of the configured values.
      *
      * <p>Fallback settings, however, are still remembered.
      */
