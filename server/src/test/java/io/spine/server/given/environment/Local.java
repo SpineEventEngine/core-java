@@ -23,9 +23,8 @@ package io.spine.server.given.environment;
 import io.spine.base.EnvironmentType;
 
 /**
- * A local environment.
- *
- * <p>Controlled by static methods: {@link #enable()}, {@link #disable()}.
+ * A custom environment for testing the {@link io.spine.server.ServerEnvironment} and
+ * {@link io.spine.server.EnvSetting}.
  */
 public final class Local extends EnvironmentType {
 
