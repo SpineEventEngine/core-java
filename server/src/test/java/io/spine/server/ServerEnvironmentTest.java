@@ -200,7 +200,6 @@ class ServerEnvironmentTest {
                     .isInstanceOf(SystemAwareStorageFactory.class);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isSameInstanceAs(storageFactory);
-
         }
     }
 
@@ -247,7 +246,7 @@ class ServerEnvironmentTest {
             Environment.instance()
                        .register(new Local());
             Environment.instance()
-                       .setTo(new Local());
+                       .setTo(Local.class);
             Local.enable();
         }
 
@@ -268,7 +267,7 @@ class ServerEnvironmentTest {
         @DisplayName("returning a configured wrapped instance")
         void returnConfiguredStorageFactory() {
             InMemoryStorageFactory inMemory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.use(inMemory, new Local());
+            serverEnvironment.use(inMemory, Local.class);
 
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(inMemory);
@@ -348,7 +347,7 @@ class ServerEnvironmentTest {
             Environment.instance()
                        .register(new Local());
             Environment.instance()
-                       .setTo(new Local());
+                       .setTo(Local.class);
             Local.enable();
         }
 
@@ -369,7 +368,7 @@ class ServerEnvironmentTest {
         @DisplayName("returning a configured instance")
         void ok() {
             InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-            serverEnvironment.use(transportFactory, new Local());
+            serverEnvironment.use(transportFactory, Local.class);
             assertThat(serverEnvironment.transportFactory()).isSameInstanceAs(transportFactory);
         }
     }
@@ -422,10 +421,10 @@ class ServerEnvironmentTest {
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         void forCustom() {
             Environment.instance()
-                       .setTo(new Local());
+                       .setTo(Local.class);
 
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            serverEnvironment.use(memoizingTracer, new Local());
+            serverEnvironment.use(memoizingTracer, Local.class);
 
             assertThat(serverEnvironment.tracing()
                                         .get()).isSameInstanceAs(memoizingTracer);
@@ -437,7 +436,7 @@ class ServerEnvironmentTest {
             Local.disable();
 
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            serverEnvironment.use(memoizingTracer, new Local());
+            serverEnvironment.use(memoizingTracer, Local.class);
 
             assertThat(serverEnvironment.tracing()).isEmpty();
         }

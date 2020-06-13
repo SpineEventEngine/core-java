@@ -38,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>For example:
  * <pre>
  *
- * {@literal EnvSetting<StorageFactory>} storageFactory = new EnvSetting<>();
+ * {@literal EnvSetting<StorageFactory>} storageFactory ={@literal new EnvSetting<>();}
  * storageFactory.use(InMemoryStorageFactory.newInstance(), Production.class);
  *
  * assertThat(storageFactory.optionalValue(Production.class)).isPresent();
@@ -54,7 +54,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *      // Assuming the environment is `Tests`.
  *      StorageFactory fallbackStorageFactory = createStorageFactory();
  *     {@literal EnvSetting<StorageFactory>} setting =
- *          new EnvSetting<>(Tests.class, () -> fallbackStorageFactory);
+ *          {@literal new EnvSetting<>(Tests.class, () -> fallbackStorageFactory)};
  *
  *     // Despite having never configured the `StorageFactory` for `Tests`, we still get the
  *     // fallback value.
@@ -70,7 +70,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *      // This `Supplier` is calculated only once.
  *     {@literal Supplier<StorageFactory>} fallbackStorage = InMemoryStorageFactory::newInstance;
  *
- *     {@literal EnvSetting<StorageFactory>} setting = new EnvSetting<>(Tests.class, fallbackStorage);
+ *     {@literal EnvSetting<StorageFactory>} setting = {@literal new EnvSetting<>(Tests.class, fallbackStorage);}
  *
  *     // `Supplier` is calculated and cached.
  *     StorageFactory storageFactory = setting.value();
@@ -91,7 +91,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of value
  */
 @Internal
-public final class EnvSetting<V> {
+final class EnvSetting<V> {
 
     private final Map<Class<? extends EnvironmentType>, V> environmentValues =
             new HashMap<>();
@@ -102,7 +102,7 @@ public final class EnvSetting<V> {
     /**
      * Creates a new instance without any fallback configuration.
      */
-    public EnvSetting() {
+    EnvSetting() {
     }
 
     /**
@@ -112,7 +112,7 @@ public final class EnvSetting<V> {
      * with {@code setting.value(type)} was made, {@code fallback} is calculated, cached and
      * returned.
      */
-    public EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
+    EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
         this.fallbacks.put(type, fallback);
     }
 
