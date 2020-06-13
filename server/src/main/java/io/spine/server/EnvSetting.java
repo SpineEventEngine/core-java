@@ -45,27 +45,29 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * </pre>
  *
  * <h1>Fallback</h1>
- * <p>{@code EnvSetting} allows fallback value configuration:
+ * <p>{@code EnvSetting} allows to configure a default value for an environment type. It is used
+ * when the value for the environment hasn't been {@linkplain #use(V, Class) set explicitly}.
  * <pre>
  *      // Assuming the environment is `Tests`.
+ *
  *      StorageFactory fallbackStorageFactory = createStorageFactory();
  *     {@literal EnvSetting<StorageFactory>} setting =
  *          {@literal new EnvSetting<>(Tests.class, () -> fallbackStorageFactory)};
  *
- *     // Despite having never configured the `StorageFactory` for `Tests`, we still get the
- *     // fallback value.
+ *     // `use` was never called, so the fallback value is calculated and returned.
  *     assertThat(setting.optionalValue()).isPresent();
  *     assertThat(setting.value()).isSameInstanceAs(fallbackStorageFactory);
  * </pre>
  *
- * <p>Fallback values are calculated once, after it they are {@linkplain #use(Object, Class)
- * configured} internally.
+ * <p>Fallback values are calculated once on first {@linkplain #value(Class) access} for the
+ * specified environment. Every subsequent access returns the cached value.
  *
  * <pre>
  *      // This `Supplier` is calculated only once.
  *     {@literal Supplier<StorageFactory>} fallbackStorage = InMemoryStorageFactory::newInstance;
  *
- *     {@literal EnvSetting<StorageFactory>} setting = {@literal new EnvSetting<>(Tests.class, fallbackStorage);}
+ *     {@literal EnvSetting<StorageFactory>} setting =
+ *     {@literal new EnvSetting<>(Tests.class, fallbackStorage);}
  *
  *     // `Supplier` is calculated and cached.
  *     StorageFactory storageFactory = setting.value();
@@ -100,10 +102,10 @@ final class EnvSetting<V> {
     }
 
     /**
-     * Creates a new instance, configuring the specified function to supply a fallback value.
+     * Creates a new instance, configuring {@code fallback} to supply a default value.
      *
-     * <p>If a value for {@code type} was not configured, {@code setting.value(type)} caches and
-     * returns the {@code fallback} evaluation result.
+     * <p>If a value for {@code type} is not {@linkplain #use(Object, Class) set explicitly},
+     * {@link #value(Class)} and {@link #optionalValue(Class)} return the {@code fallback} result.
      */
     EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
         this.fallbacks.put(type, fallback);
@@ -153,7 +155,8 @@ final class EnvSetting<V> {
     /**
      * Clears this setting, forgetting all of the configured values.
      *
-     * <p>Fallback settings, however, are still remembered.
+     * <p>Cached default values are also cleared and will be recalculated using the {@code
+     * Supplier} passed to the {@linkplain #EnvSetting(Class, Supplier) constructor}.
      */
     @VisibleForTesting
     void reset() {

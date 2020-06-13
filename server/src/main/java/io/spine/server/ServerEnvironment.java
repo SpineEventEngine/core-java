@@ -47,6 +47,29 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The server conditions and configuration under which the application operates.
+ *
+ * <h1>Configuration</h1>
+ * <p>Some parts of the {@code ServerEnvironment} can be customized based on the {@code
+ * EnvironmentType}. To do so, one of the overloads of the {@code use} method can be called.
+ * Two environment types exist out of the box: {@link Tests} and {@link Production}. For example:
+ * <pre>
+ *     ServerEnvironment.use(productionStorageFactory, Production.class)
+ *                      .use(testingStorageFactory, Tests.class)
+ *                      .use(memoizingTracerFactory, Production.class)
+ * </pre>
+ * A custom environment type may also be used:
+ * <pre>
+ *     final class StagingEnvironment extends EnvironmentType {
+ *         ...
+ *     }
+ *
+ *     // Can also be
+ *     // `ServerEnvironment.use(inMemoryStorageFactory, new Staging(stagingServiceDiscovery));`,
+ *     // if `Staging` expects dependencies to its constructor.
+ *     ServerEnvironment.use(inMemoryStorageFactory, Staging.class);
+ * </pre>
+ * If {@code Staging} is {@link Environment#type() enabled}, the specified value is going to be
+ * returned on {@link #storageFactory()}.
  */
 @SuppressWarnings("ClassWithTooManyMethods" /* there are some deprecated methods to be eliminated later. */)
 public final class ServerEnvironment implements AutoCloseable {
@@ -226,9 +249,6 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Assigns the specified {@code TransportFactory} for the specified application environment.
      *
-     * <p>You may use {@code Tests.class}, {@code Production.class} or an environment type instance
-     * defined by you.
-     *
      * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
@@ -253,9 +273,6 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Assigns the specified {@code Delivery} for the selected environment.
      *
-     * <p>You may use {@code Tests.class}, {@code Production.class} or an environment type
-     * defined by you.
-     *
      * @return this instance of {@code ServerEnvironment}
      */
     @CanIgnoreReturnValue
@@ -274,11 +291,9 @@ public final class ServerEnvironment implements AutoCloseable {
         use(factory, tracerFactory, envType);
         return this;
     }
+
     /**
      * Assigns {@code TracerFactory} for the specified application environment.
-     *
-     * <p>You may use {@code Tests.class}, {@code Production.class} or an environment type
-     * defined by you.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -301,9 +316,6 @@ public final class ServerEnvironment implements AutoCloseable {
 
     /**
      * Configures the specified transport factory for the selected type of environment.
-     *
-     * <p>You may use {@code Tests.class}, {@code Production.class} or an environment type
-     * defined by you.
      *
      * @return this instance of {@code ServerEnvironment}
      */
