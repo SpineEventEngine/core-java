@@ -27,7 +27,6 @@ import io.spine.base.EnvironmentType;
  *
  * <p>Controlled by static methods: {@link #enable()}, {@link #disable()}.
  */
-@SuppressWarnings("ImmutableEnumChecker")
 public final class Local extends EnvironmentType {
 
     private static boolean enabled = false;

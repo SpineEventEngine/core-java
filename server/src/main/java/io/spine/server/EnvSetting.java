@@ -106,7 +106,7 @@ final class EnvSetting<V> {
     }
 
     /**
-     * Creates a new instance, configuring the specified function to act as a fallback value.
+     * Creates a new instance, configuring the specified function to supply a fallback value.
      *
      * <p>If a value was not configured for the type {@code type}, and an attempt to access it
      * with {@code setting.value(type)} was made, {@code fallback} is calculated, cached and
@@ -130,7 +130,7 @@ final class EnvSetting<V> {
      * type if it's present, does nothing otherwise.
      *
      * <p>If you wish to run an operation that doesn't throw, use {@code
-     * value(type).ifPresent(operation)}.
+     * optionalValue(type).ifPresent(operation)}.
      *
      * @param operation
      *         operation to run
@@ -146,7 +146,8 @@ final class EnvSetting<V> {
     /**
      * If the value corresponding to the specified environment type is set, just returns it.
      *
-     * <p>If it is not set, runs the specified supplier, configures and returns the supplied value.
+     * <p>If it is not set, return a fallback value. If no fallback was configured, an
+     * {@code IllegalStateException} is thrown.
      */
     V value(Class<? extends EnvironmentType> type) {
         checkNotNull(type);
@@ -157,10 +158,9 @@ final class EnvSetting<V> {
     }
 
     /**
-     * Changes the value for all environments types, such that all of them return
-     * {@code Optional.empty()} when {@linkplain #value(Class) accessing the value}.
+     * Cleans this setting, forgetting all configured values.
      *
-     * <p>Fallback settings, however, remain unchanged.
+     * <p>Fallback settings, however, are still remembered.
      */
     @VisibleForTesting
     void reset() {

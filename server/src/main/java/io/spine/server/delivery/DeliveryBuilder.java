@@ -212,7 +212,7 @@ public final class DeliveryBuilder {
      * this {@code ServerEnvironment}.
      *
      * <p>If no {@code StorageFactory} is present in the {@code ServerEnvironment}, a new
-     * {@code InMemoryStorage} is used.
+     * {@code InMemoryStorageFactory} is used.
      */
     @CanIgnoreReturnValue
     public DeliveryBuilder setInboxStorage(InboxStorage inboxStorage) {
@@ -227,7 +227,7 @@ public final class DeliveryBuilder {
      * this {@code ServerEnvironment}.
      *
      * <p>If no {@code StorageFactory} is present in the {@code ServerEnvironment}, a new
-     * {@code InMemoryStorage} is used.
+     * {@code InMemoryStorageFactory} is used.
      */
     @CanIgnoreReturnValue
     public DeliveryBuilder setCatchUpStorage(CatchUpStorage catchUpStorage) {

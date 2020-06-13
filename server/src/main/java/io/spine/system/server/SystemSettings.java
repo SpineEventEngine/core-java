@@ -61,8 +61,7 @@ public final class SystemSettings implements SystemFeatures {
                 .disableCommandLog()
                 .enableAggregateQuerying()
                 .forgetEvents();
-        if (Environment.instance()
-                       .is(Production.class)) {
+        if (Environment.instance().is(Production.class)) {
             settings.enableParallelPosting();
         } else {
             settings.disableParallelPosting();

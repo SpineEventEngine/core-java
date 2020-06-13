@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.base.Environment;
+import io.spine.base.Production;
 import io.spine.base.Tests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -76,7 +77,7 @@ class SystemSettingsTest {
             assertFalse(SystemSettings.defaults()
                                       .postEventsInParallel());
 
-//            env.setTo(Production.class);
+            env.setTo(Production.class);
             assertTrue(SystemSettings.defaults()
                                      .postEventsInParallel());
         }
