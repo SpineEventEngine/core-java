@@ -26,5 +26,5 @@
  */
 
 val spineBaseVersion: String by extra("1.5.18")
-val spineTimeVersion: String by extra("1.5.12")
-val versionToPublish: String by extra("1.5.15")
+val spineTimeVersion: String by extra("1.5.18")
+val versionToPublish: String by extra("1.5.18")

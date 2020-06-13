@@ -244,8 +244,6 @@ class ServerEnvironmentTest {
         void reset() {
             serverEnvironment.reset();
             Environment.instance()
-                       .register(new Local());
-            Environment.instance()
                        .setTo(Local.class);
             Local.enable();
         }
@@ -344,8 +342,6 @@ class ServerEnvironmentTest {
         @BeforeEach
         void reset() {
             serverEnvironment.reset();
-            Environment.instance()
-                       .register(new Local());
             Environment.instance()
                        .setTo(Local.class);
             Local.enable();
