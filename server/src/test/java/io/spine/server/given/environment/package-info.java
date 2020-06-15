@@ -19,12 +19,13 @@
  */
 
 /**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
+ * Contains a custom environment to test {@link io.spine.server.ServerEnvironment} and
+ * {@link io.spine.server.EnvSetting}.
  */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.given.environment;
 
-val spineBaseVersion: String by extra("1.5.18")
-val spineTimeVersion: String by extra("1.5.18")
-val versionToPublish: String by extra("1.5.18")
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -18,13 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+package io.spine.server.given.environment;
 
-val spineBaseVersion: String by extra("1.5.18")
-val spineTimeVersion: String by extra("1.5.18")
-val versionToPublish: String by extra("1.5.18")
+import io.spine.base.EnvironmentType;
+
+/**
+ * A custom environment for testing the {@link io.spine.server.ServerEnvironment} and
+ * {@link io.spine.server.EnvSetting}.
+ */
+public final class Local extends EnvironmentType {
+
+    private static boolean enabled = false;
+
+    @Override
+    protected boolean enabled() {
+        return enabled;
+    }
+
+    public static void enable() {
+        enabled = true;
+    }
+
+    public static void disable() {
+        enabled = false;
+    }
+}

@@ -37,10 +37,10 @@ class IncrementGuard : Plugin<Project> {
     override fun apply(target: Project) {
         val tasks = target.tasks
         tasks.register(taskName, CheckVersionIncrement::class.java) {
-            it.repository = PublishingRepos.cloudRepo
-            tasks.getByName("check").dependsOn(it)
+            repository = PublishingRepos.cloudRepo
+            tasks.getByName("check").dependsOn(this)
 
-            it.shouldRunAfter("test")
+            shouldRunAfter("test")
         }
     }
 }

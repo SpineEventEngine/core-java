@@ -22,6 +22,7 @@ package io.spine.server.trace;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.base.Tests;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
@@ -67,7 +68,7 @@ class TracingTest {
     @BeforeEach
     void setUp() {
         tracing = new MemoizingTracerFactory();
-        serverEnvironment.configureTracing(tracing);
+        serverEnvironment.use(tracing, Tests.class);
         context = AirportContext
                 .builder()
                 .build();
@@ -78,6 +79,7 @@ class TracingTest {
     void tearDown() {
         serverEnvironment.reset();
     }
+
     @Test
     @DisplayName("trace actor commands")
     void traceCommands() {
@@ -112,7 +114,8 @@ class TracingTest {
                                 Message entityId,
                                 TypeUrl entityStateType) {
         assertTrue(
-                tracing.tracer(spec, messageType).isReceiver(entityId, entityStateType)
+                tracing.tracer(spec, messageType)
+                       .isReceiver(entityId, entityStateType)
         );
     }
 

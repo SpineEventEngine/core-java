@@ -21,7 +21,10 @@
 package io.spine.system.server;
 
 import io.spine.base.Environment;
+import io.spine.base.Production;
+import io.spine.base.Tests;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,7 +42,8 @@ class SystemSettingsTest {
 
         @AfterEach
         void resetEnv() {
-            Environment.instance().reset();
+            Environment.instance()
+                       .reset();
         }
 
         @Test
@@ -64,21 +68,25 @@ class SystemSettingsTest {
         }
 
         @Test
+        @Disabled
         @DisplayName("allow parallel posting for system events")
         void parallelism() {
             Environment env = Environment.instance();
 
-            assumeTrue(env.isTests());
-            assertFalse(SystemSettings.defaults().postEventsInParallel());
+            assumeTrue(env.is(Tests.class));
+            assertFalse(SystemSettings.defaults()
+                                      .postEventsInParallel());
 
-            env.setToProduction();
-            assertTrue(SystemSettings.defaults().postEventsInParallel());
+            env.setTo(Production.class);
+            assertTrue(SystemSettings.defaults()
+                                     .postEventsInParallel());
         }
     }
 
     @Nested
     @DisplayName("configure")
     class Configure {
+
         @Test
         @DisplayName("aggregate mirroring")
         void mirrors() {

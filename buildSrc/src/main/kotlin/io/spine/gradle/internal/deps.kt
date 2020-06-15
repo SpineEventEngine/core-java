@@ -71,7 +71,7 @@ object Versions {
     val errorProne       = "2.3.4"
     val errorProneJavac  = "9+181-r4173-1" // taken from here: https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
     val errorPronePlugin = "1.1.1"
-    val pmd              = "6.20.0"
+    val pmd              = "6.24.0"
     val checkstyle       = "8.29"
     val protobufPlugin   = "0.8.12"
     val appengineApi     = "1.9.79"
@@ -278,12 +278,12 @@ object Deps {
 object DependencyResolution {
 
     fun forceConfiguration(configurations: ConfigurationContainer) {
-        configurations.all { config ->
-            config.resolutionStrategy { strategy ->
-                strategy.failOnVersionConflict()
-                strategy.cacheChangingModulesFor(0, "seconds")
+        configurations.all {
+            resolutionStrategy {
+                failOnVersionConflict()
+                cacheChangingModulesFor(0, "seconds")
                 @Suppress("DEPRECATION") // Force SLF4J version.
-                strategy.force(
+                force(
                         Deps.build.slf4j,
                         Deps.build.errorProneAnnotations,
                         Deps.build.jsr305Annotations,
@@ -329,17 +329,17 @@ object DependencyResolution {
 
     fun defaultRepositories(repositories: RepositoryHandler) {
         repositories.mavenLocal()
-        repositories.maven { repository ->
-            repository.url = URI(Repos.spine)
-            repository.content { descriptor ->
-                descriptor.includeGroup("io.spine")
-                descriptor.includeGroup("io.spine.tools")
-                descriptor.includeGroup("io.spine.gcloud")
+        repositories.maven {
+            url = URI(Repos.spine)
+            content {
+                includeGroup("io.spine")
+                includeGroup("io.spine.tools")
+                includeGroup("io.spine.gcloud")
             }
         }
         repositories.jcenter()
-        repositories.maven { repository ->
-            repository.url = URI(Repos.gradlePlugins)
+        repositories.maven {
+            url = URI(Repos.gradlePlugins)
         }
     }
 }
