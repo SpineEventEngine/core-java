@@ -151,13 +151,13 @@ public final class RecordQueries {
      *         the type of the values stored in the column
      */
     public static <I, V> RecordQuery<I> byColumn(RecordSpec<I, ?, ?> recordSpec,
-                                                 EntityColumn declaredColumn,
+                                                 EntityColumn<?, ?> declaredColumn,
                                                  V value) {
         checkNotNull(recordSpec);
         checkNotNull(declaredColumn);
         checkNotNull(value);
         String rawColumnName = declaredColumn.name()
-                                     .value();
+                                             .value();
         Optional<Column> maybeColumn = recordSpec.find(ColumnName.of(rawColumnName));
         checkState(maybeColumn.isPresent(),
                    "The passed column `%s` is not found among the declared columns: `%s`",

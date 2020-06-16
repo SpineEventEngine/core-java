@@ -39,10 +39,11 @@ import static com.google.common.collect.Streams.stream;
  */
 class EntityQueryProcessor implements QueryProcessor {
 
-    private final RecordBasedRepository<?, ? extends Entity, ? extends EntityState> repository;
+    private final
+    RecordBasedRepository<?, ? extends Entity<?, ?>, ? extends EntityState> repository;
 
     EntityQueryProcessor(
-            RecordBasedRepository<?, ? extends Entity, ? extends EntityState> repository) {
+            RecordBasedRepository<?, ? extends Entity<?, ?>, ? extends EntityState> repository) {
         this.repository = repository;
     }
 
@@ -59,7 +60,7 @@ class EntityQueryProcessor implements QueryProcessor {
 
     private Iterator<EntityRecord> loadByQuery(Query query) {
         Iterator<EntityRecord> entities =
-            repository.findRecords(query.filters(), query.responseFormat());
+                repository.findRecords(query.filters(), query.responseFormat());
         return entities;
     }
 
