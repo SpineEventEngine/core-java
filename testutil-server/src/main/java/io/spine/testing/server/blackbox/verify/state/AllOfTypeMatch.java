@@ -21,7 +21,7 @@
 package io.spine.testing.server.blackbox.verify.state;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 
@@ -34,7 +34,7 @@ import static com.google.common.truth.Truth.assertThat;
  * Verifies that all entities of a type match expected ones in the exact order.
  */
 @VisibleForTesting
-class AllOfTypeMatch<T extends EntityState> extends VerifyState {
+class AllOfTypeMatch<T extends EntityState<?>> extends VerifyState {
 
     private final Iterable<T> expected;
     private final Class<T> entityType;
@@ -51,7 +51,7 @@ class AllOfTypeMatch<T extends EntityState> extends VerifyState {
     }
 
     @Override
-    protected void verify(Collection<? extends EntityState> actualEntities) {
+    protected void verify(Collection<? extends EntityState<?>> actualEntities) {
         assertThat(actualEntities).containsExactlyElementsIn(expected);
     }
 }

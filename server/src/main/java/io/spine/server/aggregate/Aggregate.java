@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
 import io.spine.base.Error;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -120,7 +120,7 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for this central concept.
 public abstract class Aggregate<I,
-        S extends EntityState,
+        S extends EntityState<I>,
         B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventPlayer, EventReactor, HasLifecycleColumns<I, S> {

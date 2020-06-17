@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.logging.Logging;
@@ -66,7 +66,7 @@ import static io.spine.protobuf.Messages.isDefault;
  *         the entity state type
  */
 @Experimental
-public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S extends EntityState>
+public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S extends EntityState<I>>
         implements Function<S, S>, Logging {
 
     /**
@@ -230,7 +230,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      * A migration operation on an entity instance.
      */
     private static class Operation<I,
-                                   S extends EntityState,
+                                   S extends EntityState<I>,
                                    E extends TransactionalEntity<I, S, ?>> {
 
         private boolean archive;

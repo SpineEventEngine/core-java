@@ -100,6 +100,7 @@ class AggregateTransactionTest
                 .contains(actualMessage);
     }
 
+    @SuppressWarnings("rawtypes")   // for simplicity.
     @Override
     protected DispatchOutcome applyEvent(Transaction tx, Event event) {
         AggregateTransaction cast = (AggregateTransaction) tx;

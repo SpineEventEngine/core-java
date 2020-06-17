@@ -59,3 +59,11 @@ message Task {
     string title = 2;
     string description = 3;
 }
+
+message ItgProjection {
+
+    option (entity).kind = PROJECTION;
+
+    ProjectId id = 1;
+}
+

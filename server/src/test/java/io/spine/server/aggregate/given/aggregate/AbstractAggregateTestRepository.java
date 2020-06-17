@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -38,7 +38,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @param <A> the type of aggregates
  * @param <S> the type of aggregate state
  */
-public class AbstractAggregateTestRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState>
+public class AbstractAggregateTestRepository<I,
+                                             A extends Aggregate<I, S, ?>,
+                                             S extends EntityState<I>>
         extends AggregateRepository<I, A, S> {
 
     public A loadAggregate(I id) {

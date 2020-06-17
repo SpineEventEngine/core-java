@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -48,7 +48,7 @@ public final class AggregateTestSupport {
      * @param <S> the type of {@code Aggregate} state
      * @return the list of produced event messages
      */
-    public static <I, A extends Aggregate<I, S, ?>, S extends EntityState> DispatchOutcome
+    public static <I, A extends Aggregate<I, S, ?>, S extends EntityState<I>> DispatchOutcome
     dispatchCommand(AggregateRepository<I, A, S> repository, A aggregate, CommandEnvelope command) {
         checkArguments(repository, aggregate, command);
         return dispatchAndCollect(new AggregateCommandEndpoint<>(repository, command),aggregate);
@@ -62,7 +62,7 @@ public final class AggregateTestSupport {
      * @param <S> the type of {@code Aggregate} state
      * @return the list of produced event messages
      */
-    public static <I, A extends Aggregate<I, S, ?>, S extends EntityState> DispatchOutcome
+    public static <I, A extends Aggregate<I, S, ?>, S extends EntityState<I>> DispatchOutcome
     dispatchEvent(AggregateRepository<I, A, S> repository, A instance, EventEnvelope event) {
         checkArguments(repository, instance, event);
         return dispatchAndCollect(new AggregateEventReactionEndpoint<>(repository, event),instance);
@@ -73,7 +73,7 @@ public final class AggregateTestSupport {
         return endpoint.handleAndApplyEvents(aggregate);
     }
 
-    private static <I, A extends Aggregate<I, S, ?>, S extends EntityState> void
+    private static <I, A extends Aggregate<I, S, ?>, S extends EntityState<I>> void
     checkArguments(AggregateRepository<I, A, S> repository,
                    A aggregate,
                    MessageEnvelope<?, ?, ?> envelope) {

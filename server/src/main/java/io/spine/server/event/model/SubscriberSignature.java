@@ -23,7 +23,7 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Subscribe;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;

@@ -26,7 +26,7 @@ import io.spine.core.CommandContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.test.shared.StringAggregate;
+import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.test.aggregate.cli.Evaluate;
 import io.spine.test.aggregate.cli.Evaluated;
 
@@ -39,7 +39,7 @@ import static java.lang.String.format;
  * {@code AggregateId-CommandMessage}.
  */
 public class RepoOfAggregateWithLifecycle
-        extends AggregateRepository<Long, AggregateWithLifecycle, StringAggregate> {
+        extends AggregateRepository<Long, AggregateWithLifecycle, LongIdAggregate> {
 
     private static final char SEPARATOR = '-';
     /**

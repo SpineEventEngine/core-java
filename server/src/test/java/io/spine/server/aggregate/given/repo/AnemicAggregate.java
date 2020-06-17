@@ -26,5 +26,5 @@ import io.spine.server.test.shared.EmptyAggregate;
 /**
  * An aggregate class which neither handles commands nor reacts on events or rejections.
  */
-class AnemicAggregate extends Aggregate<Integer, EmptyAggregate, EmptyAggregate.Builder> {
+class AnemicAggregate extends Aggregate<String, EmptyAggregate, EmptyAggregate.Builder> {
 }

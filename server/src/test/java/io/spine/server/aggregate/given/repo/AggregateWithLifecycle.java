@@ -23,7 +23,7 @@ package io.spine.server.aggregate.given.repo;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.test.shared.StringAggregate;
+import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.test.aggregate.cli.Evaluate;
 import io.spine.test.aggregate.cli.Evaluated;
 
@@ -32,12 +32,9 @@ import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 
 /**
  * The aggregate that can handle status flags.
- *
- * <p>We use {@code StringValue} for messages to save on code generation
- * in the tests. Real aggregates should use generated messages.
  */
 public class AggregateWithLifecycle
-        extends Aggregate<Long, StringAggregate, StringAggregate.Builder> {
+        extends Aggregate<Long, LongIdAggregate, LongIdAggregate.Builder> {
 
     @Assign
     Evaluated handle(Evaluate commandMessage) {
@@ -60,6 +57,6 @@ public class AggregateWithLifecycle
                    .equalsIgnoreCase(msg)) {
             setDeleted(true);
         }
-        builder().setValue(msg);
+        builder().setValue(eventMessage.hashCode());
     }
 }

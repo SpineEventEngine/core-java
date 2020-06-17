@@ -22,7 +22,7 @@ package io.spine.server.storage.given;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.EntityRecord;

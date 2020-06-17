@@ -21,7 +21,7 @@ package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Internal
 public class ProjectionTransaction<I,
-                                   S extends EntityState,
+                                   S extends EntityState<I>,
                                    B extends ValidatingBuilder<S>>
         extends EventPlayingTransaction<I, Projection<I, S, B>, S, B> {
 
@@ -64,7 +64,7 @@ public class ProjectionTransaction<I,
      * @return the new transaction instance
      */
     protected static <I,
-                      S extends EntityState,
+                      S extends EntityState<I>,
                       B extends ValidatingBuilder<S>>
     ProjectionTransaction<I, S, B> start(Projection<I, S, B> projection) {
         checkNotNull(projection);

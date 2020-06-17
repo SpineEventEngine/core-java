@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Abstract base for entity factories.
  */
-public abstract class AbstractEntityFactory<E extends Entity> implements EntityFactory<E>  {
+public abstract class AbstractEntityFactory<E extends Entity<?, ?>> implements EntityFactory<E>  {
 
     private static final long serialVersionUID = 0L;
 
@@ -112,7 +112,7 @@ public abstract class AbstractEntityFactory<E extends Entity> implements EntityF
         if (!(obj instanceof AbstractEntityFactory)) {
             return false;
         }
-        final AbstractEntityFactory other = (AbstractEntityFactory) obj;
+        final AbstractEntityFactory<?> other = (AbstractEntityFactory<?>) obj;
         return Objects.equals(this.idClass, other.idClass)
                 && Objects.equals(this.entityClass, other.entityClass);
     }

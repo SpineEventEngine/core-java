@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import io.spine.annotation.Experimental;
 import io.spine.annotation.SPI;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 
 import java.util.Optional;
 
@@ -56,5 +56,5 @@ public interface AggregateRootDirectory {
      */
     Optional<? extends AggregatePartRepository<?, ?, ?, ?>>
     findPart(Class<? extends AggregateRoot<?>> rootClass,
-             Class<? extends EntityState> partStateClass);
+             Class<? extends EntityState<?>> partStateClass);
 }

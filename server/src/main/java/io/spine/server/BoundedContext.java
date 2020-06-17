@@ -21,7 +21,7 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
@@ -346,13 +346,13 @@ public abstract class BoundedContext implements Closeable, Logging {
      * @see VisibilityGuard
      */
     @Internal
-    public Optional<Repository> findRepository(Class<? extends EntityState> stateClass) {
+    public Optional<Repository<?, ?>> findRepository(Class<? extends EntityState<?>> stateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(stateClass)) {
             throw newIllegalStateException("No repository found for the entity state class `%s`.",
                                            stateClass.getName());
         }
-        Optional<Repository> repository = guard.repositoryFor(stateClass);
+        Optional<Repository<?, ?>> repository = guard.repositoryFor(stateClass);
         return repository;
     }
 
@@ -376,7 +376,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      *
      * @see #findRepository(Class)
      */
-    public boolean hasEntitiesWithState(Class<? extends EntityState> stateClass) {
+    public boolean hasEntitiesWithState(Class<? extends EntityState<?>> stateClass) {
         boolean result = guard.hasRepository(stateClass);
         return result;
     }

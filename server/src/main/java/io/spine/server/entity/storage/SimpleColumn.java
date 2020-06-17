@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.storage.AbstractColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -67,7 +67,7 @@ final class SimpleColumn
     }
 
     @Override
-    public @Nullable Object valueIn(EntityState state) {
+    public @Nullable Object valueIn(EntityState<?> state) {
         return getter.apply(state);
     }
 
@@ -78,6 +78,6 @@ final class SimpleColumn
 
     @Immutable
     @FunctionalInterface
-    interface Getter extends Function<EntityState, Object> {
+    interface Getter extends Function<EntityState<?>, Object> {
     }
 }

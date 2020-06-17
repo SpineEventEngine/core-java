@@ -27,7 +27,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
 import io.spine.client.grpc.QueryServiceGrpc;
@@ -271,7 +271,7 @@ public class Client implements AutoCloseable {
     /**
      * Queries the read-side with the specified query.
      */
-    <S extends EntityState> ImmutableList<S> read(Query query, Class<S> stateType) {
+    <S extends EntityState<?>> ImmutableList<S> read(Query query, Class<S> stateType) {
         ImmutableList<S> result = queryService
                 .read(query)
                 .states(stateType);

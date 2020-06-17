@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Default implementation of entity factory which creates entities by invoking constructor
  * which accepts entity ID.
  */
-public final class DefaultEntityFactory<E extends Entity> extends AbstractEntityFactory<E> {
+public final class DefaultEntityFactory<E extends Entity<?, ?>> extends AbstractEntityFactory<E> {
 
     private static final long serialVersionUID = 0L;
 

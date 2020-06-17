@@ -26,9 +26,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.Time;
+import io.spine.base.entity.EntityState;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -45,8 +45,11 @@ import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
 import io.spine.server.model.Nothing;
 import io.spine.server.storage.AbstractStorageTest;
+import io.spine.test.aggregate.IntegerProject;
+import io.spine.test.aggregate.LongProject;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.StringProject;
 import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
 import io.spine.testing.TestValues;
@@ -165,7 +168,7 @@ public class AggregateStorageTest
      *         the type of aggregate IDs
      * @return a new storage instance
      */
-    <I, S extends EntityState> AggregateStorage<I, S>
+    <I, S extends EntityState<I>> AggregateStorage<I, S>
     newStorage(Class<? extends Aggregate<I, S, ?>> aggregateClass) {
         ContextSpec spec = ContextSpec.singleTenant("`AggregateStorage` tests");
         AggregateStorage<I, S> result =
@@ -702,7 +705,7 @@ public class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdString
-            extends Aggregate<String, Project, Project.Builder> {
+            extends Aggregate<String, StringProject, StringProject.Builder> {
 
         private TestAggregateWithIdString(String id) {
             super(id);
@@ -710,7 +713,7 @@ public class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdInteger
-            extends Aggregate<Integer, Project, Project.Builder> {
+            extends Aggregate<Integer, IntegerProject, IntegerProject.Builder> {
 
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
@@ -718,14 +721,14 @@ public class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdLong
-            extends Aggregate<Long, Project, Project.Builder> {
+            extends Aggregate<Long, LongProject, LongProject.Builder> {
 
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }
     }
 
-    private static EventMessage event(EntityState state) {
+    private static EventMessage event(EntityState<?> state) {
         return StateImported
                 .newBuilder()
                 .setState(Any.pack(state))

@@ -30,8 +30,8 @@ import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.test.shared.AnyProcess;
 import io.spine.server.tuple.Pair;
+import io.spine.test.procman.ElephantProcess;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
@@ -65,7 +65,7 @@ import static io.spine.testdata.Sample.messageOfType;
  * A test Process Manager which remembers past message as its state.
  */
 public class TestProcessManager
-        extends ProcessManager<ProjectId, AnyProcess, AnyProcess.Builder> {
+        extends ProcessManager<ProjectId, ElephantProcess, ElephantProcess.Builder> {
 
     public static final ProjectId ID = messageOfType(ProjectId.class);
 

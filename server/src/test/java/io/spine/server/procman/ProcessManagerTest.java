@@ -38,12 +38,12 @@ import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.test.shared.AnyProcess;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.test.procman.ElephantProcess;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
@@ -133,7 +133,7 @@ class ProcessManagerTest {
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
-                              .withState(AnyProcess.getDefaultInstance())
+                              .withState(ElephantProcess.getDefaultInstance())
                               .build();
     }
 

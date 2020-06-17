@@ -21,9 +21,9 @@
 package io.spine.client;
 
 import com.google.protobuf.Message;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.MessageContext;
+import io.spine.base.entity.EntityState;
 import io.spine.core.EmptyContext;
 import io.spine.core.EventContext;
 
@@ -44,7 +44,7 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
         return new DelegatingEventConsumer<>(consumer);
     }
 
-    static <S extends EntityState> StateConsumer<S> ofState(Consumer<S> consumer) {
+    static <S extends EntityState<?>> StateConsumer<S> ofState(Consumer<S> consumer) {
         checkNotNull(consumer);
         return new DelegatingStateConsumer<>(consumer);
     }
@@ -62,7 +62,7 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
      */
     static Object toRealConsumer(MessageConsumer<?, ?> consumer) {
         return consumer instanceof DelegatingConsumer
-               ? ((DelegatingConsumer) consumer).delegate()
+               ? ((DelegatingConsumer<?, ?>) consumer).delegate()
                : consumer;
     }
 
@@ -89,7 +89,7 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
         }
     }
 
-    private static final class DelegatingStateConsumer<S extends EntityState>
+    private static final class DelegatingStateConsumer<S extends EntityState<?>>
             extends DelegatingConsumer<S, EmptyContext>
             implements StateConsumer<S> {
 

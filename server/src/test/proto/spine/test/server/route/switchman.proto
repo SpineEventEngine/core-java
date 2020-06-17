@@ -44,9 +44,11 @@ enum SwitchPosition {
 message LogState {
     option (entity).kind = AGGREGATE;
 
-    map<string, int32> counters = 1;
+    int64 id = 1;
 
-    repeated string missing_switchman = 2;
+    map<string, int32> counters = 2;
+
+    repeated string missing_switchman = 3;
 }
 
 // A simple counter of turned switches.

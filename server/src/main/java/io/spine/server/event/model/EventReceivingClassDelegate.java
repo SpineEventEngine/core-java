@@ -55,8 +55,8 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     private final ImmutableSet<EventClass> events;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
-    private final ImmutableSet<StateClass> domesticStates;
-    private final ImmutableSet<StateClass> externalStates;
+    private final ImmutableSet<StateClass<?>> domesticStates;
+    private final ImmutableSet<StateClass<?>> externalStates;
 
     /**
      * Creates new instance for the passed raw class with methods obtained
@@ -100,14 +100,14 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains domestic entity states to which the delegating class is subscribed.
      */
-    public ImmutableSet<StateClass> domesticStates() {
+    public ImmutableSet<StateClass<?>> domesticStates() {
         return domesticStates;
     }
 
     /**
      * Obtains external entity states to which the delegating class is subscribed.
      */
-    public ImmutableSet<StateClass> externalStates() {
+    public ImmutableSet<StateClass<?>> externalStates() {
         return externalStates;
     }
 
@@ -123,7 +123,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *
      * @throws IllegalStateException if there is such method in the class
      */
-    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass originClass) {
+    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass<?> originClass) {
         return handlers.handlersOf(eventClass, originClass);
     }
 
@@ -132,26 +132,25 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *
      * @throws IllegalStateException if there is such method in the class
      */
-    public M handlerOf(EventClass eventClass, MessageClass originClass) {
+    public M handlerOf(EventClass eventClass, MessageClass<?> originClass) {
         return handlers.handlerOf(eventClass, originClass);
     }
 
     /**
      * Obtains the classes of entity state messages from the passed handlers.
      */
-    private ImmutableSet<StateClass> extractStates(boolean external) {
+    private ImmutableSet<StateClass<?>> extractStates(boolean external) {
         EventClass updateEvent = StateClass.updateEvent();
         if (!handlers.containsClass(updateEvent)) {
             return ImmutableSet.of();
         }
         ImmutableSet<M> stateHandlers = handlers.handlersOf(updateEvent);
-        ImmutableSet<StateClass> result =
+        ImmutableSet<StateClass<?>> result =
                 stateHandlers.stream()
                         .filter(h -> h instanceof StateSubscriberMethod)
                         .map(h -> (StateSubscriberMethod) h)
                         .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
-                        .map(StateSubscriberMethod::stateType)
-                        .map(StateClass::from)
+                        .map(StateSubscriberMethod::stateClass)
                         .collect(toImmutableSet());
         return result;
     }

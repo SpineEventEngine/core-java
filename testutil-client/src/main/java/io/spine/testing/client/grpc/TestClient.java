@@ -25,7 +25,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.CommandMessage;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.CommandServiceGrpc;
@@ -101,7 +101,7 @@ public class TestClient implements Logging {
      *         an entity type to query
      * @return query response with the state of entities obtained from the server
      */
-    public QueryResponse queryAll(Class<? extends EntityState> messageType) {
+    public QueryResponse queryAll(Class<? extends EntityState<?>> messageType) {
         Query query = requestFactory.query()
                                     .all(messageType);
         try {

@@ -27,7 +27,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.GeneratedMessageV3;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.code.proto.EntityStateOption;
 import io.spine.core.Event;
 import io.spine.option.EntityOption;
@@ -100,7 +100,7 @@ public final class EntityVisibility implements Serializable {
      *         therefore this method handles {@code Event.class} as a special case and returns
      *         {@code NONE} visibility level for it.
      */
-    public static Optional<EntityVisibility> of(Class<? extends EntityState> stateClass) {
+    public static Optional<EntityVisibility> of(Class<? extends EntityState<?>> stateClass) {
         checkNotNull(stateClass);
 
         if (Event.class.equals(stateClass)) {

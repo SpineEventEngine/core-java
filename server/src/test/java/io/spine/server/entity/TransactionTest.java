@@ -21,9 +21,9 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -59,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public abstract class TransactionTest<I,
         E extends TransactionalEntity<I, S, B>,
-        S extends EntityState,
+        S extends EntityState<I>,
         B extends ValidatingBuilder<S>> {
 
     /**
@@ -120,7 +120,7 @@ public abstract class TransactionTest<I,
                 .build();
     }
 
-    protected abstract DispatchOutcome applyEvent(Transaction tx, Event event);
+    protected abstract DispatchOutcome applyEvent(Transaction<I, E, S, B> tx, Event event);
 
     @BeforeEach
     void setUp() {

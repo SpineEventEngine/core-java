@@ -21,7 +21,7 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.Message;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventStorage;
@@ -67,7 +67,7 @@ public interface StorageFactory extends AutoCloseable {
      * @param aggregateCls
      *         the class of {@code Aggregate}s to be stored
      */
-    default <I, S extends EntityState> AggregateStorage<I, S>
+    default <I, S extends EntityState<I>> AggregateStorage<I, S>
     createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, S, ?>> aggregateCls) {
         return new AggregateStorage<>(context, aggregateCls, this);
     }
@@ -136,7 +136,7 @@ public interface StorageFactory extends AutoCloseable {
      * @param entityClass
      *         the class of entities to be stored
      */
-    default <I, S extends EntityState> EntityRecordStorage<I, S>
+    default <I, S extends EntityState<I>> EntityRecordStorage<I, S>
     createEntityRecordStorage(ContextSpec context, Class<? extends Entity<I, S>> entityClass) {
         EntityRecordStorage<I, S> result =
                 new EntityRecordStorage<>(this, entityClass, context.isMultitenant());

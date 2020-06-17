@@ -22,14 +22,14 @@ package io.spine.server.procman.given.pm;
 
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRouting;
-import io.spine.server.test.shared.AnyProcess;
+import io.spine.test.procman.ElephantProcess;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 
 import static io.spine.server.route.EventRoute.withId;
 
 public final class TestProcessManagerRepo
-        extends ProcessManagerRepository<ProjectId, TestProcessManager, AnyProcess> {
+        extends ProcessManagerRepository<ProjectId, TestProcessManager, ElephantProcess> {
 
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {

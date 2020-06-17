@@ -21,7 +21,7 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.server.DefaultRepository;
 import io.spine.server.procman.model.ProcessManagerClass;
 
@@ -35,7 +35,7 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
 @Internal
 public final class DefaultProcessManagerRepository<I,
                                                    P extends ProcessManager<I, S, ?>,
-                                                   S extends EntityState>
+                                                   S extends EntityState<I>>
         extends ProcessManagerRepository<I, P, S>
         implements DefaultRepository {
 

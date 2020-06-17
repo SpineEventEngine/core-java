@@ -315,7 +315,7 @@ public class Given {
     static final String PROJECTS_CONTEXT_NAME = "Projects";
 
     static class ProjectDetailsRepository
-            extends ProjectionRepository<io.spine.test.commandservice.ProjectId,
+            extends ProjectionRepository<io.spine.test.projection.ProjectId,
                                          ProjectDetails,
                                          io.spine.test.projection.Project> {
     }
@@ -335,11 +335,11 @@ public class Given {
     }
 
     static class ProjectDetails
-            extends Projection<io.spine.test.commandservice.ProjectId,
+            extends Projection<io.spine.test.projection.ProjectId,
                                io.spine.test.projection.Project,
                                io.spine.test.projection.Project.Builder> {
 
-        private ProjectDetails(io.spine.test.commandservice.ProjectId id) {
+        private ProjectDetails(io.spine.test.projection.ProjectId id) {
             super(id);
         }
 

@@ -26,8 +26,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
 import io.spine.base.Time;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
@@ -106,7 +106,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S>
  *         the type of projection state messages
  */
-public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState>
+public abstract class ProjectionRepository<I,
+                                           P extends Projection<I, S, ?>,
+                                           S extends EntityState<I>>
         extends EventDispatchingRepository<I, P, S> {
 
     private @MonotonicNonNull Inbox<I> inbox;
@@ -234,10 +236,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     private void validate(StateUpdateRouting<I> routing) throws IllegalStateException {
         ProjectionClass<P> cls = projectionClass();
-        Set<StateClass> stateClasses = union(cls.domesticStates(), cls.externalStates());
-        ImmutableList<StateClass> unsupported =
+        Set<StateClass<?>> stateClasses = union(cls.domesticStates(), cls.externalStates());
+        ImmutableList<StateClass<?>> unsupported =
                 stateClasses.stream()
-                            .filter(c -> !routing.supports(c.value()))
+                            .filter(c -> !routing.supports(c.typedValue()))
                             .collect(toImmutableList());
         if (!unsupported.isEmpty()) {
             boolean moreThanOne = unsupported.size() > 1;

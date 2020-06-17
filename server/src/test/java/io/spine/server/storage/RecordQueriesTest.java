@@ -26,8 +26,8 @@ import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
-import io.spine.base.EntityColumn;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityColumn;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
@@ -40,6 +40,7 @@ import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.entity.storage.given.TestProjection;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
 import io.spine.testdata.Sample;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
@@ -104,7 +105,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .addFilter(compositeFilter)
                 .build();
 
-        EntityRecordSpec<String> columns = EntityRecordSpec.of(TestEntity.class);
+        EntityRecordSpec<StgProjectId> columns = EntityRecordSpec.of(TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
                      () -> RecordQueries.from(filters, columns));
@@ -121,7 +122,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .addFilter(compositeFilter)
                 .build();
 
-        EntityRecordSpec<String> columns = EntityRecordSpec.of(TestEntity.class);
+        EntityRecordSpec<StgProjectId> columns = EntityRecordSpec.of(TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
                      () -> RecordQueries.from(filters, columns));
@@ -152,7 +153,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .setIdFilter(idFilter)
                 .addFilter(aggregatingFilter)
                 .build();
-        EntityRecordSpec<String> spec = EntityRecordSpec.of(TestProjection.class);
+        EntityRecordSpec<StgProjectId> spec = EntityRecordSpec.of(TestProjection.class);
         RecordQuery<?> query = RecordQueries.from(filters, spec);
         assertNotNull(query);
 

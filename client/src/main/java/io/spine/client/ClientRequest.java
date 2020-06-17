@@ -21,8 +21,8 @@
 package io.spine.client;
 
 import io.spine.base.CommandMessage;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.base.entity.EntityState;
 import io.spine.core.UserId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -67,7 +67,7 @@ public class ClientRequest {
     /**
      * Creates a builder for customizing subscription for the passed entity state type.
      */
-    public <S extends EntityState> SubscriptionRequest<S> subscribeTo(Class<S> type) {
+    public <S extends EntityState<?>> SubscriptionRequest<S> subscribeTo(Class<S> type) {
         checkNotNull(type);
         return new SubscriptionRequest<>(this, type);
     }
@@ -83,7 +83,7 @@ public class ClientRequest {
     /**
      * Creates a builder for constructing a query for messages of the specified type.
      */
-    public <S extends EntityState> QueryRequest<S> select(Class<S> type) {
+    public <S extends EntityState<?>> QueryRequest<S> select(Class<S> type) {
         return new QueryRequest<>(this, type);
     }
 

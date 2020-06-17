@@ -23,8 +23,8 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -47,7 +47,7 @@ import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
  * @param <I> the type of the identifiers of stored entities
  * @param <S> the type of {@code Entity} state
  */
-public class EntityRecordStorage<I, S extends EntityState>
+public class EntityRecordStorage<I, S extends EntityState<I>>
         extends RecordStorageDelegate<I, EntityRecord> {
 
     private final RecordQuery<I> findActiveRecordsQuery;

@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.server.entity.storage.SystemColumn;
 
@@ -30,7 +30,7 @@ import io.spine.server.entity.storage.SystemColumn;
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literals in annotation.
 @Internal
-public interface HasVersionColumn<I, S extends EntityState> extends Entity<I, S> {
+public interface HasVersionColumn<I, S extends EntityState<I>> extends Entity<I, S> {
 
     /**
      * Obtains the version of the entity.

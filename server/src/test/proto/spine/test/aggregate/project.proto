@@ -55,6 +55,39 @@ message Project {
     Status status = 4;
 }
 
+// An aggregate with a `String` identifier.
+message StringProject {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    string id = 1 [(required) = false];
+
+    string name = 2;
+    repeated Task task = 3;
+    Status status = 4;
+}
+
+// An aggregate with an `Integer` identifier.
+message IntegerProject {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    int32 id = 1 [(required) = false];
+
+    string name = 2;
+    repeated Task task = 3;
+    Status status = 4;
+}
+
+// An aggregate with a `Long` identifier.
+message LongProject {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    int64 id = 1 [(required) = false];
+
+    string name = 2;
+    repeated Task task = 3;
+    Status status = 4;
+}
+
 message ProjectLifecycle {
     option (entity) = {kind: AGGREGATE visibility: FULL};
 
@@ -84,6 +117,14 @@ message Task {
 
 message SubProjectList {
     option (entity) = {kind: AGGREGATE visibility: FULL};
+
     ProjectId parent_project = 1 [(required) = false, (validate) = false];
     repeated ProjectId item = 2;
+}
+
+message ParentState {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    ProjectId parent_project = 1;
+    string value = 2;
 }

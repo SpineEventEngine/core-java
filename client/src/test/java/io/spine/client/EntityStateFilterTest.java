@@ -22,8 +22,8 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Int32Value;
-import io.spine.base.EntityStateField;
 import io.spine.base.FieldPath;
+import io.spine.base.entity.EntityStateField;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import org.junit.jupiter.api.DisplayName;

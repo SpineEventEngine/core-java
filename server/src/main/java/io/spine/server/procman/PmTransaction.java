@@ -21,7 +21,7 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.DispatchCommand;
@@ -47,7 +47,7 @@ import io.spine.server.type.EventEnvelope;
  */
 @Internal
 public class PmTransaction<I,
-                           S extends EntityState,
+                           S extends EntityState<I>,
                            B extends ValidatingBuilder<S>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 

@@ -28,9 +28,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
+import io.spine.base.entity.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
@@ -118,7 +118,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings({
         "ClassReferencesSubclass", /* See the API note. */
         "ClassWithTooManyMethods",
-        "OverlyCoupledClass"})
+        "OverlyCoupledClass",
+        "OverlyComplexClass"})
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>>
         extends AbstractEventSubscriber
@@ -164,7 +165,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
      */
     private final UnsupportedCommandGuard unsupportedCommandGuard;
 
-    private final Map<Class<? extends EntityState>, Repository<?, ?>> repositories;
+    private final Map<Class<? extends EntityState<?>>, Repository<?, ?>> repositories;
 
     private Actor actor;
 
@@ -399,8 +400,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     }
 
     private void remember(Repository<?, ?> repository) {
-        Class<? extends EntityState> stateClass = repository.entityModelClass()
-                                                            .stateClass();
+        Class<? extends EntityState<?>> stateClass = repository.entityModelClass()
+                                                               .stateClass();
         repositories.put(stateClass, repository);
     }
 
@@ -893,7 +894,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
     /**
      * Obtains a Subject for an entity of the passed class with the given ID.
      */
-    public <I, E extends Entity<I, ? extends EntityState>>
+    public <I, E extends Entity<I, ? extends EntityState<I>>>
     EntitySubject assertEntity(Class<E> entityClass, I id) {
         @Nullable Entity<I, ?> found = findEntity(entityClass, id);
         return EntitySubject.assertEntity(found);
@@ -901,20 +902,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
 
     private <I> @Nullable Entity<I, ?>
     findEntity(Class<? extends Entity<I, ?>> entityClass, I id) {
-        Class<? extends EntityState> stateClass = stateClassOf(entityClass);
+        Class<? extends EntityState<I>> stateClass = stateClassOf(entityClass);
         return findByState(stateClass, id);
     }
 
     /**
      * Obtains a Subject for an entity which has the state of the passed class with the given ID.
      */
-    public <I, S extends EntityState> EntitySubject
+    public <I, S extends EntityState<I>> EntitySubject
     assertEntityWithState(Class<S> stateClass, I id) {
         @Nullable Entity<I, S> found = findByState(stateClass, id);
         return EntitySubject.assertEntity(found);
     }
 
-    private <I, S extends EntityState> @Nullable Entity<I, S>
+    private <I, S extends EntityState<I>> @Nullable Entity<I, S>
     findByState(Class<S> stateClass, I id) {
         @SuppressWarnings("unchecked")
         Repository<I, ? extends Entity<I, S>> repo =
@@ -922,7 +923,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext<T>
         return readOperation(() -> (Entity<I, S>) repo.find(id).orElse(null));
     }
 
-    private Repository<?, ?> repositoryOf(Class<? extends EntityState> stateClass) {
+    private Repository<?, ?> repositoryOf(Class<? extends EntityState<?>> stateClass) {
         Repository<?, ?> repository = repositories.get(stateClass);
         return repository;
     }

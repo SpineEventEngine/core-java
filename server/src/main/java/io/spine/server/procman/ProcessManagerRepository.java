@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -81,7 +81,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
-                                               S extends EntityState>
+                                               S extends EntityState<I>>
         extends EventDispatchingRepository<I, P, S>
         implements CommandDispatcherDelegate, EventProducingRepository {
 

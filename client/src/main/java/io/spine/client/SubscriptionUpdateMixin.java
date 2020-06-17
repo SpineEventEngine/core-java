@@ -22,8 +22,8 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.GeneratedMixin;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 
@@ -49,24 +49,24 @@ interface SubscriptionUpdateMixin {
      * @throws IndexOutOfBoundsException
      *         if the index is out of the range of entities returned by this update
      */
-    default EntityState state(int index) {
+    default EntityState<?> state(int index) {
         EntityStateUpdate stateUpdate =
                 getEntityUpdates().getUpdateList()
                                   .get(index);
-        EntityState result = (EntityState) AnyPacker.unpack(stateUpdate.getState());
+        EntityState<?> result = (EntityState<?>) AnyPacker.unpack(stateUpdate.getState());
         return result;
     }
 
     /**
      * Obtains an immutable list of stored entity states.
      */
-    default List<EntityState> states() {
-        ImmutableList<EntityState> result =
+    default List<EntityState<?>> states() {
+        ImmutableList<EntityState<?>> result =
                 getEntityUpdates().getUpdateList()
                                   .stream()
                                   .map(EntityStateUpdate::getState)
                                   .map(AnyPacker::unpack)
-                                  .map(EntityState.class::cast)
+                                  .map((s) -> (EntityState<?>) s)
                                   .collect(toImmutableList());
         return result;
     }

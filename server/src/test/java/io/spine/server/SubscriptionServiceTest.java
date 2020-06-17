@@ -24,7 +24,7 @@ import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityUpdates;
 import io.spine.client.Subscription;
@@ -281,8 +281,8 @@ class SubscriptionServiceTest {
         // `activationObserver::onCompleted` to be called.
         verifyState(activationObserver, false);
 
-        EntityState actual = memoizedEntity(activationObserver, Project.class);
-        EntityState expected = toExpected(entityId);
+        EntityState<?> actual = memoizedEntity(activationObserver, Project.class);
+        EntityState<?> expected = toExpected(entityId);
         ProtoTruth.assertThat(actual)
                   .comparingExpectedFieldsOnly()
                   .isEqualTo(expected);
@@ -301,13 +301,13 @@ class SubscriptionServiceTest {
         return projectId;
     }
 
-    private static EntityState toExpected(ProjectId entityId) {
+    private static EntityState<?> toExpected(ProjectId entityId) {
         return Project.newBuilder()
                .setId(entityId)
                .build();
     }
 
-    private static <T extends EntityState>
+    private static <T extends EntityState<?>>
     T memoizedEntity(MemoizingObserver<SubscriptionUpdate> observer, Class<T> stateType) {
         SubscriptionUpdate update = observer.firstResponse();
         EntityUpdates entityUpdates = update.getEntityUpdates();

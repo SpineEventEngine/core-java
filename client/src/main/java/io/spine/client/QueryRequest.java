@@ -21,8 +21,8 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.base.EntityColumn;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityColumn;
+import io.spine.base.entity.EntityState;
 
 import java.util.function.Function;
 
@@ -56,7 +56,7 @@ import static io.spine.client.Filters.extractFilters;
  *         the type of the queried entity states
  * @see Filters
  */
-public final class QueryRequest<S extends EntityState>
+public final class QueryRequest<S extends EntityState<?>>
         extends FilteringRequest<S, Query, QueryBuilder, QueryRequest<S>> {
 
     QueryRequest(ClientRequest parent, Class<S> type) {
@@ -103,7 +103,7 @@ public final class QueryRequest<S extends EntityState>
      * @param direction
      *         sorting direction
      */
-    public QueryRequest<S> orderBy(EntityColumn column, OrderBy.Direction direction) {
+    public QueryRequest<S> orderBy(EntityColumn<?, ?> column, OrderBy.Direction direction) {
         String columnName = column.name()
                                   .value();
         builder().orderBy(columnName, direction);

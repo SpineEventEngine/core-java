@@ -26,8 +26,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.ResponseFormat;
@@ -198,9 +198,9 @@ public class EntityRecordStorageTest
     void createUniqueStatesForSameId() {
         int checkCount = 10;
         StgProjectId id = newId();
-        Set<EntityState> states = newHashSet();
+        Set<EntityState<StgProjectId>> states = newHashSet();
         for (int i = 0; i < checkCount; i++) {
-            EntityState newState = newState(id);
+            EntityState<StgProjectId> newState = newState(id);
             if (states.contains(newState)) {
                 fail("RecordStorageTest.newState() should return unique messages.");
             }
@@ -219,7 +219,7 @@ public class EntityRecordStorageTest
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
             storage.write(id, record);
 
-            EntityState state = newState(id);
+            EntityState<StgProjectId> state = newState(id);
             FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
 
             Optional<EntityRecord> optional = storage.read(id, idMask);
@@ -241,7 +241,7 @@ public class EntityRecordStorageTest
 
             for (int i = 0; i < count; i++) {
                 StgProjectId id = newId();
-                EntityState state = newState(id);
+                EntityState<StgProjectId> state = newState(id);
                 if (stateClass == null) {
                     stateClass = state.getClass();
                 }

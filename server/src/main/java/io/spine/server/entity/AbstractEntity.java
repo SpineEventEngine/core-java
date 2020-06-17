@@ -29,8 +29,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.model.EntityClass;
@@ -68,7 +68,7 @@ import static io.spine.validate.Validate.checkValid;
         "SynchronizeOnThis" /* This class uses double-check idiom for lazy init of some
             fields. See Effective Java 2nd Ed. Item #71. */,
         "ClassWithTooManyMethods"})
-public abstract class AbstractEntity<I, S extends EntityState>
+public abstract class AbstractEntity<I, S extends EntityState<I>>
         implements Entity<I, S>, HandlerLifecycle {
 
     /**

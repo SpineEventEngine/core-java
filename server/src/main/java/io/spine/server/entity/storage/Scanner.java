@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
-import io.spine.base.EntityWithColumns;
+import io.spine.base.entity.EntityWithColumns;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromEntity;

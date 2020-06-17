@@ -22,8 +22,8 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.base.entity.EntityState;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.UserAccount;
@@ -74,8 +74,8 @@ class ClientRequestTest extends AbstractClientTest {
         @Test
         @DisplayName("`SubscriptionRequest`")
         void subscription() {
-            Class<? extends EntityState> messageType = UserAccount.class;
-            SubscriptionRequest<? extends EntityState> subscriptionRequest =
+            Class<? extends EntityState<?>> messageType = UserAccount.class;
+            SubscriptionRequest<? extends EntityState<?>> subscriptionRequest =
                     request.subscribeTo(messageType);
 
             assertThat(subscriptionRequest.messageType())
@@ -96,8 +96,8 @@ class ClientRequestTest extends AbstractClientTest {
         @Test
         @DisplayName("`QueryRequest`")
         void query() {
-            Class<? extends EntityState> messageType = UserAccount.class;
-            QueryRequest<? extends EntityState> queryRequest =
+            Class<? extends EntityState<?>> messageType = UserAccount.class;
+            QueryRequest<? extends EntityState<?>> queryRequest =
                     request.select(messageType);
 
             assertThat(queryRequest.messageType())

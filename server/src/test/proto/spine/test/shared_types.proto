@@ -29,6 +29,7 @@ option java_outer_classname = "SharedTypesProto";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 
 // This file defines messages that can be safely re-used in tests environments that do
 // not require domain-specific data.
@@ -137,4 +138,34 @@ message Int64Projection {
     string id = 1 [(required) = false];
 
     int64 value = 2;
+}
+
+// An aggregate which IDs are integers.
+message IntIdAggregate {
+
+    option (entity).kind = AGGREGATE;
+
+    int32 id = 1;
+
+    int32 value = 2;
+}
+
+// An aggregate which IDs are `Long` values.
+message LongIdAggregate {
+
+    option (entity).kind = AGGREGATE;
+
+    int64 id = 1;
+
+    int32 value = 2;
+}
+
+// An aggregate which IDs are `Timestamp`s.
+message TimestampIdAggregate {
+
+    option (entity).kind = AGGREGATE;
+
+    google.protobuf.Timestamp id = 1;
+
+    int32 value = 2;
 }

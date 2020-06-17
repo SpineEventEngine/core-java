@@ -27,5 +27,5 @@ import io.spine.server.test.shared.EmptyAggregate;
  * The repository of {@link io.spine.server.aggregate.given.repo.AnemicAggregate}.
  */
 public class AnemicAggregateRepository
-        extends AggregateRepository<Integer, AnemicAggregate, EmptyAggregate> {
+        extends AggregateRepository<String, AnemicAggregate, EmptyAggregate> {
 }

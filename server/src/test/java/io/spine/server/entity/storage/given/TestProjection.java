@@ -22,6 +22,7 @@ package io.spine.server.entity.storage.given;
 
 import io.spine.server.projection.Projection;
 import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
 
-public class TestProjection extends Projection<String, StgProject, StgProject.Builder> {
+public class TestProjection extends Projection<StgProjectId, StgProject, StgProject.Builder> {
 }

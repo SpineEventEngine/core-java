@@ -42,7 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("TransactionalEventPlayer should")
+@SuppressWarnings("rawtypes")   // for simplicity.
+@DisplayName("`TransactionalEventPlayer` should")
 class TransactionalEventPlayerTest {
 
     @Test
@@ -85,11 +86,11 @@ class TransactionalEventPlayerTest {
      * Stub implementation of {@code TransactionalEntity}.
      */
     private static class TxPlayingEntity
-            extends TransactionalEntity<Long, StringEntity, StringEntity.Builder>
+            extends TransactionalEntity<String, StringEntity, StringEntity.Builder>
             implements EventPlayer {
 
         private TxPlayingEntity() {
-            super(0L);
+            super("TxPlayingEntity ID");
         }
 
         @Override

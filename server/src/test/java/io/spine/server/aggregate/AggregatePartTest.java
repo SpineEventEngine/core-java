@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.CommandMessage;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.grpc.MemoizingObserver;
@@ -115,13 +115,13 @@ class AggregatePartTest {
         assertEquals(ASSIGNEE, task.getAssignee());
     }
 
-    private void assertEntityCount(Class<? extends EntityState> stateType, int expectedCount) {
-        Collection<? extends EntityState> entityStates = queryEntities(stateType);
+    private void assertEntityCount(Class<? extends EntityState<?>> stateType, int expectedCount) {
+        Collection<? extends EntityState<?>> entityStates = queryEntities(stateType);
         assertThat(entityStates).hasSize(expectedCount);
     }
 
-    private Collection<? extends EntityState>
-    queryEntities(Class<? extends EntityState> entityClass) {
+    private Collection<? extends EntityState<?>>
+    queryEntities(Class<? extends EntityState<?>> entityClass) {
         Query query = factory.query()
                              .all(entityClass);
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
@@ -135,7 +135,7 @@ class AggregatePartTest {
     }
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
-        Constructor constructor =
+        Constructor<AnAggregateRoot> constructor =
                 AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, ProjectId.class);
         NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)

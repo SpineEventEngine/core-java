@@ -23,8 +23,8 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Version;
@@ -137,7 +137,7 @@ final class AggregateRecords {
                             .setLifecycleFlags(flags)
                             .setVersion(version);
         if (mirrorState) {
-            EntityState state = aggregate.state();
+            EntityState<I> state = aggregate.state();
             builder.setState(AnyPacker.pack(state));
         }
         return builder.vBuild();

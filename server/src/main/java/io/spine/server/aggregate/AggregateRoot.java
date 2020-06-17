@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.annotation.Experimental;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.server.BoundedContext;
 
 import java.util.Optional;
@@ -73,7 +73,7 @@ public class AggregateRoot<I> {
      *         if a repository was not found, or the ID type of the part state does not match
      *         the ID type of this {@code AggregateRoot}
      */
-    protected <S extends EntityState, A extends AggregatePart<I, S, ?, ?>>
+    protected <S extends EntityState<I>, A extends AggregatePart<I, S, ?, ?>>
     S partState(Class<S> partStateClass) {
         AggregatePartRepository<I, A, S, ?> repo = repositoryOf(partStateClass);
         AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(id());
@@ -89,7 +89,7 @@ public class AggregateRoot<I> {
      *         of this {@code AggregateRoot}
      */
     @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
-    private <S extends EntityState, A extends AggregatePart<I, S, ?, ?>>
+    private <S extends EntityState<I>, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, S, ?> repositoryOf(Class<S> stateClass) {
         Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
         Optional<? extends AggregatePartRepository<?, ?, ?, ?>> partRepository = boundedContext

@@ -21,7 +21,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -39,7 +39,7 @@ import io.spine.server.type.EventEnvelope;
  */
 @Internal
 public class AggregateTransaction<I,
-                                  S extends EntityState,
+                                  S extends EntityState<I>,
                                   B extends ValidatingBuilder<S>>
         extends EventPlayingTransaction<I, Aggregate<I, S, B>, S, B> {
 

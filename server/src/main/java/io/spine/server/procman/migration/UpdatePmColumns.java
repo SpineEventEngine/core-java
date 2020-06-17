@@ -21,7 +21,7 @@
 package io.spine.server.procman.migration;
 
 import io.spine.annotation.Experimental;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
@@ -34,7 +34,7 @@ import io.spine.server.procman.ProcessManagerMigration;
  *
  * <p>When applied to an entity, this operation will trigger the recalculation of entity storage
  * fields according to the current implementation of
- * {@link io.spine.base.EntityWithColumns EntityWithColumns}-derived methods.
+ * {@link io.spine.base.entity.EntityWithColumns EntityWithColumns}-derived methods.
  *
  * <p>Such operation may be useful when the logic behind manually calculated columns changes as
  * well as when adding the new columns to an entity.
@@ -49,7 +49,7 @@ import io.spine.server.procman.ProcessManagerMigration;
 @Experimental
 public final class UpdatePmColumns<I,
                                    P extends ProcessManager<I, S, B>,
-                                   S extends EntityState,
+                                   S extends EntityState<I>,
                                    B extends ValidatingBuilder<S>>
         extends ProcessManagerMigration<I, P, S, B> {
 

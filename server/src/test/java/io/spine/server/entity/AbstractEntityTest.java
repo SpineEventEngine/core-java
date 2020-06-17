@@ -22,9 +22,10 @@ package io.spine.server.entity;
 
 import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.server.entity.given.entity.AnEntity;
 import io.spine.server.entity.given.entity.NaturalNumberEntity;
+import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.server.number.NaturalNumber;
@@ -36,7 +37,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Identifier.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -80,7 +80,7 @@ class AbstractEntityTest {
     @Test
     @DisplayName("throw InvalidEntityStateException if state is invalid")
     void rejectInvalidState() {
-        AbstractEntity<?, NaturalNumber> entity = new NaturalNumberEntity(0L);
+        AbstractEntity<?, NaturalNumber> entity = new NaturalNumberEntity(0);
         NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
         try {
             // This should pass.
@@ -110,15 +110,11 @@ class AbstractEntityTest {
     @DisplayName("allow valid state")
     void allowValidState() {
         AnEntity entity = new AnEntity(0L);
-        ProjectId id = ProjectId
+        LongIdAggregate state = LongIdAggregate
                 .newBuilder()
-                .setId(newUuid())
+                .setId(entity.id())
                 .build();
-        Project project = Project
-                .newBuilder()
-                .setId(id)
-                .build();
-        assertTrue(entity.checkEntityState(project)
+        assertTrue(entity.checkEntityState(state)
                          .isEmpty());
     }
 

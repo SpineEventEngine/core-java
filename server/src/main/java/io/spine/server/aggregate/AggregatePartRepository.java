@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregatePartClass;
 
@@ -44,7 +44,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
 @Experimental
 public abstract class AggregatePartRepository<I,
                                               A extends AggregatePart<I, S, ?, R>,
-                                              S extends EntityState,
+                                              S extends EntityState<I>,
                                               R extends AggregateRoot<I>>
                       extends AggregateRepository<I, A, S> {
 

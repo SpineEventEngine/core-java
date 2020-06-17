@@ -21,7 +21,7 @@
 package io.spine.server.procman.migration;
 
 import io.spine.annotation.Experimental;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Migration;
@@ -39,7 +39,7 @@ import io.spine.server.procman.ProcessManagerMigration;
 @Experimental
 public final class MarkPmDeleted<I,
                                  P extends ProcessManager<I, S, B>,
-                                 S extends EntityState,
+                                 S extends EntityState<I>,
                                  B extends ValidatingBuilder<S>>
         extends ProcessManagerMigration<I, P, S, B> {
 

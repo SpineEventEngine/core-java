@@ -21,8 +21,8 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityUpdates;

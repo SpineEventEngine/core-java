@@ -21,7 +21,7 @@
 package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;
@@ -33,9 +33,9 @@ import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 
 /**
  * A composite query filter which targets one or more entity
- * {@link io.spine.base.EntityColumn columns}.
+ * {@link io.spine.base.entity.EntityColumn columns}.
  */
-public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState> {
+public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState<?>> {
 
     private static final long serialVersionUID = 0L;
 

@@ -25,15 +25,15 @@
  * as we want to manage the versions in a single source.
  */
 
-final def spineVersion = '1.5.1'
+final def spineVersion = '1.5.19'
 
 ext {
     // The version of the modules in this project.
     versionToPublish = spineVersion
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.5.0'
+    spineBaseVersion = '1.5.19'
 
     // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.5.0'
+    spineTimeVersion = '1.5.19'
 }

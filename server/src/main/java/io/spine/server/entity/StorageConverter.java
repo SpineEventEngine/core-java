@@ -23,8 +23,8 @@ package io.spine.server.entity;
 import com.google.common.base.Converter;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -39,7 +39,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * An abstract base for converters of entities into {@link EntityRecord}.
  */
-public abstract class StorageConverter<I, E extends Entity<I, S>, S extends EntityState>
+public abstract class StorageConverter<I, E extends Entity<I, S>, S extends EntityState<I>>
         extends Converter<E, EntityRecord> implements Serializable {
 
     private static final long serialVersionUID = 0L;

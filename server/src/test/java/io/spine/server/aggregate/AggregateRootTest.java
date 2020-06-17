@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.AggregateRootTestEnv;

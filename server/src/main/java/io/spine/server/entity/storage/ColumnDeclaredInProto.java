@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.storage.Column;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,7 +36,7 @@ interface ColumnDeclaredInProto extends Column {
     /**
      * Extracts the column value currently stored in the entity state.
      */
-    @Nullable Object valueIn(EntityState state);
+    @Nullable Object valueIn(EntityState<?> state);
 
     /**
      * Obtains the corresponding proto field declaration.

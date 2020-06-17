@@ -12,4 +12,6 @@ option java_multiple_files = true;
 message EmptyEntityState {
     option (entity).kind = ENTITY;
     option (entity).visibility = FULL;
+
+    int32 id = 1;
 }

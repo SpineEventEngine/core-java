@@ -24,8 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.base.entity.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.CommandId;
@@ -85,7 +85,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @see Aggregate
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
-public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState>
+public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState<I>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository,
                    EventDispatcherDelegate, QueryableRepository {

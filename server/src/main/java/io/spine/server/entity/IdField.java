@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.model.EntityClass;
@@ -42,7 +42,7 @@ final class IdField {
     private final @Nullable FieldDeclaration declaration;
 
     static IdField of(EntityClass<?> entityClass) {
-        EntityState defaultState = entityClass.defaultState();
+        EntityState<?> defaultState = entityClass.defaultState();
         List<FieldDescriptor> fields =
                 defaultState.getDescriptorForType()
                             .getFields();
@@ -78,7 +78,7 @@ final class IdField {
      * Initializes the passed builder with the passed value of the entity ID,
      * <em>iff</em> the field is required.
      */
-    <I, S extends EntityState, B extends ValidatingBuilder<S>>
+    <I, S extends EntityState<I>, B extends ValidatingBuilder<S>>
     void initBuilder(B builder, I id) {
         checkNotNull(builder);
         checkNotNull(id);

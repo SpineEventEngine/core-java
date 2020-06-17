@@ -20,7 +20,7 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
@@ -64,8 +64,10 @@ final class InMemoryTypeRegistry implements TypeRegistry {
         TypeUrl entityType = repository.entityStateType();
 
         if (repository instanceof RecordBasedRepository) {
-            RecordBasedRepository<I, E, ? extends EntityState> recordBasedRepository
-                    = (RecordBasedRepository<I, E, ? extends EntityState>) repository;
+            @SuppressWarnings("unchecked")  /* as per method declaration;
+                                               note, this warning is emitted by Error Prone only. */
+            RecordBasedRepository<I, E, ? extends EntityState<I>> recordBasedRepository
+                    = (RecordBasedRepository<I, E, ? extends EntityState<I>>) repository;
             recordRepositories.put(entityType, recordBasedRepository);
         }
         if (repository instanceof AggregateRepository) {

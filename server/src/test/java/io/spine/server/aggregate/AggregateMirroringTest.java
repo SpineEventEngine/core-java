@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.CommandMessage;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.CommandFactory;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
@@ -89,7 +89,7 @@ class AggregateMirroringTest {
         @DisplayName("all instances")
         void includeAll() {
             Query query = queries.all(MRPhoto.class);
-            List<? extends EntityState> readMessages = execute(query);
+            List<? extends EntityState<?>> readMessages = execute(query);
             assertThat(readMessages, containsInAnyOrder(givenPhotos.toArray()));
         }
 
@@ -163,7 +163,7 @@ class AggregateMirroringTest {
         }
 
         private void checkRead(Query query, MRPhoto... expected) {
-            List<? extends EntityState> readMessages = execute(query);
+            List<? extends EntityState<?>> readMessages = execute(query);
             assertThat(readMessages, containsInAnyOrder(expected));
         }
 
@@ -193,18 +193,18 @@ class AggregateMirroringTest {
             dispatchCommand(delete(photo));
         }
 
-        private List<? extends EntityState> execute(Query query) {
+        private List<? extends EntityState<?>> execute(Query query) {
             MemoizingObserver<QueryResponse> observer = new MemoizingObserver<>();
             context.stand()
                    .execute(query, observer);
             QueryResponse response = observer.responses()
                                              .get(0);
             List<EntityStateWithVersion> result = response.getMessageList();
-            List<? extends EntityState> readMessages =
+            List<? extends EntityState<?>> readMessages =
                     result.stream()
                           .map(EntityStateWithVersion::getState)
                           .map(unpackFunc())
-                          .map(EntityState.class::cast)
+                          .map((s) -> (EntityState<?>) s)
                           .collect(toList());
             return readMessages;
         }

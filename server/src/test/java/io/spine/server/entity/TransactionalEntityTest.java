@@ -19,7 +19,7 @@
  */
 package io.spine.server.entity;
 
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Versions;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.given.TeEntity;
@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("rawtypes")   // for simplicity
 @DisplayName("TransactionalEntity should")
 class TransactionalEntityTest {
 
@@ -225,7 +226,7 @@ class TransactionalEntityTest {
     }
 
     private static TransactionalEntity<?, ?, ?> newEntity() {
-        return new TeEntity(1L);
+        return new TeEntity("TransactionalId");
     }
 
     private static TransactionalEntity entityWithActiveTx(boolean txChanged) {

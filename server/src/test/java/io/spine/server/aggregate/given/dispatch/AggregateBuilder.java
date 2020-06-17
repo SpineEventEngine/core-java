@@ -22,7 +22,7 @@ package io.spine.server.aggregate.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
@@ -39,7 +39,7 @@ import io.spine.server.entity.EntityBuilder;
 @VisibleForTesting
 public class AggregateBuilder<A extends Aggregate<I, S, ?>,
                               I,
-                              S extends EntityState>
+                              S extends EntityState<I>>
         extends EntityBuilder<A, I, S> {
 
     public AggregateBuilder() {

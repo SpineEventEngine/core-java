@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -41,7 +41,7 @@ import static io.spine.util.Preconditions2.checkPositive;
  * @param <I> the type of aggregate IDs
  * @param <S> the type of aggregate state
  */
-final class ReadOperation<I, S extends EntityState> {
+final class ReadOperation<I, S extends EntityState<I>> {
 
     private final AggregateStorage<I, S> storage;
     private final Deque<Event> history;

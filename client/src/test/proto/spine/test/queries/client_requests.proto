@@ -65,7 +65,7 @@ message TestEntity {
 message TestEntityName {
     option (entity).kind = ENTITY;
 
-    string value = 1 [(column) = true];
+    string value = 1;
 }
 
 // A message-typed field of the `TestEntity` which is used to test operations on nested fields.

@@ -29,8 +29,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
@@ -80,7 +80,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  *         the type of the {@link Entity} of this repository
  */
 public abstract
-class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends EntityState>
+class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends EntityState<I>>
         extends TenantAwareTest {
 
     private RecordBasedRepository<I, E, S> repository;

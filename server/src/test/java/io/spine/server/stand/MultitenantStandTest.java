@@ -21,7 +21,7 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
@@ -102,7 +102,7 @@ class MultitenantStandTest extends StandTest {
     MemoizeSubscriptionCallback
     subscribeToAllOf(Stand stand,
                      ActorRequestFactory requestFactory,
-                     Class<? extends EntityState> stateClass) {
+                     Class<? extends EntityState<?>> stateClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(stateClass);
         MemoizeSubscriptionCallback action = new MemoizeSubscriptionCallback();

@@ -23,8 +23,8 @@ package io.spine.client;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.base.entity.EntityState;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;

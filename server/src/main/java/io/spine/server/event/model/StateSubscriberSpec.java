@@ -22,8 +22,8 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.base.entity.EntityState;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.MethodParams;
@@ -48,14 +48,14 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     MESSAGE(classImplementing(EntityState.class)) {
         @Override
-        protected Object[] arrangeArguments(EntityState state, EventEnvelope event) {
+        protected Object[] arrangeArguments(EntityState<?> state, EventEnvelope event) {
             return new Object[]{state};
         }
     },
 
     MESSAGE_AND_EVENT_CONTEXT(classImplementing(EntityState.class), exactly(EventContext.class)) {
         @Override
-        protected Object[] arrangeArguments(EntityState state, EventEnvelope event) {
+        protected Object[] arrangeArguments(EntityState<?> state, EventEnvelope event) {
             return new Object[]{state, event.context()};
         }
     };
@@ -72,8 +72,8 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
             return false;
         }
         @SuppressWarnings("unchecked") // Checked above.
-        Class<? extends EntityState> firstParameter =
-                (Class<? extends EntityState>) params.type(0);
+        Class<? extends EntityState<?>> firstParameter =
+                (Class<? extends EntityState<?>>) params.type(0);
         Optional<EntityVisibility> visibilityOption = EntityVisibility.of(firstParameter);
         if (!visibilityOption.isPresent()) {
             return false;
@@ -92,9 +92,9 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         checkArgument(eventMessage instanceof EntityStateChanged,
                       "Must be an `%s` event.", EntityStateChanged.class.getSimpleName());
         EntityStateChanged systemEvent = (EntityStateChanged) eventMessage;
-        EntityState state = (EntityState) unpack(systemEvent.getNewState());
+        EntityState<?> state = (EntityState<?>) unpack(systemEvent.getNewState());
         return arrangeArguments(state, event);
     }
 
-    protected abstract Object[] arrangeArguments(EntityState state, EventEnvelope event);
+    protected abstract Object[] arrangeArguments(EntityState<?> state, EventEnvelope event);
 }

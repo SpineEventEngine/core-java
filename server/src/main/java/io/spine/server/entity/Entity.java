@@ -20,8 +20,8 @@
 
 package io.spine.server.entity;
 
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.entity.model.EntityClass;
@@ -42,7 +42,7 @@ import io.spine.string.Stringifiers;
  * @param <S>
  *         the type of the entity state
  */
-public interface Entity<I, S extends EntityState> extends WithLifecycle {
+public interface Entity<I, S extends EntityState<I>> extends WithLifecycle {
 
     /**
      * Obtains the identifier of the entity.
@@ -79,7 +79,7 @@ public interface Entity<I, S extends EntityState> extends WithLifecycle {
     /**
      * Enumeration of generic type parameters of this interface.
      */
-    enum GenericParameter implements GenericTypeIndex<Entity> {
+    enum GenericParameter implements GenericTypeIndex<Entity<?, ?>> {
 
         /**
          * The index of the declaration of the generic parameter type {@code <I>} in

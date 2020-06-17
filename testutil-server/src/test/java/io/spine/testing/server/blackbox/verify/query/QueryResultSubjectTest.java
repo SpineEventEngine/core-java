@@ -23,7 +23,7 @@ package io.spine.testing.server.blackbox.verify.query;
 import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.client.QueryResponse;
 import io.spine.testing.SubjectTest;
 import org.junit.jupiter.api.DisplayName;
@@ -50,13 +50,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * {@linkplain QueryResultSubject#assertQueryResult(QueryResponse) way} of subject creation.
  */
 @DisplayName("QueryResultSubject should")
-class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<EntityState>> {
+class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<EntityState<?>>> {
 
     private static final String EXPECTED_ASSERTION_ERROR_TO_BE_THROWN =
             "Expected `AssertionError` to be thrown.";
 
     @Override
-    protected Subject.Factory<QueryResultSubject, Iterable<EntityState>> subjectFactory() {
+    protected Subject.Factory<QueryResultSubject, Iterable<EntityState<?>>> subjectFactory() {
         return queryResult();
     }
 
@@ -86,7 +86,7 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
     @DisplayName("return actual query results")
     void provideActualResults() {
         QueryResponse response = responseWithMultipleEntities();
-        ImmutableList<EntityState> actualEntities = assertWithSubjectThat(response).actual();
+        ImmutableList<EntityState<?>> actualEntities = assertWithSubjectThat(response).actual();
         assertThat(actualEntities).hasSize(2);
     }
 

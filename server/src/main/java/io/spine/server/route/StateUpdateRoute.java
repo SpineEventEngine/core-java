@@ -20,7 +20,7 @@
 
 package io.spine.server.route;
 
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.core.EventContext;
 
 /**
@@ -32,5 +32,6 @@ import io.spine.core.EventContext;
  *         the type of entity states to get IDs from
  */
 @FunctionalInterface
-public interface StateUpdateRoute<I, M extends EntityState> extends Multicast<I, M, EventContext> {
+public interface StateUpdateRoute<I, M extends EntityState<?>>
+        extends Multicast<I, M, EventContext> {
 }
