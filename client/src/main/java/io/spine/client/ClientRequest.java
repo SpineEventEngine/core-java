@@ -20,10 +20,13 @@
 
 package io.spine.client;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.entity.EntityState;
 import io.spine.core.UserId;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
@@ -47,6 +50,9 @@ public class ClientRequest {
     private final UserId user;
     private final Client client;
 
+    private @Nullable ErrorHandler streamingErrorHandler;
+    private @Nullable ServerErrorHandler serverErrorHandler;
+
     ClientRequest(UserId user, Client client) {
         checkNotDefaultArg(user);
         this.user = user;
@@ -55,12 +61,15 @@ public class ClientRequest {
 
     ClientRequest(ClientRequest parent) {
         this(parent.user, parent.client);
+        this.streamingErrorHandler = parent.streamingErrorHandler;
+        this.serverErrorHandler = parent.serverErrorHandler;
     }
 
     /**
      * Creates a builder for customizing command request.
      */
     public CommandRequest command(CommandMessage c) {
+        checkNotNull(c);
         return new CommandRequest(this, c);
     }
 
@@ -99,5 +108,37 @@ public class ClientRequest {
      */
     protected final Client client() {
         return client;
+    }
+
+    /**
+     * Assigns a handler for errors occurred when delivering messages from the server.
+     *
+     * <p>If such an error occurs, no more results are expected from the server.
+     */
+    @CanIgnoreReturnValue
+    @OverridingMethodsMustInvokeSuper
+    public ClientRequest onStreamingError(ErrorHandler handler) {
+        this.streamingErrorHandler = checkNotNull(handler);
+        return this;
+    }
+
+    /**
+     * Assigns a handler for an error occurred on the server-side (such as validation error)
+     * in response to posting a request.
+     */
+    @CanIgnoreReturnValue
+    @OverridingMethodsMustInvokeSuper
+    public ClientRequest onServerError(ServerErrorHandler handler) {
+        checkNotNull(handler);
+        this.serverErrorHandler = handler;
+        return this;
+    }
+
+    final @Nullable ErrorHandler streamingErrorHandler() {
+        return streamingErrorHandler;
+    }
+
+    final @Nullable ServerErrorHandler serverErrorHandler() {
+        return serverErrorHandler;
     }
 }

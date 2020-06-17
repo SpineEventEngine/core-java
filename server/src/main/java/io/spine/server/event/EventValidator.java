@@ -22,7 +22,7 @@ package io.spine.server.event;
 
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.MessageInvalid;
+import io.spine.server.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ConstraintViolation;

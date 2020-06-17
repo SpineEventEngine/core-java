@@ -21,12 +21,12 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableList;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.given.AbstractReactorTestEnv.AutoCharityDonor;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.ServicePerformanceTracker;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,25 +41,27 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServed
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
 
-    private SingleTenantBlackBoxContext restaurantContext;
-    private SingleTenantBlackBoxContext deliveryContext;
-    private SingleTenantBlackBoxContext charityContext;
+    private BlackBoxContext restaurantContext;
+    private BlackBoxContext charityContext;
 
     private AutoCharityDonor charityDonor;
     private ServicePerformanceTracker performanceTracker;
 
     @BeforeEach
     void setUp() {
-        restaurantContext = BlackBoxBoundedContext.singleTenant();
-        deliveryContext = BlackBoxBoundedContext.singleTenant();
-        charityContext = BlackBoxBoundedContext.singleTenant();
-
-        charityDonor = new AutoCharityDonor();
-        charityContext.withEventDispatchers(charityDonor);
-
         performanceTracker = new ServicePerformanceTracker();
         RestaurantNotifier notifier = new RestaurantNotifier();
-        restaurantContext.withEventDispatchers(performanceTracker, notifier);
+        restaurantContext = BlackBoxContext.from(
+                BoundedContext.singleTenant("Restaurant")
+                              .addEventDispatcher(performanceTracker)
+                              .addEventDispatcher(notifier)
+        );
+
+        charityDonor = new AutoCharityDonor();
+        charityContext = BlackBoxContext.from(
+                BoundedContext.singleTenant("Charity")
+                              .addEventDispatcher(charityDonor)
+        );
     }
 
     @DisplayName("while dealing with domestic events")

@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model.given.classes;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
 import io.spine.test.event.model.ConferenceAnnounced;
@@ -34,8 +35,8 @@ import io.spine.test.event.model.TalkSubmitted;
  */
 public class ConferenceProgram implements EventSubscriber {
 
-    @Subscribe(external = true) // Pretend this is an external event.
-    void setConferenceDate(ConferenceAnnounced event) {
+    @Subscribe // Pretend this is an external event.
+    void setConferenceDate(@External ConferenceAnnounced event) {
         // Do nothing.
     }
 

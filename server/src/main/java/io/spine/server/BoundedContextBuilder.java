@@ -47,8 +47,10 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemFeatures;
+import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.SystemSettings;
 import io.spine.system.server.SystemWriteSide;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,7 +89,8 @@ public final class BoundedContextBuilder implements Logging {
      */
     private final Collection<EventDispatcher> eventDispatchers = new ArrayList<>();
 
-    private final SystemFeatures systemFeatures;
+    //TODO:2020-06-17:alex.tymchenko: rename the variable.
+    private final SystemSettings systemFeatures;
 
     private Stand stand;
     private Supplier<AggregateRootDirectory> rootDirectory;
@@ -105,7 +108,7 @@ public final class BoundedContextBuilder implements Logging {
      * @see BoundedContext#multitenant
      */
     BoundedContextBuilder(ContextSpec spec) {
-        this(spec, SystemFeatures.defaults());
+        this(spec, SystemSettings.defaults());
     }
 
     /**
@@ -118,7 +121,7 @@ public final class BoundedContextBuilder implements Logging {
      * @see BoundedContext#singleTenant
      * @see BoundedContext#multitenant
      */
-    private BoundedContextBuilder(ContextSpec spec, SystemFeatures systemFeatures) {
+    private BoundedContextBuilder(ContextSpec spec, SystemSettings systemFeatures) {
         this.spec = checkNotNull(spec);
         this.systemFeatures = checkNotNull(systemFeatures);
     }
@@ -189,8 +192,8 @@ public final class BoundedContextBuilder implements Logging {
      */
     TenantIndex buildTenantIndex() {
         TenantIndex result = isMultitenant()
-            ? checkNotNull(tenantIndex)
-            : TenantIndex.singleTenant();
+                             ? checkNotNull(tenantIndex)
+                             : TenantIndex.singleTenant();
         return result;
     }
 
@@ -316,7 +319,8 @@ public final class BoundedContextBuilder implements Logging {
      * <p>The order of appending the filters to the builder is the order of the filters in
      * the {@code EventBus}.
      *
-     * @param filter the filter to add
+     * @param filter
+     *         the filter to add
      */
     public BoundedContextBuilder addEventFilter(BusFilter<EventEnvelope> filter) {
         checkNotNull(filter);
@@ -508,9 +512,9 @@ public final class BoundedContextBuilder implements Logging {
      *
      * <p>Users may enable or disable some features of the system context.
      *
-     * @see SystemFeatures
+     * @see SystemSettings
      */
-    public SystemFeatures systemFeatures() {
+    public SystemSettings systemFeatures() {
         return systemFeatures;
     }
 
@@ -550,6 +554,7 @@ public final class BoundedContextBuilder implements Logging {
     EventBus buildEventBus(BoundedContext context) {
         checkNotNull(context);
         eventBus.injectContext(context);
+        eventBus.addListener(stand.eventListener());
         return eventBus.build();
     }
 
@@ -596,6 +601,13 @@ public final class BoundedContextBuilder implements Logging {
 
     private <B extends BoundedContext>
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
+        return buildPartial(instanceFactory, client, null);
+    }
+
+    private <B extends BoundedContext>
+    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
+                   SystemClient client,
+                   @Nullable Stand systemStand) {
         initTenantIndex();
         initCommandBus(client.writeSide());
         this.stand = createStand();
@@ -622,5 +634,38 @@ public final class BoundedContextBuilder implements Logging {
                 .newBuilder()
                 .setMultitenant(isMultitenant());
         return result.build();
+    }
+
+    //TODO:2020-06-17:alex.tymchenko: `withSubscriptionRegistryFrom`?
+//    private Stand createStand(SystemReadSide systemReadSide, @Nullable Stand systemStand) {
+//        Stand.Builder result = Stand
+//                .newBuilder()
+//                .setMultitenant(isMultitenant())
+//                .setSystemReadSide(systemReadSide);
+//        if (systemStand != null) {
+//            result.withSubscriptionRegistryFrom(systemStand);
+//        }
+//        return result.build();
+//    }
+
+    /**
+     * Creates a copy of this context builder for the purpose of testing.
+     */
+    @Internal
+    @VisibleForTesting
+    public BoundedContextBuilder testingCopy() {
+        String name = name().getValue();
+        EventEnricher enricher =
+                eventEnricher().orElseGet(() -> EventEnricher.newBuilder()
+                                                             .build());
+        BoundedContextBuilder copy =
+                isMultitenant()
+                ? BoundedContext.multitenant(name)
+                : BoundedContext.singleTenant(name);
+        copy.enrichEventsUsing(enricher);
+        repositories().forEach(copy::add);
+        commandDispatchers().forEach(copy::addCommandDispatcher);
+        eventDispatchers().forEach(copy::addEventDispatcher);
+        return copy;
     }
 }

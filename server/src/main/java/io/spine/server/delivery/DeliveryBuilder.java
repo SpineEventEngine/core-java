@@ -25,6 +25,7 @@ import com.google.protobuf.Duration;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -209,6 +210,9 @@ public final class DeliveryBuilder {
      *
      * <p>If none set, the storage is initialized by the {@code StorageFactory} specific for
      * this {@code ServerEnvironment}.
+     *
+     * <p>If no {@code StorageFactory} is present in the {@code ServerEnvironment}, a new
+     * {@code InMemoryStorageFactory} is used.
      */
     @CanIgnoreReturnValue
     public DeliveryBuilder setInboxStorage(InboxStorage inboxStorage) {
@@ -221,6 +225,9 @@ public final class DeliveryBuilder {
      *
      * <p>If none set, the storage is initialized by the {@code StorageFactory} specific for
      * this {@code ServerEnvironment}.
+     *
+     * <p>If no {@code StorageFactory} is present in the {@code ServerEnvironment}, a new
+     * {@code InMemoryStorageFactory} is used.
      */
     @CanIgnoreReturnValue
     public DeliveryBuilder setCatchUpStorage(CatchUpStorage catchUpStorage) {
@@ -274,8 +281,7 @@ public final class DeliveryBuilder {
             deduplicationWindow = Duration.getDefaultInstance();
         }
 
-        StorageFactory factory = ServerEnvironment.instance()
-                                                  .storageFactory();
+        StorageFactory factory = storageFactory();
         if (this.inboxStorage == null) {
             this.inboxStorage = factory.createInboxStorage(false);
         }
@@ -302,5 +308,11 @@ public final class DeliveryBuilder {
 
         Delivery delivery = new Delivery(this);
         return delivery;
+    }
+
+    private static StorageFactory storageFactory() {
+        ServerEnvironment serverEnvironment = ServerEnvironment.instance();
+        Optional<StorageFactory> currentStorageFactory = serverEnvironment.optionalStorageFactory();
+        return currentStorageFactory.orElseGet(InMemoryStorageFactory::newInstance);
     }
 }

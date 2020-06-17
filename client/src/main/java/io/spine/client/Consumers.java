@@ -181,10 +181,11 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
      * @param <B>
      *         the type of this builder for return type covariance
      */
+    @SuppressWarnings("rawtypes")
     abstract static class Builder<M extends Message,
-                                   C extends MessageContext,
-                                   W extends Message,
-                                   B extends Builder> {
+                                  C extends MessageContext,
+                                  W extends Message,
+                                  B extends Builder> {
 
         private final ImmutableSet.Builder<MessageConsumer<M, C>> consumers =
                 ImmutableSet.builder();

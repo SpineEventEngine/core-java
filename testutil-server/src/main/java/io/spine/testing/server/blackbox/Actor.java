@@ -21,14 +21,15 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.base.Time;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.time.ZoneId;
-import io.spine.time.ZoneOffset;
+import io.spine.time.ZoneIds;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -37,77 +38,64 @@ import static io.spine.validate.Validate.checkValid;
 @VisibleForTesting
 final class Actor {
 
-    private static final Actor defaultActor = from(BlackBoxBoundedContext.class.getName());
+    private static final Actor defaultActor = from(
+            UserId.newBuilder()
+                  .setValue(BlackBoxContext.class.getName())
+                  .build()
+    );
 
     private final UserId id;
     private final ZoneId zoneId;
-    private final ZoneOffset zoneOffset;
 
-    private Actor(UserId id, ZoneId zoneId, ZoneOffset zoneOffset) {
+    private Actor(UserId id, @Nullable ZoneId zoneId) {
         this.id = id;
-        this.zoneId = zoneId;
-        this.zoneOffset = zoneOffset;
+        this.zoneId = zoneId == null
+                ? ZoneIds.of(Time.currentTimeZone())
+                : zoneId;
     }
 
-    /**
-     * Obtains the default actor.
-     */
+    /** Obtains the default actor. */
     static Actor defaultActor() {
         return defaultActor;
     }
 
-    private static Actor from(String userId) {
-        checkNotEmptyOrBlank(userId);
-        UserId id = UserId
-                .newBuilder()
-                .setValue(userId)
-                .build();
-        return from(id);
+    /** Creates a new actor with the given actor ID and the default time zone. */
+    static Actor from(UserId userId) {
+        checkUser(userId);
+        return new Actor(userId, null);
     }
 
-    /**
-     * Creates a new actor with the given actor ID and the default time zone.
-     */
-    static Actor from(UserId userId) {
+    /** Creates a copy of this actor with the passed time zone. */
+    Actor in(ZoneId zone) {
+        checkZone(zone);
+        return new Actor(this.id, zone);
+    }
+
+    /** Creates a copy of this actor with the passed user ID. */
+    Actor withId(UserId id) {
+        checkUser(id);
+        return new Actor(id, this.zoneId);
+    }
+
+    private static void checkUser(UserId userId) {
         checkNotNull(userId);
         checkValid(userId);
-        return new Actor(userId,
-                         ZoneId.getDefaultInstance(),
-                         ZoneOffset.getDefaultInstance());
     }
 
-    /**
-     * Creates a new actor with the given time zone and the default actor ID.
-     */
-    static Actor from(ZoneId zoneId, ZoneOffset zoneOffset) {
-        checkNotNull(zoneId);
-        checkNotNull(zoneOffset);
-        return new Actor(defaultActor.id, zoneId, zoneOffset);
+    private static void checkZone(ZoneId zone) {
+        checkNotNull(zone);
+        checkValid(zone);
     }
 
-    /**
-     * Creates a new actor with the given actor ID and time zone.
-     */
-    static Actor from(UserId userId, ZoneId zoneId, ZoneOffset zoneOffset) {
-        checkNotNull(userId);
-        checkNotNull(zoneId);
-        checkNotNull(zoneOffset);
-        return new Actor(userId, zoneId, zoneOffset);
-    }
-
-    /**
-     * Creates a new factory for requests of the single tenant.
-     */
+    /** Creates a new factory for requests of the single tenant. */
     TestActorRequestFactory requests() {
-        return new TestActorRequestFactory(null, id, zoneOffset, zoneId);
+        return new TestActorRequestFactory(null, id, zoneId);
     }
 
-    /**
-     * Creates a new factory for requests of the given tenant.
-     */
+    /** Creates a new factory for requests of the given tenant. */
     TestActorRequestFactory requestsFor(TenantId tenant) {
         checkNotNull(tenant);
         checkValid(tenant);
-        return new TestActorRequestFactory(tenant, id, zoneOffset, zoneId);
+        return new TestActorRequestFactory(tenant, id, zoneId);
     }
 }

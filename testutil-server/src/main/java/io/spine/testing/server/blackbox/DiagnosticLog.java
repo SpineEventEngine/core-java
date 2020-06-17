@@ -69,16 +69,17 @@ final class DiagnosticLog
 
     @Subscribe
     void on(ConstraintViolated event) {
-        String typeUrl = event.getEntity()
-                              .getTypeUrl();
-        String idAsString = Identifier.toString(event.getEntity().getId());
-        log(event, "Entity state (ID: `%s`, type: `%s`) is invalid.", idAsString, typeUrl);
+        MessageId entity = event.getEntity();
+        String typeUrl = entity.getTypeUrl();
+        String idAsString = Identifier.toString(entity.getId());
+        log(event, "The state (type: `%s`) of the entity (ID: `%s`) is invalid.",
+            typeUrl, idAsString);
     }
 
     @Subscribe
     void on(CannotDispatchDuplicateCommand event) {
         MessageId command = event.getDuplicateCommand();
-        log(event, "Command `%s` (ID: `%s`) should not be dispatched twice.",
+        log(event, "The command `%s` (ID: `%s`) should not be dispatched twice.",
             command.getTypeUrl(),
             command.asCommandId()
                    .getUuid());
@@ -95,10 +96,10 @@ final class DiagnosticLog
 
     @Subscribe
     void on(HandlerFailedUnexpectedly event) {
-        log(event, "Signal `%s` could not be handled by %s:%n%s%n",
-            event.getHandledSignal()
-                 .getTypeUrl(),
+        log(event, "The entity (state type `%s`) could not handle the signal `%s`:%n%s%n",
             event.getEntity()
+                 .getTypeUrl(),
+            event.getHandledSignal()
                  .getTypeUrl(),
             event.getError()
                  .getMessage());
@@ -106,7 +107,7 @@ final class DiagnosticLog
 
     @Subscribe
     void on(RoutingFailed event) {
-        log(event, "Signal `%s` could not be routed to `%s`:%n%s%n",
+        log(event, "The signal `%s` could not be routed to `%s`:%n%s%n",
             event.getHandledSignal()
                  .getTypeUrl(),
             event.getEntityType()
@@ -119,7 +120,8 @@ final class DiagnosticLog
     void on(AggregateHistoryCorrupted event) {
         MessageId aggregate = event.getEntity();
         String idAsString = Identifier.toString(aggregate.getId());
-        log(event, "History of aggregate `%s` (ID: `%s`) could not be loaded:%n%s%n",
+        log(event,
+            "Unable to load the history of the aggregate (state type: `%s`, ID: `%s`):%n%s%n",
             aggregate.getTypeUrl(),
             idAsString,
             event.getError()

@@ -20,13 +20,11 @@
 
 package io.spine.server.projection;
 
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.DefaultRepository;
 import io.spine.server.route.given.sur.ArtistMood;
 import io.spine.server.route.given.sur.ArtistMoodRepo;
 import io.spine.server.route.given.sur.ArtistName;
@@ -38,7 +36,7 @@ import io.spine.server.route.given.sur.Works;
 import io.spine.server.route.given.sur.WorksProjection;
 import io.spine.server.route.given.sur.command.PublishArticle;
 import io.spine.server.route.given.sur.event.PieceOfArtCreated;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,21 +47,23 @@ import static io.spine.server.route.given.sur.Surrealism.GOLL;
 @DisplayName("ProjectionRepository state routing should")
 class StateRoutingTest {
 
-    private BlackBoxBoundedContext<?> context;
+    private BlackBoxContext context;
 
     @BeforeEach
     void setupContext() {
-        context = BlackBoxBoundedContext.from(
+        context = BlackBoxContext.from(
                 BoundedContextBuilder
                         .assumingTests()
-                        .add(MagazineAggregate.class));
+                        .add(MagazineAggregate.class)
+                        .add(new ArtistMoodRepo())
+                        .add(new Gallery())
+                        .add(WorksProjection.class)
+        );
     }
 
     @Test
     @DisplayName("support explicit routing")
     void explicit() {
-        context.with(new ArtistMoodRepo());
-
         context.receivesCommand(
                 PublishArticle.newBuilder()
                               .setMagazineName("Manifeste du surréalisme")
@@ -75,9 +75,7 @@ class StateRoutingTest {
                               .build()
         );
 
-        context.assertEntityWithState(ArtistMood.class, BRETON)
-               .hasStateThat()
-               .comparingExpectedFieldsOnly()
+        context.assertState(BRETON, ArtistMood.class)
                .isEqualTo(ArtistMood.newBuilder()
                                     .setMood(ArtistMood.Mood.ANGER)
                                     .build());
@@ -86,9 +84,6 @@ class StateRoutingTest {
     @Test
     @DisplayName("route state by the first field matching the ID type")
     void implicit() {
-        context.with(new Gallery(),
-                     DefaultRepository.of(WorksProjection.class));
-
         ArtistName artist = Surrealism.name("André Masson");
         Any automaticDrawing = AnyPacker.pack(StringValue.of("Automatic Drawing"));
         context.receivesEvent(
@@ -100,14 +95,11 @@ class StateRoutingTest {
                         .build()
         );
 
-        ProtoSubject assertWorks =
-                context.assertEntity(WorksProjection.class, artist)
-                       .hasStateThat();
-        Works expectedWork =
+        context.assertState(
+                artist,
                 Works.newBuilder()
                      .addWork(automaticDrawing)
-                     .build();
-        assertWorks.comparingExpectedFieldsOnly()
-                   .isEqualTo(expectedWork);
+                     .build()
+        );
     }
 }

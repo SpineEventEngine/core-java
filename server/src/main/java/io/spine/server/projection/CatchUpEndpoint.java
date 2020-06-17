@@ -20,6 +20,7 @@
 
 package io.spine.server.projection;
 
+import io.spine.base.EntityState;
 import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.EventEnvelope;
@@ -31,8 +32,8 @@ import io.spine.type.TypeName;
  * <p>Handles the special {@link CatchUpStarted} event by deleting the state of the target
  * projection instance.
  */
-final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
-        extends ProjectionEndpoint<I, P> {
+final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntityState>
+        extends ProjectionEndpoint<I, P, S> {
 
     private static final TypeName CATCH_UP_STARTED =
             TypeName.from(CatchUpStarted.getDescriptor());
@@ -41,8 +42,8 @@ final class CatchUpEndpoint<I, P extends Projection<I, ?, ?>>
         super(repository, event);
     }
 
-    static <I, P extends Projection<I, ?, ?>>
-    CatchUpEndpoint<I, P> of(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
+    static <I, P extends Projection<I, S, ?>, S extends EntityState>
+    CatchUpEndpoint<I, P, S> of(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
         return new CatchUpEndpoint<>(repository, event);
     }
 

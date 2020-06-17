@@ -124,6 +124,7 @@ class DefaultSystemReadSideTest {
         }
     }
 
+    //TODO:2020-06-17:alex.tymchenko: migrate?
 //    @Nested
 //    @DisplayName("read domain aggregate states")
 //    //TODO:2020-03-28:alex.tymchenko: move this test to the `AggregateRepositoryTest`.

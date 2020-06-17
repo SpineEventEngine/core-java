@@ -25,6 +25,7 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.delivery.given.ConsecutiveNumberProcess;
 import io.spine.server.delivery.given.ConsecutiveProjection;
@@ -36,8 +37,7 @@ import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.EmitNextNumber;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.SlowTest;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -273,9 +273,11 @@ public class CatchUpTest extends AbstractDeliveryTest {
         ConsecutiveProjection.Repo projectionRepo = new ConsecutiveProjection.Repo();
         Repository<String, ConsecutiveNumberProcess> pmRepo =
                 DefaultRepository.of(ConsecutiveNumberProcess.class);
-        SingleTenantBlackBoxContext ctx = BlackBoxBoundedContext.singleTenant()
-                                                                .with(projectionRepo)
-                                                                .with(pmRepo);
+        BlackBoxContext ctx = BlackBoxContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(projectionRepo)
+                                     .add(pmRepo)
+        );
         List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
         post(jobs, 1);
 
@@ -339,8 +341,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
         return commands;
     }
 
-    private static List<Callable<Object>> asPostCommandJobs(SingleTenantBlackBoxContext ctx,
-                                                            List<EmitNextNumber> commands) {
+    private static List<Callable<Object>>
+    asPostCommandJobs(BlackBoxContext ctx, List<EmitNextNumber> commands) {
         return commands.stream()
                        .map(cmd -> (Callable<Object>) () -> ctx.receivesCommand(cmd))
                        .collect(toList());

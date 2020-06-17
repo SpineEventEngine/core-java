@@ -58,13 +58,14 @@ class CommandHandlerTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext boundedContext = BoundedContextBuilder
+        BoundedContext context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        commandBus = boundedContext.commandBus();
-        eventBus = boundedContext.eventBus();
+        commandBus = context.commandBus();
+        eventBus = context.eventBus();
         handler = new TestCommandHandler();
-        boundedContext.registerCommandDispatcher(handler);
+        context.internalAccess()
+               .registerCommandDispatcher(handler);
     }
 
     @AfterEach

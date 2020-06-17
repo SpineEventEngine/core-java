@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox.given;
 
 import io.spine.core.CommandContext;
+import io.spine.core.External;
 import io.spine.core.UserId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
@@ -105,7 +106,7 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
 
     @Assign
     BbAssigneeAdded handle(BbAssignSelf command, CommandContext context) {
-        UserId assignee = context.getActorContext().getActor();
+        UserId assignee = context.actor();
         return BbAssigneeAdded
                 .newBuilder()
                 .setId(id())
@@ -113,8 +114,8 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
                 .build();
     }
 
-    @React(external = true)
-    Optional<BbAssigneeRemoved> on(BbUserDeleted event) {
+    @React
+    Optional<BbAssigneeRemoved> on(@External BbUserDeleted event) {
         List<UserId> assignees = state().getAssigneeList();
         UserId user = event.getId();
         if (!assignees.contains(user)) {

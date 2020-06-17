@@ -21,6 +21,7 @@
 package io.spine.server.route;
 
 import io.spine.core.UserId;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.route.given.user.SessionProjection;
 import io.spine.server.route.given.user.SessionRepository;
 import io.spine.server.route.given.user.UserRepository;
@@ -28,7 +29,7 @@ import io.spine.server.route.given.user.event.RUserSignedIn;
 import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,13 +63,16 @@ class EventRoutingIntegrationTest {
                 .setUserConsentRequested(true)
                 .build();
 
-        BlackBoxBoundedContext.singleTenant()
-                              .with(new UserRepository())
-                              .with(new SessionRepository())
-                              .receivesEvent(event)
-                              .assertEntity(SessionProjection.class, sessionId)
-                              .hasStateThat()
-                              .comparingExpectedFieldsOnly()
-                              .isEqualTo(session);
+        BlackBoxContext context = BlackBoxContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(new UserRepository())
+                                     .add(new SessionRepository())
+        );
+        context.receivesEvent(event);
+
+        context.assertEntity(sessionId, SessionProjection.class)
+               .hasStateThat()
+               .comparingExpectedFieldsOnly()
+               .isEqualTo(session);
     }
 }

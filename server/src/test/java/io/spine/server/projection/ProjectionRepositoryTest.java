@@ -110,7 +110,7 @@ class ProjectionRepositoryTest
 
     private static final Any PRODUCER_ID = pack(GivenEventMessage.ENTITY_ID);
 
-    private BoundedContext boundedContext;
+    private BoundedContext context;
 
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
         TestActorRequestFactory requestFactory =
@@ -127,11 +127,12 @@ class ProjectionRepositoryTest
      * Simulates updating TenantIndex, which occurs during command processing
      * in multi-tenant context.
      */
-    private static void keepTenantIdFromEvent(BoundedContext boundedContext, Event event) {
+    private static void keepTenantIdFromEvent(BoundedContext context, Event event) {
         TenantId tenantId = event.tenant();
-        if (boundedContext.isMultitenant()) {
-            boundedContext.tenantIndex()
-                          .keep(tenantId);
+        if (context.isMultitenant()) {
+            context.internalAccess()
+                   .tenantIndex()
+                   .keep(tenantId);
         }
     }
 
@@ -143,7 +144,7 @@ class ProjectionRepositoryTest
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
         TestProjectionRepository repository = new TestProjectionRepository();
-        repository.registerWith(boundedContext);
+        repository.registerWith(context);
         return repository;
     }
 
@@ -226,11 +227,11 @@ class ProjectionRepositoryTest
     @Override
     @BeforeEach
     protected void setUp() {
-        boundedContext = BoundedContext
+        context = BoundedContext
                 .multitenant(getClass().getSimpleName())
                 .build();
         super.setUp();
-        boundedContext.register(this.repository());
+        context.internalAccess().register(this.repository());
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -242,7 +243,7 @@ class ProjectionRepositoryTest
      */
     @AfterEach
     void shutDown() throws Exception {
-        boundedContext.close();
+        context.close();
     }
 
     /*
@@ -363,7 +364,8 @@ class ProjectionRepositoryTest
             EntitySubscriberProjection.Repository repository =
                     new EntitySubscriberProjection.Repository();
             BoundedContext context = BoundedContextBuilder.assumingTests().build();
-            context.register(repository);
+            context.internalAccess()
+                   .register(repository);
             EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
             repository.dispatch(envelope);
             ProjectTaskNames expectedValue = ProjectTaskNames
@@ -383,7 +385,7 @@ class ProjectionRepositoryTest
             TestEventFactory eventFactory = newEventFactory(tenantId(), PRODUCER_ID);
             Event event = eventFactory.createEvent(eventMessage);
 
-            keepTenantIdFromEvent(boundedContext, event);
+            keepTenantIdFromEvent(context, event);
 
             dispatchEvent(event);
             assertTrue(TestProjection.processed(eventMessage));
@@ -400,7 +402,8 @@ class ProjectionRepositoryTest
         @BeforeEach
         void setUp() {
             monitor = new DiagnosticMonitor();
-            boundedContext.registerEventDispatcher(monitor);
+            context.internalAccess()
+                   .registerEventDispatcher(monitor);
         }
 
         @Test
@@ -458,7 +461,8 @@ class ProjectionRepositoryTest
     void emitRoutingFailedOnUnknownEvent() {
         Event event = GivenEvent.arbitrary();
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        boundedContext.registerEventDispatcher(monitor);
+        context.internalAccess()
+               .registerEventDispatcher(monitor);
 
         dispatchEvent(event);
 
@@ -503,7 +507,8 @@ class ProjectionRepositoryTest
     @DisplayName("not create record if entity is not updated")
     void notCreateRecordForUnchanged() {
         NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
-        boundedContext.register(repo);
+        context.internalAccess()
+               .register(repo);
 
         assertFalse(repo.loadAll(ResponseFormat.getDefaultInstance())
                         .hasNext());
@@ -608,7 +613,6 @@ class ProjectionRepositoryTest
                 .containsExactly(id1, id2);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked with `assertThat`.
     @Test
     @DisplayName("archive entity via migration")
     void archiveEntityViaMigration() {
@@ -623,7 +627,6 @@ class ProjectionRepositoryTest
         assertThat(found.get().isArchived()).isTrue();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked with `assertThat`.
     @Test
     @DisplayName("delete entity via migration")
     void deleteEntityViaMigration() {

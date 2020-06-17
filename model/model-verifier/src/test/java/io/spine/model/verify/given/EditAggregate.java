@@ -35,7 +35,7 @@ public class EditAggregate extends Aggregate<String, EditState, EditState.Builde
         return PhotoEdited
                 .newBuilder()
                 .setNewPhoto(command.getNewPhoto())
-                .setEditor(ctx.getActorContext().getActor().getValue())
+                .setEditor(ctx.actor().getValue())
                 .build();
     }
 

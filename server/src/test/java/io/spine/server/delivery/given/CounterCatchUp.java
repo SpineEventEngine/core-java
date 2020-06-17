@@ -24,8 +24,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Tests;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.CatchUp;
 import io.spine.server.delivery.CatchUpStatus;
@@ -36,8 +38,7 @@ import io.spine.server.event.EventStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,19 +61,19 @@ import static java.util.stream.Collectors.toList;
 public class CounterCatchUp {
 
     private final CounterView.Repository repo;
-    private final SingleTenantBlackBoxContext ctx;
+    private final BlackBoxContext ctx;
     private final String[] ids;
 
     public CounterCatchUp(String... ids) {
         this.ids = ids.clone();
         this.repo = new CounterView.Repository();
-        this.ctx = BlackBoxBoundedContext.singleTenant()
-                                         .with(repo);
+        this.ctx = BlackBoxContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repo)
+        );
     }
 
     public void addHistory(Timestamp when, List<NumberAdded> events) {
-        EventStore eventStore = ctx.eventBus()
-                                   .eventStore();
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
         for (NumberAdded message : events) {
             Event event = factory.createEvent(message, null);
@@ -83,7 +84,7 @@ public class CounterCatchUp {
             Event eventAtTime = event.toBuilder()
                                      .setContext(modifiedContext)
                                      .vBuild();
-            eventStore.append(eventAtTime);
+            ctx.append(eventAtTime);
         }
     }
 
@@ -148,8 +149,8 @@ public class CounterCatchUp {
         }
     }
 
-    private static List<Callable<Object>> asPostEventJobs(SingleTenantBlackBoxContext ctx,
-                                                          List<NumberAdded> events) {
+    private static List<Callable<Object>>
+    asPostEventJobs(BlackBoxContext ctx, List<NumberAdded> events) {
         return events.stream()
                      .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
                      .collect(toList());
@@ -164,7 +165,7 @@ public class CounterCatchUp {
                                                   .storageFactory();
         CatchUpStorage storage = new CatchUpStorage(factory,false);
         Collection<Object> ids = null;
-        if(!target.shouldCatchUpAll()) {
+        if (!target.shouldCatchUpAll()) {
             String identifier = checkNotNull(target.id());
             ids = ImmutableList.of(identifier);
         }
@@ -176,6 +177,6 @@ public class CounterCatchUp {
                                     .build();
         delivery.subscribe(new LocalDispatchingObserver());
         ServerEnvironment.instance()
-                         .configureDelivery(delivery);
+                         .use(delivery, Tests.class);
     }
 }

@@ -69,7 +69,7 @@ class EnricherBuilderTest {
             assertBuilt(builder.build());
         }
 
-        void assertBuilt(Enricher enricher) {
+        void assertBuilt(Enricher<?, ?> enricher) {
             assertThat(enricher).isNotNull();
         }
     }

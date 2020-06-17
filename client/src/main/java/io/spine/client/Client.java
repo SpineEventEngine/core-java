@@ -22,19 +22,16 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.entity.EntityState;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.client.grpc.QueryServiceGrpc.QueryServiceBlockingStub;
-import io.spine.client.grpc.SubscriptionServiceGrpc;
-import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceBlockingStub;
-import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceStub;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
@@ -80,23 +77,42 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class Client implements AutoCloseable {
 
-    /** The number of seconds to wait when {@linkplain #close() closing} the client. */
+    /** The default amount of time to wait when {@linkplain #close() closing} the client. */
     public static final Timeout DEFAULT_SHUTDOWN_TIMEOUT = Timeout.of(5, SECONDS);
 
     /** Default ID for a guest user. */
     public static final UserId DEFAULT_GUEST_ID = user("guest");
 
+    /** The ID of the tenant in a multi-tenant application, or {@code null} if single-tenant. */
     private final @Nullable TenantId tenant;
-    private final UserId guestUser;
-    private final ManagedChannel channel;
-    private final Timeout shutdownTimeout;
-    private final QueryServiceBlockingStub queryService;
-    private final CommandServiceBlockingStub commandService;
-    private final SubscriptionServiceStub subscriptionService;
-    private final SubscriptionServiceBlockingStub blockingSubscriptionService;
 
-    /** Subscriptions created by the client which are not cancelled yet. */
-    private final ActiveSubscriptions subscriptions;
+    /** The ID of a user to be used for performing {@linkplain #asGuest() guest requests}. */
+    private final UserId guestUser;
+
+    /** The channel for gRPC requests. */
+    private final ManagedChannel channel;
+
+    /** The amount of time to wait before {@linkplain #close() closing} the client. */
+    private final Timeout shutdownTimeout;
+
+    /** The stub for communicating with the {@code QueryService}. */
+    private final QueryServiceBlockingStub queryService;
+
+    /** The stub for communicating with the {@code CommandService}. */
+    private final CommandServiceBlockingStub commandService;
+
+    /** Active subscriptions maintained by the client. */
+    private final Subscriptions subscriptions;
+
+    /**
+     * The handler for errors that may occur during asynchronous requests initiated by this client.
+     */
+    private final @Nullable ErrorHandler streamingErrorHandler;
+
+    /**
+     * The handler for errors returned from server side in response to posted messages.
+     */
+    private final @Nullable ServerErrorHandler serverErrorHandler;
 
     /**
      * Creates a builder for a client connected to the specified address.
@@ -152,9 +168,9 @@ public class Client implements AutoCloseable {
         this.shutdownTimeout = checkNotNull(builder.shutdownTimeout);
         this.commandService = CommandServiceGrpc.newBlockingStub(channel);
         this.queryService = QueryServiceGrpc.newBlockingStub(channel);
-        this.subscriptionService = SubscriptionServiceGrpc.newStub(channel);
-        this.blockingSubscriptionService = SubscriptionServiceGrpc.newBlockingStub(channel);
-        this.subscriptions = new ActiveSubscriptions();
+        this.streamingErrorHandler = builder.streamingErrorHandler;
+        this.serverErrorHandler = builder.serverErrorHandler;
+        this.subscriptions = new Subscriptions(channel, streamingErrorHandler, serverErrorHandler);
     }
 
     /**
@@ -180,7 +196,7 @@ public class Client implements AutoCloseable {
         if (!isOpen()) {
             return;
         }
-        subscriptions.cancelAll(this);
+        subscriptions.cancelAll();
         try {
             channel.shutdown()
                    .awaitTermination(shutdownTimeout.value(), shutdownTimeout.unit());
@@ -212,7 +228,14 @@ public class Client implements AutoCloseable {
      */
     public ClientRequest onBehalfOf(UserId user) {
         checkNotDefaultArg(user);
-        return new ClientRequest(user, this);
+        ClientRequest request = new ClientRequest(user, this);
+        if (streamingErrorHandler != null) {
+            request.onStreamingError(streamingErrorHandler);
+        }
+        if (serverErrorHandler != null) {
+            request.onServerError(serverErrorHandler);
+        }
+        return request;
     }
 
     /**
@@ -229,10 +252,11 @@ public class Client implements AutoCloseable {
      *
      * @see ClientRequest#subscribeTo(Class)
      * @see ClientRequest#subscribeToEvent(Class)
+     * @deprecated please call {@link Subscriptions#cancel(Subscription)}
      */
+    @Deprecated // Make this method package-access during next deprecation cycle.
     public void cancel(Subscription s) {
-        blockingSubscriptionService.cancel(s);
-        subscriptions.forget(s);
+        subscriptions.cancel(s);
     }
 
     @VisibleForTesting
@@ -245,8 +269,10 @@ public class Client implements AutoCloseable {
         return shutdownTimeout;
     }
 
-    @VisibleForTesting
-    ActiveSubscriptions subscriptions() {
+    /**
+     * Obtains subscriptions created by this client.
+     */
+    public Subscriptions subscriptions() {
         return subscriptions;
     }
 
@@ -264,8 +290,9 @@ public class Client implements AutoCloseable {
     /**
      * Posts the command to the {@code CommandService}.
      */
-    void post(Command c) {
-        commandService.post(c);
+    Ack post(Command c) {
+        Ack ack = commandService.post(c);
+        return ack;
     }
 
     /**
@@ -276,26 +303,6 @@ public class Client implements AutoCloseable {
                 .read(query)
                 .states(stateType);
         return result;
-    }
-
-    /**
-     * Subscribes the given {@link StreamObserver} to the given topic and activates
-     * the subscription.
-     *
-     * @param topic
-     *         the topic to subscribe to
-     * @param observer
-     *         the observer to subscribe
-     * @param <M>
-     *         the type of the result messages
-     * @return the activated subscription
-     * @see #cancel(Subscription)
-     */
-    <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
-        Subscription subscription = blockingSubscriptionService.subscribe(topic);
-        subscriptionService.activate(subscription, new SubscriptionObserver<>(observer));
-        subscriptions.remember(subscription);
-        return subscription;
     }
 
     private static UserId user(String value) {
@@ -338,6 +345,9 @@ public class Client implements AutoCloseable {
 
         /** The ID of the user for performing requests on behalf of a non-logged in user. */
         private UserId guestUser = DEFAULT_GUEST_ID;
+
+        private @Nullable ErrorHandler streamingErrorHandler;
+        private @Nullable ServerErrorHandler serverErrorHandler;
 
         private Builder(ManagedChannel channel) {
             this.channel = checkNotNull(channel);
@@ -416,6 +426,27 @@ public class Client implements AutoCloseable {
         public Builder shutdownTimout(long timeout, TimeUnit timeUnit) {
             checkNotNull(timeUnit);
             this.shutdownTimeout = Timeout.of(timeout, timeUnit);
+            return this;
+        }
+
+        /**
+         * Assigns a default handler for streaming errors for the asynchronous requests
+         * initiated by the client.
+         */
+        @CanIgnoreReturnValue
+        public Builder onStreamingError(ErrorHandler handler) {
+            this.streamingErrorHandler = checkNotNull(handler);
+            return this;
+        }
+
+        /**
+         * Assigns a default handler for an error occurred on the server-side (such as
+         * validation error) in response to a message posted by the client.
+         */
+        @CanIgnoreReturnValue
+        public Builder onServerError(ServerErrorHandler handler) {
+            checkNotNull(handler);
+            this.serverErrorHandler = handler;
             return this;
         }
 

@@ -22,7 +22,6 @@ package io.spine.server.event.store;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
-import com.google.common.flogger.LoggerConfig;
 import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.OrderBy;
@@ -49,7 +48,6 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -109,6 +107,25 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
                                         .getValue());
         }
         return formatBuilder.build();
+    }
+
+    /**
+     * Initializes the instance by registering itself with the passed {@code BoundedContext}.
+     *
+     * @implNote Normally repositories are explicitly registered with a context during its creation.
+     * This method performs the registration with the context, so that normal repository flow
+     * is ensured. It avoids calling the {@code super.init()} since it assumes that the context
+     * is already assigned.
+     */
+    //TODO:2020-06-17:alex.tymchenko: this piece is new!
+    @Override
+    @SuppressWarnings({"OverridingMethodsMustInvokeSuper", "MissingSuperCall"}) // see impl. note
+    public void registerWith(BoundedContext context) {
+        if (!isRegistered()) { // Quit recursion.
+            super.registerWith(context);
+            context.internalAccess()
+                   .register(this);
+        }
     }
 
     @Override
@@ -218,13 +235,7 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
     final class Log {
 
         private final FluentLogger.Api debug = logger().atFine();
-        private final boolean debugEnabled = debugEnabled();
-
-        private boolean debugEnabled() {
-            Level level = LoggerConfig.getConfig(getClass())
-                                      .getLevel();
-            return level != null && level.intValue() <= Level.FINE.intValue();
-        }
+        private final boolean debugEnabled = debug.isEnabled();
 
         private void stored(Event event) {
             debug.log("Stored: %s.", lazy(() -> TextFormat.shortDebugString(event)));

@@ -21,14 +21,14 @@
 package io.spine.server.bus;
 
 import io.spine.annotation.Internal;
-import io.spine.core.MessageRejection;
+import io.spine.server.MessageError;
 
 /**
- * An interface for the {@link MessageRejection} types which report an unhandled message being
+ * An interface for the {@link MessageError} types which report an unhandled message being
  * posted into a {@link Bus}.
  *
- * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
+ * <p>Except the methods declared in {@link MessageError}, this type is a marker interface.
  */
 @Internal
-public interface MessageUnhandled extends MessageRejection {
+public interface MessageUnhandled extends MessageError {
 }

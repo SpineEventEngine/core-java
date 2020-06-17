@@ -52,8 +52,7 @@ import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -85,42 +84,52 @@ class ProjectionEndToEndTest {
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
-        BlackBoxBoundedContext
-                .singleTenant()
-                .with(new EntitySubscriberProjection.Repository(),
-                      new TestProjection.Repository())
-                .receivesEventsProducedBy(producerId,
-                                          created,
-                                          firstTaskAdded,
-                                          secondTaskAdded)
-                .assertEntityWithState(ProjectTaskNames.class, producerId)
-                .hasStateThat()
-                .isEqualTo(ProjectTaskNames
-                                   .newBuilder()
-                                   .setProjectId(producerId)
-                                   .setProjectName(created.getName())
-                                   .addTaskName(firstTaskAdded.getTask().getTitle())
-                                   .addTaskName(secondTaskAdded.getTask().getTitle())
-                                   .build());
+        BlackBoxContext context = BlackBoxContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(new EntitySubscriberProjection.Repository())
+                                     .add(new TestProjection.Repository())
+        );
+
+        context.receivesEventsProducedBy(producerId,
+                                         created,
+                                         firstTaskAdded,
+                                         secondTaskAdded);
+
+        context.assertState(
+                producerId,
+                ProjectTaskNames
+                        .newBuilder()
+                        .setProjectId(producerId)
+                        .setProjectName(created.getName())
+                        .addTaskName(firstTaskAdded.getTask()
+                                                   .getTitle())
+                        .addTaskName(secondTaskAdded.getTask()
+                                                    .getTitle())
+                        .build()
+        );
     }
 
     @Test
     @DisplayName("receive entity state updates of entities of other context")
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
-        SingleTenantBlackBoxContext sender = BlackBoxBoundedContext
-                .singleTenant("Organizations")
-                .with(new OrganizationProjection.Repository());
-        SingleTenantBlackBoxContext receiver = BlackBoxBoundedContext
-                .singleTenant("Groups")
-                .with(new GroupNameProjection.Repository());
+
+        BlackBoxContext sender = BlackBoxContext.from(
+                BoundedContext.singleTenant("Organizations")
+                              .add(new OrganizationProjection.Repository())
+        );
+        BlackBoxContext receiver = BlackBoxContext.from(
+                BoundedContext.singleTenant("Groups")
+                .add(new GroupNameProjection.Repository())
+        );
+
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId, established);
         GroupId groupId = GroupId
                 .newBuilder()
                 .setUuid(producerId.getUuid())
                 .build();
-        receiver.assertEntityWithState(GroupName.class, groupId)
+        receiver.assertEntityWithState(groupId, GroupName.class)
                 .hasStateThat()
                 .isEqualTo(GroupName.newBuilder()
                                     .setId(groupId)
@@ -136,7 +145,8 @@ class ProjectionEndToEndTest {
         BoundedContext groups = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        groups.register(repository);
+        groups.internalAccess()
+              .register(repository);
         UserId organizationHead = GivenUserId.newUuid();
         MessageId entityId = MessageId
                 .newBuilder()

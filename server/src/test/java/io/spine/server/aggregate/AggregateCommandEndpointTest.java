@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregateCommandEndpoint should")
 class AggregateCommandEndpointTest {
 
-    private BoundedContext boundedContext;
+    private BoundedContext context;
     private AggregateRepository<ProjectId, ProjectAggregate, Project> repository;
 
     private ProjectId projectId;
@@ -60,24 +60,27 @@ class AggregateCommandEndpointTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContextBuilder.assumingTests().build();
-        projectId = ProjectId.newBuilder()
-                             .setId(Identifier.newUuid())
-                             .build();
+        context = BoundedContextBuilder.assumingTests()
+                                       .build();
+        projectId = ProjectId
+                .newBuilder()
+                .setId(Identifier.newUuid())
+                .build();
 
         // Create a subscriber of ProjectCreated event.
         subscriber = new Subscriber();
-        boundedContext.eventBus()
-                      .register(subscriber);
+        context.eventBus()
+               .register(subscriber);
 
         repository = new ProjectAggregateRepository();
-        boundedContext.register(repository);
+        context.internalAccess()
+               .register(repository);
     }
 
     @AfterEach
     void tearDown() throws Exception {
         ProjectAggregate.clearCommandsHandled();
-        boundedContext.close();
+        context.close();
     }
 
     @Test

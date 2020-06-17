@@ -20,7 +20,6 @@
 
 package io.spine.server.given.groups;
 
-import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.given.organizations.Organization;
@@ -39,7 +38,7 @@ import static io.spine.testing.Tests.halt;
 public class FilteredStateSubscriber extends AbstractEventSubscriber {
 
     @Subscribe(
-            filter = @ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
+            filter = @io.spine.core.ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
     )
     void on(Organization organization) {
         halt();

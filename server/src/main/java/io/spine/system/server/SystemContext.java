@@ -50,8 +50,12 @@ import java.util.Optional;
 @Internal
 public final class SystemContext extends BoundedContext {
 
+    private final SystemConfig config;
+
     private SystemContext(BoundedContextBuilder builder) {
         super(builder);
+        this.config = builder.systemFeatures()
+                             .freeze();
     }
 
     /**
@@ -64,16 +68,16 @@ public final class SystemContext extends BoundedContext {
     public static SystemContext newInstance(BoundedContextBuilder builder) {
         CommandLogRepository commandLog = new CommandLogRepository();
         EventEnricher enricher = SystemEnricher.create(commandLog);
-        BoundedContextBuilder preparedBuilder = builder.enrichEventsUsing(enricher);
-        SystemContext result = new SystemContext(preparedBuilder);
-        result.registerRepositories(commandLog, builder.systemFeatures());
+        builder.enrichEventsUsing(enricher);
+        SystemContext result = new SystemContext(builder);
+        result.registerRepositories(commandLog);
         result.registerTracing();
         result.init();
         return result;
     }
 
-    private void registerRepositories(CommandLogRepository commandLog, SystemFeatures features) {
-        if (features.includeCommandLog()) {
+    private void registerRepositories(CommandLogRepository commandLog) {
+        if (config.includeCommandLog()) {
             register(commandLog);
             register(new ScheduledCommandRepository());
         }
@@ -108,5 +112,12 @@ public final class SystemContext extends BoundedContext {
     @Override
     public NoOpSystemClient systemClient() {
         return NoOpSystemClient.INSTANCE;
+    }
+
+    /**
+     * Obtains the configuration of this system context.
+     */
+    SystemConfig config() {
+        return config;
     }
 }

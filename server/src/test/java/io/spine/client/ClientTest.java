@@ -23,12 +23,12 @@ package io.spine.client;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.test.client.ActiveUsers;
 import io.spine.test.client.ClientTestContext;
-import io.spine.test.client.LoginStatus;
-import io.spine.test.client.command.LogInUser;
-import io.spine.test.client.event.UserLoggedIn;
-import io.spine.test.client.event.UserLoggedOut;
+import io.spine.test.client.users.ActiveUsers;
+import io.spine.test.client.users.LoginStatus;
+import io.spine.test.client.users.command.LogInUser;
+import io.spine.test.client.users.event.UserLoggedIn;
+import io.spine.test.client.users.event.UserLoggedOut;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ class ClientTest extends AbstractClientTest {
 
     @Override
     protected ImmutableList<BoundedContextBuilder> contexts() {
-        return ImmutableList.of(ClientTestContext.builder());
+        return ImmutableList.of(ClientTestContext.users());
     }
 
     @Test
@@ -96,7 +96,7 @@ class ClientTest extends AbstractClientTest {
 
     @Nested
     @DisplayName("manage subscriptions")
-    class Subscriptions {
+    class ActiveSubscriptions {
 
         private List<Subscription> subscriptions;
 
@@ -134,13 +134,13 @@ class ClientTest extends AbstractClientTest {
         @DisplayName("remembering them until canceled")
         void remembering() {
             Client client = client();
-            ActiveSubscriptions remembered = client.subscriptions();
+            Subscriptions remembered = client.subscriptions();
             subscriptions.forEach(
                     (s) -> assertTrue(remembered.contains(s))
             );
             subscriptions.forEach(
                     (s) -> {
-                        client.cancel(s);
+                        remembered.cancel(s);
                         assertFalse(remembered.contains(s));
                     }
             );
@@ -150,7 +150,7 @@ class ClientTest extends AbstractClientTest {
         @DisplayName("clear subscriptions when closing")
         void clearing() {
             Client client = client();
-            ActiveSubscriptions subscriptions = client.subscriptions();
+            Subscriptions subscriptions = client.subscriptions();
             this.subscriptions.forEach(
                     (s) -> assertTrue(subscriptions.contains(s))
             );

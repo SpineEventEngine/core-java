@@ -22,7 +22,7 @@ package io.spine.system.server;
 
 import io.spine.core.UserId;
 import io.spine.net.EmailAddress;
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.system.server.given.diagnostics.ValidatedAggregate;
 import io.spine.system.server.given.diagnostics.VerificationProcman;
 import io.spine.system.server.given.diagnostics.ViolationsWatch;
@@ -31,8 +31,7 @@ import io.spine.system.server.test.StartVerification;
 import io.spine.system.server.test.ValidateAndSet;
 import io.spine.system.server.test.ValidatedId;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,43 +46,49 @@ class ConstraintViolatedTest {
     @DisplayName("an entity state is set to an invalid value as a result of an event")
     void afterEvent() {
         String invalidText = "123-non numerical";
-        SingleTenantBlackBoxContext context = BlackBoxBoundedContext
-                .singleTenant()
-                .with(DefaultRepository.of(ValidatedAggregate.class),
-                      new ViolationsWatch.Repository())
-                .receivesCommand(ValidateAndSet
-                                         .newBuilder()
-                                         .setId(ValidatedId.generate())
-                                         .setTextToValidate(invalidText)
-                                         .vBuild());
-        context.assertEntity(ViolationsWatch.class, DEFAULT)
+        BlackBoxContext context = BlackBoxContext.from(
+                BoundedContextBuilder.assumingTests()
+                    .add(ValidatedAggregate.class)
+                    .add(new ViolationsWatch.Repository())
+        );
+        context.receivesCommand(
+                ValidateAndSet.newBuilder()
+                              .setId(ValidatedId.generate())
+                              .setTextToValidate(invalidText)
+                              .vBuild()
+        );
+        context.assertEntity(DEFAULT, ViolationsWatch.class)
                .hasStateThat()
-               .isEqualTo(InvalidText
-                                  .newBuilder()
-                                  .setId(DEFAULT)
-                                  .setInvalidText(invalidText)
-                                  .buildPartial());
+               .isEqualTo(InvalidText.newBuilder()
+                                     .setId(DEFAULT)
+                                     .setInvalidText(invalidText)
+                                     .buildPartial()
+               );
     }
 
     @MuteLogging
     @Test
     @DisplayName("an entity state is set to an invalid value as a result of a command")
     void afterCommand() {
-        SingleTenantBlackBoxContext context = BlackBoxBoundedContext
-                .singleTenant()
-                .with(DefaultRepository.of(VerificationProcman.class),
-                      new ViolationsWatch.Repository())
-                .receivesCommand(StartVerification
-                                         .newBuilder()
-                                         .setUserId(UserId.newBuilder().setValue(newUuid()))
-                                         .setAddress(EmailAddress.newBuilder().setValue("a@b.c"))
-                                         .vBuild());
-        context.assertEntity(ViolationsWatch.class, DEFAULT)
+        BlackBoxContext context = BlackBoxContext.from(
+                BoundedContextBuilder.assumingTests()
+                .add(VerificationProcman.class)
+                .add(new ViolationsWatch.Repository())
+        );
+        context.receivesCommand(
+                StartVerification
+                        .newBuilder()
+                        .setUserId(UserId.newBuilder()
+                                         .setValue(newUuid()))
+                        .setAddress(EmailAddress.newBuilder()
+                                                .setValue("a@b.c"))
+                        .vBuild()
+        );
+        context.assertEntity(DEFAULT, ViolationsWatch.class)
                .hasStateThat()
-               .isEqualTo(InvalidText
-                                  .newBuilder()
-                                  .setId(DEFAULT)
-                                  .setErrorMessage("A value must be set.")
-                                  .buildPartial());
+               .isEqualTo(InvalidText.newBuilder()
+                                     .setId(DEFAULT)
+                                     .setErrorMessage("A value must be set.")
+                                     .buildPartial());
     }
 }

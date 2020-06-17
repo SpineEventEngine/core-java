@@ -26,10 +26,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
+import io.spine.base.Tests;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.Messages;
-import io.spine.server.DefaultRepository;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
@@ -44,8 +45,7 @@ import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -151,7 +151,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
         newDelivery.subscribe(memoizer);
         ServerEnvironment.instance()
-                         .configureDelivery(newDelivery);
+                         .use(newDelivery, Tests.class);
 
         ImmutableSet<String> targets = manyTargets(7);
         new NastyClient(5, false).runWith(targets);
@@ -171,7 +171,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                     .setStrategy(UniformAcrossAllShards.forNumber(7))
                                     .build();
         ServerEnvironment.instance()
-                         .configureDelivery(delivery);
+                         .use(delivery, Tests.class);
         List<DeliveryStats> deliveryStats = synchronizedList(new ArrayList<>());
         delivery.subscribe(msg -> {
             Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(msg.shardIndex());
@@ -202,7 +202,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                     .setWorkRegistry(registry)
                                     .build();
         ServerEnvironment env = ServerEnvironment.instance();
-        env.configureDelivery(delivery);
+        env.use(delivery, Tests.class);
 
         ShardIndex index = strategy.nonEmptyShard();
         TenantId tenantId = GivenTenantId.generate();
@@ -232,7 +232,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         delivery.subscribe(rawMessageMemoizer);
         delivery.subscribe(new LocalDispatchingObserver());
         ServerEnvironment.instance()
-                         .configureDelivery(delivery);
+                         .use(delivery, Tests.class);
 
         ImmutableSet<String> aTarget = singleTarget();
         assertThat(monitor.stats()).isEmpty();
@@ -272,7 +272,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         RawMessageMemoizer memoizer = new RawMessageMemoizer();
         newDelivery.subscribe(memoizer);
         ServerEnvironment.instance()
-                         .configureDelivery(newDelivery);
+                         .use(newDelivery, Tests.class);
 
         ImmutableSet<String> targets = manyTargets(6);
         new NastyClient(3, false).runWith(targets);
@@ -306,7 +306,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         deliverAfterPause(delivery);
 
         ServerEnvironment.instance()
-                         .configureDelivery(delivery);
+                         .use(delivery, Tests.class);
         ImmutableSet<String> targets = singleTarget();
         NastyClient simulator = new NastyClient(7, false);
         simulator.runWith(targets);
@@ -327,12 +327,12 @@ public class DeliveryTest extends AbstractDeliveryTest {
     public void deliverMessagesInOrderOfEmission() throws InterruptedException {
         changeShardCountTo(20);
 
-        SingleTenantBlackBoxContext context =
-                BlackBoxBoundedContext.singleTenant()
-                                      .with(DefaultRepository.of(
-                                              TaskAggregate.class))
-                                      .with(new TaskAssignment.Repository())
-                                      .with(new TaskView.Repository());
+        BlackBoxContext context = BlackBoxContext.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(TaskAggregate.class)
+                                     .add(new TaskAssignment.Repository())
+                                     .add(new TaskView.Repository())
+        );
         List<DCreateTask> commands = generateCommands(200);
         ExecutorService service = newFixedThreadPool(20);
         service.invokeAll(commands.stream()
@@ -343,7 +343,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
         for (DCreateTask command : commands) {
             String taskId = command.getId();
-            EntitySubject subject = context.assertEntity(TaskView.class, taskId);
+            EntitySubject subject = context.assertEntity(taskId, TaskView.class);
             subject.exists();
 
             TaskView actualView = (TaskView) subject.actual();
@@ -366,6 +366,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
      ******************************************************************************/
 
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent"/* unchecked exception fails the test. */)
     private static void assertStatsMatch(Delivery delivery, ShardIndex index) {
         Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
         Truth8.assertThat(stats)

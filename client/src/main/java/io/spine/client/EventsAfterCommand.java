@@ -60,9 +60,7 @@ final class EventsAfterCommand implements Logging {
     private EventsAfterCommand(Client client, Command cmd, MultiEventConsumers consumers) {
         this.client = checkNotNull(client);
         this.command = checkNotDefaultArg(cmd);
-        this.user = cmd.getContext()
-                       .getActorContext()
-                       .getActor();
+        this.user = cmd.actor();
         this.consumers = checkNotNull(consumers);
     }
 
@@ -71,7 +69,8 @@ final class EventsAfterCommand implements Logging {
         StreamObserver<Event> observer = consumers.toObserver(errorHandler);
         ImmutableSet<Subscription> subscriptions =
                 topics.stream()
-                      .map((topic) -> client.subscribeTo(topic, observer))
+                      .map((topic) -> client.subscriptions()
+                                            .subscribeTo(topic, observer))
                       .collect(toImmutableSet());
         return subscriptions;
     }
@@ -81,12 +80,14 @@ final class EventsAfterCommand implements Logging {
      * as the origin.
      */
     private ImmutableSet<Topic> eventsOf(Command c) {
-        Field pastMessage = EventContext.Field.pastMessage()
-                                              .getField();
-        String fieldName = Event.Field.context()
-                                      .getField()
-                                      .nested(pastMessage)
-                                      .toString();
+        Field pastMessage =
+                EventContext.Field.pastMessage()
+                                  .getField();
+        String fieldName =
+                Event.Field.context()
+                           .getField()
+                           .nested(pastMessage)
+                           .toString();
         ImmutableSet<Class<? extends EventMessage>> eventTypes = consumers.eventTypes();
         TopicFactory topic = client.requestOf(user)
                                    .topic();

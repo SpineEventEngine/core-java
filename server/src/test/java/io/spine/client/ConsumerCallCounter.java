@@ -42,7 +42,7 @@ final class ConsumerCallCounter {
         add(e.getClass());
     }
 
-    void add(Class<? extends EventMessage> eventType) {
+    private void add(Class<? extends EventMessage> eventType) {
         eventTypes.add(eventType);
     }
 

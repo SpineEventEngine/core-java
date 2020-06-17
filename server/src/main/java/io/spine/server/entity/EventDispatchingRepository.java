@@ -68,7 +68,8 @@ public abstract class EventDispatchingRepository<I,
     @OverridingMethodsMustInvokeSuper
     public void registerWith(BoundedContext context) {
         super.registerWith(context);
-        context.registerEventDispatcher(this);
+        context.internalAccess()
+               .registerEventDispatcher(this);
         setupEventRouting(eventRouting());
     }
 

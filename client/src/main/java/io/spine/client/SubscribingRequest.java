@@ -21,6 +21,7 @@
 package io.spine.client;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.MessageContext;
@@ -53,8 +54,14 @@ SubscribingRequest<M extends Message,
         super(parent, type);
     }
 
+    /**
+     * Obtains the builder for collecting consumers of the subscribed messages.
+     */
     abstract Consumers.Builder<M, C, W, ?> consumers();
 
+    /**
+     * Adapts the passed instance to the specific type of {@link MessageConsumer}.
+     */
     abstract MessageConsumer<M, C> toMessageConsumer(Consumer<M> consumer);
 
     /**
@@ -76,8 +83,11 @@ SubscribingRequest<M extends Message,
      *
      * @see #onConsumingError(ConsumerErrorHandler)
      */
+    @Override
     @CanIgnoreReturnValue
+    @OverridingMethodsMustInvokeSuper
     public B onStreamingError(ErrorHandler handler) {
+        super.onStreamingError(handler);
         consumers().onStreamingError(handler);
         return self();
     }
@@ -109,7 +119,9 @@ SubscribingRequest<M extends Message,
     }
 
     private Subscription subscribe(Topic topic, StreamObserver<W> observer) {
-        Subscription subscription = client().subscribeTo(topic, observer);
+        Subscription subscription =
+                client().subscriptions()
+                        .subscribeTo(topic, observer);
         return subscription;
     }
 }

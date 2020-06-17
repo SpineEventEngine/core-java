@@ -26,9 +26,9 @@ import io.spine.base.EventMessage;
 import io.spine.base.entity.EntityState;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
-import io.spine.test.client.UserAccount;
-import io.spine.test.client.command.LogInUser;
-import io.spine.test.client.event.UserLoggedIn;
+import io.spine.test.client.users.UserAccount;
+import io.spine.test.client.users.command.LogInUser;
+import io.spine.test.client.users.event.UserLoggedIn;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class ClientRequestTest extends AbstractClientTest {
 
     @Override
     protected ImmutableList<BoundedContextBuilder> contexts() {
-        return ImmutableList.of(ClientTestContext.builder());
+        return ImmutableList.of(ClientTestContext.users());
     }
 
     @BeforeEach

@@ -20,6 +20,7 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.test.integration.ItgProjection;
@@ -39,8 +40,8 @@ public class ProjectDetails
         super(id);
     }
 
-    @Subscribe(external = true)
-    void on(ItgProjectCreated event) {
+    @Subscribe
+    void on(@External ItgProjectCreated event) {
         externalEvent = event;
     }
 

@@ -20,7 +20,6 @@
 
 package io.spine.server.model.given.map;
 
-import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.given.SavedString;
@@ -42,12 +41,12 @@ public final class DupEventFilterValue
         super(id);
     }
 
-    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "1"))
+    @Subscribe(filter = @io.spine.core.ByField(path = VALUE_FIELD_PATH, value = "1"))
     void onString1(Int32Imported event) {
         halt();
     }
 
-    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "+1"))
+    @Subscribe(filter = @io.spine.core.ByField(path = VALUE_FIELD_PATH, value = "+1"))
     void onStringOne(Int32Imported event) {
         halt();
     }

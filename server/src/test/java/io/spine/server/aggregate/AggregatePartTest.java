@@ -65,7 +65,7 @@ class AggregatePartTest {
     private static final TestActorRequestFactory factory =
             new TestActorRequestFactory(AggregatePartTest.class);
 
-    private BoundedContext boundedContext;
+    private BoundedContext context;
     private TaskRoot root;
     private TaskPart taskPart;
     private TaskCommentsPart taskCommentsPart;
@@ -75,14 +75,15 @@ class AggregatePartTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContextBuilder.assumingTests().build();
-        root = new TaskRoot(boundedContext, ID);
+        context = BoundedContextBuilder.assumingTests().build();
+        root = new TaskRoot(context, ID);
         taskPart = new TaskPart(root);
         taskCommentsPart = new TaskCommentsPart(root);
         taskRepository = new TaskRepository();
         taskCommentsRepository = new TaskCommentsRepository();
-        boundedContext.register(taskRepository);
-        boundedContext.register(taskCommentsRepository);
+        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        contextAccess.register(taskRepository);
+        contextAccess.register(taskCommentsRepository);
         prepareAggregatePart();
     }
 
@@ -125,8 +126,8 @@ class AggregatePartTest {
         Query query = factory.query()
                              .all(entityClass);
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
-        boundedContext.stand()
-                      .execute(query, observer);
+        context.stand()
+               .execute(query, observer);
         return observer.firstResponse()
                        .getMessageList()
                        .stream()
@@ -139,7 +140,7 @@ class AggregatePartTest {
                 AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, ProjectId.class);
         NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
-              .setDefault(BoundedContext.class, boundedContext)
+              .setDefault(BoundedContext.class, context)
               .setDefault(AggregateRoot.class, root);
         return tester;
     }

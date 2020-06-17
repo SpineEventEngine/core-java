@@ -22,6 +22,8 @@ package io.spine.server;
 
 import com.google.common.base.MoreObjects;
 import io.spine.base.entity.EntityState;
+import com.google.common.collect.ImmutableSet;
+import io.spine.base.EntityState;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.entity.Repository;
@@ -32,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -43,8 +46,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 final class VisibilityGuard {
 
-    private final Map<Class<? extends EntityState<?>>, RepositoryAccess> repositories
-            = new HashMap<>();
+    private final
+    Map<Class<? extends EntityState<?>>, RepositoryAccess> repositories = new HashMap<>();
 
     /** Prevent instantiation from outside. */
     private VisibilityGuard() {
@@ -119,27 +122,45 @@ final class VisibilityGuard {
     }
 
     /**
+     * Obtains a repository by the type of the entity state.
+     *
+     * @throws IllegalStateException
+     *         if there is not repository entities of which have the passed state
+     */
+    Repository<?, ?> get(Class<? extends EntityState> stateClass) {
+        RepositoryAccess access = findOrThrow(stateClass);
+        return access.repository;
+    }
+
+    private Stream<RepositoryAccess> repoAccess() {
+        return repositories.values()
+                           .stream();
+    }
+
+    /** Obtains all guarded repositories. */
+    private ImmutableSet<Repository<?, ?>> repositories() {
+        ImmutableSet<Repository<?, ?>> result =
+                repoAccess().map(access -> access.repository)
+                            .collect(toImmutableSet());
+        return result;
+    }
+
+    /**
      * Obtains a set of entity type names by their visibility.
      */
     public Set<TypeName> entityStateTypes(Visibility visibility) {
         checkNotNull(visibility);
-        Set<TypeName> result = repositories.values()
-                                           .stream()
-                                           .filter(access -> access.visibility.is(visibility))
-                                           .map(access -> access.repository
-                                                   .entityStateType()
-                                                   .toTypeName())
-                                           .collect(toImmutableSet());
+        Set<TypeName> result =
+                repoAccess().filter(access -> access.visibility.is(visibility))
+                            .map(RepositoryAccess::stateTypeName)
+                            .collect(toImmutableSet());
         return result;
     }
 
     Set<TypeName> allEntityTypes() {
-        Set<TypeName> result = repositories.values()
-                                           .stream()
-                                           .map(access -> access.repository
-                                                   .entityStateType()
-                                                   .toTypeName())
-                                           .collect(toImmutableSet());
+        Set<TypeName> result =
+                repoAccess().map(RepositoryAccess::stateTypeName)
+                            .collect(toImmutableSet());
         return result;
     }
 
@@ -147,9 +168,7 @@ final class VisibilityGuard {
      * Closes all registered repositories and clears the registration list.
      */
     void shutDownRepositories() {
-        for (RepositoryAccess repositoryAccess : repositories.values()) {
-            repositoryAccess.repository.close();
-        }
+        repositories().forEach(Repository::close);
         repositories.clear();
     }
 
@@ -162,7 +181,7 @@ final class VisibilityGuard {
      */
     private static class RepositoryAccess {
 
-        private final Repository<? ,?> repository;
+        private final Repository<?, ?> repository;
         private final EntityVisibility visibility;
 
         private RepositoryAccess(Repository<?, ?> repository) {
@@ -175,6 +194,11 @@ final class VisibilityGuard {
             return visibility.isNotNone()
                    ? Optional.of(repository)
                    : Optional.empty();
+        }
+
+        private TypeName stateTypeName() {
+            return repository.entityStateType()
+                             .toTypeName();
         }
 
         @Override

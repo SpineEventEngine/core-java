@@ -23,7 +23,7 @@ package io.spine.server.event;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventValidationError;
-import io.spine.core.MessageInvalid;
+import io.spine.server.MessageInvalid;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCreated;
 import org.junit.jupiter.api.DisplayName;

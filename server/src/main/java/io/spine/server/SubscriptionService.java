@@ -19,12 +19,15 @@
  */
 package io.spine.server;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
+import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
@@ -40,9 +43,8 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
-import static io.spine.client.Subscriptions.toShortString;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -53,6 +55,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public final class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
         implements Logging {
+
+    private static final Joiner LIST_JOINER = Joiner.on(", ");
 
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
@@ -69,11 +73,7 @@ public final class SubscriptionService
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
         _debug().log("Creating the subscription to the topic: `%s`.", topic);
         try {
-            Target target = topic.getTarget();
-            BoundedContext context = findContextOf(target)
-                    .orElseThrow(() -> unknownTargetType(target));
-            Stand stand = context.stand();
-            stand.subscribe(topic, responseObserver);
+            subscribeTo(topic, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error processing subscription request.");
@@ -81,36 +81,49 @@ public final class SubscriptionService
         }
     }
 
-    private static IllegalArgumentException unknownTargetType(Target target) {
-        return newIllegalArgumentException(
-                "Unable to subscribe to the type `%s` which is not a part of" +
-                        " any of Bounded Contexts handled by this `SubscriptionService`." +
-                        " Please check that the method" +
-                        " `SubscriptionService.Builder.add(BoundedContext)` is called for" +
-                        " the context which produces this type.",
-                target.getType());
+    private void subscribeTo(Topic topic, StreamObserver<Subscription> responseObserver) {
+        Target target = topic.getTarget();
+        Optional<BoundedContext> foundContext = findContextOf(target);
+        if (foundContext.isPresent()) {
+            Stand stand = foundContext.get().stand();
+            stand.subscribe(topic, responseObserver);
+        } else {
+            Set<BoundedContext> contexts = ImmutableSet.copyOf(typeToContextMap.values());
+            _warn().log("Unable to find a Bounded Context for type `%s`." +
+                                " Creating a subscription in contexts: %s.",
+                        topic.getTarget().type(),
+                        LIST_JOINER.join(contexts));
+            Subscription subscription = Subscriptions.from(topic);
+            for (BoundedContext context : contexts) {
+                Stand stand = context.stand();
+                stand.subscribe(subscription);
+            }
+            responseObserver.onNext(subscription);
+            responseObserver.onCompleted();
+        }
     }
 
     @Override
     public void activate(Subscription subscription, StreamObserver<SubscriptionUpdate> observer) {
         _debug().log("Activating the subscription: `%s`.", subscription);
         try {
-            BoundedContext context = findContextOf(subscription)
-                    .orElseThrow(() -> unknownSubscription(subscription));
-            SubscriptionCallback callback = SubscriptionCallback.forwardingTo(observer);
-            Stand targetStand = context.stand();
-            targetStand.activate(subscription, callback, forwardErrorsOnly(observer));
+            SubscriptionCallback callback = forwardingTo(observer);
+            StreamObserver<Response> responseObserver = forwardErrorsOnly(observer);
+            Optional<BoundedContext> foundContext = findContextOf(subscription);
+            if (foundContext.isPresent()) {
+                Stand targetStand = foundContext.get().stand();
+                targetStand.activate(subscription, callback, responseObserver);
+            } else {
+                for (BoundedContext context : typeToContextMap.values()) {
+                    Stand stand = context.stand();
+                    stand.activate(subscription, callback, responseObserver);
+                }
+            }
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error activating the subscription.");
             observer.onError(e);
         }
-    }
-
-    private static IllegalArgumentException unknownSubscription(Subscription subscription) {
-        return newIllegalArgumentException(
-                "Target subscription `%s` could not be found for activation.",
-                toShortString(subscription));
     }
 
     @Override
@@ -120,7 +133,7 @@ public final class SubscriptionService
         Optional<BoundedContext> selected = findContextOf(subscription);
         if (!selected.isPresent()) {
             _warn().log("Trying to cancel a subscription `%s` which could not be found.",
-                        lazy(() -> toShortString(subscription)));
+                        lazy(subscription::toShortString));
             responseObserver.onCompleted();
             return;
         }

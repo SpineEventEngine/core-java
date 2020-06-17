@@ -19,7 +19,6 @@
  */
 package io.spine.server;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.entity.EntityState;
 import io.spine.core.BoundedContextName;
@@ -82,18 +81,35 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
 public abstract class BoundedContext implements Closeable, Logging {
 
+    /** Basic features of the context. */
     private final ContextSpec spec;
+
+    /** The Command Bus of this context. */
     private final CommandBus commandBus;
+
+    /** The Event Bus of this context. */
     private final EventBus eventBus;
-    private final IntegrationBroker broker;
+
+    /** The bus for importing events. */
     private final ImportBus importBus;
+
+    /** The broker for interaction with other contexts. */
+    private final IntegrationBroker broker;
+
+    /** The bridge to the read-side of the context. */
     private final Stand stand;
 
     /** Controls access to entities of all registered repositories. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
+
+    /** Provides access to data parts of aggregate roots of this context. */
     private final AggregateRootDirectory aggregateRootDirectory;
 
+    /** The index of tenants having data in this context. */
     private final TenantIndex tenantIndex;
+
+    /** Provides access to internally-used features of the context. */
+    private final InternalAccess internalAccess;
 
     /**
      * Creates new instance.
@@ -118,6 +134,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         this.commandBus = builder.buildCommandBus();
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
+        this.internalAccess = new InternalAccess();
     }
 
     /**
@@ -128,6 +145,8 @@ public abstract class BoundedContext implements Closeable, Logging {
      */
     protected final void init() {
         eventBus.registerWith(this);
+        //TODO:2020-06-17:alex.tymchenko: do we need this?
+        tenantIndex.registerWith(this);
         broker.registerWith(this);
     }
     
@@ -179,55 +198,35 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     /**
-     * Internal method that registers the passed repository with this {@code BoundedContext}.
-     *
-     * @param repository
-     *         the repository to register
-     * @param <I>
-     *         the type of IDs used in the repository
-     * @param <E>
-     *         the type of entities
-     * @throws SecurityException
-     *          if called from outside the framework
+     * Adds the passed repository to the context.
      */
-    @Internal
-    public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
+    protected final void register(Repository<?, ?> repository) {
         checkNotNull(repository);
-        Security.allowOnlyFrameworkServer();
         registerIfAware(repository);
         guard.register(repository);
         repository.onRegistered();
-        registerEventDispatcher(stand());
     }
 
     /**
      * Creates and registers the {@linkplain DefaultRepository default repository} for the passed
      * class of entities.
      *
-     * @param <I>
-     *         the type of entity identifiers
-     * @param <E>
-     *         the type of entities
      * @param entityClass
      *         the class of entities which will be served by a {@link DefaultRepository}
      * @see #register(Repository)
      */
-    final <I, E extends Entity<I, ?>> void register(Class<E> entityClass) {
+    final <I, E extends Entity<I, ?>> void register(Class<? extends E> entityClass) {
         checkNotNull(entityClass);
         register(DefaultRepository.of(entityClass));
     }
 
     /**
-     * Internal method for registering the passed command dispatcher with the {@code CommandBus} of
-     * this context.
+     * Registers the passed command dispatcher with the {@code CommandBus}.
      *
-     * @throws SecurityException
-     *          if called from outside the framework
+     * @see #registerCommandDispatcher(CommandDispatcherDelegate)
      */
-    @Internal
-    public void registerCommandDispatcher(CommandDispatcher dispatcher) {
+    protected void registerCommandDispatcher(CommandDispatcher dispatcher) {
         checkNotNull(dispatcher);
-        Security.allowOnlyFrameworkServer();
         registerIfAware(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             commandBus().register(dispatcher);
@@ -239,11 +238,9 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     /**
-     * Internal method for registering the passed command dispatcher with the {@code CommandBus} of
-     * this context.
+     * Registering the passed command dispatcher delegate with the {@code CommandBus}.
      *
-     * @throws SecurityException
-     *          if called from outside the framework
+     * @see #registerCommandDispatcher(CommandDispatcher)
      */
     private void registerCommandDispatcher(CommandDispatcherDelegate dispatcher) {
         checkNotNull(dispatcher);
@@ -253,19 +250,15 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     /**
-     * Internal method for registering the passed event dispatcher with the buses of
-     * this context.
+     * Registering the passed event dispatcher with the buses of this context.
      *
      * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
      * If the passed instance dispatches external events, registers it with
      * the {@code IntegrationBroker}.
      *
-     * @throws SecurityException
-     *         if called from outside the framework
      * @see #registerEventDispatcher(EventDispatcherDelegate)
      */
-    @Internal
-    public void registerEventDispatcher(EventDispatcher dispatcher) {
+    protected void registerEventDispatcher(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
         Security.allowOnlyFrameworkServer();
         registerIfAware(dispatcher);
@@ -276,7 +269,7 @@ public abstract class BoundedContext implements Closeable, Logging {
             systemReadSide.register(dispatcher);
         }
         if (dispatcher.dispatchesExternalEvents()) {
-            broker().register(dispatcher);
+            broker.register(dispatcher);
         }
         if (dispatcher instanceof CommandDispatcherDelegate) {
             CommandDispatcherDelegate commandDispatcher = (CommandDispatcherDelegate) dispatcher;
@@ -285,11 +278,8 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     /**
-     * Internal method for registering the passed delegate of an {@link EventDispatcher} with
-     * the buses of this context.
+     * Registers the passed delegate of an {@link EventDispatcher} with the buses of this context.
      *
-     * @throws SecurityException
-     *         if called from outside the framework
      * @see #registerEventDispatcher(EventDispatcher)
      */
     private void registerEventDispatcher(EventDispatcherDelegate dispatcher) {
@@ -328,40 +318,9 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     /**
-     * Finds a repository by the state class of entities.
-     *
-     * <p>This method assumes that a repository for the given entity state class <b>is</b>
-     * registered in this context. If there is no such repository, throws
-     * an {@link IllegalStateException}.
-     *
-     * <p>If a repository is registered, the method returns it or {@link Optional#empty()} if
-     * the requested entity is {@linkplain Visibility#NONE not visible}.
-     *
-     * @param stateClass
-     *         the class of the state of the entity managed by the resulting repository
-     * @return the requested repository or {@link Optional#empty()} if the repository manages
-     *         a {@linkplain Visibility#NONE non-visible} entity
-     * @throws IllegalStateException
-     *         if the requested repository is not registered
-     * @see VisibilityGuard
-     */
-    @Internal
-    public Optional<Repository<?, ?>> findRepository(Class<? extends EntityState<?>> stateClass) {
-        // See if there is a repository for this state at all.
-        if (!guard.hasRepository(stateClass)) {
-            throw newIllegalStateException("No repository found for the entity state class `%s`.",
-                                           stateClass.getName());
-        }
-        Optional<Repository<?, ?>> repository = guard.repositoryFor(stateClass);
-        return repository;
-    }
-
-    /**
      * Verifies if this Bounded Context contains entities of the passed class.
      *
      * <p>This method does not take into account visibility of entity states.
-     *
-     * @see #findRepository(Class)
      */
     public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
         EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
@@ -373,8 +332,6 @@ public abstract class BoundedContext implements Closeable, Logging {
      * Verifies if this Bounded Context has entities with the state of the passed class.
      *
      * <p>This method does not take into account visibility of entity states.
-     *
-     * @see #findRepository(Class)
      */
     public boolean hasEntitiesWithState(Class<? extends EntityState<?>> stateClass) {
         boolean result = guard.hasRepository(stateClass);
@@ -389,12 +346,6 @@ public abstract class BoundedContext implements Closeable, Logging {
     /** Obtains instance of {@link EventBus} of this {@code BoundedContext}. */
     public EventBus eventBus() {
         return eventBus;
-    }
-
-    /** Obtains instance of {@link IntegrationBroker} of this {@code BoundedContext}. */
-    @Internal
-    public IntegrationBroker broker() {
-        return this.broker;
     }
 
     /** Obtains instance of {@link ImportBus} of this {@code BoundedContext}. */
@@ -436,27 +387,10 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     /**
-     * Obtains a tenant index of this Bounded Context.
-     *
-     * <p>If the Bounded Context is single-tenant returns
-     * {@linkplain TenantIndex#singleTenant() null-object}
-     * implementation.
-     */
-    @Internal
-    public TenantIndex tenantIndex() {
-        return tenantIndex;
-    }
-
-    /**
      * Obtains instance of {@link SystemClient} of this {@code BoundedContext}.
      */
     @Internal
     public abstract SystemClient systemClient();
-
-    @Internal
-    public AggregateRootDirectory aggregateRootDirectory() {
-        return aggregateRootDirectory;
-    }
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.
@@ -487,20 +421,6 @@ public abstract class BoundedContext implements Closeable, Logging {
         shutDownRepositories();
 
         _debug().log(closed(nameForLogging()));
-    }
-
-    /**
-     * Tells if the context is closed.
-     *
-     * <p>This is a test-only method which is needed for the tests that forcibly close a context,
-     * so that cleanup methods do not call it again.
-     *
-     * @deprecated please use {@link #isOpen()} instead
-     */
-    @Deprecated
-    @VisibleForTesting
-    public boolean isClosed() {
-        return !isOpen();
     }
 
     @Override
@@ -537,5 +457,118 @@ public abstract class BoundedContext implements Closeable, Logging {
     public String toString() {
         return spec.name()
                    .getValue();
+    }
+
+    /**
+     * Provides access to features of the context used internally by the framework.
+     *
+     * @throws SecurityException
+     *         if called from outside the framework
+     */
+    @Internal
+    public final InternalAccess internalAccess() {
+        Security.allowOnlyFrameworkServer();
+        return this.internalAccess;
+    }
+
+    /**
+     * Provides access to features of {@link BoundedContext} used internally by the framework.
+     */
+    @Internal
+    public class InternalAccess {
+
+        /** Prevents instantiation from outside. */
+        private InternalAccess() {
+        }
+
+        /**
+         * Registers the passed repository.
+         *
+         * @see BoundedContext#register(Repository)
+         */
+        public void register(Repository<?, ?> repository) {
+            self().register(checkNotNull(repository));
+        }
+
+        /**
+         * Registers the passed command dispatcher.
+         *
+         * @see BoundedContext#registerCommandDispatcher(CommandDispatcher)
+         */
+        public void registerCommandDispatcher(CommandDispatcher dispatcher) {
+            self().registerCommandDispatcher(checkNotNull(dispatcher));
+        }
+
+        /**
+         * Registers the passed event dispatcher.
+         *
+         * @see BoundedContext#registerEventDispatcher(EventDispatcher)
+         */
+        public void registerEventDispatcher(EventDispatcher dispatcher) {
+            self().registerEventDispatcher(dispatcher);
+        }
+
+        /**
+         * Obtains repositories of the context.
+         *
+         * @throws IllegalStateException
+         *         if there is not repository entities of which have the passed state
+         */
+        public Repository<?, ?> getRepository(Class<? extends EntityState> stateClass) {
+            return guard.get(stateClass);
+        }
+
+        /**
+         * Finds a repository by the state class of entities.
+         *
+         * <p>This method assumes that a repository for the given entity state class <b>is</b>
+         * registered in this context. If there is no such repository, throws
+         * an {@link IllegalStateException}.
+         *
+         * <p>If a repository is registered, the method returns it or {@link Optional#empty()} if
+         * the requested entity is {@linkplain Visibility#NONE not visible}.
+         *
+         * @param stateClass
+         *         the class of the state of the entity managed by the resulting repository
+         * @return the requested repository or {@link Optional#empty()} if the repository manages
+         *         a {@linkplain Visibility#NONE non-visible} entity
+         * @throws IllegalStateException
+         *         if the requested repository is not registered
+         * @see VisibilityGuard
+         */
+        public Optional<Repository<?, ?>> findRepository(Class<? extends EntityState> stateClass) {
+            // See if there is a repository for this state at all.
+            if (!guard.hasRepository(stateClass)) {
+                throw newIllegalStateException(
+                        "No repository found for the entity state class `%s`.",
+                        stateClass.getName()
+                );
+            }
+            Optional<Repository<?, ?>> repository = guard.repositoryFor(stateClass);
+            return repository;
+        }
+
+        /** Obtains an {@link IntegrationBroker} of this {@code BoundedContext}. */
+        public IntegrationBroker broker() {
+            return self().broker;
+        }
+
+        /**
+         * Obtains a tenant index of this Bounded Context.
+         *
+         * <p>If the context is single-tenant returns
+         * {@linkplain TenantIndex#singleTenant() null-object} implementation.
+         */
+        public TenantIndex tenantIndex() {
+            return tenantIndex;
+        }
+
+        public AggregateRootDirectory aggregateRootDirectory() {
+            return aggregateRootDirectory;
+        }
+
+        private BoundedContext self() {
+            return BoundedContext.this;
+        }
     }
 }

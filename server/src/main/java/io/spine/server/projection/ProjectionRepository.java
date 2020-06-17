@@ -161,7 +161,8 @@ public abstract class ProjectionRepository<I,
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
         catchUpProcess = builder.setDispatchOp(this::sendToCatchingUp)
                                 .build();
-        context.registerEventDispatcher(catchUpProcess);
+        context.internalAccess()
+               .registerEventDispatcher(catchUpProcess);
     }
 
     private void initCache(boolean multitenant) {

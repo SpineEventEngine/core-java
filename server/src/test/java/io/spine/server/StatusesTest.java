@@ -24,7 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.Error;
-import io.spine.core.MessageRejection;
 import io.spine.grpc.MetadataConverter;
 import io.spine.server.event.UnsupportedEventException;
 import io.spine.server.transport.Statuses;
@@ -61,7 +60,7 @@ class StatusesTest {
     @Test
     @DisplayName("create invalid argument status exception")
     void createInvalidArgumentStatusEx() {
-        MessageRejection rejection =
+        MessageError rejection =
                 new UnsupportedEventException(Sample.messageOfType(ProjectCreated.class));
         StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);
         @SuppressWarnings("OptionalGetWithoutIsPresent")

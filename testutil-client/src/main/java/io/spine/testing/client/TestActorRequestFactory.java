@@ -38,7 +38,7 @@ import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 /**
  * An {@code ActorRequestFactory} for running tests.
@@ -50,20 +50,17 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         super(ActorRequestFactory
                       .newBuilder()
                       .setActor(actor)
-                      .setZoneOffset(idToZoneOffset(zoneId))
+                      .setZoneOffset(toOffset(zoneId))
                       .setZoneId(zoneId)
         );
     }
 
-    public TestActorRequestFactory(@Nullable TenantId tenantId,
-                                   UserId actor,
-                                   ZoneOffset zoneOffset,
-                                   ZoneId zoneId) {
+    public TestActorRequestFactory(@Nullable TenantId tenantId, UserId actor, ZoneId zoneId) {
         super(ActorRequestFactory
                       .newBuilder()
                       .setTenantId(tenantId)
                       .setActor(actor)
-                      .setZoneOffset(zoneOffset)
+                      .setZoneOffset(toOffset(zoneId))
                       .setZoneId(zoneId)
         );
     }
@@ -80,47 +77,14 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         this(actor, ZoneIds.systemDefault());
     }
 
-    /**
-     * Deprecated.
-     *
-     * @deprecated use {@link #TestActorRequestFactory(UserId, TenantId)}
-     */
-    @Deprecated
-    public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
-        return new TestActorRequestFactory(actor, tenantId);
-    }
-
     public TestActorRequestFactory(UserId actor, TenantId tenantId) {
-        this(tenantId, actor, ZoneOffsets.getDefault(), ZoneIds.systemDefault());
-    }
-
-    /**
-     * Deprecated.
-     *
-     * @deprecated use {@link #TestActorRequestFactory(Class, TenantId)}
-     */
-    @Deprecated
-    public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
-        return new TestActorRequestFactory(testClass, tenantId);
+        this(tenantId, actor, ZoneIds.systemDefault());
     }
 
     public TestActorRequestFactory(Class<?> testClass, TenantId tenantId) {
         this(tenantId,
              GivenUserId.of(testClass.getName()),
-             ZoneOffsets.getDefault(),
              ZoneIds.systemDefault());
-    }
-
-    private static ZoneOffset idToZoneOffset(ZoneId zoneId) {
-        java.time.ZoneId javaZoneId = java.time.ZoneId.of(zoneId.getValue());
-        int offsetInSeconds = ZonedDateTime.now(javaZoneId)
-                                           .getOffset()
-                                           .getTotalSeconds();
-        ZoneOffset offset = ZoneOffset
-                .newBuilder()
-                .setAmountSeconds(offsetInSeconds)
-                .build();
-        return offset;
     }
 
     /** Creates new command with the passed timestamp. */
@@ -131,16 +95,19 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     private static Command withTimestamp(Command command, Timestamp timestamp) {
         CommandContext origin = command.context();
-        ActorContext withTime = origin.getActorContext()
-                                      .toBuilder()
-                                      .setTimestamp(timestamp)
-                                      .build();
-        CommandContext resultContext = origin.toBuilder()
-                                             .setActorContext(withTime)
-                                             .build();
-        Command result = command.toBuilder()
-                                .setContext(resultContext)
-                                .build();
+        ActorContext withTime =
+                origin.getActorContext()
+                      .toBuilder()
+                      .setTimestamp(timestamp)
+                      .build();
+        CommandContext resultContext =
+                origin.toBuilder()
+                      .setActorContext(withTime)
+                      .build();
+        Command result =
+                command.toBuilder()
+                       .setContext(resultContext)
+                       .build();
         return result;
     }
 
@@ -171,5 +138,16 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     @Override
     public CommandContext createCommandContext() {
         return super.createCommandContext();
+    }
+
+    /**
+     * Obtains the current offset for the passed time zone.
+     */
+    public static ZoneOffset toOffset(ZoneId zoneId) {
+        java.time.ZoneOffset offset =
+                ZoneIds.toJavaTime(zoneId)
+                       .getRules()
+                       .getOffset(Instant.now());
+        return ZoneOffsets.of(offset);
     }
 }

@@ -74,7 +74,7 @@ message EventId {
 // See `EventContext.rejection` to determine the event kind.
 //
 message Event {
-    option (is).java_type = "io.spine.core.EventMixin";
+    option (is).java_type = "EventMixin";
     option (SPI_type) = true;
 
     // The ID of the event.
@@ -89,7 +89,7 @@ message Event {
 
 // Meta-information for an event.
 message EventContext {
-    option (is).java_type = "io.spine.core.EventContextMixin";
+    option (is).java_type = "EventContextMixin";
     option (SPI_type) = true;
 
     // When the event occurred.

@@ -63,8 +63,7 @@ import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -84,7 +83,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
-import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.boundedContext;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.context;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregate;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenStoredAggregate;
@@ -111,12 +110,13 @@ public class AggregateRepositoryTest {
         ModelTests.dropAllModels();
         resetBoundedContext();
         resetRepository();
-        boundedContext().register(repository());
+        context().internalAccess()
+                 .register(repository());
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        boundedContext().close();
+        context().close();
     }
 
     @Nested
@@ -399,7 +399,8 @@ public class AggregateRepositoryTest {
         @DisplayName("on events")
         void onEvents() {
             ReactingRepository repository = new ReactingRepository();
-            boundedContext().register(repository);
+            context().internalAccess()
+                     .register(repository);
 
             ProjectId parentId = givenAggregateId("parent");
             ProjectId childId = givenAggregateId("child");
@@ -419,8 +420,8 @@ public class AggregateRepositoryTest {
             Event event = factory.createEvent(msg);
 
             // Posting this event should archive the aggregate.
-            boundedContext().eventBus()
-                            .post(event);
+            context().eventBus()
+                     .post(event);
 
             // Check that the aggregate marked itself as `archived`, and therefore became invisible
             // to regular queries.
@@ -439,10 +440,11 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("on rejections")
         void onRejections() {
-            BoundedContext context = boundedContext();
-            context.register(new RejectingRepository());
+            BoundedContext context = context();
+            BoundedContext.InternalAccess contextAccess = context.internalAccess();
+            contextAccess.register(new RejectingRepository());
             RejectionReactingRepository repository = new RejectionReactingRepository();
-            context.register(repository);
+            contextAccess.register(repository);
 
             ProjectId parentId = givenAggregateId("rejectingParent");
             ProjectId childId1 = givenAggregateId("acceptingChild-1");
@@ -493,7 +495,7 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
-        private BlackBoxBoundedContext<?> context;
+        private BlackBoxContext context;
 
         /**
          * Create a fresh instance of the repository since this nested class uses
@@ -504,10 +506,10 @@ public class AggregateRepositoryTest {
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            AggregateRepository<?, ?, ?> repository = repository();
-            context = BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(repository);
+            context = BlackBoxContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(repository())
+            );
         }
 
         @Test
@@ -583,11 +585,12 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            SingleTenantBlackBoxContext context = BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(new EventDiscardingAggregateRepository())
-                    .receivesCommands(create, start)
-                    .receivesEvent(archived);
+            BlackBoxContext context = BlackBoxContext.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(new EventDiscardingAggregateRepository())
+            );
+            context.receivesCommands(create, start)
+                   .receivesEvent(archived);
             context.assertEvents()
                    .isEmpty();
             context.close();
@@ -626,8 +629,8 @@ public class AggregateRepositoryTest {
                                                    .build();
         Event event = factory.createEvent(msg);
 
-        boundedContext().eventBus()
-                        .post(event);
+        context().eventBus()
+                 .post(event);
 
         // Check that the child aggregate was archived.
         Optional<ProjectAggregate> childAfterArchive = repository().find(child.id());
@@ -647,9 +650,10 @@ public class AggregateRepositoryTest {
     @MuteLogging
     void doNothingWhenEventReactionFails() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
-        boundedContext().register(repository);
+        BoundedContext.InternalAccess contextAccess = context().internalAccess();
+        contextAccess.register(repository);
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        boundedContext().registerEventDispatcher(monitor);
+        contextAccess.registerEventDispatcher(monitor);
 
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
 
@@ -658,8 +662,8 @@ public class AggregateRepositoryTest {
                 EventEnvelope.of(factory.createEvent(FloatEncountered.newBuilder()
                                                                      .setNumber(-412.0f)
                                                                      .build()));
-        boundedContext().eventBus()
-                        .post(envelope.outerObject());
+        context().eventBus()
+                 .post(envelope.outerObject());
 
         List<HandlerFailedUnexpectedly> handlerFailureEvents = monitor.handlerFailureEvents();
         assertThat(handlerFailureEvents).hasSize(1);
@@ -678,9 +682,10 @@ public class AggregateRepositoryTest {
     @DisplayName("not pass command rejection to `onError`")
     void notPassCommandRejectionToOnError() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
-        boundedContext().register(repository);
+        BoundedContext.InternalAccess contextAccess = context().internalAccess();
+        contextAccess.register(repository);
         DiagnosticMonitor monitor = new DiagnosticMonitor();
-        boundedContext().registerEventDispatcher(monitor);
+        contextAccess.registerEventDispatcher(monitor);
 
         // Passing negative long value to `FailingAggregate` should cause a rejection.
         RejectNegativeLong rejectNegative = RejectNegativeLong
@@ -690,8 +695,8 @@ public class AggregateRepositoryTest {
         Command command = requestFactory().createCommand(rejectNegative);
         CommandEnvelope envelope = CommandEnvelope.of(
                 command);
-        boundedContext().commandBus()
-                        .post(envelope.command(), noOpObserver());
+        context().commandBus()
+                 .post(envelope.command(), noOpObserver());
         assertThat(monitor.handlerFailureEvents()).isEmpty();
     }
 
@@ -699,6 +704,7 @@ public class AggregateRepositoryTest {
     @DisplayName("not allow anemic aggregates")
     void notAllowAnemicAggregates() {
         assertThrows(IllegalStateException.class,
-                     () -> boundedContext().register(new AnemicAggregateRepository()));
+                     () -> context().internalAccess()
+                                    .register(new AnemicAggregateRepository()));
     }
 }

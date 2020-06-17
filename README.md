@@ -5,7 +5,7 @@
 [![Gitter chat](https://badges.gitter.im/SpineEventEngine.png)](https://gitter.im/SpineEventEngine)
 
 Spine Event Engine is a Java framework for building Event Sourcing and CQRS applications that are 
-accessed by clients built with JavaScript, Java Nano (Android), C++, and Java.
+accessed by clients built with JavaScript, Java Nano (Android), Dart, and Java.
 
 Requires Java 8 or higher.
 

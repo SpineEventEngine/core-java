@@ -21,27 +21,19 @@
 package io.spine.client;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.protobuf.Message;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() severe} level
- * of the passed logger.
- *
- * @param <M>
- *         the type of the messages delivered to the consumer
- */
-final class LoggingErrorHandler<M extends Message>
-        extends LoggingHandler
-        implements ErrorHandler {
+final class LoggingErrorHandler extends LoggingHandler implements ErrorHandler{
 
-    LoggingErrorHandler(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
-        super(logger, messageFormat, type);
+    private final @Nullable Object param;
+
+    LoggingErrorHandler(FluentLogger logger, String messageFormat, @Nullable Object param) {
+        super(logger, messageFormat);
+        this.param = param;
     }
 
     @Override
     public void accept(Throwable throwable) {
-        logger().atSevere()
-                .withCause(throwable)
-                .log(messageFormat(), type());
+        error(throwable).log(messageFormat(), param);
     }
 }

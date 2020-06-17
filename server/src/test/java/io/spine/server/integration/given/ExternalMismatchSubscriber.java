@@ -20,6 +20,7 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.integration.command.ItgStartProject;
@@ -31,8 +32,9 @@ import io.spine.test.integration.rejection.IntegrationRejections;
 @SuppressWarnings("unused") // OK to have unused params in this test env. class
 public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
 
-    @Subscribe(external = true)
-    void on(IntegrationRejections.ItgCannotStartArchivedProject rejection, ItgStartProject command) {
+    @Subscribe
+    void on(@External IntegrationRejections.ItgCannotStartArchivedProject rejection,
+            ItgStartProject command) {
         // do nothing.
     }
 

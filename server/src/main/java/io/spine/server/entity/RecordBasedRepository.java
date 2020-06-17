@@ -421,7 +421,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     private E findOrThrow(I id) {
         return find(id).orElseThrow(() -> newIllegalArgumentException(
-                "An entity with ID `%s` is not found in the repository.", id
+                "An entity `%s` with ID `%s` is not found in the repository.",
+                entityClass().getCanonicalName(), id
         ));
     }
 
@@ -489,7 +490,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     private void checkEntityIsTransactional() {
         checkState(TransactionalEntity.class.isAssignableFrom(entityClass()),
                    "`%s` is not a transactional entity type. The requested operation is only " +
-                           "supported for transactional entity types.");
+                           "supported for transactional entity types.",
+                   entityClass().getCanonicalName()
+        );
     }
 
     /**

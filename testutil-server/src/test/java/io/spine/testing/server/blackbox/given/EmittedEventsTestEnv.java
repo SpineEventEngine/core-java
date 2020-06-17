@@ -26,7 +26,7 @@ import io.spine.core.TenantId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BbProjectId;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 
@@ -67,7 +67,7 @@ public class EmittedEventsTestEnv {
     }
 
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return new TestActorRequestFactory(BlackBoxBoundedContext.class, tenantId);
+        return new TestActorRequestFactory(BlackBoxContext.class, tenantId);
     }
 
     private static BbProjectId newProjectId() {

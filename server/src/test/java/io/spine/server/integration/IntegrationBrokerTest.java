@@ -28,7 +28,6 @@ import io.spine.core.EventValidationError;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.given.BillingAggregate;
@@ -43,7 +42,7 @@ import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -142,10 +141,12 @@ class IntegrationBrokerTest {
             BoundedContext sourceContext = newContext();
 
             BoundedContext destination1 = newContext();
-            destination1.register(new MemoizingProjectDetails1Repository());
+            destination1.internalAccess()
+                        .register(new MemoizingProjectDetails1Repository());
 
             BoundedContext destination2 = newContext();
-            destination2.register(new MemoizingProjectDetails2Repository());
+            destination2.internalAccess()
+                        .register(new MemoizingProjectDetails2Repository());
 
             assertTrue(MemoizingProjection.events()
                                           .isEmpty());
@@ -258,12 +259,15 @@ class IntegrationBrokerTest {
     @Test
     @DisplayName("send messages between two contexts regardless of registration order")
     void mutual() {
-        BlackBoxBoundedContext<?> photos = BlackBoxBoundedContext
-                .singleTenant("Photos-" + IntegrationBrokerTest.class.getSimpleName())
-                .with(DefaultRepository.of(PhotosProcMan.class));
-        BlackBoxBoundedContext<?> billing = BlackBoxBoundedContext
-                .singleTenant("Billing-" + IntegrationBrokerTest.class.getSimpleName())
-                .with(DefaultRepository.of(BillingAggregate.class));
+        String suffix = IntegrationBrokerTest.class.getSimpleName();
+        BlackBoxContext photos = BlackBoxContext.from(
+                BoundedContext.singleTenant("Photos-" + suffix)
+                              .add(PhotosProcMan.class)
+        );
+        BlackBoxContext billing = BlackBoxContext.from(
+                BoundedContext.singleTenant("Billing-" + suffix)
+                              .add(BillingAggregate.class)
+        );
         photos.receivesCommand(UploadPhotos.generate());
         assertReceived(photos, PhotosUploaded.class);
         assertReceived(billing, CreditsHeld.class);
@@ -273,7 +277,7 @@ class IntegrationBrokerTest {
         billing.close();
     }
 
-    private static void assertReceived(BlackBoxBoundedContext<?> context,
+    private static void assertReceived(BlackBoxContext context,
                                        Class<? extends EventMessage> eventClass) {
         context.assertEvents()
                .withType(eventClass)
@@ -312,7 +316,8 @@ class IntegrationBrokerTest {
 
         Event event = projectCreated();
         MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-        context.broker()
+        context.internalAccess()
+               .broker()
                .dispatchLocally(event, observer);
         Error error = observer.firstResponse()
                               .getStatus()

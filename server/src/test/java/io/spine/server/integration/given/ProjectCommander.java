@@ -20,6 +20,7 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.core.External;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
 import io.spine.test.integration.command.ItgAddTask;
@@ -36,8 +37,8 @@ public final class ProjectCommander extends AbstractCommander {
     private static ItgProjectStarted domesticEvent = null;
 
 
-    @Command(external = true)
-    Optional<ItgStartProject> on(ItgProjectCreated event) {
+    @Command
+    Optional<ItgStartProject> on(@External ItgProjectCreated event) {
         externalEvent = event;
         return Optional.empty();
     }

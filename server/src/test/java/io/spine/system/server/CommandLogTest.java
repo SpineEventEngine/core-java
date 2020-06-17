@@ -90,8 +90,9 @@ class CommandLogTest {
                 .build();
         system = systemOf(context);
 
-        context.register(DefaultRepository.of(CompanyAggregate.class));
-        context.register(new CompanyNameProcmanRepo());
+        BoundedContext.InternalAccess ctx = context.internalAccess();
+        ctx.register(DefaultRepository.of(CompanyAggregate.class));
+        ctx.register(new CompanyNameProcmanRepo());
     }
 
     @AfterEach

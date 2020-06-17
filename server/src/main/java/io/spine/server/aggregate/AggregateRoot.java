@@ -37,8 +37,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @Experimental
 public class AggregateRoot<I> {
 
-    /** The {@code BoundedContext} to which the aggregate belongs. */
-    private final BoundedContext boundedContext;
+    /** The context to which the aggregate belongs. */
+    private final BoundedContext context;
 
     /** The aggregate ID. */
     private final I id;
@@ -46,11 +46,11 @@ public class AggregateRoot<I> {
     /**
      * Creates a new instance.
      *
-     * @param boundedContext the bounded context to which the aggregate belongs
+     * @param context the bounded context to which the aggregate belongs
      * @param id             the ID of the aggregate
      */
-    protected AggregateRoot(BoundedContext boundedContext, I id) {
-        this.boundedContext = checkNotNull(boundedContext);
+    protected AggregateRoot(BoundedContext context, I id) {
+        this.context = checkNotNull(context);
         this.id = checkNotNull(id);
     }
 
@@ -92,11 +92,12 @@ public class AggregateRoot<I> {
     private <S extends EntityState<I>, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, S, ?> repositoryOf(Class<S> stateClass) {
         Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
-        Optional<? extends AggregatePartRepository<?, ?, ?, ?>> partRepository = boundedContext
-                .aggregateRootDirectory()
-                .findPart(thisType, stateClass);
+        Optional<? extends AggregatePartRepository<?, ?, ?, ?>> partRepository =
+                context.internalAccess()
+                       .aggregateRootDirectory()
+                       .findPart(thisType, stateClass);
         AggregatePartRepository<?, ?, ?, ?> repository = partRepository.orElseThrow(
-                () -> newIllegalStateException("Could not find a repository for aggregate part %s",
+                () -> newIllegalStateException("Could not find repository for aggregate part `%s`.",
                                                stateClass.getName())
         );
         AggregatePartRepository<I, A, S, ?> result =

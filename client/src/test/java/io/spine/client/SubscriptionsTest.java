@@ -23,18 +23,10 @@ import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
 @DisplayName("Subscriptions utility should")
 class SubscriptionsTest {
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Subscriptions.class);
-    }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)

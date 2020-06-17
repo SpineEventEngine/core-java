@@ -825,6 +825,7 @@
     <inspection_tool class="UnqualifiedInnerClassAccess" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="ignoreReferencesToLocalInnerClasses" value="true" />
     </inspection_tool>
+    <inspection_tool class="UnnecessaryLocalVariable" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="UnsecureRandomNumberGeneration" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UnstableApiUsage" enabled="true" level="WEAK WARNING" enabled_by_default="true">
       <scope name="Tests" level="WEAK WARNING" enabled="false" />

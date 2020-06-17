@@ -37,7 +37,7 @@ message Project {
     option (entity).kind = ENTITY;
     option (entity).visibility = FULL;
 
-    ProjectId id = 1 [(required) = false, (set_once) = false];
+    ProjectId id = 1 [(required) = false];
 
     string name = 2 [(column) = true];
 
@@ -70,7 +70,7 @@ message Task {
 message ProjectTaskNames {
     option (entity).kind = PROJECTION;
 
-    ProjectId project_id = 1 [(required) = false, (set_once) = false];
+    ProjectId project_id = 1 [(required) = false];
 
     string project_name = 2;
 

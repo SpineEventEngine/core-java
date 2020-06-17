@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model.given.subscriber;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.test.reflect.event.RefProjectCreated;
 
@@ -29,7 +30,7 @@ import io.spine.test.reflect.event.RefProjectCreated;
  */
 public class ExternalSubscriber extends TestEventSubscriber {
 
-    @Subscribe(external = true)
-    void handle(RefProjectCreated externalEvent) {
+    @Subscribe
+    void handle(@External RefProjectCreated externalEvent) {
     }
 }

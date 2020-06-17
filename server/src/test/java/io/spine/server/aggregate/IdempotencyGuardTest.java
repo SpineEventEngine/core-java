@@ -61,23 +61,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("IdempotencyGuard should")
 class IdempotencyGuardTest {
 
-    private BoundedContext boundedContext;
+    private BoundedContext context;
     private IgTestAggregateRepository repository;
     private ProjectId projectId;
 
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContextBuilder.assumingTests().build();
+        context = BoundedContextBuilder.assumingTests().build();
         repository = new IgTestAggregateRepository();
-        boundedContext.register(repository);
+        context.internalAccess()
+               .register(repository);
         projectId = newProjectId();
     }
 
     @AfterEach
     void tearDown() throws Exception {
         repository.close();
-        boundedContext.close();
+        context.close();
         ModelTests.dropAllModels();
     }
 
@@ -147,7 +148,7 @@ class IdempotencyGuardTest {
         }
 
         private void post(Command command) {
-            CommandBus commandBus = boundedContext.commandBus();
+            CommandBus commandBus = context.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(command, noOpObserver);
         }
@@ -164,8 +165,8 @@ class IdempotencyGuardTest {
 
         @BeforeEach
         void setUp() {
-            boundedContext.commandBus()
-                          .post(command(createProject(projectId)), noOpObserver());
+            context.commandBus()
+                   .post(command(createProject(projectId)), noOpObserver());
         }
 
         @Test
@@ -213,7 +214,7 @@ class IdempotencyGuardTest {
             Event taskEvent = event(taskStarted(projectId));
             Event projectEvent = event(projectPaused(projectId));
 
-            EventBus eventBus = boundedContext.eventBus();
+            EventBus eventBus = context.eventBus();
             eventBus.post(taskEvent);
 
             IgTestAggregate aggregate = repository.loadAggregate(projectId);
@@ -224,8 +225,8 @@ class IdempotencyGuardTest {
         }
 
         private void post(Event event) {
-            boundedContext.eventBus()
-                          .post(event);
+            context.eventBus()
+                   .post(event);
         }
 
         private Optional<Error> check(IdempotencyGuard guard, Event event) {

@@ -20,6 +20,7 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.test.integration.ItgProjection;
 import io.spine.test.integration.ProjectId;
@@ -40,8 +41,8 @@ public class MemoizingProjectDetails2
         super(id);
     }
 
-    @Subscribe(external = true)
-    void on(ItgProjectCreated event) {
+    @Subscribe
+    void on(@External ItgProjectCreated event) {
         memoize(event);
     }
 }

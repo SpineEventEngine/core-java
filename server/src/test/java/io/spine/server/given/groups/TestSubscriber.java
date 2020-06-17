@@ -20,6 +20,7 @@
 
 package io.spine.server.given.groups;
 
+import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.given.organizations.Organization;
@@ -39,8 +40,8 @@ public final class TestSubscriber extends AbstractEventSubscriber {
         this.domestic = group;
     }
 
-    @Subscribe(external = true)
-    void external(Organization organization) {
+    @Subscribe
+    void external(@External Organization organization) {
         this.external = organization;
     }
 

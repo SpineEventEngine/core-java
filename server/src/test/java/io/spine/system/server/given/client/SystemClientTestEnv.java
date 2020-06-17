@@ -42,7 +42,8 @@ public class SystemClientTestEnv {
     public static BoundedContext contextWithSystemProjection() {
         BoundedContext context = BoundedContextBuilder.assumingTests().build();
         BoundedContext systemContext = systemOf(context);
-        systemContext.register(new MealOrderRepository());
+        systemContext.internalAccess()
+                     .register(new MealOrderRepository());
         return context;
     }
 
@@ -51,7 +52,8 @@ public class SystemClientTestEnv {
         @SuppressWarnings("unchecked")
         AggregateRepository<ListId, ShoppingListAggregate, ShoppingList> repository =
                 (AggregateRepository<ListId, ShoppingListAggregate, ShoppingList>)
-                        context.findRepository(ShoppingList.class)
+                        context.internalAccess()
+                               .findRepository(ShoppingList.class)
                                .orElseGet(() -> fail("Aggregate repository should be visible."));
         ShoppingListAggregate aggregate =
                 repository.find(aggregateId)
@@ -61,7 +63,8 @@ public class SystemClientTestEnv {
 
     public static MealOrderProjection findProjection(OrderId projectionId, BoundedContext context) {
         MealOrderRepository repository = (MealOrderRepository)
-                context.findRepository(MealOrder.class)
+                context.internalAccess()
+                       .findRepository(MealOrder.class)
                        .orElseGet(() -> fail("Projection repository should be visible."));
         MealOrderProjection projection =
                 repository.find(projectionId)

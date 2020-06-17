@@ -74,7 +74,7 @@ import static java.util.Collections.singleton;
  * @param <B>
  *         a type of the builder implementations
  */
-public abstract class TargetBuilder<T extends Message, B extends TargetBuilder> {
+public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T, B>> {
 
     private final Class<? extends Message> targetType;
 
@@ -329,7 +329,8 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder> 
         String valueSeparator = "; ";
         StringBuilder sb = new StringBuilder();
 
-        Class<? extends TargetBuilder> builderCls = self().getClass();
+        @SuppressWarnings("unchecked") // Ensured by declaration of this class.
+        Class<B> builderCls = (Class<B>) self().getClass();
         sb.append(builderCls.getSimpleName())
           .append('(')
           .append("SELECT ")

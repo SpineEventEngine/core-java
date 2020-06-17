@@ -28,9 +28,10 @@ import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
-import io.spine.test.client.command.LogInUser;
-import io.spine.test.client.event.UserLoggedIn;
+import io.spine.test.client.users.command.LogInUser;
+import io.spine.test.client.users.event.UserLoggedIn;
 import io.spine.testing.core.given.GivenUserId;
+import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +55,7 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
 
     @Override
     protected ImmutableList<BoundedContextBuilder> contexts() {
-        return ImmutableList.of(ClientTestContext.builder());
+        return ImmutableList.of(ClientTestContext.users());
     }
 
     @BeforeEach
@@ -76,6 +77,7 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
         counter.clear();
     }
 
+    @MuteLogging
     @Test
     @DisplayName("allow to receive event messages")
     void observeEventMessage() {
@@ -89,6 +91,7 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
             .isTrue();
     }
 
+    @MuteLogging
     @Nested
     @DisplayName("allow to receive event messages and contexts, filtering by")
     class Filtering {

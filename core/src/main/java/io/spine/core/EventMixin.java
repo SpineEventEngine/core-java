@@ -45,17 +45,19 @@ import static io.spine.protobuf.Messages.isDefault;
 interface EventMixin
         extends Signal<EventId, EventMessage, EventContext>, FieldAwareMessage, KnownMessage {
 
-    /**
-     * Obtains the ID of the tenant of the event.
-     */
     @Override
-    default TenantId tenant() {
-        return actorContext().getTenantId();
+    default Timestamp timestamp() {
+        return context().getTimestamp();
     }
 
-    @Override
+    /**
+     * Obtains the time of the event.
+     *
+     * @deprecated please use {@link #timestamp()}
+     */
+    @Deprecated
     default Timestamp time() {
-        return context().getTimestamp();
+        return timestamp();
     }
 
     /**
