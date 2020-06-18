@@ -101,7 +101,7 @@ class MultiTenantContextTest
         assertThrows(
                 IllegalStateException.class,
                 () -> BlackBoxContext.from(BoundedContextBuilder.assumingTests(true))
-                                     .assertEntityWithState("verify state", BbProject.class)
+                                     .assertEntityWithState(BbProjectId.generate(), BbProject.class)
         );
     }
 }
