@@ -37,6 +37,7 @@ import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.StorageRecords;
@@ -55,7 +56,6 @@ import io.spine.testdata.Sample;
 import io.spine.testing.TestValues;
 import io.spine.testing.Tests;
 import io.spine.testing.core.given.GivenCommandContext;
-import io.spine.testing.server.TestBoundedContext;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -737,7 +737,8 @@ public class AggregateStorageTest
 
     private static GivenAggregate givenAggregate() {
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        TestBoundedContext.create().register(repository);
+        BoundedContextBuilder.assumingTests().add(repository).build();
+//        TestBoundedContext.create().register(repository);
         return new GivenAggregate(repository);
     }
 }

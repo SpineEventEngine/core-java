@@ -71,8 +71,8 @@ class AggregateMirroringTest {
     @BeforeEach
     void setUp() {
         context = BoundedContextBuilder.assumingTests(false)
+                                       .add(newPhotosRepository())
                                        .build();
-        context.register(newPhotosRepository());
         TestActorRequestFactory requestFactory =
                 new TestActorRequestFactory(AggregateMirroringTest.class);
         queries = requestFactory.query();

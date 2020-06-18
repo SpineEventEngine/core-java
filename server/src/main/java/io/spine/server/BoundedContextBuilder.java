@@ -47,7 +47,6 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemSettings;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -578,7 +577,7 @@ public final class BoundedContextBuilder implements Logging {
         SystemClient systemClient = system.createClient();
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemClient);
-        BoundedContext result = buildPartial(instanceFactory, systemClient);
+        BoundedContext result = buildPartial(instanceFactory, systemClient, system.stand());
         return result;
     }
 
@@ -610,7 +609,7 @@ public final class BoundedContextBuilder implements Logging {
                    @Nullable Stand systemStand) {
         initTenantIndex();
         initCommandBus(client.writeSide());
-        this.stand = createStand();
+        this.stand = createStand(systemStand);
         B result = instanceFactory.apply(this);
         return result;
     }
@@ -629,24 +628,16 @@ public final class BoundedContextBuilder implements Logging {
                   .injectTenantIndex(tenantIndex);
     }
 
-    private Stand createStand() {
+    //TODO:2020-06-17:alex.tymchenko: `withSubscriptionRegistryFrom`?
+    private Stand createStand(@Nullable Stand systemStand) {
         Stand.Builder result = Stand
                 .newBuilder()
                 .setMultitenant(isMultitenant());
+        if (systemStand != null) {
+            result.withSubscriptionRegistryFrom(systemStand);
+        }
         return result.build();
     }
-
-    //TODO:2020-06-17:alex.tymchenko: `withSubscriptionRegistryFrom`?
-//    private Stand createStand(SystemReadSide systemReadSide, @Nullable Stand systemStand) {
-//        Stand.Builder result = Stand
-//                .newBuilder()
-//                .setMultitenant(isMultitenant())
-//                .setSystemReadSide(systemReadSide);
-//        if (systemStand != null) {
-//            result.withSubscriptionRegistryFrom(systemStand);
-//        }
-//        return result.build();
-//    }
 
     /**
      * Creates a copy of this context builder for the purpose of testing.

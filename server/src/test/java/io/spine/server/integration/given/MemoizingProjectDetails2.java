@@ -22,12 +22,12 @@ package io.spine.server.integration.given;
 
 import io.spine.core.External;
 import io.spine.core.Subscribe;
-import io.spine.test.integration.ItgProjection;
+import io.spine.test.integration.AnotherMemoizingView;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 
 public class MemoizingProjectDetails2
-        extends MemoizingProjection<ProjectId, ItgProjection, ItgProjection.Builder> {
+        extends MemoizingProjection<ProjectId, AnotherMemoizingView, AnotherMemoizingView.Builder> {
 
     /**
      * Creates a new instance.

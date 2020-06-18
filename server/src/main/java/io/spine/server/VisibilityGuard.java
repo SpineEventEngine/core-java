@@ -21,9 +21,8 @@
 package io.spine.server;
 
 import com.google.common.base.MoreObjects;
-import io.spine.base.entity.EntityState;
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.EntityState;
+import io.spine.base.entity.EntityState;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.entity.Repository;
@@ -127,7 +126,7 @@ final class VisibilityGuard {
      * @throws IllegalStateException
      *         if there is not repository entities of which have the passed state
      */
-    Repository<?, ?> get(Class<? extends EntityState> stateClass) {
+    Repository<?, ?> get(Class<? extends EntityState<?>> stateClass) {
         RepositoryAccess access = findOrThrow(stateClass);
         return access.repository;
     }

@@ -72,7 +72,6 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.TestBoundedContext;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;
@@ -662,7 +661,8 @@ class StandTest extends TenantAwareTest {
                 .setMultitenant(multitenant)
                 .build();
         CustomerAggregateRepository repository = new CustomerAggregateRepository();
-        TestBoundedContext.create().register(repository);
+        BoundedContextBuilder.assumingTests().add(repository).build();
+//        TestBoundedContext.create().register(repository);
         stand.registerTypeSupplier(repository);
         Query query = getRequestFactory().query()
                                          .all(Customer.class);

@@ -40,7 +40,7 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     protected void setRecordPayload(EventEnvelope envelope, InboxMessage.Builder builder) {
         Event event = envelope.outerObject();
         builder.setEvent(event)
-               .setWhenReceived(event.time());
+               .setWhenReceived(event.timestamp());
     }
 
     @Override

@@ -70,7 +70,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("SubscriptionService should")
+@DisplayName("`SubscriptionService` should")
 class SubscriptionServiceTest {
 
     private final TestActorRequestFactory requestFactory =

@@ -425,7 +425,7 @@ public final class CatchUpProcess<I>
         List<Event> events = readMore(request, null, null);
         if (events.size() > 0) {
             Timestamp lastEventTimestamp = events.get(events.size() - 1)
-                                                 .time();
+                                                 .timestamp();
             builder().setWhenLastRead(lastEventTimestamp);
             dispatchAll(events);
         }

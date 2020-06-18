@@ -40,7 +40,7 @@ final class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     protected void setRecordPayload(CommandEnvelope envelope, InboxMessage.Builder builder) {
         Command command = envelope.outerObject();
         builder.setCommand(command)
-               .setWhenReceived(command.time());
+               .setWhenReceived(command.timestamp());
     }
 
     @Override

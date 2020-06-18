@@ -145,8 +145,6 @@ public abstract class BoundedContext implements Closeable, Logging {
      */
     protected final void init() {
         eventBus.registerWith(this);
-        //TODO:2020-06-17:alex.tymchenko: do we need this?
-        tenantIndex.registerWith(this);
         broker.registerWith(this);
     }
     
@@ -514,7 +512,7 @@ public abstract class BoundedContext implements Closeable, Logging {
          * @throws IllegalStateException
          *         if there is not repository entities of which have the passed state
          */
-        public Repository<?, ?> getRepository(Class<? extends EntityState> stateClass) {
+        public Repository<?, ?> getRepository(Class<? extends EntityState<?>> stateClass) {
             return guard.get(stateClass);
         }
 
@@ -528,7 +526,7 @@ public abstract class BoundedContext implements Closeable, Logging {
          * <p>If a repository is registered, the method returns it or {@link Optional#empty()} if
          * the requested entity is {@linkplain Visibility#NONE not visible}.
          *
-         * @param stateClass
+         * @param stateCls
          *         the class of the state of the entity managed by the resulting repository
          * @return the requested repository or {@link Optional#empty()} if the repository manages
          *         a {@linkplain Visibility#NONE non-visible} entity
@@ -536,15 +534,15 @@ public abstract class BoundedContext implements Closeable, Logging {
          *         if the requested repository is not registered
          * @see VisibilityGuard
          */
-        public Optional<Repository<?, ?>> findRepository(Class<? extends EntityState> stateClass) {
+        public Optional<Repository<?, ?>> findRepository(Class<? extends EntityState<?>> stateCls) {
             // See if there is a repository for this state at all.
-            if (!guard.hasRepository(stateClass)) {
+            if (!guard.hasRepository(stateCls)) {
                 throw newIllegalStateException(
                         "No repository found for the entity state class `%s`.",
-                        stateClass.getName()
+                        stateCls.getName()
                 );
             }
-            Optional<Repository<?, ?>> repository = guard.repositoryFor(stateClass);
+            Optional<Repository<?, ?>> repository = guard.repositoryFor(stateCls);
             return repository;
         }
 

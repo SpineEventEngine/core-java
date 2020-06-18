@@ -109,25 +109,6 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
         return formatBuilder.build();
     }
 
-    /**
-     * Initializes the instance by registering itself with the passed {@code BoundedContext}.
-     *
-     * @implNote Normally repositories are explicitly registered with a context during its creation.
-     * This method performs the registration with the context, so that normal repository flow
-     * is ensured. It avoids calling the {@code super.init()} since it assumes that the context
-     * is already assigned.
-     */
-    //TODO:2020-06-17:alex.tymchenko: this piece is new!
-    @Override
-    @SuppressWarnings({"OverridingMethodsMustInvokeSuper", "MissingSuperCall"}) // see impl. note
-    public void registerWith(BoundedContext context) {
-        if (!isRegistered()) { // Quit recursion.
-            super.registerWith(context);
-            context.internalAccess()
-                   .register(this);
-        }
-    }
-
     @Override
     public void append(Event event) {
         checkNotNull(event);

@@ -24,7 +24,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.event.React;
-import io.spine.test.integration.Project;
+import io.spine.test.integration.ProjectEventCount;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 
@@ -33,7 +33,7 @@ import java.util.List;
 
 @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
 public class ProjectCountAggregate
-        extends Aggregate<ProjectId, Project, Project.Builder> {
+        extends Aggregate<ProjectId, ProjectEventCount, ProjectEventCount.Builder> {
 
     private static ItgProjectCreated externalEvent = null;
 

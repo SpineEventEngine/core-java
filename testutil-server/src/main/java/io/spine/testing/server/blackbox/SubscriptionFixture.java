@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.IterableOfProtosSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.base.entity.EntityState;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
@@ -89,12 +89,12 @@ public final class SubscriptionFixture {
      *
      * <p>If messages of other kind were received instead, the returned iterable would be empty.
      */
-    public IterableOfProtosSubject<EntityState> assertEntityStates() {
-        ImmutableList<EntityState> states =
+    public IterableOfProtosSubject<EntityState<?>> assertEntityStates() {
+        ImmutableList<EntityState<?>> states =
                 updates.stream()
                        .flatMap(SubscriptionFixture::toEntityState)
                        .collect(toImmutableList());
-        IterableOfProtosSubject<EntityState> subject = ProtoTruth.assertThat(states);
+        IterableOfProtosSubject<EntityState<?>> subject = ProtoTruth.assertThat(states);
         return subject;
     }
 
@@ -105,7 +105,7 @@ public final class SubscriptionFixture {
         return Stream.empty();
     }
 
-    private static Stream<EntityState> toEntityState(SubscriptionUpdate update) {
+    private static Stream<EntityState<?>> toEntityState(SubscriptionUpdate update) {
         if (update.getUpdateCase() == ENTITY_UPDATES) {
             return update.states().stream();
         }

@@ -50,6 +50,27 @@ message Project {
     Status status = 4;
 }
 
+message ProjectEventCount {
+
+    option (entity).kind = AGGREGATE;
+
+    ProjectId id = 1;
+}
+
+message MemoizingView {
+
+    option (entity).kind = PROJECTION;
+
+    ProjectId id = 1;
+}
+
+message AnotherMemoizingView {
+
+    option (entity).kind = PROJECTION;
+
+    ProjectId id = 1;
+}
+
 message TaskId {
     int32 id = 1;
 }

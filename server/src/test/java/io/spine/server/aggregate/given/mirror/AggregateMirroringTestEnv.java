@@ -129,6 +129,7 @@ public final class AggregateMirroringTestEnv {
         return MRDeletePhoto.newBuilder()
                             .setId(photo.getId())
                             .vBuild();
+    }
 
     public static class PhotoAggregate extends Aggregate<MRPhotoId, MRPhoto, MRPhoto.Builder> {
 
