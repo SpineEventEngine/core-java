@@ -25,6 +25,6 @@
  * as we want to manage the versions in a single source.
  */
 
-val spineBaseVersion: String by extra("1.5.18")
-val spineTimeVersion: String by extra("1.5.18")
-val versionToPublish: String by extra("1.5.18")
+val spineBaseVersion: String by extra("1.5.19")
+val spineTimeVersion: String by extra("1.5.19")
+val versionToPublish: String by extra("1.5.19")

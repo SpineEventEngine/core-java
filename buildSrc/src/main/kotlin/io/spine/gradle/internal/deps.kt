@@ -97,6 +97,7 @@ object Versions {
     val jackson          = "2.9.10.4"
     val animalSniffer    = "1.18"
     val apiguardian      = "1.1.0"
+    val javaxAnnotation  = "1.3.2"
 
     /**
      * Version of the SLF4J library.
@@ -163,7 +164,8 @@ object Build {
 }
 
 object Gen {
-    val javaPoet = "com.squareup:javapoet:${Versions.javaPoet}"
+    val javaPoet        = "com.squareup:javapoet:${Versions.javaPoet}"
+    val javaxAnnotation = "javax.annotation:javax.annotation-api:${Versions.javaxAnnotation}"
 }
 
 object Grpc {
