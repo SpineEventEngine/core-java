@@ -21,7 +21,7 @@ package io.spine.server.aggregate.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;

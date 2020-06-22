@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.logging.Logging;

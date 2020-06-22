@@ -20,7 +20,7 @@
 
 package io.spine.server.procman.given.dispatch;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.procman.PmTransaction;

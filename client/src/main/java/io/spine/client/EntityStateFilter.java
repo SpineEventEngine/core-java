@@ -20,9 +20,9 @@
 
 package io.spine.client;
 
-import io.spine.base.entity.EntityState;
-import io.spine.base.entity.EntityStateField;
+import io.spine.base.EntityState;
 import io.spine.client.Filter.Operator;
+import io.spine.query.EntityStateField;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator.EQUAL;

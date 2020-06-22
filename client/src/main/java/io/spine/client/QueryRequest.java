@@ -21,8 +21,8 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.base.entity.EntityColumn;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
+import io.spine.query.EntityColumn;
 
 import java.util.function.Function;
 

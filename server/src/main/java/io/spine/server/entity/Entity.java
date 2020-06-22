@@ -20,8 +20,8 @@
 
 package io.spine.server.entity;
 
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.base.entity.EntityState;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.entity.model.EntityClass;

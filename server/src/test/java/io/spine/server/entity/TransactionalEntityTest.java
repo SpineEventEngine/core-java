@@ -19,7 +19,7 @@
  */
 package io.spine.server.entity;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Versions;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.given.TeEntity;

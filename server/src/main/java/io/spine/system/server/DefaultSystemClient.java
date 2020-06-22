@@ -21,7 +21,7 @@
 package io.spine.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.Repository;
 

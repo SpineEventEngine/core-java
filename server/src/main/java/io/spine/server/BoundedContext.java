@@ -20,7 +20,7 @@
 package io.spine.server;
 
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;

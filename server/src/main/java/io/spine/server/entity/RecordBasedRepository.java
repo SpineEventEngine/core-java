@@ -29,7 +29,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;

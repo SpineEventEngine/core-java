@@ -21,8 +21,8 @@
 package io.spine.server.projection;
 
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Error;
-import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.BatchDispatchOutcome;

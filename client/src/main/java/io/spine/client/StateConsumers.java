@@ -21,7 +21,7 @@
 package io.spine.client;
 
 import io.grpc.stub.StreamObserver;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.EmptyContext;
 
 /**

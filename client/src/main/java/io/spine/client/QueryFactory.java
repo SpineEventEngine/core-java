@@ -22,7 +22,7 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.ActorContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

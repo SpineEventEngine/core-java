@@ -21,7 +21,7 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;

@@ -20,7 +20,7 @@
 
 package io.spine.server.route;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.EventContext;
 
 /**

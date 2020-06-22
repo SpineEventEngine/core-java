@@ -21,7 +21,7 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;

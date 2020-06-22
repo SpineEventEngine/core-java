@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;

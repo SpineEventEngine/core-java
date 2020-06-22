@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.CommandMessage;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.grpc.MemoizingObserver;

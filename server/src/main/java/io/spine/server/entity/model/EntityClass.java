@@ -22,8 +22,8 @@ package io.spine.server.entity.model;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Descriptors.Descriptor;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.base.entity.EntityState;
 import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;

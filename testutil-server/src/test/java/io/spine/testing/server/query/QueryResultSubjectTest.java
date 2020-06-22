@@ -23,7 +23,7 @@ package io.spine.testing.server.query;
 import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.QueryResponse;
 import io.spine.testing.SubjectTest;
 import org.junit.jupiter.api.DisplayName;

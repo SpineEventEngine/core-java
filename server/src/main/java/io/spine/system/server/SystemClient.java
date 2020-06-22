@@ -21,7 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.entity.Repository;
 
 import java.util.Optional;

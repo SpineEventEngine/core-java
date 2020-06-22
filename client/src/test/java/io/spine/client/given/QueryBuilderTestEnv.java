@@ -20,7 +20,7 @@
 
 package io.spine.client.given;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.OrderBy;
 import io.spine.test.client.TestEntity;
 import io.spine.type.TypeUrl;

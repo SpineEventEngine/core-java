@@ -20,7 +20,7 @@
 
 package io.spine.server.entity.storage.given;
 
-import io.spine.base.entity.EntityWithColumns;
+import io.spine.query.EntityWithColumns;
 import io.spine.server.projection.Projection;
 import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;

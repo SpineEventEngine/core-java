@@ -27,7 +27,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.GeneratedMessageV3;
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.code.proto.EntityStateOption;
 import io.spine.core.Event;
 import io.spine.option.EntityOption;

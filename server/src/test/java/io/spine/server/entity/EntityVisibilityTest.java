@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Truth8;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.option.EntityOption;
 import io.spine.test.entity.AccountDetails;
 import io.spine.test.entity.LastSeen;

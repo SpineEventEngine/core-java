@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.FieldMask;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.type.TypeUrl;
 
 /**

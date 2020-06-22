@@ -29,13 +29,13 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.base.entity.EntityColumn;
-import io.spine.base.entity.EntityStateField;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.code.proto.FieldName;
 import io.spine.core.Event;
 import io.spine.core.EventContextField;
 import io.spine.core.Version;
+import io.spine.query.EntityColumn;
+import io.spine.query.EntityStateField;
 
 import java.util.Collection;
 import java.util.function.Predicate;

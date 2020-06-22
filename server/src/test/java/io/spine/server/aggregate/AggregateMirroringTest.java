@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.CommandMessage;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.CommandFactory;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;

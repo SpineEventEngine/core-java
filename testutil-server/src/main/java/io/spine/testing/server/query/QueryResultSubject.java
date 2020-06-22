@@ -26,7 +26,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.IterableOfProtosSubject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.QueryResponse;
 import io.spine.core.Status;
 import io.spine.core.Status.StatusCase;

@@ -36,7 +36,7 @@ modelCompiler {
     fields {
         // Enable the strongly-typed fields generation for `spine.core.Event` as currently it's
         // a subscribable entity state.
-        generateFor("spine.core.Event", markAs("io.spine.base.entity.EntityStateField"))
+        generateFor("spine.core.Event", markAs("io.spine.query.EntityStateField"))
 
         // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
         // creation of typed event filters based on event context.

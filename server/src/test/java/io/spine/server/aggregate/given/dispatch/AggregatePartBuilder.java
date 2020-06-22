@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.given.dispatch;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.model.AggregatePartClass;

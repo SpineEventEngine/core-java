@@ -20,7 +20,7 @@
 
 package io.spine.server.enrich.given;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.enrich.given.event.EitProjectCreated;
 import io.spine.server.enrich.given.event.EitTaskCreated;
 import io.spine.server.enrich.given.event.EitUserAccountCreated;

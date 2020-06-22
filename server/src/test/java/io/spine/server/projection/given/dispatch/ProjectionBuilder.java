@@ -22,7 +22,7 @@ package io.spine.server.projection.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EntityBuilder;

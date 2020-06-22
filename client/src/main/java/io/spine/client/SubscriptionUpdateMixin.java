@@ -22,8 +22,8 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
-import io.spine.base.entity.EntityState;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 

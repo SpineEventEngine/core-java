@@ -21,9 +21,9 @@
 package io.spine.client;
 
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.MessageContext;
-import io.spine.base.entity.EntityState;
 import io.spine.core.EmptyContext;
 import io.spine.core.EventContext;
 

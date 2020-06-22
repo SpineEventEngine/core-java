@@ -27,10 +27,10 @@ import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.FieldPath;
 import io.spine.base.Identifier;
-import io.spine.base.entity.EntityColumn;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.TargetFilters;
+import io.spine.query.EntityColumn;
 import io.spine.server.entity.storage.ColumnName;
 
 import java.util.List;

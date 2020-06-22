@@ -23,8 +23,8 @@ package io.spine.client;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
-import io.spine.base.entity.EntityState;
 import io.spine.core.UserId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

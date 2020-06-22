@@ -21,7 +21,7 @@
 package io.spine.client;
 
 import com.google.protobuf.FieldMask;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 
 import java.util.Optional;
 

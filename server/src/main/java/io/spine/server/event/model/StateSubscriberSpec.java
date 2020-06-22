@@ -22,8 +22,8 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
-import io.spine.base.entity.EntityState;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.MethodParams;

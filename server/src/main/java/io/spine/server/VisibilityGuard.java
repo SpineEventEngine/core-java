@@ -22,7 +22,7 @@ package io.spine.server;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.entity.Repository;

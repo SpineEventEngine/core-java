@@ -22,7 +22,7 @@ package io.spine.server.procman.given.dispatch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;

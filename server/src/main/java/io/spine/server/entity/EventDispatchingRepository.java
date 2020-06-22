@@ -23,7 +23,7 @@ package io.spine.server.entity;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;

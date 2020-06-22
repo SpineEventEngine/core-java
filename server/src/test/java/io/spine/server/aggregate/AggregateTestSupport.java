@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;

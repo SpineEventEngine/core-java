@@ -21,7 +21,7 @@
 package io.spine.server.projection.migration;
 
 import io.spine.annotation.Experimental;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Migration;

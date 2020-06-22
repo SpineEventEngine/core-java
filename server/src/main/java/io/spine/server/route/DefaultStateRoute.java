@@ -23,7 +23,7 @@ package io.spine.server.route;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.EventContext;
 import io.spine.protobuf.Messages;
 

@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;

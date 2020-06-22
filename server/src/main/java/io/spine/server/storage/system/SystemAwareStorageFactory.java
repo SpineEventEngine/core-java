@@ -23,7 +23,7 @@ package io.spine.server.storage.system;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;

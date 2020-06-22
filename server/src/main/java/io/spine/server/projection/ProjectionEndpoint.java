@@ -22,8 +22,8 @@ package io.spine.server.projection;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Error;
-import io.spine.base.entity.EntityState;
 import io.spine.server.delivery.EventEndpoint;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycleMonitor;

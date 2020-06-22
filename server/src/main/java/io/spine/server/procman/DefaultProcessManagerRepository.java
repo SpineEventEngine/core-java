@@ -21,7 +21,7 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.DefaultRepository;
 import io.spine.server.procman.model.ProcessManagerClass;
 

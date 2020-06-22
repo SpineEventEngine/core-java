@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;

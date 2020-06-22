@@ -22,7 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.AbstractColumn;
@@ -31,7 +31,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.function.Function;
 
 /**
- * A column declared with the help of {@link io.spine.base.entity.EntityWithColumns}-derived interface.
+ * A column declared with the help of {@link io.spine.query.EntityWithColumns
+ * EntityColumn}-derived interface.
  *
  * <p>An interface-based column is:
  * <ol>

@@ -22,8 +22,8 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
-import io.spine.base.entity.EntityState;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.users.UserAccount;

@@ -20,7 +20,7 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;

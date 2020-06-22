@@ -19,7 +19,7 @@
  */
 package io.spine.server.entity.model;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.entity.Entity;
 import io.spine.server.type.EventClass;
 import io.spine.system.server.event.EntityStateChanged;

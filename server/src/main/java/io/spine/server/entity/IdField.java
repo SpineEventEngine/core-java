@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.model.EntityClass;

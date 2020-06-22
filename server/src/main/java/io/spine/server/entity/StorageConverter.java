@@ -23,8 +23,8 @@ package io.spine.server.entity;
 import com.google.common.base.Converter;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.base.entity.EntityState;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

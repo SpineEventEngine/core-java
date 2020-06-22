@@ -24,9 +24,9 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.KnownMessage;
-import io.spine.base.entity.EntityState;
 import io.spine.protobuf.Messages;
 import io.spine.validate.FieldAwareMessage;
 

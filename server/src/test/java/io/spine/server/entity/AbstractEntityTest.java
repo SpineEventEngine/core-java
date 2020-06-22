@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.entity.given.entity.AnEntity;
 import io.spine.server.entity.given.entity.NaturalNumberEntity;
 import io.spine.server.test.shared.LongIdAggregate;

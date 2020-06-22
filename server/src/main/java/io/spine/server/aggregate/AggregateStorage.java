@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;

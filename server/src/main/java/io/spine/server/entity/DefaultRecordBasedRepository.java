@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeUrl;

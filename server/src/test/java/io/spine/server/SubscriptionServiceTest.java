@@ -24,7 +24,7 @@ import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityUpdates;
 import io.spine.client.EventUpdates;

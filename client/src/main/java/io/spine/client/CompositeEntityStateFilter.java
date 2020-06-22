@@ -20,7 +20,7 @@
 
 package io.spine.client;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.Collection;

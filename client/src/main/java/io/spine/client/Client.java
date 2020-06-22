@@ -26,7 +26,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
 import io.spine.client.grpc.QueryServiceGrpc;

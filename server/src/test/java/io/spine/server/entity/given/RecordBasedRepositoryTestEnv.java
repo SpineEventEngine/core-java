@@ -21,7 +21,7 @@
 package io.spine.server.entity.given;
 
 import com.google.protobuf.FieldMask;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.AbstractEntity;

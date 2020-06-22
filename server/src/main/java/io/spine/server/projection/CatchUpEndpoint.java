@@ -20,7 +20,7 @@
 
 package io.spine.server.projection;
 
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.EventEnvelope;

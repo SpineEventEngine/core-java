@@ -22,8 +22,8 @@ package io.spine.server.route;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.base.MessageContext;
-import io.spine.base.entity.EntityState;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.event.EntityStateChanged;

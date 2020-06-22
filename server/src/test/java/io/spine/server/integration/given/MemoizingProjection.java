@@ -22,7 +22,7 @@ package io.spine.server.integration.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.projection.Projection;
 

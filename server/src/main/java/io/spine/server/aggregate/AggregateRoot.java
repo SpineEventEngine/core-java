@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.annotation.Experimental;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
 
 import java.util.Optional;

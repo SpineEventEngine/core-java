@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import io.spine.annotation.Internal;
-import io.spine.base.entity.EntityState;
+import io.spine.base.EntityState;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
