@@ -70,7 +70,7 @@ object Versions {
     val checkerFramework = "3.3.0"
     val errorProne       = "2.3.4"
     val errorProneJavac  = "9+181-r4173-1" // taken from here: https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
-    val errorPronePlugin = "1.1.1"
+    val errorPronePlugin = "1.2.1"
     val pmd              = "6.24.0"
     val checkstyle       = "8.29"
     val protobufPlugin   = "0.8.12"
@@ -102,7 +102,7 @@ object Versions {
     /**
      * Version of the SLF4J library.
      *
-     * Spine used to log with SLF4J. Now we use Flogger. Whenever a coice comes up, we recommend to
+     * Spine used to log with SLF4J. Now we use Flogger. Whenever a choice comes up, we recommend to
      * use the latter.
      *
      * Some third-party libraries may clash with different versions of the library. Thus, we specify
@@ -229,7 +229,7 @@ object Test {
             "com.google.truth.extensions:truth-proto-extension:${Versions.truth}"
     )
     @Deprecated("Use Flogger over SLF4J.",
-                replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend"))
+            replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend"))
     @Suppress("DEPRECATION") // Version of SLF4J.
     val slf4j         = "org.slf4j:slf4j-jdk14:${Versions.slf4j}"
 }
