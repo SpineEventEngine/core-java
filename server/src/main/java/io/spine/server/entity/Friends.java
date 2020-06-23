@@ -18,13 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+package io.spine.server.entity;
 
-val spineBaseVersion: String by extra("1.5.12")
-val spineTimeVersion: String by extra("1.5.12")
-val versionToPublish: String by extra("2.0.0-alfa-001")
+import io.spine.server.command.CommandHandlingEntity;
+
+public @interface Friends {
+    Class<? extends CommandHandlingEntity<?, ?, ?>> entities();
+}
