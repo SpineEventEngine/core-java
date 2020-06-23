@@ -18,10 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.test.friends;
 
-import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.server.test.friends.command.CreateTask;
+import io.spine.server.test.friends.event.TaskCreated;
 
-public @interface Friends {
-    Class<? extends CommandHandlingEntity<?, ?, ?>>[] entities();
+final class TaskDefinitionAggregate extends Aggregate<TaskId, Task, Task.Builder> {
+
+    @Assign
+    TaskCreated handle(CreateTask c) {
+        return TaskCreated.newBuilder()
+                          .setId(id())
+                          .setTitle(c.getTitle())
+                          .vBuild();
+    }
+
+    @Apply
+    void event(TaskCreated e) {
+        builder().setTitle(e.getTitle());
+    }
 }

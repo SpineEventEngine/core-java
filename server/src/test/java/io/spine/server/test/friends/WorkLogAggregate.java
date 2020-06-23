@@ -18,10 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.test.friends;
 
-import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.server.entity.Friends;
+import io.spine.server.test.friends.command.LogWork;
+import io.spine.server.test.friends.event.WorkLogged;
 
-public @interface Friends {
-    Class<? extends CommandHandlingEntity<?, ?, ?>>[] entities();
+@Friends(entities = TaskDefinitionAggregate.class)
+final class WorkLogAggregate extends Aggregate<TaskId, WorkLog, WorkLog.Builder> {
+
+    @Assign
+    WorkLogged handle(LogWork c) {
+        return WorkLogged.newBuilder()
+                         .setTask(c.getTask())
+                         .setWork(c.getWork())
+                         .vBuild();
+    }
+
+    @Apply
+    void event(WorkLogged e) {
+        builder().setTotal(state().getTotal() + e.getWork())
+                 .addRecord(e.getWork());
+    }
 }
