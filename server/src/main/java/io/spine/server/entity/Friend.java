@@ -38,8 +38,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Friend {
 
     /**
-     * Enumerates classes of command-handling entities that can load the state of
-     * the annotated entity.
+     * Enumerates classes of command-handling entities, such as
+     * {@link io.spine.server.aggregate.Aggregate Aggregate} or
+     * {@link io.spine.server.procman.ProcessManager ProcessManager},
+     * that can load the state of the annotated entity.
      */
     Class<? extends CommandHandlingEntity<?, ?, ?>>[] entity();
 }
