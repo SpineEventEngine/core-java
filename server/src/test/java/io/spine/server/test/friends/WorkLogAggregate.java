@@ -23,11 +23,11 @@ package io.spine.server.test.friends;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.Friends;
+import io.spine.server.entity.Friend;
 import io.spine.server.test.friends.command.LogWork;
 import io.spine.server.test.friends.event.WorkLogged;
 
-@Friends(entities = TaskDefinitionAggregate.class)
+@Friend(entity = TaskDefinitionAggregate.class)
 final class WorkLogAggregate extends Aggregate<TaskId, WorkLog, WorkLog.Builder> {
 
     @Assign

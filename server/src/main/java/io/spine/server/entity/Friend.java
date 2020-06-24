@@ -22,6 +22,24 @@ package io.spine.server.entity;
 
 import io.spine.server.command.CommandHandlingEntity;
 
-public @interface Friends {
-    Class<? extends CommandHandlingEntity<?, ?, ?>>[] entities();
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+/**
+ * Specifies classes of entities, such as {@link io.spine.server.aggregate.Aggregate Aggregate}
+ * or {@link io.spine.server.procman.ProcessManager ProcessManager}, that can load the state
+ * of the annotated entity.
+ */
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Friend {
+
+    /**
+     * Enumerates classes of command-handling entities that can load the state of
+     * the annotated entity.
+     */
+    Class<? extends CommandHandlingEntity<?, ?, ?>>[] entity();
 }

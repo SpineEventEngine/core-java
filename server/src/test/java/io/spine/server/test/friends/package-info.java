@@ -19,7 +19,7 @@
  */
 
 /**
- * This package tests the {@link io.spine.server.entity.Friends Friends} annotation
+ * This package tests the {@link io.spine.server.entity.Friend Friend} annotation
  * which allows {@linkplain io.spine.server.command.CommandHandlingEntity command handling entities}
  * to load states of other entities.
  */
