@@ -21,10 +21,11 @@
 package io.spine.core;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.PACKAGE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks a package as one belonging to a Bounded Context with
@@ -49,8 +50,8 @@ import java.lang.annotation.Target;
  * <p>Packages that do not have a common “parent” but annotated with the same name belong
  * to the same Bounded Context.
  */
-@Target(ElementType.PACKAGE)
-@Retention(RetentionPolicy.RUNTIME)
+@Target(PACKAGE)
+@Retention(RUNTIME)
 @Documented
 public @interface BoundedContext {
 

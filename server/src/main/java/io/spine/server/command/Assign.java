@@ -20,10 +20,11 @@
 
 package io.spine.server.command;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks a method as command handler.
@@ -133,7 +134,7 @@ import java.lang.annotation.Target;
  * @see io.spine.server.tuple.Either Returning One of Event Messages
  * @see io.spine.server.command.Command Transforming Commands
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target(METHOD)
 public @interface Assign {
 }

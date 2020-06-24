@@ -20,10 +20,11 @@
 
 package io.spine.server.aggregate;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks a method of an aggregate as one that modifies the state of the aggregate with data
@@ -47,8 +48,8 @@ import java.lang.annotation.Target;
  * {@code true}, the aggregate can receive incoming events as if they were produced
  * by the aggregate.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target(METHOD)
 public @interface Apply {
 
     /**

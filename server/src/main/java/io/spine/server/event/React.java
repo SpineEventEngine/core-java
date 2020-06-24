@@ -23,10 +23,11 @@ package io.spine.server.event;
 import io.spine.core.AcceptsExternal;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks a method of an entity as one that <em>may</em> modify the state of the entity in
@@ -150,8 +151,8 @@ import java.lang.annotation.Target;
  * <p>If the annotation is applied to a method which does not satisfy either of these requirements,
  * this method will not be registering for receiving events.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target(METHOD)
 @Documented
 @AcceptsExternal
 public @interface React {
