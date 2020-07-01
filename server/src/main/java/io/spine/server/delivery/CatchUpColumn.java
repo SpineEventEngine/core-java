@@ -49,7 +49,7 @@ public enum CatchUpColumn implements QueryableField<CatchUp> {
 
     static ImmutableList<CustomColumn<?, CatchUp>> definitions() {
         ImmutableList.Builder<CustomColumn<?, CatchUp>> list = ImmutableList.builder();
-        for (CatchUpColumn value : CatchUpColumn.values()) {
+        for (CatchUpColumn value : values()) {
             list.add(value.column);
         }
         return list.build();

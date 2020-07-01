@@ -26,6 +26,7 @@ import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
@@ -81,8 +82,8 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 
-    private static EntityColumn<StgProject, Any> someEntityColumn() {
-        return new EntityColumn<>("some_column", StgProject.class, Any.class);
+    private static EntityColumn<StgProject, Timestamp> someEntityColumn() {
+        return new EntityColumn<>("due_date", Timestamp.class, StgProject::getDueDate);
     }
 
     @SuppressWarnings("UnnecessaryLambda")  // for better readability.

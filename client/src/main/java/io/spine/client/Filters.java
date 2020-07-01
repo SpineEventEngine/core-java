@@ -120,7 +120,7 @@ public final class Filters {
     public static Filter eq(EntityColumn<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, EQUAL);
+        return createFilter(column.name().value(), value, EQUAL);
     }
 
     /**
@@ -203,7 +203,7 @@ public final class Filters {
     public static Filter gt(EntityColumn<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, GREATER_THAN);
+        return createFilter(column.name().value(), value, GREATER_THAN);
     }
 
     /**
@@ -292,7 +292,7 @@ public final class Filters {
     public static Filter lt(EntityColumn<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, LESS_THAN);
+        return createFilter(column.name().value(), value, LESS_THAN);
     }
 
     /**
@@ -381,7 +381,7 @@ public final class Filters {
     public static Filter ge(EntityColumn<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, GREATER_OR_EQUAL);
+        return createFilter(column.name().value(), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -470,7 +470,7 @@ public final class Filters {
     public static Filter le(EntityColumn<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, LESS_OR_EQUAL);
+        return createFilter(column.name().value(), value, LESS_OR_EQUAL);
     }
 
     /**
