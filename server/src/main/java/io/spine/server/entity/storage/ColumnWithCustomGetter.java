@@ -22,7 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.entity.Entity;
-import io.spine.server.storage.Column;
+import io.spine.server.storage.OldColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * {@linkplain Entity#state() state}.
  */
 @Immutable
-interface ColumnWithCustomGetter extends Column {
+interface ColumnWithCustomGetter extends OldColumn {
 
     /**
      * Extracts the actual column value from the source.

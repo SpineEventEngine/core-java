@@ -24,11 +24,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.storage.Column;
+import io.spine.server.storage.OldColumn;
 import io.spine.server.storage.RecordSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -53,6 +55,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @see io.spine.server.storage.MessageRecordSpec
  */
+//TODO:2020-07-01:alex.tymchenko: use `io.spine.query.EntityColumn` here.
 @Immutable
 @Internal
 public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entity<I, ?>> {
@@ -65,23 +68,23 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
     /**
      * The {@linkplain SystemColumn system columns} of the entity.
      */
-    private final ImmutableMap<ColumnName, SysColumn> systemColumns;
+    private final ImmutableMap<OldColumnName, SysColumn> systemColumns;
 
     /**
      * The entity-state-based columns of the entity.
      */
-    private final ImmutableMap<ColumnName, SimpleColumn> simpleColumns;
+    private final ImmutableMap<OldColumnName, SimpleColumn> simpleColumns;
 
     /**
      * The interface-based columns of the entity.
      */
-    private final ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns;
+    private final ImmutableMap<OldColumnName, InterfaceBasedColumn> interfaceBasedColumns;
 
 
     private EntityRecordSpec(
-            ImmutableMap<ColumnName, SysColumn> systemColumns,
-            ImmutableMap<ColumnName, SimpleColumn> simpleColumns,
-            ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns,
+            ImmutableMap<OldColumnName, SysColumn> systemColumns,
+            ImmutableMap<OldColumnName, SimpleColumn> simpleColumns,
+            ImmutableMap<OldColumnName, InterfaceBasedColumn> interfaceBasedColumns,
             EntityClass<?> entityClass) {
         super(EntityRecord.class);
         this.systemColumns = systemColumns;
@@ -110,8 +113,8 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
         return of(aClass);
     }
 
-    static ImmutableMap<ColumnName, Object> lifecycleValuesIn(EntityRecord record) {
-        ImmutableMap.Builder<ColumnName, Object> builder = ImmutableMap.builder();
+    static ImmutableMap<OldColumnName, Object> lifecycleValuesIn(EntityRecord record) {
+        ImmutableMap.Builder<OldColumnName, Object> builder = ImmutableMap.builder();
         for (LifecycleColumn column : LifecycleColumn.values()) {
             Boolean value = column.valueIn(record);
             builder.put(column.columnName(), value);
@@ -136,7 +139,7 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
     @Override
     public Map<ColumnName, @Nullable Object> valuesIn(Entity<I, ?> entity) {
         checkNotNull(entity);
-        Map<ColumnName, @Nullable Object> result = new HashMap<>();
+        Map<OldColumnName, @Nullable Object> result = new HashMap<>();
         systemColumns.forEach(
                 (name, column) -> result.put(name, column.valueIn(entity))
         );
@@ -153,8 +156,8 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
      * Returns all columns of the entity.
      */
     @Override
-    public ImmutableList<Column> columnList() {
-        ImmutableList.Builder<Column> builder = ImmutableList.builder();
+    public ImmutableList<Column<EntityRecord, ?>> columnList() {
+        ImmutableList.Builder<OldColumn> builder = ImmutableList.builder();
         builder.addAll(systemColumns.values());
         builder.addAll(simpleColumns.values());
         builder.addAll(interfaceBasedColumns.values());
@@ -167,9 +170,9 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
     }
 
     @Override
-    public Optional<Column> find(ColumnName columnName) {
+    public Optional<Column<EntityRecord, ?>> find(ColumnName columnName) {
         checkNotNull(columnName);
-        Column column = systemColumns.get(columnName);
+        Column<EntityRecord, ?> column = systemColumns.get(columnName);
         if (column == null) {
             column = simpleColumns.get(columnName);
         }
@@ -190,11 +193,11 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
     /**
      * Returns a subset of columns corresponding to the lifecycle of the entity.
      */
-    public ImmutableMap<ColumnName, Column> lifecycleColumns() {
-        ImmutableMap.Builder<ColumnName, Column> result = ImmutableMap.builder();
+    public ImmutableMap<OldColumnName, OldColumn> lifecycleColumns() {
+        ImmutableMap.Builder<OldColumnName, OldColumn> result = ImmutableMap.builder();
 
         for (LifecycleColumn declaration : LifecycleColumn.values()) {
-            ColumnName name = declaration.columnName();
+            OldColumnName name = declaration.columnName();
             SysColumn column = systemColumns.get(name);
             if (column != null) {
                 result.put(name, column);
@@ -206,7 +209,7 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
     /**
      * Obtains {@linkplain InterfaceBasedColumn interface-based} columns of the entity.
      */
-    public ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
+    public ImmutableMap<OldColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
         return interfaceBasedColumns;
     }
 }

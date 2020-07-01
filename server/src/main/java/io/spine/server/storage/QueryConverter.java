@@ -20,32 +20,24 @@
 
 package io.spine.server.storage;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.server.entity.storage.ColumnMapping;
-import io.spine.server.entity.storage.ColumnName;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
+import io.spine.query.RecordQuery;
 
 /**
- * A column of the {@linkplain io.spine.server.entity.Entity entity}.
- *
- * <p>Columns are the entity state fields which are stored separately from the entity record and
- * can be used as criteria for query {@linkplain io.spine.client.Filter filters}.
- *
- * <p>The {@linkplain #name() name} of the column represents the value which needs to be specified
- * to the filter. The {@linkplain #type() type} is an expected type of the filter value.
+ * @author Alex Tymchenko
  */
-@Immutable
-public interface Column {
+@Internal
+public final class QueryConverter {
 
-    /**
-     * The name of the column in the storage.
-     */
-    ColumnName name();
+    private QueryConverter() {
+    }
 
-    /**
-     * The type of the column.
-     *
-     * <p>As user-defined columns are proto-based, there is a fixed set of possible column types.
-     * See {@link ColumnMapping}.
-     */
-    Class<?> type();
+    public static <I, R extends Message> RecordQuery<I, R>
+    convert(TargetFilters filters, ResponseFormat format, RecordSpec<I, R, ?> spec) {
+        //TODO:2020-07-01:alex.tymchenko:  implement the conversion
+        return null;
+    }
 }

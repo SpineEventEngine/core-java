@@ -28,7 +28,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
-import io.spine.server.storage.Column;
+import io.spine.server.storage.OldColumn;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,13 +38,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyMap;
 
 /**
- * A value of {@link EntityRecord} associated with the values of its {@linkplain Column columns}.
+ * A value of {@link EntityRecord} associated with the values of its {@linkplain OldColumn columns}.
  */
 @Internal
 public final class EntityRecordWithColumns<I>
         extends RecordWithColumns<I, EntityRecord> implements WithLifecycle {
 
-    private EntityRecordWithColumns(I id, EntityRecord record, Map<ColumnName, Object> columns) {
+    private EntityRecordWithColumns(I id, EntityRecord record, Map<OldColumnName, Object> columns) {
         super(id, record, columns);
     }
 
@@ -66,7 +66,7 @@ public final class EntityRecordWithColumns<I>
      */
     public static <I, E extends Entity<I, ?>> EntityRecordWithColumns<I>
     create(E entity, EntityRecordSpec<I> recordSpec, EntityRecord record) {
-        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(entity);
+        Map<OldColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(entity);
         return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
     }
 
@@ -88,7 +88,7 @@ public final class EntityRecordWithColumns<I>
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
         checkNotNull(id);
         checkNotNull(record);
-        ImmutableMap<ColumnName, Object> lifecycleValues = EntityRecordSpec.lifecycleValuesIn(record);
+        ImmutableMap<OldColumnName, Object> lifecycleValues = EntityRecordSpec.lifecycleValuesIn(record);
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 
@@ -113,7 +113,7 @@ public final class EntityRecordWithColumns<I>
      */
     @VisibleForTesting
     public static <I> EntityRecordWithColumns<I>
-    of(EntityRecord record, Map<ColumnName, Object> storageFields) {
+    of(EntityRecord record, Map<OldColumnName, Object> storageFields) {
         I id = extractId(record);
         return new EntityRecordWithColumns<>(id, record, storageFields);
     }

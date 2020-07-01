@@ -23,15 +23,12 @@ package io.spine.server.event.store;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.CustomColumn;
-import io.spine.server.storage.CustomColumn.Getter;
-import io.spine.server.storage.QueryableField;
+import io.spine.query.RecordColumn;
 
 /**
  * Columns stored along with {@link Event}.
  */
-enum EventColumn implements QueryableField<Event> {
+final class EventColumn {
 
     /**
      * The name of the column storing the Protobuf type name of the event.
@@ -40,34 +37,23 @@ enum EventColumn implements QueryableField<Event> {
      * is enclosed in the {@code spine.test} Protobuf package would have this column
      * equal to {@code "spine.test.TaskAdded"}.
      */
-    type(String.class, (m) -> m.enclosedTypeUrl()
-                               .toTypeName()
-                               .value()),
+    static final RecordColumn<Event, String> type =
+            new RecordColumn<>("type", String.class, (m) -> m.enclosedTypeUrl()
+                                                             .toTypeName()
+                                                             .value());
 
     /**
      * The name of the column storing the time, when the event was fired.
      */
-    created(Timestamp.class, (m) -> m.getContext()
-                                     .getTimestamp());
+    @SuppressWarnings("DuplicateStringLiteralInspection")   // popular column name.
+    static final RecordColumn<Event, Timestamp> created =
+            new RecordColumn<>("created", Timestamp.class, (m) -> m.getContext()
+                                                                   .getTimestamp());
 
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final CustomColumn<?, Event> column;
-
-    <T> EventColumn(Class<T> type, Getter<Event, T> getter) {
-        ColumnName name = ColumnName.of(name());
-        this.column = new CustomColumn<>(name, type, getter);
+    private EventColumn() {
     }
 
-    static ImmutableList<CustomColumn<?, Event>> definitions() {
-        ImmutableList.Builder<CustomColumn<?, Event>> list = ImmutableList.builder();
-        for (EventColumn value : values()) {
-            list.add(value.column);
-        }
-        return list.build();
-    }
-
-    @Override
-    public CustomColumn<?, Event> column() {
-        return column;
+    static ImmutableList<RecordColumn<Event, ?>> definitions() {
+        return ImmutableList.of(type, created);
     }
 }

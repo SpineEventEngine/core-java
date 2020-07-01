@@ -23,7 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
-import io.spine.server.storage.Column;
+import io.spine.server.storage.OldColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -31,7 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * {@linkplain io.spine.server.entity.Entity entity} state.
  */
 @Immutable
-interface ColumnDeclaredInProto extends Column {
+interface ColumnDeclaredInProto extends OldColumn {
 
     /**
      * Extracts the column value currently stored in the entity state.

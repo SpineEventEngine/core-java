@@ -44,7 +44,7 @@ final class SysColumn extends AbstractColumn implements ColumnWithCustomGetter {
      */
     private final Getter getter;
 
-    SysColumn(ColumnName name, Class<?> type, Getter getter) {
+    SysColumn(OldColumnName name, Class<?> type, Getter getter) {
         super(name, type);
         this.getter = getter;
     }

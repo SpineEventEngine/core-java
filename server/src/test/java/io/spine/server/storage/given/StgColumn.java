@@ -22,51 +22,30 @@ package io.spine.server.storage.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.CustomColumn;
-import io.spine.server.storage.QueryableField;
+import io.spine.query.RecordColumn;
 import io.spine.test.storage.StgProject;
 
 /**
  * Columns of the {@link StgProject} stored as a plain {@link Message}.
  */
-public enum StgColumn implements QueryableField<StgProject> {
+@SuppressWarnings("DuplicateStringLiteralInspection") // column names repeat across different types.
+public final class StgColumn {
 
-    /**
-     * The version of the project, stored as an integer number.
-     */
-    project_version(Integer.class, (m) -> m.getProjectVersion()
-                                           .getNumber()),
+    public static final RecordColumn<StgProject, Integer> project_version =
+            new RecordColumn<>("project_version", Integer.class, (r) -> r.getProjectVersion()
+                                                                         .getNumber());
 
-    /**
-     * When the project is due; stored as {@link Timestamp}.
-     */
-    due_date(Timestamp.class, StgProject::getDueDate),
+    public static final RecordColumn<StgProject, Timestamp> due_date =
+            new RecordColumn<>("due_date", Timestamp.class, StgProject::getDueDate);
 
-    /**
-     * The status of the project; stored as a {@code String} with the status name.
-     */
-    status(String.class, (r) -> r.getStatus()
-                                 .name());
+    public static final RecordColumn<StgProject, String> status =
+            new RecordColumn<>("status", String.class, (r) -> r.getStatus()
+                                                               .name());
 
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final CustomColumn<?, StgProject> column;
-
-    <T> StgColumn(Class<T> type, CustomColumn.Getter<StgProject, T> getter) {
-        ColumnName name = ColumnName.of(name());
-        this.column = new CustomColumn<>(name, type, getter);
+    private StgColumn() {
     }
 
-    static ImmutableList<CustomColumn<?, StgProject>> definitions() {
-        ImmutableList.Builder<CustomColumn<?, StgProject>> list = ImmutableList.builder();
-        for (StgColumn value : values()) {
-            list.add(value.column);
-        }
-        return list.build();
-    }
-
-    @Override
-    public CustomColumn<?, StgProject> column() {
-        return column;
+    public static ImmutableList<RecordColumn<StgProject, ?>> definitions() {
+        return ImmutableList.of(project_version, due_date, status);
     }
 }

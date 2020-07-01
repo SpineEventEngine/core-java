@@ -20,12 +20,12 @@
 
 package io.spine.server.projection;
 
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.GivenEntityColumns;
 import io.spine.server.entity.storage.LifecycleColumn;
+import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.projection.given.SavingProjection;
-import io.spine.server.storage.Column;
+import io.spine.server.storage.OldColumn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,8 +54,8 @@ class ProjectionColumnTest {
         assertHasColumn(LifecycleColumn.deleted.columnName());
     }
 
-    private static void assertHasColumn(ColumnName columnName) {
-        Optional<Column> result = recordSpec.find(columnName);
+    private static void assertHasColumn(OldColumnName columnName) {
+        Optional<OldColumn> result = recordSpec.find(columnName);
         assertThat(result).isPresent();
     }
 }

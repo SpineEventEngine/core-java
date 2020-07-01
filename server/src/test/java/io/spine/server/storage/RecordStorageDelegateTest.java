@@ -51,8 +51,6 @@ import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
 import static io.spine.client.ResponseFormats.formatWith;
-import static io.spine.server.storage.QueryParameters.le;
-import static io.spine.server.storage.QueryParameters.lt;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.server.storage.given.StgColumn.due_date;
 import static io.spine.server.storage.given.StgColumn.status;
@@ -195,7 +193,7 @@ public class RecordStorageDelegateTest
                     RecordStorageDelegateTestEnv.coupleOfDone(currentTime());
             storage().writeBatch(doneProjects);
 
-            RecordQuery<StgProjectId> queryForDone =
+            OldRecordQuery<StgProjectId> queryForDone =
                     RecordQueries.byField(status, DONE.name());
             Iterator<StgProject> iterator = storage().readAll(queryForDone);
             ImmutableList<StgProject> actualProjects = ImmutableList.copyOf(iterator);
@@ -220,8 +218,8 @@ public class RecordStorageDelegateTest
 
             Timestamp aMinuteAgo = subtract(now, fromMinutes(1));
 
-            RecordQuery<StgProjectId> queryForDone = RecordQueries.byField(status, DONE.name());
-            RecordQuery<StgProjectId> doneAndDueLessThanMinuteAgo =
+            OldRecordQuery<StgProjectId> queryForDone = RecordQueries.byField(status, DONE.name());
+            OldRecordQuery<StgProjectId> doneAndDueLessThanMinuteAgo =
                     queryForDone.append(le(due_date, aMinuteAgo));
             Iterator<StgProject> iterator = storage().readAll(doneAndDueLessThanMinuteAgo);
             ImmutableList<StgProject> actualProjects = ImmutableList.copyOf(iterator);
@@ -236,7 +234,7 @@ public class RecordStorageDelegateTest
                                                                                           .values();
             storage().writeBatch(createdProjects);
 
-            RecordQuery<StgProjectId> queryForDone = RecordQueries.byField(status, DONE.name());
+            OldRecordQuery<StgProjectId> queryForDone = RecordQueries.byField(status, DONE.name());
             Iterator<StgProject> iterator = storage().readAll(queryForDone,
                                                               formatWith(
                                                                       RecordStorageDelegateTestEnv.dueDateAsc(),
@@ -248,7 +246,7 @@ public class RecordStorageDelegateTest
             int limit = 2;
             List<StgProject> expected = sortedByDueDate.subList(0, limit);
 
-            RecordQuery<StgProjectId> queryForCreated =
+            OldRecordQuery<StgProjectId> queryForCreated =
                     RecordQueries.byField(status, CREATED.name());
             Iterator<StgProject> limitedIterator =
                     storage().readAll(queryForCreated, formatWith(
@@ -275,8 +273,8 @@ public class RecordStorageDelegateTest
                             .build();
             storage().writeBatch(records);
 
-            RecordQuery<StgProjectId> inDoneStatus = RecordQueries.byField(status, DONE.name());
-            RecordQuery<StgProjectId> doneAndDueBeforeNow = inDoneStatus.append(le(due_date, now));
+            OldRecordQuery<StgProjectId> inDoneStatus = RecordQueries.byField(status, DONE.name());
+            OldRecordQuery<StgProjectId> doneAndDueBeforeNow = inDoneStatus.append(le(due_date, now));
             Iterator<StgProject> iterator =
                     storage().readAll(doneAndDueBeforeNow, formatWith(
                             RecordStorageDelegateTestEnv.dueDateAsc(), 2));
@@ -302,8 +300,8 @@ public class RecordStorageDelegateTest
                             .build();
             storage().writeBatch(records);
 
-            RecordQuery<StgProjectId> inDoneStatus = RecordQueries.byField(status, DONE.name());
-            RecordQuery<StgProjectId> doneAndDueBeforeNow = inDoneStatus.append(lt(due_date, now));
+            OldRecordQuery<StgProjectId> inDoneStatus = RecordQueries.byField(status, DONE.name());
+            OldRecordQuery<StgProjectId> doneAndDueBeforeNow = inDoneStatus.append(lt(due_date, now));
             ResponseFormat format = formatWith(RecordStorageDelegateTestEnv.idAndDueDate(),
                                                RecordStorageDelegateTestEnv.dueDateDesc(), 2);
 

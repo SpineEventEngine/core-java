@@ -32,12 +32,12 @@ import io.spine.core.EventId;
 import io.spine.core.Signal;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
+import io.spine.query.RecordQuery;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.RecordQueries;
-import io.spine.server.storage.RecordQuery;
+import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
@@ -98,7 +98,7 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
         ResponseFormat.Builder formatBuilder = ResponseFormat.newBuilder();
         OrderBy ascendingByCreated = OrderBy
                 .newBuilder()
-                .setColumn(created.name())
+                .setColumn(created.name().value())
                 .setDirection(OrderBy.Direction.ASCENDING)
                 .vBuild();
         formatBuilder.addOrderBy(ascendingByCreated);
@@ -190,9 +190,10 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
             return readAll(format);
         } else {
             TargetFilters filters = QueryToFilters.convert(query);
-            RecordQuery<EventId> recordQuery = RecordQueries.from(filters, recordSpec());
-
-            return readAll(recordQuery, format);
+//            OldRecordQuery<EventId> recordQuery = RecordQueries.from(filters, recordSpec());
+            RecordQuery<EventId, Event> recordQuery =
+                    QueryConverter.convert(filters, format, recordSpec());
+            return readAll(recordQuery);
         }
     }
 

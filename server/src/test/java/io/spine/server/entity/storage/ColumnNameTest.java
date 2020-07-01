@@ -38,14 +38,14 @@ class ColumnNameTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(ColumnName.class);
+                .testAllPublicStaticMethods(OldColumnName.class);
     }
 
     @Test
     @DisplayName("be constructed from string value")
     void initFromString() {
         String columnName = "the-column-name";
-        ColumnName name = ColumnName.of(columnName);
+        OldColumnName name = OldColumnName.of(columnName);
 
         assertThat(name.value()).isEqualTo(columnName);
     }
@@ -55,7 +55,7 @@ class ColumnNameTest {
     @Test
     @DisplayName("not be constructed from empty string")
     void notInitFromEmpty() {
-        assertThrows(IllegalArgumentException.class, () -> ColumnName.of(""));
+        assertThrows(IllegalArgumentException.class, () -> OldColumnName.of(""));
     }
 
     @Test
@@ -65,7 +65,7 @@ class ColumnNameTest {
                                         .getFields()
                                         .get(0);
         FieldDeclaration fieldDeclaration = new FieldDeclaration(field);
-        ColumnName columnName = ColumnName.of(fieldDeclaration);
+        OldColumnName columnName = OldColumnName.of(fieldDeclaration);
 
         assertThat(columnName.value()).isEqualTo(field.getName());
     }

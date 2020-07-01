@@ -26,9 +26,9 @@ import io.spine.base.Identifier;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.core.Version;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.RecordQueries;
-import io.spine.server.storage.RecordQuery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -54,7 +54,7 @@ public class HistoryBackward<I> {
 
     protected Iterator<AggregateEventRecord>
     read(I aggregateId, int batchSize, @Nullable Version startingFrom) {
-        RecordQuery<AggregateEventRecordId> query = historyBackwardQuery(aggregateId);
+        OldRecordQuery<AggregateEventRecordId> query = historyBackwardQuery(aggregateId);
         if (startingFrom != null) {
             QueryParameters lessThanVersion = QueryParameters.lt(version, startingFrom.getNumber());
             query = query.append(lessThanVersion);
@@ -64,7 +64,7 @@ public class HistoryBackward<I> {
         return iterator;
     }
 
-    protected RecordQuery<AggregateEventRecordId> historyBackwardQuery(I id) {
+    protected OldRecordQuery<AggregateEventRecordId> historyBackwardQuery(I id) {
         Any packedId = Identifier.pack(id);
         QueryParameters params = QueryParameters.eq(aggregate_id, packedId);
         return RecordQueries.of(params);

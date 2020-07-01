@@ -23,13 +23,10 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
-import io.spine.client.OrderBy;
-import io.spine.client.ResponseFormat;
+import io.spine.query.RecordQuery;
+import io.spine.query.RecordQueryBuilder;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.QueryParameters;
-import io.spine.server.storage.RecordQueries;
-import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,15 +36,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Streams.stream;
-import static io.spine.client.OrderBy.Direction.ASCENDING;
-import static io.spine.client.OrderBy.Direction.DESCENDING;
+import static io.spine.query.Direction.ASC;
+import static io.spine.query.Direction.DESC;
 import static io.spine.server.delivery.InboxColumn.inbox_shard;
 import static io.spine.server.delivery.InboxColumn.received_at;
 import static io.spine.server.delivery.InboxColumn.status;
 import static io.spine.server.delivery.InboxColumn.version;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
-import static io.spine.server.storage.QueryParameters.eq;
-import static io.spine.server.storage.QueryParameters.gt;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -62,32 +57,6 @@ import static java.util.stream.Collectors.toList;
  */
 @SPI
 public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
-
-    /**
-     * Ordering for the {@code InboxMessage} queries which puts the messages
-     * received earlier first.
-     */
-    private static final OrderBy OLDER_FIRST = OrderBy.newBuilder()
-                                                      .setColumn(received_at.name())
-                                                      .setDirection(ASCENDING)
-                                                      .vBuild();
-
-    /**
-     * Ordering for the {@code InboxMessage} queries which puts the messages
-     * received later first.
-     */
-    private static final OrderBy NEWEST_FIRST = OrderBy.newBuilder()
-                                                      .setColumn(received_at.name())
-                                                      .setDirection(DESCENDING)
-                                                      .vBuild();
-    /**
-     * Ordering for the {@code InboxMessage} queries which puts the messages
-     * with smaller version numbers first.
-     */
-    private static final OrderBy BY_VERSION = OrderBy.newBuilder()
-                                                     .setColumn(version.name())
-                                                     .setDirection(ASCENDING)
-                                                     .vBuild();
 
     public InboxStorage(StorageFactory factory, boolean multitenant) {
         super(createStorage(factory, multitenant));
@@ -142,23 +111,23 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
 
     public ImmutableList<InboxMessage>
     readAll(ShardIndex index, @Nullable Timestamp sinceWhen, int pageSize) {
-        QueryParameters byIndex = eq(inbox_shard, index);
-        RecordQuery<InboxMessageId> query = RecordQueries.of(byIndex);
+        RecordQueryBuilder<InboxMessageId, InboxMessage> builder =
+                queryBuilder().where(inbox_shard)
+                              .is(index);
         if (sinceWhen != null) {
-            QueryParameters byTime = gt(received_at, sinceWhen);
-            query = query.append(byTime);
+            builder.where(received_at)
+                   .isGreaterThan(sinceWhen);
         }
-        ResponseFormat limit = queryResponse(pageSize);
-        Iterator<InboxMessage> iterator = readAll(query, limit);
+        RecordQuery<InboxMessageId, InboxMessage> query = limitAndOrder(pageSize, builder).build();
+        Iterator<InboxMessage> iterator = readAll(query);
         return ImmutableList.copyOf(iterator);
     }
 
-    private static ResponseFormat queryResponse(int pageSize) {
-        return ResponseFormat.newBuilder()
-                             .addOrderBy(OLDER_FIRST)
-                             .addOrderBy(BY_VERSION)
-                             .setLimit(pageSize)
-                             .vBuild();
+    private static RecordQueryBuilder<InboxMessageId, InboxMessage>
+    limitAndOrder(int pageSize, RecordQueryBuilder<InboxMessageId, InboxMessage> builder) {
+        return builder.limit(pageSize)
+                      .orderBy(received_at, ASC)
+                      .orderBy(version, ASC);
     }
 
     /**
@@ -171,14 +140,13 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
      *         in the specified shard
      */
     public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
-        QueryParameters byIndex = eq(inbox_shard, index);
-        RecordQuery<InboxMessageId> query = RecordQueries.of(byIndex);
-        query = query.append(eq(status, TO_DELIVER));
-        ResponseFormat limitToOne = ResponseFormat.newBuilder()
-                                                  .addOrderBy(NEWEST_FIRST)
-                                                  .setLimit(1)
-                                                  .vBuild();
-        Iterator<InboxMessage> iterator = readAll(query, limitToOne);
+        RecordQuery<InboxMessageId, InboxMessage> query =
+                queryBuilder().where(inbox_shard).is(index)
+                              .where(status).is(TO_DELIVER)
+                              .orderBy(received_at, DESC)
+                              .limit(1)
+                              .build();
+        Iterator<InboxMessage> iterator = readAll(query);
         Optional<InboxMessage> result = iterator.hasNext() ? Optional.of(iterator.next())
                                                            : Optional.empty();
         return result;

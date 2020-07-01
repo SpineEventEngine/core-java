@@ -25,7 +25,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.server.entity.storage.ColumnName;
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
+import io.spine.query.RecordColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
@@ -66,14 +68,14 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
     /**
      * The columns to store along with the record itself.
      */
-    private final ImmutableMap<ColumnName, CustomColumn<?, R>> columns;
+    private final ImmutableMap<ColumnName, RecordColumn<R, ?>> columns;
 
 
     public MessageRecordSpec(Class<R> recordClass,
                              ExtractId<R, I> extractId,
-                             Iterable<CustomColumn<?, R>> columns) {
+                             Iterable<RecordColumn<R, ?>> columns) {
         super(recordClass);
-        this.columns = stream(columns).collect(toImmutableMap(AbstractColumn::name, (c) -> c));
+        this.columns = stream(columns).collect(toImmutableMap(RecordColumn::name, (c) -> c));
         this.recordClass = recordClass;
         this.extractId = extractId;
     }
@@ -102,8 +104,8 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
      * Returns all columns of the record.
      */
     @Override
-    public final ImmutableList<Column> columnList() {
-        ImmutableList<Column> result = ImmutableList.copyOf(this.columns.values());
+    public final ImmutableList<Column<R, ?>> columnList() {
+        ImmutableList<Column<R, ?>> result = ImmutableList.copyOf(this.columns.values());
         return result;
     }
 
@@ -111,9 +113,9 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
      * Searches for a column with a given name.
      */
     @Override
-    public final Optional<Column> find(ColumnName columnName) {
+    public final Optional<Column<R, ?>> find(ColumnName columnName) {
         checkNotNull(columnName);
-        Column column = columns.get(columnName);
+        Column<R, ?> column = columns.get(columnName);
         return Optional.ofNullable(column);
     }
 

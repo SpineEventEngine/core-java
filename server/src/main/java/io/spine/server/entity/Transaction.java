@@ -37,8 +37,8 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.InterfaceBasedColumn;
+import io.spine.server.entity.storage.OldColumnName;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
@@ -460,9 +460,9 @@ public abstract class Transaction<I,
      */
     @SuppressWarnings("unchecked") // Logically correct.
     private S stateWithColumns() {
-        ImmutableMap<ColumnName, InterfaceBasedColumn> columns = entity.thisClass()
-                                                                       .recordSpec()
-                                                                       .interfaceBasedColumns();
+        ImmutableMap<OldColumnName, InterfaceBasedColumn> columns = entity.thisClass()
+                                                                          .recordSpec()
+                                                                          .interfaceBasedColumns();
         if (columns.isEmpty()) {
             return entity.state();
         }

@@ -45,7 +45,7 @@ class ScannerTest {
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
         Scanner scanner = new Scanner(entityClass);
-        ImmutableMap<ColumnName, SysColumn> systemColumns = scanner.systemColumns();
+        ImmutableMap<OldColumnName, SysColumn> systemColumns = scanner.systemColumns();
 
         assertThat(systemColumns.keySet())
                 .containsExactlyElementsIn(GivenEntityColumns.defaultEntityColumns);
@@ -56,13 +56,13 @@ class ScannerTest {
     void extractImplementedColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
         Scanner scanner = new Scanner(entityClass);
-        ImmutableMap<ColumnName, InterfaceBasedColumn> columns =
+        ImmutableMap<OldColumnName, InterfaceBasedColumn> columns =
                 scanner.interfaceBasedColumns();
 
-        assertThat(columns).containsKey(ColumnName.of("name"));
-        assertThat(columns).containsKey(ColumnName.of("estimate_in_days"));
-        assertThat(columns).containsKey(ColumnName.of("status"));
-        assertThat(columns).containsKey(ColumnName.of("due_date"));
+        assertThat(columns).containsKey(OldColumnName.of("name"));
+        assertThat(columns).containsKey(OldColumnName.of("estimate_in_days"));
+        assertThat(columns).containsKey(OldColumnName.of("status"));
+        assertThat(columns).containsKey(OldColumnName.of("due_date"));
     }
 
     @Test
@@ -72,9 +72,9 @@ class ScannerTest {
                 asEntityClass(TaskListViewProjection.class);
         Scanner scanner = new Scanner(entityClass);
 
-        ImmutableMap<ColumnName, SimpleColumn> columns = scanner.simpleColumns();
+        ImmutableMap<OldColumnName, SimpleColumn> columns = scanner.simpleColumns();
 
-        assertThat(columns).containsKey(ColumnName.of("description"));
+        assertThat(columns).containsKey(OldColumnName.of("description"));
     }
 
     @Test
@@ -83,10 +83,10 @@ class ScannerTest {
         EntityClass<PrivateProjection> entityClass = asEntityClass(PrivateProjection.class);
         Scanner scanner = new Scanner(entityClass);
 
-        ImmutableMap<ColumnName, InterfaceBasedColumn> columns =
+        ImmutableMap<OldColumnName, InterfaceBasedColumn> columns =
                 scanner.interfaceBasedColumns();
 
-        ColumnName description = ColumnName.of("description");
+        OldColumnName description = OldColumnName.of("description");
         InterfaceBasedColumn column = columns.get(description);
 
         Entity<TaskListViewId, TaskListView> projection = new PrivateProjection();

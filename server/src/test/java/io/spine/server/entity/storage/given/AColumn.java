@@ -20,9 +20,9 @@
 
 package io.spine.server.entity.storage.given;
 
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordSpec;
-import io.spine.server.storage.Column;
+import io.spine.server.entity.storage.OldColumnName;
+import io.spine.server.storage.OldColumn;
 
 @SuppressWarnings("DuplicateStringLiteralInspection")
 public final class AColumn {
@@ -31,26 +31,26 @@ public final class AColumn {
     private AColumn() {
     }
 
-    public static Column column() {
+    public static OldColumn column() {
         return stringColumn();
     }
 
-    public static Column stringColumn() {
+    public static OldColumn stringColumn() {
         return column("name");
     }
 
-    public static Column intColumn() {
+    public static OldColumn intColumn() {
         return column("estimate_in_days");
     }
 
-    public static Column timestampColumn() {
+    public static OldColumn timestampColumn() {
         return column("due_date");
     }
 
-    private static Column column(String name) {
+    private static OldColumn column(String name) {
         EntityRecordSpec spec = EntityRecordSpec.of(TaskViewProjection.class);
-        ColumnName columnName = ColumnName.of(name);
-        Column column = spec.get(columnName);
+        OldColumnName columnName = OldColumnName.of(name);
+        OldColumn column = spec.get(columnName);
         return column;
     }
 }

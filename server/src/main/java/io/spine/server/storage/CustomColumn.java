@@ -22,7 +22,7 @@ package io.spine.server.storage;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.OldColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
@@ -61,7 +61,7 @@ public final class CustomColumn<V, M extends Message> extends AbstractColumn {
      * @param getter
      *         the getter for the column value
      */
-    public CustomColumn(ColumnName name, Class<V> type, Getter<M, V> getter) {
+    public CustomColumn(OldColumnName name, Class<V> type, Getter<M, V> getter) {
         super(name, type);
         this.getter = getter;
     }

@@ -36,8 +36,8 @@ import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.AbstractStorage;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.RecordQueries;
-import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -216,7 +216,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
-        RecordQuery<I> query = RecordQueries.from(filters, stateStorage.recordSpec());
+        OldRecordQuery<I> query = RecordQueries.from(filters, stateStorage.recordSpec());
         return stateStorage.readAll(query, format);
     }
 

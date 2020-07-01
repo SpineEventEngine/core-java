@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.OrderBy;
-import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.storage.RecordWithColumns;
 
 import java.io.Serializable;
@@ -103,7 +103,7 @@ public class RecordComparator<I, R extends Message>
     public int compare(RecordWithColumns<I, R> a, RecordWithColumns<I, R> b) {
         checkNotNull(a);
         checkNotNull(b);
-        ColumnName columnName = ColumnName.of(column);
+        OldColumnName columnName = OldColumnName.of(column);
         Object aValue = a.columnValue(columnName);
         Object bValue = b.columnValue(columnName);
         if (aValue == null) {

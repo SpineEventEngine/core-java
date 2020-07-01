@@ -23,7 +23,7 @@ package io.spine.server.storage;
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
-import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.OldColumnName;
 
 /**
  * An abstract base for different column types.
@@ -32,18 +32,18 @@ import io.spine.server.entity.storage.ColumnName;
 @Internal
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
 // Prevent instantiation in favor of concrete column types.
-public abstract class AbstractColumn implements Column {
+public abstract class AbstractColumn implements OldColumn {
 
-    private final ColumnName name;
+    private final OldColumnName name;
     private final Class<?> type;
 
-    protected AbstractColumn(ColumnName name, Class<?> type) {
+    protected AbstractColumn(OldColumnName name, Class<?> type) {
         this.name = name;
         this.type = type;
     }
 
     @Override
-    public ColumnName name() {
+    public OldColumnName name() {
         return name;
     }
 

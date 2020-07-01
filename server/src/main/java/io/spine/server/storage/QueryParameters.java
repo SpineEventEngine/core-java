@@ -28,8 +28,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.SPI;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.server.entity.storage.OldColumnName;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -39,7 +39,7 @@ import static io.spine.server.entity.storage.LifecycleColumn.archived;
 import static io.spine.server.entity.storage.LifecycleColumn.deleted;
 
 /**
- * The parameters of an {@link RecordQuery}.
+ * The parameters of an {@link OldRecordQuery}.
  *
  * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
  * implementations.
@@ -78,10 +78,10 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
     }
 
     public static QueryParameters activeEntityQueryParams(EntityRecordSpec<?> recordSpec) {
-        ColumnName archivedColumnName = archived.columnName();
-        ColumnName deletedColumnName = deleted.columnName();
-        Optional<Column> archivedColumn = recordSpec.find(archivedColumnName);
-        Optional<Column> deletedColumn = recordSpec.find(deletedColumnName);
+        OldColumnName archivedColumnName = archived.columnName();
+        OldColumnName deletedColumnName = deleted.columnName();
+        Optional<OldColumn> archivedColumn = recordSpec.find(archivedColumnName);
+        Optional<OldColumn> deletedColumn = recordSpec.find(deletedColumnName);
         boolean entityHasLifecycle = archivedColumn.isPresent() && deletedColumn.isPresent();
         if (!entityHasLifecycle) {
             return newBuilder().build();
@@ -101,7 +101,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
         return forSingleField(field, Filters.eq(field.columnName().value(), value));
     }
 
-    public static <V> QueryParameters eq(Column column, V value) {
+    public static <V> QueryParameters eq(OldColumn column, V value) {
         return forSingleColumn(column, Filters.eq(column.name()
                                                         .value(), value));
     }
@@ -110,7 +110,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
         return forSingleField(field, Filters.gt(field.columnName().value(), value));
     }
 
-    public static <V> QueryParameters gt(Column column, V value) {
+    public static <V> QueryParameters gt(OldColumn column, V value) {
         return forSingleColumn(column, Filters.gt(column.name()
                                                         .value(), value));
     }
@@ -119,7 +119,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
         return forSingleField(field, Filters.ge(field.columnName().value(), value));
     }
 
-    public static <V> QueryParameters ge(Column column, V value) {
+    public static <V> QueryParameters ge(OldColumn column, V value) {
         return forSingleColumn(column, Filters.ge(column.name()
                                                         .value(), value));
     }
@@ -128,7 +128,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
         return forSingleField(field, Filters.lt(field.columnName().value(), value));
     }
 
-    public static <V> QueryParameters lt(Column column, V value) {
+    public static <V> QueryParameters lt(OldColumn column, V value) {
         return forSingleColumn(column, Filters.lt(column.name()
                                                         .value(), value));
     }
@@ -137,13 +137,13 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
         return forSingleField(field, Filters.le(field.columnName().value(), value));
     }
 
-    public static <V> QueryParameters le(Column column, V value) {
+    public static <V> QueryParameters le(OldColumn column, V value) {
         return forSingleColumn(column, Filters.le(column.name()
                                                         .value(), value));
     }
 
-    private static QueryParameters forSingleColumn(Column column, Filter filter) {
-        ImmutableMultimap<Column, Filter> filters = ImmutableMultimap.of(column, filter);
+    private static QueryParameters forSingleColumn(OldColumn column, Filter filter) {
+        ImmutableMultimap<OldColumn, Filter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         return newBuilder().add(parameter)
                            .build();
@@ -151,7 +151,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter> 
 
 
     private static QueryParameters forSingleField(QueryableField<?> field, Filter filter) {
-        ImmutableMultimap<Column, Filter> filters = ImmutableMultimap.of(field.column(), filter);
+        ImmutableMultimap<OldColumn, Filter> filters = ImmutableMultimap.of(field.column(), filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         return newBuilder().add(parameter)
                            .build();

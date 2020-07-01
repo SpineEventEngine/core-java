@@ -29,8 +29,8 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.given.user.event.RUserConsentRequested;
 import io.spine.server.route.given.user.event.RUserSignedIn;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.RecordQueries;
-import io.spine.server.storage.RecordQuery;
 import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
 
@@ -53,7 +53,7 @@ public class SessionRepository
     private Set<RSessionId> findByUserId(UserId id) {
         EntityRecordStorage<RSessionId, RSession> storage = recordStorage();
         EntityRecordSpec<RSessionId> spec = storage.recordSpec();
-        RecordQuery<RSessionId> query = RecordQueries.byColumn(spec, RSession.Column.userId(), id);
+        OldRecordQuery<RSessionId> query = RecordQueries.byColumn(spec, RSession.Column.userId(), id);
         Iterator<RSessionId> identifiers = storage.index(query);
         ImmutableSet<RSessionId> result = ImmutableSet.copyOf(identifiers);
         return result;

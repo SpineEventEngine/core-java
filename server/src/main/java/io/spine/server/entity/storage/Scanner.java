@@ -26,7 +26,7 @@ import io.spine.query.EntityWithColumns;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromEntity;
 import io.spine.server.entity.storage.InterfaceBasedColumn.GetterFromState;
-import io.spine.server.storage.Column;
+import io.spine.server.storage.OldColumn;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
@@ -66,15 +66,15 @@ final class Scanner {
     /**
      * Obtains the {@linkplain SystemColumn system} columns of the class.
      */
-    ImmutableMap<ColumnName, SysColumn> systemColumns() {
-        ImmutableMap.Builder<ColumnName, SysColumn> columns = ImmutableMap.builder();
+    ImmutableMap<OldColumnName, SysColumn> systemColumns() {
+        ImmutableMap.Builder<OldColumnName, SysColumn> columns = ImmutableMap.builder();
         Class<?> entityClazz = entityClass.value();
         addSystemColumns(entityClazz, columns);
         return columns.build();
     }
 
     private static void addSystemColumns(Class<?> entityClazz,
-                                         ImmutableMap.Builder<ColumnName, SysColumn> columns) {
+                                         ImmutableMap.Builder<OldColumnName, SysColumn> columns) {
         Method[] methods = entityClazz.getMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(SystemColumn.class)) {
@@ -84,7 +84,7 @@ final class Scanner {
     }
 
     private static void addSystemColumn(Method method,
-                                        ImmutableMap.Builder<ColumnName, SysColumn> columns) {
+                                        ImmutableMap.Builder<OldColumnName, SysColumn> columns) {
         ColumnData data = ColumnData.of(method);
         MethodHandle handle = asHandle(method);
         SysColumn.Getter getter = entity -> invoke(handle, entity);
@@ -98,11 +98,11 @@ final class Scanner {
      * <p>Currently is mutually exclusive with {@link #interfaceBasedColumns()}, i.e. one of the
      * methods will hold an empty map for any given entity.
      */
-    ImmutableMap<ColumnName, SimpleColumn> simpleColumns() {
+    ImmutableMap<OldColumnName, SimpleColumn> simpleColumns() {
         if (columnsInterfaceBased) {
             return ImmutableMap.of();
         }
-        ImmutableMap.Builder<ColumnName, SimpleColumn> columns = ImmutableMap.builder();
+        ImmutableMap.Builder<OldColumnName, SimpleColumn> columns = ImmutableMap.builder();
         for (FieldDeclaration field : columnsOf(entityClass.stateType())) {
             addSimpleColumn(field, columns);
         }
@@ -110,7 +110,7 @@ final class Scanner {
     }
 
     private void addSimpleColumn(FieldDeclaration field,
-                                 ImmutableMap.Builder<ColumnName, SimpleColumn> columns) {
+                                 ImmutableMap.Builder<OldColumnName, SimpleColumn> columns) {
         ColumnData data = ColumnData.of(field, entityClass);
         MethodHandle handle = asHandle(data.getter);
         SimpleColumn.Getter getter = state -> invoke(handle, state);
@@ -124,11 +124,11 @@ final class Scanner {
      * <p>Currently is mutually exclusive with {@link #simpleColumns()}, i.e. one of the
      * methods will hold an empty map for any given entity.
      */
-    ImmutableMap<ColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
+    ImmutableMap<OldColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
         if (!columnsInterfaceBased) {
             return ImmutableMap.of();
         }
-        ImmutableMap.Builder<ColumnName, InterfaceBasedColumn> columns = ImmutableMap.builder();
+        ImmutableMap.Builder<OldColumnName, InterfaceBasedColumn> columns = ImmutableMap.builder();
         for (FieldDeclaration field : columnsOf(entityClass.stateType())) {
             addImplementedColumn(field, columns);
         }
@@ -136,7 +136,7 @@ final class Scanner {
     }
 
     private void addImplementedColumn(FieldDeclaration field,
-                                      ImmutableMap.Builder<ColumnName, InterfaceBasedColumn> columns) {
+                                      ImmutableMap.Builder<OldColumnName, InterfaceBasedColumn> columns) {
         ColumnData data = ColumnData.of(field, entityClass);
 
         MethodHandle stateGetterHandle = asHandle(data.getter);
@@ -184,14 +184,14 @@ final class Scanner {
     }
 
     /**
-     * The basic column data needed to create an entity {@link Column} instance.
+     * The basic column data needed to create an entity {@link OldColumn} instance.
      */
     private static class ColumnData {
 
         /**
          * The name of the column.
          */
-        private final ColumnName name;
+        private final OldColumnName name;
 
         /**
          * The Java type of the column.
@@ -207,7 +207,7 @@ final class Scanner {
          */
         private final Method getter;
 
-        private ColumnData(ColumnName name, Class<?> type, Method getter) {
+        private ColumnData(OldColumnName name, Class<?> type, Method getter) {
             this.name = name;
             this.type = type;
             this.getter = getter;
@@ -220,7 +220,7 @@ final class Scanner {
          * instance.
          */
         private static ColumnData of(FieldDeclaration protoColumn, EntityClass<?> entityClass) {
-            ColumnName columnName = ColumnName.of(protoColumn);
+            OldColumnName columnName = OldColumnName.of(protoColumn);
             Method getter = getterOf(protoColumn, entityClass.stateClass());
             Class<?> columnType = getter.getReturnType();
             return new ColumnData(columnName, columnType, getter);
@@ -231,7 +231,7 @@ final class Scanner {
          */
         private static ColumnData of(Method systemColumn) {
             SystemColumn annotation = checkNotNull(systemColumn.getAnnotation(SystemColumn.class));
-            ColumnName name = ColumnName.of(annotation.name());
+            OldColumnName name = OldColumnName.of(annotation.name());
             Class<?> type = systemColumn.getReturnType();
             return new ColumnData(name, type, systemColumn);
         }

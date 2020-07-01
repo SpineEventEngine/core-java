@@ -21,6 +21,7 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
+import io.spine.query.RecordQuery;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordStorage;
@@ -30,7 +31,6 @@ import io.spine.type.TypeUrl;
 import java.util.Iterator;
 
 import static io.spine.server.delivery.CatchUpColumn.projection_type;
-import static io.spine.server.storage.RecordQueries.byField;
 
 /**
  * A storage for the state of the ongoing catch-up processes.
@@ -59,7 +59,11 @@ public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
      *         the type of the projection state to use for filtering
      */
     public Iterator<CatchUp> readByType(TypeUrl projectionType) {
-        Iterator<CatchUp> result = readAll(byField(projection_type, projectionType.value()));
+        RecordQuery<CatchUpId, CatchUp> query =
+                queryBuilder().where(projection_type)
+                              .is(projectionType.value())
+                              .build();
+        Iterator<CatchUp> result = readAll(query);
         return result;
     }
 

@@ -60,7 +60,7 @@ final class SimpleColumn
      */
     private final FieldDeclaration field;
 
-    SimpleColumn(ColumnName name, Class<?> type, Getter getter, FieldDeclaration field) {
+    SimpleColumn(OldColumnName name, Class<?> type, Getter getter, FieldDeclaration field) {
         super(name, type);
         this.getter = getter;
         this.field = field;

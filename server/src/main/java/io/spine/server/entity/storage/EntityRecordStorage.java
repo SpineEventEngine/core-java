@@ -28,9 +28,9 @@ import io.spine.base.Identifier;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.RecordQueries;
-import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
@@ -50,7 +50,7 @@ import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
 public class EntityRecordStorage<I, S extends EntityState<I>>
         extends RecordStorageDelegate<I, EntityRecord> {
 
-    private final RecordQuery<I> findActiveRecordsQuery;
+    private final OldRecordQuery<I> findActiveRecordsQuery;
     private final QueryParameters activeQueryParams;
 
     public EntityRecordStorage(StorageFactory factory,
@@ -87,8 +87,8 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      *         if the storage is already closed
      */
     @Override
-    public Iterator<I> index(RecordQuery<I> query) {
-        RecordQuery<I> onlyActive = query.append(findActiveRecordsQuery.getParameters());
+    public Iterator<I> index(OldRecordQuery<I> query) {
+        OldRecordQuery<I> onlyActive = query.append(findActiveRecordsQuery.getParameters());
         return super.index(onlyActive);
     }
 
@@ -113,7 +113,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * <p>Overrides to expose as a part of the public API.
      */
     @Override
-    public Iterator<EntityRecord> readAll(RecordQuery<I> query, ResponseFormat format) {
+    public Iterator<EntityRecord> readAll(OldRecordQuery<I> query, ResponseFormat format) {
         return super.readAll(query, format);
     }
 
@@ -128,7 +128,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * <p>Overrides to expose as a part of the public API.
      */
     @Override
-    public Iterator<EntityRecord> readAll(RecordQuery<I> query) {
+    public Iterator<EntityRecord> readAll(OldRecordQuery<I> query) {
         return super.readAll(query);
     }
 
@@ -145,7 +145,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     @Override
     public Iterator<EntityRecord> readAll(Iterable<I> ids) {
         //TODO:2020-04-17:alex.tymchenko: do we need to append the params?
-        RecordQuery<I> query = RecordQueries.of(ids, activeQueryParams);
+        OldRecordQuery<I> query = RecordQueries.of(ids, activeQueryParams);
 //        RecordQuery<I> query = RecordQueries.of(ids);
         return readAll(query);
     }

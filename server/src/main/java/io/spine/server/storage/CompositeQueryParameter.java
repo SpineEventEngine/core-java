@@ -44,7 +44,7 @@ public final class CompositeQueryParameter {
 
     private final CompositeOperator operator;
 
-    private final ImmutableMultimap<Column, Filter> filters;
+    private final ImmutableMultimap<OldColumn, Filter> filters;
 
     /**
      * A flag that shows whether the current instance of {@code CompositeQueryParameter} has
@@ -62,7 +62,7 @@ public final class CompositeQueryParameter {
      *         the operator to apply to the given filters
      * @return new instance of {@code CompositeQueryParameter}
      */
-    public static CompositeQueryParameter from(Multimap<Column, Filter> filters,
+    public static CompositeQueryParameter from(Multimap<OldColumn, Filter> filters,
                                                CompositeOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
@@ -72,19 +72,19 @@ public final class CompositeQueryParameter {
     }
 
     private CompositeQueryParameter(CompositeOperator operator,
-                                    Multimap<Column, Filter> filters) {
+                                    Multimap<OldColumn, Filter> filters) {
         this.operator = operator;
         this.filters = ImmutableMultimap.copyOf(filters);
         this.hasLifecycle = containsLifecycle(filters.keySet());
     }
 
-    private static boolean containsLifecycle(Iterable<Column> columns) {
+    private static boolean containsLifecycle(Iterable<OldColumn> columns) {
         boolean result = Streams.stream(columns)
                                 .anyMatch(CompositeQueryParameter::isLifecycleColumn);
         return result;
     }
 
-    private static boolean isLifecycleColumn(Column column) {
+    private static boolean isLifecycleColumn(OldColumn column) {
         checkNotNull(column);
         boolean result = archived.columnName().equals(column.name())
                 || deleted.columnName().equals(column.name());
@@ -101,7 +101,7 @@ public final class CompositeQueryParameter {
     /**
      * Returns the joined entity column {@linkplain Filter filters}.
      */
-    public ImmutableMultimap<Column, Filter> filters() {
+    public ImmutableMultimap<OldColumn, Filter> filters() {
         return filters;
     }
 
@@ -118,7 +118,7 @@ public final class CompositeQueryParameter {
     public CompositeQueryParameter conjunct(Iterable<CompositeQueryParameter> other) {
         checkNotNull(other);
 
-        Multimap<Column, Filter> mergedFilters = LinkedListMultimap.create();
+        Multimap<OldColumn, Filter> mergedFilters = LinkedListMultimap.create();
         mergedFilters.putAll(filters);
         for (CompositeQueryParameter parameter : other) {
             mergedFilters.putAll(parameter.filters());
@@ -134,17 +134,17 @@ public final class CompositeQueryParameter {
      * the {@link CompositeOperator#ALL ALL} operator.
      *
      * @param column
-     *         the {@link Column} to add the filter to
+     *         the {@link OldColumn} to add the filter to
      * @param filter
      *         the value of the filter to add
      * @return new instance of {@code CompositeQueryParameter} merged from current instance and
      * the given filter
      */
-    public CompositeQueryParameter and(Column column, Filter filter) {
+    public CompositeQueryParameter and(OldColumn column, Filter filter) {
         checkNotNull(column);
         checkNotNull(filter);
 
-        Multimap<Column, Filter> newFilters = HashMultimap.create(filters);
+        Multimap<OldColumn, Filter> newFilters = HashMultimap.create(filters);
         newFilters.put(column, filter);
         CompositeQueryParameter parameter = from(newFilters, ALL);
         return parameter;

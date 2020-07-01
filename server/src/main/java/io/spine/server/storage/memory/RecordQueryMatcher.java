@@ -26,11 +26,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.Column;
+import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.storage.CompositeQueryParameter;
+import io.spine.server.storage.OldColumn;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.QueryParameters;
-import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -44,7 +44,7 @@ import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Matches the records to the given {@link RecordQuery}.
+ * Matches the records to the given {@link OldRecordQuery}.
  *
  * @param <I>
  *         the type of the identifiers of the matched records
@@ -57,7 +57,7 @@ public class RecordQueryMatcher<I, R extends Message>
     private final Set<I> acceptedIds;
     private final QueryParameters queryParams;
 
-    RecordQueryMatcher(RecordQuery<I> query) {
+    RecordQueryMatcher(OldRecordQuery<I> query) {
         checkNotNull(query);
         // Pack IDs from the query for faster search using packed IDs from loaded records.
         Set<I> ids = query.getIds();
@@ -108,7 +108,7 @@ public class RecordQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> boolean
-    checkAll(Multimap<Column, Filter> filters, RecordWithColumns<I, R> record) {
+    checkAll(Multimap<OldColumn, Filter> filters, RecordWithColumns<I, R> record) {
         if (filters.isEmpty()) {
             return true;
         }
@@ -120,7 +120,7 @@ public class RecordQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> boolean
-    checkEither(Multimap<Column, Filter> filters, RecordWithColumns<I, R> record) {
+    checkEither(Multimap<OldColumn, Filter> filters, RecordWithColumns<I, R> record) {
         if (filters.isEmpty()) {
             return true;
         }
@@ -132,18 +132,18 @@ public class RecordQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> boolean
-    matches(RecordWithColumns<I, R> record, Map.Entry<Column, Filter> filter) {
+    matches(RecordWithColumns<I, R> record, Map.Entry<OldColumn, Filter> filter) {
         if (!hasColumn(record, filter)) {
             return false;
         }
-        Column column = filter.getKey();
+        OldColumn column = filter.getKey();
         @Nullable Object columnValue = columnValue(record, column);
         boolean result = checkSingleParameter(filter.getValue(), columnValue, column);
         return result;
     }
 
     private static <I, R extends Message> boolean
-    hasColumn(RecordWithColumns<I, R> record, Map.Entry<Column, Filter> filter) {
+    hasColumn(RecordWithColumns<I, R> record, Map.Entry<OldColumn, Filter> filter) {
         boolean result = record.hasColumn(filter.getKey()
                                                 .name());
         return result;
@@ -151,7 +151,7 @@ public class RecordQueryMatcher<I, R extends Message>
 
     private static boolean checkSingleParameter(Filter filter,
                                                 @Nullable Object actualValue,
-                                                Column column) {
+                                                OldColumn column) {
         if (actualValue == null) {
             return false;
         }
@@ -168,8 +168,8 @@ public class RecordQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> @Nullable Object
-    columnValue(RecordWithColumns<I, R> record, Column column) {
-        ColumnName columnName = column.name();
+    columnValue(RecordWithColumns<I, R> record, OldColumn column) {
+        OldColumnName columnName = column.name();
         Object value = record.columnValue(columnName);
         return value;
     }

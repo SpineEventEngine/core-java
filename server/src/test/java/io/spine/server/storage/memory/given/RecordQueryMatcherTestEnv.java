@@ -25,11 +25,11 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.projection.Projection;
-import io.spine.server.storage.Column;
 import io.spine.server.storage.CustomColumn;
+import io.spine.server.storage.OldColumn;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.StgProjectWithColumns;
@@ -50,7 +50,7 @@ public final class RecordQueryMatcherTestEnv {
     /**
      * A {@code Column} which holds an {@link Any} instance.
      */
-    public static Column anyColumn() {
+    public static OldColumn anyColumn() {
         return column("wrapped_state");
     }
 
@@ -66,7 +66,7 @@ public final class RecordQueryMatcherTestEnv {
     /**
      * A {@code Column} which holds a {@code boolean} value.
      */
-    public static Column booleanColumn() {
+    public static OldColumn booleanColumn() {
         return column("internal");
     }
 
@@ -79,10 +79,10 @@ public final class RecordQueryMatcherTestEnv {
         return true;
     }
 
-    private static Column column(String name) {
+    private static OldColumn column(String name) {
         EntityRecordSpec spec = EntityRecordSpec.of(ProjectView.class);
-        ColumnName columnName = ColumnName.of(name);
-        Column column = spec.get(columnName);
+        OldColumnName columnName = OldColumnName.of(name);
+        OldColumn column = spec.get(columnName);
         return column;
     }
 

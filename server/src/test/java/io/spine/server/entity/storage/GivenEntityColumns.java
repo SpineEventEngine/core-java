@@ -27,9 +27,9 @@ import com.google.common.collect.ImmutableSet;
  */
 public final class GivenEntityColumns {
 
-    public static final ColumnName version = ColumnName.of("version");
+    public static final OldColumnName version = OldColumnName.of("version");
 
-    static final ImmutableSet<ColumnName> defaultEntityColumns =
+    static final ImmutableSet<OldColumnName> defaultEntityColumns =
             ImmutableSet.of(
                     LifecycleColumn.archived.columnName(),
                     LifecycleColumn.deleted.columnName(),

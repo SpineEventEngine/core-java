@@ -34,9 +34,9 @@ import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.TargetFilters;
 import io.spine.query.EntityColumn;
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.LifecycleColumn;
+import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.entity.storage.given.TestProjection;
 import io.spine.test.entity.ProjectId;
@@ -92,7 +92,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
     }
 
     private static CustomColumn<String, Any> sampleColumn() {
-        return new CustomColumn<>(ColumnName.of("sample"), String.class, (v) -> "");
+        return new CustomColumn<>(OldColumnName.of("sample"), String.class, (v) -> "");
     }
 
     @Test
@@ -155,7 +155,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .addFilter(aggregatingFilter)
                 .build();
         EntityRecordSpec<StgProjectId> spec = EntityRecordSpec.of(TestProjection.class);
-        RecordQuery<?> query = RecordQueries.from(filters, spec);
+        OldRecordQuery<?> query = RecordQueries.from(filters, spec);
         assertNotNull(query);
 
         Collection<?> ids = query.getIds();
@@ -181,7 +181,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
     @Test
     @DisplayName("create a `RecordQuery` targeting all the records of the storage")
     void createQueryForAll() {
-        RecordQuery<Object> actual = RecordQueries.all();
+        OldRecordQuery<Object> actual = RecordQueries.all();
 
         assertIdsEmpty(actual);
         assertParametersEmpty(actual);
@@ -191,7 +191,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
     @DisplayName("create a `RecordQuery` targeting only the records with the selected IDs")
     void createQueryForIds() {
         ImmutableList<Integer> expectedIds = sampleIds();
-        RecordQuery<Integer> actual = RecordQueries.of(expectedIds);
+        OldRecordQuery<Integer> actual = RecordQueries.of(expectedIds);
 
         assertThat(actual.getIds()).containsExactlyElementsIn(expectedIds);
         assertParametersEmpty(actual);
@@ -202,7 +202,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
     void createQueryForIdsAndParameters() {
         ImmutableList<Integer> expectedIds = sampleIds();
         QueryParameters expectedParams = sampleParams();
-        RecordQuery<Integer> actual = RecordQueries.of(expectedIds, expectedParams);
+        OldRecordQuery<Integer> actual = RecordQueries.of(expectedIds, expectedParams);
 
         assertThat(actual.getIds()).containsExactlyElementsIn(expectedIds);
         assertThat(actual.getParameters()).isEqualTo(expectedParams);
@@ -212,7 +212,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
     @DisplayName("create a `RecordQuery` targeting records by the specific query parameters only")
     void createQueryForParameters() {
         QueryParameters expectedParams = sampleParams();
-        RecordQuery<Object> actual = RecordQueries.of(expectedParams);
+        OldRecordQuery<Object> actual = RecordQueries.of(expectedParams);
 
         assertIdsEmpty(actual);
         assertThat(actual.getParameters()).isEqualTo(expectedParams);
@@ -222,7 +222,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
     void createQueryByTheColumnValue() {
         CustomColumn<String, Any> expectedColumn = sampleColumn();
         Any expectedValue = pack(currentTime());
-        RecordQuery<Object> actual = RecordQueries.byColumn(expectedColumn, expectedValue);
+        OldRecordQuery<Object> actual = RecordQueries.byColumn(expectedColumn, expectedValue);
 
         assertIdsEmpty(actual);
         assertThat(actual.getParameters())
@@ -234,7 +234,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
         CustomColumn<String, Any> columnUsed = sampleColumn();
         QueryableField<Any> expectedField = () -> columnUsed;
         Any expectedValue = pack(currentTime());
-        RecordQuery<Object> actual = RecordQueries.byField(expectedField, expectedValue);
+        OldRecordQuery<Object> actual = RecordQueries.byField(expectedField, expectedValue);
 
         assertIdsEmpty(actual);
         assertThat(actual.getParameters())
@@ -249,11 +249,11 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
         return ImmutableList.of(41, 17, 324);
     }
 
-    private static void assertIdsEmpty(RecordQuery<Object> actual) {
+    private static void assertIdsEmpty(OldRecordQuery<Object> actual) {
         assertThat(actual.getIds()).isEmpty();
     }
 
-    private static void assertParametersEmpty(RecordQuery<?> actual) {
+    private static void assertParametersEmpty(OldRecordQuery<?> actual) {
         assertThat(actual.getParameters()
                          .iterator()
                          .hasNext()).isFalse();

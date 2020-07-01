@@ -53,7 +53,7 @@ import static java.util.Collections.singleton;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("`RecordQuery` should")
-class RecordQueryTest {
+class OldRecordQueryTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -62,7 +62,7 @@ class RecordQueryTest {
                 .setDefault(IdFilter.class, IdFilter.getDefaultInstance())
                 .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                   .build())
-                .testStaticMethods(RecordQuery.class, NullPointerTester.Visibility.PACKAGE);
+                .testStaticMethods(OldRecordQuery.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
@@ -70,13 +70,13 @@ class RecordQueryTest {
     void supportToString() {
         Object someId = Sample.messageOfType(ProjectId.class);
         Collection<Object> ids = singleton(someId);
-        Column someColumn = column();
+        OldColumn someColumn = column();
         Object someValue = "something";
 
-        Map<Column, Object> params = new HashMap<>(1);
+        Map<OldColumn, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
-        RecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(params));
+        OldRecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(params));
 
         StringSubject assertQuery = assertThat(query.toString());
         assertQuery.contains(query.getIds()
@@ -102,10 +102,10 @@ class RecordQueryTest {
      */
     private static void addEqualityGroupA(EqualsTester tester) {
         Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
-        Map<Column, Object> params = new IdentityHashMap<>(2);
+        Map<OldColumn, Object> params = new IdentityHashMap<>(2);
         params.put(column(), "anything");
         params.put(column(), 5);
-        RecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(params));
+        OldRecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query);
     }
 
@@ -115,10 +115,10 @@ class RecordQueryTest {
      */
     private static void addEqualityGroupB(EqualsTester tester) {
         Collection<?> ids = emptyList();
-        Map<Column, Object> params = new HashMap<>(1);
+        Map<OldColumn, Object> params = new HashMap<>(1);
         params.put(column(), 5);
-        RecordQuery<?> query1 = RecordQueries.of(ids, paramsFromValues(params));
-        RecordQuery<?> query2 = RecordQueries.of(ids, paramsFromValues(params));
+        OldRecordQuery<?> query1 = RecordQueries.of(ids, paramsFromValues(params));
+        OldRecordQuery<?> query2 = RecordQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
@@ -131,12 +131,12 @@ class RecordQueryTest {
      */
     private static void addEqualityGroupC(EqualsTester tester) {
         Collection<?> ids = emptySet();
-        Column column = column();
+        OldColumn column = column();
         Object value = 42;
-        Map<Column, Object> params = new HashMap<>(1);
+        Map<OldColumn, Object> params = new HashMap<>(1);
         params.put(column, value);
-        RecordQuery<?> query1 = RecordQueries.of(ids, paramsFromValues(params));
-        RecordQuery<?> query2 = RecordQueries.of(ids, paramsFromValues(params));
+        OldRecordQuery<?> query1 = RecordQueries.of(ids, paramsFromValues(params));
+        OldRecordQuery<?> query2 = RecordQueries.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
@@ -146,16 +146,16 @@ class RecordQueryTest {
      */
     private static void addEqualityGroupD(EqualsTester tester) {
         Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
-        Map<Column, Object> columns = Collections.emptyMap();
-        RecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(columns));
+        Map<OldColumn, Object> columns = Collections.emptyMap();
+        OldRecordQuery<?> query = RecordQueries.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
     }
 
-    private static QueryParameters paramsFromValues(Map<Column, Object> values) {
+    private static QueryParameters paramsFromValues(Map<OldColumn, Object> values) {
         QueryParameters.Builder builder = QueryParameters.newBuilder();
-        Multimap<Column, Filter> filters = HashMultimap.create(values.size(), 1);
-        for (Map.Entry<Column, Object> param : values.entrySet()) {
-            Column column = param.getKey();
+        Multimap<OldColumn, Filter> filters = HashMultimap.create(values.size(), 1);
+        for (Map.Entry<OldColumn, Object> param : values.entrySet()) {
+            OldColumn column = param.getKey();
             FieldPath fieldPath = Field.parse(column.name()
                                                     .value())
                                        .path();

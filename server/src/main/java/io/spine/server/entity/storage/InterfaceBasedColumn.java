@@ -81,7 +81,7 @@ public final class InterfaceBasedColumn
      */
     private final FieldDeclaration field;
 
-    InterfaceBasedColumn(ColumnName name,
+    InterfaceBasedColumn(OldColumnName name,
                          Class<?> type,
                          GetterFromEntity getterFromEntity,
                          GetterFromState getterFromState,

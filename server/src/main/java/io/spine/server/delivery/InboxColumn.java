@@ -22,52 +22,46 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.CustomColumn;
-import io.spine.server.storage.CustomColumn.Getter;
-import io.spine.server.storage.QueryableField;
+import io.spine.query.RecordColumn;
 
 /**
  * Columns stored along with each {@link InboxMessage}.
  */
-public enum InboxColumn implements QueryableField<InboxMessage> {
+@SuppressWarnings("DuplicateStringLiteralInspection")  // column names may repeat across records.
+final class InboxColumn {
 
-    signal_id(InboxSignalId.class, InboxMessage::getSignalId),
+    static final RecordColumn<InboxMessage, InboxSignalId> signal_id =
+            new RecordColumn<>("signal_id", InboxSignalId.class, InboxMessage::getSignalId);
 
-    inbox_id(InboxId.class, InboxMessage::getInboxId),
+    static final RecordColumn<InboxMessage, InboxId> inbox_id =
+            new RecordColumn<>("inbox_id", InboxId.class, InboxMessage::getInboxId);
 
-    inbox_shard(ShardIndex.class, InboxMessage::shardIndex),
+    static final RecordColumn<InboxMessage, ShardIndex> inbox_shard =
+            new RecordColumn<>("inbox_shard", ShardIndex.class, InboxMessage::shardIndex);
 
-    is_event(Boolean.class, InboxMessage::hasEvent),
+    static final RecordColumn<InboxMessage, Boolean> is_event =
+            new RecordColumn<>("is_event", Boolean.class, InboxMessage::hasEvent);
 
-    is_command(Boolean.class, InboxMessage::hasCommand),
+    static final RecordColumn<InboxMessage, Boolean> is_command =
+            new RecordColumn<>("is_command", Boolean.class, InboxMessage::hasCommand);
 
-    label(InboxLabel.class, InboxMessage::getLabel),
+    static final RecordColumn<InboxMessage, InboxLabel> label =
+            new RecordColumn<>("label", InboxLabel.class, InboxMessage::getLabel);
 
-    status(InboxMessageStatus.class, InboxMessage::getStatus),
+    static final RecordColumn<InboxMessage, InboxMessageStatus> status =
+            new RecordColumn<>("status", InboxMessageStatus.class, InboxMessage::getStatus);
 
-    received_at(Timestamp.class, InboxMessage::getWhenReceived),
+    static final RecordColumn<InboxMessage, Timestamp> received_at =
+            new RecordColumn<>("received_at", Timestamp.class, InboxMessage::getWhenReceived);
 
-    version(Integer.class, InboxMessage::getVersion);
+    static final RecordColumn<InboxMessage, Integer> version =
+            new RecordColumn<>("version", Integer.class, InboxMessage::getVersion);
 
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final CustomColumn<?, InboxMessage> column;
-
-    <T> InboxColumn(Class<T> type, Getter<InboxMessage, T> getter) {
-        ColumnName name = ColumnName.of(name());
-        this.column = new CustomColumn<>(name, type, getter);
+    private InboxColumn() {
     }
 
-    static ImmutableList<CustomColumn<?, InboxMessage>> definitions() {
-        ImmutableList.Builder<CustomColumn<?, InboxMessage>> list = ImmutableList.builder();
-        for (InboxColumn value : InboxColumn.values()) {
-            list.add(value.column);
-        }
-        return list.build();
-    }
-
-    @Override
-    public CustomColumn<?, InboxMessage> column() {
-        return column;
+    static ImmutableList<RecordColumn<InboxMessage, ?>> definitions() {
+        return ImmutableList.of(signal_id, inbox_id, inbox_shard, is_event,
+                                is_command, label, status, received_at, version);
     }
 }

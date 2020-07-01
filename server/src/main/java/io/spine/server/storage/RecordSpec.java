@@ -22,7 +22,8 @@ package io.spine.server.storage;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.Internal;
-import io.spine.server.entity.storage.ColumnName;
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
@@ -82,12 +83,12 @@ public abstract class RecordSpec<I, R, S> {
     /**
      * Returns all columns of the record.
      */
-    public abstract ImmutableList<Column> columnList();
+    public abstract ImmutableList<Column<R, ?>> columnList();
 
     /**
      * Searches for a column with a given name.
      */
-    public abstract Optional<Column> find(ColumnName columnName);
+    public abstract Optional<Column<R, ?>> find(ColumnName columnName);
 
     /**
      * Obtains a column by name.
@@ -95,9 +96,9 @@ public abstract class RecordSpec<I, R, S> {
      * @throws IllegalArgumentException
      *         if the column with the specified name is not found
      */
-    public final Column get(ColumnName columnName) {
+    public final Column<R, ?> get(ColumnName columnName) {
         checkNotNull(columnName);
-        Column result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
+        Column<R, ?> result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
         return result;
     }
 

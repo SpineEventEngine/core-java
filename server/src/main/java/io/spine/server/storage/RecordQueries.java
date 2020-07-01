@@ -31,7 +31,7 @@ import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.TargetFilters;
 import io.spine.query.EntityColumn;
-import io.spine.server.entity.storage.ColumnName;
+import io.spine.server.entity.storage.OldColumnName;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +47,7 @@ import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 
 /**
- * A set of the factory methods for the creation of {@link RecordQuery} instances.
+ * A set of the factory methods for the creation of {@link OldRecordQuery} instances.
  */
 @Internal
 public final class RecordQueries {
@@ -67,8 +67,8 @@ public final class RecordQueries {
      * @param <I>
      *         the type of the record identifiers
      */
-    public static <I> RecordQuery<I> all() {
-        return new RecordQuery<>(ImmutableSet.of(), EMPTY_PARAMS);
+    public static <I> OldRecordQuery<I> all() {
+        return new OldRecordQuery<>(ImmutableSet.of(), EMPTY_PARAMS);
     }
 
     /**
@@ -79,9 +79,9 @@ public final class RecordQueries {
      * @param <I>
      *         the type of the record identifiers
      */
-    public static <I> RecordQuery<I> of(Iterable<I> ids) {
+    public static <I> OldRecordQuery<I> of(Iterable<I> ids) {
         checkNotNull(ids);
-        return new RecordQuery<>(ids, EMPTY_PARAMS);
+        return new OldRecordQuery<>(ids, EMPTY_PARAMS);
     }
 
     /**
@@ -95,10 +95,10 @@ public final class RecordQueries {
      * @param <I>
      *         the type of the record identifiers
      */
-    public static <I> RecordQuery<I> of(Iterable<I> ids, QueryParameters parameters) {
+    public static <I> OldRecordQuery<I> of(Iterable<I> ids, QueryParameters parameters) {
         checkNotNull(ids);
         checkNotNull(parameters);
-        return new RecordQuery<>(ids, parameters);
+        return new OldRecordQuery<>(ids, parameters);
     }
 
     /**
@@ -110,9 +110,9 @@ public final class RecordQueries {
      * @param <I>
      *         the type of the record identifiers
      */
-    public static <I> RecordQuery<I> of(QueryParameters parameters) {
+    public static <I> OldRecordQuery<I> of(QueryParameters parameters) {
         checkNotNull(parameters);
-        return new RecordQuery<>(ImmutableSet.of(), parameters);
+        return new OldRecordQuery<>(ImmutableSet.of(), parameters);
     }
 
     /**
@@ -128,7 +128,7 @@ public final class RecordQueries {
      * @param <V>
      *         the type of the values stored in the column
      */
-    public static <I, V> RecordQuery<I> byColumn(Column column, V value) {
+    public static <I, V> OldRecordQuery<I> byColumn(OldColumn column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         QueryParameters queryParams = QueryParameters.eq(column, value);
@@ -150,19 +150,19 @@ public final class RecordQueries {
      * @param <V>
      *         the type of the values stored in the column
      */
-    public static <I, V> RecordQuery<I> byColumn(RecordSpec<I, ?, ?> recordSpec,
-                                                 EntityColumn<?, ?> declaredColumn,
-                                                 V value) {
+    public static <I, V> OldRecordQuery<I> byColumn(RecordSpec<I, ?, ?> recordSpec,
+                                                    EntityColumn<?, ?> declaredColumn,
+                                                    V value) {
         checkNotNull(recordSpec);
         checkNotNull(declaredColumn);
         checkNotNull(value);
         String rawColumnName = declaredColumn.name()
                                              .value();
-        Optional<Column> maybeColumn = recordSpec.find(ColumnName.of(rawColumnName));
+        Optional<OldColumn> maybeColumn = recordSpec.find(OldColumnName.of(rawColumnName));
         checkState(maybeColumn.isPresent(),
                    "The passed column `%s` is not found among the declared columns: `%s`",
                    rawColumnName, recordSpec.columnList());
-        Column column = maybeColumn.get();
+        OldColumn column = maybeColumn.get();
         QueryParameters queryParams = QueryParameters.eq(column, value);
         return of(queryParams);
     }
@@ -180,7 +180,7 @@ public final class RecordQueries {
      * @param <V>
      *         the type of the field
      */
-    public static <I, V> RecordQuery<I> byField(QueryableField<?> field, V value) {
+    public static <I, V> OldRecordQuery<I> byField(QueryableField<?> field, V value) {
         checkNotNull(field);
         checkNotNull(value);
         QueryParameters queryParams = QueryParameters.eq(field.column(), value);
@@ -198,14 +198,14 @@ public final class RecordQueries {
      * @param <I>
      *         the type of the record identifiers
      */
-    public static <I> RecordQuery<I> from(TargetFilters filters, RecordSpec<?, ?, ?> recordSpec) {
+    public static <I> OldRecordQuery<I> from(TargetFilters filters, RecordSpec<?, ?, ?> recordSpec) {
         checkNotNull(filters);
         checkNotNull(recordSpec);
 
         QueryParameters queryParams = toQueryParams(filters, recordSpec);
         List<I> ids = toIdentifiers(filters);
 
-        RecordQuery<I> result = of(ids, queryParams);
+        OldRecordQuery<I> result = of(ids, queryParams);
         return result;
     }
 
@@ -242,33 +242,33 @@ public final class RecordQueries {
 
     private static CompositeQueryParameter
     queryParameterFromFilter(CompositeFilter filter, RecordSpec<?, ?, ?> recordSpec) {
-        Multimap<Column, Filter> filters = splitFilters(filter, recordSpec);
+        Multimap<OldColumn, Filter> filters = splitFilters(filter, recordSpec);
         CompositeFilter.CompositeOperator operator = filter.getOperator();
         return CompositeQueryParameter.from(filters, operator);
     }
 
-    private static Multimap<Column, Filter>
+    private static Multimap<OldColumn, Filter>
     splitFilters(CompositeFilter filter, RecordSpec<?, ?, ?> recordSpec) {
-        Multimap<Column, Filter> filters = create(filter.getFilterCount(), 1);
+        Multimap<OldColumn, Filter> filters = create(filter.getFilterCount(), 1);
         for (Filter columnFilter : filter.getFilterList()) {
-            Column column = findMatchingColumn(columnFilter, recordSpec);
+            OldColumn column = findMatchingColumn(columnFilter, recordSpec);
             checkFilterType(column, columnFilter);
             filters.put(column, columnFilter);
         }
         return filters;
     }
 
-    private static Column findMatchingColumn(Filter filter, RecordSpec<?, ?, ?> recordSpec) {
+    private static OldColumn findMatchingColumn(Filter filter, RecordSpec<?, ?, ?> recordSpec) {
         FieldPath fieldPath = filter.getFieldPath();
         checkArgument(fieldPath.getFieldNameCount() == 1,
                       "Incorrect column name in the passed `Filter`: %s",
                       join(".", fieldPath.getFieldNameList()));
         String column = fieldPath.getFieldName(0);
-        ColumnName columnName = ColumnName.of(column);
+        OldColumnName columnName = OldColumnName.of(column);
         return recordSpec.get(columnName);
     }
 
-    private static void checkFilterType(Column column, Filter filter) {
+    private static void checkFilterType(OldColumn column, Filter filter) {
         Class<?> expectedType = column.type();
         Any filterConvent = filter.getValue();
         Object filterValue = toObject(filterConvent, expectedType);

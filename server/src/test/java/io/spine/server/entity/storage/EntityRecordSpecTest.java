@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
-import io.spine.server.storage.Column;
+import io.spine.server.storage.OldColumn;
 import io.spine.test.entity.TaskListViewId;
 import io.spine.test.entity.TaskViewId;
 import org.junit.jupiter.api.DisplayName;
@@ -60,8 +60,8 @@ class EntityRecordSpecTest {
     @DisplayName("be extracted from an entity class")
     void beExtractedFromEntityClass() {
         EntityRecordSpec<TaskListViewId> spec = EntityRecordSpec.of(TaskListViewProjection.class);
-        ColumnName columnName = ColumnName.of("description");
-        Optional<Column> descriptionColumn = spec.find(columnName);
+        OldColumnName columnName = OldColumnName.of("description");
+        Optional<OldColumn> descriptionColumn = spec.find(columnName);
 
         assertThat(descriptionColumn.isPresent()).isTrue();
     }
@@ -69,8 +69,8 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("obtain a column by name")
     void obtainByName() {
-        ColumnName columName = ColumnName.of("estimate_in_days");
-        Column column = spec().get(columName);
+        OldColumnName columName = OldColumnName.of("estimate_in_days");
+        OldColumn column = spec().get(columName);
 
         assertThat(column.type()).isEqualTo(int.class);
     }
@@ -80,7 +80,7 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("throw `IAE` when the column with the specified name is not found")
     void throwOnColumnNotFound() {
-        ColumnName nonExistent = ColumnName.of("non-existent-column");
+        OldColumnName nonExistent = OldColumnName.of("non-existent-column");
 
         assertThrows(IllegalArgumentException.class, () -> spec().get(nonExistent));
     }
@@ -88,8 +88,8 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("search for a column by name")
     void searchByName() {
-        ColumnName existent = ColumnName.of("name");
-        Optional<Column> column = spec().find(existent);
+        OldColumnName existent = OldColumnName.of("name");
+        Optional<OldColumn> column = spec().find(existent);
 
         assertThat(column.isPresent()).isTrue();
     }
@@ -97,8 +97,8 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("return empty `Optional` when searching for a non-existent column")
     void returnEmptyOptionalForNonExistent() {
-        ColumnName nonExistent = ColumnName.of("non-existent-column");
-        Optional<Column> result = spec().find(nonExistent);
+        OldColumnName nonExistent = OldColumnName.of("non-existent-column");
+        Optional<OldColumn> result = spec().find(nonExistent);
 
         assertThat(result.isPresent()).isFalse();
     }
@@ -118,45 +118,45 @@ class EntityRecordSpecTest {
     @DisplayName("extract values from entity")
     void extractColumnValues() {
         TaskViewProjection projection = new TaskViewProjection();
-        Map<ColumnName, Object> values = spec().valuesIn(projection);
+        Map<OldColumnName, Object> values = spec().valuesIn(projection);
 
         assertThat(values).containsExactly(
-                ColumnName.of("archived"), projection.isArchived(),
-                ColumnName.of("deleted"), projection.isDeleted(),
-                ColumnName.of("version"), projection.version(),
-                ColumnName.of("name"), projection.state()
-                                                 .getName(),
-                ColumnName.of("estimate_in_days"), projection.state()
-                                                             .getEstimateInDays(),
-                ColumnName.of("status"), projection.state()
-                                                   .getStatus(),
-                ColumnName.of("due_date"), projection.state()
-                                                     .getDueDate()
+                OldColumnName.of("archived"), projection.isArchived(),
+                OldColumnName.of("deleted"), projection.isDeleted(),
+                OldColumnName.of("version"), projection.version(),
+                OldColumnName.of("name"), projection.state()
+                                                    .getName(),
+                OldColumnName.of("estimate_in_days"), projection.state()
+                                                                .getEstimateInDays(),
+                OldColumnName.of("status"), projection.state()
+                                                      .getStatus(),
+                OldColumnName.of("due_date"), projection.state()
+                                                        .getDueDate()
         );
     }
 
     @Test
     @DisplayName("return a map of interface-based columns")
     void extractInterfaceBasedValues() {
-        ImmutableMap<ColumnName, InterfaceBasedColumn> values = spec().interfaceBasedColumns();
+        ImmutableMap<OldColumnName, InterfaceBasedColumn> values = spec().interfaceBasedColumns();
 
-        assertThat(values).containsKey(ColumnName.of("name"));
-        assertThat(values).containsKey(ColumnName.of("estimate_in_days"));
-        assertThat(values).containsKey(ColumnName.of("status"));
-        assertThat(values).containsKey(ColumnName.of("due_date"));
+        assertThat(values).containsKey(OldColumnName.of("name"));
+        assertThat(values).containsKey(OldColumnName.of("estimate_in_days"));
+        assertThat(values).containsKey(OldColumnName.of("status"));
+        assertThat(values).containsKey(OldColumnName.of("due_date"));
     }
 
     @Test
     @DisplayName("return a map of lifecycle columns of the entity")
     void returnLifecycleColumns() {
-        ImmutableMap<ColumnName, Column> columns = spec().lifecycleColumns();
+        ImmutableMap<OldColumnName, OldColumn> columns = spec().lifecycleColumns();
 
         assertThat(columns).hasSize(2);
 
-        Column archivedColumn = columns.get(archived.columnName());
+        OldColumn archivedColumn = columns.get(archived.columnName());
         assertThat(archivedColumn).isNotNull();
 
-        Column deletedColumn = columns.get(deleted.columnName());
+        OldColumn deletedColumn = columns.get(deleted.columnName());
         assertThat(deletedColumn).isNotNull();
     }
 }

@@ -20,27 +20,32 @@
 
 package io.spine.server.storage;
 
-import com.google.protobuf.Message;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.entity.storage.OldColumnName;
 
 /**
- * A field of a plain Protobuf {@code Message} record stored in the {@link RecordStorage}
- * which may be used in a query.
+ * A column of the {@linkplain io.spine.server.entity.Entity entity}.
  *
- * @param <R>
- *         the type of the record, along with which the field is stored
+ * <p>Columns are the entity state fields which are stored separately from the entity record and
+ * can be used as criteria for query {@linkplain io.spine.client.Filter filters}.
+ *
+ * <p>The {@linkplain #name() name} of the column represents the value which needs to be specified
+ * to the filter. The {@linkplain #type() type} is an expected type of the filter value.
  */
-public interface QueryableField<R extends Message> {
+@Immutable
+public interface OldColumn {
 
     /**
-     * Returns the definition of a {@link CustomColumn} for the field.
+     * The name of the column in the storage.
      */
-    CustomColumn<?, R> column();
+    OldColumnName name();
 
     /**
-     * Returns the name of the column.
+     * The type of the column.
+     *
+     * <p>As user-defined columns are proto-based, there is a fixed set of possible column types.
+     * See {@link ColumnMapping}.
      */
-    default OldColumnName columnName() {
-        return column().name();
-    }
+    Class<?> type();
 }

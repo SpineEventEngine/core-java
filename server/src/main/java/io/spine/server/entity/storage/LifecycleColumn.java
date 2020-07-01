@@ -40,7 +40,7 @@ public enum LifecycleColumn implements QueryableField<EntityRecord> {
     private final CustomColumn<Boolean, EntityRecord> column;
 
     <T> LifecycleColumn(Getter<EntityRecord, Boolean> getter) {
-        ColumnName name = ColumnName.of(name());
+        OldColumnName name = OldColumnName.of(name());
         this.column = new CustomColumn<>(name, Boolean.class, getter);
     }
 

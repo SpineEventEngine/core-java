@@ -23,44 +23,37 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.CustomColumn;
-import io.spine.server.storage.CustomColumn.Getter;
-import io.spine.server.storage.QueryableField;
+import io.spine.query.Column;
+import io.spine.query.RecordColumn;
 
 /**
  * Columns stored along with an {@link AggregateEventRecord}.
  */
-public enum AggregateEventRecordColumn implements QueryableField<AggregateEventRecord> {
+@SuppressWarnings("DuplicateStringLiteralInspection")   // column names repeat in different records.
+public final class AggregateEventRecordColumn {
 
-    aggregate_id(Any.class, AggregateEventRecord::getAggregateId),
+    static final RecordColumn<AggregateEventRecord, Any> aggregate_id =
+            new RecordColumn<>("aggregate_id", Any.class, AggregateEventRecord::getAggregateId);
 
-    created(Timestamp.class, AggregateEventRecord::getTimestamp),
+    static final RecordColumn<AggregateEventRecord, Timestamp> created =
+            new RecordColumn<>("created", Timestamp.class, AggregateEventRecord::getTimestamp);
 
-    version(Integer.class, r -> r.hasEvent() ? versionOfEvent(r)
-                                             : versionOfSnapshot(r)),
+    static final RecordColumn<AggregateEventRecord, Integer> version =
+            new RecordColumn<>("version", Integer.class, versionGetter());
 
-    snapshot(Boolean.class, AggregateEventRecord::hasSnapshot);
+    static final RecordColumn<AggregateEventRecord, Boolean> snapshot =
+            new RecordColumn<>("snapshot", Boolean.class, AggregateEventRecord::hasSnapshot);
 
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final CustomColumn<?, AggregateEventRecord> column;
-
-    <T> AggregateEventRecordColumn(Class<T> type, Getter<AggregateEventRecord, T> getter) {
-        ColumnName name = ColumnName.of(name());
-        this.column = new CustomColumn<>(name, type, getter);
+    private AggregateEventRecordColumn() {
     }
 
-    static ImmutableList<CustomColumn<?, AggregateEventRecord>> definitions() {
-        ImmutableList.Builder<CustomColumn<?, AggregateEventRecord>> list = ImmutableList.builder();
-        for (AggregateEventRecordColumn value : values()) {
-            list.add(value.column);
-        }
-        return list.build();
+    static ImmutableList<RecordColumn<AggregateEventRecord, ?>> definitions() {
+        return ImmutableList.of(aggregate_id, created, version, snapshot);
     }
 
-    @Override
-    public CustomColumn<?, AggregateEventRecord> column() {
-        return column;
+    private static Column.Getter<AggregateEventRecord, Integer> versionGetter() {
+        return r -> r.hasEvent() ? versionOfEvent(r)
+                                 : versionOfSnapshot(r);
     }
 
     private static int versionOfSnapshot(AggregateEventRecord rawRecord) {

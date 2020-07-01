@@ -25,8 +25,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
 import io.spine.client.Filter;
 import io.spine.server.entity.storage.given.TestEntity;
-import io.spine.server.storage.Column;
 import io.spine.server.storage.CompositeQueryParameter;
+import io.spine.server.storage.OldColumn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -63,11 +63,11 @@ class CompositeQueryParameterTest {
     void mergeWithOtherInstances() {
         EntityRecordSpec spec = EntityRecordSpec.of(TestEntity.class);
 
-        ColumnName archivedColumnName = archived.columnName();
-        ColumnName deletedColumnName = deleted.columnName();
+        OldColumnName archivedColumnName = archived.columnName();
+        OldColumnName deletedColumnName = deleted.columnName();
 
-        Column archivedColumn = spec.get(archivedColumnName);
-        Column deletedColumn = spec.get(deletedColumnName);
+        OldColumn archivedColumn = spec.get(archivedColumnName);
+        OldColumn deletedColumn = spec.get(deletedColumnName);
 
         Filter archived = eq(archivedColumnName.value(), true);
         Filter deleted = eq(deletedColumnName.value(), false);
@@ -81,7 +81,7 @@ class CompositeQueryParameterTest {
         // Check
         assertEquals(lifecycle.operator(), ALL);
 
-        Multimap<Column, Filter> asMultimap = lifecycle.filters();
+        Multimap<OldColumn, Filter> asMultimap = lifecycle.filters();
 
         assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
         assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);
@@ -92,11 +92,11 @@ class CompositeQueryParameterTest {
     void mergeWithSingleFilter() {
         EntityRecordSpec spec = EntityRecordSpec.of(TestEntity.class);
 
-        ColumnName archivedColumnName = archived.columnName();
-        ColumnName deletedColumnName = deleted.columnName();
+        OldColumnName archivedColumnName = archived.columnName();
+        OldColumnName deletedColumnName = deleted.columnName();
 
-        Column archivedColumn = spec.get(archivedColumnName);
-        Column deletedColumn = spec.get(deletedColumnName);
+        OldColumn archivedColumn = spec.get(archivedColumnName);
+        OldColumn deletedColumn = spec.get(deletedColumnName);
 
         Filter archived = eq(archivedColumnName.value(), false);
         Filter deleted = eq(deletedColumnName.value(), false);
@@ -110,7 +110,7 @@ class CompositeQueryParameterTest {
         // Check
         assertEquals(lifecycle.operator(), ALL);
 
-        Multimap<Column, Filter> asMultimap = lifecycle.filters();
+        Multimap<OldColumn, Filter> asMultimap = lifecycle.filters();
 
         assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
         assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);

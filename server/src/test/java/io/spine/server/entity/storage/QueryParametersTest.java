@@ -31,8 +31,8 @@ import io.spine.client.Filters;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bc.given.ProjectProjection;
-import io.spine.server.storage.Column;
 import io.spine.server.storage.CompositeQueryParameter;
+import io.spine.server.storage.OldColumn;
 import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.bc.ProjectId;
@@ -87,7 +87,7 @@ class QueryParametersTest {
 
         // --- Group B ---
         // Consists of 3 instances with a single filter targeting a String column
-        Column bColumn = column();
+        OldColumn bColumn = column();
         Filter bFilter = Filters.eq("b", "c");
         QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                .build();
@@ -98,7 +98,7 @@ class QueryParametersTest {
 
         // --- Group C ---
         // Consists of an instance with a single filter targeting an integer number column
-        Column cColumn = column();
+        OldColumn cColumn = column();
         Filter cFilter = Filters.eq("a", 42);
         QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
                                               .build();
@@ -124,7 +124,7 @@ class QueryParametersTest {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
                 gt("thirdFilter", currentTime())};
-        Multimap<Column, Filter> filterMap =
+        Multimap<OldColumn, Filter> filterMap =
                 ImmutableMultimap.of(column(), filters[0],
                                      column(), filters[1],
                                      column(), filters[2]);
@@ -146,8 +146,8 @@ class QueryParametersTest {
                 eq("$1st", "entityColumnValue"),
                 eq("$2nd", 42.0),
                 gt("$3d", currentTime())};
-        Column[] columns = {stringColumn(), intColumn(), timestampColumn()};
-        Multimap<Column, Filter> filterMap =
+        OldColumn[] columns = {stringColumn(), intColumn(), timestampColumn()};
+        Multimap<OldColumn, Filter> filterMap =
                 ImmutableMultimap.of(columns[0], filters[0],
                                      columns[1], filters[1],
                                      columns[2], filters[2]);
@@ -156,9 +156,9 @@ class QueryParametersTest {
                                                  .build();
         CompositeQueryParameter singleParameter = parameters.iterator()
                                                             .next();
-        Multimap<Column, Filter> actualFilters = singleParameter.filters();
+        Multimap<OldColumn, Filter> actualFilters = singleParameter.filters();
         for (int i = 0; i < columns.length; i++) {
-            Column column = columns[i];
+            OldColumn column = columns[i];
             Collection<Filter> readFilters = actualFilters.get(column);
             assertThat(readFilters).hasSize(1);
             assertEquals(filters[i], readFilters.iterator()
@@ -170,7 +170,7 @@ class QueryParametersTest {
     @DisplayName("keep multiple filters for single column")
     void keepManyFiltersForColumn() throws ParseException {
         String columnName = "time";
-        Column column = column();
+        OldColumn column = column();
 
         // Some valid Timestamp values
         Timestamp startTime = Timestamps.parse("2000-01-01T10:00:00.000-05:00");
@@ -178,8 +178,8 @@ class QueryParametersTest {
 
         Filter startTimeFilter = gt(columnName, startTime);
         Filter deadlineFilter = le(columnName, deadline);
-        Multimap<Column, Filter> filterMap =
-                ImmutableMultimap.<Column, Filter>builder()
+        Multimap<OldColumn, Filter> filterMap =
+                ImmutableMultimap.<OldColumn, Filter>builder()
                         .put(column, startTimeFilter)
                         .put(column, deadlineFilter)
                         .build();
@@ -188,7 +188,7 @@ class QueryParametersTest {
                                                  .build();
         List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
         assertThat(aggregatingParameters).hasSize(1);
-        Multimap<Column, Filter> actualFilters =
+        Multimap<OldColumn, Filter> actualFilters =
                 aggregatingParameters.get(0)
                                      .filters();
         Collection<Filter> timeFilters = actualFilters.get(column);
@@ -214,15 +214,15 @@ class QueryParametersTest {
         assertFalse(paramsIterator.hasNext());
         assertTrue(lifecycleParameter.hasLifecycle());
         assertEquals(ALL, lifecycleParameter.operator());
-        ImmutableMultimap<Column, Filter> filters = lifecycleParameter.filters();
+        ImmutableMultimap<OldColumn, Filter> filters = lifecycleParameter.filters();
         assertThat(filters.size()).isEqualTo(2);
 
         Filter expectedFilterArchived = eq(archived.name(), false);
         Filter expectedFilterDeleted = eq(deleted.name(), false);
 
-        for (Map.Entry<Column, Filter> entry : filters.entries()) {
-            Column column = entry.getKey();
-            ColumnName actualName = column.name();
+        for (Map.Entry<OldColumn, Filter> entry : filters.entries()) {
+            OldColumn column = entry.getKey();
+            OldColumnName actualName = column.name();
             Filter actualFilter = entry.getValue();
 
             boolean archivedMatches = actualName.equals(archived.columnName())
@@ -233,9 +233,9 @@ class QueryParametersTest {
         }
     }
 
-    private static CompositeQueryParameter aggregatingParameter(Column column,
+    private static CompositeQueryParameter aggregatingParameter(OldColumn column,
                                                                 Filter filter) {
-        Multimap<Column, Filter> filters = ImmutableMultimap.of(column, filter);
+        Multimap<OldColumn, Filter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter result = CompositeQueryParameter.from(filters, ALL);
         return result;
     }

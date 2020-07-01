@@ -24,6 +24,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.ResponseFormat;
+import io.spine.query.RecordQuery;
+import io.spine.query.RecordQueryBuilder;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -59,7 +61,7 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    protected Iterator<R> readAll(RecordQuery<I> query) {
+    protected Iterator<R> readAll(RecordQuery<I, R> query) {
         return delegate.readAll(query);
     }
 
@@ -84,7 +86,7 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    protected Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAll(RecordQuery<I, R> query, ResponseFormat format) {
         return delegate.readAll(query, format);
     }
 
@@ -114,7 +116,7 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    protected Iterator<I> index(RecordQuery<I> query) {
+    protected Iterator<I> index(RecordQuery<I, R> query) {
         return delegate.index(query);
     }
 
@@ -166,12 +168,17 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    protected Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAllRecords(RecordQuery<I, R> query, ResponseFormat format) {
         return delegate.readAllRecords(query, format);
     }
 
     @Override
     protected boolean deleteRecord(I id) {
         return delegate.deleteRecord(id);
+    }
+
+    @Override
+    public RecordQueryBuilder<I, R> queryBuilder() {
+        return delegate.queryBuilder();
     }
 }

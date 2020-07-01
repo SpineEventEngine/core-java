@@ -40,8 +40,8 @@ import io.spine.core.Signal;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.RecordQueries;
-import io.spine.server.storage.RecordQuery;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
@@ -339,7 +339,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         EntityRecordStorage<I, S> storage = recordStorage();
-        RecordQuery<I> query = RecordQueries.of(ids);
+        OldRecordQuery<I> query = RecordQueries.of(ids);
         ResponseFormat format = ResponseFormat.newBuilder()
                                               .setFieldMask(fieldMask)
                                               .vBuild();
@@ -414,7 +414,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         EntityRecordStorage<I, S> storage = recordStorage();
         EntityRecordSpec<I> entityRecordSpec = storage.recordSpec();
-        RecordQuery<I> entityQuery = RecordQueries.from(filters, entityRecordSpec);
+        OldRecordQuery<I> entityQuery = RecordQueries.from(filters, entityRecordSpec);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
     }

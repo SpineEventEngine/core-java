@@ -22,41 +22,28 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.storage.CustomColumn;
-import io.spine.server.storage.CustomColumn.Getter;
-import io.spine.server.storage.QueryableField;
+import io.spine.query.RecordColumn;
 
 /**
  * The columns stored for {@link CatchUp} statuses.
  */
-public enum CatchUpColumn implements QueryableField<CatchUp> {
+@SuppressWarnings("DuplicateStringLiteralInspection") // column names may repeat in different types.
+public class CatchUpColumn {
 
-    status(CatchUpStatus.class, CatchUp::getStatus),
+    public static final RecordColumn<CatchUp, CatchUpStatus> status =
+            new RecordColumn<>("status", CatchUpStatus.class, CatchUp::getStatus);
 
-    when_last_read(Timestamp.class, CatchUp::getWhenLastRead),
+    public static final RecordColumn<CatchUp, Timestamp> when_last_read =
+            new RecordColumn<>("when_last_read", Timestamp.class, CatchUp::getWhenLastRead);
 
-    projection_type(String.class, (m) -> m.getId()
-                                          .getProjectionType());
+    public static final RecordColumn<CatchUp, String> projection_type =
+            new RecordColumn<>("projection_type", String.class, (m) -> m.getId()
+                                                                        .getProjectionType());
 
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final CustomColumn<?, CatchUp> column;
-
-    <T> CatchUpColumn(Class<T> type, Getter<CatchUp, T> getter) {
-        ColumnName name = ColumnName.of(name());
-        this.column = new CustomColumn<>(name, type, getter);
+    private CatchUpColumn() {
     }
 
-    static ImmutableList<CustomColumn<?, CatchUp>> definitions() {
-        ImmutableList.Builder<CustomColumn<?, CatchUp>> list = ImmutableList.builder();
-        for (CatchUpColumn value : values()) {
-            list.add(value.column);
-        }
-        return list.build();
-    }
-
-    @Override
-    public CustomColumn<?, CatchUp> column() {
-        return column;
+    public static ImmutableList<RecordColumn<CatchUp, ?>> definitions() {
+        return ImmutableList.of(status, when_last_read, projection_type);
     }
 }

@@ -40,22 +40,22 @@ import static io.spine.server.storage.QueryParameters.FIELD_PARAMETERS;
  * {@link RecordStorage MessageStorage}.
  *
  * <p>The query contains the acceptable values of the record IDs and the
- * {@linkplain Column entity columns}.
+ * {@linkplain OldColumn entity columns}.
  *
  * <p>A storage may ignore the query or throw an exception if it's specified. By default,
  * {@link RecordStorage MessageStorage} supports the Entity queries.
  *
- * <p>If the {@linkplain RecordQuery#getIds() accepted IDs set} is empty, all the IDs are
+ * <p>If the {@linkplain OldRecordQuery#getIds() accepted IDs set} is empty, all the IDs are
  * considered to be queried.
  *
- * <p>Empty {@linkplain RecordQuery#getParameters() query parameters} are not considered when
+ * <p>Empty {@linkplain OldRecordQuery#getParameters() query parameters} are not considered when
  * the actual data query is performed as well as the parameters which have no accepted values.
  *
- * <p>If the {@link Column} specified in the query is absent in a record,
+ * <p>If the {@link OldColumn} specified in the query is absent in a record,
  * the record is considered <b>not matching</b>.
  *
- * <p>If both the {@linkplain RecordQuery#getIds() accepted IDs set} and
- * {@linkplain RecordQuery#getParameters() query parameters} are empty, all the records are
+ * <p>If both the {@linkplain OldRecordQuery#getIds() accepted IDs set} and
+ * {@linkplain OldRecordQuery#getParameters() query parameters} are empty, all the records are
  * considered matching.
  *
  * <p>If the query specifies the values of
@@ -67,12 +67,12 @@ import static io.spine.server.storage.QueryParameters.FIELD_PARAMETERS;
  *         the type of the IDs of the query target
  * @see EntityRecordWithColumns
  */
-public final class RecordQuery<I> {
+public final class OldRecordQuery<I> {
 
     private final ImmutableSet<I> ids;
     private final QueryParameters parameters;
 
-    RecordQuery(Iterable<I> ids, QueryParameters parameters) {
+    OldRecordQuery(Iterable<I> ids, QueryParameters parameters) {
         this.ids = ImmutableSet.copyOf(ids);
         this.parameters = parameters;
     }
@@ -85,18 +85,18 @@ public final class RecordQuery<I> {
     }
 
     /**
-     * Obtains a {@link Map} of the {@link Column} metadata to the column required value.
+     * Obtains a {@link Map} of the {@link OldColumn} metadata to the column required value.
      */
     public QueryParameters getParameters() {
         return parameters;
     }
 
-    public RecordQuery<I> append(QueryParameters moreParams) {
+    public OldRecordQuery<I> append(QueryParameters moreParams) {
         ImmutableList<CompositeQueryParameter> toAdd = ImmutableList.copyOf(moreParams.iterator());
         QueryParameters newParams = QueryParameters.newBuilder(this.parameters)
                                                    .addAll(toAdd)
                                                    .build();
-        return new RecordQuery<>(ids, newParams);
+        return new OldRecordQuery<>(ids, newParams);
     }
 
     @Override
@@ -107,7 +107,7 @@ public final class RecordQuery<I> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        RecordQuery<?> query = (RecordQuery<?>) o;
+        OldRecordQuery<?> query = (OldRecordQuery<?>) o;
         return Objects.equal(getIds(), query.getIds()) &&
                 Objects.equal(getParameters(), query.getParameters());
     }

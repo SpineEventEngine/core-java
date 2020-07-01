@@ -20,13 +20,14 @@
 
 package io.spine.server.storage;
 
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
+import io.spine.query.RecordQuery;
+import io.spine.query.RecordQueryBuilder;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         the query to execute
      * @return an iterator over the matching record identifiers
      */
-    protected abstract Iterator<I> index(RecordQuery<I> query);
+    protected abstract Iterator<I> index(RecordQuery<I, R> query);
 
     /**
      * Writes the record along with its filled-in column values to the storage.
@@ -101,7 +102,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
 
     @Override
     public Optional<R> read(I id) {
-        RecordQuery<I> query = RecordQueries.of(ImmutableList.of(id));
+        RecordQuery<I, R> query = byId(id);
         Optional<R> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
         return result;
     }
@@ -119,13 +120,13 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Optional<R> read(I id, FieldMask mask) {
-        RecordQuery<I> query = RecordQueries.of(ImmutableList.of(id));
+        RecordQuery<I, R> query = byId(id);
         ResponseFormat format = formatWith(mask);
         Optional<R> result = readSingleRecord(query, format);
         return result;
     }
 
-    private Optional<R> readSingleRecord(RecordQuery<I> query, ResponseFormat format) {
+    private Optional<R> readSingleRecord(RecordQuery<I, R> query, ResponseFormat format) {
         Iterator<R> iterator = readAll(query, format);
         return iterator.hasNext()
                ? Optional.of(iterator.next())
@@ -142,7 +143,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Iterator<R> readAll() {
-        return readAll(RecordQueries.all());
+        return readAll(queryBuilder().build());
     }
 
     /**
@@ -156,7 +157,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    protected Iterator<R> readAll(RecordQuery<I> query) {
+    protected Iterator<R> readAll(RecordQuery<I, R> query) {
         return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
@@ -172,7 +173,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Iterator<R> readAll(Iterable<I> ids) {
-        RecordQuery<I> query = RecordQueries.of(ids);
+        RecordQuery<I, R> query = byIds(ids);
         return readAll(query);
     }
 
@@ -191,7 +192,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
-        RecordQuery<I> query = RecordQueries.of(ids);
+        RecordQuery<I, R> query = byIds(ids);
         ResponseFormat format = formatWith(mask);
         return readAll(query, format);
     }
@@ -209,7 +210,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Iterator<R> readAll(ResponseFormat format) {
-        RecordQuery<I> query = RecordQueries.all();
+        RecordQuery<I, R> query = queryBuilder().build();
         return readAll(query, format);
     }
 
@@ -225,7 +226,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    protected Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAll(RecordQuery<I, R> query, ResponseFormat format) {
         checkNotClosed();
         return readAllRecords(query, format);
     }
@@ -294,7 +295,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         format of the expected response
      * @return iterator over the matching message records
      */
-    protected abstract Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format);
+    protected abstract Iterator<R> readAllRecords(RecordQuery<I, R> query, ResponseFormat format);
 
     /**
      * Performs the physical removal of the message record from the storage
@@ -317,5 +318,21 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     @Internal
     protected RecordSpec<I, R, ?> recordSpec() {
         return recordSpec;
+    }
+
+    protected RecordQueryBuilder<I, R> queryBuilder() {
+        return RecordQuery.newBuilder(recordSpec().recordType());
+    }
+
+    private RecordQuery<I, R> byId(I id) {
+        return queryBuilder().id()
+                             .is(id)
+                             .build();
+    }
+
+    private RecordQuery<I, R> byIds(Iterable<I> ids) {
+        return queryBuilder().id()
+                             .with(ids)
+                             .build();
     }
 }

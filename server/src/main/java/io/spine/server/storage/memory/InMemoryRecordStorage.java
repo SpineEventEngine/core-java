@@ -22,7 +22,7 @@ package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
 import io.spine.client.ResponseFormat;
-import io.spine.server.storage.RecordQuery;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordWithColumns;
@@ -61,12 +61,12 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
     }
 
     @Override
-    protected Iterator<I> index(RecordQuery<I> query) {
+    protected Iterator<I> index(OldRecordQuery<I> query) {
         return records().index(query);
     }
 
     @Override
-    protected Iterator<R> readAllRecords(RecordQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAllRecords(OldRecordQuery<I> query, ResponseFormat format) {
         return records().readAll(query, format);
     }
 

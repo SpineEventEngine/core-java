@@ -31,20 +31,20 @@ import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
  * A name of the column in the storage.
  */
 @Immutable
-public final class ColumnName extends StringTypeValue {
+public final class OldColumnName extends StringTypeValue {
 
     private static final long serialVersionUID = 0L;
 
-    private ColumnName(String value) {
+    private OldColumnName(String value) {
         super(value);
     }
 
-    public static ColumnName of(String value) {
+    public static OldColumnName of(String value) {
         checkNotEmptyOrBlank(value);
-        return new ColumnName(value);
+        return new OldColumnName(value);
     }
 
-    public static ColumnName of(FieldDeclaration field) {
+    public static OldColumnName of(FieldDeclaration field) {
         checkNotNull(field);
         return of(field.name()
                        .value());

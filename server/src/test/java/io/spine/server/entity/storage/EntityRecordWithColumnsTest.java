@@ -85,7 +85,7 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ColumnName columnName = LifecycleColumn.archived.columnName();
+        OldColumnName columnName = LifecycleColumn.archived.columnName();
         Object value = false;
         EntityRecordWithColumns<?> emptyFieldsEnvelope =
                 EntityRecordWithColumns.of(sampleEntityRecord());
@@ -106,7 +106,7 @@ class EntityRecordWithColumnsTest {
     void returnEmptyColumns() {
         EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
         assertFalse(record.hasColumns());
-        ImmutableSet<ColumnName> names = record.columnNames();
+        ImmutableSet<OldColumnName> names = record.columnNames();
         assertTrue(names.isEmpty());
     }
 
@@ -114,7 +114,7 @@ class EntityRecordWithColumnsTest {
     @DisplayName("throw `ISE` on attempt to get value by non-existent name")
     void throwOnNonExistentColumn() {
         EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
-        ColumnName nonExistentName = ColumnName.of("non-existent-column");
+        OldColumnName nonExistentName = OldColumnName.of("non-existent-column");
         assertThrows(IllegalStateException.class, () -> record.columnValue(nonExistentName));
     }
 
@@ -124,7 +124,7 @@ class EntityRecordWithColumnsTest {
         EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(SAMPLE_ID);
 
         EntityRecordSpec<StgTaskId> columns = EntityRecordSpec.of(entity.getClass());
-        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
+        Map<OldColumnName, Object> storageFields = columns.valuesIn(entity);
 
         EntityRecordWithColumns<?> record =
                 EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
@@ -134,9 +134,9 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("return column value by column name")
     void returnColumnValue() {
-        ColumnName columnName = ColumnName.of("some-boolean-column");
+        OldColumnName columnName = OldColumnName.of("some-boolean-column");
         boolean columnValue = false;
-        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
+        ImmutableMap<OldColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
         EntityRecordWithColumns<?> record =
                 EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
         Object value = record.columnValue(columnName);
@@ -147,10 +147,10 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("return a column value with the column mapping applied")
     void returnValueWithColumnMapping() {
-        ColumnName columnName = ColumnName.of("some-int-column");
+        OldColumnName columnName = OldColumnName.of("some-int-column");
         int columnValue = 42;
 
-        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
+        ImmutableMap<OldColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
         EntityRecordWithColumns<?> record =
                 EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
         String value = record.columnValue(columnName, new TestColumnMapping());
@@ -161,8 +161,8 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("return `null` column value")
     void returnNullValue() {
-        ColumnName columnName = ColumnName.of("the-null-column");
-        Map<ColumnName, Object> storageFields = new HashMap<>();
+        OldColumnName columnName = OldColumnName.of("the-null-column");
+        Map<OldColumnName, Object> storageFields = new HashMap<>();
         storageFields.put(columnName, null);
         EntityRecordWithColumns<?> record =
                 EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
@@ -205,12 +205,12 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("column values")
         void columnValues() {
-            ColumnName columnName = LifecycleColumn.archived.columnName();
+            OldColumnName columnName = LifecycleColumn.archived.columnName();
             Object value = false;
-            Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
+            Map<OldColumnName, Object> columnsExpected = singletonMap(columnName, value);
             EntityRecordWithColumns<?> record =
                     EntityRecordWithColumns.of(sampleEntityRecord(), columnsExpected);
-            ImmutableSet<ColumnName> columnNames = record.columnNames();
+            ImmutableSet<OldColumnName> columnNames = record.columnNames();
             assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
             assertEquals(value, record.columnValue(columnName));

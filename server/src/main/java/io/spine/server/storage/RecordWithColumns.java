@@ -24,8 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.server.entity.storage.ColumnMapping;
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.DefaultColumnMapping;
+import io.spine.server.entity.storage.OldColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A value of some message record along with the values of its {@linkplain Column columns}.
+ * A value of some message record along with the values of its {@linkplain OldColumn columns}.
  *
  * @param <I>
  *         the type of the record identifiers
@@ -55,9 +55,9 @@ public class RecordWithColumns<I, R extends Message> {
      * @implNote It's impossible to use an {@link com.google.common.collect.ImmutableMap
      *         ImmutableMap}, as the values may contain {@code null}s.
      */
-    private final Map<ColumnName, @Nullable Object> storageFields;
+    private final Map<OldColumnName, @Nullable Object> storageFields;
 
-    protected RecordWithColumns(I identifier, R record, Map<ColumnName, Object> storageFields) {
+    protected RecordWithColumns(I identifier, R record, Map<OldColumnName, Object> storageFields) {
         this.id = checkNotNull(identifier);
         this.record = checkNotNull(record);
         this.storageFields = new HashMap<>(storageFields);
@@ -71,7 +71,7 @@ public class RecordWithColumns<I, R extends Message> {
         checkNotNull(identifier);
         checkNotNull(record);
         checkNotNull(recordSpec);
-        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(record);
+        Map<OldColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(record);
         return of(identifier, record, storageFields);
     }
 
@@ -82,7 +82,7 @@ public class RecordWithColumns<I, R extends Message> {
     RecordWithColumns<I, R> create(R record, RecordSpec<I, R, R> recordSpec) {
         checkNotNull(record);
         checkNotNull(recordSpec);
-        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(record);
+        Map<OldColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(record);
         I identifier = recordSpec.idValueIn(record);
         return of(identifier, record, storageFields);
     }
@@ -101,7 +101,7 @@ public class RecordWithColumns<I, R extends Message> {
      */
     @VisibleForTesting
     public static <I, R extends Message>
-    RecordWithColumns<I, R> of(I identifier, R record, Map<ColumnName, Object> storageFields) {
+    RecordWithColumns<I, R> of(I identifier, R record, Map<OldColumnName, Object> storageFields) {
         return new RecordWithColumns<>(identifier, record, storageFields);
     }
 
@@ -121,7 +121,7 @@ public class RecordWithColumns<I, R extends Message> {
      *
      * @return the storage field names
      */
-    public ImmutableSet<ColumnName> columnNames() {
+    public ImmutableSet<OldColumnName> columnNames() {
         return ImmutableSet.copyOf(storageFields.keySet());
     }
 
@@ -133,7 +133,7 @@ public class RecordWithColumns<I, R extends Message> {
      * conversion.
      *
      * <p>In other cases consider implementing a custom {@link ColumnMapping} and using the
-     * {@link #columnValue(ColumnName, ColumnMapping)} overload for convenient column value
+     * {@link #columnValue(OldColumnName, ColumnMapping)} overload for convenient column value
      * conversion.
      *
      * @param columnName
@@ -142,7 +142,7 @@ public class RecordWithColumns<I, R extends Message> {
      * @throws IllegalStateException
      *         if there is no column with the specified name
      */
-    public @Nullable Object columnValue(ColumnName columnName) {
+    public @Nullable Object columnValue(OldColumnName columnName) {
         return columnValue(columnName, DefaultColumnMapping.INSTANCE);
     }
 
@@ -151,7 +151,7 @@ public class RecordWithColumns<I, R extends Message> {
      *
      * <p>The specified column mapping will be used to do the column value conversion.
      */
-    public <V> V columnValue(ColumnName columnName, ColumnMapping<V> columnMapping) {
+    public <V> V columnValue(OldColumnName columnName, ColumnMapping<V> columnMapping) {
         checkNotNull(columnName);
         checkNotNull(columnMapping);
         if (!storageFields.containsKey(columnName)) {
@@ -170,7 +170,7 @@ public class RecordWithColumns<I, R extends Message> {
     }
 
     /**
-     * Tells if there are any {@linkplain Column columns} associated with this record.
+     * Tells if there are any {@linkplain OldColumn columns} associated with this record.
      */
     public boolean hasColumns() {
         return !storageFields.isEmpty();
@@ -179,7 +179,7 @@ public class RecordWithColumns<I, R extends Message> {
     /**
      * Determines if there is a column with the specified name among the storage fields.
      */
-    public boolean hasColumn(ColumnName name) {
+    public boolean hasColumn(OldColumnName name) {
         boolean result = storageFields.containsKey(name);
         return result;
     }

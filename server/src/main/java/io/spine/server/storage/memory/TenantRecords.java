@@ -26,7 +26,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.RecordQuery;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -66,7 +66,7 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
     /**
      * Obtains the iterator over the identifiers of the records which match the passed query.
      */
-    public Iterator<I> index(RecordQuery<I> query) {
+    public Iterator<I> index(OldRecordQuery<I> query) {
         List<RecordWithColumns<I, R>> subset =
                 findRecords(query, ResponseFormat.getDefaultInstance());
         Iterator<I> result = Iterators.transform(subset.iterator(), RecordWithColumns::id);
@@ -97,7 +97,7 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
         return records.remove(id) != null;
     }
 
-    Iterator<R> readAll(RecordQuery<I> query, ResponseFormat format) {
+    Iterator<R> readAll(OldRecordQuery<I> query, ResponseFormat format) {
         FieldMask fieldMask = format.getFieldMask();
         List<RecordWithColumns<I, R>> records = findRecords(query, format);
         return records
@@ -107,7 +107,7 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
                 .iterator();
     }
 
-    private List<RecordWithColumns<I, R>> findRecords(RecordQuery<I> query, ResponseFormat format) {
+    private List<RecordWithColumns<I, R>> findRecords(OldRecordQuery<I> query, ResponseFormat format) {
         synchronized (records) {
             Map<I, RecordWithColumns<I, R>> filtered = filterRecords(query);
             Stream<RecordWithColumns<I, R>> stream = filtered.values()
@@ -131,9 +131,9 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
 
     /**
      * Filters the records returning only the ones matching the
-     * {@linkplain RecordQuery message query}.
+     * {@linkplain OldRecordQuery message query}.
      */
-    private Map<I, RecordWithColumns<I, R>> filterRecords(RecordQuery<I> query) {
+    private Map<I, RecordWithColumns<I, R>> filterRecords(OldRecordQuery<I> query) {
         RecordQueryMatcher<I, R> matcher = new RecordQueryMatcher<>(query);
         return filterValues(records, matcher::test);
     }

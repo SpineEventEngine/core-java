@@ -27,13 +27,13 @@ import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.client.Filter;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.Column;
+import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.storage.CompositeQueryParameter;
+import io.spine.server.storage.OldColumn;
+import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.RecordQueries;
-import io.spine.server.storage.RecordQuery;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.TaskId;
 import io.spine.testdata.Sample;
@@ -56,13 +56,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`RecordQueryMatcher` should")
-class RecordQueryMatcherTest {
+class OldRecordQueryMatcherTest {
 
     @Test
     @DisplayName("match everything except null to empty query")
     void matchEverythingToEmpty() {
         Collection<Object> idFilter = Collections.emptyList();
-        RecordQuery<?> query = RecordQueries.of(idFilter);
+        OldRecordQuery<?> query = RecordQueries.of(idFilter);
 
         RecordQueryMatcher<?, EntityRecord> matcher = new RecordQueryMatcher<>(query);
 
@@ -75,7 +75,7 @@ class RecordQueryMatcherTest {
     void matchIds() {
         ProjectId genericId = Sample.messageOfType(ProjectId.class);
         Collection<ProjectId> idFilter = singleton(genericId);
-        RecordQuery<ProjectId> query = RecordQueries.of(idFilter);
+        OldRecordQuery<ProjectId> query = RecordQueries.of(idFilter);
 
         RecordQueryMatcher<ProjectId, EntityRecord> matcher = new RecordQueryMatcher<>(query);
         EntityRecord matching = sampleEntityRecord(genericId);
@@ -90,17 +90,17 @@ class RecordQueryMatcherTest {
     @Test
     @DisplayName("match columns")
     void matchColumns() {
-        Column column = booleanColumn();
+        OldColumn column = booleanColumn();
         boolean actualValue = false;
 
-        ColumnName columnName = column.name();
+        OldColumnName columnName = column.name();
         QueryParameters params = QueryParameters.eq(column, actualValue);
-        RecordQuery<TaskId> query = RecordQueries.of(params);
+        OldRecordQuery<TaskId> query = RecordQueries.of(params);
 
         RecordQueryMatcher<TaskId, EntityRecord> matcher = new RecordQueryMatcher<>(query);
 
         EntityRecord matching = sampleEntityRecord(Sample.messageOfType(TaskId.class));
-        Map<ColumnName, Object> matchingColumns = ImmutableMap.of(columnName, actualValue);
+        Map<OldColumnName, Object> matchingColumns = ImmutableMap.of(columnName, actualValue);
         EntityRecordWithColumns<TaskId> matchingRecord =
                 EntityRecordWithColumns.of(matching, matchingColumns);
 
@@ -114,17 +114,17 @@ class RecordQueryMatcherTest {
     @Test
     @DisplayName("match `Any` instances")
     void matchAnyInstances() {
-        Column column = anyColumn();
+        OldColumn column = anyColumn();
         Any actualValue = anyValue();
 
-        ColumnName columnName = column.name();
+        OldColumnName columnName = column.name();
 
         EntityRecord record = sampleEntityRecord();
-        Map<ColumnName, Object> columns = singletonMap(columnName, actualValue);
+        Map<OldColumnName, Object> columns = singletonMap(columnName, actualValue);
         EntityRecordWithColumns<String> recordAndCols = EntityRecordWithColumns.of(record, columns);
 
         QueryParameters parameters = QueryParameters.eq(column, actualValue);
-        RecordQuery<String> query = RecordQueries.of(parameters);
+        OldRecordQuery<String> query = RecordQueries.of(parameters);
 
         RecordQueryMatcher<String, EntityRecord> matcher = new RecordQueryMatcher<>(query);
         assertTrue(matcher.test(recordAndCols));
@@ -134,15 +134,15 @@ class RecordQueryMatcherTest {
     @DisplayName("not match by wrong field name")
     void notMatchByWrongField() {
         String wrongName = "wrong";
-        Column target = booleanColumn();
+        OldColumn target = booleanColumn();
 
-        Multimap<Column, Filter> filters =
+        Multimap<OldColumn, Filter> filters =
                 ImmutableMultimap.of(target, eq(wrongName, "any"));
         CompositeQueryParameter parameter = createParams(filters, EITHER);
         QueryParameters params = QueryParameters.newBuilder()
                                                 .add(parameter)
                                                 .build();
-        RecordQuery<String> query = RecordQueries.of(params);
+        OldRecordQuery<String> query = RecordQueries.of(params);
         RecordQueryMatcher<String, EntityRecord> matcher = new RecordQueryMatcher<>(query);
 
         EntityRecord record = sampleEntityRecord();
