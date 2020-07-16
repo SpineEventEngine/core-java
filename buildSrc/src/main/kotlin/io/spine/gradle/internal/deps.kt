@@ -70,8 +70,8 @@ object Versions {
     val checkerFramework = "3.3.0"
     val errorProne       = "2.3.4"
     val errorProneJavac  = "9+181-r4173-1" // taken from here: https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
-    val errorPronePlugin = "1.1.1"
-    val pmd              = "6.20.0"
+    val errorPronePlugin = "1.2.1"
+    val pmd              = "6.24.0"
     val checkstyle       = "8.29"
     val protobufPlugin   = "0.8.12"
     val appengineApi     = "1.9.79"
@@ -94,14 +94,15 @@ object Versions {
     val javaPoet         = "1.12.1"
     val autoService      = "1.0-rc6"
     val autoCommon       = "0.10"
-    val jackson          = "2.9.10.4"
+    val jackson          = "2.9.10.5"
     val animalSniffer    = "1.18"
     val apiguardian      = "1.1.0"
+    val javaxAnnotation  = "1.3.2"
 
     /**
      * Version of the SLF4J library.
      *
-     * Spine used to log with SLF4J. Now we use Flogger. Whenever a coice comes up, we recommend to
+     * Spine used to log with SLF4J. Now we use Flogger. Whenever a choice comes up, we recommend to
      * use the latter.
      *
      * Some third-party libraries may clash with different versions of the library. Thus, we specify
@@ -163,7 +164,8 @@ object Build {
 }
 
 object Gen {
-    val javaPoet = "com.squareup:javapoet:${Versions.javaPoet}"
+    val javaPoet        = "com.squareup:javapoet:${Versions.javaPoet}"
+    val javaxAnnotation = "javax.annotation:javax.annotation-api:${Versions.javaxAnnotation}"
 }
 
 object Grpc {
@@ -227,7 +229,7 @@ object Test {
             "com.google.truth.extensions:truth-proto-extension:${Versions.truth}"
     )
     @Deprecated("Use Flogger over SLF4J.",
-                replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend"))
+            replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend"))
     @Suppress("DEPRECATION") // Version of SLF4J.
     val slf4j         = "org.slf4j:slf4j-jdk14:${Versions.slf4j}"
 }
@@ -278,12 +280,12 @@ object Deps {
 object DependencyResolution {
 
     fun forceConfiguration(configurations: ConfigurationContainer) {
-        configurations.all { config ->
-            config.resolutionStrategy { strategy ->
-                strategy.failOnVersionConflict()
-                strategy.cacheChangingModulesFor(0, "seconds")
+        configurations.all {
+            resolutionStrategy {
+                failOnVersionConflict()
+                cacheChangingModulesFor(0, "seconds")
                 @Suppress("DEPRECATION") // Force SLF4J version.
-                strategy.force(
+                force(
                         Deps.build.slf4j,
                         Deps.build.errorProneAnnotations,
                         Deps.build.jsr305Annotations,
@@ -329,17 +331,17 @@ object DependencyResolution {
 
     fun defaultRepositories(repositories: RepositoryHandler) {
         repositories.mavenLocal()
-        repositories.maven { repository ->
-            repository.url = URI(Repos.spine)
-            repository.content { descriptor ->
-                descriptor.includeGroup("io.spine")
-                descriptor.includeGroup("io.spine.tools")
-                descriptor.includeGroup("io.spine.gcloud")
+        repositories.maven {
+            url = URI(Repos.spine)
+            content {
+                includeGroup("io.spine")
+                includeGroup("io.spine.tools")
+                includeGroup("io.spine.gcloud")
             }
         }
         repositories.jcenter()
-        repositories.maven { repository ->
-            repository.url = URI(Repos.gradlePlugins)
+        repositories.maven {
+            url = URI(Repos.gradlePlugins)
         }
     }
 }
