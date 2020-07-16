@@ -31,8 +31,8 @@ public final class GivenEntityColumns {
 
     static final ImmutableSet<OldColumnName> defaultEntityColumns =
             ImmutableSet.of(
-                    LifecycleColumn.archived.columnName(),
-                    LifecycleColumn.deleted.columnName(),
+                    EntityRecordColumn.archived.columnName(),
+                    EntityRecordColumn.deleted.columnName(),
                     version
             );
 

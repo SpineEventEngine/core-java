@@ -32,8 +32,6 @@ import io.spine.query.RecordQueryBuilder;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static io.spine.client.ResponseFormats.formatWith;
-
 /**
  * An abstract base for storage implementations, which store the Protobuf messages as records.
  *
@@ -48,6 +46,7 @@ import static io.spine.client.ResponseFormats.formatWith;
  *         the type of the stored message records
  */
 @SPI
+@SuppressWarnings("ClassWithTooManyMethods")    // This is a centerpiece.
 public abstract class RecordStorage<I, R extends Message> extends AbstractStorage<I, R> {
 
     private final RecordSpec<I, R, ?> recordSpec;
@@ -102,9 +101,9 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
 
     @Override
     public Optional<R> read(I id) {
-        RecordQuery<I, R> query = byId(id);
-        Optional<R> result = readSingleRecord(query, ResponseFormat.getDefaultInstance());
-        return result;
+        checkNotClosed();
+        RecordQuery<I, R> query = toQuery(id);
+        return readSingleRecord(query);
     }
 
     /**
@@ -120,17 +119,9 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Optional<R> read(I id, FieldMask mask) {
-        RecordQuery<I, R> query = byId(id);
-        ResponseFormat format = formatWith(mask);
-        Optional<R> result = readSingleRecord(query, format);
-        return result;
-    }
-
-    private Optional<R> readSingleRecord(RecordQuery<I, R> query, ResponseFormat format) {
-        Iterator<R> iterator = readAll(query, format);
-        return iterator.hasNext()
-               ? Optional.of(iterator.next())
-               : Optional.empty();
+        checkNotClosed();
+        RecordQuery<I, R> query = toQuery(id, mask);
+        return readSingleRecord(query);
     }
 
     /**
@@ -143,22 +134,9 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Iterator<R> readAll() {
-        return readAll(queryBuilder().build());
-    }
-
-    /**
-     * Reads all message records according to the passed query.
-     *
-     * <p>The default {@link ResponseFormat} is used.
-     *
-     * @param query
-     *         the query to execute
-     * @return iterator over the matching records
-     * @throws IllegalStateException
-     *         if the storage was closed before
-     */
-    protected Iterator<R> readAll(RecordQuery<I, R> query) {
-        return readAll(query, ResponseFormat.getDefaultInstance());
+        checkNotClosed();
+        RecordQuery<I, R> query = queryForAll();
+        return readAll(query);
     }
 
     /**
@@ -173,7 +151,8 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Iterator<R> readAll(Iterable<I> ids) {
-        RecordQuery<I, R> query = byIds(ids);
+        checkNotClosed();
+        RecordQuery<I, R> query = toQuery(ids);
         return readAll(query);
     }
 
@@ -192,43 +171,25 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
-        RecordQuery<I, R> query = byIds(ids);
-        ResponseFormat format = formatWith(mask);
-        return readAll(query, format);
+        checkNotClosed();
+        RecordQuery<I, R> query = toQuery(ids, mask);
+        return readAll(query);
     }
 
     /**
-     * Reads all message records in this storage according to the passed response format.
+     * Reads all message records according to the passed query.
      *
-     * <p>The callers of this method should consider performance and memory impact of reading
-     * the potentially huge number of records from the storage at a time.
-     *
-     * @param format
-     *         the format of the response
-     * @return iterator over the message records
-     * @throws IllegalStateException
-     *         if the storage was closed before
-     */
-    protected Iterator<R> readAll(ResponseFormat format) {
-        RecordQuery<I, R> query = queryBuilder().build();
-        return readAll(query, format);
-    }
-
-    /**
-     * Reads the message records which match the passed query and returns the result
-     * in the specified response format.
+     * <p>The default {@link ResponseFormat} is used.
      *
      * @param query
      *         the query to execute
-     * @param format
-     *         format of the expected response
-     * @return iterator over the matching message records
+     * @return iterator over the matching records
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    protected Iterator<R> readAll(RecordQuery<I, R> query, ResponseFormat format) {
+    protected Iterator<R> readAll(RecordQuery<I, R> query) {
         checkNotClosed();
-        return readAllRecords(query, format);
+        return readAllRecords(query);
     }
 
     /**
@@ -268,6 +229,48 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     }
 
     /**
+     * Creates a new query which targets the single record with the specified ID.
+     */
+    protected RecordQuery<I, R> toQuery(I id) {
+        return queryBuilder().id().is(id).build();
+    }
+
+    /**
+     * Creates a new query for the target with the specified ID, which, if exists, should be
+     * returned according to the specified field mask.
+     */
+    protected RecordQuery<I, R> toQuery(I id, FieldMask mask) {
+        return queryBuilder().id().is(id).withMask(mask).build();
+    }
+
+    /**
+     * Creates a new query for the targets which have one of the passed identifiers.
+     */
+    protected RecordQuery<I, R> toQuery(Iterable<I> ids) {
+        return queryBuilder().id().with(ids).build();
+    }
+
+    /**
+     * Creates a new query for the targets which have one of the passed identifiers.
+     *
+     * <p>The results will contain only the fields specified by the given field mask.
+     */
+    protected RecordQuery<I, R> toQuery(Iterable<I> ids, FieldMask mask) {
+        return queryBuilder().id().with(ids).withMask(mask).build();
+    }
+
+    /**
+     * Creates a new query targeting all records in the storage.
+     */
+    protected RecordQuery<I, R> queryForAll() {
+        return queryBuilder().build();
+    }
+
+    public RecordQueryBuilder<I, R> queryBuilder() {
+        return RecordQuery.newBuilder(recordSpec().recordType());
+    }
+
+    /**
      * Performs writing the record and its column values to the storage.
      *
      * @param record
@@ -287,15 +290,11 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     /**
      * Performs reading of the message records by executing the passed query.
      *
-     * <p>Returns the result according to the specified response format.
-     *
      * @param query
      *         the query to execute
-     * @param format
-     *         format of the expected response
      * @return iterator over the matching message records
      */
-    protected abstract Iterator<R> readAllRecords(RecordQuery<I, R> query, ResponseFormat format);
+    protected abstract Iterator<R> readAllRecords(RecordQuery<I, R> query);
 
     /**
      * Performs the physical removal of the message record from the storage
@@ -320,19 +319,11 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
         return recordSpec;
     }
 
-    protected RecordQueryBuilder<I, R> queryBuilder() {
-        return RecordQuery.newBuilder(recordSpec().recordType());
-    }
-
-    private RecordQuery<I, R> byId(I id) {
-        return queryBuilder().id()
-                             .is(id)
-                             .build();
-    }
-
-    private RecordQuery<I, R> byIds(Iterable<I> ids) {
-        return queryBuilder().id()
-                             .with(ids)
-                             .build();
+    private Optional<R> readSingleRecord(RecordQuery<I, R> query) {
+        Iterator<R> iterator = readAll(query);
+        return iterator.hasNext()
+               ? Optional.of(iterator.next())
+               : Optional.empty();
     }
 }
+

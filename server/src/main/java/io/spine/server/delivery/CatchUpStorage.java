@@ -24,7 +24,6 @@ import io.spine.annotation.SPI;
 import io.spine.query.RecordQuery;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
@@ -39,12 +38,7 @@ import static io.spine.server.delivery.CatchUpColumn.projection_type;
 public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
 
     public CatchUpStorage(StorageFactory factory, boolean multitenant) {
-        super(createStorage(factory, multitenant));
-    }
-
-    private static RecordStorage<CatchUpId, CatchUp>
-    createStorage(StorageFactory factory, boolean multitenant) {
-        return factory.createRecordStorage(getSpec(), multitenant);
+        super(factory.createRecordStorage(getSpec(), multitenant));
     }
 
     @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}.

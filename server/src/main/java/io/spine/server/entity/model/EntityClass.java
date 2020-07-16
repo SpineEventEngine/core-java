@@ -28,7 +28,6 @@ import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
-import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.system.server.EntityTypeName;
@@ -69,12 +68,6 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     @LazyInit
     private transient volatile @MonotonicNonNull EntityState<?> defaultState;
 
-    /**
-     * The specification of the record format, in which the state of this entity is stored.
-     */
-    @LazyInit
-    private transient volatile @MonotonicNonNull EntityRecordSpec<?> recordSpec;
-
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
     private transient volatile @MonotonicNonNull EntityFactory<E> factory;
@@ -99,6 +92,19 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      * Obtains an entity class for the passed raw class.
      */
     public static <E extends Entity<?, ?>> EntityClass<E> asEntityClass(Class<E> cls) {
+        checkNotNull(cls);
+        EntityClass<E> result = (EntityClass<E>)
+                get(cls, EntityClass.class, () -> new EntityClass<>(cls));
+        return result;
+    }
+
+    /**
+     * Obtains an entity class for the passed parameterized class.
+     *
+     * <p>Use this method when a more precise type bounds are required.
+     */
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    EntityClass<E> asParameterizedEntityClass(Class<E> cls) {
         checkNotNull(cls);
         EntityClass<E> result = (EntityClass<E>)
                 get(cls, EntityClass.class, () -> new EntityClass<>(cls));
@@ -143,23 +149,6 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
                     Class<? extends EntityState<?>> stateClass = stateClass();
                     defaultState = defaultInstance(stateClass);
                     result = defaultState;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Obtains the specification of the storage record for this class.
-     */
-    public final EntityRecordSpec<?> recordSpec() {
-        EntityRecordSpec<?> result = recordSpec;
-        if (result == null) {
-            synchronized (this) {
-                result = recordSpec;
-                if (result == null) {
-                    recordSpec = EntityRecordSpec.of(this);
-                    result = recordSpec;
                 }
             }
         }

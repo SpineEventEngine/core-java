@@ -20,9 +20,9 @@
 
 package io.spine.server.projection;
 
+import io.spine.server.entity.storage.EntityRecordColumn;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.GivenEntityColumns;
-import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.projection.given.SavingProjection;
 import io.spine.server.storage.OldColumn;
@@ -50,8 +50,8 @@ class ProjectionColumnTest {
     @Test
     @DisplayName("`archived` and `deleted`")
     void lifecycleColumns() {
-        assertHasColumn(LifecycleColumn.archived.columnName());
-        assertHasColumn(LifecycleColumn.deleted.columnName());
+        assertHasColumn(EntityRecordColumn.archived.columnName());
+        assertHasColumn(EntityRecordColumn.deleted.columnName());
     }
 
     private static void assertHasColumn(OldColumnName columnName) {

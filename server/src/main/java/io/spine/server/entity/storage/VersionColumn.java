@@ -18,34 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
-import io.spine.server.entity.storage.EntityRecordColumn;
-import io.spine.server.entity.storage.SystemColumn;
+import io.spine.core.Version;
+import io.spine.query.ColumnName;
+import io.spine.query.CustomColumn;
+import io.spine.server.entity.Entity;
 
 /**
- * Marks an {@link Entity} that declares columns for lifecycle flags.
- *
- * @see SystemColumn
+ * @author Alex Tymchenko
  */
-@Internal
-public interface HasLifecycleColumns<I, S extends EntityState<I>> extends Entity<I, S> {
+class VersionColumn extends CustomColumn<Entity<?, ?>, Version> {
 
-    /**
-     * Obtains the value of {@code archived} flag.
-     */
-    @SystemColumn(impl = EntityRecordColumn.archived)
-    default boolean getArchived() {
-        return isArchived();
+    public static final ColumnName VERSION = ColumnName.of("version");
+
+    VersionColumn() {
     }
 
-    /**
-     * Obtains the value of {@code deleted} flag.
-     */
-    @SystemColumn(impl = EntityRecordColumn.deleted)
-    default boolean getDeleted() {
-        return isDeleted();
+    @Override
+    public ColumnName name() {
+        return VERSION;
+    }
+
+    @Override
+    public Class<Version> type() {
+        return Version.class;
+    }
+
+    @Override
+    public Version valueIn(Entity<?, ?> entity) {
+        return entity.version();
     }
 }

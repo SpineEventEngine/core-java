@@ -20,7 +20,6 @@
 
 package io.spine.server.storage;
 
-import com.google.common.collect.ImmutableList;
 import io.spine.annotation.Internal;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
@@ -28,8 +27,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Defines the specification of a record in a storage.
@@ -80,28 +77,5 @@ public abstract class RecordSpec<I, R, S> {
      */
     protected abstract I idValueIn(S source);
 
-    /**
-     * Returns all columns of the record.
-     */
-    public abstract ImmutableList<Column<R, ?>> columnList();
-
-    /**
-     * Searches for a column with a given name.
-     */
-    public abstract Optional<Column<R, ?>> find(ColumnName columnName);
-
-    /**
-     * Obtains a column by name.
-     *
-     * @throws IllegalArgumentException
-     *         if the column with the specified name is not found
-     */
-    public final Column<R, ?> get(ColumnName columnName) {
-        checkNotNull(columnName);
-        Column<R, ?> result = find(columnName).orElseThrow(() -> columnNotFound(columnName));
-        return result;
-    }
-
-    protected abstract IllegalArgumentException columnNotFound(ColumnName columnName);
-
+    protected abstract Optional<Column<?, ?>> findColumn(ColumnName name);
 }

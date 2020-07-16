@@ -20,17 +20,17 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
+import io.spine.query.CustomColumn;
+import io.spine.query.EntityColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.Transaction;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.storage.OldColumn;
 import io.spine.server.storage.RecordSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -39,8 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.server.entity.model.EntityClass.asParameterizedEntityClass;
 
 /**
  * Instructs the storage on how to handle {@link EntityRecord}s storing the information about
@@ -58,68 +57,59 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 //TODO:2020-07-01:alex.tymchenko: use `io.spine.query.EntityColumn` here.
 @Immutable
 @Internal
-public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entity<I, ?>> {
+public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entity<I, S>>
+        extends RecordSpec<I, EntityRecord, E> {
 
     /**
      * The class of {@code Entity} which storage is configured.
      */
-    private final EntityClass<?> entityClass;
+    private final EntityClass<E> entityClass;
 
     /**
      * The {@linkplain SystemColumn system columns} of the entity.
      */
-    private final ImmutableMap<OldColumnName, SysColumn> systemColumns;
+    private final ImmutableSet<CustomColumn<E, ?>> systemColumns;
 
     /**
      * The entity-state-based columns of the entity.
      */
-    private final ImmutableMap<OldColumnName, SimpleColumn> simpleColumns;
+    private final ImmutableSet<EntityColumn<S, ?>> simpleColumns;
 
-    /**
-     * The interface-based columns of the entity.
-     */
-    private final ImmutableMap<OldColumnName, InterfaceBasedColumn> interfaceBasedColumns;
-
-
-    private EntityRecordSpec(
-            ImmutableMap<OldColumnName, SysColumn> systemColumns,
-            ImmutableMap<OldColumnName, SimpleColumn> simpleColumns,
-            ImmutableMap<OldColumnName, InterfaceBasedColumn> interfaceBasedColumns,
-            EntityClass<?> entityClass) {
+    private EntityRecordSpec(EntityClass<E> entityClass,
+                             ImmutableSet<EntityColumn<S, ?>> simpleColumns,
+                             ImmutableSet<CustomColumn<E, ?>> systemColumns) {
         super(EntityRecord.class);
-        this.systemColumns = systemColumns;
-        this.simpleColumns = simpleColumns;
-        this.interfaceBasedColumns = interfaceBasedColumns;
         this.entityClass = entityClass;
+        this.simpleColumns = simpleColumns;
+        this.systemColumns = systemColumns;
     }
 
     /**
      * Gathers columns of the entity class.
      */
-    public static <I> EntityRecordSpec<I> of(EntityClass<?> entityClass) {
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    EntityRecordSpec<I, S, E> of(EntityClass<E> entityClass) {
         checkNotNull(entityClass);
-        Scanner scanner = new Scanner(entityClass);
-        return new EntityRecordSpec<>(scanner.systemColumns(),
-                                      scanner.simpleColumns(),
-                                      scanner.interfaceBasedColumns(),
-                                      entityClass);
+        Scanner<I, S, E> scan = new Scanner<>(entityClass);
+        return new EntityRecordSpec<>(entityClass, scan.simpleColumns(), scan.systemColumns());
+    }
+
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    EntityRecordSpec<I, S, E> of(E entity) {
+        checkNotNull(entity);
+        @SuppressWarnings("unchecked")  // Ensured by the entity type declaration.
+            EntityClass<E> modelClass = (EntityClass<E>) entity.modelClass();
+        Scanner<I, S, E> scan = new Scanner<>(modelClass);
+        return new EntityRecordSpec<>(modelClass, scan.simpleColumns(), scan.systemColumns());
     }
 
     /**
      * Gathers columns of the entity class.
      */
-    public static <I> EntityRecordSpec<I> of(Class<? extends Entity<I, ?>> cls) {
-        EntityClass<?> aClass = asEntityClass(cls);
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>>  EntityRecordSpec<I, S, E>
+    of(Class<E> cls) {
+        EntityClass<E> aClass = asParameterizedEntityClass(cls);
         return of(aClass);
-    }
-
-    static ImmutableMap<OldColumnName, Object> lifecycleValuesIn(EntityRecord record) {
-        ImmutableMap.Builder<OldColumnName, Object> builder = ImmutableMap.builder();
-        for (LifecycleColumn column : LifecycleColumn.values()) {
-            Boolean value = column.valueIn(record);
-            builder.put(column.columnName(), value);
-        }
-        return builder.build();
     }
 
     /**
@@ -128,88 +118,52 @@ public final class EntityRecordSpec<I> extends RecordSpec<I, EntityRecord, Entit
      * <p>The {@linkplain ColumnDeclaredInProto proto-based} columns are extracted from the entity
      * state while the system columns are obtained from the entity itself via the corresponding
      * getters.
-     *
-     * @implNote This method assumes that the {@linkplain InterfaceBasedColumn
-     *         interface-based} column values are already propagated to the entity state as they are
-     *         finalized by the moment of the transaction {@linkplain Transaction#commit() commit}.
-     *         The values are thus extracted from the entity state directly, avoiding any
-     *         recalculation to prevent possible inconsistencies in the stored data
-     *         as well as performance drops.
      */
     @Override
-    public Map<ColumnName, @Nullable Object> valuesIn(Entity<I, ?> entity) {
+    public Map<ColumnName, @Nullable Object> valuesIn(E entity) {
         checkNotNull(entity);
-        Map<OldColumnName, @Nullable Object> result = new HashMap<>();
+        Map<ColumnName, @Nullable Object> result = new HashMap<>();
         systemColumns.forEach(
-                (name, column) -> result.put(name, column.valueIn(entity))
+                column -> result.put(column.name(), column.valueIn(entity))
         );
         simpleColumns.forEach(
-                (name, column) -> result.put(name, column.valueIn(entity.state()))
-        );
-        interfaceBasedColumns.forEach(
-                (name, column) -> result.put(name, column.valueIn(entity.state()))
+                column -> result.put(column.name(), column.valueIn(entity.state()))
         );
         return result;
     }
 
-    /**
-     * Returns all columns of the entity.
-     */
     @Override
-    public ImmutableList<Column<EntityRecord, ?>> columnList() {
-        ImmutableList.Builder<OldColumn> builder = ImmutableList.builder();
-        builder.addAll(systemColumns.values());
-        builder.addAll(simpleColumns.values());
-        builder.addAll(interfaceBasedColumns.values());
-        return builder.build();
-    }
-
-    @Override
-    protected I idValueIn(Entity<I, ?> source) {
+    protected I idValueIn(E source) {
         return source.id();
     }
 
     @Override
-    public Optional<Column<EntityRecord, ?>> find(ColumnName columnName) {
-        checkNotNull(columnName);
-        Column<EntityRecord, ?> column = systemColumns.get(columnName);
-        if (column == null) {
-            column = simpleColumns.get(columnName);
+    protected Optional<Column<?, ?>> findColumn(ColumnName name) {
+        Column<?, ?> resultInSimple = lookForColumn(name, simpleColumns);
+        if (resultInSimple != null) {
+            return Optional.of(resultInSimple);
         }
-        if (column == null) {
-            column = interfaceBasedColumns.get(columnName);
+        Column<?, ?> resultInSystem = lookForColumn(name, systemColumns);
+        if (resultInSystem != null) {
+            return Optional.of(resultInSystem);
         }
-        return Optional.ofNullable(column);
+        return Optional.empty();
     }
 
-    @Override
-    protected IllegalArgumentException columnNotFound(ColumnName columnName) {
-        throw newIllegalArgumentException(
-                "A column with name '%s' not found in the `Entity` class `%s`.",
-                columnName, entityClass.stateClass()
-                                       .getCanonicalName());
-    }
-
-    /**
-     * Returns a subset of columns corresponding to the lifecycle of the entity.
-     */
-    public ImmutableMap<OldColumnName, OldColumn> lifecycleColumns() {
-        ImmutableMap.Builder<OldColumnName, OldColumn> result = ImmutableMap.builder();
-
-        for (LifecycleColumn declaration : LifecycleColumn.values()) {
-            OldColumnName name = declaration.columnName();
-            SysColumn column = systemColumns.get(name);
-            if (column != null) {
-                result.put(name, column);
+    private static @Nullable Column<?, ?>
+    lookForColumn(ColumnName name, Iterable<? extends Column<?, ?>> columns) {
+        for (Column<?, ?> column : columns) {
+            if(column.name().equals(name)) {
+                return column;
             }
         }
-        return result.build();
+        return null;
     }
 
     /**
-     * Obtains {@linkplain InterfaceBasedColumn interface-based} columns of the entity.
+     * Returns the value of the entity class, which record spec this is.
      */
-    public ImmutableMap<OldColumnName, InterfaceBasedColumn> interfaceBasedColumns() {
-        return interfaceBasedColumns;
+    public EntityClass<E> entityClass() {
+        return entityClass;
     }
 }

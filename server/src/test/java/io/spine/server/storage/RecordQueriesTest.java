@@ -34,8 +34,8 @@ import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.TargetFilters;
 import io.spine.query.EntityColumn;
+import io.spine.server.entity.storage.EntityRecordColumn;
 import io.spine.server.entity.storage.EntityRecordSpec;
-import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.entity.storage.given.TestProjection;
@@ -55,7 +55,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -76,7 +76,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
         tester.setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
               .setDefault(QueryParameters.class, QueryParameters.newBuilder()
                                                                 .build())
-              .setDefault(CustomColumn.class, sampleColumn())
+              .setDefault(OldCustomColumn.class, sampleColumn())
               .setDefault(RecordSpec.class, new MessageRecordSpec<>(Any.class, someId()))
               .setDefault(EntityColumn.class, someEntityColumn())
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
@@ -91,8 +91,8 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
         return input -> nullRef();
     }
 
-    private static CustomColumn<String, Any> sampleColumn() {
-        return new CustomColumn<>(OldColumnName.of("sample"), String.class, (v) -> "");
+    private static OldCustomColumn<String, Any> sampleColumn() {
+        return new OldCustomColumn<>(OldColumnName.of("sample"), String.class, (v) -> "");
     }
 
     @Test
@@ -143,7 +143,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
                 .setValue(true)
                 .build();
         Filter archivedFilter = Filters
-                .eq(LifecycleColumn.archived.name(), archived);
+                .eq(EntityRecordColumn.archived.name(), archived);
         CompositeFilter aggregatingFilter = CompositeFilter
                 .newBuilder()
                 .addFilter(archivedFilter)
@@ -220,7 +220,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
 
     @Test
     void createQueryByTheColumnValue() {
-        CustomColumn<String, Any> expectedColumn = sampleColumn();
+        OldCustomColumn<String, Any> expectedColumn = sampleColumn();
         Any expectedValue = pack(currentTime());
         OldRecordQuery<Object> actual = RecordQueries.byColumn(expectedColumn, expectedValue);
 
@@ -231,7 +231,7 @@ class RecordQueriesTest extends UtilityClassTest<RecordQueries> {
 
     @Test
     void createQueryByTheFieldValue() {
-        CustomColumn<String, Any> columnUsed = sampleColumn();
+        OldCustomColumn<String, Any> columnUsed = sampleColumn();
         QueryableField<Any> expectedField = () -> columnUsed;
         Any expectedValue = pack(currentTime());
         OldRecordQuery<Object> actual = RecordQueries.byField(expectedField, expectedValue);

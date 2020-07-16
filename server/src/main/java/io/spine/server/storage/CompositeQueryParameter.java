@@ -29,12 +29,13 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
+import io.spine.server.entity.storage.EntityRecordColumn;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
-import static io.spine.server.entity.storage.LifecycleColumn.archived;
-import static io.spine.server.entity.storage.LifecycleColumn.deleted;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 
 /**
  * A set of {@link Filter} instances joined by a logical
@@ -48,7 +49,7 @@ public final class CompositeQueryParameter {
 
     /**
      * A flag that shows whether the current instance of {@code CompositeQueryParameter} has
-     * the {@link io.spine.server.entity.storage.LifecycleColumn lifecycle attributes} set.
+     * the {@link EntityRecordColumn lifecycle attributes} set.
      */
     private final boolean hasLifecycle;
 

@@ -20,16 +20,8 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 
-import java.util.Map;
-import java.util.Set;
-
-import static io.spine.server.storage.QueryParameters.FIELD_PARAMETERS;
 
 /**
  * A query to a {@link RecordStorage MessageStorage} for the records
@@ -69,59 +61,59 @@ import static io.spine.server.storage.QueryParameters.FIELD_PARAMETERS;
  */
 public final class OldRecordQuery<I> {
 
-    private final ImmutableSet<I> ids;
-    private final QueryParameters parameters;
-
-    OldRecordQuery(Iterable<I> ids, QueryParameters parameters) {
-        this.ids = ImmutableSet.copyOf(ids);
-        this.parameters = parameters;
-    }
-
-    /**
-     * Obtains an immutable set of accepted ID values.
-     */
-    public Set<I> getIds() {
-        return ids;
-    }
-
-    /**
-     * Obtains a {@link Map} of the {@link OldColumn} metadata to the column required value.
-     */
-    public QueryParameters getParameters() {
-        return parameters;
-    }
-
-    public OldRecordQuery<I> append(QueryParameters moreParams) {
-        ImmutableList<CompositeQueryParameter> toAdd = ImmutableList.copyOf(moreParams.iterator());
-        QueryParameters newParams = QueryParameters.newBuilder(this.parameters)
-                                                   .addAll(toAdd)
-                                                   .build();
-        return new OldRecordQuery<>(ids, newParams);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        OldRecordQuery<?> query = (OldRecordQuery<?>) o;
-        return Objects.equal(getIds(), query.getIds()) &&
-                Objects.equal(getParameters(), query.getParameters());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getIds(), getParameters());
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("ID filter", ids)
-                          .add(FIELD_PARAMETERS, parameters)
-                          .toString();
-    }
+//    private final ImmutableSet<I> ids;
+//    private final QueryParameters parameters;
+//
+//    OldRecordQuery(Iterable<I> ids, QueryParameters parameters) {
+//        this.ids = ImmutableSet.copyOf(ids);
+//        this.parameters = parameters;
+//    }
+//
+//    /**
+//     * Obtains an immutable set of accepted ID values.
+//     */
+//    public Set<I> getIds() {
+//        return ids;
+//    }
+//
+//    /**
+//     * Obtains a {@link Map} of the {@link OldColumn} metadata to the column required value.
+//     */
+//    public QueryParameters getParameters() {
+//        return parameters;
+//    }
+//
+//    public OldRecordQuery<I> append(QueryParameters moreParams) {
+//        ImmutableList<CompositeQueryParameter> toAdd = ImmutableList.copyOf(moreParams.iterator());
+//        QueryParameters newParams = QueryParameters.newBuilder(this.parameters)
+//                                                   .addAll(toAdd)
+//                                                   .build();
+//        return new OldRecordQuery<>(ids, newParams);
+//    }
+//
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) {
+//            return true;
+//        }
+//        if (o == null || getClass() != o.getClass()) {
+//            return false;
+//        }
+//        OldRecordQuery<?> query = (OldRecordQuery<?>) o;
+//        return Objects.equal(getIds(), query.getIds()) &&
+//                Objects.equal(getParameters(), query.getParameters());
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hashCode(getIds(), getParameters());
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return MoreObjects.toStringHelper(this)
+//                          .add("ID filter", ids)
+//                          .add(FIELD_PARAMETERS, parameters)
+//                          .toString();
+//    }
 }

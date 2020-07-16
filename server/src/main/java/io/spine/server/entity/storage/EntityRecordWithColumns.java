@@ -23,7 +23,9 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.query.ColumnName;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
@@ -35,6 +37,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static java.util.Collections.emptyMap;
 
 /**
@@ -44,7 +48,7 @@ import static java.util.Collections.emptyMap;
 public final class EntityRecordWithColumns<I>
         extends RecordWithColumns<I, EntityRecord> implements WithLifecycle {
 
-    private EntityRecordWithColumns(I id, EntityRecord record, Map<OldColumnName, Object> columns) {
+    private EntityRecordWithColumns(I id, EntityRecord record, Map<ColumnName, Object> columns) {
         super(id, record, columns);
     }
 
@@ -54,8 +58,6 @@ public final class EntityRecordWithColumns<I>
      *
      * @param entity
      *         the entity to use as a provider of the record identifier and the column values
-     * @param recordSpec
-     *         the specification of the stored record format
      * @param record
      *         the record prepared for storage
      * @param <I>
@@ -64,9 +66,12 @@ public final class EntityRecordWithColumns<I>
      *         the type of the entity
      * @return a new instance of {@code EntityRecordWithColumns}
      */
-    public static <I, E extends Entity<I, ?>> EntityRecordWithColumns<I>
-    create(E entity, EntityRecordSpec<I> recordSpec, EntityRecord record) {
-        Map<OldColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(entity);
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
+    create(E entity, EntityRecord record) {
+        checkNotNull(entity);
+        checkNotNull(record);
+        EntityRecordSpec<I, S, E> recordSpec = EntityRecordSpec.of(entity);
+        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(entity);
         return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
     }
 
@@ -75,7 +80,7 @@ public final class EntityRecordWithColumns<I>
      * entity record and the entity identifier.
      *
      * <p>This method considers only the values of the
-     * {@linkplain LifecycleColumn lifecycle columns}.
+     * {@linkplain EntityRecordColumn lifecycle columns}.
      *
      * @param id
      *         the identifier of the entity
@@ -88,7 +93,12 @@ public final class EntityRecordWithColumns<I>
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
         checkNotNull(id);
         checkNotNull(record);
-        ImmutableMap<OldColumnName, Object> lifecycleValues = EntityRecordSpec.lifecycleValuesIn(record);
+        LifecycleFlags flags = record.getLifecycleFlags();
+        ImmutableMap<ColumnName, Object> lifecycleValues =
+                ImmutableMap.of(archived.get()
+                                        .name(), flags.getArchived(),
+                                deleted.get()
+                                       .name(), flags.getArchived());
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 
@@ -113,7 +123,7 @@ public final class EntityRecordWithColumns<I>
      */
     @VisibleForTesting
     public static <I> EntityRecordWithColumns<I>
-    of(EntityRecord record, Map<OldColumnName, Object> storageFields) {
+    of(EntityRecord record, Map<ColumnName, Object> storageFields) {
         I id = extractId(record);
         return new EntityRecordWithColumns<>(id, record, storageFields);
     }

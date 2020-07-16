@@ -20,27 +20,21 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.CompositeFilter;
-import io.spine.client.Filter;
-import io.spine.server.entity.storage.OldColumnName;
-import io.spine.server.storage.CompositeQueryParameter;
-import io.spine.server.storage.OldColumn;
+import io.spine.query.Column;
+import io.spine.query.LogicalOperator;
+import io.spine.query.QueryPredicate;
+import io.spine.query.Subject;
+import io.spine.query.SubjectParameter;
 import io.spine.server.storage.OldRecordQuery;
-import io.spine.server.storage.QueryParameters;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.OperatorEvaluator.eval;
-import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -54,17 +48,15 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public class RecordQueryMatcher<I, R extends Message>
         implements Predicate<@Nullable RecordWithColumns<I, R>> {
 
-    private final Set<I> acceptedIds;
-    private final QueryParameters queryParams;
+    private final ImmutableSet<I> acceptedIds;
+    private final ImmutableList<QueryPredicate<R>> predicates;
 
-    RecordQueryMatcher(OldRecordQuery<I> query) {
-        checkNotNull(query);
+    RecordQueryMatcher(Subject<I, R> subject) {
+        checkNotNull(subject);
         // Pack IDs from the query for faster search using packed IDs from loaded records.
-        Set<I> ids = query.getIds();
-        this.acceptedIds = ids.isEmpty()
-                           ? ImmutableSet.of()
-                           : ImmutableSet.copyOf(ids);
-        this.queryParams = query.getParameters();
+        this.acceptedIds = subject.id()
+                                  .values();
+        this.predicates = subject.predicates();
     }
 
     @Override
@@ -84,20 +76,20 @@ public class RecordQueryMatcher<I, R extends Message>
         return acceptedIds.contains(actualId);
     }
 
-    @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
     private boolean columnValuesMatch(RecordWithColumns<I, R> record) {
         boolean match;
-        for (CompositeQueryParameter filter : queryParams) {
-            CompositeFilter.CompositeOperator operator = filter.operator();
+
+        for (QueryPredicate<R> predicate : predicates) {
+            LogicalOperator operator = predicate.operator();
             switch (operator) {
-                case ALL:
-                    match = checkAll(filter.filters(), record);
+                case AND:
+                    match = checkAnd(predicate.parameters(), record);
                     break;
-                case EITHER:
-                    match = checkEither(filter.filters(), record);
+                case OR:
+                    match = checkEither(predicate.parameters(), record);
                     break;
                 default:
-                    throw newIllegalArgumentException("Composite operator %s is invalid.",
+                    throw newIllegalArgumentException("Logical operator `%s` is invalid.",
                                                       operator);
             }
             if (!match) {
@@ -108,69 +100,45 @@ public class RecordQueryMatcher<I, R extends Message>
     }
 
     private static <I, R extends Message> boolean
-    checkAll(Multimap<OldColumn, Filter> filters, RecordWithColumns<I, R> record) {
-        if (filters.isEmpty()) {
+    checkAnd(ImmutableList<SubjectParameter<R, ?, ?>> params, RecordWithColumns<I, R> record) {
+        if (params.isEmpty()) {
             return true;
         }
-        boolean result =
-                filters.entries()
-                       .stream()
-                       .allMatch(filter -> matches(record, filter));
+        boolean result = params.stream()
+                               .allMatch(param -> matches(record, param));
         return result;
     }
 
     private static <I, R extends Message> boolean
-    checkEither(Multimap<OldColumn, Filter> filters, RecordWithColumns<I, R> record) {
-        if (filters.isEmpty()) {
+    checkEither(ImmutableList<SubjectParameter<R, ?, ?>> params, RecordWithColumns<I, R> record) {
+        if (params.isEmpty()) {
             return true;
         }
-        boolean result =
-                filters.entries()
-                       .stream()
-                       .anyMatch(filter -> matches(record, filter));
+        boolean result = params.stream()
+                               .anyMatch(param -> matches(record, param));
         return result;
     }
 
     private static <I, R extends Message> boolean
-    matches(RecordWithColumns<I, R> record, Map.Entry<OldColumn, Filter> filter) {
-        if (!hasColumn(record, filter)) {
+    matches(RecordWithColumns<I, R> recWithColumns, SubjectParameter<R, ?, ?> param) {
+        Column<R, ?> column = param.column();
+        if (!recWithColumns.hasColumn(column.name())) {
             return false;
         }
-        OldColumn column = filter.getKey();
-        @Nullable Object columnValue = columnValue(record, column);
-        boolean result = checkSingleParameter(filter.getValue(), columnValue, column);
+        @Nullable Object columnValue = recWithColumns.columnValue(param.column()
+                                                                       .name());
+        boolean result = checkSingleParameter(param, columnValue);
         return result;
     }
 
-    private static <I, R extends Message> boolean
-    hasColumn(RecordWithColumns<I, R> record, Map.Entry<OldColumn, Filter> filter) {
-        boolean result = record.hasColumn(filter.getKey()
-                                                .name());
-        return result;
-    }
-
-    private static boolean checkSingleParameter(Filter filter,
-                                                @Nullable Object actualValue,
-                                                OldColumn column) {
+    private static <R extends Message> boolean
+    checkSingleParameter(SubjectParameter<R, ?, ?> parameter, @Nullable Object actualValue) {
         if (actualValue == null) {
             return false;
         }
-        Object filterValue;
-        Any wrappedValue = filter.getValue();
-        Class<?> sourceClass = column.type();
-        if (sourceClass != Any.class) {
-            filterValue = toObject(wrappedValue, sourceClass);
-        } else {
-            filterValue = wrappedValue;
-        }
-        boolean result = eval(actualValue, filter.getOperator(), filterValue);
+        Object paramValue = parameter.value();
+        boolean result = parameter.operator()
+                                  .eval(actualValue, paramValue);
         return result;
-    }
-
-    private static <I, R extends Message> @Nullable Object
-    columnValue(RecordWithColumns<I, R> record, OldColumn column) {
-        OldColumnName columnName = column.name();
-        Object value = record.columnValue(columnName);
-        return value;
     }
 }

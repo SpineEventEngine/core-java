@@ -20,12 +20,11 @@
 
 package io.spine.server.storage;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.client.ResponseFormat;
 import io.spine.query.RecordQuery;
-import io.spine.query.RecordQueryBuilder;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -39,8 +38,6 @@ import java.util.Optional;
  * @param <R>
  *         the type of the message records
  */
-//TODO:2020-04-17:alex.tymchenko: describe the `protected` level of the API.
-@Internal
 public abstract class RecordStorageDelegate<I, R extends Message> extends RecordStorage<I, R> {
 
     private final RecordStorage<I, R> delegate;
@@ -51,6 +48,11 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
+    public Iterator<I> index(RecordQuery<I, R> query) {
+        return delegate.index(query);
+    }
+
+    @Override
     public Optional<R> read(I id) {
         return delegate.read(id);
     }
@@ -58,11 +60,6 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     @Override
     protected Optional<R> read(I id, FieldMask mask) {
         return delegate.read(id, mask);
-    }
-
-    @Override
-    protected Iterator<R> readAll(RecordQuery<I, R> query) {
-        return delegate.readAll(query);
     }
 
     @Override
@@ -81,13 +78,8 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    protected Iterator<R> readAll(ResponseFormat format) {
-        return delegate.readAll(format);
-    }
-
-    @Override
-    protected Iterator<R> readAll(RecordQuery<I, R> query, ResponseFormat format) {
-        return delegate.readAll(query, format);
+    protected Iterator<R> readAll(RecordQuery<I, R> query) {
+        return delegate.readAll(query);
     }
 
     @Override
@@ -101,59 +93,8 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    protected boolean delete(I id) {
-        return delegate.delete(id);
-    }
-
-    @Override
-    protected void deleteAll(Iterable<I> ids) {
-        delegate.deleteAll(ids);
-    }
-
-    @Override
-    public Iterator<I> index() {
-        return delegate.index();
-    }
-
-    @Override
-    protected Iterator<I> index(RecordQuery<I, R> query) {
-        return delegate.index(query);
-    }
-
-    @Override
-    @Internal
-    protected RecordSpec<I, R, ?> recordSpec() {
-        return delegate.recordSpec();
-    }
-
-    @Override
-    public boolean isMultitenant() {
-        return delegate.isMultitenant();
-    }
-
-    @Override
-    public boolean isOpen() {
-        return delegate.isOpen();
-    }
-
-    @Override
-    public boolean isClosed() {
-        return delegate.isClosed();
-    }
-
-    @Override
-    protected void checkNotClosed(String message) throws IllegalStateException {
-        delegate.checkNotClosed(message);
-    }
-
-    @Override
-    protected void checkNotClosed() throws IllegalStateException {
-        delegate.checkNotClosed();
-    }
-
-    @Override
-    public void close() {
-        delegate.close();
+    public void write(I id, R record) {
+        delegate.write(id, record);
     }
 
     @Override
@@ -168,17 +109,91 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    protected Iterator<R> readAllRecords(RecordQuery<I, R> query, ResponseFormat format) {
-        return delegate.readAllRecords(query, format);
+    @CanIgnoreReturnValue
+    protected boolean delete(I id) {
+        return delegate.delete(id);
     }
 
     @Override
+    protected void deleteAll(Iterable<I> ids) {
+        delegate.deleteAll(ids);
+    }
+
+    @Override
+    protected RecordQuery<I, R> toQuery(I id) {
+        return delegate.toQuery(id);
+    }
+
+    @Override
+    protected RecordQuery<I, R> toQuery(I id, FieldMask mask) {
+        return delegate.toQuery(id, mask);
+    }
+
+    @Override
+    protected RecordQuery<I, R> toQuery(Iterable<I> ids) {
+        return delegate.toQuery(ids);
+    }
+
+    @Override
+    protected RecordQuery<I, R> toQuery(Iterable<I> ids, FieldMask mask) {
+        return delegate.toQuery(ids, mask);
+    }
+
+    @Override
+    protected RecordQuery<I, R> queryForAll() {
+        return delegate.queryForAll();
+    }
+
+
+    @Override
+    protected Iterator<R> readAllRecords(RecordQuery<I, R> query) {
+        return delegate.readAllRecords(query);
+    }
+
+    @Override
+    @CanIgnoreReturnValue
     protected boolean deleteRecord(I id) {
         return delegate.deleteRecord(id);
     }
 
     @Override
-    public RecordQueryBuilder<I, R> queryBuilder() {
-        return delegate.queryBuilder();
+    @Internal
+    protected RecordSpec<I, R, ?> recordSpec() {
+        return delegate.recordSpec();
+    }
+
+    @Override
+    public boolean isMultitenant() {
+        return delegate.isMultitenant();
+    }
+
+    @Override
+    protected void checkNotClosed(String message) throws IllegalStateException {
+        delegate.checkNotClosed(message);
+    }
+
+    @Override
+    protected void checkNotClosed() throws IllegalStateException {
+        delegate.checkNotClosed();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return delegate.isOpen();
+    }
+
+    @Override
+    public boolean isClosed() {
+        return delegate.isClosed();
+    }
+
+    @Override
+    public void close() {
+        delegate.close();
+    }
+
+    @Override
+    public Iterator<I> index() {
+        return delegate.index();
     }
 }

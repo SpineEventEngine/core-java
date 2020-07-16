@@ -34,8 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.storage.LifecycleColumn.archived;
-import static io.spine.server.entity.storage.LifecycleColumn.deleted;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

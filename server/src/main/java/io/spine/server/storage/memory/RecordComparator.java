@@ -23,8 +23,9 @@ package io.spine.server.storage.memory;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.client.OrderBy;
-import io.spine.server.entity.storage.OldColumnName;
+import io.spine.query.Direction;
+import io.spine.query.OrderBy;
+import io.spine.query.RecordColumn;
 import io.spine.server.storage.RecordWithColumns;
 
 import java.io.Serializable;
@@ -51,9 +52,9 @@ public class RecordComparator<I, R extends Message>
 
     private static final long serialVersionUID = 0L;
 
-    private final String column;
+    private final RecordColumn<R, ?> column;
 
-    private RecordComparator(String column) {
+    private RecordComparator(RecordColumn<R, ?> column) {
         this.column = column;
     }
 
@@ -69,17 +70,17 @@ public class RecordComparator<I, R extends Message>
      *         if the provided {@code OrderBy} list is empty
      */
     static <I, R extends Message>
-    Comparator<RecordWithColumns<I, R>> orderedBy(List<OrderBy> orderByList) {
+    Comparator<RecordWithColumns<I, R>> orderedBy(List<OrderBy<?, R>> orderByList) {
         checkArgument(!orderByList.isEmpty(),
                       "`RecordComparator` requires at least one `OrderBy` instance.");
         Comparator<RecordWithColumns<I, R>> result = null;
-        for (OrderBy orderBy : orderByList) {
+        for (OrderBy<?, R> orderBy : orderByList) {
             Comparator<RecordWithColumns<I, R>> thisComparator;
-            OrderBy.Direction direction = orderBy.getDirection();
-            String columnName = orderBy.getColumn();
-            thisComparator = direction == OrderBy.Direction.ASCENDING
-                             ? ascending(columnName)
-                             : descending(columnName);
+            Direction direction = orderBy.direction();
+            RecordColumn<R, ?> column = orderBy.column();
+            thisComparator = direction == Direction.ASC
+                             ? ascending(column)
+                             : descending(column);
             result = result == null
                      ? thisComparator
                      : result.thenComparing(thisComparator);
@@ -89,13 +90,13 @@ public class RecordComparator<I, R extends Message>
     }
 
     private static <I, R extends Message>
-    Comparator<RecordWithColumns<I, R>> ascending(String columnName) {
-        return new RecordComparator<>(columnName);
+    Comparator<RecordWithColumns<I, R>> ascending(RecordColumn<R, ?> column) {
+        return new RecordComparator<>(column);
     }
 
     private static <I, R extends Message>
-    Comparator<RecordWithColumns<I, R>> descending(String columnName) {
-        return RecordComparator.<I, R>ascending(columnName).reversed();
+    Comparator<RecordWithColumns<I, R>> descending(RecordColumn<R, ?> column) {
+        return RecordComparator.<I, R>ascending(column).reversed();
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks")    // Different special cases are covered.
@@ -103,9 +104,9 @@ public class RecordComparator<I, R extends Message>
     public int compare(RecordWithColumns<I, R> a, RecordWithColumns<I, R> b) {
         checkNotNull(a);
         checkNotNull(b);
-        OldColumnName columnName = OldColumnName.of(column);
-        Object aValue = a.columnValue(columnName);
-        Object bValue = b.columnValue(columnName);
+
+        Object aValue = column.valueIn(a.record());
+        Object bValue = column.valueIn(b.record());
         if (aValue == null) {
             return bValue == null ? 0 : -1;
         }
@@ -126,5 +127,4 @@ public class RecordComparator<I, R extends Message>
                 "The message record value is neither a `Comparable` nor a `Timestamp`."
         );
     }
-
 }

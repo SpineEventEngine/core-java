@@ -33,9 +33,9 @@ import io.spine.server.entity.storage.OldColumnName;
 public interface QueryableField<R extends Message> {
 
     /**
-     * Returns the definition of a {@link CustomColumn} for the field.
+     * Returns the definition of a {@link OldCustomColumn} for the field.
      */
-    CustomColumn<?, R> column();
+    OldCustomColumn<?, R> column();
 
     /**
      * Returns the name of the column.

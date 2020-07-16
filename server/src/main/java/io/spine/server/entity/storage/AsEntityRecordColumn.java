@@ -20,36 +20,31 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.query.Column;
+import io.spine.query.RecordColumn;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.CustomColumn;
-import io.spine.server.storage.CustomColumn.Getter;
-import io.spine.server.storage.QueryableField;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Columns storing the lifecycle attributes of an {@code Entity} within an {@link EntityRecord}.
+ * A definition of an {@link EntityRecord} column, which uses the name of another column.
  */
-public enum LifecycleColumn implements QueryableField<EntityRecord> {
+final class AsEntityRecordColumn extends RecordColumn<EntityRecord, Object> {
 
-    archived((r) -> r.getLifecycleFlags()
-                     .getArchived()),
+    private static final long serialVersionUID = 0L;
 
-    deleted((r) -> r.getLifecycleFlags()
-                    .getDeleted());
-
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final CustomColumn<Boolean, EntityRecord> column;
-
-    <T> LifecycleColumn(Getter<EntityRecord, Boolean> getter) {
-        OldColumnName name = OldColumnName.of(name());
-        this.column = new CustomColumn<>(name, Boolean.class, getter);
+    @SuppressWarnings({"unchecked", "rawtypes"})  // to avoid the generics hell.
+    AsEntityRecordColumn(Column<?, ?> original) {
+        super(columnName(original), (Class) original.type(), getter(original));
     }
 
-    Boolean valueIn(EntityRecord record) {
-        return column.valueIn(record);
+    @SuppressWarnings("unused")     // method always throws an `IllegalStateException`.
+    private static Getter<EntityRecord, Object> getter(Column<?, ?> original) {
+        throw newIllegalStateException("`EntityRecordColumn`s do not have getters.");
     }
 
-    @Override
-    public CustomColumn<?, EntityRecord> column() {
-        return column;
+    private static String columnName(Column<?, ?> original) {
+        return original.name()
+                       .value();
     }
 }

@@ -21,28 +21,44 @@
 package io.spine.server.entity.storage;
 
 import io.spine.annotation.Internal;
+import io.spine.query.CustomColumn;
+import io.spine.server.entity.Entity;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.util.function.Supplier;
 
 /**
- * Marks an entity column declared by the Spine Framework.
- *
- * <p>Such columns may be shared across entities and are used internally by the Spine routines.
- *
- * <p>This annotation should not be used in the client code. The users should rely on the
- * {@code (column)} option to declare entity columns instead.
+ * Columns storing the internal framework-specific attributes of an {@code Entity}.
  */
-@Target(METHOD)
-@Retention(RUNTIME)
 @Internal
-public @interface SystemColumn {
+public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>> {
+
+    //TODO:2020-07-16:alex.tymchenko: document!
+    archived(new ArchivedColumn()),
+
+    deleted(new DeletedColumn()),
+
+    version(new VersionColumn());
+
+    private final CustomColumn<Entity<?, ?>, ?> column;
+
+    EntityRecordColumn(CustomColumn<Entity<?, ?>, ?> column) {
+        this.column = column;
+    }
+
+    @Override
+    public CustomColumn<Entity<?, ?>, ?> get() {
+        return column;
+    }
 
     /**
-     * The implementation of the column.
+     * Obtains the column treating it as a column with {@code Boolean} values.
+     *
+     * <p>If the column has the different type of values, the {@link ClassCastException} is thrown.
      */
-    EntityRecordColumn impl();
+    @SuppressWarnings("unchecked")
+    public CustomColumn<Entity<?, ?>, Boolean> asBooleanColumn() {
+        CustomColumn<Entity<?, ?>, Boolean> boolColumn =
+                (CustomColumn<Entity<?, ?>, Boolean>) this.column;
+        return boolColumn;
+    }
 }

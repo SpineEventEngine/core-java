@@ -21,16 +21,13 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.client.ResponseFormat;
+import io.spine.query.EntityQuery;
+import io.spine.query.RecordQuery;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.OldRecordQuery;
-import io.spine.server.storage.QueryParameters;
-import io.spine.server.storage.RecordQueries;
 import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
@@ -39,29 +36,30 @@ import java.util.Iterator;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
-import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
 
 /**
  * A {@code MessageStorage} which stores {@link EntityRecord}s.
  *
- * @param <I> the type of the identifiers of stored entities
- * @param <S> the type of {@code Entity} state
+ * @param <I>
+ *         the type of the identifiers of stored entities
+ * @param <S>
+ *         the type of {@code Entity} state
  */
 public class EntityRecordStorage<I, S extends EntityState<I>>
         extends RecordStorageDelegate<I, EntityRecord> {
 
-    private final OldRecordQuery<I> findActiveRecordsQuery;
-    private final QueryParameters activeQueryParams;
+    private final RecordQuery<I, EntityRecord> findActiveRecordsQuery;
 
     public EntityRecordStorage(StorageFactory factory,
-                               Class<? extends Entity<I, ?>> entityClass,
+                               Class<? extends Entity<I, S>> entityClass,
                                boolean multitenant) {
         super(factory.createRecordStorage(spec(entityClass), multitenant));
-        activeQueryParams = activeEntityQueryParams(recordSpec());
-        this.findActiveRecordsQuery = RecordQueries.of(ImmutableSet.of(), activeQueryParams);
+        FindActiveEntites<I, S> entityQuery = findActiveEntities().build();
+        this.findActiveRecordsQuery = ToEntityRecordQuery.transform(entityQuery);
     }
 
-    private static <I> EntityRecordSpec<I> spec(Class<? extends Entity<I, ?>> entityClass) {
+    private static <I, S extends EntityState<I>> EntityRecordSpec<I, S, ?>
+    spec(Class<? extends Entity<I, S>> entityClass) {
         return EntityRecordSpec.of(entityClass);
     }
 
@@ -86,50 +84,28 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * @throws IllegalStateException
      *         if the storage is already closed
      */
-    @Override
-    public Iterator<I> index(OldRecordQuery<I> query) {
-        OldRecordQuery<I> onlyActive = query.append(findActiveRecordsQuery.getParameters());
-        return super.index(onlyActive);
+    public Iterator<I> entityIndex(EntityQuery<I, S, ?> query) {
+        RecordQuery<I, EntityRecord> recordQuery = onlyActive(query);
+        return index(recordQuery);
     }
 
     /**
-     * Reads all non-archived and non-deleted entity records according
-     * to the response format specified.
+     * Returns the iterator over all stored non-archived and non-deleted entity records.
      *
-     * @param format
-     *         the format of the expected response
-     * @return iterator over the matching entity records
      * @throws IllegalStateException
      *         if the storage is already closed
      */
     @Override
-    public Iterator<EntityRecord> readAll(ResponseFormat format) {
-        return readAll(findActiveRecordsQuery, format);
+    public Iterator<EntityRecord> readAll() {
+        return readAll(findActiveRecordsQuery);
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose as a part of the public API.
+     * Finds all records which match the given query.
      */
-    @Override
-    public Iterator<EntityRecord> readAll(OldRecordQuery<I> query, ResponseFormat format) {
-        return super.readAll(query, format);
-    }
-
-//    //TODO:2020-06-06:alex.tymchenko: complete the implementation.
-//    public RecordQuery<I> query(EntityColumn<S, ?> column) {
-//        recordSpec().find(column.name())
-//    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose as a part of the public API.
-     */
-    @Override
-    public Iterator<EntityRecord> readAll(OldRecordQuery<I> query) {
-        return super.readAll(query);
+    public final Iterator<EntityRecord> findAll(EntityQuery<I, S, ?> query) {
+        RecordQuery<I, EntityRecord> result = onlyActive(query);
+        return readAll(result);
     }
 
     /**
@@ -145,20 +121,9 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     @Override
     public Iterator<EntityRecord> readAll(Iterable<I> ids) {
         //TODO:2020-04-17:alex.tymchenko: do we need to append the params?
-        OldRecordQuery<I> query = RecordQueries.of(ids, activeQueryParams);
-//        RecordQuery<I> query = RecordQueries.of(ids);
-        return readAll(query);
-    }
-
-    /**
-     * Returns the iterator over all stored non-archived and non-deleted entity records.
-     *
-     * @throws IllegalStateException
-     *         if the storage is already closed
-     */
-    @Override
-    public Iterator<EntityRecord> readAll() {
-        return readAll(findActiveRecordsQuery);
+        FindActiveEntites<I, S> query = findActiveEntities().buildWithIds(ids);
+        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
+        return readAll(recordQuery);
     }
 
     /**
@@ -218,8 +183,8 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     @Internal
     @Override
     @SuppressWarnings("unchecked")  // Guaranteed by the generic declaration of `EntityRecordSpec`.
-    public final EntityRecordSpec<I> recordSpec() {
-        return (EntityRecordSpec<I>) super.recordSpec();
+    public final EntityRecordSpec<I, S, ?> recordSpec() {
+        return (EntityRecordSpec<I, S, ?>) super.recordSpec();
     }
 
     /**
@@ -236,5 +201,21 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
                 .map(id -> (I) id)
                 .collect(toImmutableList());
         return ids.iterator();
+    }
+
+    @SuppressWarnings("unchecked")  // ensured by the `EntityClass` definition.
+    private Class<S> stateType() {
+        return (Class<S>) recordSpec().entityClass()
+                                      .stateClass();
+    }
+
+    private FindActiveEntites.Builder<I, S> findActiveEntities() {
+        return FindActiveEntites.newBuilder(stateType());
+    }
+
+
+    private RecordQuery<I, EntityRecord> onlyActive(EntityQuery<I, S, ?> query) {
+        FindActiveEntites<I, S> onlyActive = findActiveEntities().buildOnTop(query);
+        return ToEntityRecordQuery.transform(onlyActive);
     }
 }

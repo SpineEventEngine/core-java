@@ -20,11 +20,14 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.ResponseFormat;
+import io.spine.query.OrderBy;
+import io.spine.query.RecordQuery;
+import io.spine.query.Subject;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.RecordWithColumns;
@@ -66,9 +69,8 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
     /**
      * Obtains the iterator over the identifiers of the records which match the passed query.
      */
-    public Iterator<I> index(OldRecordQuery<I> query) {
-        List<RecordWithColumns<I, R>> subset =
-                findRecords(query, ResponseFormat.getDefaultInstance());
+    public Iterator<I> index(RecordQuery<I, R> query) {
+        List<RecordWithColumns<I, R>> subset = findRecords(query);
         Iterator<I> result = Iterators.transform(subset.iterator(), RecordWithColumns::id);
         return result;
     }
@@ -97,9 +99,9 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
         return records.remove(id) != null;
     }
 
-    Iterator<R> readAll(OldRecordQuery<I> query, ResponseFormat format) {
-        FieldMask fieldMask = format.getFieldMask();
-        List<RecordWithColumns<I, R>> records = findRecords(query, format);
+    Iterator<R> readAll(RecordQuery<I, R> query) {
+        FieldMask fieldMask = query.mask();
+        List<RecordWithColumns<I, R>> records = findRecords(query);
         return records
                 .stream()
                 .map(RecordWithColumns::record)
@@ -107,23 +109,24 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
                 .iterator();
     }
 
-    private List<RecordWithColumns<I, R>> findRecords(OldRecordQuery<I> query, ResponseFormat format) {
+    private List<RecordWithColumns<I, R>> findRecords(RecordQuery<I, R> query) {
         synchronized (records) {
-            Map<I, RecordWithColumns<I, R>> filtered = filterRecords(query);
+            Map<I, RecordWithColumns<I, R>> filtered = filterRecords(query.subject());
             Stream<RecordWithColumns<I, R>> stream = filtered.values()
                                                              .stream();
-            return orderAndLimit(stream, format).collect(toList());
+            return orderAndLimit(stream, query).collect(toList());
         }
     }
 
     private static <I, R extends Message> Stream<RecordWithColumns<I, R>>
-    orderAndLimit(Stream<RecordWithColumns<I, R>> data, ResponseFormat format) {
+    orderAndLimit(Stream<RecordWithColumns<I, R>> data, RecordQuery<I, R> query) {
         Stream<RecordWithColumns<I, R>> stream = data;
-        if (format.getOrderByCount() > 0) {
-            stream = stream.sorted(orderedBy(format.getOrderByList()));
+        ImmutableList<OrderBy<?, R>> ordering = query.ordering();
+        if (ordering.size() > 0) {
+            stream = stream.sorted(orderedBy(ordering.asList()));
         }
-        int limit = format.getLimit();
-        if (limit > 0) {
+        Integer limit = query.limit();
+        if (limit != null && limit > 0) {
             stream = stream.limit(limit);
         }
         return stream;
@@ -133,8 +136,8 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
      * Filters the records returning only the ones matching the
      * {@linkplain OldRecordQuery message query}.
      */
-    private Map<I, RecordWithColumns<I, R>> filterRecords(OldRecordQuery<I> query) {
-        RecordQueryMatcher<I, R> matcher = new RecordQueryMatcher<>(query);
+    private Map<I, RecordWithColumns<I, R>> filterRecords(Subject<I, R> subject) {
+        RecordQueryMatcher<I, R> matcher = new RecordQueryMatcher<>(subject);
         return filterValues(records, matcher::test);
     }
 

@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.client.ResponseFormat;
 import io.spine.query.RecordQuery;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
@@ -52,19 +51,9 @@ public class AggregateEventStorage
      * <p>Overrides to expose this method as a part of storage's package-level API.
      */
     @Override
-    protected Iterator<AggregateEventRecord> readAll(ResponseFormat format) {
-        return super.readAll(format);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose this method as a part of storage's package-level API.
-     */
-    @Override
     protected Iterator<AggregateEventRecord>
-    readAll(RecordQuery<AggregateEventRecordId, AggregateEventRecord> query, ResponseFormat fmt) {
-        return super.readAll(query, fmt);
+    readAll(RecordQuery<AggregateEventRecordId, AggregateEventRecord> query) {
+        return super.readAll(query);
     }
 
     /**

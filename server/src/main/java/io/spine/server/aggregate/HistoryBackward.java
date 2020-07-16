@@ -23,16 +23,14 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Any;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
-import io.spine.client.OrderBy;
-import io.spine.client.ResponseFormat;
 import io.spine.core.Version;
-import io.spine.server.storage.OldRecordQuery;
-import io.spine.server.storage.QueryParameters;
-import io.spine.server.storage.RecordQueries;
+import io.spine.query.RecordQuery;
+import io.spine.query.RecordQueryBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 
+import static io.spine.query.Direction.DESC;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.aggregate_id;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.created;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.version;
@@ -43,9 +41,6 @@ import static io.spine.server.aggregate.AggregateEventRecordColumn.version;
 @SPI
 public class HistoryBackward<I> {
 
-    private static final OrderBy newestFirst = newestFirst();
-    private static final OrderBy higherVersionFirst = higherVersionFirst();
-
     private final AggregateEventStorage eventStorage;
 
     protected HistoryBackward(AggregateEventStorage storage) {
@@ -54,44 +49,27 @@ public class HistoryBackward<I> {
 
     protected Iterator<AggregateEventRecord>
     read(I aggregateId, int batchSize, @Nullable Version startingFrom) {
-        OldRecordQuery<AggregateEventRecordId> query = historyBackwardQuery(aggregateId);
+        RecordQueryBuilder<AggregateEventRecordId, AggregateEventRecord> builder =
+                historyBackwardQuery(aggregateId);
         if (startingFrom != null) {
-            QueryParameters lessThanVersion = QueryParameters.lt(version, startingFrom.getNumber());
-            query = query.append(lessThanVersion);
+            builder.where(version)
+                   .isLessThan(startingFrom.getNumber());
         }
-        ResponseFormat responseFormat = chronologicalResponseWith(batchSize);
-        Iterator<AggregateEventRecord> iterator = eventStorage.readAll(query, responseFormat);
+
+        RecordQuery<AggregateEventRecordId, AggregateEventRecord> query =
+                builder.orderBy(version, DESC)
+                       .orderBy(created, DESC)
+                       .limit(batchSize)
+                       .build();
+        Iterator<AggregateEventRecord> iterator = eventStorage.readAll(query);
         return iterator;
     }
 
-    protected OldRecordQuery<AggregateEventRecordId> historyBackwardQuery(I id) {
+    private RecordQueryBuilder<AggregateEventRecordId, AggregateEventRecord>
+    historyBackwardQuery(I id) {
         Any packedId = Identifier.pack(id);
-        QueryParameters params = QueryParameters.eq(aggregate_id, packedId);
-        return RecordQueries.of(params);
-    }
-
-    protected static ResponseFormat chronologicalResponseWith(@Nullable Integer batchSize) {
-        ResponseFormat.Builder builder =
-                ResponseFormat.newBuilder()
-                              .addOrderBy(higherVersionFirst)
-                              .addOrderBy(newestFirst);
-        if (batchSize != null) {
-            builder.setLimit(batchSize);
-        }
-        return builder.vBuild();
-    }
-
-    private static OrderBy newestFirst() {
-        return OrderBy.newBuilder()
-                      .setDirection(OrderBy.Direction.DESCENDING)
-                      .setColumn(created.name())
-                      .vBuild();
-    }
-
-    private static OrderBy higherVersionFirst() {
-        return OrderBy.newBuilder()
-                      .setDirection(OrderBy.Direction.DESCENDING)
-                      .setColumn(version.name())
-                      .vBuild();
+        return eventStorage.queryBuilder()
+                           .where(aggregate_id)
+                           .is(packedId);
     }
 }

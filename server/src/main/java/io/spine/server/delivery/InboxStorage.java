@@ -27,7 +27,6 @@ import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -59,17 +58,16 @@ import static java.util.stream.Collectors.toList;
 public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
 
     public InboxStorage(StorageFactory factory, boolean multitenant) {
-        super(createStorage(factory, multitenant));
+        super(factory.createRecordStorage(spec(), multitenant));
     }
 
-    private static RecordStorage<InboxMessageId, InboxMessage>
-    createStorage(StorageFactory factory, boolean multitenant) {
+    private static MessageRecordSpec<InboxMessageId, InboxMessage> spec() {
         @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.
         MessageRecordSpec<InboxMessageId, InboxMessage> spec =
                 new MessageRecordSpec<>(InboxMessage.class,
                                         InboxMessage::getId,
                                         InboxColumn.definitions());
-        return factory.createRecordStorage(spec, multitenant);
+        return spec;
     }
 
     /**

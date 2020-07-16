@@ -23,7 +23,6 @@ package io.spine.server.tenant;
 import io.spine.base.Time;
 import io.spine.core.TenantId;
 import io.spine.server.storage.MessageRecordSpec;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
 /**
@@ -34,11 +33,7 @@ import io.spine.server.storage.StorageFactory;
 final class DefaultTenantStorage extends TenantStorage<Tenant> {
 
     DefaultTenantStorage(StorageFactory factory) {
-        super(configureStorage(factory));
-    }
-
-    private static RecordStorage<TenantId, Tenant> configureStorage(StorageFactory factory) {
-        return factory.createRecordStorage(getSpec(), false);
+        super(factory.createRecordStorage(getSpec(), false));
     }
 
     @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.

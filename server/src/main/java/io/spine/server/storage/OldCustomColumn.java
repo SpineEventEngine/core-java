@@ -47,7 +47,7 @@ import java.util.function.Function;
  *         the type of the message record, along with which this column should be stored
  */
 @Immutable
-public final class CustomColumn<V, M extends Message> extends AbstractColumn {
+public final class OldCustomColumn<V, M extends Message> extends AbstractColumn {
 
     private final Getter<M, V> getter;
 
@@ -61,7 +61,7 @@ public final class CustomColumn<V, M extends Message> extends AbstractColumn {
      * @param getter
      *         the getter for the column value
      */
-    public CustomColumn(OldColumnName name, Class<V> type, Getter<M, V> getter) {
+    public OldCustomColumn(OldColumnName name, Class<V> type, Getter<M, V> getter) {
         super(name, type);
         this.getter = getter;
     }

@@ -68,7 +68,7 @@ import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.assertMatches;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFormat;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.orderByName;
-import static io.spine.server.entity.storage.LifecycleColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

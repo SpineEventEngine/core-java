@@ -27,8 +27,8 @@ import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.test.aggregate.cli.Evaluate;
 import io.spine.test.aggregate.cli.Evaluated;
 
-import static io.spine.server.entity.storage.LifecycleColumn.archived;
-import static io.spine.server.entity.storage.LifecycleColumn.deleted;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 
 /**
  * The aggregate that can handle status flags.

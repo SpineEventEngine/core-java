@@ -52,8 +52,8 @@ import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.a
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.delete;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.givenPhotos;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.newPhotosRepository;
-import static io.spine.server.entity.storage.LifecycleColumn.archived;
-import static io.spine.server.entity.storage.LifecycleColumn.deleted;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;

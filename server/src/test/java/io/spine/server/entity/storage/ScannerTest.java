@@ -21,6 +21,8 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import io.spine.query.CustomColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.IntrospectorTestEnv.InvalidEntityWithColumns;
@@ -44,10 +46,10 @@ class ScannerTest {
     @DisplayName("extract system columns from the entity class")
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-        Scanner scanner = new Scanner(entityClass);
-        ImmutableMap<OldColumnName, SysColumn> systemColumns = scanner.systemColumns();
+        Scanner scanner = new Scanner<>(entityClass);
+        ImmutableSet<CustomColumn<?, ?>> systemColumns = scanner.systemColumns();
 
-        assertThat(systemColumns.keySet())
+        assertThat(systemColumns)
                 .containsExactlyElementsIn(GivenEntityColumns.defaultEntityColumns);
     }
 

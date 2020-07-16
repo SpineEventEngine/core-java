@@ -22,7 +22,6 @@ package io.spine.server.storage.given;
 
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -41,16 +40,16 @@ import io.spine.test.storage.StgProjectId;
 public class StgProjectStorage extends MessageStorage<StgProjectId, StgProject> {
 
     public StgProjectStorage(StorageFactory factory, boolean multitenant) {
-        super(newStorage(factory, multitenant));
+        super(factory.createRecordStorage(spec(), multitenant));
     }
 
-    private static RecordStorage<StgProjectId, StgProject>
-    newStorage(StorageFactory factory, boolean multitenant) {
+    @org.jetbrains.annotations.NotNull
+    private static MessageRecordSpec<StgProjectId, StgProject> spec() {
         @SuppressWarnings("ConstantConditions")     // Proto getters are non-{@code null}.
         MessageRecordSpec<StgProjectId, StgProject> spec =
                 new MessageRecordSpec<>(StgProject.class,
                                         StgProject::getId,
                                         StgColumn.definitions());
-        return factory.createRecordStorage(spec, multitenant);
+        return spec;
     }
 }

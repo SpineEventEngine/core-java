@@ -37,7 +37,6 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.Streams.stream;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Instructs storage implementations on how to store a plain Protobuf message record.
@@ -70,7 +69,6 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
      */
     private final ImmutableMap<ColumnName, RecordColumn<R, ?>> columns;
 
-
     public MessageRecordSpec(Class<R> recordClass,
                              ExtractId<R, I> extractId,
                              Iterable<RecordColumn<R, ?>> columns) {
@@ -78,6 +76,10 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
         this.columns = stream(columns).collect(toImmutableMap(RecordColumn::name, (c) -> c));
         this.recordClass = recordClass;
         this.extractId = extractId;
+    }
+
+    public Class<R> recordClass() {
+        return recordClass;
     }
 
     public MessageRecordSpec(Class<R> aClass, ExtractId<R, I> extractId) {
@@ -100,30 +102,10 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
         return extractId.apply(source);
     }
 
-    /**
-     * Returns all columns of the record.
-     */
     @Override
-    public final ImmutableList<Column<R, ?>> columnList() {
-        ImmutableList<Column<R, ?>> result = ImmutableList.copyOf(this.columns.values());
-        return result;
-    }
-
-    /**
-     * Searches for a column with a given name.
-     */
-    @Override
-    public final Optional<Column<R, ?>> find(ColumnName columnName) {
-        checkNotNull(columnName);
-        Column<R, ?> column = columns.get(columnName);
-        return Optional.ofNullable(column);
-    }
-
-    @Override
-    protected IllegalArgumentException columnNotFound(ColumnName columnName) {
-        throw newIllegalArgumentException(
-                "A column with name '%s' not found in the `Message` class `%s`.",
-                columnName, recordClass.getCanonicalName());
+    protected Optional<Column<?, ?>> findColumn(ColumnName name) {
+        RecordColumn<R, ?> result = columns.get(name);
+        return Optional.ofNullable(result);
     }
 
     @Immutable

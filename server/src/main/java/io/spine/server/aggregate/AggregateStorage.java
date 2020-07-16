@@ -32,7 +32,6 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.AbstractStorage;
@@ -222,9 +221,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
         EntityRecord record = AggregateRecords.newStateRecord(aggregate, mirrorEnabled);
-        EntityRecordSpec<I> recordSpec = EntityRecordSpec.of(aggregate.modelClass());
         EntityRecordWithColumns<I> result =
-                EntityRecordWithColumns.create(aggregate, recordSpec, record);
+                EntityRecordWithColumns.create(aggregate, record);
         stateStorage.write(result);
     }
 

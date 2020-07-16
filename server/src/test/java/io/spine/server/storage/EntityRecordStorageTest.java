@@ -38,10 +38,10 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.entity.storage.EntityRecordColumn;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.LifecycleColumn;
 import io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -71,8 +71,8 @@ import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.server.entity.storage.LifecycleColumn.archived;
 import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.archive;
@@ -184,7 +184,7 @@ public class EntityRecordStorageTest
         ImmutableList<OldColumn> columnList = storage.recordSpec()
                                                      .columnList();
 
-        int systemColumnCount = LifecycleColumn.values().length;
+        int systemColumnCount = EntityRecordColumn.values().length;
         int protoColumnCount = 6;
 
         int expectedSize = systemColumnCount + protoColumnCount;

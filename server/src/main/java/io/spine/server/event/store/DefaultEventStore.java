@@ -38,7 +38,6 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.QueryConverter;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -75,15 +74,14 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
      * Constructs new instance.
      */
     public DefaultEventStore(StorageFactory factory, boolean multitenant) {
-        super(storageForEvents(factory, multitenant));
+        super(factory.createRecordStorage(spec(), multitenant));
         this.log = new Log();
     }
 
-    private static RecordStorage<EventId, Event>
-    storageForEvents(StorageFactory factory, boolean multitenant) {
+    private static MessageRecordSpec<EventId, Event> spec() {
         MessageRecordSpec<EventId, Event> spec =
                 new MessageRecordSpec<>(Event.class, Signal::id, EventColumn.definitions());
-        return factory.createRecordStorage(spec, multitenant);
+        return spec;
     }
 
     private static void ensureSameTenant(ImmutableList<Event> events) {
@@ -187,12 +185,12 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
     private Iterator<Event> find(EventStreamQuery query) {
         ResponseFormat format = formatFrom(query);
         if (query.includeAll()) {
-            return readAll(format);
+            RecordQuery<EventId, Event> recordQuery = QueryConverter.convert(recordSpec(), format);
+            return readAll(recordQuery);
         } else {
             TargetFilters filters = QueryToFilters.convert(query);
-//            OldRecordQuery<EventId> recordQuery = RecordQueries.from(filters, recordSpec());
             RecordQuery<EventId, Event> recordQuery =
-                    QueryConverter.convert(filters, format, recordSpec());
+                    QueryConverter.convert(recordSpec(), filters, format);
             return readAll(recordQuery);
         }
     }

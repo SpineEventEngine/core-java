@@ -85,7 +85,7 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        OldColumnName columnName = LifecycleColumn.archived.columnName();
+        OldColumnName columnName = EntityRecordColumn.archived.columnName();
         Object value = false;
         EntityRecordWithColumns<?> emptyFieldsEnvelope =
                 EntityRecordWithColumns.of(sampleEntityRecord());
@@ -205,7 +205,7 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("column values")
         void columnValues() {
-            OldColumnName columnName = LifecycleColumn.archived.columnName();
+            OldColumnName columnName = EntityRecordColumn.archived.columnName();
             Object value = false;
             Map<OldColumnName, Object> columnsExpected = singletonMap(columnName, value);
             EntityRecordWithColumns<?> record =
