@@ -30,7 +30,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
-import io.spine.server.storage.OldColumn;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -42,7 +41,8 @@ import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static java.util.Collections.emptyMap;
 
 /**
- * A value of {@link EntityRecord} associated with the values of its {@linkplain OldColumn columns}.
+ * A value of {@link EntityRecord} associated with the values
+ * of its {@linkplain io.spine.query.Column columns}.
  */
 @Internal
 public final class EntityRecordWithColumns<I>

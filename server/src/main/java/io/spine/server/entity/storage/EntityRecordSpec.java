@@ -116,9 +116,8 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     /**
      * Extracts column values from the entity.
      *
-     * <p>The {@linkplain ColumnDeclaredInProto proto-based} columns are extracted from the entity
-     * state while the system columns are obtained from the entity itself via the corresponding
-     * getters.
+     * <p>The Protobuf-based columns are extracted from the entity state while the system columns
+     * are obtained from the entity itself via the corresponding getters.
      */
     @Override
     public Map<ColumnName, @Nullable Object> valuesIn(E entity) {

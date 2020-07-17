@@ -181,7 +181,7 @@ public class EntityRecordStorageTest
     @DisplayName("return a list of entity columns")
     void returnColumnList() {
         EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-        ImmutableList<OldColumn> columnList = storage.recordSpec()
+        ImmutableList<Column> columnList = storage.recordSpec()
                                                      .columnList();
 
         int systemColumnCount = EntityRecordColumn.values().length;

@@ -21,11 +21,10 @@
 package io.spine.server.entity.storage;
 
 import io.spine.annotation.SPI;
-import io.spine.server.storage.OldColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * The value mapping rules of entity {@linkplain OldColumn columns}.
+ * The value mapping rules of entity {@linkplain io.spine.query.Column columns}.
  *
  * <p>A {@link ColumnTypeMapping} allows to map column values of certain type to their value
  * in the storage.

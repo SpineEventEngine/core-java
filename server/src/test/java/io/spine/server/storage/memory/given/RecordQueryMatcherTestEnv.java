@@ -20,16 +20,17 @@
 
 package io.spine.server.storage.memory.given;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.storage.EntityRecordSpec;
-import io.spine.server.entity.storage.OldColumnName;
+import io.spine.query.IdParameter;
+import io.spine.query.RecordColumn;
+import io.spine.query.Subject;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.Projection;
-import io.spine.server.storage.OldColumn;
-import io.spine.server.storage.OldCustomColumn;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.StgProjectWithColumns;
@@ -38,7 +39,7 @@ import io.spine.testdata.Sample;
 /**
  * The test environment for {@link io.spine.server.storage.memory.RecordQueryMatcher} tests.
  *
- * <p>Provides various types of {@linkplain OldCustomColumn record columns}
+ * <p>Provides various types of {@linkplain RecordColumn record columns}
  * that can be used to emulate a client-side query.
  */
 public final class RecordQueryMatcherTestEnv {
@@ -48,10 +49,29 @@ public final class RecordQueryMatcherTestEnv {
     }
 
     /**
+     * Creates an empty {@code Subject} for the {@link EntityRecord}.
+     */
+    public static Subject<Object, EntityRecord> recordSubject() {
+        Subject<Object, EntityRecord> sampleSubject =
+                new Subject<>(IdParameter.empty(), EntityRecord.class, ImmutableList.of());
+        return sampleSubject;
+    }
+
+
+    /**
+     * Creates a {@code Subject} for the {@link EntityRecord} with the given ID.
+     */
+    public static <I> Subject<I, EntityRecord> recordSubject(I id) {
+        Subject<I, EntityRecord> sampleSubject =
+                new Subject<>(IdParameter.is(id), EntityRecord.class, ImmutableList.of());
+        return sampleSubject;
+    }
+
+    /**
      * A {@code Column} which holds an {@link Any} instance.
      */
-    public static OldColumn anyColumn() {
-        return column("wrapped_state");
+    public static RecordColumn<EntityRecord, Any> anyColumn() {
+        return new RecordColumn<>("wrapped_state", Any.class, (r) -> anyValue());
     }
 
     /**
@@ -66,8 +86,8 @@ public final class RecordQueryMatcherTestEnv {
     /**
      * A {@code Column} which holds a {@code boolean} value.
      */
-    public static OldColumn booleanColumn() {
-        return column("internal");
+    public static RecordColumn<EntityRecord, Boolean> booleanColumn() {
+        return new RecordColumn<>("internal", Boolean.class, (r) -> booleanValue());
     }
 
     /**
@@ -77,13 +97,6 @@ public final class RecordQueryMatcherTestEnv {
     @SuppressWarnings("MethodOnlyUsedFromInnerClass")   // for the sake of consistency.
     private static boolean booleanValue() {
         return true;
-    }
-
-    private static OldColumn column(String name) {
-        EntityRecordSpec spec = EntityRecordSpec.of(ProjectView.class);
-        OldColumnName columnName = OldColumnName.of(name);
-        OldColumn column = spec.get(columnName);
-        return column;
     }
 
     private static class ProjectView

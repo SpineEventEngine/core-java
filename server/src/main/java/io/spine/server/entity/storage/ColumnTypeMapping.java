@@ -22,12 +22,11 @@ package io.spine.server.entity.storage;
 
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.server.storage.OldColumn;
 
 import java.util.function.Function;
 
 /**
- * A persistence strategy of an entity {@linkplain OldColumn column}.
+ * A persistence strategy of an entity {@linkplain io.spine.query.Column column}.
  *
  * <p>Maps a column value to a stored value of type {@code R}.
  *

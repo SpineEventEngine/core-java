@@ -37,7 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A value of some message record along with the values of its {@linkplain OldColumn columns}.
+ * A value of some message record along with the values
+ * of its {@linkplain io.spine.query.Column columns}.
  *
  * @param <I>
  *         the type of the record identifiers
@@ -170,7 +171,8 @@ public class RecordWithColumns<I, R extends Message> {
     }
 
     /**
-     * Tells if there are any {@linkplain OldColumn columns} associated with this record.
+     * Tells if there are any {@linkplain io.spine.query.Column columns}
+     * associated with this record.
      */
     public boolean hasColumns() {
         return !storageFields.isEmpty();

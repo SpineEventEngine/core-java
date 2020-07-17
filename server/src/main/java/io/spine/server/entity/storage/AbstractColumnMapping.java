@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.spine.server.storage.OldColumn;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -33,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * The basic implementation of mapping rules for entity {@linkplain OldColumn columns}.
+ * The basic implementation of mapping rules for entity {@linkplain io.spine.query.Column columns}.
  *
  * <p>Since entity columns are proto-based and have a limited amount of possible types, this class
  * allows descendants to override concrete type mapping rules in a convenient way.
