@@ -20,12 +20,11 @@
 
 package io.spine.server.projection;
 
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
 import io.spine.server.entity.storage.EntityRecordColumn;
 import io.spine.server.entity.storage.EntityRecordSpec;
-import io.spine.server.entity.storage.GivenEntityColumns;
-import io.spine.server.entity.storage.OldColumnName;
 import io.spine.server.projection.given.SavingProjection;
-import io.spine.server.storage.OldColumn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,13 +37,13 @@ import static com.google.common.truth.Truth8.assertThat;
 @DisplayName("Projection should have columns")
 class ProjectionColumnTest {
 
-    private static final EntityRecordSpec<String> recordSpec =
+    private static final EntityRecordSpec<String, SavedString, SavingProjection> recordSpec =
             EntityRecordSpec.of(SavingProjection.class);
 
     @Test
     @DisplayName("`version`")
     void version() {
-        assertHasColumn(GivenEntityColumns.version);
+        assertHasColumn(EntityRecordColumn.version.columnName());
     }
 
     @Test
@@ -54,8 +53,8 @@ class ProjectionColumnTest {
         assertHasColumn(EntityRecordColumn.deleted.columnName());
     }
 
-    private static void assertHasColumn(OldColumnName columnName) {
-        Optional<OldColumn> result = recordSpec.find(columnName);
+    private static void assertHasColumn(ColumnName columnName) {
+        Optional<Column<?, ?>> result = recordSpec.findColumn(columnName);
         assertThat(result).isPresent();
     }
 }

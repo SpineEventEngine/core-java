@@ -20,21 +20,12 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableSet;
-
 /**
  * Utilities for testing columns.
  */
 public final class GivenEntityColumns {
 
     public static final OldColumnName version = OldColumnName.of("version");
-
-    static final ImmutableSet<OldColumnName> defaultEntityColumns =
-            ImmutableSet.of(
-                    EntityRecordColumn.archived.columnName(),
-                    EntityRecordColumn.deleted.columnName(),
-                    version
-            );
 
     /** Prevent instantiation of this utility class. */
     private GivenEntityColumns() {

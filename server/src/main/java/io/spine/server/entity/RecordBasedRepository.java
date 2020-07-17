@@ -37,11 +37,10 @@ import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.core.Event;
 import io.spine.core.Signal;
-import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.query.RecordQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.OldRecordQuery;
-import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
@@ -339,11 +338,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         EntityRecordStorage<I, S> storage = recordStorage();
-        OldRecordQuery<I> query = RecordQueries.of(ids);
-        ResponseFormat format = ResponseFormat.newBuilder()
-                                              .setFieldMask(fieldMask)
-                                              .vBuild();
-        Iterator<EntityRecord> records = storage.readAll(query, format);
+        Iterator<EntityRecord> records = storage.readAll(ids,  fieldMask);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
@@ -369,7 +364,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
         checkNotNull(format);
         EntityRecordStorage<I, S> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll(format);
+        RecordQuery<I, EntityRecord> query = QueryConverter.convert(storage.recordSpec(), format);
+        Iterator<EntityRecord> records = storage.readAll(query);
         return records;
     }
 
@@ -397,6 +393,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> find(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
+        checkValid(filters);
         checkNotNull(format);
 
         Iterator<EntityRecord> records = findRecords(filters, format);
@@ -413,9 +410,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(format);
 
         EntityRecordStorage<I, S> storage = recordStorage();
-        EntityRecordSpec<I> entityRecordSpec = storage.recordSpec();
-        OldRecordQuery<I> entityQuery = RecordQueries.from(filters, entityRecordSpec);
-        Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
+        RecordQuery<I, EntityRecord> query =
+                QueryConverter.convert(storage.recordSpec(), filters, format);
+        Iterator<EntityRecord> records = storage.readAll(query);
         return records;
     }
 
@@ -468,11 +465,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @VisibleForTesting
     RecordWithColumns<I, EntityRecord> toRecord(E entity) {
-        EntityRecordSpec<I> spec = EntityRecordSpec.of(entity.modelClass());
         EntityRecord record = storageConverter().convert(entity);
         checkNotNull(record);
         RecordWithColumns<I, EntityRecord> result =
-                EntityRecordWithColumns.create(entity, spec, record);
+                EntityRecordWithColumns.create(entity, record);
         return result;
     }
 

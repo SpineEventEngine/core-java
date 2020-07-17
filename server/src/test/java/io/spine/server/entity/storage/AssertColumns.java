@@ -18,21 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.entity.storage;
 
-import io.spine.query.EntityWithColumns;
-import io.spine.server.projection.Projection;
-import io.spine.test.entity.TaskView;
-import io.spine.test.entity.TaskViewId;
+import com.google.common.collect.ImmutableSet;
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
+import io.spine.query.EntityColumn;
 
-public final class IntrospectorTestEnv {
+import static com.google.common.truth.Truth.assertThat;
 
-    /** Prevents instantiation of this test env class. */
-    private IntrospectorTestEnv() {
+/**
+ * An assertion utility for {@link EntityColumn} tests.
+ */
+final class AssertColumns {
+
+    /**
+     * Prevents this utility from instantiating.
+     */
+    private AssertColumns() {
     }
 
-    public static final class InvalidEntityWithColumns
-            extends Projection<TaskViewId, TaskView, TaskView.Builder>
-            implements EntityWithColumns {
+    static void assertContains(ImmutableSet<? extends Column<?, ?>> columns, String columnName) {
+        ColumnName expectedName = ColumnName.of(columnName);
+        boolean contains = false;
+        for (Column<?, ?> column : columns) {
+            contains = contains || column.name().equals(expectedName);
+        }
+        assertThat(contains).isTrue();
     }
 }

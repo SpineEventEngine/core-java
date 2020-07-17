@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
@@ -138,7 +139,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     }
 
     @Override
-    protected Optional<Column<?, ?>> findColumn(ColumnName name) {
+    public Optional<Column<?, ?>> findColumn(ColumnName name) {
         Column<?, ?> resultInSimple = lookForColumn(name, simpleColumns);
         if (resultInSimple != null) {
             return Optional.of(resultInSimple);
@@ -165,5 +166,21 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
      */
     public EntityClass<E> entityClass() {
         return entityClass;
+    }
+
+    /**
+     * Returns the total number of columns in this specification.
+     */
+    @VisibleForTesting
+    int columnCount() {
+        return systemColumns.size() + simpleColumns.size();
+    }
+
+    /**
+     * Returns the discovered system columns.
+     */
+    @VisibleForTesting
+    ImmutableSet<CustomColumn<E, ?>> systemColumns() {
+        return systemColumns;
     }
 }

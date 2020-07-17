@@ -20,9 +20,14 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.query.ColumnName;
 import io.spine.query.CustomColumn;
+import io.spine.query.RecordColumn;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityRecord;
 
 import java.util.function.Supplier;
 
@@ -51,14 +56,34 @@ public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>
     }
 
     /**
-     * Obtains the column treating it as a column with {@code Boolean} values.
+     * Returns the name of the column.
+     */
+    public ColumnName columnName() {
+        return get().name();
+    }
+
+    /**
+     * Obtains the column treating it as a lifecycle column with {@code Boolean} values.
      *
-     * <p>If the column has the different type of values, the {@link ClassCastException} is thrown.
+     * <p>If the column has the type of values different from {@code Boolean},
+     * the {@link ClassCastException} is thrown.
      */
     @SuppressWarnings("unchecked")
-    public CustomColumn<Entity<?, ?>, Boolean> asBooleanColumn() {
+    public CustomColumn<Entity<?, ?>, Boolean> lifecycle() {
         CustomColumn<Entity<?, ?>, Boolean> boolColumn =
                 (CustomColumn<Entity<?, ?>, Boolean>) this.column;
         return boolColumn;
+    }
+
+    <V> RecordColumn<EntityRecord, V> asRecordColumn(Class<V> valueType) {
+        return AsEntityRecordColumn.apply(column, valueType);
+    }
+
+    /**
+     * Returns the names of all columns.
+     */
+    @VisibleForTesting
+    static ImmutableSet<ColumnName> columnNames() {
+        return ImmutableSet.of(archived.columnName(), deleted.columnName(), version.columnName());
     }
 }

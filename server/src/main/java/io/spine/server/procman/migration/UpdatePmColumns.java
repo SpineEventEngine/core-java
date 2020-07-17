@@ -29,6 +29,8 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerMigration;
 
 /**
+ * //TODO:2020-07-17:alex.tymchenko: introduce the `onBeforeCommit()` and rewrite the docs.
+ *
  * A migration operation that does the update of interface-based columns of a
  * {@link ProcessManager}.
  *
@@ -43,7 +45,6 @@ import io.spine.server.procman.ProcessManagerMigration;
  *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}.
  *         It thus does not change the entity state itself in {@link #apply(EntityState)}.
  *
- * @see io.spine.server.entity.storage.InterfaceBasedColumn
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental

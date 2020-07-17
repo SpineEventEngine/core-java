@@ -24,22 +24,55 @@ import io.spine.query.Column;
 import io.spine.query.RecordColumn;
 import io.spine.server.entity.EntityRecord;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A definition of an {@link EntityRecord} column, which uses the name of another column.
+ * Utility which creates views on the {@linkplain Column columns}.
  */
-final class AsEntityRecordColumn extends RecordColumn<EntityRecord, Object> {
+final class AsEntityRecordColumn {
 
-    private static final long serialVersionUID = 0L;
+    /**
+     * Prevents the instantiation of this utility.
+     */
+    private AsEntityRecordColumn() {
+    }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})  // to avoid the generics hell.
-    AsEntityRecordColumn(Column<?, ?> original) {
-        super(columnName(original), (Class) original.type(), getter(original));
+    /**
+     * Creates a view on the given column as on a record column of an {@link EntityRecord}
+     * with the given type of values.
+     *
+     * <p>The resulting view loses an ability to {@linkplain Column#valueIn(Object) obtain
+     * the values from the record instance}.
+     *
+     * @param original the column to create a view for
+     * @param typeOfValues the type of the column values
+     * @param <V> the type of the column values
+     * @return a view on the column
+     */
+    static <V> RecordColumn<EntityRecord, V> apply(Column<?, ?> original, Class<V> typeOfValues) {
+        checkNotNull(original);
+        checkNotNull(typeOfValues);
+        String columnName = columnName(original);
+        return new RecordColumn<>(columnName, typeOfValues, noGetter());
+    }
+
+    /**
+     * Creates a view on the given column as on the record column of an {@linkplain EntityRecord}
+     * with the {@code Object} values.
+     *
+     * <p>The resulting view loses an ability to {@linkplain Column#valueIn(Object) obtain
+     * the values from the record instance}.
+     *
+     * @param original the column to create a view for
+     * @return a view on the column
+     */
+    static RecordColumn<EntityRecord, Object> apply(Column<?, ?> original) {
+        return apply(original, Object.class);
     }
 
     @SuppressWarnings("unused")     // method always throws an `IllegalStateException`.
-    private static Getter<EntityRecord, Object> getter(Column<?, ?> original) {
+    private static <V> Column.Getter<EntityRecord, V> noGetter() {
         throw newIllegalStateException("`EntityRecordColumn`s do not have getters.");
     }
 

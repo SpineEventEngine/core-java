@@ -103,7 +103,7 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
     }
 
     @Override
-    protected Optional<Column<?, ?>> findColumn(ColumnName name) {
+    public Optional<Column<?, ?>> findColumn(ColumnName name) {
         RecordColumn<R, ?> result = columns.get(name);
         return Optional.ofNullable(result);
     }

@@ -63,8 +63,6 @@ final class FindActiveEntites<I, S extends EntityState<I>>
     static final class Builder<I, S extends EntityState<I>>
             extends EntityQueryBuilder<I, S, Builder<I, S>, FindActiveEntites<I, S>> {
 
-        private EntityQuery<I, S, ?> groundQuery;
-
         /**
          * Prevents this builder from a direct instantiation.
          */
@@ -74,8 +72,8 @@ final class FindActiveEntites<I, S extends EntityState<I>>
         }
 
         private void setLifecycle() {
-            this.where(archived.asBooleanColumn(), false)
-                .where(deleted.asBooleanColumn(), false);
+            this.where(archived.lifecycle(), false)
+                .where(deleted.lifecycle(), false);
         }
 
         @Override

@@ -81,7 +81,7 @@ final class Scanner<I, S extends EntityState<I>, E extends Entity<I, S>>  {
     }
 
     /**
-     * Obtains the {@linkplain SimpleColumn entity-state-based} columns of the class.
+     * Obtains the {@linkplain EntityColumn entity-state-based} columns of the class.
      */
     @SuppressWarnings("OverlyBroadCatchBlock")  // Treating all exceptions equally.
     ImmutableSet<EntityColumn<S, ?>> simpleColumns() {

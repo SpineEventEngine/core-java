@@ -28,6 +28,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+
 /**
  * Defines the specification of a record in a storage.
  *
@@ -77,5 +79,30 @@ public abstract class RecordSpec<I, R, S> {
      */
     protected abstract I idValueIn(S source);
 
-    protected abstract Optional<Column<?, ?>> findColumn(ColumnName name);
+    /**
+     * Finds the column in this specification by the column name.
+     *
+     * @param name the name of the column to search for
+     * @return the column wrapped into {@code Optional},
+     * or {@code Optional.empty()} if no column is found
+     */
+    public abstract Optional<Column<?, ?>> findColumn(ColumnName name);
+
+    /**
+     * Finds the column in this specification by the column name.
+     *
+     * <p>Throws {@link IllegalArgumentException} if no such column exists.
+     *
+     * @param name
+     *         the name of the column to search for
+     * @return the column
+     * @throws IllegalArgumentException
+     *         if the column is not found
+     */
+    public final Column<?, ?> get(ColumnName name) throws IllegalArgumentException {
+        return findColumn(name)
+                .orElseThrow(() -> newIllegalArgumentException(
+                        "Cannot find the column `%s` in the record specification of type `%s`.",
+                        name, recordType));
+    }
 }

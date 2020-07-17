@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.FieldMask;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
@@ -36,6 +37,8 @@ import java.util.Iterator;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 
 /**
  * A {@code MessageStorage} which stores {@link EntityRecord}s.
@@ -76,6 +79,45 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Returns the records for both active and non-active entities.
+     *
+     * <p>Overrides the parent method in order to expose it as a part of the public API.
+     */
+    @Override
+    public Iterator<EntityRecord> readAll(Iterable<I> ids, FieldMask mask) {
+        return super.readAll(ids, mask);
+    }
+
+    /**
+     * Reads the entity records according to the passed query.
+     *
+     * <p>If the passed query has no ID parameter set, only the records of the active entities
+     * are returned. If the query includes the ID parameter, includes non-active entities as well.
+     *
+     * <p>Overrides the parent method in order to expose it as a part of the public API.
+     */
+    @Override
+    public Iterator<EntityRecord> readAll(RecordQuery<I, EntityRecord> query) {
+        RecordQuery<I, EntityRecord> toExecute = query;
+        if (!query.subject()
+                  .id()
+                  .values()
+                  .isEmpty()) {
+            toExecute =
+                    query.toBuilder()
+                         .where(archived.asRecordColumn(Boolean.class))
+                         .is(false)
+                         .where(deleted.asRecordColumn(Boolean.class))
+                         .is(false)
+                         .build();
+
+        }
+        return super.readAll(toExecute);
+    }
+
+    /**
      * Returns the iterator over identifiers of the records which match the passed query.
      *
      * <p>Unless the query specifies otherwise, only non-archived and non-deleted entity records
@@ -102,6 +144,8 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
 
     /**
      * Finds all records which match the given query.
+     *
+     * <p>Only the records of active entities are returned.
      */
     public final Iterator<EntityRecord> findAll(EntityQuery<I, S, ?> query) {
         RecordQuery<I, EntityRecord> result = onlyActive(query);
@@ -109,8 +153,9 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     }
 
     /**
-     * Reads the entity records by the passed record identifiers, limiting the results
-     * to non-archived and non-deleted records.
+     * Reads the entity records by the passed record identifiers.
+     *
+     * <p>The results include the records of both active and non-active entities.
      *
      * @param ids
      *         identifiers of the records of interest
@@ -120,10 +165,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public Iterator<EntityRecord> readAll(Iterable<I> ids) {
-        //TODO:2020-04-17:alex.tymchenko: do we need to append the params?
-        FindActiveEntites<I, S> query = findActiveEntities().buildWithIds(ids);
-        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
-        return readAll(recordQuery);
+        return super.readAll(ids);
     }
 
     /**
@@ -213,9 +255,12 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
         return FindActiveEntites.newBuilder(stateType());
     }
 
-
     private RecordQuery<I, EntityRecord> onlyActive(EntityQuery<I, S, ?> query) {
-        FindActiveEntites<I, S> onlyActive = findActiveEntities().buildOnTop(query);
+        EntityQuery<I, S, ?> onlyActive =
+                query.toBuilder()
+                     .where(archived.lifecycle(), false)
+                     .where(deleted.lifecycle(), false)
+                     .build();
         return ToEntityRecordQuery.transform(onlyActive);
     }
 }

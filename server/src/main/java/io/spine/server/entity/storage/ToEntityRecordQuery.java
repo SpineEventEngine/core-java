@@ -59,7 +59,7 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         ImmutableList<OrderBy<?, S>> ordering = source.ordering();
         for (OrderBy<?, S> orderByOrigin : ordering) {
             RecordColumn<EntityRecord, ?> thisColumn =
-                    new AsEntityRecordColumn(orderByOrigin.column());
+                    AsEntityRecordColumn.apply(orderByOrigin.column());
             this.orderBy(thisColumn, orderByOrigin.direction());
         }
 
@@ -95,7 +95,7 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
                    RecordQueryBuilder<I, EntityRecord> builder) {
         for (SubjectParameter<S, ?, ?> parameter : parameters) {
             Column<S, ?> sourceColumn = parameter.column();
-            AsEntityRecordColumn column = new AsEntityRecordColumn(sourceColumn);
+            RecordColumn<EntityRecord, Object> column = AsEntityRecordColumn.apply(sourceColumn);
 
             RecordCriterion<I, EntityRecord, Object> where = builder.where(column);
             Object paramValue = parameter.value();
