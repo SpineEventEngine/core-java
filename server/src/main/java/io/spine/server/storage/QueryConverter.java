@@ -98,9 +98,11 @@ public final class QueryConverter {
 
                 switch (compositeOperator) {
                     case ALL:
-                        parts(builder, spec, composite); break;
+                        parts(builder, spec, composite);
+                        break;
                     case EITHER:
-                        builder.either((either) -> parts(either, spec, composite)); break;
+                        builder.either((either) -> parts(either, spec, composite));
+                        break;
                     case UNRECOGNIZED:
                     case CCF_CO_UNDEFINED:
                     default:
@@ -136,19 +138,24 @@ public final class QueryConverter {
         switch (operator) {
             case EQUAL:
                 builder.where(convertedColumn)
-                       .is(value); break;
+                       .is(value);
+                break;
             case GREATER_THAN:
                 builder.where(convertedColumn)
-                       .isGreaterThan(value); break;
+                       .isGreaterThan(value);
+                break;
             case GREATER_OR_EQUAL:
                 builder.where(convertedColumn)
-                       .isGreaterOrEqualTo(value); break;
+                       .isGreaterOrEqualTo(value);
+                break;
             case LESS_THAN:
                 builder.where(convertedColumn)
-                       .isLessThan(value); break;
+                       .isLessThan(value);
+                break;
             case LESS_OR_EQUAL:
                 builder.where(convertedColumn)
-                       .isLessOrEqualTo(value); break;
+                       .isLessOrEqualTo(value);
+                break;
 
             case UNRECOGNIZED:
             case CFO_UNDEFINED:
@@ -241,13 +248,18 @@ public final class QueryConverter {
 
         private AsRecordColumn(Column<?, ?> origin) {
             super(origin.name()
-                        .value(), Object.class, getter());
+                        .value(), Object.class, noGetter());
         }
 
-        private static <R extends Message> Getter<R, Object> getter() {
-            throw newIllegalStateException(
-                    "`AsRecordColumn` serves for the column conversion only " +
-                            "and does not supply a getter.");
+        /**
+         * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
+         */
+        private static <R extends Message> Getter<R, Object> noGetter() {
+            return record -> {
+                throw newIllegalStateException(
+                        "`AsRecordColumn`s serves for the column conversion only " +
+                                "and does not supply a getter.");
+            };
         }
     }
 }
