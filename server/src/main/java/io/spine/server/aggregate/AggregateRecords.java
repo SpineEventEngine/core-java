@@ -101,15 +101,17 @@ final class AggregateRecords {
 
         String stringId = Stringifiers.toString(aggregateId);
         String snapshotTimestamp = Timestamps.toString(snapshot.getTimestamp());
-        String snapshotColumnName = AggregateEventRecordColumn.snapshot.name();
+        String snapshotColumnName = AggregateEventRecordColumn.snapshot.name()
+                                                                       .value();
         String snapshotId = format("%s_%s_%s", snapshotColumnName, stringId, snapshotTimestamp);
         AggregateEventRecordId recordId = eventRecordId(snapshotId);
-        return AggregateEventRecord.newBuilder()
-                                   .setId(recordId)
-                                   .setAggregateId(Identifier.pack(aggregateId))
-                                   .setTimestamp(value)
-                                   .setSnapshot(snapshot)
-                                   .build();
+        return AggregateEventRecord
+                .newBuilder()
+                .setId(recordId)
+                .setAggregateId(Identifier.pack(aggregateId))
+                .setTimestamp(value)
+                .setSnapshot(snapshot)
+                .build();
     }
 
     /**

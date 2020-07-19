@@ -20,75 +20,80 @@
 
 package io.spine.server.event.store;
 
-import com.google.protobuf.Any;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.util.Timestamps;
-import io.spine.client.CompositeFilter;
-import io.spine.client.CompositeFilter.CompositeOperator;
-import io.spine.client.Filter;
-import io.spine.client.TargetFilters;
+import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.query.QueryPredicate;
+import io.spine.query.RecordQuery;
+import io.spine.query.Subject;
+import io.spine.query.SubjectParameter;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.query.LogicalOperator.AND;
+import static io.spine.query.LogicalOperator.OR;
+import static io.spine.server.event.store.Queries.convert;
 
-import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.event.store.QueryToFilters.convert;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-@DisplayName("QueryToFilters should")
-class QueryToFiltersTest {
+@DisplayName("`Queries` should")
+class QueriesTest {
 
     @Test
-    @DisplayName("convert empty query to empty EntityFilters")
+    @DisplayName("convert empty query to an empty `RecordQuery`")
     void convertEmptyToFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
-        TargetFilters entityFilters = convert(query);
-        assertTrue(entityFilters.getFilterList()
-                                .isEmpty());
+        RecordQuery<EventId, Event> result = convert(query);
+        Subject<EventId, Event> subject = result.subject();
+        assertThat(subject.id().values()).isEmpty();
+        assertThat(subject.predicates()).isEmpty();
     }
 
     @Test
-    @DisplayName("convert time query to EntityFilters")
+    @DisplayName("convert time query to the corresponding `RecordQuery`")
     void convertTimeToFilters() {
         EventStreamQuery query = EventStreamQuery
                 .newBuilder()
                 .setAfter(Timestamps.MIN_VALUE)
                 .setBefore(Timestamps.MAX_VALUE)
                 .build();
-        TargetFilters entityFilters = convert(query);
-        assertEquals(1, entityFilters.getFilterCount());
+        RecordQuery<EventId, Event> result = convert(query);
+        Subject<EventId, Event> subject = result.subject();
+        assertThat(subject.predicates()).hasSize(1);
 
-        CompositeFilter compositeFilter = entityFilters.getFilter(0);
-        List<Filter> filters = compositeFilter.getFilterList();
-        assertEquals(CompositeOperator.ALL, compositeFilter.getOperator());
-        assertEquals(2, filters.size());
+        QueryPredicate<Event> predicate = subject.predicates()
+                                                 .get(0);
+        assertThat(predicate.operator()).isEqualTo(AND);
+        assertThat(predicate.parameters()).hasSize(2);
     }
 
     @Test
-    @DisplayName("convert type query to EntityFilters")
+    @DisplayName("convert type query to the corresponding `RecordQuery`")
     void convertTypeToFilters() {
-        String typeName = " com.example.EventType ";
-        EventFilter validFilter = filterForType(typeName);
+        String expected = " com.example.EventType ";
+        EventFilter validFilter = filterForType(expected);
         EventFilter invalidFilter = filterForType("   ");
         EventStreamQuery query = EventStreamQuery
                 .newBuilder()
                 .addFilter(validFilter)
                 .addFilter(invalidFilter)
                 .build();
-        TargetFilters entityFilters = convert(query);
-        assertEquals(1, entityFilters.getFilterCount());
+        RecordQuery<EventId, Event> result = convert(query);
+        Subject<EventId, Event> subject = result.subject();
+        assertThat(subject.predicates()).hasSize(1);
+        QueryPredicate<Event> predicate = subject.predicates()
+                                                 .get(0);
+        assertThat(predicate.operator()).isEqualTo(OR);
 
-        CompositeFilter compositeFilter = entityFilters.getFilter(0);
-        List<Filter> filters = compositeFilter.getFilterList();
-        assertEquals(CompositeOperator.EITHER, compositeFilter.getOperator());
-        assertEquals(1, filters.size());
-        Any typeNameAsAny = filters.get(0)
-                                   .getValue();
-        assertEquals(typeName.trim(), toObject(typeNameAsAny, String.class));
+        ImmutableList<SubjectParameter<Event, ?, ?>> parameters = predicate.parameters();
+        assertThat(parameters).hasSize(1);
+
+        SubjectParameter<Event, ?, ?> parameter = parameters.get(0);
+        Object value = parameter.value();
+        assertThat(value).isEqualTo(expected.trim());
     }
 
     private static EventFilter filterForType(String typeName) {

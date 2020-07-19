@@ -26,9 +26,9 @@ import com.google.protobuf.Message;
 import io.spine.query.Column;
 import io.spine.query.LogicalOperator;
 import io.spine.query.QueryPredicate;
+import io.spine.query.RecordQuery;
 import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
-import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Matches the records to the given {@link OldRecordQuery}.
+ * Matches the records to the subject of the given {@link io.spine.query.RecordQuery RecordQuery}.
  *
  * @param <I>
  *         the type of the identifiers of the matched records
@@ -50,6 +50,10 @@ public class RecordQueryMatcher<I, R extends Message>
 
     private final ImmutableSet<I> acceptedIds;
     private final ImmutableList<QueryPredicate<R>> predicates;
+
+    RecordQueryMatcher(RecordQuery<I, R> query) {
+        this(checkNotNull(query).subject());
+    }
 
     RecordQueryMatcher(Subject<I, R> subject) {
         checkNotNull(subject);

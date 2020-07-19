@@ -30,6 +30,7 @@ import io.spine.query.ColumnName;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.server.entity.storage.given.TestColumnMapping;
+import io.spine.test.storage.StgTask;
 import io.spine.test.storage.StgTaskId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

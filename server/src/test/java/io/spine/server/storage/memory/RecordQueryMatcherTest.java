@@ -21,20 +21,15 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
-import io.spine.client.Filter;
-import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordQuery;
+import io.spine.query.RecordQueryBuilder;
 import io.spine.query.Subject;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.QueryParameters;
-import io.spine.server.storage.RecordQueries;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.TaskId;
 import io.spine.testdata.Sample;
@@ -43,12 +38,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
-import static io.spine.client.Filters.eq;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.anyColumn;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.anyValue;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.booleanColumn;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.recordSubject;
+import static io.spine.testing.Tests.nullRef;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -60,10 +54,9 @@ class RecordQueryMatcherTest {
     @DisplayName("match everything except `null` to empty query")
     void matchEverythingToEmpty() {
         Subject<Object, EntityRecord> sampleSubject = recordSubject();
-
         RecordQueryMatcher<?, EntityRecord> matcher = new RecordQueryMatcher<>(sampleSubject);
 
-        assertFalse(matcher.test(null));
+        assertFalse(matcher.test(nullRef()));
         assertTrue(matcher.test(EntityRecordWithColumns.of(sampleEntityRecord())));
     }
 
@@ -90,21 +83,21 @@ class RecordQueryMatcherTest {
         boolean actualValue = false;
         ColumnName columnName = column.name();
         RecordQuery<Object, EntityRecord> query =
-                RecordQuery.newBuilder(EntityRecord.class)
-                           .where(column)
-                           .is(actualValue)
-                           .build();
+                newBuilder()
+                        .where(column)
+                        .is(actualValue)
+                        .build();
 
-        RecordQueryMatcher<TaskId, EntityRecord> matcher = new RecordQueryMatcher<>(
-                query.subject());
+        RecordQueryMatcher<Object, EntityRecord> matcher =
+                new RecordQueryMatcher<>(query.subject());
 
         EntityRecord matching = sampleEntityRecord(Sample.messageOfType(TaskId.class));
         Map<ColumnName, Object> matchingColumns = ImmutableMap.of(columnName, actualValue);
-        EntityRecordWithColumns<TaskId> matchingRecord =
+        EntityRecordWithColumns<Object> matchingRecord =
                 EntityRecordWithColumns.of(matching, matchingColumns);
 
         EntityRecord nonMatching = sampleEntityRecord(Sample.messageOfType(TaskId.class));
-        EntityRecordWithColumns<TaskId> nonMatchingRecord = EntityRecordWithColumns.of(nonMatching);
+        EntityRecordWithColumns<Object> nonMatchingRecord = EntityRecordWithColumns.of(nonMatching);
 
         assertTrue(matcher.test(matchingRecord));
         assertFalse(matcher.test(nonMatchingRecord));
@@ -113,39 +106,39 @@ class RecordQueryMatcherTest {
     @Test
     @DisplayName("match `Any` instances")
     void matchAnyInstances() {
-        Column<?, Any> column = anyColumn();
+        RecordColumn<EntityRecord, Any> column = anyColumn();
         Any actualValue = anyValue();
 
         ColumnName columnName = column.name();
 
         EntityRecord record = sampleEntityRecord();
         Map<ColumnName, Object> columns = singletonMap(columnName, actualValue);
-        EntityRecordWithColumns<String> recordAndCols = EntityRecordWithColumns.of(record, columns);
-
-        QueryParameters parameters = QueryParameters.eq(column, actualValue);
-        RecordQuery<String> query = RecordQueries.of(parameters);
-
-        RecordQueryMatcher<String, EntityRecord> matcher = new RecordQueryMatcher<>(query);
+        EntityRecordWithColumns<Object> recordAndCols = EntityRecordWithColumns.of(record, columns);
+        RecordQuery<Object, EntityRecord> query = newBuilder().where(column)
+                                                              .is(actualValue)
+                                                              .build();
+        RecordQueryMatcher<Object, EntityRecord> matcher = new RecordQueryMatcher<>(query);
         assertTrue(matcher.test(recordAndCols));
     }
 
     @Test
     @DisplayName("not match by wrong field name")
     void notMatchByWrongField() {
-        String wrongName = "wrong";
-        Column<?, Boolean> target = booleanColumn();
-
-        Multimap<Column<?, ?>, Filter> filters =ImmutableMultimap.of(target, eq(wrongName, "any"));
-        CompositeQueryParameter parameter = createParams(filters, EITHER);
-        QueryParameters params = QueryParameters.newBuilder()
-                                                .add(parameter)
-                                                .build();
-        RecordQuery<String> query = RecordQueries.of(params);
-        RecordQueryMatcher<String, EntityRecord> matcher = new RecordQueryMatcher<>(query);
+        RecordColumn<EntityRecord, Boolean> target = booleanColumn("some_random_name");
+        RecordQuery<Object, EntityRecord> query =
+                newBuilder()
+                        .where(target)
+                        .is(true)
+                        .build();
+        RecordQueryMatcher<Object, EntityRecord> matcher = new RecordQueryMatcher<>(query);
 
         EntityRecord record = sampleEntityRecord();
-        EntityRecordWithColumns<String> recordWithColumns = EntityRecordWithColumns.of(record);
+        EntityRecordWithColumns<Object> recordWithColumns = EntityRecordWithColumns.of(record);
         assertFalse(matcher.test(recordWithColumns));
+    }
+
+    private static RecordQueryBuilder<Object, EntityRecord> newBuilder() {
+        return RecordQuery.newBuilder(EntityRecord.class);
     }
 
     private static EntityRecord sampleEntityRecord() {

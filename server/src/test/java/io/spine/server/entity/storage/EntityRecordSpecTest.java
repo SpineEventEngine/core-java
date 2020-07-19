@@ -27,6 +27,7 @@ import io.spine.query.ColumnName;
 import io.spine.query.CustomColumn;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
+import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

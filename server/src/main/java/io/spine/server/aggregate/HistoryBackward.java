@@ -55,12 +55,8 @@ public class HistoryBackward<I> {
             builder.where(version)
                    .isLessThan(startingFrom.getNumber());
         }
-
         RecordQuery<AggregateEventRecordId, AggregateEventRecord> query =
-                builder.orderBy(version, DESC)
-                       .orderBy(created, DESC)
-                       .limit(batchSize)
-                       .build();
+                inChronologicalOrder(builder, batchSize).build();
         Iterator<AggregateEventRecord> iterator = eventStorage.readAll(query);
         return iterator;
     }
@@ -71,5 +67,15 @@ public class HistoryBackward<I> {
         return eventStorage.queryBuilder()
                            .where(aggregate_id)
                            .is(packedId);
+    }
+
+    static <B extends RecordQueryBuilder<AggregateEventRecordId, AggregateEventRecord>> B
+    inChronologicalOrder(B builder, @Nullable Integer batchSize) {
+        builder.orderBy(version, DESC)
+               .orderBy(created, DESC);
+        if(batchSize != null) {
+            builder.limit(batchSize);
+        }
+        return builder;
     }
 }

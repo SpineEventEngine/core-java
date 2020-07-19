@@ -91,6 +91,13 @@ public final class RecordQueryMatcherTestEnv {
     }
 
     /**
+     * A {@code Column} which holds a {@code boolean} value.
+     */
+    public static RecordColumn<EntityRecord, Boolean> booleanColumn(String name) {
+        return new RecordColumn<>(name, Boolean.class, (r) -> booleanValue());
+    }
+
+    /**
      * The {@code boolean} value held by the corresponding {@linkplain #booleanColumn() entity
      * column}.
      */

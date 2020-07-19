@@ -30,7 +30,6 @@ import io.spine.server.route.EventRouting;
 import io.spine.server.route.given.user.event.RUserConsentRequested;
 import io.spine.server.route.given.user.event.RUserSignedIn;
 import io.spine.server.storage.OldRecordQuery;
-import io.spine.server.storage.RecordQueries;
 import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
 

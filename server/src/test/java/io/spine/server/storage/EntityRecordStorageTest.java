@@ -20,32 +20,24 @@
 
 package io.spine.server.storage;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.client.CompositeFilter;
-import io.spine.client.Filter;
-import io.spine.client.ResponseFormat;
-import io.spine.client.TargetFilters;
-import io.spine.client.Targets;
 import io.spine.core.Version;
+import io.spine.query.RecordQuery;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.EntityRecordColumn;
-import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.given.EntityRecordStorageTestEnv;
 import io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
-import io.spine.testing.core.given.GivenVersion;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -65,26 +57,24 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
-import static io.spine.client.Filters.all;
-import static io.spine.client.Filters.eq;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.server.storage.QueryParameters.activeEntityQueryParams;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.archive;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.assertIteratorsEqual;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.assertQueryHasSingleResult;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.assertSingleRecord;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.buildStorageRecord;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.delete;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newEntity;
-import static io.spine.server.storage.given.EntityRecordStorageTestEnv.withLifecycleColumns;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.test.storage.StgProject.Status.CANCELLED;
+import static io.spine.test.storage.StgProject.Status.CANCELLED_VALUE;
 import static io.spine.test.storage.StgProject.Status.DONE;
+import static io.spine.test.storage.StgProject.Status.DONE_VALUE;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;
 import static java.util.stream.Collectors.toList;
@@ -100,27 +90,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("`EntityRecordStorage` should")
 public class EntityRecordStorageTest
         extends AbstractStorageTest<StgProjectId,
-                                    EntityRecord,
-                                    EntityRecordStorage<StgProjectId, StgProject>> {
-
-    private static EntityRecord newStorageRecord(StgProjectId id, EntityState state) {
-        Any wrappedState = pack(state);
-        EntityRecord record = EntityRecord
-                .newBuilder()
-                .setEntityId(Identifier.pack(id))
-                .setState(wrappedState)
-                .setVersion(GivenVersion.withNumber(0))
-                .build();
-        return record;
-    }
-
-    private static List<EntityRecordWithColumns<StgProjectId>>
-    recordsWithColumnsFrom(Map<StgProjectId, EntityRecord> recordMap) {
-        return recordMap.entrySet()
-                        .stream()
-                        .map(entry -> withLifecycleColumns(entry.getKey(), entry.getValue()))
-                        .collect(toList());
-    }
+        EntityRecord,
+        EntityRecordStorage<StgProjectId, StgProject>> {
 
     @Override
     protected EntityRecordStorage<StgProjectId, StgProject> newStorage() {
@@ -131,7 +102,7 @@ public class EntityRecordStorageTest
 
     @Override
     protected EntityRecord newStorageRecord(StgProjectId id) {
-        return newStorageRecord(id, newState(id));
+        return EntityRecordStorageTestEnv.newStorageRecord(id, newState(id));
     }
 
     @Override
@@ -148,12 +119,12 @@ public class EntityRecordStorageTest
                 .newBuilder()
                 .addPaths("invalid-path")
                 .build();
-        ResponseFormat format = ResponseFormat
-                .newBuilder()
-                .setFieldMask(nonEmptyFieldMask)
-                .vBuild();
-        EntityRecordStorage<?, ?> storage = storage();
-        Iterator<?> empty = storage.readAll(format);
+        EntityRecordStorage<StgProjectId, ?> storage = storage();
+        RecordQuery<StgProjectId, EntityRecord> query =
+                storage.queryBuilder()
+                       .withMask(nonEmptyFieldMask)
+                       .build();
+        Iterator<?> empty = storage.readAll(query);
 
         assertNotNull(empty);
         assertFalse(empty.hasNext(), "Iterator is not empty!");
@@ -175,20 +146,6 @@ public class EntityRecordStorageTest
         // There's no record with such ID.
         assertFalse(storage.read(id)
                            .isPresent());
-    }
-
-    @Test
-    @DisplayName("return a list of entity columns")
-    void returnColumnList() {
-        EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-        ImmutableList<Column> columnList = storage.recordSpec()
-                                                     .columnList();
-
-        int systemColumnCount = EntityRecordColumn.values().length;
-        int protoColumnCount = 6;
-
-        int expectedSize = systemColumnCount + protoColumnCount;
-        assertThat(columnList).hasSize(expectedSize);
     }
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection" /* Storing of generated objects and
@@ -237,6 +194,7 @@ public class EntityRecordStorageTest
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
             int count = 10;
             List<StgProjectId> ids = new ArrayList<>();
+            @SuppressWarnings("rawtypes")
             Class<? extends EntityState> stateClass = null;
 
             for (int i = 0; i < count; i++) {
@@ -245,7 +203,7 @@ public class EntityRecordStorageTest
                 if (stateClass == null) {
                     stateClass = state.getClass();
                 }
-                EntityRecord record = newStorageRecord(id, state);
+                EntityRecord record = EntityRecordStorageTestEnv.newStorageRecord(id, state);
                 storage.write(id, record);
                 ids.add(id);
             }
@@ -278,19 +236,15 @@ public class EntityRecordStorageTest
             archive(archivedEntity);
 
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            storage.write(create(activeEntity, spec, activeRecord));
-            storage.write(create(archivedEntity, spec, archivedRecord));
 
-            TargetFilters filters = TargetFilters
-                    .newBuilder()
-                    .addFilter(all(eq(archived.name(), true)))
-                    .build();
-            OldRecordQuery<StgProjectId> query = RecordQueries.from(filters, spec);
-            Iterator<EntityRecord> read = storage.readAll(query);
-            assertSingleRecord(archivedRecord, read);
+            storage.write(create(activeEntity, activeRecord));
+            storage.write(create(archivedEntity, archivedRecord));
+
+            StgProject.Query query = StgProject.newQuery()
+                                               .where(archived.lifecycle(), true)
+                                               .build();
+            assertQueryHasSingleResult(query, archivedRecord, storage);
         }
-
     }
 
     @Nested
@@ -301,78 +255,58 @@ public class EntityRecordStorageTest
         @DisplayName("by columns")
         void byColumns() {
             StgProject.Status done = DONE;
-            Filter status = projectStatusFilter(done);
-            Filter version = projectVersionFilter();
-            CompositeFilter aggregatingFilter = CompositeFilter
-                    .newBuilder()
-                    .setOperator(ALL)
-                    .addFilter(status)
-                    .addFilter(version)
-                    .build();
-            TargetFilters filters = TargetFilters
-                    .newBuilder()
-                    .addFilter(aggregatingFilter)
-                    .build();
-
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
 
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            OldRecordQuery<StgProjectId> query = RecordQueries.from(filters, spec);
             StgProjectId idMatching = newId();
             StgProjectId idWrong1 = newId();
             StgProjectId idWrong2 = newId();
 
             TestCounterEntity matchingEntity = newEntity(idMatching);
-            TestCounterEntity wrongEntity1 = newEntity(idWrong1);
-            TestCounterEntity wrongEntity2 = newEntity(idWrong2);
+            TestCounterEntity wrong1 = newEntity(idWrong1);
+            TestCounterEntity wrong2 = newEntity(idWrong2);
 
             // 2 of 3 have required values
 
             matchingEntity.assignStatus(done);
-            wrongEntity1.assignStatus(done);
-            wrongEntity2.assignStatus(CANCELLED);
+            wrong1.assignStatus(done);
+            wrong2.assignStatus(CANCELLED);
 
             // Change internal Entity state
-            wrongEntity1.assignCounter(1);
+            wrong1.assignCounter(1);
 
             // After the mutation above the single matching record is the one
             // under the `idMatching` ID
+            EntityRecord fineRecord = writeRecord(storage, idMatching, matchingEntity);
+            writeRecord(storage, idWrong1, wrong1);
+            writeRecord(storage, idWrong2, wrong2);
 
-            EntityRecord fineRecord = buildStorageRecord(idMatching, newState(idMatching));
-            EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
-            EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
-
-            EntityRecordWithColumns<StgProjectId> recordRight =
-                    create(matchingEntity, spec, fineRecord);
-            EntityRecordWithColumns<StgProjectId> recordWrong1 =
-                    create(wrongEntity1, spec, notFineRecord1);
-            EntityRecordWithColumns<StgProjectId> recordWrong2 =
-                    create(wrongEntity2, spec, notFineRecord2);
-
-            storage.write(recordRight);
-            storage.write(recordWrong1);
-            storage.write(recordWrong2);
-
-            Iterator<EntityRecord> readRecords = storage.readAll(query);
-            assertSingleRecord(fineRecord, readRecords);
+            StgProject.Query query = StgProject
+                    .newQuery()
+                    .projectStatusValue()
+                    .is(DONE_VALUE)
+                    .projectVersion()
+                    .is(projectVersion())
+                    .build();
+            assertQueryHasSingleResult(query, fineRecord, storage);
         }
 
-        private Filter projectVersionFilter() {
+        @CanIgnoreReturnValue
+        private EntityRecord writeRecord(EntityRecordStorage<StgProjectId, StgProject> storage,
+                                         StgProjectId id,
+                                         TestCounterEntity entity) {
+            EntityRecord record = buildStorageRecord(id, newState(id));
+            EntityRecordWithColumns<StgProjectId> withCols = create(entity, record);
+            storage.write(withCols);
+            return record;
+        }
+
+        private Version projectVersion() {
             Version versionValue = Version
                     .newBuilder()
                     .setNumber(0)
                     .setTimestamp(PROJECT_VERSION_TIMESTAMP)
                     .build();
-            return eq(StgProject.Column.projectVersion(), versionValue);
-        }
-
-        private Filter projectStatusFilter(StgProject.Status requiredValue) {
-            Int32Value wrappedValue = Int32Value
-                    .newBuilder()
-                    .setValue(requiredValue.getNumber())
-                    .build();
-
-            return eq(StgProject.Column.projectStatusValue(), wrappedValue);
+            return versionValue;
         }
 
         @Test
@@ -398,17 +332,19 @@ public class EntityRecordStorageTest
             write(noMatchIdEntity);
             write(deletedEntity);
 
-            CompositeFilter filter = all(eq("project_status_value", CANCELLED.getNumber()));
-            TargetFilters filters =
-                    Targets.acceptingOnly(targetId)
-                           .toBuilder()
-                           .addFilter(filter)
-                           .build();
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            OldRecordQuery<StgProjectId> filteringQuery = RecordQueries.from(filters, spec);
-            OldRecordQuery<StgProjectId> query = filteringQuery.append(activeEntityQueryParams(spec));
-            Iterator<EntityRecord> read = storage.readAll(query);
+
+            StgProject.Query query = StgProject
+                    .newQuery()
+                    .id()
+                    .is(targetId)
+                    .projectStatusValue()
+                    .is(CANCELLED_VALUE)
+                    .where(archived.lifecycle(), false)
+                    .where(deleted.lifecycle(), false)
+                    .build();
+
+            Iterator<EntityRecord> read = storage.findAll(query);
             List<EntityRecord> readRecords = newArrayList(read);
             assertEquals(1, readRecords.size());
             EntityRecord readRecord = readRecords.get(0);
@@ -417,141 +353,115 @@ public class EntityRecordStorageTest
         }
 
         @Test
-        @DisplayName("by ID and not use columns")
+        @DisplayName("by ID and without using the columns")
         void byIdAndNoColumns() {
-            // Create the test data
-            StgProjectId idMatching = newId();
-            StgProjectId idWrong1 = newId();
-            StgProjectId idWrong2 = newId();
-
-            Entity<StgProjectId, ?> matchingEntity = newEntity(idMatching);
-            Entity<StgProjectId, ?> nonMatchingEntity = newEntity(idWrong1);
-            Entity<StgProjectId, ?> nonMatchingEntity2 = newEntity(idWrong2);
-
-            EntityRecord matchingRecord = buildStorageRecord(idMatching, newState(idMatching));
-            EntityRecord nonMatching1 = buildStorageRecord(idWrong1, newState(idWrong1));
-            EntityRecord nonMatching2 = buildStorageRecord(idWrong2, newState(idWrong2));
+            StgProjectId matchingId = newId();
 
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
+            EntityRecord matchingRecord = writeRecord(matchingId, storage);
+            writeRecord(newId(), storage);
+            writeRecord(newId(), storage);
 
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            EntityRecordWithColumns<StgProjectId> matchingWithCols =
-                    create(matchingEntity, spec, matchingRecord);
-            EntityRecordWithColumns<StgProjectId> nonMatching1WithCols =
-                    create(nonMatchingEntity, spec, nonMatching1);
-            EntityRecordWithColumns<StgProjectId> nontMatching2WithCols =
-                    create(nonMatchingEntity2, spec, nonMatching2);
+            StgProject.Query query = StgProject.newQuery()
+                                               .id()
+                                               .is(matchingId)
+                                               .build();
+            assertQueryHasSingleResult(query, matchingRecord, storage);
+        }
 
-            // Fill the storage
-            storage.write(nonMatching1WithCols);
-            storage.write(matchingWithCols);
-            storage.write(nontMatching2WithCols);
-
-            // Prepare the query
-            Any entityId = Identifier.pack(idMatching);
-            TargetFilters filters = Targets.acceptingOnly(entityId);
-            OldRecordQuery<StgProjectId> query = RecordQueries.from(filters, spec);
-
-            // Perform the query
-            Iterator<EntityRecord> readRecords = storage.readAll(query);
-            // Check results
-            assertSingleRecord(matchingRecord, readRecords);
+        @CanIgnoreReturnValue
+        private EntityRecord writeRecord(StgProjectId id,
+                                         EntityRecordStorage<StgProjectId, StgProject> storage) {
+            Entity<StgProjectId, ?> entity = newEntity(id);
+            EntityRecord record = buildStorageRecord(id, newState(id));
+            EntityRecordWithColumns<StgProjectId> withCols = create(entity, record);
+            storage.write(withCols);
+            return record;
         }
 
         @Test
-        @DisplayName("to exclude inactive records by default")
+        @DisplayName("excluding inactive records by default")
         void emptyQueryExcludesInactive() {
-            StgProjectId activeId = newId();
-            StgProjectId archivedId = newId();
-            StgProjectId deletedId = newId();
-
-            TestCounterEntity activeEntity = newEntity(activeId);
-            TestCounterEntity archivedEntity = newEntity(archivedId);
-            TestCounterEntity deletedEntity = newEntity(deletedId);
-            archive(archivedEntity);
-            delete(deletedEntity);
-
-            EntityRecord activeRecord = buildStorageRecord(activeEntity);
-            EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
-            EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
-
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            storage.write(create(deletedEntity, spec, deletedRecord));
-            storage.write(create(activeEntity, spec, activeRecord));
-            storage.write(create(archivedEntity, spec, archivedRecord));
+            StgProjectId activeId = newId();
+
+            EntityRecord activeRecord = writeRecord(activeId, storage);
+            writeRecordAndArchive(newId(), storage);
+            writeRecordAndDelete(newId(), storage);
 
             Iterator<EntityRecord> read = storage.readAll();
             assertSingleRecord(activeRecord, read);
         }
 
-        @Test
-        @DisplayName("include inactive records when reading by a query")
-        void withQueryIdsAndStatusFilter() {
-            StgProjectId activeId = newId();
-            StgProjectId archivedId = newId();
-            StgProjectId deletedId = newId();
-
-            TestCounterEntity activeEntity = newEntity(activeId);
-            TestCounterEntity archivedEntity = newEntity(archivedId);
+        @CanIgnoreReturnValue
+        private EntityRecord writeRecordAndDelete(
+                StgProjectId deletedId, EntityRecordStorage<StgProjectId, StgProject> storage) {
             TestCounterEntity deletedEntity = newEntity(deletedId);
-            archive(archivedEntity);
-            delete(deletedEntity);
-
-            EntityRecord activeRecord = buildStorageRecord(activeEntity);
-            EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
             EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
+            storage.write(create(deletedEntity, deletedRecord));
+            delete(deletedEntity);
+            return deletedRecord;
+        }
 
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            storage.write(create(deletedEntity, spec, deletedRecord));
-            storage.write(create(activeEntity, spec, activeRecord));
-            storage.write(create(archivedEntity, spec, archivedRecord));
-
-            TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
-            OldRecordQuery<StgProjectId> query = RecordQueries.from(filters, spec);
-            Iterator<EntityRecord> result = storage.readAll(query);
-            ImmutableSet<EntityRecord> actualRecords = ImmutableSet.copyOf(result);
-
-            assertThat(actualRecords).containsExactly(deletedRecord, activeRecord, archivedRecord);
+        @CanIgnoreReturnValue
+        private EntityRecord writeRecordAndArchive
+                (StgProjectId archivedId, EntityRecordStorage<StgProjectId, StgProject> storage) {
+            TestCounterEntity archivedEntity = newEntity(archivedId);
+            EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
+            storage.write(create(archivedEntity, archivedRecord));
+            archive(archivedEntity);
+            return archivedRecord;
         }
 
         @Test
-        @DisplayName("exclude inactive records on bulk read by IDs by default")
+        @DisplayName("including inactive records when reading " +
+                "by a query with explicit `archived` and `deleted` flags set to true")
+        void explicitFlags() {
+            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
+            // Writing the active record.
+            writeRecord(newId(), storage);
+            EntityRecord expectedArchived = writeRecordAndArchive(newId(), storage);
+            EntityRecord expectedDeleted = writeRecordAndDelete(newId(), storage);
+
+            StgProject.Query queryArchived = StgProject.newQuery()
+                                                       .where(archived.lifecycle(), true)
+                                                       .build();
+            assertQueryHasSingleResult(queryArchived, expectedArchived, storage);
+
+            StgProject.Query queryDeleted = StgProject.newQuery()
+                                                      .where(deleted.lifecycle(), true)
+                                                      .build();
+            assertQueryHasSingleResult(queryDeleted, expectedDeleted, storage);
+        }
+
+        @Test
+        @DisplayName("including inactive records on bulk read by IDs by default")
         void filterByIdByDefaultInBulk() {
             StgProjectId activeId = newId();
             StgProjectId archivedId = newId();
             StgProjectId deletedId = newId();
 
-            TestCounterEntity activeEntity = newEntity(activeId);
-            TestCounterEntity archivedEntity = newEntity(archivedId);
-            TestCounterEntity deletedEntity = newEntity(deletedId);
-            archive(archivedEntity);
-            delete(deletedEntity);
-
-            EntityRecord activeRecord = buildStorageRecord(activeEntity);
-            EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
-            EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
-
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            storage.write(create(deletedEntity, spec, deletedRecord));
-            storage.write(create(activeEntity, spec, activeRecord));
-            storage.write(create(archivedEntity, spec, archivedRecord));
+            EntityRecord activeRecord = writeRecord(activeId, storage);
+            EntityRecord archivedRecord = writeRecordAndArchive(archivedId, storage);
+            EntityRecord deletedRecord = writeRecordAndDelete(deletedId, storage);
 
-            ImmutableSet<StgProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
-            //TODO:2020-04-01:alex.tymchenko: deal with the inconsistency read(ids) vs. read(query).
-            Iterator<EntityRecord> actual = storage.readAll(targetIds);
+            StgProject.Query query = StgProject
+                    .newQuery()
+                    .id()
+                    .in(activeId, archivedId, deletedId)
+                    .build();
+            Iterator<EntityRecord> actual = storage.findAll(query);
 
-            assertSingleRecord(activeRecord, actual);
+            assertThat(ImmutableSet.copyOf(actual))
+                    .containsExactly(activeRecord, archivedRecord, deletedRecord);
         }
 
         private void write(Entity<StgProjectId, ?> entity) {
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
             EntityRecord record = buildStorageRecord(entity.id(), entity.state(),
                                                      entity.lifecycleFlags());
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            storage.write(create(entity, spec, record));
+            storage.write(create(entity, record));
         }
     }
 
@@ -582,8 +492,7 @@ public class EntityRecordStorageTest
             EntityRecord record = newStorageRecord(id);
             Entity<StgProjectId, ?> testEntity = newEntity(id);
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordWithColumns<StgProjectId> recordWithColumns =
-                    create(testEntity, storage.recordSpec(), record);
+            EntityRecordWithColumns<StgProjectId> recordWithColumns = create(testEntity, record);
             storage.write(recordWithColumns);
 
             Optional<EntityRecord> readRecord = storage.read(id);
@@ -603,7 +512,7 @@ public class EntityRecordStorageTest
             for (int i = 0; i < bulkSize; i++) {
                 StgProjectId id = newId();
                 EntityRecord record = newStorageRecord(id);
-                initial.put(id, EntityRecordWithColumns.create(id, record));
+                initial.put(id, create(id, record));
             }
             storage.writeAll(initial.values());
 
@@ -643,13 +552,12 @@ public class EntityRecordStorageTest
                 v2Records.put(id, alternateRecord);
             }
 
-            storage.writeAll(recordsWithColumnsFrom(v1Records));
+            storage.writeAll(EntityRecordStorageTestEnv.recordsWithColumnsFrom(v1Records));
             Iterator<EntityRecord> firstRevision = storage.readAll();
             assertIteratorsEqual(v1Records.values()
                                           .iterator(), firstRevision);
-            storage.writeAll(recordsWithColumnsFrom(v2Records));
-            Iterator<EntityRecord> secondRevision =
-                    storage.readAll(ResponseFormat.getDefaultInstance());
+            storage.writeAll(EntityRecordStorageTestEnv.recordsWithColumnsFrom(v2Records));
+            Iterator<EntityRecord> secondRevision = storage.readAll();
             assertIteratorsEqual(v2Records.values()
                                           .iterator(), secondRevision);
         }
@@ -657,55 +565,41 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("a record and update its column values")
         void updateColumnValues() {
-            StgProject.Status initialStatus = DONE;
-            @SuppressWarnings("UnnecessaryLocalVariable") // is used for documentation purposes.
-                    StgProject.Status statusAfterUpdate = CANCELLED;
-            Int32Value initialStatusValue = Int32Value
-                    .newBuilder()
-                    .setValue(initialStatus.getNumber())
-                    .build();
-            Filter status = eq("project_status_value", initialStatusValue);
-            CompositeFilter aggregatingFilter = CompositeFilter
-                    .newBuilder()
-                    .setOperator(ALL)
-                    .addFilter(status)
-                    .build();
-            TargetFilters filters = TargetFilters
-                    .newBuilder()
-                    .addFilter(aggregatingFilter)
-                    .build();
-
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordSpec<StgProjectId> spec = storage.recordSpec();
-            OldRecordQuery<StgProjectId> query = RecordQueries.from(filters, spec);
-
             StgProjectId id = newId();
             TestCounterEntity entity = newEntity(id);
-
-            entity.assignStatus(initialStatus);
-
             EntityRecord record = buildStorageRecord(id, newState(id));
-            EntityRecordWithColumns<StgProjectId> recordWithColumns = create(entity, spec, record);
 
-            FieldMask fieldMask = FieldMask.getDefaultInstance();
-
-            ResponseFormat format = ResponseFormat
-                    .newBuilder()
-                    .setFieldMask(fieldMask)
-                    .vBuild();
-            // Create the record.
-            storage.write(recordWithColumns);
-            Iterator<EntityRecord> recordsBefore = storage.readAll(query, format);
+            // Write with `DONE` status at first.
+            StgProject.Status initialStatus = DONE;
+            record = writeWithStatus(entity, initialStatus, record, storage);
+            StgProject.Query query = StgProject.newQuery()
+                                               .projectStatusValue()
+                                               .is(initialStatus.getNumber())
+                                               .build();
+            Iterator<EntityRecord> recordsBefore = storage.findAll(query);
             assertSingleRecord(record, recordsBefore);
 
-            // Update the entity columns of the record.
-            entity.assignStatus(statusAfterUpdate);
+            // Update the column status with `CANCELLED` value.
+            StgProject.Status statusAfterUpdate = CANCELLED;
+            writeWithStatus(entity, statusAfterUpdate, record, storage);
 
-            EntityRecordWithColumns<StgProjectId> updatedRecordWCols = create(entity, spec, record);
-            storage.write(updatedRecordWCols);
-
-            Iterator<EntityRecord> recordsAfter = storage.readAll(query, format);
+            Iterator<EntityRecord> recordsAfter = storage.findAll(query);
             assertFalse(recordsAfter.hasNext());
         }
+
+        @CanIgnoreReturnValue
+        private EntityRecord
+        writeWithStatus(TestCounterEntity entity,
+                        StgProject.Status status,
+                        EntityRecord record,
+                        EntityRecordStorage<StgProjectId, StgProject> storage) {
+            entity.assignStatus(status);
+            EntityRecordWithColumns<StgProjectId> recordWithColumns = create(entity, record);
+            storage.write(recordWithColumns);
+            return record;
+        }
+
     }
+
 }

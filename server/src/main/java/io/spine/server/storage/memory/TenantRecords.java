@@ -29,7 +29,6 @@ import io.spine.query.OrderBy;
 import io.spine.query.RecordQuery;
 import io.spine.query.Subject;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.OldRecordQuery;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -134,7 +133,7 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
 
     /**
      * Filters the records returning only the ones matching the
-     * {@linkplain OldRecordQuery message query}.
+     * {@linkplain Subject subject of the record query}.
      */
     private Map<I, RecordWithColumns<I, R>> filterRecords(Subject<I, R> subject) {
         RecordQueryMatcher<I, R> matcher = new RecordQueryMatcher<>(subject);

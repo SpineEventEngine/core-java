@@ -43,7 +43,6 @@ public class StgProjectStorage extends MessageStorage<StgProjectId, StgProject> 
         super(factory.createRecordStorage(spec(), multitenant));
     }
 
-    @org.jetbrains.annotations.NotNull
     private static MessageRecordSpec<StgProjectId, StgProject> spec() {
         @SuppressWarnings("ConstantConditions")     // Proto getters are non-{@code null}.
         MessageRecordSpec<StgProjectId, StgProject> spec =

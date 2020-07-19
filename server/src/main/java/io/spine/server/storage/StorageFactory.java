@@ -22,7 +22,6 @@ package io.spine.server.storage;
 
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
-import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventStorage;
@@ -52,7 +51,7 @@ public interface StorageFactory extends AutoCloseable {
      * @param <R>
      *         the type of the stored records
      */
-    <I, R extends Message> RecordStorage<I, R, RecordQuery<I, R>>
+    <I, R extends Message> RecordStorage<I, R>
     createRecordStorage(RecordSpec<I, R, ?> recordSpec, boolean multitenant);
 
     /**

@@ -22,22 +22,20 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Any;
 import io.spine.annotation.SPI;
-import io.spine.client.ResponseFormat;
+import io.spine.query.RecordQuery;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.server.aggregate.HistoryBackward.inChronologicalOrder;
 
 /**
  * Performs the truncation of the Aggregate history.
- *
- * @param <I>
- *         the type of the aggregate identifiers
  */
 @SPI
-public class Truncate<I> {
+public class Truncate {
 
     private final AggregateEventStorage eventStorage;
 
@@ -46,7 +44,9 @@ public class Truncate<I> {
     }
 
     protected void performWith(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
-        ResponseFormat orderChronologically = HistoryBackward.chronologicalResponseWith(null);
+
+        RecordQuery<AggregateEventRecordId, AggregateEventRecord> orderChronologically =
+                inChronologicalOrder(eventStorage.queryBuilder(), null).build();
         Iterator<AggregateEventRecord> eventRecords = eventStorage.readAll(orderChronologically);
         Map<Any, Integer> snapshotHitsByAggregateId = newHashMap();
         while (eventRecords.hasNext()) {

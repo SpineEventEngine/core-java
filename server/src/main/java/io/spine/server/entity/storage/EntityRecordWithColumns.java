@@ -66,6 +66,7 @@ public final class EntityRecordWithColumns<I>
      *         the type of the entity
      * @return a new instance of {@code EntityRecordWithColumns}
      */
+    //TODO:2020-07-19:alex.tymchenko: can we avoid passing the record here?
     public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
     create(E entity, EntityRecord record) {
         checkNotNull(entity);

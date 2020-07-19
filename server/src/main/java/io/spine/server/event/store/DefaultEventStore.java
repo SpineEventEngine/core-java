@@ -24,9 +24,6 @@ import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
-import io.spine.client.OrderBy;
-import io.spine.client.ResponseFormat;
-import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Signal;
@@ -37,7 +34,6 @@ import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
-import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -53,7 +49,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.server.event.EventComparator.chronological;
-import static io.spine.server.event.store.EventColumn.created;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -90,21 +85,6 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
                                       .map(Event::tenant)
                                       .collect(toSet());
         checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
-    }
-
-    private static ResponseFormat formatFrom(EventStreamQuery query) {
-        ResponseFormat.Builder formatBuilder = ResponseFormat.newBuilder();
-        OrderBy ascendingByCreated = OrderBy
-                .newBuilder()
-                .setColumn(created.name().value())
-                .setDirection(OrderBy.Direction.ASCENDING)
-                .vBuild();
-        formatBuilder.addOrderBy(ascendingByCreated);
-        if (query.hasLimit()) {
-            formatBuilder.setLimit(query.getLimit()
-                                        .getValue());
-        }
-        return formatBuilder.build();
     }
 
     @Override
@@ -183,16 +163,8 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
      * Obtains iteration over entities matching the passed query.
      */
     private Iterator<Event> find(EventStreamQuery query) {
-        ResponseFormat format = formatFrom(query);
-        if (query.includeAll()) {
-            RecordQuery<EventId, Event> recordQuery = QueryConverter.convert(recordSpec(), format);
-            return readAll(recordQuery);
-        } else {
-            TargetFilters filters = QueryToFilters.convert(query);
-            RecordQuery<EventId, Event> recordQuery =
-                    QueryConverter.convert(recordSpec(), filters, format);
-            return readAll(recordQuery);
-        }
+        RecordQuery<EventId, Event> converted = Queries.convert(query);
+        return readAll(converted);
     }
 
     private void store(Event event) {

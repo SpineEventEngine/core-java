@@ -23,6 +23,7 @@ package io.spine.server.storage.given;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityState;
+import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.EntityRecord;
@@ -30,6 +31,7 @@ import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -38,11 +40,14 @@ import io.spine.testing.core.given.GivenVersion;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +58,8 @@ public final class EntityRecordStorageTestEnv {
     private EntityRecordStorageTestEnv() {
     }
 
-    public static EntityRecord buildStorageRecord(StgProjectId id, EntityState state) {
+    public static EntityRecord buildStorageRecord(StgProjectId id,
+                                                  EntityState<StgProjectId> state) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
                 .newBuilder()
@@ -64,7 +70,8 @@ public final class EntityRecordStorageTestEnv {
         return record;
     }
 
-    public static EntityRecord buildStorageRecord(StgProjectId id, EntityState state,
+    public static EntityRecord buildStorageRecord(StgProjectId id,
+                                                  EntityState<StgProjectId> state,
                                                   LifecycleFlags lifecycleFlags) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
@@ -113,6 +120,14 @@ public final class EntityRecordStorageTestEnv {
         return result;
     }
 
+    public static List<EntityRecordWithColumns<StgProjectId>>
+    recordsWithColumnsFrom(Map<StgProjectId, EntityRecord> recordMap) {
+        return recordMap.entrySet()
+                        .stream()
+                        .map(entry -> withLifecycleColumns(entry.getKey(), entry.getValue()))
+                        .collect(toList());
+    }
+
     public static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
         assertTrue(actual.hasNext());
         EntityRecord singleRecord = actual.next();
@@ -126,6 +141,25 @@ public final class EntityRecordStorageTestEnv {
         Collection<? extends E> secondCollection = newArrayList(second);
         assertEquals(firstCollection.size(), secondCollection.size());
         assertThat(firstCollection).containsExactlyElementsIn(secondCollection);
+    }
+
+    public static EntityRecord newStorageRecord(StgProjectId id, EntityState<StgProjectId> state) {
+        Any wrappedState = pack(state);
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(id))
+                .setState(wrappedState)
+                .setVersion(GivenVersion.withNumber(0))
+                .build();
+        return record;
+    }
+
+    public static void assertQueryHasSingleResult(
+            StgProject.Query query,
+            EntityRecord expected,
+            EntityRecordStorage<StgProjectId, StgProject> storage) {
+        Iterator<EntityRecord> actual = storage.findAll(query);
+        assertSingleRecord(expected, actual);
     }
 
     @SuppressWarnings("unused") // Reflective access

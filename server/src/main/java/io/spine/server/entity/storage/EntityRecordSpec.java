@@ -55,7 +55,6 @@ import static io.spine.server.entity.model.EntityClass.asParameterizedEntityClas
  *
  * @see io.spine.server.storage.MessageRecordSpec
  */
-//TODO:2020-07-01:alex.tymchenko: use `io.spine.query.EntityColumn` here.
 @Immutable
 @Internal
 public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entity<I, S>>

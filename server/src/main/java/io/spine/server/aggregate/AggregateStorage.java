@@ -30,13 +30,13 @@ import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.AbstractStorage;
-import io.spine.server.storage.OldRecordQuery;
-import io.spine.server.storage.RecordQueries;
+import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -66,7 +66,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
     private final AggregateEventStorage eventStorage;
     private final EntityRecordStorage<I, S> stateStorage;
     private boolean mirrorEnabled = false;
-    private final Truncate<Object> truncation;
+    private final Truncate truncation;
     private final HistoryBackward<I> historyBackward;
 
     public AggregateStorage(ContextSpec context,
@@ -75,7 +75,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
         super(context.isMultitenant());
         eventStorage = factory.createAggregateEventStorage(context.isMultitenant());
         stateStorage = factory.createEntityRecordStorage(context, aggregateClass);
-        truncation = new Truncate<>(eventStorage);
+        truncation = new Truncate(eventStorage);
         historyBackward = new HistoryBackward<>(eventStorage);
     }
 
@@ -215,8 +215,9 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
-        OldRecordQuery<I> query = RecordQueries.from(filters, stateStorage.recordSpec());
-        return stateStorage.readAll(query, format);
+        RecordQuery<I, EntityRecord> query =
+                QueryConverter.convert(stateStorage.recordSpec(),filters, format);
+        return stateStorage.readAll(query);
     }
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
