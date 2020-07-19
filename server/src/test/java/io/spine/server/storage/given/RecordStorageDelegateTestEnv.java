@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
-import io.spine.client.OrderBy;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 
@@ -35,11 +34,9 @@ import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.client.OrderBy.Direction.ASCENDING;
-import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
-import static io.spine.server.storage.given.StgColumn.due_date;
+import static io.spine.test.storage.StgProject.Column.dueDate;
 import static io.spine.test.storage.StgProject.Status.DONE;
 import static java.util.stream.Collectors.toList;
 
@@ -61,7 +58,8 @@ public final class RecordStorageDelegateTestEnv {
     public static FieldMask idAndDueDate() {
         return FieldMask.newBuilder()
                         .addPaths("id")
-                        .addPaths(due_date.name())
+                        .addPaths(dueDate().name()
+                                           .value())
                         .build();
     }
 
@@ -92,26 +90,6 @@ public final class RecordStorageDelegateTestEnv {
     public static ImmutableList<StgProjectId> halfDozenOf(ImmutableSet<StgProjectId> ids) {
         return ids.asList()
                   .subList(0, 6);
-    }
-
-    /**
-     * Creates an ordering by the due date in ascending order.
-     */
-    public static OrderBy dueDateAsc() {
-        return OrderBy.newBuilder()
-                      .setColumn(due_date.name())
-                      .setDirection(ASCENDING)
-                      .build();
-    }
-
-    /**
-     * Creates an ordering by the due date in descending order.
-     */
-    public static OrderBy dueDateDesc() {
-        return OrderBy.newBuilder()
-                      .setColumn(due_date.name())
-                      .setDirection(DESCENDING)
-                      .build();
     }
 
     /**
