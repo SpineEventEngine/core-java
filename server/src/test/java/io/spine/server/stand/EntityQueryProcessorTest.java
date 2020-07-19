@@ -57,7 +57,7 @@ import static io.spine.server.stand.given.MenuProjection.UUID_COLUMN;
 import static java.util.Comparator.comparing;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("EntityQueryProcessor should")
+@DisplayName("`EntityQueryProcessor` should")
 class EntityQueryProcessorTest {
 
     private static final int MENU_COUNT = 16;
@@ -71,9 +71,8 @@ class EntityQueryProcessorTest {
     @BeforeEach
     void setUp() {
         ProjectionRepository<?, ?, ?> repository = new MenuRepository();
-        context = BlackBoxContext
-                .from(BoundedContext
-                              .singleTenant("Cafeteria")
+        context = BlackBoxContext.from(
+                BoundedContext.singleTenant("Cafeteria")
                               .add(repository));
         processor = new EntityQueryProcessor(repository);
         fill();

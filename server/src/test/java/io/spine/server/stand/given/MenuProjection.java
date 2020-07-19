@@ -31,6 +31,7 @@ import io.spine.test.stand.MenuWithColumns;
 
 import java.util.List;
 
+//TODO:2020-07-19:alex.tymchenko: test `onBeforeCommit` with this!
 public final class MenuProjection
         extends Projection<MenuId, Menu, Menu.Builder>
         implements MenuWithColumns {
@@ -39,7 +40,8 @@ public final class MenuProjection
 
     @Subscribe
     void on(DishAdded event) {
-        builder().addDish(event.getDish());
+        builder().addDish(event.getDish())
+                 .setUuid(id().getUuid());
     }
 
     @Subscribe
@@ -52,6 +54,7 @@ public final class MenuProjection
                 return;
             }
         }
+        builder().setUuid(id().getUuid());
     }
 
     @Override
