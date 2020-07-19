@@ -23,9 +23,11 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
+import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.query.Column;
 import io.spine.query.ComparisonOperator;
+import io.spine.query.CustomSubjectParameter;
 import io.spine.query.EntityQuery;
 import io.spine.query.LogicalOperator;
 import io.spine.query.OrderBy;
@@ -42,10 +44,34 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * @author Alex Tymchenko
+ * Transforms the given {@link EntityQuery} into a {@link RecordQuery}
+ * over the {@link EntityRecord}s.
+ *
+ * @param <I>
+ *         the type of the identifiers of entities which are queried by the given query
+ * @param <S>
+ *         the type of the queried entity state
  */
+@Internal
 public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         extends RecordQueryBuilder<I, EntityRecord> {
+
+    /**
+     * Transforms the entity query into a {@code RecordQuery}.
+     *
+     * @param query
+     *         a query to transform
+     * @param <I>
+     *         the type of the identifiers of entities which are queried by the given query
+     * @param <S>
+     *         the type of the queried entity state
+     * @return a new instance of {@code RecordQuery} targeting the {@link EntityRecord}s
+     */
+    public static <I, S extends EntityState<I>> RecordQuery<I, EntityRecord>
+    transform(EntityQuery<I, S, ?> query) {
+        checkNotNull(query);
+        return new ToEntityRecordQuery<>(query).build();
+    }
 
     private ToEntityRecordQuery(EntityQuery<I, S, ?> source) {
         super(EntityRecord.class);
@@ -80,51 +106,55 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         ImmutableList<QueryPredicate<S>> predicates = subject.predicates();
         for (QueryPredicate<S> sourcePredicate : predicates) {
             ImmutableList<SubjectParameter<S, ?, ?>> parameters = sourcePredicate.parameters();
+            ImmutableList<CustomSubjectParameter<?, ?>> customParams = sourcePredicate.customParameters();
             LogicalOperator operator = sourcePredicate.operator();
             if (operator == LogicalOperator.AND) {
-                copyParameters(parameters, this);
+                copyParameters(parameters, customParams, this);
             } else {
-                this.either((builder) -> copyParameters(parameters, builder));
+                this.either((builder) -> copyParameters(parameters, customParams, builder));
             }
+
         }
     }
 
+    @SuppressWarnings("MethodWithMultipleLoops")    // Decreasing the number of methods.
     @CanIgnoreReturnValue
     private RecordQueryBuilder<I, EntityRecord>
     copyParameters(ImmutableList<SubjectParameter<S, ?, ?>> parameters,
+                   ImmutableList<CustomSubjectParameter<?, ?>> customParams,
                    RecordQueryBuilder<I, EntityRecord> builder) {
         for (SubjectParameter<S, ?, ?> parameter : parameters) {
-            Column<S, ?> sourceColumn = parameter.column();
-            RecordColumn<EntityRecord, Object> column = AsEntityRecordColumn.apply(sourceColumn);
-
-            RecordCriterion<I, EntityRecord, Object> where = builder.where(column);
-            Object paramValue = parameter.value();
-            ComparisonOperator paramOperator = parameter.operator();
-            switch (paramOperator) {
-                case EQUALS:
-                    where.is(paramValue); break;
-                case NOT_EQUALS:
-                    where.isNot(paramValue); break;
-                case GREATER_OR_EQUALS:
-                    where.isGreaterOrEqualTo(paramValue); break;
-                case GREATER_THAN:
-                    where.isGreaterThan(paramValue); break;
-                case LESS_OR_EQUALS:
-                    where.isLessOrEqualTo(paramValue); break;
-                case LESS_THAN:
-                    where.isLessThan(paramValue); break;
-                default:
-                    throw newIllegalStateException("Unknown comparison operator `%s`.",
-                                                   paramOperator);
-            }
+            addParameter(builder, parameter.column(), parameter.value(), parameter.operator());
+        }
+        for (CustomSubjectParameter<?, ?> parameter : customParams) {
+            addParameter(builder, parameter.column(), parameter.value(), parameter.operator());
         }
         return builder;
     }
 
-    public static <I, S extends EntityState<I>> RecordQuery<I, EntityRecord>
-    transform(EntityQuery<I, S, ?> query) {
-        checkNotNull(query);
-        return new ToEntityRecordQuery<>(query).build();
-    }
+    private void addParameter(RecordQueryBuilder<I, EntityRecord> builder,
+                              Column<?, ?> sourceColumn,
+                              Object paramValue,
+                              ComparisonOperator paramOperator) {
+        RecordColumn<EntityRecord, Object> column = AsEntityRecordColumn.apply(sourceColumn);
 
+        RecordCriterion<I, EntityRecord, Object> where = builder.where(column);
+        switch (paramOperator) {
+            case EQUALS:
+                where.is(paramValue); break;
+            case NOT_EQUALS:
+                where.isNot(paramValue); break;
+            case GREATER_OR_EQUALS:
+                where.isGreaterOrEqualTo(paramValue); break;
+            case GREATER_THAN:
+                where.isGreaterThan(paramValue); break;
+            case LESS_OR_EQUALS:
+                where.isLessOrEqualTo(paramValue); break;
+            case LESS_THAN:
+                where.isLessThan(paramValue); break;
+            default:
+                throw newIllegalStateException("Unknown comparison operator `%s`.",
+                                               paramOperator);
+        }
+    }
 }

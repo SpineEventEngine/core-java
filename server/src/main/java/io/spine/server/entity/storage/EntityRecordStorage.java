@@ -79,6 +79,20 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     }
 
     /**
+     * Returns the iterator over identifiers of the records which match the passed query.
+     *
+     * <p>Unless the query specifies otherwise, only non-archived and non-deleted entity records
+     * are queried.
+     *
+     * @throws IllegalStateException
+     *         if the storage is already closed
+     */
+    public Iterator<I> entityIndex(EntityQuery<I, S, ?> query) {
+        RecordQuery<I, EntityRecord> recordQuery = onlyActive(query);
+        return index(recordQuery);
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Returns the records for both active and non-active entities.
@@ -117,19 +131,6 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
         return super.readAll(toExecute);
     }
 
-    /**
-     * Returns the iterator over identifiers of the records which match the passed query.
-     *
-     * <p>Unless the query specifies otherwise, only non-archived and non-deleted entity records
-     * are queried.
-     *
-     * @throws IllegalStateException
-     *         if the storage is already closed
-     */
-    public Iterator<I> entityIndex(EntityQuery<I, S, ?> query) {
-        RecordQuery<I, EntityRecord> recordQuery = onlyActive(query);
-        return index(recordQuery);
-    }
 
     /**
      * Returns the iterator over all stored non-archived and non-deleted entity records.

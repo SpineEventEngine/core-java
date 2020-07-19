@@ -76,7 +76,7 @@ class EntityRecordSpecTest {
         ColumnName columName = ColumnName.of("estimate_in_days");
         Column<?, ?> column = spec().get(columName);
 
-        assertThat(column.type()).isEqualTo(int.class);
+        assertThat(column.type()).isEqualTo(Integer.class);
     }
 
     @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})

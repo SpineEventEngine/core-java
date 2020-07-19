@@ -71,9 +71,13 @@ final class AsEntityRecordColumn {
         return apply(original, Object.class);
     }
 
-    @SuppressWarnings("unused")     // method always throws an `IllegalStateException`.
+    /**
+     * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
+     */
     private static <V> Column.Getter<EntityRecord, V> noGetter() {
-        throw newIllegalStateException("`EntityRecordColumn`s do not have getters.");
+        return record -> {
+            throw newIllegalStateException("`EntityRecordColumn`s do not have getters.");
+        };
     }
 
     private static String columnName(Column<?, ?> original) {

@@ -138,6 +138,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
 
     @Override
     public Optional<Column<?, ?>> findColumn(ColumnName name) {
+        checkNotNull(name);
         Column<?, ?> resultInSimple = lookForColumn(name, simpleColumns);
         if (resultInSimple != null) {
             return Optional.of(resultInSimple);

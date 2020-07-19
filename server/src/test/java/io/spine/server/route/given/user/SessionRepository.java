@@ -23,13 +23,10 @@ package io.spine.server.route.given.user;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.UserId;
-import io.spine.server.entity.storage.EntityRecordSpec;
-import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.given.user.event.RUserConsentRequested;
 import io.spine.server.route.given.user.event.RUserSignedIn;
-import io.spine.server.storage.OldRecordQuery;
 import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
 
@@ -50,10 +47,11 @@ public class SessionRepository
     }
 
     private Set<RSessionId> findByUserId(UserId id) {
-        EntityRecordStorage<RSessionId, RSession> storage = recordStorage();
-        EntityRecordSpec<RSessionId> spec = storage.recordSpec();
-        OldRecordQuery<RSessionId> query = RecordQueries.byColumn(spec, RSession.Column.userId(), id);
-        Iterator<RSessionId> identifiers = storage.index(query);
+        RSession.Query query = RSession.newQuery()
+                                       .userId()
+                                       .is(id)
+                                       .build();
+        Iterator<RSessionId> identifiers = recordStorage().entityIndex(query);
         ImmutableSet<RSessionId> result = ImmutableSet.copyOf(identifiers);
         return result;
     }

@@ -26,6 +26,7 @@ import io.spine.query.CustomColumn;
 import io.spine.query.EntityColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -50,7 +51,7 @@ final class Scanner<I, S extends EntityState<I>, E extends Entity<I, S>>  {
      *
      * <p>The method returns all the definitions of the columns for this state class.
      */
-    private static final String COL_DEFS_METHOD_NAME = "columnDefinitions";
+    private static final String COL_DEFS_METHOD_NAME = "definitions";
 
     /**
      * The target entity class.
@@ -87,6 +88,9 @@ final class Scanner<I, S extends EntityState<I>, E extends Entity<I, S>>  {
     ImmutableSet<EntityColumn<S, ?>> simpleColumns() {
         Class<? extends EntityState<?>> stateClass = entityClass.stateClass();
         Class<?> columnClass = findColumnsClass(stateClass);
+        if(columnClass == null) {
+            return ImmutableSet.of();
+        }
         try {
             Method getDefinitions = columnClass.getDeclaredMethod(COL_DEFS_METHOD_NAME);
             @SuppressWarnings("unchecked")  // ensured by the Spine code generation.
@@ -102,19 +106,23 @@ final class Scanner<I, S extends EntityState<I>, E extends Entity<I, S>>  {
         }
     }
 
-    private static Class<?> findColumnsClass(Class<? extends EntityState<?>> stateClass) {
+    /**
+     * Finds the {@code Column} class which is generated the messages representing the entity
+     * state type.
+     *
+     * <p>If an entity has no such class generated, it does not declare any columns. In this
+     * case, this method returns {@code null}.
+     * @param stateClass the class of the entity state to look for the method in
+     * @return the class declaring the entity columns,
+     * or {@code null} if the entity declares no columns
+     */
+    private static @Nullable Class<?> findColumnsClass(Class<? extends EntityState<?>> stateClass) {
         Class<?>[] innerClasses = stateClass.getDeclaredClasses();
         Class<?> columnClass = null;
         for (Class<?> aClass : innerClasses) {
             if(aClass.getSimpleName().equals(COLS_NESTED_CLASSNAME)) {
                 columnClass = aClass;
             }
-        }
-        if(columnClass == null) {
-            throw newIllegalStateException(
-                    "Cannot find the nested `%s` class which declares the entity column" +
-                            " for the entity state type `%s`.",
-                    COLS_NESTED_CLASSNAME, stateClass.getName());
         }
         return columnClass;
     }

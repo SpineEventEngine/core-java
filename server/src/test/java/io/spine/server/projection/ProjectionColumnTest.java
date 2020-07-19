@@ -24,6 +24,7 @@ import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.server.entity.storage.EntityRecordColumn;
 import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.server.projection.given.SavedString;
 import io.spine.server.projection.given.SavingProjection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

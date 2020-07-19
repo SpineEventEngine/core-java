@@ -20,11 +20,9 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.base.EntityState;
 import io.spine.query.EntityQuery;
 import io.spine.query.EntityQueryBuilder;
-import io.spine.query.IdParameter;
 
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
@@ -84,17 +82,6 @@ final class FindActiveEntites<I, S extends EntityState<I>>
         @Override
         public FindActiveEntites<I, S> build() {
             return new FindActiveEntites<>(this);
-        }
-
-        FindActiveEntites<I, S> buildWithIds(Iterable<I> ids) {
-            IdParameter<I> idParameter = IdParameter.in(ImmutableSet.copyOf(ids));
-            this.setIdParameter(idParameter);
-            return build();
-        }
-
-        FindActiveEntites<I, S> buildOnTop(EntityQuery<I, S, ?> query) {
-            query.copyTo(this);
-            return build();
         }
     }
 }
