@@ -23,6 +23,7 @@ package io.spine.server.storage.memory;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.query.ColumnName;
 import io.spine.query.Direction;
 import io.spine.query.OrderBy;
 import io.spine.query.RecordColumn;
@@ -105,8 +106,9 @@ public class RecordComparator<I, R extends Message>
         checkNotNull(a);
         checkNotNull(b);
 
-        Object aValue = column.valueIn(a.record());
-        Object bValue = column.valueIn(b.record());
+        ColumnName columnName = column.name();
+        Object aValue = a.columnValue(columnName);
+        Object bValue = b.columnValue(columnName);
         if (aValue == null) {
             return bValue == null ? 0 : -1;
         }
