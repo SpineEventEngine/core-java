@@ -71,6 +71,9 @@ final class Queries {
 
     private static void addTypeParams(EventStreamQuery query,
                                       RecordQueryBuilder<EventId, Event> builder) {
+        if(query.getFilterCount() == 0) {
+            return;
+        }
         //TODO:2020-07-17:alex.tymchenko: find out if this is true.
         builder.either((b) -> {
             for (EventFilter eventFilter : query.getFilterList()) {
