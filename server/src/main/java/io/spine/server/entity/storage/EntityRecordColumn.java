@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.query.ColumnName;
@@ -30,6 +31,9 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
 import java.util.function.Supplier;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Arrays.stream;
 
 /**
  * Columns storing the internal framework-specific attributes of an {@code Entity}.
@@ -85,5 +89,13 @@ public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>
     @VisibleForTesting
     static ImmutableSet<ColumnName> columnNames() {
         return ImmutableSet.of(archived.columnName(), deleted.columnName(), version.columnName());
+    }
+
+    @VisibleForTesting
+    static ImmutableList<CustomColumn<Entity<?, ?>, ?>> columns() {
+        ImmutableList<CustomColumn<Entity<?, ?>, ?>> result =
+                stream(values()).map(EntityRecordColumn::get)
+                                .collect(toImmutableList());
+        return result;
     }
 }
