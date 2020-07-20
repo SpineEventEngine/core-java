@@ -46,8 +46,9 @@ final class FindActiveEntites<I, S extends EntityState<I>>
      *         the type of entity states
      * @return a new builder instance
      */
-    public static <I, S extends EntityState<I>> Builder<I, S> newBuilder(Class<S> stateType) {
-        return new Builder<>(stateType);
+    public static <I, S extends EntityState<I>> Builder<I, S>
+    newBuilder(Class<S> stateType, boolean hasArchivedColumn, boolean hasDeletedColumn) {
+        return new Builder<>(stateType, hasArchivedColumn, hasDeletedColumn);
     }
 
     /**
@@ -61,17 +62,26 @@ final class FindActiveEntites<I, S extends EntityState<I>>
     static final class Builder<I, S extends EntityState<I>>
             extends EntityQueryBuilder<I, S, Builder<I, S>, FindActiveEntites<I, S>> {
 
+        private final boolean hasArchivedColumn;
+        private final boolean hasDeletedColumn;
+
         /**
          * Prevents this builder from a direct instantiation.
          */
-        private Builder(Class<S> stateType) {
+        private Builder(Class<S> stateType, boolean hasArchivedColumn, boolean hasDeletedColumn) {
             super(stateType);
+            this.hasArchivedColumn = hasArchivedColumn;
+            this.hasDeletedColumn = hasDeletedColumn;
             setLifecycle();
         }
 
         private void setLifecycle() {
-            this.where(archived.lifecycle(), false)
-                .where(deleted.lifecycle(), false);
+            if(hasArchivedColumn) {
+                where(archived.lifecycle(), false);
+            }
+            if(hasDeletedColumn) {
+                where(deleted.lifecycle(), false);
+            }
         }
 
         @Override

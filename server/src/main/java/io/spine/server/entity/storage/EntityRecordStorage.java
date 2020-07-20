@@ -25,8 +25,14 @@ import com.google.protobuf.FieldMask;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
 import io.spine.query.EntityQuery;
+import io.spine.query.Query;
+import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
+import io.spine.query.RecordQueryBuilder;
+import io.spine.query.Subject;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageDelegate;
@@ -39,6 +45,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
+import static io.spine.server.entity.storage.ToEntityRecordQuery.transform;
 
 /**
  * A {@code MessageStorage} which stores {@link EntityRecord}s.
@@ -52,13 +59,17 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
         extends RecordStorageDelegate<I, EntityRecord> {
 
     private final RecordQuery<I, EntityRecord> findActiveRecordsQuery;
+    private final boolean hasArchivedColumn;
+    private final boolean hasDeletedColumn;
 
     public EntityRecordStorage(StorageFactory factory,
                                Class<? extends Entity<I, S>> entityClass,
                                boolean multitenant) {
         super(factory.createRecordStorage(spec(entityClass), multitenant));
         FindActiveEntites<I, S> entityQuery = findActiveEntities().build();
-        this.findActiveRecordsQuery = ToEntityRecordQuery.transform(entityQuery);
+        this.findActiveRecordsQuery = transform(entityQuery);
+        this.hasArchivedColumn = hasColumn(archived);
+        this.hasDeletedColumn = hasColumn(deleted);
     }
 
     private static <I, S extends EntityState<I>> EntityRecordSpec<I, S, ?>
@@ -74,7 +85,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public Iterator<I> index() {
-        Iterator<EntityRecord> iterator = readAll(findActiveRecordsQuery);
+        Iterator<EntityRecord> iterator = super.readAll(findActiveRecordsQuery);
         return asIdStream(iterator);
     }
 
@@ -88,7 +99,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      *         if the storage is already closed
      */
     public Iterator<I> entityIndex(EntityQuery<I, S, ?> query) {
-        RecordQuery<I, EntityRecord> recordQuery = onlyActive(query);
+        RecordQuery<I, EntityRecord> recordQuery = transform(query);
         return index(recordQuery);
     }
 
@@ -114,23 +125,9 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public Iterator<EntityRecord> readAll(RecordQuery<I, EntityRecord> query) {
-        RecordQuery<I, EntityRecord> toExecute = query;
-        if (!query.subject()
-                  .id()
-                  .values()
-                  .isEmpty()) {
-            toExecute =
-                    query.toBuilder()
-                         .where(archived.asRecordColumn(Boolean.class))
-                         .is(false)
-                         .where(deleted.asRecordColumn(Boolean.class))
-                         .is(false)
-                         .build();
-
-        }
+        RecordQuery<I, EntityRecord> toExecute = onlyActive(query);
         return super.readAll(toExecute);
     }
-
 
     /**
      * Returns the iterator over all stored non-archived and non-deleted entity records.
@@ -140,7 +137,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public Iterator<EntityRecord> readAll() {
-        return readAll(findActiveRecordsQuery);
+        return super.readAll(findActiveRecordsQuery);
     }
 
     /**
@@ -149,7 +146,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * <p>Only the records of active entities are returned.
      */
     public final Iterator<EntityRecord> findAll(EntityQuery<I, S, ?> query) {
-        RecordQuery<I, EntityRecord> result = onlyActive(query);
+        RecordQuery<I, EntityRecord> result = transform(query);
         return readAll(result);
     }
 
@@ -252,16 +249,54 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
                                       .stateClass();
     }
 
-    private FindActiveEntites.Builder<I, S> findActiveEntities() {
-        return FindActiveEntites.newBuilder(stateType());
+    private static boolean hasNoIds(Query<?, ?> query) {
+        return query.subject()
+                    .id()
+                    .values()
+                    .isEmpty();
     }
 
-    private RecordQuery<I, EntityRecord> onlyActive(EntityQuery<I, S, ?> query) {
-        EntityQuery<I, S, ?> onlyActive =
-                query.toBuilder()
-                     .where(archived.lifecycle(), false)
-                     .where(deleted.lifecycle(), false)
-                     .build();
-        return ToEntityRecordQuery.transform(onlyActive);
+    private static <I> boolean hasNoLifecycleCols(Query<I, ?> query) {
+        Subject<I, ?> subject = query.subject();
+        ImmutableList<? extends QueryPredicate<?>> predicates = subject.predicates();
+        for (QueryPredicate<?> predicate : predicates) {
+            boolean hasColumn = predicate.parameters()
+                                         .stream()
+                                         .anyMatch((param) -> isLifecycleColumn(param.column()));
+            if (hasColumn) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private RecordQuery<I, EntityRecord> onlyActive(RecordQuery<I, EntityRecord> query) {
+        RecordQuery<I, EntityRecord> result = query;
+        if (hasNoIds(query) && hasNoLifecycleCols(query)) {
+            RecordQueryBuilder<I, EntityRecord> builder = query.toBuilder();
+            if(hasArchivedColumn) {
+                builder.where(archived.asRecordColumn(Boolean.class)).is(false);
+            }
+            if(hasDeletedColumn) {
+                builder.where(deleted.asRecordColumn(Boolean.class)).is(false);
+            }
+            result = builder.build();
+        }
+        return result;
+    }
+
+    private static boolean isLifecycleColumn(Column<?, ?> column) {
+        ColumnName name = column.name();
+        return name.equals(archived.columnName()) || name.equals(deleted.columnName());
+    }
+
+    private FindActiveEntites.Builder<I, S> findActiveEntities() {
+        return FindActiveEntites.newBuilder(stateType(), hasArchivedColumn, hasDeletedColumn);
+    }
+
+    private boolean hasColumn(EntityRecordColumn column) {
+        EntityRecordSpec<I, S, ?> spec = recordSpec();
+        return spec.findColumn(column.columnName())
+                              .isPresent();
     }
 }
