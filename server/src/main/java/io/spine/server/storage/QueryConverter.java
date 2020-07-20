@@ -243,6 +243,14 @@ public final class QueryConverter {
         return ColumnName.of(column);
     }
 
+    /**
+     * A view on a {@link Column} as on a {@link RecordColumn}.
+     *
+     * <p>Serves for the column conversion when a simple cast is not possible due to the generic
+     * type erasure.
+     *
+     * @param <R> the type of the message, which column is being viewed
+     */
     private static final class AsRecordColumn<R extends Message> extends RecordColumn<R, Object> {
 
         private static final long serialVersionUID = 0L;
@@ -258,8 +266,8 @@ public final class QueryConverter {
         private static <R extends Message> Getter<R, Object> noGetter() {
             return record -> {
                 throw newIllegalStateException(
-                        "`AsRecordColumn`s serves for the column conversion only " +
-                                "and does not supply a getter.");
+                        "`AsRecordColumn`s serve for the column conversion only " +
+                                "and do not provide a getter.");
             };
         }
     }

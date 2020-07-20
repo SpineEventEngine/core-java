@@ -39,7 +39,7 @@ public final class AggregateEventRecordColumn {
             new RecordColumn<>("created", Timestamp.class, AggregateEventRecord::getTimestamp);
 
     static final RecordColumn<AggregateEventRecord, Integer> version =
-            new RecordColumn<>("version", Integer.class, versionGetter());
+            new RecordColumn<>("version", Integer.class, new GetVersion());
 
     static final RecordColumn<AggregateEventRecord, Boolean> snapshot =
             new RecordColumn<>("snapshot", Boolean.class, AggregateEventRecord::hasSnapshot);
@@ -51,21 +51,28 @@ public final class AggregateEventRecordColumn {
         return ImmutableList.of(aggregate_id, created, version, snapshot);
     }
 
-    private static Column.Getter<AggregateEventRecord, Integer> versionGetter() {
-        return r -> r.hasEvent() ? versionOfEvent(r)
-                                 : versionOfSnapshot(r);
-    }
+    /**
+     * Obtains the version of {@link AggregateEventRecord}.
+     */
+    private static final class GetVersion implements Column.Getter<AggregateEventRecord, Integer> {
 
-    private static int versionOfSnapshot(AggregateEventRecord rawRecord) {
-        return rawRecord.getSnapshot()
-                        .getVersion()
-                        .getNumber();
-    }
+        @Override
+        public Integer apply(AggregateEventRecord record) {
+            return record.hasEvent() ? versionOfEvent(record)
+                                     : versionOfSnapshot(record);
+        }
 
-    private static int versionOfEvent(AggregateEventRecord rawRecord) {
-        return rawRecord.getEvent()
-                        .getContext()
-                        .getVersion()
-                        .getNumber();
+        private static int versionOfSnapshot(AggregateEventRecord rawRecord) {
+            return rawRecord.getSnapshot()
+                            .getVersion()
+                            .getNumber();
+        }
+
+        private static int versionOfEvent(AggregateEventRecord rawRecord) {
+            return rawRecord.getEvent()
+                            .getContext()
+                            .getVersion()
+                            .getNumber();
+        }
     }
 }

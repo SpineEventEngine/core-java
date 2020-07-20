@@ -54,7 +54,7 @@ final class AsEntityRecordColumn {
         checkNotNull(original);
         checkNotNull(typeOfValues);
         String columnName = columnName(original);
-        return new RecordColumn<>(columnName, typeOfValues, noGetter());
+        return new RecordColumn<>(columnName, typeOfValues, new NoGetter<>());
     }
 
     /**
@@ -71,17 +71,19 @@ final class AsEntityRecordColumn {
         return apply(original, Object.class);
     }
 
-    /**
-     * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
-     */
-    private static <V> Column.Getter<EntityRecord, V> noGetter() {
-        return record -> {
-            throw newIllegalStateException("`EntityRecordColumn`s do not have getters.");
-        };
-    }
-
     private static String columnName(Column<?, ?> original) {
         return original.name()
                        .value();
+    }
+
+    /**
+     * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
+     */
+    private static final class NoGetter<V> implements Column.Getter<EntityRecord, V> {
+
+        @Override
+        public V apply(EntityRecord record) {
+            throw newIllegalStateException("`EntityRecordColumn`s do not have getters.");
+        }
     }
 }
