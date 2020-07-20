@@ -30,6 +30,7 @@ import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
+import io.spine.protobuf.TypeConverter;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.query.Direction;
@@ -42,7 +43,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.join;
@@ -133,7 +133,8 @@ public final class QueryConverter {
         Column<?, ?> column = findColumn(spec, name);
         AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
 
-        Message value = unpack(filter.getValue());
+        Object value = TypeConverter.toObject(filter.getValue(), column.type());
+
         Filter.Operator operator = filter.getOperator();
         switch (operator) {
             case EQUAL:
