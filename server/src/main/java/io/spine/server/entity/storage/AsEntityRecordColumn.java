@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.query.Column;
 import io.spine.query.RecordColumn;
 import io.spine.server.entity.EntityRecord;
@@ -79,6 +80,7 @@ final class AsEntityRecordColumn {
     /**
      * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
      */
+    @Immutable
     private static final class NoGetter<V> implements Column.Getter<EntityRecord, V> {
 
         @Override

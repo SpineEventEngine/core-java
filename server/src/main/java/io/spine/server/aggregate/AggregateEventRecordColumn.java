@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.query.Column;
@@ -54,6 +55,7 @@ public final class AggregateEventRecordColumn {
     /**
      * Obtains the version of {@link AggregateEventRecord}.
      */
+    @Immutable
     private static final class GetVersion implements Column.Getter<AggregateEventRecord, Integer> {
 
         @Override

@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.FieldPath;
@@ -249,7 +250,7 @@ public final class QueryConverter {
      * <p>Serves for the column conversion when a simple cast is not possible due to the generic
      * type erasure.
      *
-     * @param <R> the type of the message, which column is being viewed
+     * @param <R> the type of the message which column is being viewed
      */
     private static final class AsRecordColumn<R extends Message> extends RecordColumn<R, Object> {
 
@@ -257,18 +258,23 @@ public final class QueryConverter {
 
         private AsRecordColumn(Column<?, ?> origin) {
             super(origin.name()
-                        .value(), Object.class, noGetter());
+                        .value(), Object.class, new NoGetter<>());
         }
+    }
 
-        /**
-         * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
-         */
-        private static <R extends Message> Getter<R, Object> noGetter() {
-            return record -> {
-                throw newIllegalStateException(
-                        "`AsRecordColumn`s serve for the column conversion only " +
-                                "and do not provide a getter.");
-            };
+    /**
+     * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
+     *
+     * @param <R> the type of the message which column getter it is
+     */
+    @Immutable
+    private static final class NoGetter<R extends Message> implements Column.Getter<R, Object> {
+
+        @Override
+        public Object apply(R r) {
+            throw newIllegalStateException(
+                    "`AsRecordColumn`s serve for the column conversion only " +
+                            "and do not provide a getter.");
         }
     }
 }
