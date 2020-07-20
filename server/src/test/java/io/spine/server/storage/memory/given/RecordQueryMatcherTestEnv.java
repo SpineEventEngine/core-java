@@ -22,18 +22,12 @@ package io.spine.server.storage.memory.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
-import io.spine.core.Version;
-import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.query.IdParameter;
 import io.spine.query.RecordColumn;
 import io.spine.query.Subject;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.projection.Projection;
 import io.spine.test.storage.StgProject;
-import io.spine.test.storage.StgProjectId;
-import io.spine.test.storage.StgProjectWithColumns;
 import io.spine.testdata.Sample;
 
 /**
@@ -101,46 +95,7 @@ public final class RecordQueryMatcherTestEnv {
      * The {@code boolean} value held by the corresponding {@linkplain #booleanColumn() entity
      * column}.
      */
-    @SuppressWarnings("MethodOnlyUsedFromInnerClass")   // for the sake of consistency.
     private static boolean booleanValue() {
         return true;
-    }
-
-    private static class ProjectView
-            extends Projection<StgProjectId, StgProject, StgProject.Builder>
-            implements StgProjectWithColumns {
-
-        @Override
-        public String getIdString() {
-            return idAsString();
-        }
-
-        @Override
-        public boolean getInternal() {
-            return booleanValue();
-        }
-
-        @Override
-        public Any getWrappedState() {
-            return anyValue();
-        }
-
-        @Override
-        public int getProjectStatusValue() {
-            return 0;
-        }
-
-        @Override
-        public Version getProjectVersion() {
-            return Versions.zero();
-        }
-
-        @Override
-        public Timestamp getDueDate() {
-            return Timestamp.newBuilder()
-                            .setSeconds(4250)
-                            .setNanos(212)
-                            .build();
-        }
     }
 }
