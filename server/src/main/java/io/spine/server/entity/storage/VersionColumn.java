@@ -26,13 +26,15 @@ import io.spine.query.CustomColumn;
 import io.spine.server.entity.Entity;
 
 /**
- * @author Alex Tymchenko
+ * A column of an entity to store the {@linkplain Entity#version() entity version}.
  */
 class VersionColumn extends CustomColumn<Entity<?, ?>, Version> {
 
-    public static final ColumnName VERSION = ColumnName.of("version");
+    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
+    private static final ColumnName VERSION = ColumnName.of("version");
 
     VersionColumn() {
+        super();
     }
 
     @Override

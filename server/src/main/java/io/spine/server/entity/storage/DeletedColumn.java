@@ -25,13 +25,15 @@ import io.spine.query.CustomColumn;
 import io.spine.server.entity.Entity;
 
 /**
- * @author Alex Tymchenko
+ * A column of an entity, which tells if the entity is deleted.
  */
 class DeletedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
     private static final ColumnName DELETED = ColumnName.of("deleted");
 
     DeletedColumn() {
+        super();
     }
 
     @Override
