@@ -199,7 +199,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("by ID if archived")
         void byIdArchived() {
-            archive((TransactionalEntity) entity);
+            archive(asTxEntity(entity));
             storeEntity(entity);
             assertFound();
         }
@@ -207,7 +207,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("by ID if deleted")
         void byIdDeleted() {
-            delete((TransactionalEntity) entity);
+            delete(asTxEntity(entity));
             storeEntity(entity);
             assertFound();
         }
@@ -527,8 +527,8 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         E activeEntity = createEntity(271);
         E archivedEntity = createEntity(42);
         E deletedEntity = createEntity(314);
-        delete((TransactionalEntity) deletedEntity);
-        archive((TransactionalEntity) archivedEntity);
+        delete(asTxEntity(deletedEntity));
+        archive(asTxEntity(archivedEntity));
 
         // Fill the storage
         storeEntity(activeEntity);
@@ -549,8 +549,8 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         E activeEntity = createEntity(42);
         E archivedEntity = createEntity(314);
         E deletedEntity = createEntity(271);
-        delete((TransactionalEntity) deletedEntity);
-        archive((TransactionalEntity) archivedEntity);
+        delete(asTxEntity(deletedEntity));
+        archive(asTxEntity(archivedEntity));
 
         // Fill the storage
         storeEntity(activeEntity);
@@ -569,5 +569,9 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         IterableSubject assertFoundList = assertThat(foundList);
         assertFoundList.hasSize(2);
         assertFoundList.containsExactly(activeEntity, deletedEntity);
+    }
+
+    private TransactionalEntity<?, ?, ?> asTxEntity(E entity) {
+        return (TransactionalEntity<?, ?, ?>) entity;
     }
 }

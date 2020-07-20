@@ -363,16 +363,9 @@ public abstract class Transaction<I,
      */
     @VisibleForTesting
     public final void commit() throws InvalidEntityStateException, IllegalStateException {
-        B builder = builder();
-        // If the transaction is running with phases, the entity already got its state.
-        S newState = withPhases()
-                     ? entity.state()
-                     : builder.buildPartial();
+        executeOnBeforeCommit();
+        S newState = builder().buildPartial();
         doCommit(newState);
-    }
-
-    private boolean withPhases() {
-        return !phases.isEmpty();
     }
 
     /**
@@ -437,6 +430,10 @@ public abstract class Transaction<I,
     @VisibleForTesting
     final void deactivate() {
         this.active = false;
+    }
+
+    private void executeOnBeforeCommit() {
+        entity.onBeforeCommit();
     }
 
     private void beforeCommit(S newState, Version newVersion) {

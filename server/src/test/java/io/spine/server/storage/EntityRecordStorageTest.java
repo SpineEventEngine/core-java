@@ -90,8 +90,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("`EntityRecordStorage` should")
 public class EntityRecordStorageTest
         extends AbstractStorageTest<StgProjectId,
-        EntityRecord,
-        EntityRecordStorage<StgProjectId, StgProject>> {
+                                    EntityRecord,
+                                    EntityRecordStorage<StgProjectId, StgProject>> {
 
     @Override
     protected EntityRecordStorage<StgProjectId, StgProject> newStorage() {
@@ -397,9 +397,9 @@ public class EntityRecordStorageTest
         private EntityRecord writeRecordAndDelete(
                 StgProjectId deletedId, EntityRecordStorage<StgProjectId, StgProject> storage) {
             TestCounterEntity deletedEntity = newEntity(deletedId);
+            delete(deletedEntity);
             EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
             storage.write(create(deletedEntity, deletedRecord));
-            delete(deletedEntity);
             return deletedRecord;
         }
 
@@ -407,9 +407,9 @@ public class EntityRecordStorageTest
         private EntityRecord writeRecordAndArchive
                 (StgProjectId archivedId, EntityRecordStorage<StgProjectId, StgProject> storage) {
             TestCounterEntity archivedEntity = newEntity(archivedId);
+            archive(archivedEntity);
             EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
             storage.write(create(archivedEntity, archivedRecord));
-            archive(archivedEntity);
             return archivedRecord;
         }
 

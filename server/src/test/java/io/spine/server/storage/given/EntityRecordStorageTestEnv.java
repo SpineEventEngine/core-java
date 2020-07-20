@@ -35,7 +35,6 @@ import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
-import io.spine.test.storage.StgProjectWithColumns;
 import io.spine.testing.core.given.GivenVersion;
 
 import java.util.Collection;
@@ -165,7 +164,7 @@ public final class EntityRecordStorageTestEnv {
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity
             extends TransactionalEntity<StgProjectId, StgProject, StgProject.Builder>
-            implements StgProjectWithColumns, HasLifecycleColumns<StgProjectId, StgProject> {
+            implements HasLifecycleColumns<StgProjectId, StgProject> {
 
         public static final Timestamp PROJECT_VERSION_TIMESTAMP = Timestamp.newBuilder()
                                                                            .setSeconds(124565)
@@ -174,44 +173,33 @@ public final class EntityRecordStorageTestEnv {
 
         private int counter = 0;
 
-        public TestCounterEntity(StgProjectId id) {
+        private TestCounterEntity(StgProjectId id) {
             super(id);
         }
 
         @Override
-        public String getIdString() {
-            return idAsString();
+        protected void onBeforeCommit() {
+            builder().setIdString(idAsString())
+                     .setInternal(false)
+                     .setWrappedState(Any.getDefaultInstance())
+                     .setProjectStatusValue(builder().getStatusValue())
+                     .setProjectVersion(versionWithCounter())
+                     .setDueDate(dueDate());
+
         }
 
-        @Override
-        public boolean getInternal() {
-            return false;
-        }
-
-        @Override
-        public Any getWrappedState() {
-            return Any.getDefaultInstance();
-        }
-
-        @Override
-        public int getProjectStatusValue() {
-            return state().getStatusValue();
-        }
-
-        @Override
-        public Version getProjectVersion() {
-            return Version.newBuilder()
-                          .setNumber(counter)
-                          .setTimestamp(PROJECT_VERSION_TIMESTAMP)
-                          .build();
-        }
-
-        @Override
-        public Timestamp getDueDate() {
+        private static Timestamp dueDate() {
             return Timestamp.newBuilder()
                             .setSeconds(42800)
                             .setNanos(140000)
                             .build();
+        }
+
+        private Version versionWithCounter() {
+            return Version.newBuilder()
+                          .setNumber(counter)
+                          .setTimestamp(PROJECT_VERSION_TIMESTAMP)
+                          .build();
         }
 
         public void assignStatus(StgProject.Status status) {
@@ -220,7 +208,7 @@ public final class EntityRecordStorageTestEnv {
                     .setId(id())
                     .setStatus(status)
                     .build();
-            injectState(this, newState, getProjectVersion());
+            injectState(this, newState, state().getProjectVersion());
         }
 
         public void assignCounter(int counter) {
@@ -229,9 +217,9 @@ public final class EntityRecordStorageTestEnv {
             StgProject newState = StgProject
                     .newBuilder(state())
                     .setId(id())
-                    .setProjectVersion(getProjectVersion())
+                    .setProjectVersion(state().getProjectVersion())
                     .build();
-            injectState(this, newState, getProjectVersion());
+            injectState(this, newState, state().getProjectVersion());
         }
     }
 }
