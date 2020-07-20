@@ -49,7 +49,7 @@ import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Converts the queries defined in Protobuf into the language of {@link io.spine.query} package.
+ * Converts the queries defined in Protobuf into the language of {@code io.spine.query} package.
  */
 @Internal
 public final class QueryConverter {
