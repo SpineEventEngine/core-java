@@ -58,8 +58,20 @@ import static io.spine.server.entity.storage.ToEntityRecordQuery.transform;
 public class EntityRecordStorage<I, S extends EntityState<I>>
         extends RecordStorageDelegate<I, EntityRecord> {
 
+    /**
+     * The query which aims to find only the records, which entity origins are neither archived
+     * nor deleted.
+     */
     private final RecordQuery<I, EntityRecord> findActiveRecordsQuery;
+
+    /**
+     * Tells if the entity has {@link EntityRecordColumn#archived archived} column declared.
+     */
     private final boolean hasArchivedColumn;
+
+    /**
+     * Tells if the entity has {@link EntityRecordColumn#deleted deleted} column declared.
+     */
     private final boolean hasDeletedColumn;
 
     public EntityRecordStorage(StorageFactory factory,
