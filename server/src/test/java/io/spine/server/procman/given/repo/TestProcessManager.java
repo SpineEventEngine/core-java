@@ -222,7 +222,6 @@ public class TestProcessManager
 
     @Override
     protected void onBeforeCommit() {
-        builder().setName(state().getName())
-                 .setIdString(id().toString());
+        builder().setIdString(id().toString());
     }
 }

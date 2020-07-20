@@ -101,7 +101,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
      * {@link io.spine.server.entity.given.RecordBasedRepositoryTestEnv#ENTITY_NAME_COLUMN "name"}
      * state property.
      */
-    protected abstract List<E> createNamed(int count, Supplier<String> nameSupplier);
+    protected abstract List<E> createWithNames(int count, Supplier<String> nameSupplier);
 
     /**
      * Orders the entities by the
@@ -312,7 +312,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @DisplayName("in ascending order")
         void entitiesInAscendingOrder() {
             int count = 10;
-            // UUIDs are guaranteed to produced a collection with unordered names. 
+            // UUIDs are used to produce a collection with the names in a random order.
             List<E> entities = createAndStoreNamed(repository(), count, Identifier::newUuid);
 
             ResponseFormat format = ResponseFormat
@@ -330,7 +330,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @DisplayName("in descending order")
         void entitiesInDescendingOrder() {
             int count = 10;
-            // UUIDs are guaranteed to produced a collection with unordered names. 
+            // UUIDs are used to produce a collection with the names in a random order.
             List<E> entities = createAndStoreNamed(repository(), count, Identifier::newUuid);
 
             ResponseFormat format = ResponseFormat
@@ -349,7 +349,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         void limitedNumberOfEntities() {
             int totalCount = 10;
             int limit = 5;
-            // UUIDs are guaranteed to produced a collection with unordered names. 
+            // UUIDs are used to produce a collection with the names in a random order.
             List<E> entities = createAndStoreNamed(repository(), totalCount, Identifier::newUuid);
 
             ResponseFormat format = ResponseFormat
@@ -407,7 +407,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
 
         private List<E> createAndStoreNamed(RecordBasedRepository<I, E, S> repo, int count,
                                             Supplier<String> nameSupplier) {
-            List<E> entities = createNamed(count, nameSupplier);
+            List<E> entities = createWithNames(count, nameSupplier);
             storeEntities(repo, entities);
             return entities;
         }

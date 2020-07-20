@@ -130,8 +130,7 @@ public class TestProjection
 
     @Override
     protected void onBeforeCommit() {
-        builder().setName(state().getName())
-                 .setIdString(id().toString());
+        builder().setIdString(id().toString());
     }
 
     public static class Repository

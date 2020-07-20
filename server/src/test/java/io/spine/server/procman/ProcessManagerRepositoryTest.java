@@ -159,32 +159,28 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected List<TestProcessManager> createEntities(int count) {
-        return createEntitiesWithState(count, id -> Project.getDefaultInstance());
+        return createNamedEntities(count, id -> randomString());
     }
 
     @Override
-    protected List<TestProcessManager> createNamed(int count, Supplier<String> nameSupplier) {
-        return createEntitiesWithState(count, id -> Project.newBuilder()
-                                                           .setId(id)
-                                                           .setName(nameSupplier.get())
-                                                           .build());
+    protected List<TestProcessManager> createWithNames(int count, Supplier<String> nameSupplier) {
+        return createNamedEntities(count, id -> nameSupplier.get());
     }
 
     private List<TestProcessManager>
-    createEntitiesWithState(int count, Function<ProjectId, Project> initialStateSupplier) {
+    createNamedEntities(int count, Function<ProjectId, String> nameSupplier) {
         List<TestProcessManager> procmans = newArrayList();
 
         for (int i = 0; i < count; i++) {
             ProjectId id = createId(i);
-            TestProcessManager procman = new TestProcessManager(id);
-            setEntityState(procman, initialStateSupplier.apply(id));
+            String name = nameSupplier.apply(id);
 
             TestProcessManager pm =
                     Given.processManagerOfClass(TestProcessManager.class)
                          .withId(id)
                          .withState(Project.newBuilder()
                                            .setId(id)
-                                           .setName("Test pm name" + randomString())
+                                           .setName(name)
                                            .build())
                          .build();
             procmans.add(pm);
@@ -754,7 +750,7 @@ class ProcessManagerRepositoryTest
         assertThat(found.isPresent()).isFalse();
     }
 
-    private static TargetFilters targetFilters(EntityColumn column, String value) {
+    private static TargetFilters targetFilters(EntityColumn<?, ?> column, String value) {
         QueryFilter filter = QueryFilter.eq(column, value);
         return targetFilters(filter);
     }

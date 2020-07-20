@@ -183,7 +183,7 @@ class ProjectionRepositoryTest
     }
 
     @Override
-    protected List<TestProjection> createNamed(int count, Supplier<String> nameSupplier) {
+    protected List<TestProjection> createWithNames(int count, Supplier<String> nameSupplier) {
         List<TestProjection> projections = Lists.newArrayList();
 
         for (int i = 0; i < count; i++) {
@@ -654,7 +654,7 @@ class ProjectionRepositoryTest
         assertThat(found.isPresent()).isFalse();
     }
 
-    private static TargetFilters targetFilters(EntityColumn column, String value) {
+    private static TargetFilters targetFilters(EntityColumn<?, ?> column, String value) {
         QueryFilter filter = QueryFilter.eq(column, value);
         return targetFilters(filter);
     }
