@@ -66,10 +66,10 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
                                Class<? extends Entity<I, S>> entityClass,
                                boolean multitenant) {
         super(factory.createRecordStorage(spec(entityClass), multitenant));
-        FindActiveEntites<I, S> entityQuery = findActiveEntities().build();
-        this.findActiveRecordsQuery = transform(entityQuery);
         this.hasArchivedColumn = hasColumn(archived);
         this.hasDeletedColumn = hasColumn(deleted);
+        FindActiveEntites<I, S> entityQuery = findActiveEntities().build();
+        this.findActiveRecordsQuery = transform(entityQuery);
     }
 
     private static <I, S extends EntityState<I>> EntityRecordSpec<I, S, ?>
