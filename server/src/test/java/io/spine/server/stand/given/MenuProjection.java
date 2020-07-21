@@ -27,14 +27,11 @@ import io.spine.test.stand.DishAdded;
 import io.spine.test.stand.DishRemoved;
 import io.spine.test.stand.Menu;
 import io.spine.test.stand.MenuId;
-import io.spine.test.stand.MenuWithColumns;
 
 import java.util.List;
 
-//TODO:2020-07-19:alex.tymchenko: test `onBeforeCommit` with this!
 public final class MenuProjection
-        extends Projection<MenuId, Menu, Menu.Builder>
-        implements MenuWithColumns {
+        extends Projection<MenuId, Menu, Menu.Builder> {
 
     public static final String UUID_COLUMN = "uuid";
 
@@ -58,7 +55,7 @@ public final class MenuProjection
     }
 
     @Override
-    public String getUuid() {
-        return id().getUuid();
+    protected void onBeforeCommit() {
+        builder().setUuid(id().getUuid());
     }
 }
