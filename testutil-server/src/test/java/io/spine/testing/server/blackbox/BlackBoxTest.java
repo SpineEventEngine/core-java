@@ -107,12 +107,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxContext}.
+ * An abstract base for integration testing of Bounded Contexts with {@link BlackBox}.
  *
  * @param <T>
- *         the type of the {@code BlackBoxBoundedContext}
+ *         the type of the {@code BlackBox} bounded context
  */
-abstract class BlackBoxContextTest<T extends BlackBoxContext> {
+abstract class BlackBoxTest<T extends BlackBox> {
 
     private T context;
 
@@ -125,7 +125,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
                .add(BbProjectViewProjection.class)
                .add(BbInitProcess.class);
         @SuppressWarnings("unchecked") // see Javadoc for newBuilder().
-        T ctx = (T) BlackBoxContext.from(builder);
+        T ctx = (T) BlackBox.from(builder);
         context = ctx;
     }
 
@@ -384,7 +384,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
             }
         };
 
-        BlackBoxContext ctx = BlackBoxContext.from(
+        BlackBox ctx = BlackBox.from(
                 newBuilder().add(throwingRepo)
         );
 
@@ -407,7 +407,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
 
         private final Set<TypeName> types = toTypes(repositories);
 
-        private BlackBoxContext blackBox;
+        private BlackBox blackBox;
         private EventEnricher enricher;
 
         @BeforeEach
@@ -436,11 +436,11 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         }
 
         private void assertBlackBox(BoundedContextBuilder builder,
-                                    Class<? extends BlackBoxContext> clazz) {
+                                    Class<? extends BlackBox> clazz) {
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);
-            blackBox = BlackBoxContext.from(builder);
+            blackBox = BlackBox.from(builder);
 
             assertThat(blackBox).isInstanceOf(clazz);
             assertRepositories();

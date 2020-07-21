@@ -34,11 +34,10 @@ import io.spine.server.delivery.CatchUpStatus;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.LocalDispatchingObserver;
-import io.spine.server.event.EventStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,19 +54,19 @@ import static io.spine.testing.Tests.nullRef;
 import static java.util.stream.Collectors.toList;
 
 /**
- * A convenience wrapper over the {@link CounterView} repository and the BlackBox Bounded Context
- * to be used in the catch-up tests.
+ * A convenience wrapper over the {@link CounterView} repository and the {@link BlackBox}
+ * Bounded Context to be used in the catch-up tests.
  */
 public class CounterCatchUp {
 
     private final CounterView.Repository repo;
-    private final BlackBoxContext ctx;
+    private final BlackBox ctx;
     private final String[] ids;
 
     public CounterCatchUp(String... ids) {
         this.ids = ids.clone();
         this.repo = new CounterView.Repository();
-        this.ctx = BlackBoxContext.from(
+        this.ctx = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(repo)
         );
@@ -150,7 +149,7 @@ public class CounterCatchUp {
     }
 
     private static List<Callable<Object>>
-    asPostEventJobs(BlackBoxContext ctx, List<NumberAdded> events) {
+    asPostEventJobs(BlackBox ctx, List<NumberAdded> events) {
         return events.stream()
                      .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
                      .collect(toList());

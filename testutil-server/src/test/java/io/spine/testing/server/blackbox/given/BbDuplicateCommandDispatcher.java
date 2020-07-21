@@ -32,6 +32,7 @@ import io.spine.server.type.CommandEnvelope;
  *
  * <p>Attempting to register them with the same bounded context should result in an exception.
  */
+//TODO:2020-07-21:alex.tymchenko: find why it is unused
 public final class BbDuplicateCommandDispatcher extends AbstractCommandDispatcher {
 
     private final CommandClass commandToIntercept;

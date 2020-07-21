@@ -28,7 +28,7 @@ import io.spine.test.bus.Buy;
 import io.spine.test.bus.Sell;
 import io.spine.test.bus.ShareId;
 import io.spine.testing.SlowTest;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +51,7 @@ class DispatchingQueueSynchronisationTest {
     @DisplayName("Bus should not lock with its system counterpart")
     void deadlock() throws InterruptedException {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) newFixedThreadPool(10);
-        BlackBoxContext context = BlackBoxContext.from(
+        BlackBox context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(ShareAggregate.class)
                                      .add(new JowDonsIndex.Repository())

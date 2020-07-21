@@ -19,7 +19,7 @@
  */
 
 /**
- * Tools that assess the {@code BlackBoxBoundedContext} state through
+ * Tools that assess the {@code BlackBox} bounded context state through
  * {@link io.spine.client.Query Query} execution.
  */
 @CheckReturnValue

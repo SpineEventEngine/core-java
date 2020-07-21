@@ -45,7 +45,7 @@ import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -327,7 +327,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
     public void deliverMessagesInOrderOfEmission() throws InterruptedException {
         changeShardCountTo(20);
 
-        BlackBoxContext context = BlackBoxContext.from(
+        BlackBox context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(TaskAggregate.class)
                                      .add(new TaskAssignment.Repository())

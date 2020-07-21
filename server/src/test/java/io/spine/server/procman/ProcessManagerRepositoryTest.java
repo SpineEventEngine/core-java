@@ -85,7 +85,7 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -608,7 +608,7 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        BlackBoxContext context = BlackBoxContext.from(
+        BlackBox context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(new EventDiscardingProcManRepository())
         );

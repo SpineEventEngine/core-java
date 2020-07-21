@@ -30,7 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Abstract base for test suites based on {@link BlackBoxContext}.
+ * Abstract base for test suites based on {@link BlackBox}.
  *
  * <p>Such a test suite creates a new instance of {@link io.spine.server.BoundedContext
  * BoundedContext} using a builder which implementing classes must {@linkplain #contextBuilder()
@@ -40,9 +40,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Testing methods {@linkplain #context() obtain the context} for:
  * <ol>
  *     <li>Sending signals under the test to the context via {@code receivesXxx()} methods, such as
- *         {@link BlackBoxContext#receivesCommand(CommandMessage) receivesCommand()}.
+ *         {@link BlackBox#receivesCommand(CommandMessage) receivesCommand()}.
  *     <li>Asserting results of handling the signals via {@code assertXxx()} methods,
- *     e.g. {@link BlackBoxContext#assertEvents() assertEvents()}.
+ *     e.g. {@link BlackBox#assertEvents() assertEvents()}.
  * </ol>
  *
  * <p>Test suites derived from this class must NOT close the context directly. Doing so will fail
@@ -50,7 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class ContextAwareTest {
 
-    private @Nullable BlackBoxContext context;
+    private @Nullable BlackBox context;
 
     /**
      * Creates a new builder for the Bounded Context under the test.
@@ -63,7 +63,7 @@ public abstract class ContextAwareTest {
         BoundedContextBuilder contextBuilder = contextBuilder();
         checkNotNull(contextBuilder,
                      "`contextBuilder()` must return a non-null `BoundedContextBuilder`.");
-        context = BlackBoxContext.from(contextBuilder);
+        context = BlackBox.from(contextBuilder);
     }
 
     @AfterEach
@@ -76,7 +76,7 @@ public abstract class ContextAwareTest {
     /**
      * Obtains test configuration and assertion API for the Bounded Context under the test.
      */
-    protected BlackBoxContext context() {
+    protected BlackBox context() {
         return checkNotNull(
                 context,
                 "The `BoundedContext` under the test is already destroyed or not yet created."

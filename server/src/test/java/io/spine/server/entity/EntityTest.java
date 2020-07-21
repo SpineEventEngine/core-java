@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Range;
 import com.google.common.truth.LongSubject;
-import com.google.protobuf.StringValue;
 import io.spine.core.UserId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -44,7 +43,7 @@ import io.spine.test.user.User;
 import io.spine.testdata.Sample;
 import io.spine.testing.Tests;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.time.LocalDates;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.BeforeEach;
@@ -208,7 +207,7 @@ class EntityTest {
                 .setId(id)
                 .setDayOfBirth(LocalDates.of(1988, FEBRUARY, 29))
                 .vBuild();
-        BlackBoxContext bbc = BlackBoxContext
+        BlackBox bbc = BlackBox
                 .from(context)
                 .receivesCommand(signUpUser)
                 .receivesCommand(chooseInitial);

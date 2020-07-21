@@ -64,7 +64,7 @@ import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -496,18 +496,18 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
-        private BlackBoxContext context;
+        private BlackBox context;
 
         /**
          * Create a fresh instance of the repository since this nested class uses
-         * {@code BlackBoxBoundedContext}. We cannot use the instance of the repository created by
+         * {@code BlackBox}. We cannot use the instance of the repository created by
          * {@link AggregateRepositoryTest#setUp()} because this method registers it with another
          * {@code BoundedContext}.
          */
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            context = BlackBoxContext.from(
+            context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(repository())
             );
@@ -586,7 +586,7 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxContext context = BlackBoxContext.from(
+            BlackBox context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new EventDiscardingAggregateRepository())
             );

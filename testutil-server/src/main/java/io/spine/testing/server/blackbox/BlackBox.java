@@ -80,7 +80,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBoxContext implements Logging {
+public abstract class BlackBox implements Logging {
 
     /** The context under the test. */
     private final BoundedContext context;
@@ -121,15 +121,15 @@ public abstract class BlackBoxContext implements Logging {
     /**
      * Creates new instance obtaining configuration parameters from the passed builder.
      */
-    public static BlackBoxContext from(BoundedContextBuilder builder) {
-        BlackBoxContext result =
+    public static BlackBox from(BoundedContextBuilder builder) {
+        BlackBox result =
                 builder.isMultitenant()
                 ? new MultiTenantContext(builder)
                 : new SingleTenantContext(builder);
         return result;
     }
 
-    BlackBoxContext(BoundedContextBuilder builder) {
+    BlackBox(BoundedContextBuilder builder) {
         super();
         this.commands = new CommandCollector();
         this.postedCommands = synchronizedSet(new HashSet<>());
@@ -160,12 +160,12 @@ public abstract class BlackBoxContext implements Logging {
      * @throws IllegalStateException
      *         if the method is called for a single-tenant context
      */
-    public abstract BlackBoxContext withTenant(TenantId tenant);
+    public abstract BlackBox withTenant(TenantId tenant);
 
     /**
      * Sets the given {@link UserId} as the actor ID for the requests produced by this context.
      */
-    public final BlackBoxContext withActor(UserId user) {
+    public final BlackBox withActor(UserId user) {
         checkNotNull(user);
         this.actor = this.actor.withId(user);
         return this;
@@ -174,7 +174,7 @@ public abstract class BlackBoxContext implements Logging {
     /**
      * Sets the given time zone parameters for the actor requests produced by this context.
      */
-    public final BlackBoxContext in(ZoneId zoneId) {
+    public final BlackBox in(ZoneId zoneId) {
         checkNotNull(zoneId);
         this.actor = this.actor.in(zoneId);
         return this;
@@ -196,7 +196,7 @@ public abstract class BlackBoxContext implements Logging {
      * Appends the passed event to the history of the context under the test.
      */
     @CanIgnoreReturnValue
-    public final BlackBoxContext append(Event event) {
+    public final BlackBox append(Event event) {
         checkNotNull(event);
         EventStore eventStore =
                 context.eventBus()
@@ -213,7 +213,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public final BlackBoxContext receivesCommand(CommandMessage domainCommand) {
+    public final BlackBox receivesCommand(CommandMessage domainCommand) {
         checkNotNull(domainCommand);
         return receivesCommands(singletonList(domainCommand));
     }
@@ -231,7 +231,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public final BlackBoxContext
+    public final BlackBox
     receivesCommands(CommandMessage first, CommandMessage second, CommandMessage... rest) {
         checkNotNull(first);
         checkNotNull(second);
@@ -245,7 +245,7 @@ public abstract class BlackBoxContext implements Logging {
      *         a list of domain commands to be dispatched to the Bounded Context
      * @return current instance
      */
-    private BlackBoxContext receivesCommands(Collection<CommandMessage> domainCommands) {
+    private BlackBox receivesCommands(Collection<CommandMessage> domainCommands) {
         checkNotNull(domainCommands);
         List<Command> posted = setup().postCommands(domainCommands);
         postedCommands.addAll(posted);
@@ -264,7 +264,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public final BlackBoxContext receivesEvent(EventMessage messageOrEvent) {
+    public final BlackBox receivesEvent(EventMessage messageOrEvent) {
         checkNotNull(messageOrEvent);
         return receivesEvents(singletonList(messageOrEvent));
     }
@@ -287,7 +287,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public final BlackBoxContext
+    public final BlackBox
     receivesEvents(EventMessage first, EventMessage second, EventMessage... rest) {
         checkNotNull(first);
         checkNotNull(second);
@@ -306,7 +306,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public final BlackBoxContext receivesExternalEvent(Message messageOrEvent) {
+    public final BlackBox receivesExternalEvent(Message messageOrEvent) {
         checkNotNull(messageOrEvent);
         setup().postExternalEvent(messageOrEvent);
         return this;
@@ -332,7 +332,7 @@ public abstract class BlackBoxContext implements Logging {
      */
     @SuppressWarnings("unused") // IDEA does not see the usage of this method from tests.
     @CanIgnoreReturnValue
-    public final BlackBoxContext
+    public final BlackBox
     receivesExternalEvents(EventMessage first, EventMessage second, EventMessage... other) {
         checkNotNull(first);
         checkNotNull(second);
@@ -346,7 +346,7 @@ public abstract class BlackBoxContext implements Logging {
      *         a list of external events to be dispatched to the Bounded Context
      * @return current instance
      */
-    private BlackBoxContext receivesExternalEvents(Collection<EventMessage> eventMessages) {
+    private BlackBox receivesExternalEvents(Collection<EventMessage> eventMessages) {
         setup().postExternalEvents(eventMessages);
         return this;
     }
@@ -366,7 +366,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public final BlackBoxContext
+    public final BlackBox
     receivesEventsProducedBy(Object producerId, EventMessage first, EventMessage... rest) {
         List<Event> sentEvents = setup().postEvents(producerId, first, rest);
         postedEvents.addAll(sentEvents);
@@ -380,7 +380,7 @@ public abstract class BlackBoxContext implements Logging {
      *         a list of domain event to be dispatched to the Bounded Context
      * @return current instance
      */
-    private BlackBoxContext receivesEvents(Collection<EventMessage> domainEvents) {
+    private BlackBox receivesEvents(Collection<EventMessage> domainEvents) {
         List<Event> sentEvents = setup().postEvents(domainEvents);
         this.postedEvents.addAll(sentEvents);
         return this;
@@ -395,7 +395,7 @@ public abstract class BlackBoxContext implements Logging {
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public BlackBoxContext importsEvent(Message eventOrMessage) {
+    public BlackBox importsEvent(Message eventOrMessage) {
         setup().importEvent(eventOrMessage);
         return this;
     }
@@ -415,12 +415,12 @@ public abstract class BlackBoxContext implements Logging {
      */
     //TODO:2020-06-17:alex.tymchenko: this method is unused!
     @CanIgnoreReturnValue
-    public final BlackBoxContext
+    public final BlackBox
     importsEvents(EventMessage first, EventMessage second, EventMessage... rest) {
         return importAll(asList(first, second, rest));
     }
 
-    private BlackBoxContext importAll(Collection<EventMessage> eventMessages) {
+    private BlackBox importAll(Collection<EventMessage> eventMessages) {
         setup().importEvents(eventMessages);
         return this;
     }
