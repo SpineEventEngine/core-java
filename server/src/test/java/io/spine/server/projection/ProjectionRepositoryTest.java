@@ -53,7 +53,7 @@ import io.spine.server.projection.given.TestProjection;
 import io.spine.server.projection.migration.MarkProjectionArchived;
 import io.spine.server.projection.migration.MarkProjectionDeleted;
 import io.spine.server.projection.migration.RemoveProjectionFromStorage;
-import io.spine.server.projection.migration.UpdateProjectionColumns;
+import io.spine.server.projection.migration.UpdateProjectionState;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
@@ -549,8 +549,8 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns through migration operation")
-    void updateColumns() {
+    @DisplayName("update state through migration operation")
+    void updateState() {
         // Store a new projection instance in the repository.
         ProjectId id = createId(42);
         TestProjectionRepository repository = repository();
@@ -565,8 +565,8 @@ class ProjectionRepositoryTest
                 repository.find(targetFilters, ResponseFormat.getDefaultInstance());
         assertThat(found.hasNext()).isFalse();
 
-        // Apply the columns update.
-        repository.applyMigration(id, new UpdateProjectionColumns<>());
+        // Apply the state update.
+        repository.applyMigration(id, new UpdateProjectionState<>());
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProjection> afterMigration =
@@ -579,8 +579,8 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns for multiple entities")
-    void updateColumnsForMultiple() {
+    @DisplayName("update state of multiple entities")
+    void updateStateForMultiple() {
         // Store three projections to the repository.
         ProjectId id1 = createId(1);
         ProjectId id2 = createId(2);
@@ -593,8 +593,8 @@ class ProjectionRepositoryTest
         repository.store(projection2);
         repository.store(projection3);
 
-        // Apply the column update to two of the three entities.
-        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateProjectionColumns<>());
+        // Apply the state update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateProjectionState<>());
 
         // Check that entities to which migration has been applied now have column values updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());

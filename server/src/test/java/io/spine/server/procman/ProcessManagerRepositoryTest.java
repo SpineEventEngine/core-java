@@ -60,7 +60,7 @@ import io.spine.server.procman.given.repo.TestProcessManagerRepository;
 import io.spine.server.procman.migration.MarkPmArchived;
 import io.spine.server.procman.migration.MarkPmDeleted;
 import io.spine.server.procman.migration.RemovePmFromStorage;
-import io.spine.server.procman.migration.UpdatePmColumns;
+import io.spine.server.procman.migration.UpdatePmState;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -645,8 +645,8 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns via migration operation")
-    void updateColumns() {
+    @DisplayName("update state via migration operation")
+    void updateState() {
         // Store a new process manager instance in the repository.
         ProjectId id = createId(42);
         TestProcessManagerRepository repository = repository();
@@ -661,8 +661,8 @@ class ProcessManagerRepositoryTest
                 repository.find(targetFilters, ResponseFormat.getDefaultInstance());
         assertThat(found.hasNext()).isFalse();
 
-        // Apply the columns update.
-        repository.applyMigration(id, new UpdatePmColumns<>());
+        // Apply the state update.
+        repository.applyMigration(id, new UpdatePmState<>());
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProcessManager> afterMigration =
@@ -675,8 +675,8 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns for multiple entities")
-    void updateColumnsForMultiple() {
+    @DisplayName("update state of multiple entities")
+    void updateStateForMultiple() {
         // Store three entities to the repository.
         ProjectId id1 = createId(1);
         ProjectId id2 = createId(2);
@@ -689,8 +689,8 @@ class ProcessManagerRepositoryTest
         repository.store(pm2);
         repository.store(pm3);
 
-        // Apply the column update to two of the three entities.
-        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdatePmColumns<>());
+        // Apply the state update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdatePmState<>());
 
         // Check that entities to which the migration has been applied now have columns updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());

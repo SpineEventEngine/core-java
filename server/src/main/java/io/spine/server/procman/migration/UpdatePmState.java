@@ -24,34 +24,30 @@ import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
-import io.spine.server.entity.Transaction;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerMigration;
 
 /**
- * //TODO:2020-07-17:alex.tymchenko: introduce the `onBeforeCommit()` and rewrite the docs.
+ * A migration operation that triggers the update of the {@link ProcessManager} state according
+ * to the logic defined in {@code onBeforeCommit()} method, if it is defined.
  *
- * A migration operation that does the update of interface-based columns of a
- * {@link ProcessManager}.
+ * <p>{@code onBeforeCommit()} is designed to contain common logic on setting
+ * the calculated state fields. In a normal operational mode it is executed after a process manager
+ * handles some signal and before the respective transaction is committed.
  *
- * <p>When applied to an entity, this operation will trigger the recalculation of entity storage
- * fields according to the current implementation of
- * {@link io.spine.query.EntityWithColumns EntityWithColumns}-derived methods.
+ * <p>However, in case this logic is changed, it may be inconvenient to feed all existing process
+ * managers with some signal just to enforce the updated {@code onBeforeCommit()} to be executed.
  *
- * <p>Such operation may be useful when the logic behind manually calculated columns changes as
- * well as when adding the new columns to an entity.
- *
- * @implNote The operation relies on the fact that column values are automatically calculated and
- *         propagated to the entity state on a transaction {@linkplain Transaction#commit() commit}.
- *         It thus does not change the entity state itself in {@link #apply(EntityState)}.
+ * <p>{@code UpdatePmColumns} creates a transaction which does nothing other than running
+ * the {@code onBeforeCommit()} and saving the state changes.
  *
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental
-public final class UpdatePmColumns<I,
-                                   P extends ProcessManager<I, S, B>,
-                                   S extends EntityState<I>,
-                                   B extends ValidatingBuilder<S>>
+public final class UpdatePmState<I,
+                                 P extends ProcessManager<I, S, B>,
+                                 S extends EntityState<I>,
+                                 B extends ValidatingBuilder<S>>
         extends ProcessManagerMigration<I, P, S, B> {
 
     @Override
