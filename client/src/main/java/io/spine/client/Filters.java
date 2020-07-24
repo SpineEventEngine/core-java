@@ -58,17 +58,13 @@ import static java.util.Arrays.stream;
 /**
  * A factory of {@link Filter} instances.
  *
- * <p>Public methods of this class represent the recommended way to create
- * a {@link Filter}.
+ * <p>Public methods of this class represent the recommended way to create a {@link Filter}.
  *
  * <a name="types"></a>
- * <h1>Comparison types</h1>
+ * <h1>Supported Types</h1>
  *
- * <p>The filters support two generic kinds of comparison:
- * <ol>
- *     <li>equality comparison;
- *     <li>ordering comparison.
- * </ol>
+ * <p>The filters allow to put criteria on fields with comparison operations. The criteria either
+ * define the particular values for the fields or specify some ordering.
  *
  * <p>The {@linkplain #eq equality comparison} supports any data type for the compared objects.
  *
