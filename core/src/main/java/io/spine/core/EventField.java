@@ -18,34 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.Deps
-import io.spine.gradle.internal.IncrementGuard
+package io.spine.core;
 
-val spineBaseVersion: String by extra
-val spineTimeVersion: String by extra
+import io.spine.base.Field;
+import io.spine.base.SubscribableField;
 
-dependencies {
-    api("io.spine:spine-base:$spineBaseVersion")
-    api("io.spine:spine-time:$spineTimeVersion")
+/**
+ * A subscribable field of an {@code Event} object.
+ */
+public class EventField extends SubscribableField {
 
-    testImplementation(project(":testutil-core"))
-    testImplementation("io.spine:spine-testutil-time:$spineTimeVersion")
-}
-
-modelCompiler {
-    fields {
-
-        // Describe the `Event` fields to allow non-reflective and strongly-typed access.
-        generateFor("spine.core.Event", markAs("io.spine.core.EventField"))
-
-        // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
-        // creation of typed event filters based on event context.
-        generateFor("spine.core.EventContext", markAs("io.spine.core.EventContextField"))
+    public EventField(Field field) {
+        super(field);
     }
-}
-
-apply {
-    from(Deps.scripts.testArtifacts(project))
-    from(Deps.scripts.publishProto(project))
-    plugin(IncrementGuard::class)
 }
