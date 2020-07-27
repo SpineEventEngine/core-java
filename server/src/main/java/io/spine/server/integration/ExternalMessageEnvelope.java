@@ -21,14 +21,11 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
-import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.server.type.AbstractMessageEnvelope;
-import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -112,17 +109,6 @@ public final class ExternalMessageEnvelope
     @Override
     public ActorContext context() {
         return actorContext;
-    }
-
-    /**
-     * Converts this instance to an envelope of the external event.
-     */
-    //TODO:2020-06-06:alex.tymchenko: remove this unused method
-    public EventEnvelope toEventEnvelope() {
-        ExternalMessage externalMessage = outerObject();
-        Event event = unpack(externalMessage.getOriginalMessage(), Event.class);
-        EventEnvelope result = EventEnvelope.of(event);
-        return result;
     }
 
     /**
