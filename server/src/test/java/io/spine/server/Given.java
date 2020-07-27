@@ -294,6 +294,13 @@ public class Given {
             return super.findRecords(filters, format);
         }
 
+        @Internal
+        @Override
+        public Iterator<EntityRecord> findRecords(ResponseFormat format) {
+            this.memoizedFormat = format;
+            return super.findRecords(format);
+        }
+
         public Optional<TargetFilters> memoizedFilters() {
             return Optional.ofNullable(memoizedFilters);
         }
@@ -336,14 +343,14 @@ public class Given {
 
     /**
      * A {@link ProjectDetailsRepository} which throws on attempt to
-     * {@link #loadAllRecords(ResponseFormat) load all records}.
+     * {@link #findRecords(ResponseFormat) load all records}.
      */
     static final class ThrowingProjectDetailsRepository
             extends ProjectDetailsRepository {
 
         @Internal
         @Override
-        public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
+        public Iterator<EntityRecord> findRecords(ResponseFormat format) {
             throw new IllegalStateException("Ignore this error.");
         }
     }

@@ -43,4 +43,13 @@ public interface QueryableRepository {
      * @return an iterator over the results
      */
     Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format);
+
+    /**
+     * Queries this repository for the records and returns them according to the specified format.
+     *
+     * @param format
+     *         the format of the response
+     * @return an iterator over the results
+     */
+    Iterator<EntityRecord> findRecords(ResponseFormat format);
 }

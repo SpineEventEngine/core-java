@@ -232,7 +232,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
     class FindMultiple {
 
         private Iterator<EntityRecord> loadAllRecords() {
-            return repository.loadAllRecords(ResponseFormat.getDefaultInstance());
+            return repository.findRecords(ResponseFormat.getDefaultInstance());
         }
 
         @Test

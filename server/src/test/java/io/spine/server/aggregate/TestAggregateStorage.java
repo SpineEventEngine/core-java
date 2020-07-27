@@ -102,6 +102,11 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId, Project> {
     }
 
     @Override
+    public Iterator<EntityRecord> readStates(ResponseFormat format) {
+        return delegate.readStates(format);
+    }
+
+    @Override
     public void writeState(Aggregate<ProjectId, ?, ?> aggregate) {
         delegate.writeState(aggregate);
     }

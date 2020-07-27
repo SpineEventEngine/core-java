@@ -39,12 +39,11 @@ import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.Identity;
 import io.spine.server.bus.Listener;
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
-import io.spine.server.entity.RecordBasedRepository;
+import io.spine.server.entity.QueryableRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
@@ -77,6 +76,8 @@ import static io.spine.grpc.StreamObservers.ack;
  * {@linkplain #activate(Subscription, SubscriptionCallback, StreamObserver) activation}, and
  * delivering updates to the subscribers when requested by
  * the {@linkplain io.spine.server.SubscriptionService SubscriptionService}.
+ *
+ * //TODO:2020-07-27:alex.tymchenko: review the obsolete classes.
  *
  * @see <a href="https://spine.io/docs/concepts/diagrams/spine-architecture-diagram-full-screen.html">
  *     Spine Architecture Diagram</a>
@@ -112,7 +113,6 @@ public class Stand implements AutoCloseable {
     private final QueryValidator queryValidator;
     private final SubscriptionValidator subscriptionValidator;
 
-//    private final AggregateQueryProcessor aggregateQueryProcessor;
     private final EventTap eventTap;
 
     private Stand(Builder builder) {
@@ -126,7 +126,6 @@ public class Stand implements AutoCloseable {
         this.topicValidator = builder.topicValidator();
         this.queryValidator = builder.queryValidator();
         this.subscriptionValidator = builder.subscriptionValidator();
-        //this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.systemReadSide());
         this.eventTap = new EventTap(subscriptionRegistry);
     }
 
@@ -392,19 +391,11 @@ public class Stand implements AutoCloseable {
      * @return suitable implementation of {@code QueryProcessor}
      */
     private QueryProcessor processorFor(TypeUrl type) {
-        Optional<? extends RecordBasedRepository<?, ?, ?>> maybeRecordRepo =
-                typeRegistry.recordRepositoryOf(type);
-        if (maybeRecordRepo.isPresent()) {
-            RecordBasedRepository<?, ?, ?> recordRepo = maybeRecordRepo.get();
+        Optional<QueryableRepository> maybeRepo = typeRegistry.recordRepositoryOf(type);
+        if (maybeRepo.isPresent()) {
+            QueryableRepository recordRepo = maybeRepo.get();
             return new EntityQueryProcessor(recordRepo);
         }
-        Optional<? extends AggregateRepository<?, ?, ?>> maybeAggregateRepo =
-                typeRegistry.aggregateRepositoryOf(type);
-        if (maybeAggregateRepo.isPresent()) {
-            AggregateRepository<?, ?, ?> aggregateRepo = maybeAggregateRepo.get();
-            return new AggregateQueryProcessor(aggregateRepo);
-        }
-
         return NO_OP_PROCESSOR;
     }
 

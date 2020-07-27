@@ -652,4 +652,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         return aggregateStorage().readStates(filters, format);
     }
+
+    @Override
+    @Internal
+    public Iterator<EntityRecord> findRecords(ResponseFormat format) {
+        return aggregateStorage().readStates(format);
+    }
 }

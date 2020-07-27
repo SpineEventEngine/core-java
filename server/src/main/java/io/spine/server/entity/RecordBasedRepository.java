@@ -300,7 +300,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @VisibleForTesting
     public Iterator<E> loadAll(ResponseFormat format) {
-        Iterator<EntityRecord> records = loadAllRecords(format);
+        Iterator<EntityRecord> records = findRecords(format);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
@@ -361,7 +361,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return an iterator over all records
      */
     @Internal
-    public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
+    @Override
+    public Iterator<EntityRecord> findRecords(ResponseFormat format) {
         checkNotNull(format);
         EntityRecordStorage<I, S> storage = recordStorage();
         RecordQuery<I, EntityRecord> query = QueryConverter.convert(storage.recordSpec(), format);

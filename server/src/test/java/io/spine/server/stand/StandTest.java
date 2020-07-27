@@ -99,6 +99,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.client.Filters.eq;
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
@@ -665,7 +666,9 @@ class StandTest extends TenantAwareTest {
 //        TestBoundedContext.create().register(repository);
         stand.registerTypeSupplier(repository);
         Query query = getRequestFactory().query()
-                                         .all(Customer.class);
+                                         .select(Customer.class)
+                                         .where(eq(Customer.Column.firstName(), "George"))
+                                         .build();
         stand.execute(query, noOpObserver());
 
         Optional<TargetFilters> actualFilter = repository.memoizedFilters();

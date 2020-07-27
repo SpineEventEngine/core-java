@@ -36,7 +36,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.AbstractStorage;
-import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -47,6 +46,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
+import static io.spine.server.storage.QueryConverter.convert;
 
 /**
  * A storage of aggregate events, snapshots and the most recent aggregate states.
@@ -214,9 +214,38 @@ public class AggregateStorage<I, S extends EntityState<I>>
         eventStorage.write(record.getId(), record);
     }
 
+    /**
+     * Reads the aggregate states from the storage according to the passed filters and returns
+     * the results in the specified response format.
+     *
+     * <p>The results of this call are eventually consistent with the latest states of aggregates,
+     * as instances are <em>not</em> restored from their events for querying.
+     * Instead, this method works on top of the storage of the latest known aggregate states,
+     * for better performance. In a distributed environment, the records in this storage may be
+     * outdated, as new events may have been emitted by an aggregate instance on other server nodes.
+     *
+     * @param filters
+     *         the filters to use when querying the aggregate states
+     * @param format
+     *         the format of the response
+     * @return an iterator over the matching {@code EntityRecord}s
+     */
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
-        RecordQuery<I, EntityRecord> query =
-                QueryConverter.convert(stateStorage.recordSpec(),filters, format);
+        RecordQuery<I, EntityRecord> query = convert(stateStorage.recordSpec(), filters, format);
+        return stateStorage.readAll(query);
+    }
+
+    /**
+     * Reads the aggregate states from the storage and returns the results in the specified format.
+     *
+     * <p>This method performs no filtering. Other than that, it works in the same manner
+     * as {@link #readStates(TargetFilters, ResponseFormat) readStates(filters, format)}.
+     *
+     * @param format the format of the response
+     * @return an iterator over the records
+     */
+    protected Iterator<EntityRecord> readStates(ResponseFormat format) {
+        RecordQuery<I, EntityRecord> query = convert(stateStorage.recordSpec(), format);
         return stateStorage.readAll(query);
     }
 
