@@ -112,6 +112,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @param <T>
  *         the type of the {@code BlackBox} bounded context
  */
+@SuppressWarnings("OverlyCoupledClass")     // It's a central piece of `BlackBox` tests.
 abstract class BlackBoxTest<T extends BlackBox> {
 
     private T context;
