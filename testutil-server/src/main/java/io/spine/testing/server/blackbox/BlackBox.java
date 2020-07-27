@@ -286,6 +286,7 @@ public abstract class BlackBox implements Logging {
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
+    @SuppressWarnings("OverloadedVarargsMethod")    // Different number of mandatory args.
     @CanIgnoreReturnValue
     public final BlackBox
     receivesEvents(EventMessage first, EventMessage second, EventMessage... rest) {
@@ -413,7 +414,6 @@ public abstract class BlackBox implements Logging {
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
-    //TODO:2020-06-17:alex.tymchenko: this method is unused!
     @CanIgnoreReturnValue
     public final BlackBox
     importsEvents(EventMessage first, EventMessage second, EventMessage... rest) {
