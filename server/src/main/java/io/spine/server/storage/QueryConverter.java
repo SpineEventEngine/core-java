@@ -58,7 +58,21 @@ public final class QueryConverter {
     private QueryConverter() {
     }
 
-    //TODO:2020-07-16:alex.tymchenko: document!
+    /**
+     * Converts the Protobuf-based filters and the response format into a {@code RecordQuery}.
+     *
+     * @param spec
+     *         the specification of the columns stored for the particular record type
+     * @param filters
+     *         the original Protobuf-based filters to convert
+     * @param format
+     *         the original response format to convert
+     * @param <I>
+     *         the type of the record identifiers
+     * @param <R>
+     *         the type of the records which are queried
+     * @return a new record query with the same semantic as the original filters and response format
+     */
     public static <I, R extends Message> RecordQuery<I, R>
     convert(RecordSpec<I, R, ?> spec, TargetFilters filters, ResponseFormat format) {
         checkNotNull(spec);
@@ -76,6 +90,21 @@ public final class QueryConverter {
         return builder.build();
     }
 
+    /**
+     * Creates a new {@code RecordQuery} based on the given response format.
+     *
+     * <p>The result contains no filters on any record field.
+     *
+     * @param spec
+     *         the specification of the columns stored for the particular record type
+     * @param format
+     *         the original response format
+     * @param <I>
+     *         the type of the record identifiers
+     * @param <R>
+     *         the type of the records which are queried
+     * @return a new record query
+     */
     public static <I, R extends Message> RecordQuery<I, R>
     convert(RecordSpec<I, R, ?> spec, ResponseFormat format) {
         checkNotNull(spec);
@@ -250,7 +279,8 @@ public final class QueryConverter {
      * <p>Serves for the column conversion when a simple cast is not possible due to the generic
      * type erasure.
      *
-     * @param <R> the type of the message which column is being viewed
+     * @param <R>
+     *         the type of the message which column is being viewed
      */
     private static final class AsRecordColumn<R extends Message> extends RecordColumn<R, Object> {
 
@@ -265,7 +295,8 @@ public final class QueryConverter {
     /**
      * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
      *
-     * @param <R> the type of the message which column getter it is
+     * @param <R>
+     *         the type of the message which column getter it is
      */
     @Immutable
     private static final class NoGetter<R extends Message> implements Column.Getter<R, Object> {
