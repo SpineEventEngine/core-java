@@ -738,7 +738,6 @@ public class AggregateStorageTest
     private static GivenAggregate givenAggregate() {
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         BoundedContextBuilder.assumingTests().add(repository).build();
-//        TestBoundedContext.create().register(repository);
         return new GivenAggregate(repository);
     }
 }
