@@ -70,7 +70,7 @@ class ScheduledCommandTest {
         ServerEnvironment.instance()
                          .scheduleCommandsUsing(() -> scheduler);
         BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-        contextBuilder.systemFeatures()
+        contextBuilder.systemSettings()
                       .enableCommandLog();
         context = contextBuilder.build();
         context.internalAccess()

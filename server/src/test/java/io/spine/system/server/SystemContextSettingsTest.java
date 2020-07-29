@@ -52,10 +52,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("System Bounded Context should")
-class SystemContextFeaturesTest {
+class SystemContextSettingsTest {
 
     private static final TestEventFactory events =
-            TestEventFactory.newInstance(SystemContextFeaturesTest.class);
+            TestEventFactory.newInstance(SystemContextSettingsTest.class);
 
     @Test
     @DisplayName("not store events by default")
@@ -74,7 +74,7 @@ class SystemContextFeaturesTest {
     @DisplayName("store events if required")
     void storeEvents() {
         BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-        contextBuilder.systemFeatures()
+        contextBuilder.systemSettings()
                       .persistEvents();
         BoundedContext domain = contextBuilder.build();
         BoundedContext system = systemOf(domain);
@@ -98,7 +98,7 @@ class SystemContextFeaturesTest {
     @DisplayName("store domain commands if required")
     void storeDomainCommands() {
         BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-        contextBuilder.systemFeatures()
+        contextBuilder.systemSettings()
                       .enableCommandLog();
         BoundedContext domain = contextBuilder.build();
         BoundedContext system = systemOf(domain);
@@ -109,7 +109,7 @@ class SystemContextFeaturesTest {
     @DisplayName("post system events in parallel")
     void asyncEvents() {
         BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-        contextBuilder.systemFeatures()
+        contextBuilder.systemSettings()
                       .enableParallelPosting();
         BoundedContext domain = contextBuilder.build();
         BoundedContext system = systemOf(domain);

@@ -84,7 +84,7 @@ public final class ThirdPartyContext implements Closeable {
         BoundedContextBuilder contextBuilder = multitenant
                                  ? BoundedContext.multitenant(name)
                                  : BoundedContext.singleTenant(name);
-        contextBuilder.systemFeatures()
+        contextBuilder.systemSettings()
                .disableCommandLog()
                .disableAggregateQuerying()
                .forgetEvents();
