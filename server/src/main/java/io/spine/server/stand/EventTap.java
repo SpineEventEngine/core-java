@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * An Event {@link Listener} which propagates events into to subscribers of
  * {@link io.spine.server.SubscriptionService}.
  */
-//TODO:2020-06-17:alex.tymchenko: for some reason, this file has been merged with `AllOfTypeMatch`.
 final class EventTap implements Listener<EventEnvelope> {
 
     /**
