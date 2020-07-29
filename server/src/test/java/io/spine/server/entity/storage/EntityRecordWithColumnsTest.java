@@ -130,7 +130,7 @@ class EntityRecordWithColumnsTest {
 
         EntityRecordWithColumns<?> record =
                 EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        assertThat(record.columnNames()).containsExactlyElementsIn(EntityRecordColumn.columnNames());
+        assertThat(record.columnNames()).containsExactlyElementsIn(EntityRecordColumn.names());
     }
 
     @Test

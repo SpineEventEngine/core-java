@@ -21,7 +21,6 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.query.ColumnName;
@@ -32,7 +31,7 @@ import io.spine.server.entity.EntityRecord;
 
 import java.util.function.Supplier;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Arrays.stream;
 
 /**
@@ -41,11 +40,19 @@ import static java.util.Arrays.stream;
 @Internal
 public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>> {
 
-    //TODO:2020-07-16:alex.tymchenko: document!
+    /**
+     * The column storing the {@code boolean} attribute telling if an entity is archived.
+     */
     archived(new ArchivedColumn()),
 
+    /**
+     * The column storing the {@code boolean} attribute telling if an entity is deleted.
+     */
     deleted(new DeletedColumn()),
 
+    /**
+     * The column storing the entity version.
+     */
     version(new VersionColumn());
 
     private final CustomColumn<Entity<?, ?>, ?> column;
@@ -87,15 +94,18 @@ public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>
      * Returns the names of all columns.
      */
     @VisibleForTesting
-    static ImmutableSet<ColumnName> columnNames() {
+    static ImmutableSet<ColumnName> names() {
         return ImmutableSet.of(archived.columnName(), deleted.columnName(), version.columnName());
     }
 
+    /**
+     * Returns all the columns which store system attributes of an {@code Entity}.
+     */
     @VisibleForTesting
-    static ImmutableList<CustomColumn<Entity<?, ?>, ?>> columns() {
-        ImmutableList<CustomColumn<Entity<?, ?>, ?>> result =
+    static ImmutableSet<CustomColumn<Entity<?, ?>, ?>> all() {
+        ImmutableSet<CustomColumn<Entity<?, ?>, ?>> result =
                 stream(values()).map(EntityRecordColumn::get)
-                                .collect(toImmutableList());
+                                .collect(toImmutableSet());
         return result;
     }
 }

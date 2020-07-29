@@ -45,7 +45,7 @@ class ScannerTest {
         ImmutableSet<CustomColumn<?, ?>> systemColumns = scanner.systemColumns();
 
         assertThat(systemColumns)
-                .containsExactlyElementsIn(EntityRecordColumn.columns());
+                .containsExactlyElementsIn(EntityRecordColumn.all());
     }
 
 
