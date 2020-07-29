@@ -77,8 +77,6 @@ import static io.spine.grpc.StreamObservers.ack;
  * delivering updates to the subscribers when requested by
  * the {@linkplain io.spine.server.SubscriptionService SubscriptionService}.
  *
- * //TODO:2020-07-27:alex.tymchenko: review the obsolete classes.
- *
  * @see <a href="https://spine.io/docs/concepts/diagrams/spine-architecture-diagram-full-screen.html">
  *     Spine Architecture Diagram</a>
  */
@@ -117,9 +115,7 @@ public class Stand implements AutoCloseable {
 
     private Stand(Builder builder) {
         super();
-        this.multitenant = builder.multitenant != null
-                           ? builder.multitenant
-                           : false;
+        this.multitenant = builder.isMultitenant();
         this.subscriptionRegistry = builder.subscriptionRegistry();
         this.typeRegistry = builder.typeRegistry();
         this.eventRegistry = builder.eventRegistry();
@@ -406,7 +402,7 @@ public class Stand implements AutoCloseable {
          *
          * <p>The value of this field should be equal to that of corresponding
          * {@linkplain io.spine.server.BoundedContextBuilder BoundedContextBuilder} and is not
-         * supposed to be {@linkplain #setMultitenant(Boolean) set directly}.
+         * supposed to be {@linkplain #setMultitenant(boolean) set directly}.
          *
          * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating
          * {@code BoundedContext}.
@@ -423,7 +419,7 @@ public class Stand implements AutoCloseable {
 
         @CanIgnoreReturnValue
         @Internal
-        public Builder setMultitenant(@Nullable Boolean multitenant) {
+        public Builder setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
             return this;
         }
@@ -436,9 +432,8 @@ public class Stand implements AutoCloseable {
             return this;
         }
 
-        @Internal
-        public @Nullable Boolean isMultitenant() {
-            return multitenant;
+        private boolean isMultitenant() {
+            return this.multitenant != null && this.multitenant;
         }
 
         private SubscriptionRegistry subscriptionRegistry() {
@@ -475,14 +470,9 @@ public class Stand implements AutoCloseable {
          */
         @Internal
         public Stand build() {
-            boolean multitenant = this.multitenant == null
-                                  ? false
-                                  : this.multitenant;
             if (subscriptionRegistry == null) {
-                subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
+                subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(isMultitenant());
             }
-            //TODO:2020-06-17:alex.tymchenko: review.
-            //  topicValidator = new TopicValidator(typeRegistry, eventRegistry); -- previously.
             topicValidator = new TopicValidator(typeRegistry);
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
