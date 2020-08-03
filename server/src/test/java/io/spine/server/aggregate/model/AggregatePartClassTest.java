@@ -32,7 +32,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -49,10 +48,7 @@ class AggregatePartClassTest {
     void setUp() {
         ModelTests.dropAllModels();
         BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
-        ProjectId projectId = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
+        ProjectId projectId = ProjectId.generate();
         root = new AnAggregateRoot(boundedContext, projectId);
     }
 

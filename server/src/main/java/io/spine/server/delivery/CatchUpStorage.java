@@ -43,7 +43,10 @@ public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
 
     @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}.
     private static MessageRecordSpec<CatchUpId, CatchUp> getSpec() {
-        return new MessageRecordSpec<>(CatchUp.class, CatchUp::getId, CatchUpColumn.definitions());
+        return new MessageRecordSpec<>(CatchUpId.class,
+                                       CatchUp.class,
+                                       CatchUp::getId,
+                                       CatchUpColumn.definitions());
     }
 
     /**

@@ -145,11 +145,7 @@ public class AggregateStorageTest
 
     @Override
     protected ProjectId newId() {
-        ProjectId id = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
-        return id;
+        return ProjectId.generate();
     }
 
     @Override

@@ -47,7 +47,10 @@ public final class RecordQueryMatcherTestEnv {
      */
     public static Subject<Object, EntityRecord> recordSubject() {
         Subject<Object, EntityRecord> sampleSubject =
-                new Subject<>(IdParameter.empty(), EntityRecord.class, ImmutableList.of());
+                new Subject<>(IdParameter.empty(),
+                              Object.class,
+                              EntityRecord.class,
+                              ImmutableList.of());
         return sampleSubject;
     }
 
@@ -57,8 +60,15 @@ public final class RecordQueryMatcherTestEnv {
      */
     public static <I> Subject<I, EntityRecord> recordSubject(I id) {
         Subject<I, EntityRecord> sampleSubject =
-                new Subject<>(IdParameter.is(id), EntityRecord.class, ImmutableList.of());
+                new Subject<>(IdParameter.is(id), parameterizedCls(id),
+                              EntityRecord.class,
+                              ImmutableList.of());
         return sampleSubject;
+    }
+
+    @SuppressWarnings("unchecked")  // as per the declaration.
+    private static <I> Class<I> parameterizedCls(I id) {
+        return (Class<I>) id.getClass();
     }
 
     /**

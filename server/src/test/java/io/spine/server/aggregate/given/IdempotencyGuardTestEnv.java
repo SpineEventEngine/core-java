@@ -52,9 +52,7 @@ public class IdempotencyGuardTestEnv {
     }
 
     public static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+        return ProjectId.generate();
     }
 
     public static TenantId newTenantId() {

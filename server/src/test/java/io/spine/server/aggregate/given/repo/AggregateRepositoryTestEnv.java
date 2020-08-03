@@ -23,7 +23,6 @@ package io.spine.server.aggregate.given.repo;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -70,7 +69,7 @@ public class AggregateRepositoryTestEnv {
 
     public static ProjectId givenAggregateId(String id) {
         return ProjectId.newBuilder()
-                        .setId(id)
+                        .setUuid(id)
                         .build();
     }
 
@@ -91,7 +90,7 @@ public class AggregateRepositoryTestEnv {
 
     private static TestActorRequestFactory newRequestFactory() {
         TestActorRequestFactory requestFactory =
-                new TestActorRequestFactory(AggregateRepositoryTest.class);
+                new TestActorRequestFactory(AggregateRepositoryTestEnv.class);
         return requestFactory;
     }
 

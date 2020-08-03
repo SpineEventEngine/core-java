@@ -124,7 +124,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregateTest {
 
     private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("prj-01")
+                                                 .setUuid("prj-01")
                                                  .build();
 
     private static final AggCreateProject createProject = Given.CommandMessage.createProject(ID);

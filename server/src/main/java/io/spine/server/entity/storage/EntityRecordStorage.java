@@ -261,6 +261,12 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
                                       .stateClass();
     }
 
+
+    @SuppressWarnings("unchecked")  // ensured by the `Entity` declaration.
+    private Class<I> idType() {
+        return (Class<I>) recordSpec().entityClass().idClass();
+    }
+
     private static boolean hasNoIds(Query<?, ?> query) {
         return query.subject()
                     .id()
@@ -303,7 +309,8 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     }
 
     private FindActiveEntites.Builder<I, S> findActiveEntities() {
-        return FindActiveEntites.newBuilder(stateType(), hasArchivedColumn, hasDeletedColumn);
+        return FindActiveEntites.newBuilder(idType(), stateType(),
+                                            hasArchivedColumn, hasDeletedColumn);
     }
 
     private boolean hasColumn(EntityRecordColumn column) {

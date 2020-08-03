@@ -79,8 +79,9 @@ public final class QueryConverter {
         checkNotNull(filters);
         checkNotNull(format);
 
+        Class<I> idType = spec.idType();
         Class<R> recordType = spec.recordType();
-        RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(recordType);
+        RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(idType, recordType);
 
         identifiers(builder, filters.getIdFilter());
         filters(builder, spec, filters);
@@ -110,8 +111,9 @@ public final class QueryConverter {
         checkNotNull(spec);
         checkNotNull(format);
 
+        Class<I> idType = spec.idType();
         Class<R> recordType = spec.recordType();
-        RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(recordType);
+        RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(idType, recordType);
 
         fieldMask(builder, format);
         orderByAndLimit(builder, spec, format);

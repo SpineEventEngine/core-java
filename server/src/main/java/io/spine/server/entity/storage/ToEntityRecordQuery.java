@@ -74,7 +74,7 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
     }
 
     private ToEntityRecordQuery(EntityQuery<I, S, ?> source) {
-        super(EntityRecord.class);
+        super(source.subject().idType(), EntityRecord.class);
 
         Subject<I, S> subject = source.subject();
         this.setIdParameter(subject.id());

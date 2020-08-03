@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.Given.CommandMessage.createProject;
@@ -246,10 +245,7 @@ class SubscriptionServiceTest {
             Subscription subscription = checkSubscribesTo(AggOwnerNotified.class);
             MemoizingObserver<SubscriptionUpdate> observer = StreamObservers.memoizingObserver();
             subscriptionService.activate(subscription, observer);
-            ProjectId projectId = ProjectId
-                    .newBuilder()
-                    .setId(newUuid())
-                    .build();
+            ProjectId projectId = ProjectId.generate();
             Command command = new TestActorRequestFactory(SubscriptionServiceTest.class)
                     .createCommand(createProject(projectId));
             context.commandBus()
@@ -314,7 +310,7 @@ class SubscriptionServiceTest {
     private ProjectId updateEntity() {
         ProjectId projectId = ProjectId
                 .newBuilder()
-                .setId("some-id")
+                .setUuid("some-id")
                 .build();
         AggCreateProject cmd = createProject(projectId);
         Command command = requestFactory.createCommand(cmd);

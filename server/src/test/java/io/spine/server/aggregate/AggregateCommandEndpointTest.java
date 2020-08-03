@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.truth.Truth;
-import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
@@ -62,10 +61,7 @@ class AggregateCommandEndpointTest {
         ModelTests.dropAllModels();
         context = BoundedContextBuilder.assumingTests()
                                        .build();
-        projectId = ProjectId
-                .newBuilder()
-                .setId(Identifier.newUuid())
-                .build();
+        projectId = ProjectId.generate();
 
         // Create a subscriber of ProjectCreated event.
         subscriber = new Subscriber();

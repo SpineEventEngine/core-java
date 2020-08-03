@@ -64,7 +64,8 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
     private static MessageRecordSpec<InboxMessageId, InboxMessage> spec() {
         @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.
         MessageRecordSpec<InboxMessageId, InboxMessage> spec =
-                new MessageRecordSpec<>(InboxMessage.class,
+                new MessageRecordSpec<>(InboxMessageId.class,
+                                        InboxMessage.class,
                                         InboxMessage::getId,
                                         InboxColumn.definitions());
         return spec;

@@ -103,8 +103,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
-@DisplayName("AggregateRepository should")
-public class AggregateRepositoryTest {
+@DisplayName("`AggregateRepository` should")
+class AggregateRepositoryTest {
 
     @BeforeEach
     void setUp() {
@@ -356,7 +356,7 @@ public class AggregateRepositoryTest {
         TenantAwareOperation op = new TenantAwareOperation(generate()) {
             @Override
             public void run() {
-                givenStoredAggregateWithId(ProjectAggregateRepository.troublesome.getId());
+                givenStoredAggregateWithId(ProjectAggregateRepository.troublesome.getUuid());
             }
         };
         op.execute();
@@ -568,7 +568,7 @@ public class AggregateRepositoryTest {
         }
 
         @Test
-        @DisplayName("through the repository EventFilter")
+        @DisplayName("through the repository `EventFilter`")
         void throughEventFilter() {
             ProjectId id = givenAggregateId(Identifier.newUuid());
             AggCreateProject create = AggCreateProject

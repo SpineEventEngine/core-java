@@ -78,7 +78,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     private EntityRecordSpec(EntityClass<E> entityClass,
                              ImmutableSet<EntityColumn<S, ?>> simpleColumns,
                              ImmutableSet<CustomColumn<E, ?>> systemColumns) {
-        super(EntityRecord.class);
+        super(idClass(entityClass), EntityRecord.class);
         this.entityClass = entityClass;
         this.simpleColumns = simpleColumns;
         this.systemColumns = systemColumns;
@@ -181,5 +181,10 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     @VisibleForTesting
     ImmutableSet<CustomColumn<E, ?>> systemColumns() {
         return systemColumns;
+    }
+
+    @SuppressWarnings("unchecked")  // Ensured by the `Entity` declaration.
+    private static <I, E extends Entity<I, ?>> Class<I> idClass(EntityClass<E> entityClass) {
+        return (Class<I>) entityClass.idClass();
     }
 }

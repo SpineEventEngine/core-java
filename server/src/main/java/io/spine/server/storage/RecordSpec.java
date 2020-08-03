@@ -46,11 +46,16 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public abstract class RecordSpec<I, R, S> {
 
     private final Class<R> recordType;
+    private final Class<I> idType;
 
     /**
      * Creates a new {@code RecordSpec} instance for the record of the passed type.
+     *
+     * @param idType the type of the record identifiers
+     * @param recordType the type of the record
      */
-    protected RecordSpec(Class<R> recordType) {
+    protected RecordSpec(Class<I> idType, Class<R> recordType) {
+        this.idType = idType;
         this.recordType = recordType;
     }
 
@@ -59,6 +64,13 @@ public abstract class RecordSpec<I, R, S> {
      */
     public final Class<R> recordType() {
         return recordType;
+    }
+
+    /**
+     * Returns the type of the record identifiers.
+     */
+    public final Class<I> idType() {
+        return idType;
     }
 
     /**

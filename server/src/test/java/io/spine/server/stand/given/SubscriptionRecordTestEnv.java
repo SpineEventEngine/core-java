@@ -146,7 +146,7 @@ public final class SubscriptionRecordTestEnv {
     public static ProjectId projectId(String id) {
         return ProjectId
                 .newBuilder()
-                .setId(id)
+                .setUuid(id)
                 .build();
     }
 }

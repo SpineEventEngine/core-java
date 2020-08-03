@@ -138,7 +138,7 @@ class RecordQueryMatcherTest {
     }
 
     private static RecordQueryBuilder<Object, EntityRecord> newBuilder() {
-        return RecordQuery.newBuilder(EntityRecord.class);
+        return RecordQuery.newBuilder(Object.class, EntityRecord.class);
     }
 
     private static EntityRecord sampleEntityRecord() {

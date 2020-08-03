@@ -472,6 +472,6 @@ public class RecordStorageDelegateTest
     }
 
     private static RecordQueryBuilder<StgProjectId, StgProject> queryBuilder() {
-        return RecordQuery.newBuilder(StgProject.class);
+        return RecordQuery.newBuilder(StgProjectId.class, StgProject.class);
     }
 }

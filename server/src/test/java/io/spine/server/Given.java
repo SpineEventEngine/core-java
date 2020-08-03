@@ -187,10 +187,7 @@ public class Given {
         }
 
         private static ProjectId newProjectId() {
-            String uuid = newUuid();
-            return ProjectId.newBuilder()
-                            .setId(uuid)
-                            .build();
+            return ProjectId.generate();
         }
     }
 

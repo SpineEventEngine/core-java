@@ -30,7 +30,7 @@ option java_multiple_files = true;
 import "google/protobuf/any.proto";
 
 message ProjectId {
-    string id = 1;
+    string uuid = 1;
 }
 
 enum Status {
@@ -50,9 +50,9 @@ message Project {
     //
     ProjectId id = 1 [(required) = false];
 
-    string name = 2;
+    string name = 2 [(column) = true];
     repeated Task task = 3;
-    Status status = 4;
+    Status status = 4 [(column) = true];
 }
 
 // An aggregate with a `String` identifier.

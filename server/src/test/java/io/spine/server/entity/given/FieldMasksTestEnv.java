@@ -47,7 +47,7 @@ public class FieldMasksTestEnv {
 
         public static Project newProject(String id) {
             ProjectId projectId = ProjectId.newBuilder()
-                                           .setId(id)
+                                           .setUuid(id)
                                            .build();
             Task first = Task.newBuilder()
                              .setTaskId(TaskId.newBuilder()

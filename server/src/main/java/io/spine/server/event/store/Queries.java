@@ -46,7 +46,8 @@ final class Queries {
     static RecordQuery<EventId, Event> convert(EventStreamQuery query) {
         checkNotNull(query);
 
-        RecordQueryBuilder<EventId, Event> builder = RecordQuery.newBuilder(Event.class);
+        RecordQueryBuilder<EventId, Event> builder =
+                RecordQuery.newBuilder(EventId.class, Event.class);
         if (!query.includeAll()) {
             addTimeBounds(query, builder);
             addTypeParams(query, builder);

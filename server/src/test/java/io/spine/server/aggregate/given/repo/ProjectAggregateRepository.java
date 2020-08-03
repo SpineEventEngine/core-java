@@ -58,7 +58,7 @@ public class ProjectAggregateRepository
         extends AggregateRepository<ProjectId, ProjectAggregate, Project> {
 
     public static final ProjectId troublesome = ProjectId.newBuilder()
-                                                         .setId("INVALID_ID")
+                                                         .setUuid("INVALID_ID")
                                                          .build();
 
     private @Nullable AggregateStorage<ProjectId, Project> customStorage;

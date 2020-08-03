@@ -75,7 +75,10 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
 
     private static MessageRecordSpec<EventId, Event> spec() {
         MessageRecordSpec<EventId, Event> spec =
-                new MessageRecordSpec<>(Event.class, Signal::id, EventColumn.definitions());
+                new MessageRecordSpec<>(EventId.class,
+                                        Event.class,
+                                        Signal::id,
+                                        EventColumn.definitions());
         return spec;
     }
 

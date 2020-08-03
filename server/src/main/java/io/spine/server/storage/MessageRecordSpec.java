@@ -55,11 +55,6 @@ import static com.google.common.collect.Streams.stream;
 public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I, R, R> {
 
     /**
-     * The class of the record which storage is configured by this spec.
-     */
-    private final Class<R> recordClass;
-
-    /**
      * A method object to extract the record identifier, once such a record is passed.
      */
     private final ExtractId<R, I> extractId;
@@ -69,21 +64,17 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
      */
     private final ImmutableMap<ColumnName, RecordColumn<R, ?>> columns;
 
-    public MessageRecordSpec(Class<R> recordClass,
+    public MessageRecordSpec(Class<I> idType,
+                             Class<R> recordType,
                              ExtractId<R, I> extractId,
                              Iterable<RecordColumn<R, ?>> columns) {
-        super(recordClass);
+        super(idType, recordType);
         this.columns = stream(columns).collect(toImmutableMap(RecordColumn::name, (c) -> c));
-        this.recordClass = recordClass;
         this.extractId = extractId;
     }
 
-    public Class<R> recordClass() {
-        return recordClass;
-    }
-
-    public MessageRecordSpec(Class<R> aClass, ExtractId<R, I> extractId) {
-        this(aClass, extractId, ImmutableList.of());
+    public MessageRecordSpec(Class<I> idType, Class<R> recordType, ExtractId<R, I> extractId) {
+        this(idType, recordType, extractId, ImmutableList.of());
     }
 
     @Override

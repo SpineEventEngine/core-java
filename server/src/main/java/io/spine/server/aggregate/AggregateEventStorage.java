@@ -36,6 +36,7 @@ public class AggregateEventStorage
     @SuppressWarnings("ConstantConditions")     // Protobuf getters return non-{@code null} values.
     private static final MessageRecordSpec<AggregateEventRecordId, AggregateEventRecord> spec =
             new MessageRecordSpec<>(
+                    AggregateEventRecordId.class,
                     AggregateEventRecord.class,
                     AggregateEventRecord::getId,
                     AggregateEventRecordColumn.definitions()

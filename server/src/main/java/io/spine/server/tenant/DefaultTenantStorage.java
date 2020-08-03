@@ -38,7 +38,7 @@ final class DefaultTenantStorage extends TenantStorage<Tenant> {
 
     @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.
     private static MessageRecordSpec<TenantId, Tenant> getSpec() {
-        return new MessageRecordSpec<>(Tenant.class, Tenant::getId);
+        return new MessageRecordSpec<>(TenantId.class, Tenant.class, Tenant::getId);
     }
 
     @Override
