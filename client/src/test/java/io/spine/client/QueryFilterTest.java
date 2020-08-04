@@ -85,9 +85,10 @@ class QueryFilterTest {
             checkCreates(QueryFilter::le, LESS_OR_EQUAL);
         }
 
-        private void checkCreates(BiFunction<EntityColumn, Object, QueryFilter> factoryMethod,
-                                  Filter.Operator expectedOperator) {
-            EntityColumn column = TestEntity.Column.thirdField();
+        private void
+        checkCreates(BiFunction<EntityColumn<?, Integer>, Integer, QueryFilter> factoryMethod,
+                     Filter.Operator expectedOperator) {
+            EntityColumn<?, Integer> column = TestEntity.Column.thirdField();
             int value = 42;
             QueryFilter queryFilter = factoryMethod.apply(column, value);
             Filter filter = queryFilter.filter();
