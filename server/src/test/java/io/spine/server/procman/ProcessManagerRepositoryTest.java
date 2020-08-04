@@ -750,7 +750,7 @@ class ProcessManagerRepositoryTest
         assertThat(found.isPresent()).isFalse();
     }
 
-    private static TargetFilters targetFilters(EntityColumn<?, ?> column, String value) {
+    private static TargetFilters targetFilters(EntityColumn<?, String> column, String value) {
         QueryFilter filter = QueryFilter.eq(column, value);
         return targetFilters(filter);
     }
