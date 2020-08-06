@@ -239,6 +239,7 @@ public final class ServerEnvironment implements AutoCloseable, Logging {
      *
      * @return this instance of {@code ServerEnvironment}
      */
+    @SuppressWarnings("DuplicateStringLiteralInspection") // we do not externalize formats
     @CanIgnoreReturnValue
     public ServerEnvironment use(StorageFactory factory, EnvironmentType envType) {
         checkNotNull(factory);
@@ -256,6 +257,7 @@ public final class ServerEnvironment implements AutoCloseable, Logging {
      *
      * @return this instance of {@code ServerEnvironment}
      */
+    @SuppressWarnings("DuplicateStringLiteralInspection") // we do not externalize formats
     @CanIgnoreReturnValue
     public ServerEnvironment use(StorageFactory factory, Class<? extends EnvironmentType> type) {
         checkNotNull(factory);
