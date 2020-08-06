@@ -34,7 +34,7 @@ import io.spine.code.proto.FieldName;
 import io.spine.core.Event;
 import io.spine.core.EventContextField;
 import io.spine.core.Version;
-import io.spine.query.EntityColumn;
+import io.spine.query.Column;
 import io.spine.query.EntityStateField;
 
 import java.util.Collection;
@@ -108,15 +108,16 @@ public final class Filters {
      * Creates a new equality {@link Filter}.
      *
      * @param column
-     *         the entity column to filter by
+     *         the column to filter by
      * @param value
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter eq(EntityColumn<?, ?> column, Object value) {
+    public static Filter eq(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name().value(), value, EQUAL);
+        return createFilter(column.name()
+                                  .value(), value, EQUAL);
     }
 
     /**
@@ -196,7 +197,7 @@ public final class Filters {
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter gt(EntityColumn<?, ?> column, Object value) {
+    public static Filter gt(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name().value(), value, GREATER_THAN);
@@ -285,7 +286,7 @@ public final class Filters {
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter lt(EntityColumn<?, ?> column, Object value) {
+    public static Filter lt(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name().value(), value, LESS_THAN);
@@ -374,7 +375,7 @@ public final class Filters {
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter ge(EntityColumn<?, ?> column, Object value) {
+    public static Filter ge(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name().value(), value, GREATER_OR_EQUAL);
@@ -463,7 +464,7 @@ public final class Filters {
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter le(EntityColumn<?, ?> column, Object value) {
+    public static Filter le(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name().value(), value, LESS_OR_EQUAL);

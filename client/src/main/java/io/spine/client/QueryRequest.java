@@ -21,122 +21,146 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.FieldMask;
 import io.spine.base.EntityState;
-import io.spine.query.EntityColumn;
+import io.spine.query.Column;
+import io.spine.query.ComparisonOperator;
+import io.spine.query.EntityQuery;
+import io.spine.query.QueryPredicate;
+import io.spine.query.Subject;
+import io.spine.query.SubjectParameter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.Function;
-
-import static io.spine.client.Filters.extractFilters;
+import static io.spine.client.Filters.eq;
+import static io.spine.client.Filters.ge;
+import static io.spine.client.Filters.gt;
+import static io.spine.client.Filters.le;
+import static io.spine.client.Filters.lt;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
+import static io.spine.client.OrderBy.Direction.DESCENDING;
+import static io.spine.query.Direction.ASC;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Allows to create a post a query for messages of the given type.
- *
- * <p>None of the parameters set by the builder methods are required. Call {@link #run()} to
- * retrieve the results of the query.
- *
- * <p>Usage example:
- * <pre>{@code
- * ImmutableList<Customer> customers = client.onBehalfOf(currentUser)
- *          .select(Customer.class)
- *          .byId(westCoastCustomerIds())
- *          .withMask("name", "address", "email")
- *          .where(eq(Customer.Column.type(), "permanent"),
- *                 eq(Customer.Column.discountPercent(), 10),
- *                 eq(Customer.Column.companySize(), Company.Size.SMALL))
- *          .orderBy(Customer.Column.name(), ASCENDING)
- *          .limit(20)
- *          .run();
- * }</pre>
- *
- * <p>Filtering by field values (via {@link #where(QueryFilter...)} and
- * {@link #where(CompositeQueryFilter...)} methods) can be composed using the {@link Filters}
- * utility class.
+ * Fetches the results of the specified {@link EntityQuery}.
  *
  * @param <S>
  *         the type of the queried entity states
- * @see Filters
  */
-public final class QueryRequest<S extends EntityState<?>>
-        extends FilteringRequest<S, Query, QueryBuilder, QueryRequest<S>> {
+final class QueryRequest<S extends EntityState<?>> extends ClientRequest {
 
-    QueryRequest(ClientRequest parent, Class<S> type) {
-        super(parent, type);
+    /** The type of entities returned by the request. */
+    private final Class<S> entityStateType;
+
+    /**
+     * The builder of a Proto-based {@code Query} used to transmit the definition
+     * of the entity query over the wire onto the server side.
+     */
+    private final QueryBuilder builder;
+
+    /**
+     * The query to run.
+     */
+    private final EntityQuery<?, S, ?> entityQuery;
+
+    /**
+     * Creates an instance of the request based on the passed parent {@code ClientRequest},
+     * for the given {@code EntityQuery}.
+     */
+    QueryRequest(ClientRequest parent, EntityQuery<?, S, ?> query) {
+        super(parent);
+        this.entityQuery = query;
+        this.entityStateType = query.subject()
+                                    .recordType();
+        ActorRequestFactory factory = client().requestOf(user());
+        this.builder = factory.query()
+                              .select(entityStateType);
     }
 
     /**
-     * Configures the request to return results matching all the passed filters.
+     * Executes and obtains results of the query.
      */
-    public QueryRequest<S> where(QueryFilter... filter) {
-        builder().where(extractFilters(filter));
-        return this;
-    }
-
-    /**
-     * Configures the request to return results matching all the passed filters.
-     */
-    public QueryRequest<S> where(CompositeQueryFilter... filter) {
-        builder().where(extractFilters(filter));
-        return this;
-    }
-
-    /**
-     * Sets the sorting order by the target column and order direction.
-     *
-     * @param column
-     *         the column to sort by
-     * @param direction
-     *         sorting direction
-     * @deprecated Please use the {@linkplain #orderBy(EntityColumn, OrderBy.Direction) alternative}
-     *             which relies on strongly-typed columns instead.
-     */
-    @Deprecated
-    public QueryRequest<S> orderBy(String column, OrderBy.Direction direction) {
-        builder().orderBy(column, direction);
-        return this;
-    }
-
-    /**
-     * Sets the sorting order by the target column and order direction.
-     *
-     * @param column
-     *         the column to sort by
-     * @param direction
-     *         sorting direction
-     */
-    public QueryRequest<S> orderBy(EntityColumn<?, ?> column, OrderBy.Direction direction) {
-        String columnName = column.name()
-                                  .value();
-        builder().orderBy(columnName, direction);
-        return this;
-    }
-
-    /**
-     * Limits the number of results returned by the query.
-     *
-     * @param count
-     *         the number of results to be returned
-     */
-    public QueryRequest<S> limit(int count) {
-        builder().limit(count);
-        return this;
-    }
-
-    /**
-     * Obtains results of the query.
-     */
-    public ImmutableList<S> run() {
-        Query query = builder().build();
-        ImmutableList<S> result = client().read(query, messageType());
+    ImmutableList<S> run() {
+        Query query = toProtoQuery(entityQuery);
+        ImmutableList<S> result = client().read(query, entityStateType);
         return result;
     }
 
-    @Override
-    Function<ActorRequestFactory, QueryBuilder> builderFn() {
-        return (f) -> f.query().select(messageType());
+    private Query toProtoQuery(EntityQuery<?, S, ?> query) {
+        Subject<?, S> subject = query.subject();
+        addIds(subject);
+        addPredicates(subject);
+        addOrdering(query);
+        addLimit(query);
+        addFieldMask(query);
+        return builder.build();
     }
 
-    @Override
-    QueryRequest<S> self() {
-        return this;
+    private void addFieldMask(EntityQuery<?, S, ?> query) {
+        FieldMask originMask = query.mask();
+        if (!originMask.equals(FieldMask.getDefaultInstance())) {
+            builder.withMask(originMask.getPathsList());
+        }
+    }
+
+    private void addLimit(EntityQuery<?, S, ?> query) {
+        Integer originLimit = query.limit();
+        if (originLimit != null) {
+            builder.limit(originLimit);
+        }
+    }
+
+    private void addOrdering(EntityQuery<?, S, ?> query) {
+        for (io.spine.query.OrderBy<?, S> orderBy : query.ordering()) {
+            String columnName = orderBy.column()
+                                       .name()
+                                       .value();
+            OrderBy.Direction direction = orderBy.direction() == ASC ? ASCENDING : DESCENDING;
+            builder.orderBy(columnName, direction);
+        }
+    }
+
+    private void addPredicates(Subject<?, S> subject) {
+        ImmutableList<QueryPredicate<S>> predicates = subject.predicates();
+        for (QueryPredicate<S> predicate : predicates) {
+            addParameters(predicate);
+        }
+    }
+
+    private void addParameters(QueryPredicate<S> predicate) {
+        ImmutableList<SubjectParameter<S, ?, ?>> parameters = predicate.parameters();
+        for (SubjectParameter<S, ?, ?> parameter : parameters) {
+            Column<S, ?> column = parameter.column();
+            ComparisonOperator operator = parameter.operator();
+            Object value = parameter.value();
+
+            @Nullable Filter filter;
+            switch (operator) {
+                case EQUALS:
+                    filter = eq(column, value); break;
+                case GREATER_THAN:
+                    filter = gt(column, value); break;
+                case GREATER_OR_EQUALS:
+                    filter = ge(column, value); break;
+                case LESS_THAN:
+                    filter = lt(column, value); break;
+                case LESS_OR_EQUALS:
+                    filter = le(column, value); break;
+                case NOT_EQUALS:
+                default:
+                    throw newIllegalStateException("Unsupported comparison operator `%s`",
+                                                   operator);
+            }
+            builder.where(filter);
+        }
+    }
+
+    private void addIds(Subject<?, S> subject) {
+        ImmutableSet<?> ids = subject.id()
+                                     .values();
+        if (!ids.isEmpty()) {
+            builder.byId(ids);
+        }
     }
 }

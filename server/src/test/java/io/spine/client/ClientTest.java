@@ -178,11 +178,14 @@ class ClientTest extends AbstractClientTest {
             client.asGuest()
                   .command(command)
                   .post();
+            ActiveUsers.Query query = ActiveUsers
+                    .newQuery()
+                    .id()
+                    .is(THE_ID)
+                    .build();
             ImmutableList<ActiveUsers> users =
                     client.onBehalfOf(user)
-                          .select(ActiveUsers.class)
-                          .byId(THE_ID)
-                          .run();
+                          .run(query);
             assertThat(users)
                     .comparingExpectedFieldsOnly()
                     .containsExactly(ActiveUsers.newBuilder()
