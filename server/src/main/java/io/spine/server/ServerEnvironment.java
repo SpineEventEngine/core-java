@@ -28,6 +28,7 @@ import io.spine.base.EnvironmentType;
 import io.spine.base.Identifier;
 import io.spine.base.Production;
 import io.spine.base.Tests;
+import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -72,7 +73,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * returned on {@link #storageFactory()}.
  */
 @SuppressWarnings("ClassWithTooManyMethods" /* there are some deprecated methods to be eliminated later. */)
-public final class ServerEnvironment implements AutoCloseable {
+public final class ServerEnvironment implements AutoCloseable, Logging {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
 
@@ -241,6 +242,10 @@ public final class ServerEnvironment implements AutoCloseable {
     @CanIgnoreReturnValue
     public ServerEnvironment use(StorageFactory factory, EnvironmentType envType) {
         checkNotNull(factory);
+        if (envType instanceof Production && factory instanceof InMemoryStorageFactory) {
+            _warn().log("`%s` should not be used in production.", factory.getClass()
+                                                                         .getSimpleName());
+        }
         SystemAwareStorageFactory wrapped = wrap(factory);
         use(wrapped, storageFactory, envType);
         return this;
@@ -254,6 +259,10 @@ public final class ServerEnvironment implements AutoCloseable {
     @CanIgnoreReturnValue
     public ServerEnvironment use(StorageFactory factory, Class<? extends EnvironmentType> type) {
         checkNotNull(factory);
+        if (Production.class.equals(type) && factory instanceof InMemoryStorageFactory) {
+            _warn().log("`%s` should not be used in production.", factory.getClass()
+                                                                         .getSimpleName());
+        }
         SystemAwareStorageFactory wrapped = wrap(factory);
         use(wrapped, storageFactory, type);
         return this;
