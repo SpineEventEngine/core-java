@@ -235,7 +235,7 @@ public final class ServerEnvironment implements AutoCloseable, Logging {
     }
 
     /**
-     * Assigns the specified {@code TransportFactory} for the specified application environment.
+     * Assigns the specified {@code StorageFactory} for the specified application environment.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -253,7 +253,7 @@ public final class ServerEnvironment implements AutoCloseable, Logging {
     }
 
     /**
-     * Assigns the specified {@code TransportFactory} for the specified application environment.
+     * Assigns the specified {@code StorageFactory} for the specified application environment.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -315,7 +315,7 @@ public final class ServerEnvironment implements AutoCloseable, Logging {
     }
 
     /**
-     * Configures the specified transport factory for the selected type of environment.
+     * Configures the specified {@code TransportFactory} for the selected type of environment.
      *
      * @return this instance of {@code ServerEnvironment}
      */
@@ -326,7 +326,7 @@ public final class ServerEnvironment implements AutoCloseable, Logging {
     }
 
     /**
-     * Configures the specified transport factory for the selected type of environment.
+     * Configures the specified {@code TransportFactory} for the selected type of environment.
      *
      * @return this instance of {@code ServerEnvironment}
      */
