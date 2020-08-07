@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.code.proto.ColumnOption.columnsOf;
-import static io.spine.reflect.Methods.asHandle;
+import static io.spine.reflect.Invokables.asHandle;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 

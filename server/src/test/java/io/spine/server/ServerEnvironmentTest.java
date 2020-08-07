@@ -21,12 +21,16 @@
 package io.spine.server;
 
 import io.spine.base.Environment;
+import io.spine.base.Production;
+import io.spine.base.Tests;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.UniformAcrossAllShards;
+import io.spine.server.given.environment.Local;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
+import io.spine.server.trace.given.MemoizingTracerFactory;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
@@ -39,6 +43,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PATH;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE;
@@ -69,11 +74,11 @@ class ServerEnvironmentTest {
                                        .build();
         ServerEnvironment environment = serverEnvironment;
         Delivery defaultValue = environment.delivery();
-        environment.configureDelivery(newDelivery);
+        environment.use(newDelivery, Tests.class);
         assertEquals(newDelivery, environment.delivery());
 
         // Restore the default value.
-        environment.configureDelivery(defaultValue);
+        environment.use(defaultValue, Tests.class);
     }
 
     @Test
@@ -147,26 +152,26 @@ class ServerEnvironmentTest {
         void turnToProduction() {
             // Ensure the server environment is clear.
             serverEnvironment.reset();
-            environment.setToProduction();
+            environment.setTo(Production.class);
         }
 
         @AfterEach
         void backToTests() {
-            environment.setToTests();
+            environment.setTo(Tests.class);
             serverEnvironment.reset();
         }
 
         @Test
-        @DisplayName("throwing NPE if not configured in the Production mode")
+        @DisplayName("throwing an `IllegalStateException` if not configured in the Production mode")
         void throwsIfNotConfigured() {
-            assertThrows(NullPointerException.class, serverEnvironment::storageFactory);
+            assertThrows(IllegalStateException.class, serverEnvironment::storageFactory);
         }
 
         @Test
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
             StorageFactory factory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.configureStorage(factory);
+            serverEnvironment.use(factory, Production.class);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -174,13 +179,27 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("return `InMemoryStorageFactory` under Tests")
         void testsFactory() {
-            environment.setToTests();
+            environment.setTo(Tests.class);
 
             StorageFactory factory = serverEnvironment.storageFactory();
             assertThat(factory)
                     .isInstanceOf(SystemAwareStorageFactory.class);
             SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) factory;
             assertThat(systemAware.delegate()).isInstanceOf(InMemoryStorageFactory.class);
+        }
+
+        @Test
+        @DisplayName("using a deprecated method")
+        @SuppressWarnings("deprecation")
+        void deprecatedMethod() {
+            environment.setTo(Production.class);
+
+            InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
+            serverEnvironment.configureStorage(storageFactory);
+            assertThat(serverEnvironment.storageFactory())
+                    .isInstanceOf(SystemAwareStorageFactory.class);
+            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
+                    .isSameInstanceAs(storageFactory);
         }
     }
 
@@ -198,14 +217,63 @@ class ServerEnvironmentTest {
         void getSet() {
             StorageFactory factory = new MemoizingStorageFactory();
 
-            serverEnvironment.configureStorageForTests(factory);
+            serverEnvironment.use(factory, Tests.class);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
+        }
+
+        @Test
+        @DisplayName("using a deprecated method")
+        @SuppressWarnings("deprecation")
+        void deprecatedMethod() {
+            MemoizingStorageFactory factory = new MemoizingStorageFactory();
+
+            serverEnvironment.configureStorageForTests(factory);
+            StorageFactory configuredFactory = serverEnvironment.storageFactory();
+            assertThat(configuredFactory).isInstanceOf(SystemAwareStorageFactory.class);
+            assertThat(((SystemAwareStorageFactory) configuredFactory).delegate())
+                    .isSameInstanceAs(factory);
         }
     }
 
     @Nested
-    @DisplayName("configure `TransportFactory`")
+    @DisplayName("configure `StorageFactory` for a custom environment")
+    class LocalStorageFactoryConfig {
+
+        @BeforeEach
+        void reset() {
+            serverEnvironment.reset();
+            Environment.instance()
+                       .setTo(Local.class);
+            Local.enable();
+        }
+
+        @AfterEach
+        void backToTests() {
+            Environment.instance()
+                       .setTo(Tests.class);
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("throwing an `IllegalStateException` if not set")
+        void illegalState() {
+            assertThrows(IllegalStateException.class, serverEnvironment::storageFactory);
+        }
+
+        @Test
+        @DisplayName("returning a configured wrapped instance")
+        void returnConfiguredStorageFactory() {
+            InMemoryStorageFactory inMemory = InMemoryStorageFactory.newInstance();
+            serverEnvironment.use(inMemory, Local.class);
+
+            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
+                    .isEqualTo(inMemory);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `TransportFactory` for the production environment")
     class TransportFactoryConfig {
 
         private final Environment environment = Environment.instance();
@@ -214,28 +282,254 @@ class ServerEnvironmentTest {
         void turnToProduction() {
             // Ensure the instance is clear.
             serverEnvironment.reset();
-            environment.setToProduction();
+            environment.setTo(Production.class);
         }
 
         @AfterEach
         void backToTests() {
-            environment.setToTests();
+            environment.setTo(Tests.class);
             serverEnvironment.reset();
         }
 
         @Test
-        @DisplayName("throw NPE if not configured")
+        @DisplayName("throw an `IllegalStateException` if not configured")
         void throwsIfNotConfigured() {
-            assertThrows(NullPointerException.class, serverEnvironment::transportFactory);
+            assertThrows(IllegalStateException.class, serverEnvironment::transportFactory);
         }
 
         @Test
         @DisplayName("return configured instance in Production")
         void productionValue() {
             TransportFactory factory = new StubTransportFactory();
-            serverEnvironment.configureTransport(factory);
+            serverEnvironment.use(factory, Production.class);
             assertThat(serverEnvironment.transportFactory())
                     .isEqualTo(factory);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `TransportFactory` for tests")
+    class TestTransportFactoryConfig {
+
+        @AfterEach
+        void resetEnvironment() {
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("returning one when explicitly set")
+        void setExplicitly() {
+            TransportFactory factory = new StubTransportFactory();
+
+            serverEnvironment.use(factory, Tests.class);
+            assertThat(serverEnvironment.transportFactory()).isEqualTo(factory);
+        }
+
+        @Test
+        @DisplayName("returning an `InMemoryTransportFactory` when not set")
+        void notSet() {
+            Environment.instance()
+                       .setTo(Tests.class);
+            assertThat(serverEnvironment.transportFactory())
+                    .isInstanceOf(InMemoryTransportFactory.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `TransportFactory` for a custom environment")
+    class LocalTransportFactory {
+
+        @BeforeEach
+        void reset() {
+            serverEnvironment.reset();
+            Environment.instance()
+                       .setTo(Local.class);
+            Local.enable();
+        }
+
+        @AfterEach
+        void backToTests() {
+            Environment.instance()
+                       .setTo(Tests.class);
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("throwing an `IllegalStateException` if not set")
+        void illegalState() {
+            assertThrows(IllegalStateException.class, serverEnvironment::transportFactory);
+        }
+
+        @Test
+        @DisplayName("returning a configured instance")
+        void ok() {
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
+            serverEnvironment.use(transportFactory, Local.class);
+            assertThat(serverEnvironment.transportFactory()).isSameInstanceAs(transportFactory);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `TracerFactory`")
+    class TracerFactory {
+
+        @BeforeEach
+        void reset() {
+            serverEnvironment.reset();
+            Environment.instance()
+                       .reset();
+        }
+
+        @AfterEach
+        void backToTests() {
+            Environment.instance()
+                       .setTo(Tests.class);
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("returning an instance for the production environment")
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        void forProduction() {
+            Environment.instance()
+                       .setTo(Production.class);
+
+            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
+            serverEnvironment.use(memoizingTracer, Production.class);
+
+            assertThat(serverEnvironment.tracing()
+                                        .get()).isSameInstanceAs(memoizingTracer);
+        }
+
+        @Test
+        @DisplayName("for the testing environment")
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        void forTesting() {
+            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
+            serverEnvironment.use(memoizingTracer, Tests.class);
+
+            assertThat(serverEnvironment.tracing()
+                                        .get()).isSameInstanceAs(memoizingTracer);
+        }
+
+        @Test
+        @DisplayName("for a custom environment")
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        void forCustom() {
+            Environment.instance()
+                       .setTo(Local.class);
+
+            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
+            serverEnvironment.use(memoizingTracer, Local.class);
+
+            assertThat(serverEnvironment.tracing()
+                                        .get()).isSameInstanceAs(memoizingTracer);
+        }
+
+        @Test
+        @DisplayName("for a custom environment, returning empty if it's disabled")
+        void forCustomEmpty() {
+            Local.disable();
+
+            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
+            serverEnvironment.use(memoizingTracer, Local.class);
+
+            assertThat(serverEnvironment.tracing()).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `Delivery`")
+    class DeliveryTest {
+
+        @BeforeEach
+        void reset() {
+            serverEnvironment.reset();
+            Environment.instance()
+                       .reset();
+        }
+
+        @AfterEach
+        void backToTests() {
+            Environment.instance()
+                       .setTo(Tests.class);
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("to default back to `Local` if no delivery is set")
+        void backToLocal() {
+            Delivery delivery = serverEnvironment.delivery();
+            assertThat(delivery).isNotNull();
+        }
+
+        @Test
+        @DisplayName("to a custom mechanism")
+        void allowToCustomizeDeliveryStrategy() {
+            Delivery newDelivery = Delivery.newBuilder()
+                                           .setStrategy(UniformAcrossAllShards.forNumber(42))
+                                           .build();
+            ServerEnvironment environment = serverEnvironment;
+            Delivery defaultValue = environment.delivery();
+            environment.use(newDelivery, Environment.instance()
+                                                    .type());
+            assertEquals(newDelivery, environment.delivery());
+
+            // Restore the default value.
+            environment.use(defaultValue, Environment.instance()
+                                                     .type());
+        }
+
+    }
+
+    @Nested
+    @DisplayName("while closing resources")
+    class TestClosesResources {
+
+        private InMemoryTransportFactory transportFactory;
+        private MemoizingStorageFactory storageFactory;
+        private MemoizingTracerFactory tracerFactory;
+
+        @BeforeEach
+        void setup() {
+            transportFactory = InMemoryTransportFactory.newInstance();
+            storageFactory = new MemoizingStorageFactory();
+            tracerFactory = new MemoizingTracerFactory();
+        }
+
+        @AfterEach
+        void resetEnvironment() {
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("close the production transport, tracer and storage factories")
+        void testCloses() throws Exception {
+            ServerEnvironment serverEnv = ServerEnvironment.instance();
+            serverEnv.use(transportFactory, Production.class)
+                     .use(storageFactory, Production.class)
+                     .use(tracerFactory, Production.class);
+
+            serverEnv.close();
+
+            assertThat(transportFactory.isOpen()).isFalse();
+            assertThat(storageFactory.isClosed()).isTrue();
+            assertThat(tracerFactory.closed()).isTrue();
+        }
+
+        @Test
+        @DisplayName("leave the testing transport, tracer and storage factories open")
+        void testDoesNotClose() throws Exception {
+            ServerEnvironment serverEnv = ServerEnvironment.instance();
+            serverEnv.use(transportFactory, Tests.class)
+                     .use(storageFactory, Tests.class)
+                     .use(tracerFactory, Tests.class);
+
+            serverEnv.close();
+
+            assertThat(tracerFactory.closed()).isFalse();
+            assertThat(transportFactory.isOpen()).isTrue();
+            assertThat(storageFactory.isClosed()).isFalse();
         }
     }
 
@@ -243,6 +537,7 @@ class ServerEnvironmentTest {
             "AccessOfSystemProperties" /* Testing the configuration loaded from System properties. */,
             "AbstractClassWithoutAbstractMethods" /* A test base with setUp and tearDown. */
     })
+
     abstract class WithAppEngineEnvironment {
 
         private final String targetEnvironment;

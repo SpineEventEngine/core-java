@@ -104,7 +104,7 @@ class BoundedContextBuilderTest {
                                                .internalAccess()
                                                .tenantIndex());
         }
-        
+
         @Test
         @DisplayName("CommandBus and EventBus simultaneously")
         void commandBusAndEventBus() {

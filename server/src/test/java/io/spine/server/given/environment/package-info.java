@@ -18,36 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery;
-
-import com.google.protobuf.util.Durations;
-import io.spine.base.Tests;
-import io.spine.server.ServerEnvironment;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-
 /**
- * An abstract base for the tests performing actual delivery.
+ * Contains a custom environment to test {@link io.spine.server.ServerEnvironment} and
+ * {@link io.spine.server.EnvSetting}.
  */
-abstract class AbstractDeliveryTest {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.given.environment;
 
-    private Delivery originalDelivery;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @BeforeEach
-    public void setUp() {
-        this.originalDelivery = ServerEnvironment.instance()
-                                                 .delivery();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        ServerEnvironment.instance()
-                         .use(originalDelivery, Tests.class);
-    }
-
-    static void changeShardCountTo(int shards) {
-        Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
-        ServerEnvironment.instance()
-                         .use(newDelivery, Tests.class);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

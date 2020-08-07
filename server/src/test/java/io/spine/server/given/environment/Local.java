@@ -18,36 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery;
+package io.spine.server.given.environment;
 
-import com.google.protobuf.util.Durations;
-import io.spine.base.Tests;
-import io.spine.server.ServerEnvironment;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import io.spine.base.EnvironmentType;
 
 /**
- * An abstract base for the tests performing actual delivery.
+ * A custom environment for testing the {@link io.spine.server.ServerEnvironment} and
+ * {@link io.spine.server.EnvSetting}.
  */
-abstract class AbstractDeliveryTest {
+public final class Local extends EnvironmentType {
 
-    private Delivery originalDelivery;
+    private static boolean enabled = false;
 
-    @BeforeEach
-    public void setUp() {
-        this.originalDelivery = ServerEnvironment.instance()
-                                                 .delivery();
+    @Override
+    protected boolean enabled() {
+        return enabled;
     }
 
-    @AfterEach
-    public void tearDown() {
-        ServerEnvironment.instance()
-                         .use(originalDelivery, Tests.class);
+    public static void enable() {
+        enabled = true;
     }
 
-    static void changeShardCountTo(int shards) {
-        Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
-        ServerEnvironment.instance()
-                         .use(newDelivery, Tests.class);
+    public static void disable() {
+        enabled = false;
     }
 }

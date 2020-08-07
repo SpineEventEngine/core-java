@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Tests;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContextBuilder;
@@ -156,7 +157,7 @@ public class CounterCatchUp {
     public static void addOngoingCatchUpRecord(WhatToCatchUp target, CatchUpStatus status) {
         InMemoryCatchUpStorage storage = new InMemoryCatchUpStorage(false);
         Collection<Object> ids = null;
-        if(!target.shouldCatchUpAll()) {
+        if (!target.shouldCatchUpAll()) {
             String identifier = checkNotNull(target.id());
             ids = ImmutableList.of(identifier);
         }
@@ -168,6 +169,6 @@ public class CounterCatchUp {
                                     .build();
         delivery.subscribe(new LocalDispatchingObserver());
         ServerEnvironment.instance()
-                         .configureDelivery(delivery);
+                         .use(delivery, Tests.class);
     }
 }
