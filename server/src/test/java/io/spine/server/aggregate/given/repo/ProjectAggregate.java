@@ -24,7 +24,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -42,7 +42,7 @@ import java.util.Optional;
  * The main aggregate class for positive scenarios tests.
  */
 public class ProjectAggregate
-        extends Aggregate<ProjectId, Project, Project.Builder> {
+        extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 
     private ProjectAggregate(ProjectId id) {
         super(id);

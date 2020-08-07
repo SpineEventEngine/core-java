@@ -44,7 +44,7 @@ import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.React;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.Task;
@@ -214,7 +214,7 @@ public class Given {
     }
 
     static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate, Project> {
+            extends AggregateRepository<ProjectId, ProjectAggregate, AggProject> {
 
         ProjectAggregateRepository() {
             super();
@@ -222,7 +222,7 @@ public class Given {
     }
 
     private static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, Project.Builder> {
+            extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 
         // an aggregate constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")

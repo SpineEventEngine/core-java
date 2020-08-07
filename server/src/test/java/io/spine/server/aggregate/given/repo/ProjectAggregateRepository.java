@@ -33,7 +33,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
@@ -55,13 +55,13 @@ import static io.spine.protobuf.AnyPacker.pack;
  * used in this test env.
  */
 public class ProjectAggregateRepository
-        extends AggregateRepository<ProjectId, ProjectAggregate, Project> {
+        extends AggregateRepository<ProjectId, ProjectAggregate, AggProject> {
 
     public static final ProjectId troublesome = ProjectId.newBuilder()
                                                          .setUuid("INVALID_ID")
                                                          .build();
 
-    private @Nullable AggregateStorage<ProjectId, Project> customStorage;
+    private @Nullable AggregateStorage<ProjectId, AggProject> customStorage;
 
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override
@@ -102,8 +102,8 @@ public class ProjectAggregateRepository
      * injecting} the custom storage.
      */
     @Override
-    public AggregateStorage<ProjectId, Project> aggregateStorage(){
-        if(customStorage != null) {
+    public AggregateStorage<ProjectId, AggProject> aggregateStorage() {
+        if (customStorage != null) {
             return customStorage;
         }
         return super.aggregateStorage();
@@ -112,7 +112,7 @@ public class ProjectAggregateRepository
     /**
      * Injects a storage to use for this repository.
      */
-    public void injectStorage(AggregateStorage<ProjectId, Project> storage) {
+    public void injectStorage(AggregateStorage<ProjectId, AggProject> storage) {
         this.customStorage = storage;
     }
 

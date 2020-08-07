@@ -46,9 +46,9 @@ import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
 import io.spine.server.model.Nothing;
 import io.spine.server.storage.AbstractStorageTest;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.IntegerProject;
 import io.spine.test.aggregate.LongProject;
-import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.StringProject;
 import io.spine.test.storage.StateImported;
@@ -97,12 +97,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregateStorageTest
         extends AbstractStorageTest<ProjectId,
                                     AggregateHistory,
-                                    AggregateStorage<ProjectId, Project>> {
+                                    AggregateStorage<ProjectId, AggProject>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
 
     private final TestEventFactory eventFactory = newInstance(AggregateStorageTest.class);
-    private AggregateStorage<ProjectId, Project> storage;
+    private AggregateStorage<ProjectId, AggProject> storage;
 
     private static Snapshot newSnapshot(Timestamp time) {
         return Snapshot.newBuilder()
@@ -149,7 +149,7 @@ public class AggregateStorageTest
     }
 
     @Override
-    protected AggregateStorage<ProjectId, Project> newStorage() {
+    protected AggregateStorage<ProjectId, AggProject> newStorage() {
         return newStorage(TestAggregate.class);
     }
 
@@ -271,7 +271,7 @@ public class AggregateStorageTest
         }
 
         private <I> void writeAndReadEventTest(I id, AggregateStorage<I, ?> storage) {
-            Event expectedEvent = eventFactory.createEvent(event(Project.getDefaultInstance()));
+            Event expectedEvent = eventFactory.createEvent(event(AggProject.getDefaultInstance()));
 
             storage.writeEvent(id, expectedEvent);
 
@@ -360,7 +360,7 @@ public class AggregateStorageTest
             Timestamp timestamp = currentTime();
             Version currentVersion = zero();
             for (int i = 0; i < eventsNumber; i++) {
-                Project state = Project.getDefaultInstance();
+                AggProject state = AggProject.getDefaultInstance();
                 Event event = eventFactory.createEvent(event(state), currentVersion, timestamp);
                 AggregateEventRecord record = StorageRecords.create(id, timestamp, event);
                 records.add(record);
@@ -377,7 +377,7 @@ public class AggregateStorageTest
         @Test
         @DisplayName("sorted by version rather than by timestamp")
         void sortByVersionFirstly() {
-            Project state = Project.getDefaultInstance();
+            AggProject state = AggProject.getDefaultInstance();
             Version minVersion = zero();
             Version maxVersion = increment(minVersion);
             Timestamp minTimestamp = Timestamps.MIN_VALUE;
@@ -447,7 +447,7 @@ public class AggregateStorageTest
         int eventsAfterSnapshot = 10;
         for (int i = 0; i < eventsAfterSnapshot; i++) {
             currentVersion = increment(currentVersion);
-            Project state = Project.getDefaultInstance();
+            AggProject state = AggProject.getDefaultInstance();
             Event event = eventFactory.createEvent(event(state), currentVersion);
             storage.writeEvent(id, event);
         }
@@ -575,7 +575,7 @@ public class AggregateStorageTest
         @CanIgnoreReturnValue
         private Event writeEvent(Timestamp atTime) {
             currentVersion = increment(currentVersion);
-            Project state = Project.getDefaultInstance();
+            AggProject state = AggProject.getDefaultInstance();
             Event event = eventFactory.createEvent(event(state), currentVersion, atTime);
             storage.writeEvent(id, event);
             return event;
@@ -693,7 +693,7 @@ public class AggregateStorageTest
         return storage.historyBackward(id, MAX_VALUE);
     }
 
-    public static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    public static class TestAggregate extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 
         protected TestAggregate(ProjectId id) {
             super(id);

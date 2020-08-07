@@ -34,7 +34,7 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.event.EvTeamId;
 import io.spine.test.event.ProjectCreated;
@@ -63,7 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SubscriptionRecordTest {
 
     private static final String TARGET_ID = "target-ID";
-    private static final Project EMPTY_PRJ = Project.getDefaultInstance();
+    private static final AggProject EMPTY_PRJ = AggProject.getDefaultInstance();
 
     @Test
     @DisplayName("detect an update according to type")
@@ -86,7 +86,7 @@ class SubscriptionRecordTest {
         @DisplayName("in case of entity subscription")
         void entitySubscription() {
             ProjectId targetId = projectId(TARGET_ID);
-            Project state = Project.getDefaultInstance();
+            AggProject state = AggProject.getDefaultInstance();
             SubscriptionRecord record = SubscriptionRecord.of(subscription(targetId));
 
             EventEnvelope envelope = stateChangedEnvelope(targetId, state, state);
@@ -131,14 +131,14 @@ class SubscriptionRecordTest {
             ProjectId targetId = projectId(TARGET_ID);
             SubscriptionRecord record = projectRecord(targetId,
                                                       Filters.eq("name", targetName));
-            Project matching = projectWithName(targetName);
+            AggProject matching = projectWithName(targetName);
             EventEnvelope envelope = stateChangedEnvelope(targetId, EMPTY_PRJ, matching);
             Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
             assertThat(maybeUpdate).isPresent();
             EntityStateUpdate entityUpdate = firstEntityUpdate(maybeUpdate);
             assertEquals(matching, AnyPacker.unpack(entityUpdate.getState()));
 
-            Project nonMatching = projectWithName("some-other-name");
+            AggProject nonMatching = projectWithName("some-other-name");
             EventEnvelope envelope2 = stateChangedEnvelope(targetId, EMPTY_PRJ, nonMatching);
             assertThat(record.detectUpdate(envelope2)).isEmpty();
         }
@@ -199,8 +199,8 @@ class SubscriptionRecordTest {
         SubscriptionRecord record = projectRecord(targetId,
                                                   Filters.eq("name", targetName));
 
-        Project matching = projectWithName(targetName);
-        Project nonMatching = projectWithName("not-matching-anymore");
+        AggProject matching = projectWithName(targetName);
+        AggProject nonMatching = projectWithName("not-matching-anymore");
 
         EventEnvelope envelope = stateChangedEnvelope(targetId, matching, nonMatching);
         Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
@@ -237,7 +237,7 @@ class SubscriptionRecordTest {
     private static SubscriptionRecord projectRecord(ProjectId targetId, Filter filter) {
         CompositeFilter compositeFilter = Filters.all(filter);
         Set<CompositeFilter> filters = singleton(compositeFilter);
-        Target target = composeTarget(Project.class, singleton(targetId), filters);
+        Target target = composeTarget(AggProject.class, singleton(targetId), filters);
 
         Subscription subscription = subscription(target);
         return SubscriptionRecord.of(subscription);

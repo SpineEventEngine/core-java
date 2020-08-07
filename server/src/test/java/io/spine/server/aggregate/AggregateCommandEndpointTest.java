@@ -29,7 +29,7 @@ import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAg
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AggregateCommandEndpointTest {
 
     private BoundedContext context;
-    private AggregateRepository<ProjectId, ProjectAggregate, Project> repository;
+    private AggregateRepository<ProjectId, ProjectAggregate, AggProject> repository;
 
     private ProjectId projectId;
     private Subscriber subscriber;

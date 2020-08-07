@@ -28,6 +28,7 @@ option java_package = "io.spine.test.aggregate";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 
 message ProjectId {
     string uuid = 1;
@@ -41,18 +42,20 @@ enum Status {
     CANCELLED = 4;
 }
 
-message Project {
+message AggProject {
     option (entity) = {kind: AGGREGATE visibility: FULL};
 
-    // The aggregate ID.
-    //
-    // In order to skip verbose test set up, this ID may be not set.
-    //
-    ProjectId id = 1 [(required) = false];
+    ProjectId id = 1;
 
     string name = 2 [(column) = true];
+
     repeated Task task = 3;
+
     Status status = 4 [(column) = true];
+
+    google.protobuf.Timestamp last_modified = 5 [(column) = true];
+
+    int32 view_count = 6 [(column) = true, (min).value = "0"];
 }
 
 // An aggregate with a `String` identifier.

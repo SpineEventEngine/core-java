@@ -23,7 +23,7 @@ package io.spine.server.aggregate.given.aggregate;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
@@ -34,7 +34,7 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
  * The test environment class for test of missing command handler or missing event applier.
  */
 public class AggregateWithMissingApplier
-        extends Aggregate<ProjectId, Project, Project.Builder> {
+        extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 
     private boolean handled = false;
 

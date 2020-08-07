@@ -49,7 +49,7 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.HandlerFailedUnexpectedly;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -218,7 +218,8 @@ class AggregateRepositoryTest {
 
         private AggregateHistory readRecord(ProjectAggregate aggregate) {
             Optional<AggregateHistory> optional =
-                    repository().aggregateStorage().read(aggregate.id(), DEFAULT_SNAPSHOT_TRIGGER);
+                    repository().aggregateStorage()
+                                .read(aggregate.id(), DEFAULT_SNAPSHOT_TRIGGER);
             assertTrue(optional.isPresent());
             return optional.get();
         }
@@ -299,7 +300,7 @@ class AggregateRepositoryTest {
     }
 
     private static void loadOrCreate(
-            AggregateRepository<ProjectId, ProjectAggregate, Project> repository, ProjectId id) {
+            AggregateRepository<ProjectId, ProjectAggregate, AggProject> repository, ProjectId id) {
         repository.loadOrCreate(id);
     }
 

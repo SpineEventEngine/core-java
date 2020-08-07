@@ -42,7 +42,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.AggProjectCreatedReactor;
 import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.stand.InvalidSubscriptionException;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggOwnerNotified;
@@ -199,7 +199,7 @@ class SubscriptionServiceTest {
     }
 
     private Topic newTopic() {
-        return topic().forTarget(Targets.allOf(Project.class));
+        return topic().forTarget(Targets.allOf(AggProject.class));
     }
 
     /**
@@ -229,7 +229,7 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("entity updates")
         void entityTopic() {
-            checkSubscribesTo(Project.class);
+            checkSubscribesTo(AggProject.class);
         }
 
         @Test
@@ -299,7 +299,7 @@ class SubscriptionServiceTest {
         // `activationObserver::onCompleted` to be called.
         verifyState(activationObserver, false);
 
-        EntityState<?> actual = memoizedEntity(activationObserver, Project.class);
+        EntityState<?> actual = memoizedEntity(activationObserver, AggProject.class);
         EntityState<?> expected = toExpected(entityId);
         ProtoTruth.assertThat(actual)
                   .comparingExpectedFieldsOnly()
@@ -320,9 +320,9 @@ class SubscriptionServiceTest {
     }
 
     private static EntityState<?> toExpected(ProjectId entityId) {
-        return Project.newBuilder()
-               .setId(entityId)
-               .build();
+        return AggProject.newBuilder()
+                         .setId(entityId)
+                         .build();
     }
 
     private static <T extends EntityState<?>>
@@ -462,7 +462,8 @@ class SubscriptionServiceTest {
             assertThat(faultyObserver.firstResponse()).isNotNull();
             assertThat(faultyObserver.isCompleted()).isFalse();
             assertThat(faultyObserver.getError()).isInstanceOf(RuntimeException.class);
-            assertThat(faultyObserver.getError().getMessage()).isEqualTo(rejectionMessage);
+            assertThat(faultyObserver.getError()
+                                     .getMessage()).isEqualTo(rejectionMessage);
         }
     }
 }

@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import io.spine.server.aggregate.AggregateTest;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 
 /**
@@ -29,5 +29,5 @@ import io.spine.test.aggregate.ProjectId;
  * Aggregate tests}.
  */
 public class TestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, TestAggregate, Project> {
+        extends AbstractAggregateTestRepository<ProjectId, TestAggregate, AggProject> {
 }

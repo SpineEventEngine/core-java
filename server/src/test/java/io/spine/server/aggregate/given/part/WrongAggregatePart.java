@@ -21,14 +21,14 @@
 package io.spine.server.aggregate.given.part;
 
 import io.spine.server.aggregate.AggregatePart;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 
 /**
  * A class which extends {@link AggregatePart} but does not provide suitable constructor.
  */
 public class WrongAggregatePart
-        extends AggregatePart<ProjectId, Project, Project.Builder, AnAggregateRoot> {
+        extends AggregatePart<ProjectId, AggProject, AggProject.Builder, AnAggregateRoot> {
 
     @SuppressWarnings("ConstantConditions")
     // Supply a "wrong" parameters on purpose to cause the validation failure
