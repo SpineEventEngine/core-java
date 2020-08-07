@@ -121,7 +121,7 @@ public final class MirrorProjection
     void on(EntityRestored event) {
         Mirror.Builder builder = builder();
         builder.getLifecycleBuilder()
-                .setDeleted(false);
+               .setDeleted(false);
         builder.setId(id())
                .setVersion(event.getVersion());
         setDeleted(false);

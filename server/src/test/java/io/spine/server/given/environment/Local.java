@@ -18,29 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.gradle.internal
+package io.spine.server.given.environment;
 
-import org.gradle.api.Plugin
-import org.gradle.api.Project
+import io.spine.base.EnvironmentType;
 
 /**
- * Gradle plugin which adds a [CheckVersionIncrement] task.
- *
- * The task is called `checkVersionIncrement` inserted before the `check` task.
+ * A custom environment for testing the {@link io.spine.server.ServerEnvironment} and
+ * {@link io.spine.server.EnvSetting}.
  */
-class IncrementGuard : Plugin<Project> {
+public final class Local extends EnvironmentType {
 
-    companion object {
-        const val taskName = "checkVersionIncrement"
+    private static boolean enabled = false;
+
+    @Override
+    protected boolean enabled() {
+        return enabled;
     }
 
-    override fun apply(target: Project) {
-        val tasks = target.tasks
-        tasks.register(taskName, CheckVersionIncrement::class.java) {
-            repository = PublishingRepos.cloudRepo
-            tasks.getByName("check").dependsOn(this)
+    public static void enable() {
+        enabled = true;
+    }
 
-            shouldRunAfter("test")
-        }
+    public static void disable() {
+        enabled = false;
     }
 }
