@@ -23,7 +23,6 @@ package io.spine.server.storage.memory;
 import io.spine.server.aggregate.AggregateStorageTruncationTest;
 import org.junit.jupiter.api.DisplayName;
 
-@DisplayName("`AggregateStorage` running in-memory after truncation should")
-public class InMemoryAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
-
+@DisplayName("`InMemoryAggregateStorage`")
+class InMemoryAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
 }
