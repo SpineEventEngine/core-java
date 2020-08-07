@@ -25,6 +25,7 @@ import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EnvironmentType;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.BoundedContextBuilder;
@@ -37,6 +38,7 @@ import io.spine.server.aggregate.given.fibonacci.SequenceId;
 import io.spine.server.aggregate.given.fibonacci.command.MoveSequence;
 import io.spine.server.aggregate.given.fibonacci.command.SetStartingNumbers;
 import io.spine.server.aggregate.given.fibonacci.event.StartingNumbersSet;
+import io.spine.server.storage.StorageFactory;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testdata.Sample;
@@ -66,11 +68,17 @@ import static java.lang.Integer.MAX_VALUE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Tests the truncation of an Aggregate history.
+ * Tests the truncation of an Aggregate history on the storage retrieved from
+ * the {@linkplain ServerEnvironment#storageFactory() current storage factory} for tests.
+ *
+ * <p>Descendant classes should supply their own storage factory for tests via
+ * {@link ServerEnvironment#use(StorageFactory, EnvironmentType)
+ * ServerEnvironment.use(customStorageFactory, Tests.class)}.
  *
  * <p>Please note, that for the test name to make sense the descendants should have some
  * meaningful display names, e.g. {@code "InMemoryAggregateStorage"}.
  */
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // designed for the various storage impls.
 public abstract class AggregateStorageTruncationTest {
 
     private static final SequenceId ID = SequenceId
