@@ -19,12 +19,15 @@
  */
 
 /**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
+ * This package tests the {@link io.spine.server.entity.Friend Friend} annotation
+ * which allows {@linkplain io.spine.server.command.CommandHandlingEntity command handling entities}
+ * to load states of other entities.
  */
 
-val spineBaseVersion: String by extra("1.5.21")
-val spineTimeVersion: String by extra("1.5.21")
-val versionToPublish: String by extra("2.0.0-alfa-001")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.test.friends;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

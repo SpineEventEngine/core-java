@@ -17,14 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+package spine.test.server.friends;
 
-val spineBaseVersion: String by extra("1.5.21")
-val spineTimeVersion: String by extra("1.5.21")
-val versionToPublish: String by extra("2.0.0-alfa-001")
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.test.friends";
+option java_outer_classname = "EntitiesProto";
+option java_multiple_files = true;
+
+import "spine/test/server/friends/identifiers.proto";
+
+message Task {
+    option (entity).kind = AGGREGATE;
+    TaskId id = 1;
+    string title = 2 [(required) = true];
+}
+
+message WorkLog {
+    option (entity).kind = AGGREGATE;
+    TaskId task = 1;
+
+    // For simplicity of the test we simply accumulate values.
+    // A real-world log would have a repeated field of a `Record` type.
+    repeated int32 record = 2;
+
+    // The total work done.
+    int32 total = 3;
+}

@@ -18,13 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+package io.spine.server.entity;
 
-val spineBaseVersion: String by extra("1.5.21")
-val spineTimeVersion: String by extra("1.5.21")
-val versionToPublish: String by extra("2.0.0-alfa-001")
+import io.spine.server.command.CommandHandlingEntity;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+/**
+ * Specifies classes of entities, such as {@link io.spine.server.aggregate.Aggregate Aggregate}
+ * or {@link io.spine.server.procman.ProcessManager ProcessManager}, that can load the state
+ * of the annotated entity.
+ */
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Friend {
+
+    /**
+     * Enumerates classes of command-handling entities, such as
+     * {@link io.spine.server.aggregate.Aggregate Aggregate} or
+     * {@link io.spine.server.procman.ProcessManager ProcessManager},
+     * that can load the state of the annotated entity.
+     */
+    Class<? extends CommandHandlingEntity<?, ?, ?>>[] entity();
+}

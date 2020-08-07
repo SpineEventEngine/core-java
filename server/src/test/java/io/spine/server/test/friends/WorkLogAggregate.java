@@ -18,13 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- */
+package io.spine.server.test.friends;
 
-val spineBaseVersion: String by extra("1.5.21")
-val spineTimeVersion: String by extra("1.5.21")
-val versionToPublish: String by extra("2.0.0-alfa-001")
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.server.entity.Friend;
+import io.spine.server.test.friends.command.LogWork;
+import io.spine.server.test.friends.event.WorkLogged;
+
+@Friend(entity = TaskDefinitionAggregate.class)
+final class WorkLogAggregate extends Aggregate<TaskId, WorkLog, WorkLog.Builder> {
+
+    @Assign
+    WorkLogged handle(LogWork c) {
+        return WorkLogged.newBuilder()
+                         .setTask(c.getTask())
+                         .setWork(c.getWork())
+                         .vBuild();
+    }
+
+    @Apply
+    void event(WorkLogged e) {
+        builder().setTotal(state().getTotal() + e.getWork())
+                 .addRecord(e.getWork());
+    }
+}
