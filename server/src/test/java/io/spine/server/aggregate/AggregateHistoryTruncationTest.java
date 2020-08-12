@@ -152,7 +152,7 @@ public abstract class AggregateHistoryTruncationTest {
     }
 
     @Nested
-    @DisplayName("truncate the history of an `Aggregate` instance")
+    @DisplayName("should truncate the history of an `Aggregate` instance")
     class Truncate {
 
         private final ProjectId id = Sample.messageOfType(ProjectId.class);
