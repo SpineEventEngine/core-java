@@ -32,7 +32,7 @@ Contributor License Agreement.
 
 Please [contact us][legal-email] for arranging the paper formalities.
    
-[wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
+[wiki-home]: https://github.com/SpineEventEngine/SpineEventEngine.github.io/wiki
 [quick-start]: https://spine.io/docs/quick-start
 [docs-intro]: https://spine.io/docs/introduction
 [legal-email]: mailto:legal@teamdev.com

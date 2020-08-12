@@ -94,7 +94,7 @@ object Versions {
     val javaPoet         = "1.12.1"
     val autoService      = "1.0-rc6"
     val autoCommon       = "0.10"
-    val jackson          = "2.9.10.4"
+    val jackson          = "2.9.10.5"
     val animalSniffer    = "1.18"
     val apiguardian      = "1.1.0"
     val javaxAnnotation  = "1.3.2"
