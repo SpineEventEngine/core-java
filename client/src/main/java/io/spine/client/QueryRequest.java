@@ -55,7 +55,6 @@ final class QueryRequest<S extends EntityState<?>> extends ClientRequest {
         this.entityQuery = query;
         this.entityStateType = query.subject()
                                     .recordType();
-
         QueryFactory factory = client().requestOf(user()).query();
         this.transformer = EntityQueryToProto.transformWith(factory);
     }
