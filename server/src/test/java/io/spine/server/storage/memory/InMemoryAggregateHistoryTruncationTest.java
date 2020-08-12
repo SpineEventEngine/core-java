@@ -20,9 +20,9 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.server.aggregate.AggregateStorageTruncationTest;
+import io.spine.server.aggregate.AggregateHistoryTruncationTest;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("`InMemoryAggregateStorage`")
-class InMemoryAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
+class InMemoryAggregateHistoryTruncationTest extends AggregateHistoryTruncationTest {
 }

@@ -79,7 +79,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * meaningful display names, e.g. {@code "InMemoryAggregateStorage"}.
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // designed for the various storage impls.
-public abstract class AggregateStorageTruncationTest {
+public abstract class AggregateHistoryTruncationTest {
 
     private static final SequenceId ID = SequenceId
             .newBuilder()
