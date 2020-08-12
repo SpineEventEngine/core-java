@@ -102,11 +102,9 @@ public final class AggregateMirroringTestEnv {
         return events.createEvent(eventMessage);
     }
 
-    @SuppressWarnings("unchecked")
     public static AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto> newPhotosRepository() {
-        Repository<MRPhotoId, PhotoAggregate> repository =
-                DefaultRepository.of(PhotoAggregate.class);
-        return (AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto>) repository;
+        Repository<MRPhotoId, PhotoAggregate> repo = DefaultRepository.of(PhotoAggregate.class);
+        return (AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto>) repo;
     }
 
     public static MRUploadPhoto upload(MRPhoto state) {
