@@ -27,6 +27,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import java.io.FileNotFoundException
 import java.net.URL
 
 /**
@@ -52,13 +53,13 @@ open class CheckVersionIncrement : DefaultTask() {
         val artifact = "${project.artifactPath()}/${MavenMetadata.FILE_NAME}"
         val repoUrl = repository.releases
         val metadata = fetch(repoUrl, artifact)
-        val versions = metadata.versioning.versions
-        val versionExists = versions.contains(version)
+        val versions = metadata?.versioning?.versions
+        val versionExists = versions?.contains(version) ?: false
         if (versionExists) {
             throw GradleException("""
                     Version `$version` is already published to maven repository `$repoUrl`.
                     Try incrementing the library version.
-                    All available versions are: ${versions.joinToString(separator = ", ")}. 
+                    All available versions are: ${versions?.joinToString(separator = ", ")}. 
                     
                     To disable this check, run Gradle with `-x $name`. 
                     """.trimIndent()
@@ -66,7 +67,7 @@ open class CheckVersionIncrement : DefaultTask() {
         }
     }
 
-    private fun fetch(repository: String, artifact: String): MavenMetadata {
+    private fun fetch(repository: String, artifact: String): MavenMetadata? {
         val url = URL("$repository/$artifact")
         return MavenMetadata.fetchAndParse(url)
     }
@@ -94,9 +95,19 @@ private data class MavenMetadata(var versioning: Versioning = Versioning()) {
             mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
 
-        fun fetchAndParse(url: URL): MavenMetadata {
-            val metadata = mapper.readValue(url, MavenMetadata::class.java)
-            return metadata
+        /**
+         * Fetches the metadata for the repository and parses the document.
+         *
+         * <p>If the document could not be found, assumes that the module was never
+         * released and thus has no metadata.
+         */
+        fun fetchAndParse(url: URL): MavenMetadata? {
+            return try {
+                val metadata = mapper.readValue(url, MavenMetadata::class.java)
+                metadata
+            } catch (e: FileNotFoundException) {
+                null
+            }
         }
     }
 }
