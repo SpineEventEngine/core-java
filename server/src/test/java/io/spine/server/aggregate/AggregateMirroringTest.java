@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.client.CommandFactory;
@@ -45,7 +44,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.List;
 
-import static io.spine.client.Filters.eq;
+import static io.spine.client.EntityQueryToProto.transformWith;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.archive;
@@ -88,7 +87,8 @@ class AggregateMirroringTest {
         @Test
         @DisplayName("all instances")
         void includeAll() {
-            Query query = queries.all(MRPhoto.class);
+            Query query = MRPhoto.newQuery()
+                                 .build(transformWith(queries));
             List<? extends EntityState<?>> readMessages = execute(query);
             assertThat(readMessages, containsInAnyOrder(givenPhotos.toArray()));
         }
@@ -106,10 +106,11 @@ class AggregateMirroringTest {
             MRPhoto target = onePhoto();
             archiveItem(target);
             MRPhotoId targetId = target.getId();
-            Query query = queries.select(MRPhoto.class)
-                                 .byId(targetId)
-                                 .where(eq(archived.name(), true))
-                                 .build();
+            Query query = MRPhoto.newQuery()
+                                 .id()
+                                 .is(targetId)
+                                 .where(archived.lifecycle(), true)
+                                 .build(transformWith(queries));
             checkRead(query, target);
         }
 
@@ -119,10 +120,11 @@ class AggregateMirroringTest {
             MRPhoto target = onePhoto();
             deleteItem(target);
             MRPhotoId targetId = target.getId();
-            Query query = queries.select(MRPhoto.class)
-                                 .byId(targetId)
-                                 .where(eq(deleted.name(), true))
-                                 .build();
+            Query query = MRPhoto.newQuery()
+                                 .id()
+                                 .is(targetId)
+                                 .where(deleted.lifecycle(), true)
+                                 .build(transformWith(queries));
             checkRead(query, target);
         }
 
@@ -133,11 +135,10 @@ class AggregateMirroringTest {
             MRPhoto secondPhoto = anotherPhoto();
             archiveItem(firstPhoto);
             archiveItem(secondPhoto);
-
-            Query query = queries.select(MRPhoto.class)
-                                 .where(eq(archived.name(), true),
-                                        eq(deleted.name(), false))
-                                 .build();
+            Query query = MRPhoto.newQuery()
+                                 .where(archived.lifecycle(), true)
+                                 .where(deleted.lifecycle(), false)
+                                 .build(transformWith(queries));
             checkRead(query, firstPhoto, secondPhoto);
         }
 
@@ -148,17 +149,19 @@ class AggregateMirroringTest {
             MRPhoto secondPhoto = anotherPhoto();
             deleteItem(firstPhoto);
             deleteItem(secondPhoto);
-
-            Query query = queries.select(MRPhoto.class)
-                                 .where(eq(deleted.name(), true),
-                                        eq(archived.name(), false))
-                                 .build();
+            Query query = MRPhoto.newQuery()
+                                 .where(archived.lifecycle(), false)
+                                 .where(deleted.lifecycle(), true)
+                                 .build(transformWith(queries));
             checkRead(query, firstPhoto, secondPhoto);
         }
 
         private void readAndCheck(MRPhoto target) {
             MRPhotoId targetId = target.getId();
-            Query query = queries.byIds(MRPhoto.class, ImmutableSet.of(targetId));
+            Query query = MRPhoto.newQuery()
+                                 .id()
+                                 .is(targetId)
+                                 .build(transformWith(queries));
             checkRead(query, target);
         }
 

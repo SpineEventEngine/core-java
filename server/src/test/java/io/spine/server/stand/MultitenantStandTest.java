@@ -54,7 +54,7 @@ class MultitenantStandTest extends StandTest {
 
         setCurrentTenant(tenantId);
         setMultitenant(true);
-        setRequestFactory(createRequestFactory(tenantId));
+        setRequestFactory(StandTestEnv.createRequestFactory(tenantId));
     }
 
     @AfterEach
@@ -75,13 +75,13 @@ class MultitenantStandTest extends StandTest {
 
         // --- Another Tenant
         TenantId anotherTenant = GivenTenantId.generate();
-        ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
+        ActorRequestFactory anotherFactory = StandTestEnv.createRequestFactory(anotherTenant);
         MemoizeSubscriptionCallback anotherCallback =
                 subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
-        Customer customer = fillSampleCustomers(1).iterator()
-                                                  .next();
+        Customer customer = StandTestEnv.fillSampleCustomers(1).iterator()
+                                        .next();
         CustomerId customerId = customer.getId();
         int version = 1;
         CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
@@ -106,7 +106,7 @@ class MultitenantStandTest extends StandTest {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(stateClass);
         MemoizeSubscriptionCallback action = new MemoizeSubscriptionCallback();
-        subscribeAndActivate(stand, allCustomers, action);
+        StandTestEnv.subscribeAndActivate(stand, allCustomers, action);
 
         assertNull(action.newEntityState());
         return action;
