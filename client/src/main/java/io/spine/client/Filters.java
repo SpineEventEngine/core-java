@@ -563,6 +563,27 @@ public final class Filters {
     }
 
     /**
+     * Creates a new disjunction composite filter.
+     *
+     * <p>A record is considered matching this filter if it matches at least one of the aggregated
+     * filters.
+     *
+     * <p>This method is used to create the default {@code EITHER} filter if the user
+     * chooses to pass instances of {@link Filter} directly to the {@link QueryBuilder}.
+     *
+     * @param filters
+     *         the aggregated filters
+     * @return new instance of {@link CompositeFilter}
+     * @see #either(Filter, Filter...) for the public API equivalent
+     */
+     static CompositeFilter either(Collection<Filter> filters) {
+        checkNotNull(filters);
+        checkArgument(!filters.isEmpty(),
+                      "Composite filter must contain at least one plain filter in it.");
+        return composeFilters(filters, EITHER);
+    }
+
+    /**
      * Creates a new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of

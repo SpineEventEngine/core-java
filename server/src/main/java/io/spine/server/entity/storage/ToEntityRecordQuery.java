@@ -27,7 +27,6 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.query.Column;
 import io.spine.query.ComparisonOperator;
-import io.spine.query.CustomSubjectParameter;
 import io.spine.query.EntityQuery;
 import io.spine.query.LogicalOperator;
 import io.spine.query.OrderBy;
@@ -78,55 +77,54 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
 
         Subject<I, S> subject = source.subject();
         this.setIdParameter(subject.id());
-
         copyPredicates(subject);
+        copyOrdering(source);
+        copyLimit(source);
+        copyMask(source);
+    }
 
-        // ordering
-        ImmutableList<OrderBy<?, S>> ordering = source.ordering();
-        for (OrderBy<?, S> orderByOrigin : ordering) {
-            RecordColumn<EntityRecord, ?> thisColumn =
-                    AsEntityRecordColumn.apply(orderByOrigin.column());
-            this.orderBy(thisColumn, orderByOrigin.direction());
-        }
-
-        // limit
-        Integer limit = source.limit();
-        if (limit != null) {
-            this.limit(limit);
-        }
-
-        // mask
+    private void copyMask(EntityQuery<I, S, ?> source) {
         FieldMask mask = source.mask();
         if (mask != null) {
             this.withMask(mask);
         }
     }
 
+    private void copyLimit(EntityQuery<I, S, ?> source) {
+        Integer limit = source.limit();
+        if (limit != null) {
+            this.limit(limit);
+        }
+    }
+
+    private void copyOrdering(EntityQuery<I, S, ?> source) {
+        ImmutableList<OrderBy<?, S>> ordering = source.ordering();
+        for (OrderBy<?, S> orderByOrigin : ordering) {
+            RecordColumn<EntityRecord, ?> thisColumn =
+                    AsEntityRecordColumn.apply(orderByOrigin.column());
+            this.orderBy(thisColumn, orderByOrigin.direction());
+        }
+    }
+
     private void copyPredicates(Subject<I, S> subject) {
         ImmutableList<QueryPredicate<S>> predicates = subject.predicates();
         for (QueryPredicate<S> sourcePredicate : predicates) {
-            ImmutableList<SubjectParameter<S, ?, ?>> parameters = sourcePredicate.parameters();
-            ImmutableList<CustomSubjectParameter<?, ?>> customParams = sourcePredicate.customParameters();
+            ImmutableList<SubjectParameter<?, ?, ?>> params = sourcePredicate.allParams();
             LogicalOperator operator = sourcePredicate.operator();
             if (operator == LogicalOperator.AND) {
-                copyParameters(parameters, customParams, this);
+                copyParameters(this, params);
             } else {
-                this.either((builder) -> copyParameters(parameters, customParams, builder));
+                this.either((builder) -> copyParameters(builder, params));
             }
 
         }
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")    // Decreasing the number of methods.
     @CanIgnoreReturnValue
     private RecordQueryBuilder<I, EntityRecord>
-    copyParameters(ImmutableList<SubjectParameter<S, ?, ?>> parameters,
-                   ImmutableList<CustomSubjectParameter<?, ?>> customParams,
-                   RecordQueryBuilder<I, EntityRecord> builder) {
-        for (SubjectParameter<S, ?, ?> parameter : parameters) {
-            addParameter(builder, parameter.column(), parameter.value(), parameter.operator());
-        }
-        for (CustomSubjectParameter<?, ?> parameter : customParams) {
+    copyParameters(RecordQueryBuilder<I, EntityRecord> builder,
+                   Iterable<SubjectParameter<?, ?, ?>> params) {
+        for (SubjectParameter<?, ?, ?> parameter : params) {
             addParameter(builder, parameter.column(), parameter.value(), parameter.operator());
         }
         return builder;

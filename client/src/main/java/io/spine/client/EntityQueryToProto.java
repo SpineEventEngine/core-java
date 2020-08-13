@@ -28,6 +28,7 @@ import io.spine.core.UserId;
 import io.spine.query.Column;
 import io.spine.query.ComparisonOperator;
 import io.spine.query.EntityQuery;
+import io.spine.query.LogicalOperator;
 import io.spine.query.QueryPredicate;
 import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
@@ -36,6 +37,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.Filters.all;
+import static io.spine.client.Filters.either;
 import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.ge;
 import static io.spine.client.Filters.gt;
@@ -108,7 +111,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
     private static Query toProtoQuery(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
         Subject<?, ?> subject = query.subject();
         addIds(builder, subject);
-        addPredicates(builder, subject);
+        addPredicates(builder, subject.predicates());
         addOrdering(builder, query);
         addLimit(builder, query);
         addFieldMask(builder, query);
@@ -139,22 +142,26 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         }
     }
 
-    private static void addPredicates(QueryBuilder builder, Subject<?, ?> subject) {
-        ImmutableList<? extends QueryPredicate<?>> predicates = subject.predicates();
+    private static void
+    addPredicates(QueryBuilder builder, ImmutableList<? extends QueryPredicate<?>> predicates) {
         for (QueryPredicate<?> predicate : predicates) {
-            addParameters(builder, predicate);
+            LogicalOperator logicalOp = predicate.operator();
+            ImmutableList<SubjectParameter<?, ?, ?>> params = predicate.allParams();
+            addParameters(builder, logicalOp, params);
         }
     }
 
-    private static void addParameters(QueryBuilder builder, QueryPredicate<?> predicate) {
-        ImmutableList<? extends SubjectParameter<?, ?, ?>> parameters = predicate.parameters();
-        for (SubjectParameter<?, ?, ?> parameter : parameters) {
+    private static void
+    addParameters(QueryBuilder builder, LogicalOperator logicalOperator,
+                  ImmutableList<SubjectParameter<?, ?, ?>> params) {
+        ImmutableList.Builder<Filter> filters = ImmutableList.builder();
+        for (SubjectParameter<?, ?, ?> parameter : params) {
             Column<?, ?> column = parameter.column();
-            ComparisonOperator operator = parameter.operator();
+            ComparisonOperator comparison = parameter.operator();
             Object value = parameter.value();
 
             @Nullable Filter filter;
-            switch (operator) {
+            switch (comparison) {
                 case EQUALS:
                     filter = eq(column, value); break;
                 case GREATER_THAN:
@@ -168,10 +175,15 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
                 case NOT_EQUALS:
                 default:
                     throw newIllegalStateException("Unsupported comparison operator `%s`",
-                                                   operator);
+                                                   comparison);
             }
-            builder.where(filter);
+            filters.add(filter);
         }
+        ImmutableList<Filter> filterList = filters.build();
+        CompositeFilter compositeFilter =
+                logicalOperator == LogicalOperator.AND ? all(filterList)
+                                                       : either(filterList);
+        builder.where(compositeFilter);
     }
 
     private static void addIds(QueryBuilder builder, Subject<?, ?> subject) {

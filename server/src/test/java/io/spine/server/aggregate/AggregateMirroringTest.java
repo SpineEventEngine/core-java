@@ -20,18 +20,18 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.client.CommandFactory;
-import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
-import io.spine.client.QueryResponse;
 import io.spine.core.Command;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv;
+import io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.PhotoAggregate;
+import io.spine.server.entity.EntityRecord;
 import io.spine.system.server.MRUploadPhoto;
 import io.spine.test.system.server.MRPhoto;
 import io.spine.test.system.server.MRPhotoId;
@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import static io.spine.client.EntityQueryToProto.transformWith;
@@ -66,11 +67,13 @@ class AggregateMirroringTest {
     private Collection<MRPhoto> givenPhotos;
     private BoundedContext context;
     private CommandFactory commands;
+    private AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto> repository;
 
     @BeforeEach
     void setUp() {
+        repository = newPhotosRepository();
         context = BoundedContextBuilder.assumingTests(false)
-                                       .add(newPhotosRepository())
+                                       .add(repository)
                                        .build();
         TestActorRequestFactory requestFactory =
                 new TestActorRequestFactory(AggregateMirroringTest.class);
@@ -182,8 +185,7 @@ class AggregateMirroringTest {
                                         .skip(1)
                                         .findFirst()
                                         .orElseGet(() -> fail(
-                                                "Too few test data items: " +
-                                                        givenPhotos.size())
+                                                "Too few test data items: " + givenPhotos.size())
                                         );
             return target;
         }
@@ -197,19 +199,16 @@ class AggregateMirroringTest {
         }
 
         private List<? extends EntityState<?>> execute(Query query) {
-            MemoizingObserver<QueryResponse> observer = new MemoizingObserver<>();
-            context.stand()
-                   .execute(query, observer);
-            QueryResponse response = observer.responses()
-                                             .get(0);
-            List<EntityStateWithVersion> result = response.getMessageList();
-            List<? extends EntityState<?>> readMessages =
-                    result.stream()
-                          .map(EntityStateWithVersion::getState)
+            Iterator<EntityRecord> records = repository.findRecords(query.filters(),
+                                                                    query.responseFormat());
+            ImmutableList<EntityRecord> asList = ImmutableList.copyOf(records);
+            List<? extends EntityState<?>> result =
+                    asList.stream()
+                          .map(EntityRecord::getState)
                           .map(unpackFunc())
                           .map((s) -> (EntityState<?>) s)
                           .collect(toList());
-            return readMessages;
+            return result;
         }
     }
 
