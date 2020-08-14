@@ -58,3 +58,7 @@ message MRPhotoDeleted {
 
     MRPhotoId id = 1;
 }
+
+message MRSoundUploaded {
+    string id = 1;
+}

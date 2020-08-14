@@ -47,6 +47,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.storage.QueryConverter.convert;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A storage of aggregate events, snapshots and the most recent aggregate states.
@@ -231,6 +232,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
      * @return an iterator over the matching {@code EntityRecord}s
      */
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
+        ensureVisible();
         RecordQuery<I, EntityRecord> query = convert(stateStorage.recordSpec(), filters, format);
         return stateStorage.readAll(query);
     }
@@ -241,12 +243,28 @@ public class AggregateStorage<I, S extends EntityState<I>>
      * <p>This method performs no filtering. Other than that, it works in the same manner
      * as {@link #readStates(TargetFilters, ResponseFormat) readStates(filters, format)}.
      *
-     * @param format the format of the response
+     * @param format
+     *         the format of the response
      * @return an iterator over the records
      */
     protected Iterator<EntityRecord> readStates(ResponseFormat format) {
+        ensureVisible();
         RecordQuery<I, EntityRecord> query = convert(stateStorage.recordSpec(), format);
         return stateStorage.readAll(query);
+    }
+
+    private void ensureVisible() {
+        if (!mirrorEnabled) {
+            throw newIllegalStateException(
+                    "The aggregate state `%s` is NOT marked as visible for querying.",
+                    stateClass());
+        }
+    }
+
+    private Class<? extends EntityState<?>> stateClass() {
+        return stateStorage.recordSpec()
+                           .entityClass()
+                           .stateClass();
     }
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {

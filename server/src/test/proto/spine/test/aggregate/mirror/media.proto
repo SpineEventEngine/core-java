@@ -59,8 +59,15 @@ message MRPhoto {
     MRPhotoType source_type = 7 [(required) = true, (column) = true];
 }
 
+enum MRPhotoType {
+    MRPT_UNDEFINED = 0;
+    FULL_FRAME = 1;
+    CROP_FRAME = 2;
+    THUMBNAIL = 3;
+}
+
 message MRVideo {
-    option (entity) = {kind: AGGREGATE visibility: QUERY};
+    option (entity) = {kind: AGGREGATE visibility: FULL};
 
     MRVideoId id = 1;
 
@@ -71,6 +78,13 @@ message MRVideo {
     map<string, spine.net.Url> soundtrack_url = 4 [(validate) = true, (required) = false];
 
     map<string, spine.net.Url> subtitles_url = 5 [(validate) = true, (required) = false];
+}
+
+// An aggregate which is used to ensure it is NOT available to querying.
+message MRSoundRecord {
+    option (entity) = {kind: AGGREGATE visibility: NONE};
+
+    string id = 1;
 }
 
 message MRLocalizedVideo {
@@ -95,11 +109,4 @@ message MRIncompleteAudio {
     spine.net.Url url = 2;
 
     reserved 3 to 42;
-}
-
-enum MRPhotoType {
-    MRT_UNDEFINED = 0;
-    FULL_FRAME = 1;
-    CROP_FRAME = 2;
-    THUMBNAIL = 3;
 }

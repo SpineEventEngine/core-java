@@ -49,6 +49,10 @@ message MRUploadPhoto {
     MRPhotoType source_type = 7 [(required) = true];
 }
 
+message MRUploadSound {
+    string id = 1;
+}
+
 message MRArchivePhoto {
 
     MRPhotoId id = 1;

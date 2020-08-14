@@ -30,11 +30,13 @@ import io.spine.core.Command;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv;
+import io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.InvisibleSound;
 import io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.PhotoAggregate;
 import io.spine.server.entity.EntityRecord;
 import io.spine.system.server.MRUploadPhoto;
 import io.spine.test.system.server.MRPhoto;
 import io.spine.test.system.server.MRPhotoId;
+import io.spine.test.system.server.MRSoundRecord;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -61,6 +63,7 @@ import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.test.system.server.MRPhotoType.CROP_FRAME;
 import static io.spine.test.system.server.MRPhotoType.FULL_FRAME;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 //TODO:2020-04-08:alex.tymchenko: test the disabled mirroring.
@@ -88,7 +91,7 @@ class AggregateMirroringTest {
     }
 
     @Nested
-    @DisplayName("returning them via `Stand` when querying")
+    @DisplayName("returning them when querying")
     class ExecuteQueries {
 
         @Test
@@ -297,6 +300,15 @@ class AggregateMirroringTest {
                           .collect(toList());
             return result;
         }
+    }
+
+    @Test
+    @DisplayName("only for those Aggregate types which are not invisible")
+    void onlyForVisible() {
+        Query query = MRSoundRecord.newQuery().build(transformWith(queries));
+        assertThrows(IllegalStateException.class,
+                     () -> InvisibleSound.repository()
+                                         .findRecords(query.filters(), query.responseFormat()));
     }
 
     private void prepareAggregates(Collection<MRPhoto> aggregateStates) {

@@ -28,6 +28,7 @@ import io.spine.core.MessageId;
 import io.spine.core.Versions;
 import io.spine.net.Url;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -37,12 +38,15 @@ import io.spine.server.entity.Repository;
 import io.spine.system.server.MRArchivePhoto;
 import io.spine.system.server.MRDeletePhoto;
 import io.spine.system.server.MRUploadPhoto;
+import io.spine.system.server.MRUploadSound;
 import io.spine.test.system.server.MRPhoto;
 import io.spine.test.system.server.MRPhotoArchived;
 import io.spine.test.system.server.MRPhotoDeleted;
 import io.spine.test.system.server.MRPhotoId;
 import io.spine.test.system.server.MRPhotoType;
 import io.spine.test.system.server.MRPhotoUploaded;
+import io.spine.test.system.server.MRSoundRecord;
+import io.spine.test.system.server.MRSoundUploaded;
 import io.spine.testing.server.TestEventFactory;
 
 import java.util.Collection;
@@ -217,6 +221,34 @@ public final class AggregateMirroringTestEnv {
         @Apply
         private void on(MRPhotoDeleted event) {
             setDeleted(true);
+        }
+    }
+
+    public static final class InvisibleSound
+            extends Aggregate<String, MRSoundRecord, MRSoundRecord.Builder> {
+
+        private static final
+        AggregateRepository<String, InvisibleSound, MRSoundRecord> repo =
+                (AggregateRepository<String, InvisibleSound, MRSoundRecord>)
+                DefaultRepository.of(InvisibleSound.class);
+
+        static {
+            BoundedContextBuilder.assumingTests(false).add(repo).build();
+        }
+
+        public static
+        AggregateRepository<String, InvisibleSound, MRSoundRecord> repository() {
+            return repo;
+        }
+
+        @Assign
+        MRSoundUploaded handle(MRUploadSound cmd) {
+            return MRSoundUploaded.newBuilder().setId(cmd.getId()).vBuild();
+        }
+
+        @Apply
+        private void event(MRSoundUploaded event) {
+            builder().setId(event.getId());
         }
     }
 }
