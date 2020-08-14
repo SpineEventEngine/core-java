@@ -179,8 +179,8 @@ public final class CommandRequest extends ClientRequest implements Logging {
     }
 
     /**
-     * Posts the command without subscribing to events that may be generated because of
-     * handling the command.
+     * Posts the command without subscribing to events that may be generated during
+     * the command handling.
      *
      * @throws IllegalStateException
      *         if {@link #observe(Class, EventConsumer)} or {@link #observe(Class, Consumer)} were
