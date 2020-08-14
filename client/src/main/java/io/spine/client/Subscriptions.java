@@ -22,6 +22,7 @@ package io.spine.client;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
@@ -34,7 +35,6 @@ import io.spine.core.Response;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -172,7 +172,7 @@ public final class Subscriptions implements Logging {
     }
 
     /** Adds all the passed subscriptions. */
-    void addAll(Collection<Subscription> newSubscriptions) {
+    void addAll(Iterable<Subscription> newSubscriptions) {
         newSubscriptions.forEach(this::add);
     }
 
@@ -188,6 +188,7 @@ public final class Subscriptions implements Logging {
      *
      * @return {@code true} if the subscription was previously made
      */
+    @CanIgnoreReturnValue
     public boolean cancel(Subscription s) {
         checkNotNull(s);
         boolean isActive = items.contains(s);
