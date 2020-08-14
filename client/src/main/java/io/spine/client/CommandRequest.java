@@ -233,7 +233,8 @@ public final class CommandRequest extends ClientRequest implements Logging {
         private void performWithoutSubscriptions() {
             if (!consumers.isEmpty()) {
                 throw newIllegalStateException(
-                        "Subscriptions to events were requested. Please call `post()` instead.");
+                        "Subscriptions to events were requested. Please call `post()` instead."
+                );
             }
             Ack ack = client().post(command);
             Status status = ack.getStatus();
@@ -243,7 +244,6 @@ public final class CommandRequest extends ClientRequest implements Logging {
         private void subscribeToEvents() {
             Client client = client();
             this.subscriptions = subscribe(client, command, consumers, streamingErrorHandler());
-            checkNotNull(subscriptions);
             client.subscriptions()
                   .addAll(subscriptions);
         }
