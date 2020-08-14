@@ -172,7 +172,6 @@ public final class CommandRequest extends ClientRequest implements Logging {
      *         because of communication or business logic reasons. That's why the returned
      *         subscriptions should be cancelled by the client code when it no longer needs it.
      */
-    @CanIgnoreReturnValue
     public ImmutableSet<Subscription> post() {
         PostOperation op = new PostOperation();
         return op.perform();
