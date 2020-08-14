@@ -66,7 +66,6 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-//TODO:2020-04-08:alex.tymchenko: test the disabled mirroring.
 @DisplayName("`AggregateRepository` should mirror aggregate states")
 class AggregateMirroringTest {
 
