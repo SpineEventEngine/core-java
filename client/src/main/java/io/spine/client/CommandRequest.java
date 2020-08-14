@@ -183,8 +183,8 @@ public final class CommandRequest extends ClientRequest implements Logging {
      * handling the command.
      *
      * @throws IllegalStateException
-     *   if {@link #observe(Class, EventConsumer)} or {@link #observe(Class, Consumer)} were
-     *   called in the command request configuration chain before calling this method
+     *         if {@link #observe(Class, EventConsumer)} or {@link #observe(Class, Consumer)} were
+     *         called in the command request configuration chain before calling this method
      * @see #post()
      */
     public void postAndForget() throws IllegalStateException {
