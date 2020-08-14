@@ -41,6 +41,12 @@ message MRPhotoUploaded {
     spine.net.Url thumbnail_url = 3 [(validate) = true, (required) = false];
 
     string alt_text = 4;
+
+    int32 width = 5 [(required) = true, (min).value = "0"];
+
+    int32 height = 6 [(required) = true, (min).value = "0"];
+
+    MRPhotoType source_type = 7 [(required) = true];
 }
 
 message MRPhotoArchived {

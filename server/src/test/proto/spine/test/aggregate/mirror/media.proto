@@ -50,7 +50,13 @@ message MRPhoto {
 
     spine.net.Url thumbnail_url = 3 [(validate) = true, (required) = false];
 
-    string alt_text = 4;
+    string alt_text = 4 [(column) = true];
+
+    int32 width = 5 [(required) = true, (min).value = "0", (column) = true];
+
+    int32 height = 6 [(required) = true, (min).value = "0", (column) = true];
+
+    MRPhotoType source_type = 7 [(required) = true, (column) = true];
 }
 
 message MRVideo {
@@ -89,4 +95,11 @@ message MRIncompleteAudio {
     spine.net.Url url = 2;
 
     reserved 3 to 42;
+}
+
+enum MRPhotoType {
+    MRT_UNDEFINED = 0;
+    FULL_FRAME = 1;
+    CROP_FRAME = 2;
+    THUMBNAIL = 3;
 }

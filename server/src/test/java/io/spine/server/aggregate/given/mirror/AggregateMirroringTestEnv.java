@@ -41,11 +41,15 @@ import io.spine.test.system.server.MRPhoto;
 import io.spine.test.system.server.MRPhotoArchived;
 import io.spine.test.system.server.MRPhotoDeleted;
 import io.spine.test.system.server.MRPhotoId;
+import io.spine.test.system.server.MRPhotoType;
 import io.spine.test.system.server.MRPhotoUploaded;
 import io.spine.testing.server.TestEventFactory;
 
 import java.util.Collection;
 
+import static io.spine.test.system.server.MRPhotoType.CROP_FRAME;
+import static io.spine.test.system.server.MRPhotoType.FULL_FRAME;
+import static io.spine.test.system.server.MRPhotoType.THUMBNAIL;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
 public final class AggregateMirroringTestEnv {
@@ -59,13 +63,29 @@ public final class AggregateMirroringTestEnv {
     }
 
     public static Collection<MRPhoto> givenPhotos() {
-        MRPhoto spineLogo = newPhoto("spine.io/logo", "Spine Logo");
-        MRPhoto projectsLogo = newPhoto("projects.tm/logo", "Projects Logo");
-        MRPhoto jxBrowserLogo = newPhoto("teamdev.com/jxbrowser/logo", "JxBrowser Logo");
+        MRPhoto spineLogo = newPhoto(THUMBNAIL,
+                                     "spine.io/logo",
+                                     "Spine Logo",
+                                     200,
+                                     200);
+        MRPhoto projectsLogo = newPhoto(CROP_FRAME,
+                                        "projects.tm/logo",
+                                        "Projects Logo",
+                                        1000,
+                                        800);
+        MRPhoto jxBrowserLogo = newPhoto(FULL_FRAME,
+                                         "teamdev.com/jxbrowser/logo",
+                                         "JxBrowser Logo",
+                                         7000,
+                                         7000);
         return ImmutableList.of(spineLogo, projectsLogo, jxBrowserLogo);
     }
 
-    private static MRPhoto newPhoto(String url, String altText) {
+    private static MRPhoto newPhoto(MRPhotoType type,
+                                    String url,
+                                    String altText,
+                                    int width,
+                                    int height) {
         Url fullSizeUrl = Url
                 .newBuilder()
                 .setSpec(url)
@@ -80,6 +100,9 @@ public final class AggregateMirroringTestEnv {
                 .setFullSizeUrl(fullSizeUrl)
                 .setThumbnailUrl(thumbnail)
                 .setAltText(altText)
+                .setSourceType(type)
+                .setWidth(width)
+                .setHeight(height)
                 .vBuild();
         return photo;
     }
@@ -114,6 +137,9 @@ public final class AggregateMirroringTestEnv {
                 .setFullSizeUrl(state.getFullSizeUrl())
                 .setThumbnailUrl(state.getThumbnailUrl())
                 .setAltText(state.getAltText())
+                .setWidth(state.getWidth())
+                .setHeight(state.getHeight())
+                .setSourceType(state.getSourceType())
                 .vBuild();
     }
 
@@ -139,6 +165,9 @@ public final class AggregateMirroringTestEnv {
                     .setFullSizeUrl(cmd.getFullSizeUrl())
                     .setThumbnailUrl(cmd.getThumbnailUrl())
                     .setAltText(cmd.getAltText())
+                    .setWidth(cmd.getWidth())
+                    .setHeight(cmd.getHeight())
+                    .setSourceType(cmd.getSourceType())
                     .vBuild();
             return event;
         }
@@ -148,7 +177,10 @@ public final class AggregateMirroringTestEnv {
             builder().setId(event.getId())
                      .setFullSizeUrl(event.getFullSizeUrl())
                      .setThumbnailUrl(event.getThumbnailUrl())
-                     .setAltText(event.getAltText());
+                     .setAltText(event.getAltText())
+                     .setWidth(event.getWidth())
+                     .setHeight(event.getHeight())
+                     .setSourceType(event.getSourceType());
         }
 
         @Assign
