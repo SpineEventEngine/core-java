@@ -215,6 +215,15 @@ public final class CommandRequest extends ClientRequest implements Logging {
         }
 
         private ImmutableSet<Subscription> perform() {
+            if (consumers.isEmpty()) {
+                throw newIllegalStateException(
+                        "No event subscriptions were requested prior to calling `post()`." +
+                        " If you intend to receive events please call `observe()`" +
+                                " before `post()`." +
+                        " Or, if you subscribe to events or projections elsewhere," +
+                                " please use `postAndForget()`."
+                );
+            }
             subscribeToEvents();
             Ack ack = client().post(command);
             Status status = ack.getStatus();

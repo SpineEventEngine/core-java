@@ -126,7 +126,7 @@ class CommandRequestTest extends AbstractClientTest {
         @DisplayName("a rejection to its consumers")
         void rejections() {
             // Post the command so that the user is logged in. We are not interested in events here.
-            commandRequest.post();
+            commandRequest.postAndForget();
             // Now post the command again, expecting the rejection.
             commandRequest.observe(UserAlreadyLoggedIn.class, counter::add)
                           .post();
@@ -139,6 +139,15 @@ class CommandRequestTest extends AbstractClientTest {
             assertThat(counter.containsAll(classes))
                     .isTrue();
         }
+    }
+
+    @Test
+    @DisplayName("Suggest `postAndForget()` call if no subscriptions were made")
+    void noSubscriptions() {
+        assertThrows(
+                IllegalStateException.class,
+                () -> commandRequest.post()
+        );
     }
 
     @Nested
@@ -232,7 +241,7 @@ class CommandRequestTest extends AbstractClientTest {
                         client().asGuest()
                                 .command(commandMessage)
                                 .onServerError(handler);
-                request.post();
+                request.postAndForget();
 
                 assertThat(returnedError)
                         .isNotNull();
