@@ -45,18 +45,22 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.EntityQueryToProto.transformWith;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.archive;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.delete;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.givenPhotos;
+import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.jxBrowserLogo7K;
 import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.newPhotosRepository;
+import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.projectLogo1000by800;
+import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.spineLogo200by200;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
+import static io.spine.test.system.server.MRPhotoType.CROP_FRAME;
+import static io.spine.test.system.server.MRPhotoType.FULL_FRAME;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.fail;
 
 //TODO:2020-04-08:alex.tymchenko: test the disabled mirroring.
@@ -93,7 +97,7 @@ class AggregateMirroringTest {
             Query query = MRPhoto.newQuery()
                                  .build(transformWith(queries));
             List<? extends EntityState<?>> readMessages = execute(query);
-            assertThat(readMessages, containsInAnyOrder(givenPhotos.toArray()));
+            assertThat(readMessages).containsExactlyElementsIn(givenPhotos);
         }
 
         @Test
@@ -109,11 +113,12 @@ class AggregateMirroringTest {
             MRPhoto target = onePhoto();
             archiveItem(target);
             MRPhotoId targetId = target.getId();
-            Query query = MRPhoto.newQuery()
-                                 .id()
-                                 .is(targetId)
-                                 .where(archived.lifecycle(), true)
-                                 .build(transformWith(queries));
+            Query query = MRPhoto
+                    .newQuery()
+                    .id()
+                    .is(targetId)
+                    .where(archived.lifecycle(), true)
+                    .build(transformWith(queries));
             checkRead(query, target);
         }
 
@@ -123,11 +128,12 @@ class AggregateMirroringTest {
             MRPhoto target = onePhoto();
             deleteItem(target);
             MRPhotoId targetId = target.getId();
-            Query query = MRPhoto.newQuery()
-                                 .id()
-                                 .is(targetId)
-                                 .where(deleted.lifecycle(), true)
-                                 .build(transformWith(queries));
+            Query query = MRPhoto
+                    .newQuery()
+                    .id()
+                    .is(targetId)
+                    .where(deleted.lifecycle(), true)
+                    .build(transformWith(queries));
             checkRead(query, target);
         }
 
@@ -138,10 +144,11 @@ class AggregateMirroringTest {
             MRPhoto secondPhoto = anotherPhoto();
             archiveItem(firstPhoto);
             archiveItem(secondPhoto);
-            Query query = MRPhoto.newQuery()
-                                 .where(archived.lifecycle(), true)
-                                 .where(deleted.lifecycle(), false)
-                                 .build(transformWith(queries));
+            Query query = MRPhoto
+                    .newQuery()
+                    .where(archived.lifecycle(), true)
+                    .where(deleted.lifecycle(), false)
+                    .build(transformWith(queries));
             checkRead(query, firstPhoto, secondPhoto);
         }
 
@@ -152,11 +159,86 @@ class AggregateMirroringTest {
             MRPhoto secondPhoto = anotherPhoto();
             deleteItem(firstPhoto);
             deleteItem(secondPhoto);
-            Query query = MRPhoto.newQuery()
-                                 .where(archived.lifecycle(), false)
-                                 .where(deleted.lifecycle(), true)
-                                 .build(transformWith(queries));
+            Query query = MRPhoto
+                    .newQuery()
+                    .where(archived.lifecycle(), false)
+                    .where(deleted.lifecycle(), true)
+                    .build(transformWith(queries));
             checkRead(query, firstPhoto, secondPhoto);
+        }
+
+        @Test
+        @DisplayName("by the a single entity column")
+        void bySingleEntityColumn() {
+            Query queryForNothing = MRPhoto
+                    .newQuery()
+                    .height()
+                    .isLessThan(20)
+                    .build(transformWith(queries));
+            checkReadsNothing(queryForNothing);
+
+            Query queryForOneElement = MRPhoto
+                    .newQuery()
+                    .height()
+                    .isLessThan(201)
+                    .build(transformWith(queries));
+            checkRead(queryForOneElement, spineLogo200by200());
+        }
+
+        @Test
+        @DisplayName("by the two entity columns joined with `AND`")
+        void byTwoEntityColumnsWithAndOperator() {
+            Query query = MRPhoto
+                    .newQuery()
+                    .height()
+                    .isGreaterOrEqualTo(7000)
+                    .width()
+                    .isGreaterThan(6999)
+                    .build(transformWith(queries));
+            checkRead(query, jxBrowserLogo7K());
+        }
+
+        @Test
+        @DisplayName("by the two entity columns joined with `OR`")
+        void byTwoEntityColumnsWithOrOperator() {
+            Query query = MRPhoto
+                    .newQuery()
+                    .either(q -> q.width()
+                                  .isLessOrEqualTo(200),
+                            q -> q.height()
+                                  .isGreaterThan(6999))
+                    .build(transformWith(queries));
+            checkRead(query, spineLogo200by200(), jxBrowserLogo7K());
+        }
+
+        @Test
+        @DisplayName("by the two parameters for the same columns with `OR` " +
+                "and by one more column joined with `AND`")
+        void byCombinationAndOr() {
+            Query query = MRPhoto
+                    .newQuery()
+                    .either(q -> q.sourceType()
+                                  .is(CROP_FRAME),
+                            q -> q.sourceType()
+                                  .is(FULL_FRAME))
+                    .height()
+                    .isLessThan(7000)
+                    .build(transformWith(queries));
+            checkRead(query, projectLogo1000by800());
+        }
+
+        @Test
+        @DisplayName("by both entity and lifecycle columns")
+        void byEntityAndLifecycleCols() {
+            archiveItem(projectLogo1000by800());
+            Query query = MRPhoto
+                    .newQuery()
+                    .either(q -> q.where(archived.lifecycle(), true),
+                            q -> q.height().isGreaterThan(1000))
+                    .width()
+                    .isLessThan(7000)
+                    .build(transformWith(queries));
+            checkRead(query, projectLogo1000by800());
         }
 
         private void readAndCheck(MRPhoto target) {
@@ -170,7 +252,12 @@ class AggregateMirroringTest {
 
         private void checkRead(Query query, MRPhoto... expected) {
             List<? extends EntityState<?>> readMessages = execute(query);
-            assertThat(readMessages, containsInAnyOrder(expected));
+            assertThat(readMessages).containsExactlyElementsIn(expected);
+        }
+
+        private void checkReadsNothing(Query query) {
+            List<? extends EntityState<?>> readMessages = execute(query);
+            assertThat(readMessages).isEmpty();
         }
 
         private MRPhoto onePhoto() {

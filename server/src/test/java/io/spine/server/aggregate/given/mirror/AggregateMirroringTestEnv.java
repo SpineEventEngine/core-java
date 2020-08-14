@@ -55,6 +55,21 @@ import static io.spine.testing.server.TestEventFactory.newInstance;
 public final class AggregateMirroringTestEnv {
 
     public static final TestEventFactory events = newInstance(AggregateMirroringTestEnv.class);
+    private static final MRPhoto spineLogo = newPhoto(THUMBNAIL,
+                                                      "spine.io/logo",
+                                                      "Spine Logo",
+                                                      200,
+                                                      200);
+    private static final MRPhoto projectsLogo = newPhoto(CROP_FRAME,
+                                                         "projects.tm/logo",
+                                                         "Projects Logo",
+                                                         1000,
+                                                         800);
+    private static final MRPhoto jxBrowserLogo = newPhoto(FULL_FRAME,
+                                                          "teamdev.com/jxbrowser/logo",
+                                                          "JxBrowser Logo",
+                                                          7000,
+                                                          7000);
 
     /**
      * Prevents the utility class instantiation.
@@ -63,22 +78,19 @@ public final class AggregateMirroringTestEnv {
     }
 
     public static Collection<MRPhoto> givenPhotos() {
-        MRPhoto spineLogo = newPhoto(THUMBNAIL,
-                                     "spine.io/logo",
-                                     "Spine Logo",
-                                     200,
-                                     200);
-        MRPhoto projectsLogo = newPhoto(CROP_FRAME,
-                                        "projects.tm/logo",
-                                        "Projects Logo",
-                                        1000,
-                                        800);
-        MRPhoto jxBrowserLogo = newPhoto(FULL_FRAME,
-                                         "teamdev.com/jxbrowser/logo",
-                                         "JxBrowser Logo",
-                                         7000,
-                                         7000);
-        return ImmutableList.of(spineLogo, projectsLogo, jxBrowserLogo);
+        return ImmutableList.of(spineLogo200by200(), projectLogo1000by800(), jxBrowserLogo7K());
+    }
+
+    public static MRPhoto jxBrowserLogo7K() {
+        return jxBrowserLogo;
+    }
+
+    public static MRPhoto projectLogo1000by800() {
+        return projectsLogo;
+    }
+
+    public static MRPhoto spineLogo200by200() {
+        return spineLogo;
     }
 
     private static MRPhoto newPhoto(MRPhotoType type,
