@@ -148,15 +148,14 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         for (QueryPredicate<?> predicate : predicates) {
             LogicalOperator logicalOp = predicate.operator();
             ImmutableList<SubjectParameter<?, ?, ?>> params = predicate.allParams();
-            CompositeFilter aFilter = addParameters(builder, logicalOp, params);
+            CompositeFilter aFilter = toFilter(params, logicalOp);
             filters.add(aFilter);
         }
         builder.where(filters.build());
     }
 
     private static CompositeFilter
-    addParameters(QueryBuilder builder, LogicalOperator logicalOperator,
-                  ImmutableList<SubjectParameter<?, ?, ?>> params) {
+    toFilter(ImmutableList<SubjectParameter<?, ?, ?>> params, LogicalOperator logicalOp) {
         ImmutableList.Builder<Filter> filters = ImmutableList.builder();
         for (SubjectParameter<?, ?, ?> parameter : params) {
             Column<?, ?> column = parameter.column();
@@ -184,8 +183,8 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         }
         ImmutableList<Filter> filterList = filters.build();
         CompositeFilter compositeFilter =
-                logicalOperator == LogicalOperator.AND ? all(filterList)
-                                                       : either(filterList);
+                logicalOp == LogicalOperator.AND ? all(filterList)
+                                                 : either(filterList);
         return compositeFilter;
     }
 
