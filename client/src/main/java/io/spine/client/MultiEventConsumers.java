@@ -63,6 +63,14 @@ final class MultiEventConsumers implements Logging {
         return map.keySet();
     }
 
+    /**
+     * Returns {@code true} if no event consumers were collected, {@code false} otherwise.
+     */
+    boolean isEmpty() {
+        boolean result = eventTypes().isEmpty();
+        return result;
+    }
+
     /** Obtains all the consumers grouped by type of consumed events. */
     ImmutableMap<Class<? extends EventMessage>, StreamObserver<Event>> toObservers() {
         @SuppressWarnings("ConstantConditions") // `null` values are prevented when gathering.
