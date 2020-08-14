@@ -177,7 +177,7 @@ class ClientTest extends AbstractClientTest {
                                          .build();
             client.asGuest()
                   .command(command)
-                  .post();
+                  .postAndForget();
             ImmutableList<ActiveUsers> users =
                     client.onBehalfOf(user)
                           .select(ActiveUsers.class)

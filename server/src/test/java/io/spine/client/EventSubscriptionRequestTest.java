@@ -85,7 +85,7 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
                 .subscribeToEvent(UserLoggedIn.class)
                 .observe(counter::add)
                 .post();
-        commandRequest.post();
+        commandRequest.postAndForget();
 
         assertThat(counter.contains(UserLoggedIn.class))
             .isTrue();
@@ -113,7 +113,7 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
                         rememberedContext = c;
                     })
                     .post();
-            commandRequest.post();
+            commandRequest.postAndForget();
         }
 
         @Test
