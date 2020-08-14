@@ -29,6 +29,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.logging.Logging;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -47,7 +48,7 @@ final class EventsAfterCommand implements Logging {
     private final Command command;
     private final MultiEventConsumers consumers;
 
-    static ImmutableSet<Subscription>
+    static @NonNull ImmutableSet<Subscription>
     subscribe(Client client,
               Command command,
               MultiEventConsumers consumers,
