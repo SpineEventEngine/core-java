@@ -171,10 +171,25 @@ public final class CommandRequest extends ClientRequest implements Logging {
      *         client code "knows" how many of them it expects. Also, some events may not arrive
      *         because of communication or business logic reasons. That's why the returned
      *         subscriptions should be cancelled by the client code when it no longer needs it.
+     * @see #postAndForget()
      */
     public ImmutableSet<Subscription> post() {
         PostOperation op = new PostOperation();
         return op.perform();
+    }
+
+    /**
+     * Posts the command without subscribing to events that may be generated because of
+     * handling the command.
+     *
+     * @throws IllegalStateException
+     *   if {@link #observe(Class, EventConsumer)} or {@link #observe(Class, Consumer)} were
+     *   called in the command request configuration chain before calling this method
+     * @see #post()
+     */
+    public void postAndForget() throws IllegalStateException {
+        PostOperation op = new PostOperation();
+        op.performWithoutSubscriptions();
     }
 
     @VisibleForTesting
@@ -203,6 +218,29 @@ public final class CommandRequest extends ClientRequest implements Logging {
             subscribeToEvents();
             Ack ack = client().post(command);
             Status status = ack.getStatus();
+            return handleStatus(status);
+        }
+
+        private void performWithoutSubscriptions() {
+            if (!consumers.isEmpty()) {
+                throw newIllegalStateException(
+                        "Subscriptions to events were requested. Please call `post()` instead.");
+            }
+            Ack ack = client().post(command);
+            Status status = ack.getStatus();
+            handleStatus(status);
+        }
+
+        private void subscribeToEvents() {
+            Client client = client();
+            this.subscriptions = subscribe(client, command, consumers, streamingErrorHandler());
+            checkNotNull(subscriptions);
+            client.subscriptions()
+                  .addAll(subscriptions);
+        }
+
+        @CanIgnoreReturnValue
+        private ImmutableSet<Subscription> handleStatus(Status status) {
             switch (status.getStatusCase()) {
                 case OK:
                     return Optional.ofNullable(subscriptions)
@@ -223,21 +261,13 @@ public final class CommandRequest extends ClientRequest implements Logging {
             }
         }
 
-        private void subscribeToEvents() {
-            Client client = client();
-            this.subscriptions = subscribe(client, command, consumers, streamingErrorHandler());
-            checkNotNull(subscriptions);
-            client.subscriptions()
-                  .addAll(subscriptions);
-        }
-
         /**
          * Cancels the passed subscriptions to events because the command could not be posted.
          *
          */
         private void cancelVoidSubscriptions() {
-            Subscriptions activeSubscriptions = client().subscriptions();
             if (subscriptions != null) {
+                Subscriptions activeSubscriptions = client().subscriptions();
                 subscriptions.forEach(activeSubscriptions::cancel);
             }
         }
