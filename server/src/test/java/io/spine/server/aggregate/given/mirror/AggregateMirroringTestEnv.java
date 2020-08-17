@@ -141,6 +141,8 @@ public final class AggregateMirroringTestEnv {
         return events.createEvent(eventMessage);
     }
 
+    // This suppression makes sense only for Error Prone.
+    @SuppressWarnings("unchecked")  // as per declaration of the `DefaultRepository`;
     public static AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto> newPhotosRepository() {
         Repository<MRPhotoId, PhotoAggregate> repo = DefaultRepository.of(PhotoAggregate.class);
         return (AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto>) repo;
@@ -227,6 +229,7 @@ public final class AggregateMirroringTestEnv {
     public static final class InvisibleSound
             extends Aggregate<String, MRSoundRecord, MRSoundRecord.Builder> {
 
+        @SuppressWarnings("unchecked")  // as per declaration of the `DefaultRepository`.
         private static final
         AggregateRepository<String, InvisibleSound, MRSoundRecord> repo =
                 (AggregateRepository<String, InvisibleSound, MRSoundRecord>)

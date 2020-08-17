@@ -124,58 +124,6 @@ class DefaultSystemReadSideTest {
         }
     }
 
-    //TODO:2020-06-17:alex.tymchenko: migrate?
-//    @Nested
-//    @DisplayName("read domain aggregate states")
-//    //TODO:2020-03-28:alex.tymchenko: move this test to the `AggregateRepositoryTest`.
-//    class ReadDomainAggregates {
-//
-//        private final TestActorRequestFactory actorRequestFactory =
-//                new TestActorRequestFactory(DefaultSystemWriteSideTest.class);
-//
-//        private ListId aggregateId;
-//
-//        @BeforeEach
-//        void setUp() {
-//            domainContext.register(DefaultRepository.of(ShoppingListAggregate.class));
-//            aggregateId = ListId
-//                    .newBuilder()
-//                    .setId(newUuid())
-//                    .build();
-//            createAggregate();
-//        }
-//
-//        @Test
-//        @DisplayName("by the given query")
-//        void query() {
-//            Query query =
-//                    actorRequestFactory.query()
-//                                       .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
-//            Iterator<EntityStateWithVersion> iterator = systemReadSide.readDomainAggregate(query);
-//            EntityStateWithVersion next = iterator.next();
-//            Message foundMessage = unpack(next.getState());
-//
-//            ShoppingListAggregate aggregate = aggregate();
-//            assertEquals(aggregate.state(), foundMessage);
-//            assertEquals(aggregate.version(), next.getVersion());
-//        }
-//
-//        private ShoppingListAggregate aggregate() {
-//            return findAggregate(aggregateId, domainContext);
-//        }
-//
-//        private void createAggregate() {
-//            CreateShoppingList command = CreateShoppingList
-//                    .newBuilder()
-//                    .setId(aggregateId)
-//                    .build();
-//            Command cmd = actorRequestFactory.command()
-//                                             .create(command);
-//            domainContext.commandBus()
-//                         .post(cmd, noOpObserver());
-//        }
-//    }
-
     /**
      * A subscriber for {@link SMProjectCreated} events.
      *
