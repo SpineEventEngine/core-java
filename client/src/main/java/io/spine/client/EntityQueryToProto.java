@@ -79,7 +79,6 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
      * @return new instance of the query transformer
      */
     public static EntityQueryToProto transformWith(ClientRequest request) {
-        //TODO:2020-08-12:alex.tymchenko: test for `null` intolerance.
         checkNotNull(request);
         Client client = request.client();
         UserId user = request.user();
