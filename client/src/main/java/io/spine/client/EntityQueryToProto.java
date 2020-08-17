@@ -174,7 +174,6 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
                     filter = lt(column, value); break;
                 case LESS_OR_EQUALS:
                     filter = le(column, value); break;
-                case NOT_EQUALS:
                 default:
                     throw newIllegalStateException("Unsupported comparison operator `%s`",
                                                    comparison);

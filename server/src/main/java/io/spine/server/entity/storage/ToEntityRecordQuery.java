@@ -140,8 +140,6 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         switch (paramOperator) {
             case EQUALS:
                 where.is(paramValue); break;
-            case NOT_EQUALS:
-                where.isNot(paramValue); break;
             case GREATER_OR_EQUALS:
                 where.isGreaterOrEqualTo(paramValue); break;
             case GREATER_THAN:
