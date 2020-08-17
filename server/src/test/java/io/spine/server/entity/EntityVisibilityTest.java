@@ -83,15 +83,6 @@ class EntityVisibilityTest {
         assertTrue(actual.isNotNone());
     }
 
-    //TODO:2020-06-16:alex.tymchenko: seems as non-compilable piece.
-//    @Test
-//    @DisplayName("report NONE level for `Event.class`")
-//    void eventDefault() {
-//        EntityVisibility visibility = visibilityOf(Event.class);
-//        assertTrue(visibility.is(NONE));
-//        assertFalse(visibility.isNotNone());
-//    }
-
     @Test
     @DisplayName("report QUERY level")
     void findQuery() {
