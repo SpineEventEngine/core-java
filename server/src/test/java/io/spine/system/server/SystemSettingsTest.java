@@ -23,8 +23,8 @@ package io.spine.system.server;
 import io.spine.base.Environment;
 import io.spine.base.Production;
 import io.spine.base.Tests;
+import io.spine.server.given.environment.Local;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -67,19 +67,36 @@ class SystemSettingsTest {
             assertFalse(features.includePersistentEvents());
         }
 
-        @Test
-        @Disabled
-        @DisplayName("allow parallel posting for system events")
-        void parallelism() {
-            Environment env = Environment.instance();
+        @Nested
+        @DisplayName("allow parallel posting of system events")
+        class AllowParallelPosting {
 
+            private final Environment env = Environment.instance();
+
+            @Test
+            @DisplayName("in the `Production` environment")
+            void forProductionEnv() {
+                env.setTo(Production.class);
+                assertTrue(SystemSettings.defaults()
+                                         .postEventsInParallel());
+            }
+
+            @Test
+            @DisplayName("in a custom environment")
+            void forCustomEnv() {
+                env.setTo(Local.class);
+                assertTrue(SystemSettings.defaults()
+                                         .postEventsInParallel());
+            }
+        }
+
+        @Test
+        @DisplayName("disallow parallel posting of system events in the test environment")
+        void disallowParallelPostingForTest() {
+            Environment env = Environment.instance();
             assumeTrue(env.is(Tests.class));
             assertFalse(SystemSettings.defaults()
                                       .postEventsInParallel());
-
-            env.setTo(Production.class);
-            assertTrue(SystemSettings.defaults()
-                                     .postEventsInParallel());
         }
     }
 

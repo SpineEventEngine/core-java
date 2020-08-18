@@ -26,7 +26,7 @@ import io.spine.base.Environment;
 import io.spine.base.EventMessage;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.base.Production;
+import io.spine.base.Tests;
 import io.spine.core.BoundedContext;
 import io.spine.core.BoundedContextName;
 import io.spine.logging.Logging;
@@ -107,7 +107,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     private BoundedContextName contextOf(Class<?> cls) {
         Model model = Model.inContextOf(cls);
         BoundedContextName name = model.contextName();
-        if (Environment.instance().is(Production.class) && name.equals(assumingTests())) {
+        if (!Environment.instance().is(Tests.class) && name.equals(assumingTests())) {
             _warn().log(
                     "The class `%s` belongs to the Bounded Context named `%s`," +
                     " which is used for testing. As such, it should not be used in production." +
