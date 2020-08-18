@@ -205,8 +205,8 @@ class EnvSettingTest {
     }
 
     @Test
-    @DisplayName("run an operation against all values")
-    void runConsumerForAll() throws Exception {
+    @DisplayName("run an operation for all present values")
+    void runOperationForAll() throws Exception {
         MemoizingStorageFactory prodStorageFactory = new MemoizingStorageFactory();
         MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
         MemoizingStorageFactory localStorageFactory = new MemoizingStorageFactory();
