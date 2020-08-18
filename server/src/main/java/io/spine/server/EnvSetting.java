@@ -139,8 +139,8 @@ final class EnvSetting<V> {
     /**
      * Applies the passed operation to this setting regardless of the current environment.
      *
-     * <p>This means the operation is applied to all passed setting
-     * {@linkplain #environmentValues values}.
+     * <p>This means the operation is applied to all passed setting {@linkplain #environmentValues
+     * values} on a per-environment basis.
      *
      * @apiNote The not yet run {@linkplain #fallbacks fallback suppliers} are ignored to avoid the
      *        unnecessary value instantiation.
