@@ -92,15 +92,19 @@ class QueriesTest {
     @Test
     @DisplayName("convert the event-type query to the corresponding `RecordQuery`")
     void convertTypeToFilters() {
-        String expected = " com.example.EventType ";
-        EventFilter validFilter = filterForType(expected);
+        String somethingHappened = " com.acme.SomethingHappened ";
+        String somethingElseHappened = "com.acme.SomethingElseHappened";
+        EventFilter firstFilter = filterForType(somethingHappened);
+        EventFilter secondFilter = filterForType(somethingElseHappened);
         EventFilter invalidFilter = filterForType("   ");
         EventStreamQuery query = EventStreamQuery
                 .newBuilder()
-                .addFilter(validFilter)
+                .addFilter(firstFilter)
+                .addFilter(secondFilter)
                 .addFilter(invalidFilter)
                 .build();
         RecordQuery<EventId, Event> result = convert(query);
+
         Subject<EventId, Event> subject = result.subject();
         assertThat(subject.predicates()).hasSize(1);
         QueryPredicate<Event> predicate = subject.predicates()
@@ -108,11 +112,12 @@ class QueriesTest {
         assertThat(predicate.operator()).isEqualTo(OR);
 
         ImmutableList<SubjectParameter<Event, ?, ?>> parameters = predicate.parameters();
-        assertThat(parameters).hasSize(1);
+        assertThat(parameters).hasSize(2);
 
-        SubjectParameter<Event, ?, ?> parameter = parameters.get(0);
-        Object value = parameter.value();
-        assertThat(value).isEqualTo(expected.trim());
+        assertThat(parameters.get(0)
+                             .value()).isEqualTo(somethingHappened.trim());
+        assertThat(parameters.get(1)
+                             .value()).isEqualTo(somethingElseHappened);
     }
 
     private static EventFilter filterForType(String typeName) {
