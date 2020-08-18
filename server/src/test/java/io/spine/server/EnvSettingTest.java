@@ -170,37 +170,58 @@ class EnvSettingTest {
                 assertThat(storageFactory.value(type)).isSameInstanceAs(actualFactory);
             }
         }
+    }
 
-        @Test
-        @DisplayName("reset the value for all environments")
-        void resetTheValues() {
-            InMemoryStorageFactory prodStorageFactory = InMemoryStorageFactory.newInstance();
-            MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
-            InMemoryStorageFactory localstorageFactory = InMemoryStorageFactory.newInstance();
+    @Test
+    @DisplayName("reset the value for all environments")
+    void resetTheValues() {
+        InMemoryStorageFactory prodStorageFactory = InMemoryStorageFactory.newInstance();
+        MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
+        InMemoryStorageFactory localStorageFactory = InMemoryStorageFactory.newInstance();
 
-            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-            storageFactory.use(prodStorageFactory, Production.class);
-            storageFactory.use(testingStorageFactory, Tests.class);
-            storageFactory.use(localstorageFactory, Local.class);
+        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+        storageFactory.use(prodStorageFactory, Production.class);
+        storageFactory.use(testingStorageFactory, Tests.class);
+        storageFactory.use(localStorageFactory, Local.class);
 
-            storageFactory.reset();
+        storageFactory.reset();
 
-            Stream.of(Production.class, Tests.class, Local.class)
-                  .map(storageFactory::optionalValue)
-                  .forEach(s -> assertThat(s).isEmpty());
-        }
+        Stream.of(Production.class, Tests.class, Local.class)
+              .map(storageFactory::optionalValue)
+              .forEach(s -> assertThat(s).isEmpty());
+    }
 
-        @Test
-        @DisplayName("should run an operation against a value value if it's present")
-        void runThrowableConsumer() throws Exception {
-            MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
+    @Test
+    @DisplayName("run an operation against a value if it's present")
+    void runThrowableConsumer() throws Exception {
+        MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
 
-            EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
+        EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
-            storageSetting.use(storageFactory, Production.class);
-            storageSetting.ifPresentForEnvironment(Production.class, AutoCloseable::close);
+        storageSetting.use(storageFactory, Production.class);
+        storageSetting.ifPresentForEnvironment(Production.class, AutoCloseable::close);
 
-            assertThat(storageFactory.isClosed()).isTrue();
-        }
+        assertThat(storageFactory.isClosed()).isTrue();
+    }
+
+    @Test
+    @DisplayName("run an operation against all values")
+    void runConsumerForAll() throws Exception {
+        MemoizingStorageFactory prodStorageFactory = new MemoizingStorageFactory();
+        MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
+        MemoizingStorageFactory localStorageFactory = new MemoizingStorageFactory();
+
+        EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
+
+        storageSetting.use(prodStorageFactory, Production.class);
+        storageSetting.use(testingStorageFactory, Tests.class);
+        storageSetting.use(localStorageFactory, Local.class);
+
+        storageSetting.apply(AutoCloseable::close);
+
+        assertThat(prodStorageFactory.isClosed()).isTrue();
+        assertThat(testingStorageFactory.isClosed()).isTrue();
+        assertThat(localStorageFactory.isClosed()).isTrue();
+
     }
 }
