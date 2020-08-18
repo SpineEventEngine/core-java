@@ -142,7 +142,7 @@ final class EnvSetting<V> {
      * <p>This means the operation is applied to all passed setting {@linkplain #environmentValues
      * values} on a per-environment basis.
      *
-     * @apiNote The not yet run {@linkplain #fallbacks fallback suppliers} are ignored to avoid the
+     * @apiNote The not yet run {@linkplain #fallbacks fallback suppliers} are ignored to avoid an
      *        unnecessary value instantiation.
      */
     void apply(SettingOperation<V> operation) throws Exception {
