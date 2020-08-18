@@ -442,9 +442,9 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        tracerFactory.ifPresentForEnvironment(Production.class, AutoCloseable::close);
-        transportFactory.ifPresentForEnvironment(Production.class, AutoCloseable::close);
-        storageFactory.ifPresentForEnvironment(Production.class, AutoCloseable::close);
+        tracerFactory.apply(AutoCloseable::close);
+        transportFactory.apply(AutoCloseable::close);
+        storageFactory.apply(AutoCloseable::close);
     }
 
     private static <V> void use(V value, EnvSetting<V> setting, EnvironmentType type) {

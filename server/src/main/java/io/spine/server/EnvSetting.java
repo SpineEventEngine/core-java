@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.annotation.Internal;
 import io.spine.base.EnvironmentType;
 
 import java.util.HashMap;
@@ -86,7 +85,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <V>
  *         the type of value
  */
-@Internal
 final class EnvSetting<V> {
 
     private final Map<Class<? extends EnvironmentType>, V> environmentValues =
@@ -135,6 +133,21 @@ final class EnvSetting<V> {
         Optional<V> value = valueFor(type);
         if (value.isPresent()) {
             operation.accept(value.get());
+        }
+    }
+
+    /**
+     * Applies the passed operation to this setting regardless of the current environment.
+     *
+     * <p>This means the operation is applied to all passed setting
+     * {@linkplain #environmentValues values}.
+     *
+     * @apiNote The not yet run {@linkplain #fallbacks fallback suppliers} are ignored to avoid the
+     *        unnecessary value instantiation.
+     */
+    void apply(SettingOperation<V> operation) throws Exception {
+        for (V v : environmentValues.values()) {
+            operation.accept(v);
         }
     }
 

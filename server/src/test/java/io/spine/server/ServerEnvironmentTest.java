@@ -21,6 +21,7 @@
 package io.spine.server;
 
 import io.spine.base.Environment;
+import io.spine.base.EnvironmentType;
 import io.spine.base.Production;
 import io.spine.base.Tests;
 import io.spine.server.delivery.Delivery;
@@ -504,32 +505,33 @@ class ServerEnvironmentTest {
 
         @Test
         @DisplayName("close the production transport, tracer and storage factories")
+        void productionCloses() throws Exception {
+            testClosesEnv(Production.class);
+        }
+
+        @Test
+        @DisplayName("close the testing transport, tracer and storage factories")
         void testCloses() throws Exception {
+            testClosesEnv(Tests.class);
+        }
+
+        @Test
+        @DisplayName("close the custom env transport, tracer and storage factories")
+        void customEnvCloses() throws Exception {
+            testClosesEnv(Local.class);
+        }
+
+        private void testClosesEnv(Class<? extends EnvironmentType> envType) throws Exception {
             ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.use(transportFactory, Production.class)
-                     .use(storageFactory, Production.class)
-                     .use(tracerFactory, Production.class);
+            serverEnv.use(transportFactory, envType)
+                     .use(storageFactory, envType)
+                     .use(tracerFactory, envType);
 
             serverEnv.close();
 
             assertThat(transportFactory.isOpen()).isFalse();
             assertThat(storageFactory.isClosed()).isTrue();
             assertThat(tracerFactory.closed()).isTrue();
-        }
-
-        @Test
-        @DisplayName("leave the testing transport, tracer and storage factories open")
-        void testDoesNotClose() throws Exception {
-            ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.use(transportFactory, Tests.class)
-                     .use(storageFactory, Tests.class)
-                     .use(tracerFactory, Tests.class);
-
-            serverEnv.close();
-
-            assertThat(tracerFactory.closed()).isFalse();
-            assertThat(transportFactory.isOpen()).isTrue();
-            assertThat(storageFactory.isClosed()).isFalse();
         }
     }
 
