@@ -54,7 +54,6 @@ import static java.util.stream.Collectors.toSet;
 /**
  * Default implementation of {@link EventStore}.
  */
-//TODO:2020-04-01:alex.tymchenko: review for the compatibility with the legacy storage principle.
 public final class DefaultEventStore extends MessageStorage<EventId, Event>
         implements EventStore, Logging {
 
