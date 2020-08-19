@@ -66,4 +66,14 @@ public class AggregateEventStorage
     protected boolean delete(AggregateEventRecordId id) {
         return super.delete(id);
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose this method as a part of storage's package-level API.
+     */
+    @Override
+    protected void deleteAll(Iterable<AggregateEventRecordId> ids) {
+        super.deleteAll(ids);
+    }
 }

@@ -24,11 +24,13 @@ import com.google.protobuf.Any;
 import io.spine.annotation.SPI;
 import io.spine.query.RecordQuery;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.server.aggregate.HistoryBackward.inChronologicalOrder;
 
 /**
@@ -44,11 +46,9 @@ public class Truncate {
     }
 
     protected void performWith(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
-
-        RecordQuery<AggregateEventRecordId, AggregateEventRecord> orderChronologically =
-                inChronologicalOrder(eventStorage.queryBuilder(), null).build();
-        Iterator<AggregateEventRecord> eventRecords = eventStorage.readAll(orderChronologically);
-        Map<Any, Integer> snapshotHitsByAggregateId = newHashMap();
+        Iterator<AggregateEventRecord> eventRecords = eventStorage.readAll(chronologically());
+        Map<Any, Integer> snapshotHitsByAggregateId = new HashMap<>();
+        Set<AggregateEventRecordId> toDelete = new HashSet<>();
         while (eventRecords.hasNext()) {
             AggregateEventRecord eventRecord = eventRecords.next();
             Any packedId = eventRecord.getAggregateId();
@@ -56,11 +56,18 @@ public class Truncate {
                                ? snapshotHitsByAggregateId.get(packedId)
                                : 0;
             if (snapshotsHit > snapshotIndex && predicate.test(eventRecord)) {
-                eventStorage.delete(eventRecord.getId());
+                toDelete.add(eventRecord.getId());
             }
             if (eventRecord.hasSnapshot()) {
                 snapshotHitsByAggregateId.put(packedId, snapshotsHit + 1);
             }
         }
+        eventStorage.deleteAll(toDelete);
+    }
+
+    private RecordQuery<AggregateEventRecordId, AggregateEventRecord> chronologically() {
+        RecordQuery<AggregateEventRecordId, AggregateEventRecord> orderChronologically =
+                inChronologicalOrder(eventStorage.queryBuilder(), null).build();
+        return orderChronologically;
     }
 }
