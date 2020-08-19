@@ -62,7 +62,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
         extends AbstractStorage<I, AggregateHistory> {
 
     private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
-            "The specified snapshot index is incorrect";
+            "The specified snapshot index `%d` must be non-negative.";
 
     private final AggregateEventStorage eventStorage;
     private final EntityRecordStorage<I, S> stateStorage;
@@ -338,7 +338,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
     @Internal
     public void truncateOlderThan(int snapshotIndex, Timestamp date) {
         checkNotNull(date);
-        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
+        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE, snapshotIndex);
         truncate(snapshotIndex, date);
     }
 
