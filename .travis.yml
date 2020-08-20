@@ -40,10 +40,9 @@ after_success:
     if [[ $TRAVIS_BRANCH == master ]] && [[ $TRAVIS_PULL_REQUEST == false ]]; then
       chmod +x ./scripts/dependent-repositories/update-dependent-repositories.sh
       ./scripts/dependent-repositories/update-dependent-repositories.sh $GITHUB_TOKEN
-      chmod +x ./scripts/trigger-publishing.sh
-      sh ./scripts/trigger-publishing.sh
+      chmod +x ./config/scripts/trigger-publishing.sh
+      sh ./config/scripts/trigger-publishing.sh
     fi
-
 
 after_script:
   - chmod +x ./config/scripts/upload-artifacts.sh
