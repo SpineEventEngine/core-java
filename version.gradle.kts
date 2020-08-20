@@ -25,6 +25,12 @@
  * as we want to manage the versions in a single source.
  */
 
-val spineBaseVersion: String by extra("1.5.23")
-val spineTimeVersion: String by extra("1.5.21")
-val versionToPublish: String by extra("1.5.25")
+val versionToPublish = "1.5.22"
+val base = "1.5.22"
+val time = "1.5.22"
+
+project.extra.apply {
+    this["versionToPublish"] = versionToPublish
+    this["spineBaseVersion"] = base
+    this["spineTimeVersion"] = time
+}
