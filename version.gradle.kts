@@ -25,12 +25,12 @@
  * as we want to manage the versions in a single source.
  */
 
-val versionToPublish = "1.5.26"
+val coreJava = "1.5.26"
 val base = "1.5.23"
 val time = "1.5.21"
 
 project.extra.apply {
-    this["versionToPublish"] = versionToPublish
+    this["versionToPublish"] = coreJava
     this["spineBaseVersion"] = base
     this["spineTimeVersion"] = time
 }
