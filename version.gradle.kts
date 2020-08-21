@@ -23,8 +23,27 @@
  *
  * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
  * as we want to manage the versions in a single source.
+ *
+ * This version file adheres to the contract of the
+ * [publishing application](https://github.com/SpineEventEngine/publishing).
+ *
+ * When changing the version declarations or adding new ones, make sure to change
+ * the publishing application accordingly.
  */
 
-val spineBaseVersion: String by extra("1.5.23")
-val spineTimeVersion: String by extra("1.5.21")
-val versionToPublish: String by extra("1.5.25")
+/**
+ * Version of this library.
+ */
+val coreJava = "1.5.26"
+
+/**
+ * Versions of the Spine libraries that `core-java` depends on.
+ */
+val base = "1.5.24"
+val time = "1.5.24"
+
+project.extra.apply {
+    this["versionToPublish"] = coreJava
+    this["spineBaseVersion"] = base
+    this["spineTimeVersion"] = time
+}
