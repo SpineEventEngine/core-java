@@ -25,7 +25,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.bus.Buses;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.command.Assign;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.projection.Projection;
@@ -54,23 +54,6 @@ import static io.spine.test.commandbus.CmdBusTeaType.GREEN;
 @DisplayName("Command bus, when a `Rejection` is thrown from a filter, should")
 class RejectionInFilterTest {
 
-    private static Optional<Ack> accept(CommandEnvelope envelope) {
-        CmdBusServeTea command =
-                unpack(envelope.command()
-                               .getMessage(), CmdBusServeTea.class);
-        boolean verifiedUser = command.getVerifiedUser();
-        if (verifiedUser) {
-            return Optional.empty();
-        }
-        CmdBusTeaOrderDenied rejection = CmdBusTeaOrderDenied
-                .newBuilder()
-                .setId(command.getId())
-                .build();
-        RejectionEnvelope from = RejectionEnvelope.from(envelope, rejection);
-        Ack reject = Buses.reject(envelope.id(), from);
-        return Optional.of(reject);
-    }
-
     @Test
     @DisplayName("post this rejection to `EventBus`")
     void postRejection() {
@@ -78,7 +61,7 @@ class RejectionInFilterTest {
                 BoundedContextBuilder.assumingTests()
                                      .add(OrderAggregate.class)
                                      .add(new OrderProjectionRepository())
-                                     .addCommandFilter(RejectionInFilterTest::accept)
+                                     .addCommandFilter(new TeaFilter())
         );
         CmdBusTeaOrderId idAllowed = CmdBusTeaOrderId.generate();
         CmdBusTeaOrderId idDenied = CmdBusTeaOrderId.generate();
@@ -158,6 +141,26 @@ class RejectionInFilterTest {
             super.setupEventRouting(routing);
             routing.route(TeaHouseRejections.CmdBusTeaOrderDenied.class,
                           EventRoute.byFirstMessageField(idClass()));
+        }
+    }
+
+    private static class TeaFilter implements BusFilter<CommandEnvelope> {
+
+        @Override
+        public Optional<Ack> accept(CommandEnvelope envelope) {
+            CmdBusServeTea command =
+                    unpack(envelope.command()
+                                   .getMessage(), CmdBusServeTea.class);
+            boolean verifiedUser = command.getVerifiedUser();
+            if (verifiedUser) {
+                return Optional.empty();
+            }
+            CmdBusTeaOrderDenied rejection = CmdBusTeaOrderDenied
+                    .newBuilder()
+                    .setId(command.getId())
+                    .build();
+            RejectionEnvelope cause = RejectionEnvelope.from(envelope, rejection);
+            return reject(envelope, cause);
         }
     }
 }

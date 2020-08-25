@@ -32,7 +32,6 @@ import io.spine.test.event.Task;
 
 import java.util.Optional;
 
-import static io.spine.server.bus.Buses.reject;
 import static java.util.Optional.empty;
 
 /**
@@ -50,9 +49,7 @@ public final class TaskCreatedFilter implements BusFilter<EventEnvelope> {
             Task task = message.getTask();
             if (task.getDone()) {
                 Error error = error();
-                Any packedId = Identifier.pack(envelope.id());
-                Ack result = reject(packedId, error);
-                return Optional.of(result);
+                return reject(envelope, error);
             }
         }
         return empty();

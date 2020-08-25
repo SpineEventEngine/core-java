@@ -39,7 +39,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static io.spine.base.Time.currentTime;
-import static io.spine.server.bus.Buses.acknowledge;
 import static java.util.Optional.empty;
 
 /**
@@ -77,11 +76,11 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
         Command command = envelope.command();
-        if (command.isScheduled()) {
-            schedule(envelope.command());
-            return Optional.of(acknowledge(envelope.id()));
+        if (!command.isScheduled()) {
+            return empty();
         }
-        return empty();
+        schedule(envelope.command());
+        return reject(envelope);
     }
 
     @Override
