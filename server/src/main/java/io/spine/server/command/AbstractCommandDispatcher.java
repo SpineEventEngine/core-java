@@ -25,15 +25,19 @@ import com.google.protobuf.Any;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.Identity;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.event.CommandRejected;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.function.Supplier;
@@ -106,6 +110,19 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
                 .setError(error)
                 .vBuild();
         system.postEvent(systemEvent, signal.asMessageOrigin());
+    }
+
+    protected void onRejection(SignalEnvelope<?, ?, ?> signal, Event rejection) {
+        checkRegistered();
+        CommandRejected commandRejected = CommandRejected
+                .newBuilder()
+                .setId(signal.messageId()
+                             .asCommandId())
+                .setRejectionEvent(rejection)
+                .build();
+        Origin origin = RejectionEnvelope.from(EventEnvelope.of(rejection))
+                                         .asMessageOrigin();
+        system.postEvent(commandRejected, origin);
     }
 
     /**
