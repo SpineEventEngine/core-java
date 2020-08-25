@@ -29,18 +29,22 @@ import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.DelegatingObserver;
+import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandErrored;
+import io.spine.system.server.event.CommandRejected;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static io.spine.core.Status.StatusCase.REJECTION;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -57,11 +61,13 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 final class CommandAckMonitor extends DelegatingObserver<Ack> {
 
     private final SystemWriteSide writeSide;
+    private final EventBus eventBus;
     private final ImmutableMap<CommandId, Command> commands;
 
     private CommandAckMonitor(Builder builder) {
         super(builder.delegate);
         this.writeSide = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
+        this.eventBus = builder.eventBus;
         this.commands = builder
                 .commands
                 .stream()
@@ -80,6 +86,15 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
     public void onNext(Ack value) {
         super.onNext(value);
         postSystemEvent(value);
+        if (value.getStatus().getStatusCase() == REJECTION) {
+            postRejection(value);
+        }
+    }
+
+    private void postRejection(Ack ack) {
+        Event rejection = ack.getStatus()
+                             .getRejection();
+        eventBus.post(rejection);
     }
 
     private void postSystemEvent(Ack ack) {
@@ -111,6 +126,10 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
                                      .setError(status.getError())
                                      .build();
             case REJECTION:
+                return CommandRejected.newBuilder()
+                                      .setId(commandId)
+                                      .setRejectionEvent(status.getRejection())
+                                      .build();
             default:
                 throw newIllegalArgumentException(
                         "Command `%s` has invalid status `%s`.",
@@ -137,6 +156,7 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
         private StreamObserver<Ack> delegate;
         private TenantId tenantId;
         private SystemWriteSide systemWriteSide;
+        private EventBus eventBus;
         private ImmutableSet<Command> commands;
 
         /**
@@ -169,6 +189,11 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
             return this;
         }
 
+        Builder setEventBus(EventBus eventBus) {
+            this.eventBus = checkNotNull(eventBus);
+            return this;
+        }
+
         /**
          * Sets the commands being posted into the command bus.
          *
@@ -188,6 +213,7 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
             checkNotNull(delegate);
             checkNotNull(tenantId);
             checkNotNull(systemWriteSide);
+            checkNotNull(eventBus);
             checkNotNull(commands);
 
             return new CommandAckMonitor(this);

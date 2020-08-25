@@ -283,6 +283,7 @@ public final class BoundedContextBuilder implements Logging {
      * <p>The order of appending the filters to the builder is the order of the filters in
      * the {@code CommandBus}.
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder addCommandFilter(BusFilter<CommandEnvelope> filter) {
         checkNotNull(filter);
         commandBus.appendFilter(filter);
@@ -656,6 +657,7 @@ public final class BoundedContextBuilder implements Logging {
         copy.enrichEventsUsing(enricher);
         repositories().forEach(copy::add);
         commandDispatchers().forEach(copy::addCommandDispatcher);
+        commandBus.filters().forEach(copy::addCommandFilter);
         eventDispatchers().forEach(copy::addEventDispatcher);
         return copy;
     }

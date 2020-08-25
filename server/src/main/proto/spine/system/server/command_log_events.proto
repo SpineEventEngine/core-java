@@ -95,7 +95,7 @@ message CommandHandled {
     core.CommandId id = 1;
 }
 
-// An event emitted if the handler fails to process the command.
+// An event emitted if the command cannot be handled due to a technical error.
 //
 message CommandErrored {
 
@@ -106,7 +106,7 @@ message CommandErrored {
     base.Error error = 2 [(validate) = true];
 }
 
-// An event emitted if the handler rejects the command.
+// An event emitted if the command cannot be handled due to a business rejection.
 //
 message CommandRejected {
 

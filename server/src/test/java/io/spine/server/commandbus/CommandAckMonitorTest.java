@@ -41,6 +41,7 @@ import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandErrored;
+import io.spine.system.server.event.CommandRejected;
 import io.spine.test.commandbus.ProjectId;
 import io.spine.test.commandbus.command.CmdBusStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -59,7 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("InnerClassMayBeStatic")
-@DisplayName("CommandAckMonitor should")
+@DisplayName("`CommandAckMonitor` should")
 class CommandAckMonitorTest {
 
     private CommandId commandId;
@@ -127,7 +128,7 @@ class CommandAckMonitorTest {
     }
 
     @Nested
-    @DisplayName("if Ack contains")
+    @DisplayName("if `Ack` contains")
     class PostSystemCommands {
 
         private CommandAckMonitor monitor;
@@ -146,7 +147,7 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("OK marker, post MarkCommandAsAcknowledged")
+        @DisplayName("OK marker, post `CommandAcknowledged`")
         void onOk() {
             Ack ack = okAck(commandId);
             monitor.onNext(ack);
@@ -161,7 +162,7 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("error, post MarkCommandAsErrored")
+        @DisplayName("error, post `CommandErrored`")
         void onError() {
             Ack ack = errorAck(commandId);
             monitor.onNext(ack);
@@ -179,10 +180,18 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("rejection, throw an exception")
+        @DisplayName("rejection, post `CommandRejected`")
         void onRejection() {
             Ack ack = rejectionAck(commandId);
-            assertThrows(IllegalArgumentException.class, () -> monitor.onNext(ack));
+            monitor.onNext(ack);
+
+            Message lastSeenEvent = writeSide.lastSeenEvent()
+                                             .message();
+            assertThat(lastSeenEvent).isInstanceOf(CommandRejected.class);
+
+            CommandRejected actualEvent = (CommandRejected) lastSeenEvent;
+            assertThat(actualEvent.getId()).isEqualTo(commandId);
+            assertThat(actualEvent.getRejectionEvent()).isEqualTo(ack.getStatus().getRejection());
         }
     }
 
@@ -206,28 +215,28 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("onNext(OK)")
+        @DisplayName("`onNext(OK)`")
         void nextOk() {
             Ack ack = okAck(commandId);
             checkOnNext(ack);
         }
 
         @Test
-        @DisplayName("onNext(Error)")
+        @DisplayName("`onNext(Error)`")
         void nextError() {
             Ack ack = errorAck(commandId);
             checkOnNext(ack);
         }
 
         @Test
-        @DisplayName("onNext(Rejection)")
+        @DisplayName("`onNext(Rejection)`")
         void nextRejection() {
             Ack ack = rejectionAck(commandId);
             checkOnNext(ack);
         }
 
         @Test
-        @DisplayName("onError(...)")
+        @DisplayName("`onError(...)`")
         void error() {
             Throwable error = new Throwable();
             monitor.onError(error);
@@ -235,9 +244,8 @@ class CommandAckMonitorTest {
             assertEquals(error, delegate.getError());
         }
 
-        @SuppressWarnings("DuplicateStringLiteralInspection") // Method name used in other scope.
         @Test
-        @DisplayName("onCompleted()")
+        @DisplayName("`onCompleted()`")
         void complete() {
             monitor.onCompleted();
 

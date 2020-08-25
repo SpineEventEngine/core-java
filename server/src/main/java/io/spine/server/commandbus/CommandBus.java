@@ -39,6 +39,7 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
+import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -70,6 +71,8 @@ public final class CommandBus
 
     private final CommandScheduler scheduler;
     private final SystemWriteSide systemWriteSide;
+
+    private @MonotonicNonNull EventBus eventBus;
 
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
@@ -119,6 +122,10 @@ public final class CommandBus
         return multitenant;
     }
 
+    public void injectEventBus(EventBus eventBus) {
+        this.eventBus = eventBus;
+    }
+
     /**
      * Places a {@link CommandReceivedTap} first and a {@link CommandScheduler} last
      * in the filter chain.
@@ -159,6 +166,7 @@ public final class CommandBus
                 .setTenantId(tenant)
                 .setPostedCommands(ImmutableSet.copyOf(commands))
                 .setSystemWriteSide(systemWriteSide)
+                .setEventBus(eventBus)
                 .build();
         return result;
     }

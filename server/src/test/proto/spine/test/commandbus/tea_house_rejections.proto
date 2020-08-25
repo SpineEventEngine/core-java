@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package spine.test.commandbus;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.commandbus.command";
+
+import "spine/test/commandbus/tea_house.proto";
+
+message CmdBusTeaOrderDenied {
+
+    CmdBusTeaOrderId id = 1;
+}
