@@ -43,7 +43,7 @@ public final class TaskCreatedFilter implements BusFilter<EventEnvelope> {
     private static final EventClass TASK_ADDED_CLASS = EventClass.from(EBTaskAdded.class);
 
     @Override
-    public Optional<Ack> accept(EventEnvelope envelope) {
+    public Optional<Ack> doFilter(EventEnvelope envelope) {
         if (TASK_ADDED_CLASS.equals(envelope.messageClass())) {
             EBTaskAdded message = (EBTaskAdded) envelope.message();
             Task task = message.getTask();
@@ -52,7 +52,7 @@ public final class TaskCreatedFilter implements BusFilter<EventEnvelope> {
                 return reject(envelope, error);
             }
         }
-        return empty();
+        return accept();
     }
 
     private static Error error() {

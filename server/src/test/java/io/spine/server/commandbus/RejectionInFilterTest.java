@@ -147,13 +147,13 @@ class RejectionInFilterTest {
     private static class TeaFilter implements BusFilter<CommandEnvelope> {
 
         @Override
-        public Optional<Ack> accept(CommandEnvelope envelope) {
+        public Optional<Ack> doFilter(CommandEnvelope envelope) {
             CmdBusServeTea command =
                     unpack(envelope.command()
                                    .getMessage(), CmdBusServeTea.class);
             boolean verifiedUser = command.getVerifiedUser();
             if (verifiedUser) {
-                return Optional.empty();
+                return accept();
             }
             CmdBusTeaOrderDenied rejection = CmdBusTeaOrderDenied
                     .newBuilder()

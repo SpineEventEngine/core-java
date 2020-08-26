@@ -90,7 +90,7 @@ class CommandReceivedTapTest {
     private void postAndCheck(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
 
-        Optional<?> ack = filter.accept(envelope);
+        Optional<?> ack = filter.doFilter(envelope);
         assertFalse(ack.isPresent());
 
         CommandReceived systemEvent = (CommandReceived) writeSide.lastSeenEvent()

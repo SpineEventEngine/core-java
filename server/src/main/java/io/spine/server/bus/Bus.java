@@ -293,7 +293,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      * {@link Optional#empty()} otherwise
      */
     private Optional<Ack> filter(E message) {
-        Optional<Ack> filterOutput = filterChain().accept(message);
+        Optional<Ack> filterOutput = filterChain().doFilter(message);
         return filterOutput;
     }
 

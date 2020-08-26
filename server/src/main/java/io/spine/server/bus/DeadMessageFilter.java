@@ -52,14 +52,14 @@ final class DeadMessageFilter<T extends Message,
     }
 
     @Override
-    public Optional<Ack> accept(E envelope) {
+    public Optional<Ack> doFilter(E envelope) {
         Collection<D> dispatchers = registry.dispatchersOf(envelope);
         if (dispatchers.isEmpty()) {
             MessageUnhandled report = deadMessageHandler.handle(envelope);
             Error error = report.asError();
             return reject(envelope, error);
         } else {
-            return Optional.empty();
+            return accept();
         }
     }
 }

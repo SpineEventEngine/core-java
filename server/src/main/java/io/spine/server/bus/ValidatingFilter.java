@@ -45,7 +45,7 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
     }
 
     @Override
-    public Optional<Ack> accept(E envelope) {
+    public Optional<Ack> doFilter(E envelope) {
         checkNotNull(envelope);
         Optional<MessageInvalid> violation = validator.validate(envelope);
         if (violation.isPresent()) {
@@ -53,7 +53,7 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
                                    .asError();
             return reject(envelope, error);
         } else {
-            return Optional.empty();
+            return accept();
         }
     }
 }

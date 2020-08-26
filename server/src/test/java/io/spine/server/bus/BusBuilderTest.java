@@ -97,8 +97,8 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
             implements BusFilter<E> {
 
         @Override
-        public Optional<Ack> accept(E envelope) {
-            return Optional.empty();
+        public Optional<Ack> doFilter(E envelope) {
+            return accept();
         }
     }
 }
