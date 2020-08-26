@@ -38,10 +38,10 @@ import static io.spine.util.Preconditions2.checkNotDefaultArg;
  * A utility for producing {@link Ack} instances.
  */
 @Internal
-public final class Acks {
+public final class AckFactory {
 
     /** Prevents instantiation of this utility class. */
-    private Acks() {
+    private AckFactory() {
     }
 
     /**
@@ -50,7 +50,7 @@ public final class Acks {
      * @param id
      *         the ID of the message which has been posted
      */
-    public static Ack ok(Message id) {
+    public static Ack acknowledgement(Message id) {
         checkNotNull(id);
         return setStatus(id, Responses.statusOk());
     }

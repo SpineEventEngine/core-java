@@ -28,6 +28,10 @@ import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
+import static io.spine.server.bus.AckFactory.acknowledgement;
+import static io.spine.server.bus.AckFactory.error;
+import static io.spine.server.bus.AckFactory.rejection;
+
 /**
  * The filter for the messages posted to a bus.
  *
@@ -79,7 +83,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope) {
-        Ack ack = Acks.ok(envelope.id());
+        Ack ack = acknowledgement(envelope.id());
         return Optional.of(ack);
     }
 
@@ -94,7 +98,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, Error cause) {
-        Ack ack = Acks.error(envelope.id(), cause);
+        Ack ack = error(envelope.id(), cause);
         return Optional.of(ack);
     }
 
@@ -109,7 +113,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, RejectionEnvelope cause) {
-        Ack ack = Acks.rejection(envelope.id(), cause);
+        Ack ack = rejection(envelope.id(), cause);
         return Optional.of(ack);
     }
 
