@@ -265,7 +265,7 @@ class CommandAckMonitorTest {
     }
 
     private static Ack okAck(CommandId commandId) {
-        return AckFactory.acknowledgement(commandId);
+        return AckFactory.acknowledge(commandId);
     }
 
     private static Ack errorAck(CommandId commandId) {
@@ -274,7 +274,7 @@ class CommandAckMonitorTest {
                 .setCode(42)
                 .setMessage("Wrong question")
                 .build();
-        return AckFactory.error(commandId, error);
+        return AckFactory.reject(commandId, error);
     }
 
     private static Ack rejectionAck(CommandId commandId) {
@@ -301,6 +301,6 @@ class CommandAckMonitorTest {
         RuntimeException wrapperThrowable = new RuntimeException(rejectionThrowable);
         RejectionEnvelope rejection = RejectionEnvelope.from(envelope, wrapperThrowable);
 
-        return AckFactory.rejection(commandId, rejection);
+        return AckFactory.reject(commandId, rejection);
     }
 }

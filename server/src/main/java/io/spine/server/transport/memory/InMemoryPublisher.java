@@ -53,7 +53,7 @@ public final class InMemoryPublisher extends AbstractChannel implements Publishe
         for (Subscriber localSubscriber : localSubscribers) {
             localSubscriber.onMessage(message);
         }
-        return AckFactory.acknowledgement(messageId);
+        return AckFactory.acknowledge(messageId);
     }
 
     private Iterable<Subscriber> subscribers() {

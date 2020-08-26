@@ -80,7 +80,7 @@ public final class CommandService
         _error().withCause(unsupported)
                 .log("Unsupported command posted to `CommandService`.");
         Error error = unsupported.asError();
-        Ack response = AckFactory.error(command.getId(), error);
+        Ack response = AckFactory.reject(command.getId(), error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

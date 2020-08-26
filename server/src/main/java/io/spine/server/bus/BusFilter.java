@@ -28,10 +28,6 @@ import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
-import static io.spine.server.bus.AckFactory.acknowledgement;
-import static io.spine.server.bus.AckFactory.error;
-import static io.spine.server.bus.AckFactory.rejection;
-
 /**
  * The filter for the messages posted to a bus.
  *
@@ -65,8 +61,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     /**
      * Lets the message pass the filter.
      *
-     * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} to
-     * allow message propagation further down the filter chain.
+     * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
+     * the message should be accepted by the filter.
      */
     default Optional<Ack> pass() {
         return Optional.empty();
@@ -83,7 +79,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope) {
-        Ack ack = acknowledgement(envelope.id());
+        Ack ack = AckFactory.acknowledge(envelope.id());
         return Optional.of(ack);
     }
 
@@ -91,14 +87,14 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * Rejects the message with an {@link io.spine.base.Error Error} status.
      *
      * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
-     * the message does not pass the filter due to a technical error in the system.
+     * the message does not pass the filter due to a technical error.
      *
      * @param envelope
      *          the envelope with the message to filter
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, Error cause) {
-        Ack ack = error(envelope.id(), cause);
+        Ack ack = AckFactory.reject(envelope.id(), cause);
         return Optional.of(ack);
     }
 
@@ -113,7 +109,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, RejectionEnvelope cause) {
-        Ack ack = rejection(envelope.id(), cause);
+        Ack ack = AckFactory.reject(envelope.id(), cause);
         return Optional.of(ack);
     }
 

@@ -50,7 +50,7 @@ public final class AckFactory {
      * @param id
      *         the ID of the message which has been posted
      */
-    public static Ack acknowledgement(Message id) {
+    public static Ack acknowledge(Message id) {
         checkNotNull(id);
         return setStatus(id, Responses.statusOk());
     }
@@ -63,7 +63,7 @@ public final class AckFactory {
      * @param cause
      *         the error
      */
-    public static Ack error(Message id, Error cause) {
+    public static Ack reject(Message id, Error cause) {
         checkNotDefaultArg(id);
         checkNotDefaultArg(cause);
         Status status = Status
@@ -81,7 +81,7 @@ public final class AckFactory {
      * @param cause
      *         the cause of the rejection
      */
-    public static Ack rejection(Message id, RejectionEnvelope cause) {
+    public static Ack reject(Message id, RejectionEnvelope cause) {
         checkNotNull(id);
         checkNotNull(cause);
         Event event = cause.outerObject();
