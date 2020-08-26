@@ -31,8 +31,6 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.TenantId;
-import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.AckFactory;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
@@ -53,11 +51,8 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("`CommandAckMonitor` should")
@@ -109,16 +104,14 @@ class CommandAckMonitorTest {
         @Test
         @DisplayName("tenant ID")
         void tenant() {
-            builder.setDelegate(noOpObserver())
-                   .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);
+            builder.setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);
             assertFailsToBuild();
         }
 
         @Test
         @DisplayName("system write side")
         void system() {
-            builder.setDelegate(noOpObserver())
-                   .setTenantId(TenantId.getDefaultInstance());
+            builder.setTenantId(TenantId.getDefaultInstance());
             assertFailsToBuild();
         }
 
@@ -139,7 +132,6 @@ class CommandAckMonitorTest {
             writeSide = MemoizingWriteSide.singleTenant();
             monitor = CommandAckMonitor
                     .newBuilder()
-                    .setDelegate(noOpObserver())
                     .setSystemWriteSide(writeSide)
                     .setTenantId(TenantId.getDefaultInstance())
                     .setPostedCommands(ImmutableSet.of(mockCommand))
@@ -192,75 +184,6 @@ class CommandAckMonitorTest {
             CommandRejected actualEvent = (CommandRejected) lastSeenEvent;
             assertThat(actualEvent.getId()).isEqualTo(commandId);
             assertThat(actualEvent.getRejectionEvent()).isEqualTo(ack.getStatus().getRejection());
-        }
-    }
-
-    @Nested
-    @DisplayName("delegate to a given observer")
-    class DelegateCalls {
-
-        private MemoizingObserver<Ack> delegate;
-        private CommandAckMonitor monitor;
-
-        @BeforeEach
-        void setUp() {
-            delegate = StreamObservers.memoizingObserver();
-            monitor = CommandAckMonitor
-                    .newBuilder()
-                    .setTenantId(TenantId.getDefaultInstance())
-                    .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
-                    .setDelegate(delegate)
-                    .setPostedCommands(ImmutableSet.of(mockCommand))
-                    .build();
-        }
-
-        @Test
-        @DisplayName("`onNext(OK)`")
-        void nextOk() {
-            Ack ack = okAck(commandId);
-            checkOnNext(ack);
-        }
-
-        @Test
-        @DisplayName("`onNext(Error)`")
-        void nextError() {
-            Ack ack = errorAck(commandId);
-            checkOnNext(ack);
-        }
-
-        @Test
-        @DisplayName("`onNext(Rejection)`")
-        void nextRejection() {
-            Ack ack = rejectionAck(commandId);
-            checkOnNext(ack);
-        }
-
-        @Test
-        @DisplayName("`onError(...)`")
-        void error() {
-            Throwable error = new Throwable();
-            monitor.onError(error);
-
-            assertEquals(error, delegate.getError());
-        }
-
-        @Test
-        @DisplayName("`onCompleted()`")
-        void complete() {
-            monitor.onCompleted();
-
-            assertTrue(delegate.isCompleted());
-        }
-
-        private void checkOnNext(Ack ack) {
-            try {
-                monitor.onNext(ack);
-            } catch (RuntimeException ignored) {
-                // May throw an exception after delegating the call.
-            }
-
-            Ack received = delegate.firstResponse();
-            assertEquals(ack, received);
         }
     }
 

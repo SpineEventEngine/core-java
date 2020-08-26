@@ -28,12 +28,9 @@ import io.spine.core.Ack;
 import io.spine.core.Acks;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.grpc.DelegatingObserver;
-import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
@@ -43,7 +40,6 @@ import io.spine.system.server.event.CommandRejected;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
-import static io.spine.core.Status.StatusCase.REJECTION;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -57,16 +53,13 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * All the calls to {@link StreamObserver} methods on an instance of {@code CommandAckMonitor}
  * invoke respective methods on a {@code delegate} instance.
  */
-final class CommandAckMonitor extends DelegatingObserver<Ack> {
+final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private final SystemWriteSide writeSide;
-    private final EventBus eventBus;
     private final ImmutableMap<CommandId, Command> commands;
 
     private CommandAckMonitor(Builder builder) {
-        super(builder.delegate);
         this.writeSide = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
-        this.eventBus = builder.eventBus;
         this.commands = builder
                 .commands
                 .stream()
@@ -76,24 +69,22 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
     /**
      * {@inheritDoc}
      *
-     * <p>Posts either {@link CommandAcknowledged} or {@link CommandErrored} system
-     * event depending on the value of the given {@code Ack}.
-     *
-     * @param value
+     * <p>Posts either {@link CommandAcknowledged}, {@link CommandErrored}, or
+     * {@link CommandRejected} system event depending on the value of the given {@code Ack}.
      */
     @Override
     public void onNext(Ack value) {
-        super.onNext(value);
         postSystemEvent(value);
-        if (value.getStatus().getStatusCase() == REJECTION) {
-            postRejection(value);
-        }
     }
 
-    private void postRejection(Ack ack) {
-        Event rejection = ack.getStatus()
-                             .getRejection();
-        eventBus.post(rejection);
+    @Override
+    public void onError(Throwable t) {
+        // NO-OP.
+    }
+
+    @Override
+    public void onCompleted() {
+        // NO-OP.
     }
 
     private void postSystemEvent(Ack ack) {
@@ -147,24 +138,14 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
      */
     static final class Builder {
 
-        private StreamObserver<Ack> delegate;
         private TenantId tenantId;
         private SystemWriteSide systemWriteSide;
-        private EventBus eventBus;
         private ImmutableSet<Command> commands;
 
         /**
          * Prevents direct instantiation.
          */
         private Builder() {
-        }
-
-        /**
-         * Sets the {@link StreamObserver} to delegate calls to.
-         */
-        Builder setDelegate(StreamObserver<Ack> delegate) {
-            this.delegate = checkNotNull(delegate);
-            return this;
         }
 
         /**
@@ -180,11 +161,6 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
          */
         Builder setSystemWriteSide(SystemWriteSide systemWriteSide) {
             this.systemWriteSide = checkNotNull(systemWriteSide);
-            return this;
-        }
-
-        Builder setEventBus(EventBus eventBus) {
-            this.eventBus = checkNotNull(eventBus);
             return this;
         }
 
@@ -204,10 +180,8 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
          * @return new instance of {@code CommandAckMonitor}
          */
         CommandAckMonitor build() {
-            checkNotNull(delegate);
             checkNotNull(tenantId);
             checkNotNull(systemWriteSide);
-            checkNotNull(eventBus);
             checkNotNull(commands);
 
             return new CommandAckMonitor(this);

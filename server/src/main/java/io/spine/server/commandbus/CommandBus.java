@@ -32,6 +32,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
+import io.spine.grpc.CompositeObserver;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
@@ -52,6 +53,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.bus.BusBuilder.FieldCheck.systemNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
@@ -71,8 +73,6 @@ public final class CommandBus
 
     private final CommandScheduler scheduler;
     private final SystemWriteSide systemWriteSide;
-
-    private @MonotonicNonNull EventBus eventBus;
 
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
@@ -94,6 +94,18 @@ public final class CommandBus
      */
     @LazyInit
     private @MonotonicNonNull CommandValidator commandValidator;
+
+    /**
+     * An observer which handles the {@linkplain io.spine.base.ThrowableMessage rejections} thrown
+     * by the bus {@linkplain BusFilter filters}.
+     *
+     * <p>Is NO-OP at bus creation. Once an {@link EventBus} is {@linkplain #init(EventBus)
+     * injected} into this instance, the observer will start publishing the rejections to the said
+     * event bus.
+     *
+     * <p>Can stay NO-OP in the test environment for the simplicity of tests.
+     */
+    private StreamObserver<Ack> immediateRejectionObserver = noOpObserver();
 
     /**
      * Creates new instance according to the passed {@link Builder}.
@@ -122,8 +134,9 @@ public final class CommandBus
         return multitenant;
     }
 
-    public void injectEventBus(EventBus eventBus) {
-        this.eventBus = eventBus;
+    public void init(EventBus eventBus) {
+        checkNotNull(eventBus);
+        immediateRejectionObserver = new AckRejectionPublisher(eventBus);
     }
 
     /**
@@ -160,14 +173,17 @@ public final class CommandBus
                                                   StreamObserver<Ack> source) {
         StreamObserver<Ack> wrappedSource = super.prepareObserver(commands, source);
         TenantId tenant = tenantOf(commands);
-        StreamObserver<Ack> result = CommandAckMonitor
+        StreamObserver<Ack> commandAckMonitor = CommandAckMonitor
                 .newBuilder()
-                .setDelegate(wrappedSource)
                 .setTenantId(tenant)
                 .setPostedCommands(ImmutableSet.copyOf(commands))
                 .setSystemWriteSide(systemWriteSide)
-                .setEventBus(eventBus)
                 .build();
+        StreamObserver<Ack> result = new CompositeObserver<>(ImmutableList.of(
+                wrappedSource,
+                commandAckMonitor,
+                immediateRejectionObserver
+        ));
         return result;
     }
 
