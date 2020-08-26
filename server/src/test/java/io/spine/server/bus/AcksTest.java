@@ -39,13 +39,13 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.newUuidValue;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
-@DisplayName("Buses utility should")
-class BusesTest {
+@DisplayName("`Acks` utility should")
+class AcksTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Buses.class);
+        assertHasPrivateParameterlessCtor(Acks.class);
     }
 
     @Test
@@ -74,6 +74,6 @@ class BusesTest {
                 .setDefault(MessageId.class, MessageId.newBuilder()
                                                       .setTypeUrl("test.example.org")
                                                       .build())
-                .testAllPublicStaticMethods(Buses.class);
+                .testAllPublicStaticMethods(Acks.class);
     }
 }

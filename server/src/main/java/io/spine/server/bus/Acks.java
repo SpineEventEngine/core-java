@@ -35,36 +35,35 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
- * A utility for working with {@link Bus buses} and related data types.
+ * A utility for producing {@link Ack} instances.
  */
 @Internal
-public final class Buses {
+public final class Acks {
 
     /** Prevents instantiation of this utility class. */
-    private Buses() {
+    private Acks() {
     }
 
     /**
-     * Acknowledges the envelope posted.
+     * Creates an {@code Ack} with the {@code OK} status.
      *
-     * @param id the ID of the message to acknowledge
-     * @return {@code Ack} with an {@code OK} status
+     * @param id
+     *         the ID of the message which has been posted
      */
-    public static Ack acknowledge(Message id) {
+    public static Ack ok(Message id) {
         checkNotNull(id);
         return setStatus(id, Responses.statusOk());
     }
 
     /**
-     * Creates {@code Ack} response for the given message ID with the error status.
+     * Creates an {@code Ack} with an error status.
      *
      * @param id
-     *         the ID of the message to provide with the status
+     *         the ID of the message which has been posted
      * @param cause
-     *         the cause of the message rejection
-     * @return the {@code Ack} response with the given message ID
+     *         the error
      */
-    public static Ack reject(Message id, Error cause) {
+    public static Ack error(Message id, Error cause) {
         checkNotDefaultArg(id);
         checkNotDefaultArg(cause);
         Status status = Status
@@ -75,13 +74,14 @@ public final class Buses {
     }
 
     /**
-     * Creates {@code Ack} response for the given message ID with the rejection status.
+     * Creates an {@code Ack} with the business rejection status.
      *
-     * @param id    the ID of the message to provide with the status
-     * @param cause the cause of the message rejection
-     * @return the {@code Ack} response with the given message ID
+     * @param id
+     *         the ID of the message which have been posted
+     * @param cause
+     *         the cause of the rejection
      */
-    public static Ack reject(Message id, RejectionEnvelope cause) {
+    public static Ack rejection(Message id, RejectionEnvelope cause) {
         checkNotNull(id);
         checkNotNull(cause);
         Event event = cause.outerObject();

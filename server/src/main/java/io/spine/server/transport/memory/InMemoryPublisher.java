@@ -21,7 +21,7 @@ package io.spine.server.transport.memory;
 
 import com.google.protobuf.Any;
 import io.spine.core.Ack;
-import io.spine.server.bus.Buses;
+import io.spine.server.bus.Acks;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.transport.AbstractChannel;
 import io.spine.server.transport.ChannelId;
@@ -53,7 +53,7 @@ public final class InMemoryPublisher extends AbstractChannel implements Publishe
         for (Subscriber localSubscriber : localSubscribers) {
             localSubscriber.onMessage(message);
         }
-        return Buses.acknowledge(messageId);
+        return Acks.ok(messageId);
     }
 
     private Iterable<Subscriber> subscribers() {

@@ -69,7 +69,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope) {
-        Ack ack = Buses.acknowledge(envelope.id());
+        Ack ack = Acks.ok(envelope.id());
         return Optional.of(ack);
     }
 
@@ -84,7 +84,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, Error cause) {
-        Ack ack = Buses.reject(envelope.id(), cause);
+        Ack ack = Acks.error(envelope.id(), cause);
         return Optional.of(ack);
     }
 
@@ -99,7 +99,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, RejectionEnvelope cause) {
-        Ack ack = Buses.reject(envelope.id(), cause);
+        Ack ack = Acks.rejection(envelope.id(), cause);
         return Optional.of(ack);
     }
 
