@@ -98,7 +98,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
 
         @Override
         public Optional<Ack> doFilter(E envelope) {
-            return accept();
+            return pass();
         }
     }
 }

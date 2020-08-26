@@ -63,12 +63,12 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     Optional<Ack> doFilter(E envelope);
 
     /**
-     * Accepts the message.
+     * Lets the message pass the filter.
      *
-     * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
-     * the message should pass the filter.
+     * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} to
+     * allow message propagation further down the filter chain.
      */
-    default Optional<Ack> accept() {
+    default Optional<Ack> pass() {
         return Optional.empty();
     }
 

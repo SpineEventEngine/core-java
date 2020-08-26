@@ -153,7 +153,7 @@ class RejectionInFilterTest {
                                    .getMessage(), CmdBusServeTea.class);
             boolean verifiedUser = command.getVerifiedUser();
             if (verifiedUser) {
-                return accept();
+                return pass();
             }
             CmdBusTeaOrderDenied rejection = CmdBusTeaOrderDenied
                     .newBuilder()

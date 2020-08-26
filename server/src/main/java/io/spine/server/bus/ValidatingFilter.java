@@ -53,7 +53,7 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
                                    .asError();
             return reject(envelope, error);
         } else {
-            return accept();
+            return pass();
         }
     }
 }
