@@ -24,29 +24,15 @@ package spine.test.commandbus;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.commandbus";
+option java_package="io.spine.test.commandbus.event";
+option java_outer_classname = "PizzaEventsProto";
 option java_multiple_files = true;
 
-message CmdBusTeaOrderId {
-    string uuid = 1;
-}
+import "spine/test/commandbus/caffetteria.proto";
 
-message CmdBusTeaOrder {
-    option (entity).kind = AGGREGATE;
+message CmdBusTableAllocated {
 
-    CmdBusTeaOrderId id = 1;
-    CmdBusTeaType tea_type = 2;
-}
-
-message CmdBusTeaOrderView {
-    option (entity).kind = PROJECTION;
-
-    CmdBusTeaOrderId id = 1;
-    CmdBusTeaType type = 2;
-    bool denied = 3;
-}
-
-enum CmdBusTeaType {
-    BLACK = 0;
-    GREEN = 1;
+    CmdBusOrderId id = 1;
+    CmdBusCaffetteriaId caffetteria = 2;
+    int32 visitor_count = 3;
 }
