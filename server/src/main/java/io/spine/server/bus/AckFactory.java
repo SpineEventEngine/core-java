@@ -31,7 +31,7 @@ import io.spine.core.Status;
 import io.spine.server.event.RejectionEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.pack;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**

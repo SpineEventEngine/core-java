@@ -129,7 +129,7 @@ class CommandAckMonitorTest {
 
     @Nested
     @DisplayName("if `Ack` contains")
-    class PostSystemCommands {
+    class PostSystemEvent {
 
         private CommandAckMonitor monitor;
         private MemoizingWriteSide writeSide;

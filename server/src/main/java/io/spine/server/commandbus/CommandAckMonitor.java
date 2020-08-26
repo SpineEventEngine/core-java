@@ -22,11 +22,10 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.core.Ack;
+import io.spine.core.Acks;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -52,7 +51,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * A {@link StreamObserver} for {@link io.spine.core.Command Command}
  * {@linkplain Ack acknowledgement}.
  *
- * <p>Posts a system command whenever a command is acknowledged or errored.
+ * <p>Posts a system event whenever a command is acknowledged or errored.
  *
  * <p>{@code CommandAckMonitor} is designed to wrap instances of {@link StreamObserver}.
  * All the calls to {@link StreamObserver} methods on an instance of {@code CommandAckMonitor}
@@ -99,18 +98,13 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
 
     private void postSystemEvent(Ack ack) {
         Status status = ack.getStatus();
-        CommandId commandId = commandIdFrom(ack);
+        CommandId commandId = Acks.toCommandId(ack);
         EventMessage systemEvent = systemEventFor(status, commandId);
         Command command = commands.get(commandId);
         checkState(command != null, "Unknown command ID encountered: `%s`.", commandId.value());
         Origin systemEventOrigin = CommandEnvelope.of(command)
                                                   .asMessageOrigin();
         writeSide.postEvent(systemEvent, systemEventOrigin);
-    }
-
-    private static CommandId commandIdFrom(Ack ack) {
-        Any messageId = ack.getMessageId();
-        return Identifier.unpack(messageId, CommandId.class);
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Default values.
