@@ -22,12 +22,15 @@ package io.spine.server.bus;
 
 import io.spine.annotation.SPI;
 import io.spine.base.Error;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -44,14 +47,14 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *
      * <p>A filter can:
      * <ul>
-     *     <li>accept the message (by returning {@code Optional.empty()};
+     *     <li>accept the message (by returning {@code Optional.empty()});
      *     <li>reject the message with {@link io.spine.base.Error Error} status, for example, if
      *         it fails to pass the validation;
-     *     <li>reject the message with a business rejection, for example, if the user who made
-     *         the request does not have enough permissions in the system; such rejection mostly
-     *         makes sense for commands;
      *     <li>reject the message with {@code OK} status. For example, a scheduled command may not
-     *         pass a filter.
+     *         pass a filter;
+     *     <li>reject the message with a business rejection. For example, a command can be rejected
+     *         if the user who made the request does not have enough permissions in the system.
+     *         Such rejection is only applicable to commands.
      * </ul>
      *
      * @param envelope
@@ -96,6 +99,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *
      * @param envelope
      *          the envelope with the message to filter
+     * @param cause
+     *         the cause of the rejection
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, Error cause) {
@@ -117,12 +122,21 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *
      * @param envelope
      *          the envelope with the message to filter
+     * @param cause
+     *         the cause of the rejection
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
+     *
+     * @throws IllegalArgumentException
+     *         if the {@code envelope} is not a {@link io.spine.server.type.CommandEnvelope
+     *         CommandEnvelope}
      */
-    default Optional<Ack> reject(E envelope, RejectionEnvelope cause) {
+    default Optional<Ack> reject(E envelope, ThrowableMessage cause) {
         checkNotNull(envelope);
         checkNotNull(cause);
-        Ack ack = AckFactory.reject(envelope.id(), cause);
+        checkArgument(envelope instanceof CommandEnvelope);
+        CommandEnvelope origin = (CommandEnvelope) envelope;
+        RejectionEnvelope rejection = RejectionEnvelope.from(origin, cause);
+        Ack ack = AckFactory.reject(envelope.id(), rejection);
         return Optional.of(ack);
     }
 
