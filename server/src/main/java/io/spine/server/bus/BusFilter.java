@@ -28,6 +28,8 @@ import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * The filter for the messages posted to a bus.
  *
@@ -80,6 +82,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope) {
+        checkNotNull(envelope);
         Ack ack = AckFactory.acknowledge(envelope.id());
         return Optional.of(ack);
     }
@@ -96,6 +99,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, Error cause) {
+        checkNotNull(envelope);
+        checkNotNull(cause);
         Ack ack = AckFactory.reject(envelope.id(), cause);
         return Optional.of(ack);
     }
@@ -115,6 +120,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
     default Optional<Ack> reject(E envelope, RejectionEnvelope cause) {
+        checkNotNull(envelope);
+        checkNotNull(cause);
         Ack ack = AckFactory.reject(envelope.id(), cause);
         return Optional.of(ack);
     }

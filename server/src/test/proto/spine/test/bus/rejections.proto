@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package spine.test.bus;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.bus.command";
+
+message BusRejection {
+
+    string message = 1;
+}
