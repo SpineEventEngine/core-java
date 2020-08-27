@@ -59,7 +59,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
                 return output;
             }
         }
-        return pass();
+        return letPass();
     }
 
     boolean contains(BusFilter<E> filter) {

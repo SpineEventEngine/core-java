@@ -45,8 +45,9 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *     <li>accept the message (by returning {@code Optional.empty()};
      *     <li>reject the message with {@link io.spine.base.Error Error} status, for example, if
      *         it fails to pass the validation;
-     *     <li>reject the message with the business rejection, for example, if the user who made
-     *         the request does not have enough permissions in the system;
+     *     <li>reject the message with a business rejection, for example, if the user who made
+     *         the request does not have enough permissions in the system; such rejection mostly
+     *         makes sense for commands;
      *     <li>reject the message with {@code OK} status. For example, a scheduled command may not
      *         pass a filter.
      * </ul>
@@ -64,7 +65,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
      * the message should be accepted by the filter.
      */
-    default Optional<Ack> pass() {
+    default Optional<Ack> letPass() {
         return Optional.empty();
     }
 
@@ -87,7 +88,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * Rejects the message with an {@link io.spine.base.Error Error} status.
      *
      * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
-     * the message does not pass the filter due to a technical error.
+     * the message does not pass the filter due to a technical error or inconsistency in model
+     * data.
      *
      * @param envelope
      *          the envelope with the message to filter
@@ -103,6 +105,10 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *
      * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
      * the message does not pass the filter due to a business rejection.
+     *
+     * <p>Such rejection method can be used to immediately disqualify a command from being executed
+     * and prevent it from reaching command handling entities, for example, when user permissions
+     * are not broad enough.
      *
      * @param envelope
      *          the envelope with the message to filter

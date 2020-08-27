@@ -48,7 +48,7 @@ public final class TaskCreatedFilter implements BusFilter<EventEnvelope> {
                 return reject(envelope, error);
             }
         }
-        return pass();
+        return letPass();
     }
 
     private static Error error() {

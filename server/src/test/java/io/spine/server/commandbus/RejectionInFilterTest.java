@@ -168,7 +168,7 @@ class RejectionInFilterTest {
             boolean withOwnFood = command.getVisitors()
                                   .getBringOwnFood();
             if (!withOwnFood) {
-                return pass();
+                return letPass();
             }
             CmdBusEntryDenied rejection = CmdBusEntryDenied
                     .newBuilder()

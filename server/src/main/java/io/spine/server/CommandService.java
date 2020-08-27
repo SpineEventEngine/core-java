@@ -29,13 +29,14 @@ import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.logging.Logging;
-import io.spine.server.bus.AckFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;
+
+import static io.spine.server.bus.AckFactory.reject;
 
 /**
  * The {@code CommandService} allows client applications to post commands and
@@ -80,7 +81,7 @@ public final class CommandService
         _error().withCause(unsupported)
                 .log("Unsupported command posted to `CommandService`.");
         Error error = unsupported.asError();
-        Ack response = AckFactory.reject(command.getId(), error);
+        Ack response = reject(command.getId(), error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

@@ -76,7 +76,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
     public Optional<Ack> doFilter(CommandEnvelope envelope) {
         Command command = envelope.command();
         if (!command.isScheduled()) {
-            return pass();
+            return letPass();
         }
         schedule(envelope.command());
         return reject(envelope);

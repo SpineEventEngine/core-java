@@ -59,7 +59,7 @@ final class DeadMessageFilter<T extends Message,
             Error error = report.asError();
             return reject(envelope, error);
         } else {
-            return pass();
+            return letPass();
         }
     }
 }
