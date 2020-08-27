@@ -23,11 +23,21 @@ package io.spine.grpc;
 import com.google.common.collect.ImmutableList;
 import io.grpc.stub.StreamObserver;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * A stream observer which delegates calls to multiple other observers with the same target type.
+ *
+ * @param <T>
+ *         the observed type
+ */
 public final class CompositeObserver<T> implements StreamObserver<T> {
 
     private final ImmutableList<StreamObserver<? super T>> observers;
 
     public CompositeObserver(Iterable<StreamObserver<? super T>> observers) {
+        checkNotNull(observers);
         this.observers = ImmutableList.copyOf(observers);
     }
 
