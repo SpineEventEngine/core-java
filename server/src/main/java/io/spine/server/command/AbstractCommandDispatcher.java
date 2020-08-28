@@ -103,6 +103,16 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
 
     protected void onError(SignalEnvelope<?, ?, ?> signal, Error error) {
         checkRegistered();
+        postHandlerFailedUnexpectedly(signal, error);
+    }
+
+    protected void onRejection(SignalEnvelope<?, ?, ?> signal, Event rejection) {
+        checkRegistered();
+        eventBus.post(rejection);
+        postSignalRejected(signal, rejection);
+    }
+
+    private void postHandlerFailedUnexpectedly(SignalEnvelope<?, ?, ?> signal, Error error) {
         HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
                 .newBuilder()
                 .setEntity(eventAnchor.get())
@@ -112,8 +122,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
         system.postEvent(systemEvent, signal.asMessageOrigin());
     }
 
-    protected void onRejection(SignalEnvelope<?, ?, ?> signal, Event rejection) {
-        checkRegistered();
+    private void postSignalRejected(SignalEnvelope<?, ?, ?> signal, Event rejection) {
         CommandRejected commandRejected = CommandRejected
                 .newBuilder()
                 .setId(signal.messageId()
