@@ -20,39 +20,21 @@
 
 package io.spine.server.commandbus;
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import io.spine.core.Ack;
-import io.spine.core.Subscribe;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
-import io.spine.server.bus.BusFilter;
-import io.spine.server.command.Assign;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.route.EventRoute;
-import io.spine.server.route.EventRouting;
-import io.spine.server.type.CommandEnvelope;
+import io.spine.server.commandbus.given.caffetteria.BeachCustomerFilter;
+import io.spine.server.commandbus.given.caffetteria.CaffetteriaStats;
+import io.spine.server.commandbus.given.caffetteria.CaffetteriaStatsRepository;
+import io.spine.server.commandbus.given.caffetteria.OrderAggregate;
 import io.spine.test.commandbus.CmdBusCaffetteriaId;
 import io.spine.test.commandbus.CmdBusCaffetteriaStats;
-import io.spine.test.commandbus.CmdBusOrder;
 import io.spine.test.commandbus.CmdBusOrderId;
-import io.spine.test.commandbus.command.CaffetteriaRejections;
 import io.spine.test.commandbus.command.CmdBusAllocateTable;
-import io.spine.test.commandbus.command.CmdBusEntryDenied;
 import io.spine.test.commandbus.command.Visitors;
-import io.spine.test.commandbus.event.CmdBusTableAllocated;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.Optional;
-
-import static io.spine.protobuf.AnyPacker.unpack;
-
-@SuppressWarnings("unused") // Reflective access.
-@DisplayName("Command bus, when a `Rejection` is thrown from a filter, should")
+@DisplayName("Command bus, when a `Rejection` is thrown from a bus filter, should")
 class RejectionInFilterTest {
 
     @Test
@@ -66,32 +48,24 @@ class RejectionInFilterTest {
         );
         CmdBusCaffetteriaId caffetteria = CmdBusCaffetteriaId.generate();
         int allowedCount = 2;
-        Visitors visitorsAllowed = Visitors
+        Visitors visitorsAllowedToEnter = Visitors
                 .newBuilder()
                 .setCount(allowedCount)
                 .setBringOwnFood(false)
                 .build();
         int deniedCount = 4;
-        Visitors visitorsDenied = Visitors
+        Visitors visitorsDeniedEntrance = Visitors
                 .newBuilder()
                 .setCount(deniedCount)
                 .setBringOwnFood(true)
                 .build();
-        context.receivesCommand(
-                CmdBusAllocateTable
-                        .newBuilder()
-                        .setId(CmdBusOrderId.generate())
-                        .setCaffetteria(caffetteria)
-                        .setVisitors(visitorsAllowed)
-                        .build())
-               .receivesCommand(
-                       CmdBusAllocateTable
-                               .newBuilder()
-                               .setId(CmdBusOrderId.generate())
-                               .setCaffetteria(caffetteria)
-                               .setVisitors(visitorsDenied)
-                               .build()
-               );
+        context
+                .receivesCommand(
+                        allocateTableForVisitors(caffetteria, visitorsAllowedToEnter)
+                )
+                .receivesCommand(
+                        allocateTableForVisitors(caffetteria, visitorsDeniedEntrance)
+                );
         context.assertEntity(caffetteria, CaffetteriaStats.class)
                .hasStateThat()
                .comparingExpectedFieldsOnly()
@@ -104,78 +78,13 @@ class RejectionInFilterTest {
                );
     }
 
-    private static class OrderAggregate
-            extends Aggregate<CmdBusOrderId, CmdBusOrder, CmdBusOrder.Builder> {
-
-        @Assign
-        CmdBusTableAllocated handle(CmdBusAllocateTable cmd) {
-            return CmdBusTableAllocated
-                    .newBuilder()
-                    .setId(cmd.getId())
-                    .setCaffetteria(cmd.getCaffetteria())
-                    .setVisitorCount(cmd.getVisitors()
-                                        .getCount())
-                    .build();
-        }
-
-        @Apply
-        private void on(CmdBusTableAllocated event) {
-            builder().setCaffetteria(event.getCaffetteria());
-            // For simplicity.
-            builder().setTableIndex(0);
-        }
-    }
-
-    private static class CaffetteriaStats extends Projection<CmdBusCaffetteriaId,
-                                                             CmdBusCaffetteriaStats,
-                                                             CmdBusCaffetteriaStats.Builder> {
-
-        @Subscribe
-        void on(CmdBusTableAllocated event) {
-            builder().setVisitorCount(state().getVisitorCount() + event.getVisitorCount());
-        }
-
-        @Subscribe
-        void on(CaffetteriaRejections.CmdBusEntryDenied rejection) {
-            builder().setEntryDenied(state().getEntryDenied() + rejection.getVisitorCount());
-        }
-    }
-
-    private static class CaffetteriaStatsRepository
-            extends ProjectionRepository<CmdBusCaffetteriaId,
-                                         CaffetteriaStats,
-                                         CmdBusCaffetteriaStats> {
-
-        @OverridingMethodsMustInvokeSuper
-        @Override
-        protected void setupEventRouting(EventRouting<CmdBusCaffetteriaId> routing) {
-            super.setupEventRouting(routing);
-            routing.route(CmdBusTableAllocated.class,
-                          (message, context) -> Collections.singleton(message.getCaffetteria()));
-            routing.route(CaffetteriaRejections.CmdBusEntryDenied.class,
-                          EventRoute.byFirstMessageField(idClass()));
-        }
-    }
-
-    private static class BeachCustomerFilter implements BusFilter<CommandEnvelope> {
-
-        @Override
-        public Optional<Ack> doFilter(CommandEnvelope envelope) {
-            CmdBusAllocateTable command =
-                    unpack(envelope.command()
-                                   .getMessage(), CmdBusAllocateTable.class);
-            boolean withOwnFood = command.getVisitors()
-                                  .getBringOwnFood();
-            if (!withOwnFood) {
-                return letPass();
-            }
-            CmdBusEntryDenied rejection = CmdBusEntryDenied
-                    .newBuilder()
-                    .setId(command.getCaffetteria())
-                    .setVisitorCount(command.getVisitors().getCount())
-                    .setReason("The caffetteria doesn't serve clients who bring their own food.")
-                    .build();
-            return reject(envelope, rejection);
-        }
+    private static CmdBusAllocateTable allocateTableForVisitors(CmdBusCaffetteriaId caffetteria,
+                                                                Visitors visitorsDenied) {
+        return CmdBusAllocateTable
+                .newBuilder()
+                .setId(CmdBusOrderId.generate())
+                .setCaffetteria(caffetteria)
+                .setVisitors(visitorsDenied)
+                .build();
     }
 }
