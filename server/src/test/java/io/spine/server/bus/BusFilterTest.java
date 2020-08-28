@@ -128,7 +128,7 @@ class BusFilterTest {
     }
 
     @Test
-    @DisplayName("throw `IAE` when throwing immediate rejection from non-command-handling filter")
+    @DisplayName("throw `IAE` when throwing business rejection from non-command-handling filter")
     void failOnThrowableMessageForNonCommand() {
         BusFilters.Throwing throwingFilter = new BusFilters.Throwing();
         assertThrows(IllegalArgumentException.class,
