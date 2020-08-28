@@ -23,7 +23,6 @@ package io.spine.grpc;
 import com.google.common.collect.ImmutableList;
 import io.grpc.stub.StreamObserver;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
