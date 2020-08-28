@@ -77,7 +77,7 @@ public final class AckFactory {
      * Creates an {@code Ack} with the business rejection status.
      *
      * @param id
-     *         the ID of the message which have been posted
+     *         the ID of the message which has been posted
      * @param cause
      *         the cause of the rejection
      */
