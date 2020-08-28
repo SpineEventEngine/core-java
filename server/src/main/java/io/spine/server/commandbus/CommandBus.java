@@ -99,11 +99,11 @@ public final class CommandBus
      * An observer which processes the {@linkplain io.spine.base.ThrowableMessage rejections}
      * thrown by the bus {@linkplain BusFilter filters}.
      *
-     * <p>Is NO-OP at bus creation. Once the {@link EventBus} is {@linkplain #inject(EventBus)
-     * injected} into this command bus instance, the observer will start publishing the rejections
-     * to the said event bus.
+     * <p>Is NO-OP at bus creation. Once an {@link EventBus} is
+     * {@linkplain #initObservers(EventBus) injected} into this command bus instance, the observer
+     * will start publishing the rejections to the said event bus.
      *
-     * <p>Can stay NO-OP in the test environment for the simplicity of tests.
+     * <p>Can stay NO-OP in test environment for the simplicity of tests.
      */
     private StreamObserver<Ack> immediateRejectionObserver = noOpObserver();
 
@@ -135,12 +135,17 @@ public final class CommandBus
     }
 
     /**
-     * Injects the corresponding {@link EventBus} into this instance of {@code CommandBus}.
+     * Initializes the {@link #immediateRejectionObserver} with the passed {@link EventBus}.
+     *
+     * <p>This enables posting of rejections received from command filters to the corresponding
+     * {@link EventBus}.
      *
      * <p>This method is called by the {@link io.spine.server.BoundedContext BoundedContext} and is
      * a part of context initialization process.
+     *
+     * @see AckRejectionPublisher
      */
-    public void inject(EventBus eventBus) {
+    public void initObservers(EventBus eventBus) {
         checkNotNull(eventBus);
         immediateRejectionObserver = new AckRejectionPublisher(eventBus);
     }

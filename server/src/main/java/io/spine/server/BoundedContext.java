@@ -147,7 +147,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         eventBus.registerWith(this);
         tenantIndex.registerWith(this);
         broker.registerWith(this);
-        commandBus.inject(eventBus);
+        commandBus.initObservers(eventBus);
     }
     
     /**
