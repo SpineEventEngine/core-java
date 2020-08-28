@@ -113,8 +113,8 @@ class AckFactoryTest {
     }
 
     @Test
-    @DisplayName("create 'reject with RejectionEnvelope' `Ack` instance")
-    void rejectWithRejectionEnvelope() {
+    @DisplayName("create 'reject with ThrowableMessage' `Ack` instance")
+    void rejectWithThrowableMessage() {
         TestActorRequestFactory requestFactory = new TestActorRequestFactory(BusFilterTest.class);
         Command command = requestFactory.generateCommand();
         CommandEnvelope origin = CommandEnvelope.of(command);
