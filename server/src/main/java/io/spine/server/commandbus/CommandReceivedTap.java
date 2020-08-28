@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>The filter notifies the {@link io.spine.system.server.SystemContext SystemContext} about
  * new commands with a {@link CommandReceived} system event.
  *
- * <p>The filter never terminates the command processing, i.e. {@link #doFilter(CommandEnvelope)}
+ * <p>The filter never terminates the command processing, i.e. {@link #filter(CommandEnvelope)}
  * always returns an empty value.
  */
 final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
@@ -51,7 +51,7 @@ final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
     }
 
     @Override
-    public Optional<Ack> doFilter(CommandEnvelope envelope) {
+    public Optional<Ack> filter(CommandEnvelope envelope) {
         CommandReceived systemEvent = systemEvent(envelope.command());
         TenantId tenantId = envelope.tenantId();
         SystemWriteSide writeSide = writeSideFunction.get(tenantId);

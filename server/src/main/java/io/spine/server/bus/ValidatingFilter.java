@@ -45,7 +45,7 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
     }
 
     @Override
-    public Optional<Ack> doFilter(E envelope) {
+    public Optional<Ack> filter(E envelope) {
         checkNotNull(envelope);
         Optional<MessageInvalid> violation = validator.validate(envelope);
         if (violation.isPresent()) {

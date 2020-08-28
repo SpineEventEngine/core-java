@@ -73,7 +73,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
     }
 
     @Override
-    public Optional<Ack> doFilter(CommandEnvelope envelope) {
+    public Optional<Ack> filter(CommandEnvelope envelope) {
         Command command = envelope.command();
         if (!command.isScheduled()) {
             return letPass();

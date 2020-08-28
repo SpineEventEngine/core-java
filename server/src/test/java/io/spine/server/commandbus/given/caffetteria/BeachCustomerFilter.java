@@ -33,7 +33,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 public final class BeachCustomerFilter implements BusFilter<CommandEnvelope> {
 
     @Override
-    public Optional<Ack> doFilter(CommandEnvelope envelope) {
+    public Optional<Ack> filter(CommandEnvelope envelope) {
         CmdBusAllocateTable command =
                 unpack(envelope.command()
                                .getMessage(), CmdBusAllocateTable.class);

@@ -62,13 +62,13 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return {@code Optional.empty()} if the message passes the filter,
      *         {@linkplain Ack posting result} with either status otherwise
      */
-    Optional<Ack> doFilter(E envelope);
+    Optional<Ack> filter(E envelope);
 
     /**
      * Lets the message pass the filter.
      *
-     * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
-     * this filter shouldn't prevent the message from being posted.
+     * <p>This method is a shortcut which can be used in {@link #filter(MessageEnvelope)} when this
+     * filter shouldn't prevent the message from being posted.
      */
     default Optional<Ack> letPass() {
         return Optional.empty();
@@ -77,8 +77,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     /**
      * Rejects the message with the {@code OK} status.
      *
-     * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
-     * the message does not pass the filter and this is expected.
+     * <p>This method is a shortcut which can be used in {@link #filter(MessageEnvelope)} when the
+     * message does not pass the filter and this is expected.
      *
      * @param envelope
      *          the envelope with the message to filter
@@ -93,8 +93,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     /**
      * Rejects the message with an {@link io.spine.base.Error Error} status.
      *
-     * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
-     * the message does not pass the filter due to a technical error or inconsistency in model
+     * <p>This method is a shortcut which can be used in {@link #filter(MessageEnvelope)} when the
+     * message does not pass the filter due to a technical error or inconsistency in model
      * data.
      *
      * @param envelope
@@ -113,8 +113,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     /**
      * Rejects the message with a {@linkplain io.spine.base.RejectionMessage rejection} status.
      *
-     * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
-     * the message does not pass the filter due to a business rejection.
+     * <p>This method is a shortcut which can be used in {@link #filter(MessageEnvelope)} when the
+     * message does not pass the filter due to a business rejection.
      *
      * <p>Such rejection method can be used when no technical error occurs but due to the business
      * rules the command should be immediately disqualified from being executed. A typical scenario

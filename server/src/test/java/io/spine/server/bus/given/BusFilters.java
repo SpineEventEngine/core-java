@@ -44,7 +44,7 @@ public final class BusFilters {
     public static final class Accepting implements BusFilter<CommandEnvelope> {
 
         @Override
-        public Optional<Ack> doFilter(CommandEnvelope envelope) {
+        public Optional<Ack> filter(CommandEnvelope envelope) {
             return letPass();
         }
     }
@@ -52,7 +52,7 @@ public final class BusFilters {
     public static final class RejectingWithOk implements BusFilter<CommandEnvelope> {
 
         @Override
-        public Optional<Ack> doFilter(CommandEnvelope envelope) {
+        public Optional<Ack> filter(CommandEnvelope envelope) {
             return reject(envelope);
         }
     }
@@ -66,7 +66,7 @@ public final class BusFilters {
         }
 
         @Override
-        public Optional<Ack> doFilter(CommandEnvelope envelope) {
+        public Optional<Ack> filter(CommandEnvelope envelope) {
             return reject(envelope, error);
         }
     }
@@ -80,7 +80,7 @@ public final class BusFilters {
         }
 
         @Override
-        public Optional<Ack> doFilter(CommandEnvelope envelope) {
+        public Optional<Ack> filter(CommandEnvelope envelope) {
             return reject(envelope, rejection);
         }
     }
@@ -88,7 +88,7 @@ public final class BusFilters {
     public static final class Throwing implements BusFilter<EventEnvelope> {
 
         @Override
-        public Optional<Ack> doFilter(EventEnvelope envelope) {
+        public Optional<Ack> filter(EventEnvelope envelope) {
             ShareCannotBeTraded rejection = ShareCannotBeTraded
                     .newBuilder()
                     .setShare(ShareId.newBuilder().setValue(newUuid()).build())

@@ -70,7 +70,7 @@ class BusFilterTest {
     @DisplayName("let the message pass the filter")
     void letPass() {
         BusFilter<CommandEnvelope> filter = new BusFilters.Accepting();
-        Optional<Ack> ack = filter.doFilter(commandEnvelope);
+        Optional<Ack> ack = filter.filter(commandEnvelope);
         assertThat(ack.isPresent()).isFalse();
     }
 
@@ -78,7 +78,7 @@ class BusFilterTest {
     @DisplayName("reject the message with the `OK` status")
     void rejectWithOk() {
         BusFilter<CommandEnvelope> filter = new BusFilters.RejectingWithOk();
-        Optional<Ack> ack = filter.doFilter(commandEnvelope);
+        Optional<Ack> ack = filter.filter(commandEnvelope);
         assertThat(ack.isPresent()).isTrue();
 
         Ack theAck = ack.get();
@@ -95,7 +95,7 @@ class BusFilterTest {
                 .setMessage("Ignore this error.")
                 .build();
         BusFilter<CommandEnvelope> filter = new BusFilters.RejectingWithError(error);
-        Optional<Ack> ack = filter.doFilter(commandEnvelope);
+        Optional<Ack> ack = filter.filter(commandEnvelope);
         assertThat(ack.isPresent()).isTrue();
 
         Ack theAck = ack.get();
@@ -115,7 +115,7 @@ class BusFilterTest {
                 .build();
         BusFilter<CommandEnvelope> filter =
                 new BusFilters.RejectingWithThrowableMessage(rejection);
-        Optional<Ack> ack = filter.doFilter(commandEnvelope);
+        Optional<Ack> ack = filter.filter(commandEnvelope);
         assertThat(ack.isPresent()).isTrue();
 
         Ack theAck = ack.get();
@@ -132,7 +132,7 @@ class BusFilterTest {
     void failOnThrowableMessageForNonCommand() {
         BusFilters.Throwing throwingFilter = new BusFilters.Throwing();
         assertThrows(IllegalArgumentException.class,
-                     () -> throwingFilter.doFilter(eventEnvelope()));
+                     () -> throwingFilter.filter(eventEnvelope()));
     }
 
     private void assertIdEquals(Ack ack) {
