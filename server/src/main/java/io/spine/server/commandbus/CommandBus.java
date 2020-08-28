@@ -99,11 +99,11 @@ public final class CommandBus
      * An observer which processes the {@linkplain io.spine.base.ThrowableMessage rejections}
      * thrown by the bus {@linkplain BusFilter filters}.
      *
-     * <p>Is NO-OP at bus creation. Once an {@link EventBus} is
+     * <p>When the bus is first created, this observer does nothing. Once an {@link EventBus} is
      * {@linkplain #initObservers(EventBus) injected} into this command bus instance, the observer
      * will start publishing the rejections to the said event bus.
      *
-     * <p>Can stay NO-OP in test environment for the simplicity of tests.
+     * <p>This observer can stay NO-OP in test environment for the simplicity of tests.
      */
     private StreamObserver<Ack> immediateRejectionObserver = noOpObserver();
 
