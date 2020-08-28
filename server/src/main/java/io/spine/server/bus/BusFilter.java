@@ -116,9 +116,9 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * <p>This method is a shortcut which can be used in {@link #doFilter(MessageEnvelope)} when
      * the message does not pass the filter due to a business rejection.
      *
-     * <p>Such rejection method can be used to immediately disqualify a command from being executed
-     * and prevent it from reaching command handling entities, for example, when user permissions
-     * are not broad enough.
+     * <p>Such rejection method can be used when no technical error occurs but due to the business
+     * rules the command should be immediately disqualified from being executed. A typical scenario
+     * would be when the permissions of the user who made the request aren't broad enough.
      *
      * @param envelope
      *          the envelope with the message to filter
@@ -127,8 +127,8 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      *
      * @throws IllegalArgumentException
-     *         if the {@code envelope} is not a {@link io.spine.server.type.CommandEnvelope
-     *         CommandEnvelope}
+     *         if the filtered {@code envelope} is not a
+     *         {@linkplain io.spine.server.type.CommandEnvelope command}
      */
     default Optional<Ack> reject(E envelope, ThrowableMessage cause) {
         checkNotNull(envelope);
