@@ -36,7 +36,7 @@ import io.spine.server.type.CommandClass;
 import java.util.Map;
 import java.util.Set;
 
-import static io.spine.server.bus.AckFactory.reject;
+import static io.spine.server.bus.Acks.reject;
 
 /**
  * The {@code CommandService} allows client applications to post commands and

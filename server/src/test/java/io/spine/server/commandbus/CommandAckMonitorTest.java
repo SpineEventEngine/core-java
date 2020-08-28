@@ -31,7 +31,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.TenantId;
-import io.spine.server.bus.AckFactory;
+import io.spine.server.bus.Acks;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
@@ -188,7 +188,7 @@ class CommandAckMonitorTest {
     }
 
     private static Ack okAck(CommandId commandId) {
-        return AckFactory.acknowledge(commandId);
+        return Acks.acknowledge(commandId);
     }
 
     private static Ack errorAck(CommandId commandId) {
@@ -197,7 +197,7 @@ class CommandAckMonitorTest {
                 .setCode(42)
                 .setMessage("Wrong question")
                 .build();
-        return AckFactory.reject(commandId, error);
+        return Acks.reject(commandId, error);
     }
 
     private static Ack rejectionAck(CommandId commandId) {
@@ -224,6 +224,6 @@ class CommandAckMonitorTest {
         RuntimeException wrapperThrowable = new RuntimeException(rejectionThrowable);
         RejectionEnvelope rejection = RejectionEnvelope.from(envelope, wrapperThrowable);
 
-        return AckFactory.reject(commandId, rejection);
+        return Acks.reject(commandId, rejection);
     }
 }

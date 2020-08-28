@@ -42,7 +42,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.server.bus.AckFactory.acknowledge;
+import static io.spine.server.bus.Acks.acknowledge;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static java.util.Collections.singleton;
 

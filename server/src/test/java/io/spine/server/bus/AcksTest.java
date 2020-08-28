@@ -51,15 +51,15 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.newUuidValue;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
-@DisplayName("`AckFactory` should")
-class AckFactoryTest {
+@DisplayName("`Acks` utility should")
+class AcksTest {
 
     public static final CommandId ID = CommandId.generate();
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(AckFactory.class);
+        assertHasPrivateParameterlessCtor(Acks.class);
     }
 
     @Test
@@ -88,13 +88,13 @@ class AckFactoryTest {
                 .setDefault(MessageId.class, MessageId.newBuilder()
                                                       .setTypeUrl("test.example.org")
                                                       .build())
-                .testAllPublicStaticMethods(AckFactory.class);
+                .testAllPublicStaticMethods(Acks.class);
     }
 
     @Test
     @DisplayName("create 'acknowledge' `Ack` instance")
     void acknowledge() {
-        Ack ack = AckFactory.acknowledge(ID);
+        Ack ack = Acks.acknowledge(ID);
         assertIdEquals(ack);
         assertStatusCase(ack, OK);
     }
@@ -104,10 +104,10 @@ class AckFactoryTest {
     void rejectWithError() {
         Error error = Error
                 .newBuilder()
-                .setType(AckFactoryTest.class.getCanonicalName())
+                .setType(AcksTest.class.getCanonicalName())
                 .setMessage("A test error.")
                 .build();
-        Ack ack = AckFactory.reject(ID, error);
+        Ack ack = Acks.reject(ID, error);
         assertIdEquals(ack);
         assertStatusCase(ack, ERROR);
     }
@@ -127,7 +127,7 @@ class AckFactoryTest {
                 .build();
         RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(origin, rejection);
 
-        Ack ack = AckFactory.reject(ID, rejectionEnvelope);
+        Ack ack = Acks.reject(ID, rejectionEnvelope);
         assertIdEquals(ack);
         assertStatusCase(ack, REJECTION);
     }

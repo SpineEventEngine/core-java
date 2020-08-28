@@ -38,10 +38,10 @@ import static io.spine.util.Preconditions2.checkNotDefaultArg;
  * A utility for producing {@link Ack} instances.
  */
 @Internal
-public final class AckFactory {
+public final class Acks {
 
     /** Prevents instantiation of this utility class. */
-    private AckFactory() {
+    private Acks() {
     }
 
     /**

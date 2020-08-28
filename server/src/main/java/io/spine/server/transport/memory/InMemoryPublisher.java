@@ -29,7 +29,7 @@ import io.spine.server.transport.Subscriber;
 
 import java.util.function.Function;
 
-import static io.spine.server.bus.AckFactory.acknowledge;
+import static io.spine.server.bus.Acks.acknowledge;
 
 /**
  * An in-memory implementation of the {@link Publisher}.

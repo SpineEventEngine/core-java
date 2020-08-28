@@ -86,7 +86,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      */
     default Optional<Ack> reject(E envelope) {
         checkNotNull(envelope);
-        Ack ack = AckFactory.acknowledge(envelope.id());
+        Ack ack = Acks.acknowledge(envelope.id());
         return Optional.of(ack);
     }
 
@@ -106,7 +106,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     default Optional<Ack> reject(E envelope, Error cause) {
         checkNotNull(envelope);
         checkNotNull(cause);
-        Ack ack = AckFactory.reject(envelope.id(), cause);
+        Ack ack = Acks.reject(envelope.id(), cause);
         return Optional.of(ack);
     }
 
@@ -136,7 +136,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
         checkArgument(envelope instanceof CommandEnvelope);
         CommandEnvelope origin = (CommandEnvelope) envelope;
         RejectionEnvelope rejection = RejectionEnvelope.from(origin, cause);
-        Ack ack = AckFactory.reject(envelope.id(), rejection);
+        Ack ack = Acks.reject(envelope.id(), rejection);
         return Optional.of(ack);
     }
 
