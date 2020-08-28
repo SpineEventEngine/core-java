@@ -37,6 +37,8 @@ public final class OrderAggregate
                 .newBuilder()
                 .setId(cmd.getId())
                 .setCaffetteria(cmd.getCaffetteria())
+                // For the simplicity, the chosen table index is always `0`.
+                .setTableIndex(0)
                 .setVisitorCount(cmd.getVisitors()
                                     .getCount())
                 .build();
@@ -45,7 +47,6 @@ public final class OrderAggregate
     @Apply
     private void on(CmdBusTableAllocated event) {
         builder().setCaffetteria(event.getCaffetteria());
-        // For simplicity, the chosen table index is always `0`.
-        builder().setTableIndex(0);
+        builder().setTableIndex(event.getTableIndex());
     }
 }

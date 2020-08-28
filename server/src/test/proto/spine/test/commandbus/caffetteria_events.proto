@@ -34,5 +34,6 @@ message CmdBusTableAllocated {
 
     CmdBusOrderId id = 1;
     CmdBusCaffetteriaId caffetteria = 2;
-    int32 visitor_count = 3;
+    int32 table_index = 3;
+    int32 visitor_count = 4;
 }
