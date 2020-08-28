@@ -24,16 +24,28 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.core.Ack;
 import io.spine.core.Command;
+import io.spine.core.CommandId;
 import io.spine.core.MessageId;
+import io.spine.core.Status.StatusCase;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.test.bus.ShareId;
+import io.spine.test.bus.command.ShareCannotBeTraded;
 import io.spine.test.commandbus.command.CmdBusStartProject;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.Status.StatusCase.ERROR;
+import static io.spine.core.Status.StatusCase.OK;
+import static io.spine.core.Status.StatusCase.REJECTION;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.newUuidValue;
@@ -41,6 +53,8 @@ import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
 @DisplayName("`AckFactory` should")
 class AckFactoryTest {
+
+    public static final CommandId ID = CommandId.generate();
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
@@ -75,5 +89,55 @@ class AckFactoryTest {
                                                       .setTypeUrl("test.example.org")
                                                       .build())
                 .testAllPublicStaticMethods(AckFactory.class);
+    }
+
+    @Test
+    @DisplayName("create 'acknowledge' `Ack` instance")
+    void acknowledge() {
+        Ack ack = AckFactory.acknowledge(ID);
+        assertIdEquals(ack);
+        assertStatusCase(ack, OK);
+    }
+
+    @Test
+    @DisplayName("create 'reject with Error' `Ack` instance")
+    void rejectWithError() {
+        Error error = Error
+                .newBuilder()
+                .setType(AckFactoryTest.class.getCanonicalName())
+                .setMessage("A test error.")
+                .build();
+        Ack ack = AckFactory.reject(ID, error);
+        assertIdEquals(ack);
+        assertStatusCase(ack, ERROR);
+    }
+
+    @Test
+    @DisplayName("create 'reject with RejectionEnvelope' `Ack` instance")
+    void rejectWithRejectionEnvelope() {
+        TestActorRequestFactory requestFactory = new TestActorRequestFactory(BusFilterTest.class);
+        Command command = requestFactory.generateCommand();
+        CommandEnvelope origin = CommandEnvelope.of(command);
+        ShareCannotBeTraded rejection = ShareCannotBeTraded
+                .newBuilder()
+                .setShare(ShareId.newBuilder()
+                                 .setValue(newUuid())
+                                 .build())
+                .setReason("Ack factory test.")
+                .build();
+        RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(origin, rejection);
+
+        Ack ack = AckFactory.reject(ID, rejectionEnvelope);
+        assertIdEquals(ack);
+        assertStatusCase(ack, REJECTION);
+    }
+
+    private static void assertIdEquals(Ack ack) {
+        Message id = unpack(ack.getMessageId());
+        assertThat(id).isEqualTo(ID);
+    }
+
+    private static void assertStatusCase(Ack ack, StatusCase status) {
+        assertThat(ack.getStatus().getStatusCase()).isEqualTo(status);
     }
 }
