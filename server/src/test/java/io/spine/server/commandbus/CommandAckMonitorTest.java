@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -185,6 +186,22 @@ class CommandAckMonitorTest {
             assertThat(actualEvent.getId()).isEqualTo(commandId);
             assertThat(actualEvent.getRejectionEvent()).isEqualTo(ack.getStatus().getRejection());
         }
+    }
+
+    @Test
+    @DisplayName("re-throw errors passed to `onError` as `IllegalStateException`")
+    void rethrowOnError() {
+        MemoizingWriteSide writeSide = MemoizingWriteSide.singleTenant();
+        CommandAckMonitor monitor = CommandAckMonitor
+                .newBuilder()
+                .setSystemWriteSide(writeSide)
+                .setTenantId(TenantId.getDefaultInstance())
+                .setPostedCommands(ImmutableSet.of(mockCommand))
+                .build();
+        RuntimeException error = new RuntimeException("The command Ack monitor test error.");
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                                                       () -> monitor.onError(error));
+        Truth.assertThat(exception).hasCauseThat().isEqualTo(error);
     }
 
     private static Ack okAck(CommandId commandId) {

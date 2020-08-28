@@ -25,6 +25,7 @@ import io.spine.core.Ack;
 import io.spine.core.Status;
 import io.spine.server.event.EventBus;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Status.StatusCase.REJECTION;
 
 /**
@@ -48,6 +49,7 @@ final class AckRejectionPublisher implements StreamObserver<Ack> {
 
     @Override
     public void onNext(Ack value) {
+        checkNotNull(value);
         Status status = value.getStatus();
         if (status.getStatusCase() == REJECTION) {
             eventBus.post(status.getRejection());
@@ -56,7 +58,7 @@ final class AckRejectionPublisher implements StreamObserver<Ack> {
 
     @Override
     public void onError(Throwable t) {
-        // NO-OP.
+        throw new IllegalStateException(t);
     }
 
     @Override

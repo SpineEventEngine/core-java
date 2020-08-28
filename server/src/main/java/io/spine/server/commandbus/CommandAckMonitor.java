@@ -75,7 +75,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
 
     @Override
     public void onError(Throwable t) {
-        // NO-OP.
+        throw new IllegalStateException(t);
     }
 
     @Override
