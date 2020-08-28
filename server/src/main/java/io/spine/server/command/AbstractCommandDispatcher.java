@@ -119,7 +119,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
                 .setId(signal.messageId()
                              .asCommandId())
                 .setRejectionEvent(rejection)
-                .build();
+                .vBuild();
         Origin origin = RejectionEnvelope.from(EventEnvelope.of(rejection))
                                          .asMessageOrigin();
         system.postEvent(commandRejected, origin);
