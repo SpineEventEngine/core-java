@@ -322,6 +322,7 @@ public final class BoundedContextBuilder implements Logging {
      * @param filter
      *         the filter to add
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder addEventFilter(BusFilter<EventEnvelope> filter) {
         checkNotNull(filter);
         eventBus.appendFilter(filter);
@@ -659,6 +660,7 @@ public final class BoundedContextBuilder implements Logging {
         commandDispatchers().forEach(copy::addCommandDispatcher);
         commandBus.filters().forEach(copy::addCommandFilter);
         eventDispatchers().forEach(copy::addEventDispatcher);
+        eventBus.filters().forEach(copy::addEventFilter);
         return copy;
     }
 }
