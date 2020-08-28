@@ -25,11 +25,16 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.core.Status.StatusCase;
 import io.spine.server.bus.given.BusFilters;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.bus.command.BusRejection;
+import io.spine.server.type.EventEnvelope;
+import io.spine.test.bus.ShareId;
+import io.spine.test.bus.ShareTraded;
+import io.spine.test.bus.command.ShareCannotBeTraded;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,11 +42,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.core.Status.StatusCase.REJECTION;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`BusFilter` should")
 class BusFilterTest {
@@ -94,15 +101,17 @@ class BusFilterTest {
         Ack theAck = ack.get();
         assertIdEquals(theAck);
         assertStatusEquals(theAck, ERROR);
-        assertThat(theAck.getStatus().getError()).isEqualTo(error);
+        assertThat(theAck.getStatus()
+                         .getError()).isEqualTo(error);
     }
 
     @Test
     @DisplayName("reject the message with a rejection")
     void rejectWithThrowableMessage() {
-        BusRejection rejection = BusRejection
+        ShareCannotBeTraded rejection = ShareCannotBeTraded
                 .newBuilder()
-                .setMessage("Ignore this rejection.")
+                .setShare(ShareId.newBuilder().setValue(newUuid()).build())
+                .setReason("The test rejection.")
                 .build();
         BusFilter<CommandEnvelope> filter =
                 new BusFilters.RejectingWithThrowableMessage(rejection);
@@ -118,6 +127,14 @@ class BusFilterTest {
         assertThat(rejectionMessage).isEqualTo(rejection.messageThrown());
     }
 
+    @Test
+    @DisplayName("throw `IAE` when throwing immediate rejection from non-command-handling filter")
+    void failOnThrowableMessageForNonCommand() {
+        BusFilters.Throwing throwingFilter = new BusFilters.Throwing();
+        assertThrows(IllegalArgumentException.class,
+                     () -> throwingFilter.doFilter(eventEnvelope()));
+    }
+
     private void assertIdEquals(Ack ack) {
         Message id = unpack(ack.getMessageId());
         assertThat(id).isEqualTo(commandEnvelope.id());
@@ -131,5 +148,20 @@ class BusFilterTest {
         TestActorRequestFactory requestFactory = new TestActorRequestFactory(BusFilterTest.class);
         Command command = requestFactory.generateCommand();
         return CommandEnvelope.of(command);
+    }
+
+    private static EventEnvelope eventEnvelope() {
+        TestEventFactory eventFactory = TestEventFactory.newInstance(BusFilterTest.class);
+        ShareId id = ShareId
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
+        ShareTraded eventMessage = ShareTraded
+                .newBuilder()
+                .setShare(id)
+                .setAmount(42)
+                .build();
+        Event event = eventFactory.createEvent(eventMessage);
+        return EventEnvelope.of(event);
     }
 }

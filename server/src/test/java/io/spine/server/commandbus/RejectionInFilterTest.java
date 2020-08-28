@@ -28,7 +28,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.command.Assign;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
@@ -176,8 +175,7 @@ class RejectionInFilterTest {
                     .setVisitorCount(command.getVisitors().getCount())
                     .setReason("The caffetteria doesn't serve clients who bring their own food.")
                     .build();
-            RejectionEnvelope cause = RejectionEnvelope.from(envelope, rejection);
-            return reject(envelope, cause);
+            return reject(envelope, rejection);
         }
     }
 }

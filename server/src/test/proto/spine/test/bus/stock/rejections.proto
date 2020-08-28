@@ -7,7 +7,10 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.test.bus.command";
 
-message BusRejection {
+import "spine/test/bus/stock/share.proto";
 
-    string message = 1;
+message ShareCannotBeTraded {
+
+    stock.ShareId share = 1;
+    string reason = 2;
 }
