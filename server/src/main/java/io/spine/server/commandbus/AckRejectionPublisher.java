@@ -28,13 +28,15 @@ import io.spine.server.event.EventBus;
 import static io.spine.core.Status.StatusCase.REJECTION;
 
 /**
- * An observer which publishes {@code Ack} rejections to the {@link EventBus}.
+ * An observer which publishes rejections on {@linkplain Ack acknowledgement} to
+ * an {@link EventBus}.
  *
  * <p>The {@linkplain io.spine.core.Event rejection events} passed to the {@code Ack} instances are
- * by default generated in-place and thus not "known" to the system. The
- * {@code AckRejectionPublisher} ensures all types that {@linkplain io.spine.core.Subscribe
- * subscribe} or {@linkplain io.spine.server.event.React react} to them are notified when such
- * rejection occurs.
+ * by default generated in-place and thus not "known" to the system.
+ *
+ * <p>The {@code AckRejectionPublisher} ensures all types that {@linkplain io.spine.core.Subscribe
+ * subscribe} or {@linkplain io.spine.server.event.React react} to such rejection types are
+ * notified when a rejection occurs.
  */
 final class AckRejectionPublisher implements StreamObserver<Ack> {
 
