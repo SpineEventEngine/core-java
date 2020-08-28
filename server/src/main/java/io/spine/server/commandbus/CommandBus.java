@@ -192,8 +192,8 @@ public final class CommandBus
                 .build();
         StreamObserver<Ack> result = new CompositeObserver<>(ImmutableList.of(
                 wrappedSource,
-                commandAckMonitor,
-                immediateRejectionObserver
+                immediateRejectionObserver,
+                commandAckMonitor
         ));
         return result;
     }
