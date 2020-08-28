@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
 import io.spine.core.Ack;
-import io.spine.core.Acks;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Origin;
@@ -40,6 +39,7 @@ import io.spine.system.server.event.CommandRejected;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static io.spine.core.Acks.toCommandId;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -47,11 +47,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * A {@link StreamObserver} for {@link io.spine.core.Command Command}
  * {@linkplain Ack acknowledgement}.
  *
- * <p>Posts a system event whenever a command is acknowledged or errored.
- *
- * <p>{@code CommandAckMonitor} is designed to wrap instances of {@link StreamObserver}.
- * All the calls to {@link StreamObserver} methods on an instance of {@code CommandAckMonitor}
- * invoke respective methods on a {@code delegate} instance.
+ * <p>Posts a system event whenever a command is acknowledged or rejected.
  */
 final class CommandAckMonitor implements StreamObserver<Ack> {
 
@@ -89,7 +85,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private void postSystemEvent(Ack ack) {
         Status status = ack.getStatus();
-        CommandId commandId = Acks.toCommandId(ack);
+        CommandId commandId = toCommandId(ack);
         EventMessage systemEvent = systemEventFor(status, commandId);
         Command command = commands.get(commandId);
         checkState(command != null, "Unknown command ID encountered: `%s`.", commandId.value());

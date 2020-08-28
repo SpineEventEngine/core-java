@@ -96,12 +96,12 @@ public final class CommandBus
     private @MonotonicNonNull CommandValidator commandValidator;
 
     /**
-     * An observer which handles the {@linkplain io.spine.base.ThrowableMessage rejections} thrown
-     * by the bus {@linkplain BusFilter filters}.
+     * An observer which processes the {@linkplain io.spine.base.ThrowableMessage rejections}
+     * thrown by the bus {@linkplain BusFilter filters}.
      *
-     * <p>Is NO-OP at bus creation. Once an {@link EventBus} is {@linkplain #init(EventBus)
-     * injected} into this instance, the observer will start publishing the rejections to the said
-     * event bus.
+     * <p>Is NO-OP at bus creation. Once the {@link EventBus} is {@linkplain #inject(EventBus)
+     * injected} into this command bus instance, the observer will start publishing the rejections
+     * to the said event bus.
      *
      * <p>Can stay NO-OP in the test environment for the simplicity of tests.
      */
@@ -134,7 +134,13 @@ public final class CommandBus
         return multitenant;
     }
 
-    public void init(EventBus eventBus) {
+    /**
+     * Injects the corresponding {@link EventBus} into this instance of {@code CommandBus}.
+     *
+     * <p>This method is called by the {@link io.spine.server.BoundedContext BoundedContext} and is
+     * a part of context initialization process.
+     */
+    public void inject(EventBus eventBus) {
         checkNotNull(eventBus);
         immediateRejectionObserver = new AckRejectionPublisher(eventBus);
     }
