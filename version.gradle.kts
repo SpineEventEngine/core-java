@@ -39,7 +39,7 @@ val coreJava = "1.5.27"
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "1.5.27"
+val base = "1.5.29"
 val time = "1.5.24"
 
 project.extra.apply {
