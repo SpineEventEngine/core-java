@@ -21,7 +21,7 @@
 /**
  * This package provides classes for return values from message-handling methods.
  *
- * <h1>Overview</h1>
+ * <h3>Overview</h3>
  * 
  * <p>Although tuples are <a href="https://github.com/google/guava/wiki/IdeaGraveyard#tuples-for-n--2">
  * considered harmful</a> in general, they are useful for describing types of several messages
@@ -55,7 +55,7 @@
  * of handling messages. Programmers are strongly discouraged from using this package for
  * other purposes.
  *
- * <h1>Two groups of classes</h1>
+ * <h3>Two groups of classes</h3>
  * 
  * This package provides two groups of classes:
  * <ol>
@@ -64,13 +64,13 @@
  *     for returning only one message belonging the known set of types.
  * </ol>
  *
- * <h2>Generic Parameters</h2>
+ * <h3>Generic Parameters</h3>
  *
  * <p>Classes provided by this package can support up to 5 generic parameters.
  * These parameters are named from {@code <A>} through {@code <E>}. Types that can be passed to
  * these parameters are described in the sections below.
  *
- * <h1>Tuples</h1>
+ * <h3>Tuples</h3>
  *
  * <p>The following tuple classes are provided:
  * <ul>
@@ -92,7 +92,7 @@
  *     Pair&lt;TaskCreated, Optional&lt;TaskAssigned&gt;&gt; on(CreateTask cmd) { ... }
  * </pre>
  *
- * <h1>Alternatives</h1>
+ * <h3>Alternatives</h3>
  *
  * <p>In some cases it is needed to return one message from a limited set of possible options.
  * For example, the following method issues a command {@code MoveToTrash} if no work
@@ -117,7 +117,7 @@
  * If you face a such a need, consider splitting incoming message into two or more independent ones
  * so that their outcome is more obvious.
  *
- * <h1>Using Tuples with Alternatives</h1>
+ * <h3>Using Tuples with Alternatives</h3>
  *
  * <p>A {@link io.spine.server.tuple.Pair Pair} can be defined with the second parameter being one
  * of the {@link io.spine.server.tuple.Either Either} subclasses, and created using
