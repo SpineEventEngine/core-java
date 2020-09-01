@@ -119,7 +119,7 @@
  *
  * <h1>Using Tuples with Alternatives</h1>
  *
- * <p>A {@link io.spine.server.tuple.Pair Pair} can be defined with the second parameter being on
+ * <p>A {@link io.spine.server.tuple.Pair Pair} can be defined with the second parameter being one
  * of the {@link io.spine.server.tuple.Either Either} subclasses, and created using
  * {@link io.spine.server.tuple.Pair#withEither(com.google.protobuf.Message,
  * io.spine.server.tuple.Either) Pair.withEither()}.
