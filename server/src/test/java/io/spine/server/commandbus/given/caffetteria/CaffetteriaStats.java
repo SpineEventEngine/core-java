@@ -18,32 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
+package io.spine.server.commandbus.given.caffetteria;
 
-/**
- * Version of this library.
- */
-val coreJava = "1.5.27"
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.test.commandbus.CmdBusCaffetteriaId;
+import io.spine.test.commandbus.CmdBusCaffetteriaStats;
+import io.spine.test.commandbus.command.CaffetteriaRejections;
+import io.spine.test.commandbus.event.CmdBusTableAllocated;
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "1.5.29"
-val time = "1.5.24"
+public final class CaffetteriaStats extends Projection<CmdBusCaffetteriaId,
+                                                       CmdBusCaffetteriaStats,
+                                                       CmdBusCaffetteriaStats.Builder> {
 
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineTimeVersion"] = time
+    @Subscribe
+    void on(CmdBusTableAllocated event) {
+        builder().setVisitorCount(state().getVisitorCount() + event.getVisitorCount());
+    }
+
+    @Subscribe
+    void on(CaffetteriaRejections.CmdBusEntryDenied rejection) {
+        builder().setEntryDenied(state().getEntryDenied() + rejection.getVisitorCount());
+    }
 }

@@ -18,42 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.given.bus;
+package io.spine.server.commandbus.given.caffetteria;
 
-import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-import io.spine.test.event.EBTaskAdded;
-import io.spine.test.event.Task;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.test.commandbus.command.CmdBusAllocateTable;
+import io.spine.test.commandbus.command.CmdBusEntryDenied;
 
 import java.util.Optional;
 
-/**
- * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()}
- * property set to {@code true}.
- */
-public final class TaskCreatedFilter implements BusFilter<EventEnvelope> {
+import static io.spine.protobuf.AnyPacker.unpack;
 
-    private static final EventClass TASK_ADDED_CLASS = EventClass.from(EBTaskAdded.class);
+public final class BeachCustomerFilter implements BusFilter<CommandEnvelope> {
 
     @Override
-    public Optional<Ack> filter(EventEnvelope envelope) {
-        if (TASK_ADDED_CLASS.equals(envelope.messageClass())) {
-            EBTaskAdded message = (EBTaskAdded) envelope.message();
-            Task task = message.getTask();
-            if (task.getDone()) {
-                Error error = error();
-                return reject(envelope, error);
-            }
+    public Optional<Ack> filter(CommandEnvelope envelope) {
+        CmdBusAllocateTable command =
+                unpack(envelope.command()
+                               .getMessage(), CmdBusAllocateTable.class);
+        boolean withOwnFood = command.getVisitors()
+                                     .getBringOwnFood();
+        if (!withOwnFood) {
+            return letPass();
         }
-        return letPass();
-    }
-
-    private static Error error() {
-        return Error.newBuilder()
-                    .setMessage("The task cannot be created in a 'completed' state.")
-                    .build();
+        CmdBusEntryDenied rejection = CmdBusEntryDenied
+                .newBuilder()
+                .setId(command.getCaffetteria())
+                .setVisitorCount(command.getVisitors()
+                                        .getCount())
+                .setReason("This caffetteria doesn't serve clients who bring their own food.")
+                .build();
+        return reject(envelope, rejection);
     }
 }

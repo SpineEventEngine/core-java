@@ -18,42 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.grpc;
 
-import com.google.protobuf.Message;
-import io.spine.base.Error;
-import io.spine.core.Ack;
-import io.spine.server.MessageInvalid;
-import io.spine.server.type.MessageEnvelope;
-
-import java.util.Optional;
+import com.google.common.collect.ImmutableList;
+import io.grpc.stub.StreamObserver;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A filter validating the {@linkplain MessageEnvelope envelopes} with the given
- * {@link EnvelopeValidator}.
+ * A stream observer which delegates calls to multiple other observers with the same target type.
+ *
+ * <p>The observers are called in the exact same order in which they are specified on the object
+ * construction.
+ *
+ * @param <T>
+ *         the observed type
  */
-final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Message>
-        implements BusFilter<E> {
+public final class CompositeObserver<T> implements StreamObserver<T> {
 
-    private final EnvelopeValidator<E> validator;
+    private final ImmutableList<StreamObserver<? super T>> observers;
 
-    ValidatingFilter(EnvelopeValidator<E> validator) {
-        super();
-        this.validator = checkNotNull(validator);
+    public CompositeObserver(Iterable<StreamObserver<? super T>> observers) {
+        checkNotNull(observers);
+        this.observers = ImmutableList.copyOf(observers);
     }
 
     @Override
-    public Optional<Ack> filter(E envelope) {
-        checkNotNull(envelope);
-        Optional<MessageInvalid> violation = validator.validate(envelope);
-        if (violation.isPresent()) {
-            Error error = violation.get()
-                                   .asError();
-            return reject(envelope, error);
-        } else {
-            return letPass();
-        }
+    public void onNext(T value) {
+        observers.forEach(o -> o.onNext(value));
+    }
+
+    @Override
+    public void onError(Throwable t) {
+        observers.forEach(o -> o.onError(t));
+    }
+
+    @Override
+    public void onCompleted() {
+        observers.forEach(StreamObserver::onCompleted);
     }
 }

@@ -50,16 +50,16 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
     }
 
     @Override
-    public Optional<Ack> accept(E envelope) {
+    public Optional<Ack> filter(E envelope) {
         checkNotNull(envelope);
         checkOpen();
         for (BusFilter<E> filter : chain) {
-            Optional<Ack> output = filter.accept(envelope);
+            Optional<Ack> output = filter.filter(envelope);
             if (output.isPresent()) {
                 return output;
             }
         }
-        return Optional.empty();
+        return letPass();
     }
 
     boolean contains(BusFilter<E> filter) {

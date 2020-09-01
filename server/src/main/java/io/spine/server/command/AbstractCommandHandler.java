@@ -80,6 +80,7 @@ public abstract class AbstractCommandHandler
                 .from(method.invoke(this, envelope))
                 .onEvents(this::postEvents)
                 .onError(error -> onError(envelope, error))
+                .onRejection(rejection -> onRejection(envelope, rejection))
                 .handle();
     }
 
