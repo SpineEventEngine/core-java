@@ -83,7 +83,8 @@ public final class Pair<A extends Message, B>
     public static <A extends Message, B extends Message>
     Pair<A, Optional<B>> withOptional(
             A a,
-            @SuppressWarnings("OptionalUsedAsFieldOrParameterType") /* see Javadoc */ Optional<B> b
+            @SuppressWarnings("OptionalUsedAsFieldOrParameterType") /* A special case of
+             construction with available instance of `Optional`. */ Optional<B> b
     ) {
         checkNotNullOrEmpty(a);
         checkNotNull(b);
