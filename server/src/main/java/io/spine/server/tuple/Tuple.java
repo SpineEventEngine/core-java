@@ -36,6 +36,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Abstract base for tuple classes.
