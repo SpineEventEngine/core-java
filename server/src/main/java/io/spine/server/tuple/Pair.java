@@ -68,6 +68,8 @@ public final class Pair<A extends Message, B>
 
     /**
      * Creates a pair with optionally present second value.
+     *
+     * @see #withOptional(Message, Optional)
      */
     public static <A extends Message, B extends Message>
     Pair<A, Optional<B>> withNullable(A a, @Nullable B b) {
@@ -79,12 +81,17 @@ public final class Pair<A extends Message, B>
 
     /**
      * Creates a pair with optionally present second value.
+     *
+     * @see #withNullable(Message, Message)
+     * @apiNote This method treats a special case of construction using already available
+     *         instance of {@code Optional}. This avoids unwrapping of {@code Optional} which would
+     *         have been required for passing an optional value to
+     *         {@link #withNullable(Message, Message)}.
      */
     public static <A extends Message, B extends Message>
     Pair<A, Optional<B>> withOptional(
             A a,
-            @SuppressWarnings("OptionalUsedAsFieldOrParameterType") /* A special case of
-             construction with available instance of `Optional`. */ Optional<B> b
+            @SuppressWarnings("OptionalUsedAsFieldOrParameterType") /* see @apiNote */ Optional<B> b
     ) {
         checkNotNullOrEmpty(a);
         checkNotNull(b);
