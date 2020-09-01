@@ -111,6 +111,10 @@ public final class Pair<A extends Message, B>
         return value(this, 1);
     }
 
+    /*
+     * Companion code
+     *******************/
+
     @CanIgnoreReturnValue
     private static <M extends Message> M checkNotNullOrEmpty(M value) {
         return checkNotNullOrEmpty(Pair.class, value);
