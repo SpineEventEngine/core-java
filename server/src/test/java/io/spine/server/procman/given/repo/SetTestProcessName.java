@@ -34,9 +34,10 @@ public final class SetTestProcessName
 
     @Override
     public Project apply(Project project) {
-        Project newState = project.toBuilder()
-                               .setName(NEW_NAME)
-                               .build();
+        Project newState = project
+                .toBuilder()
+                .setName(NEW_NAME)
+                .build();
         return newState;
     }
 }

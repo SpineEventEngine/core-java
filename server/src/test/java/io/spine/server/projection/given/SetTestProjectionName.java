@@ -34,9 +34,10 @@ public final class SetTestProjectionName
 
     @Override
     public Project apply(Project project) {
-        Project result = project.toBuilder()
-                                .setName(NEW_NAME)
-                                .build();
+        Project result = project
+                .toBuilder()
+                .setName(NEW_NAME)
+                .build();
         return result;
     }
 }
