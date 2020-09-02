@@ -688,7 +688,6 @@ class ProcessManagerRepositoryTest
 
     @Test
     @DisplayName("update entity via a custom migration")
-    @Disabled
     void performCustomMigration() {
         // Store a new process manager instance in the repository.
         ProjectId id = createId(42);
