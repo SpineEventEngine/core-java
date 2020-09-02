@@ -704,7 +704,7 @@ class ProcessManagerRepositoryTest
         // Init filters by the `name` column.
         TargetFilters filters = targetFilters(Project.Column.name(), SetTestProcessName.NEW_NAME);
 
-        // Check nothing is found as the entity state was not yet updated.
+        // Check nothing is found as the entity states were not yet updated.
         Iterator<TestProcessManager> found =
                 repository.find(filters, ResponseFormat.getDefaultInstance());
         assertThat(found.hasNext()).isFalse();

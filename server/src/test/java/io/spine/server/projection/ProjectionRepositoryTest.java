@@ -48,6 +48,8 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMe
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
+import io.spine.server.projection.given.SetTestProjectionId;
+import io.spine.server.projection.given.SetTestProjectionName;
 import io.spine.server.projection.given.TestProjection;
 import io.spine.server.projection.migration.MarkProjectionArchived;
 import io.spine.server.projection.migration.MarkProjectionDeleted;
@@ -546,6 +548,75 @@ class ProjectionRepositoryTest
 
         assertThrows(IllegalStateException.class, () ->
                 repo.registerWith(context));
+    }
+
+    @Test
+    @DisplayName("update entity via a custom migration")
+    void performCustomMigration() {
+        // Store a new process manager instance in the repository.
+        ProjectId id = createId(42);
+        TestProjectionRepository repository = repository();
+        TestProjection projection = new TestProjection(id);
+        repository.store(projection);
+
+        // Init filters by the `id_string` column.
+        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+
+        // Check nothing is found as column now should be empty.
+        Iterator<TestProjection> found =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the columns update.
+        repository.applyMigration(id, new SetTestProjectionId());
+
+        // Check the entity is now found by the provided filters.
+        Iterator<TestProjection> afterMigration =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(afterMigration.hasNext()).isTrue();
+
+        // Check the column value is propagated to the entity state.
+        TestProjection entityWithColumns = afterMigration.next();
+        assertThat(entityWithColumns.state()
+                                    .getIdString()).isEqualTo(id.toString());
+    }
+
+    @Test
+    @DisplayName("update multiple entities via a custom migration")
+    void performCustomMigrationForMultiple() {
+        // Store three entities to the repository.
+        ProjectId id1 = createId(1);
+        ProjectId id2 = createId(2);
+        ProjectId id3 = createId(3);
+        TestProjectionRepository repository = repository();
+        TestProjection projection1 = new TestProjection(id1);
+        TestProjection projection2 = new TestProjection(id2);
+        TestProjection projection3 = new TestProjection(id3);
+        repository.store(projection1);
+        repository.store(projection2);
+        repository.store(projection3);
+
+        // Init filters by the `name` column.
+        TargetFilters filters =
+                targetFilters(Project.Column.name(), SetTestProjectionName.NEW_NAME);
+
+        // Check nothing is found as the entity states were not yet updated.
+        Iterator<TestProjection> found =
+                repository.find(filters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the column update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new SetTestProjectionName());
+
+        // Check the entities are now found by the provided filters.
+        Iterator<TestProjection> foundAfterMigration =
+                repository.find(filters, ResponseFormat.getDefaultInstance());
+
+        ImmutableList<TestProjection> results = ImmutableList.copyOf(foundAfterMigration);
+        assertThat(results).hasSize(2);
+        assertThat(results)
+                .comparingElementsUsing(idCorrespondence())
+                .containsExactly(id1, id2);
     }
 
     @Test
