@@ -195,6 +195,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         Transaction<I, E, S, ?> tx = startTransaction(entity);
         EntityLifecycleMonitor<I> monitor = configureLifecycleMonitor(id);
         tx.setListener(monitor);
+        currentOperation().tx = tx;
         return tx;
     }
 
@@ -238,6 +239,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         private boolean physicallyRemoveRecord;
 
         private final E entity;
+        private @MonotonicNonNull Transaction<I, E, S, ?> tx;
         private final RecordBasedRepository<I, E, S> repository;
 
         private @MonotonicNonNull Event systemEvent;
@@ -249,16 +251,18 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
 
         private void updateState(S newState) {
             if (!entity.state().equals(newState)) {
-                entity.updateState(newState, increment(entity.version()));
+                tx.builder().mergeFrom(newState);
+                Version version = increment(entity.version());
+                tx.setVersion(version);
             }
         }
 
         private void updateLifecycle() {
             if (archive) {
-                entity.setArchived(true);
+                tx.setArchived(true);
             }
             if (delete) {
-                entity.setDeleted(true);
+                tx.setDeleted(true);
             }
         }
 
