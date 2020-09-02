@@ -56,6 +56,7 @@ import io.spine.server.procman.given.repo.ProjectCompletion;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.SetTestProcessId;
+import io.spine.server.procman.given.repo.SetTestProcessName;
 import io.spine.server.procman.given.repo.TestProcessManager;
 import io.spine.server.procman.given.repo.TestProcessManagerRepository;
 import io.spine.server.procman.migration.MarkPmArchived;
@@ -90,7 +91,6 @@ import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -656,37 +656,6 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns via migration operation")
-    void updateColumns() {
-        // Store a new process manager instance in the repository.
-        ProjectId id = createId(42);
-        TestProcessManagerRepository repository = repository();
-        TestProcessManager pm = new TestProcessManager(id);
-        repository.store(pm);
-
-        // Init filters by the `id_string` column.
-        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
-
-        // Check nothing is found as column now should be empty.
-        Iterator<TestProcessManager> found =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
-        assertThat(found.hasNext()).isFalse();
-
-        // Apply the columns update.
-        repository.applyMigration(id, new UpdatePmColumns<>());
-
-        // Check the entity is now found by the provided filters.
-        Iterator<TestProcessManager> afterMigration =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
-        assertThat(afterMigration.hasNext()).isTrue();
-
-        // Check the column value is propagated to the entity state.
-        TestProcessManager entityWithColumns = afterMigration.next();
-        assertThat(entityWithColumns.state()
-                                    .getIdString()).isEqualTo(id.toString());
-    }
-
-    @Test
     @DisplayName("update entity via a custom migration")
     void performCustomMigration() {
         // Store a new process manager instance in the repository.
@@ -705,6 +674,74 @@ class ProcessManagerRepositoryTest
 
         // Apply the columns update.
         repository.applyMigration(id, new SetTestProcessId());
+
+        // Check the entity is now found by the provided filters.
+        Iterator<TestProcessManager> afterMigration =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(afterMigration.hasNext()).isTrue();
+
+        // Check the column value is propagated to the entity state.
+        TestProcessManager entityWithColumns = afterMigration.next();
+        assertThat(entityWithColumns.state()
+                                    .getIdString()).isEqualTo(id.toString());
+    }
+
+    @Test
+    @DisplayName("update multiple entities via a custom migration")
+    void performCustomMigrationForMultiple() {
+        // Store three entities to the repository.
+        ProjectId id1 = createId(1);
+        ProjectId id2 = createId(2);
+        ProjectId id3 = createId(3);
+        TestProcessManagerRepository repository = repository();
+        TestProcessManager pm1 = new TestProcessManager(id1);
+        TestProcessManager pm2 = new TestProcessManager(id2);
+        TestProcessManager pm3 = new TestProcessManager(id3);
+        repository.store(pm1);
+        repository.store(pm2);
+        repository.store(pm3);
+
+        // Init filters by the `name` column.
+        TargetFilters filters = targetFilters(Project.Column.name(), SetTestProcessName.NEW_NAME);
+
+        // Check nothing is found as the entity state was not yet updated.
+        Iterator<TestProcessManager> found =
+                repository.find(filters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the column update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new SetTestProcessName());
+
+        // Check the entities are now found by the provided filters.
+        Iterator<TestProcessManager> foundAfterMigration =
+                repository.find(filters, ResponseFormat.getDefaultInstance());
+
+        ImmutableList<TestProcessManager> results = ImmutableList.copyOf(foundAfterMigration);
+        assertThat(results).hasSize(2);
+        assertThat(results)
+                .comparingElementsUsing(idCorrespondence())
+                .containsExactly(id1, id2);
+    }
+
+    @Test
+    @DisplayName("update columns via migration operation")
+    void updateColumns() {
+        // Store a new process manager instance in the repository.
+        ProjectId id = createId(42);
+        TestProcessManagerRepository repository = repository();
+        TestProcessManager pm = new TestProcessManager(id);
+        repository.store(pm);
+
+        // Init filters by the `id_string` column.
+        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+
+        // Check nothing is found as column now should be empty.
+        Iterator<TestProcessManager> found =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the columns update.
+        repository.applyMigration(id, new UpdatePmColumns<>());
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProcessManager> afterMigration =

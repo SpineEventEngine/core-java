@@ -25,18 +25,18 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 
 /**
- * Sets the {@code id_string} from the {@code id} field.
+ * A migration which sets the process name to a predefined {@linkplain #NEW_NAME value}.
  */
-public final class SetTestProcessId
+public final class SetTestProcessName
         extends ProcessManagerMigration<ProjectId, TestProcessManager, Project, Project.Builder> {
+
+    public static final String NEW_NAME = "Migrated project";
 
     @Override
     public Project apply(Project project) {
-        ProjectId id = id();
-        Project result = project
-                .toBuilder()
-                .setIdString(id.toString())
-                .vBuild();
-        return result;
+        Project newState = project.toBuilder()
+                               .setName(NEW_NAME)
+                               .build();
+        return newState;
     }
 }
