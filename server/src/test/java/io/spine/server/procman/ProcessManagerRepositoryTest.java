@@ -55,6 +55,7 @@ import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
 import io.spine.server.procman.given.repo.ProjectCompletion;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
+import io.spine.server.procman.given.repo.SetTestProcessId;
 import io.spine.server.procman.given.repo.TestProcessManager;
 import io.spine.server.procman.given.repo.TestProcessManagerRepository;
 import io.spine.server.procman.migration.MarkPmArchived;
@@ -89,6 +90,7 @@ import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -319,7 +321,7 @@ class ProcessManagerRepositoryTest
         PmTaskAdded message = subscriber.getRemembered();
         assertNotNull(message);
         assertThat(message.getProjectId())
-             .isEqualTo(ID);
+                .isEqualTo(ID);
     }
 
     @Nested
@@ -346,9 +348,10 @@ class ProcessManagerRepositoryTest
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(event.messageId());
             PmProjectStarted eventMessage = (PmProjectStarted) event.enclosedMessage();
-            assertThat(unpack(systemEvent.getEntity().getId()))
-                      .comparingExpectedFieldsOnly()
-                      .isEqualTo(eventMessage.getProjectId());
+            assertThat(unpack(systemEvent.getEntity()
+                                         .getId()))
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(eventMessage.getProjectId());
         }
 
         @Test
@@ -370,7 +373,8 @@ class ProcessManagerRepositoryTest
             assertThat(event.getDuplicateCommand())
                     .isEqualTo(command.messageId());
             PmCreateProject commandMessage = (PmCreateProject) command.enclosedMessage();
-            assertThat(unpack(event.getEntity().getId()))
+            assertThat(unpack(event.getEntity()
+                                   .getId()))
                     .isEqualTo(commandMessage.getProjectId());
         }
     }
@@ -506,9 +510,12 @@ class ProcessManagerRepositoryTest
         List<RoutingFailed> failures = monitor.routingFailures();
         assertThat(failures).hasSize(1);
         RoutingFailed failure = failures.get(0);
-        assertThat(failure.getEntityType().getJavaClassName())
-                .isEqualTo(repo.entityClass().getCanonicalName());
-        assertThat(failure.getError().getType())
+        assertThat(failure.getEntityType()
+                          .getJavaClassName())
+                .isEqualTo(repo.entityClass()
+                               .getCanonicalName());
+        assertThat(failure.getError()
+                          .getType())
                 .isEqualTo(IllegalStateException.class.getName());
     }
 
@@ -675,7 +682,40 @@ class ProcessManagerRepositoryTest
 
         // Check the column value is propagated to the entity state.
         TestProcessManager entityWithColumns = afterMigration.next();
-        assertThat(entityWithColumns.state().getIdString()).isEqualTo(id.toString());
+        assertThat(entityWithColumns.state()
+                                    .getIdString()).isEqualTo(id.toString());
+    }
+
+    @Test
+    @DisplayName("update entity via a custom migration")
+    @Disabled
+    void performCustomMigration() {
+        // Store a new process manager instance in the repository.
+        ProjectId id = createId(42);
+        TestProcessManagerRepository repository = repository();
+        TestProcessManager pm = new TestProcessManager(id);
+        repository.store(pm);
+
+        // Init filters by the `id_string` column.
+        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+
+        // Check nothing is found as column now should be empty.
+        Iterator<TestProcessManager> found =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the columns update.
+        repository.applyMigration(id, new SetTestProcessId());
+
+        // Check the entity is now found by the provided filters.
+        Iterator<TestProcessManager> afterMigration =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(afterMigration.hasNext()).isTrue();
+
+        // Check the column value is propagated to the entity state.
+        TestProcessManager entityWithColumns = afterMigration.next();
+        assertThat(entityWithColumns.state()
+                                    .getIdString()).isEqualTo(id.toString());
     }
 
     @Test
@@ -724,7 +764,8 @@ class ProcessManagerRepositoryTest
 
         Optional<TestProcessManager> found = repository().find(id);
         assertThat(found.isPresent()).isTrue();
-        assertThat(found.get().isArchived()).isTrue();
+        assertThat(found.get()
+                        .isArchived()).isTrue();
     }
 
     @Test
@@ -738,7 +779,8 @@ class ProcessManagerRepositoryTest
 
         Optional<TestProcessManager> found = repository().find(id);
         assertThat(found.isPresent()).isTrue();
-        assertThat(found.get().isDeleted()).isTrue();
+        assertThat(found.get()
+                        .isDeleted()).isTrue();
     }
 
     @Test
@@ -773,6 +815,7 @@ class ProcessManagerRepositoryTest
     }
 
     private static boolean hasId(TestProcessManager projection, ProjectId id) {
-        return projection.id().equals(id);
+        return projection.id()
+                         .equals(id);
     }
 }
