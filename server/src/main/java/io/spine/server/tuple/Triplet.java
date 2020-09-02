@@ -106,10 +106,6 @@ public final class Triplet<A extends Message, B, C>
         return value(this, 2);
     }
 
-    /*
-     * Companion code
-     *******************/
-
     @CanIgnoreReturnValue
     private static <M extends Message> M checkNotNullOrEmpty(M value) {
         return checkNotNullOrEmpty(Triplet.class, value);

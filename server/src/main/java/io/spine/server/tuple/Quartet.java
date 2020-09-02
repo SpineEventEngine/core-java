@@ -127,10 +127,6 @@ public final class Quartet<A extends Message, B, C, D>
         return value(this, 3);
     }
 
-    /*
-     * Companion code
-     *******************/
-
     @CanIgnoreReturnValue
     private static <M extends Message> M checkNotNullOrEmpty(M value) {
         return checkNotNullOrEmpty(Quartet.class, value);
