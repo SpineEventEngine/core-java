@@ -34,12 +34,12 @@
 /**
  * Version of this library.
  */
-val coreJava = "1.5.28"
+val coreJava = "1.5.29"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "1.5.29"
+val base = "1.5.31"
 val time = "1.5.24"
 
 project.extra.apply {
