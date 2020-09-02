@@ -20,6 +20,7 @@
 
 package io.spine.server.tuple;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
@@ -69,7 +70,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     public static
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     Quintet<A, B, C, D, E> of(A a, B b, C c, D d, E e) {
-        checkAllNotNullOrEmpty(Quintet.class, a, b, c, d, e);
+        checkAllNotNullOrEmpty(a, b, c, d, e);
         Quintet<A, B, C, D, E> result = new Quintet<>(a, b, c, d, e);
         return result;
     }
@@ -81,8 +82,8 @@ public final class Quintet<A extends Message, B, C, D, E>
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     Quintet<A, B, C, D, Optional<E>>
     withNullable(A a, B b, C c, D d, @Nullable E e) {
-        checkAllNotNullOrEmpty(Quintet.class, a, b, c, d);
-        checkNotEmpty(Quintet.class, e);
+        checkAllNotNullOrEmpty(a, b, c, d);
+        checkNotEmpty(e);
         Quintet<A, B, C, D, Optional<E>> result = new Quintet<>(a, b, c, d, ofNullable(e));
         return result;
     }
@@ -94,8 +95,8 @@ public final class Quintet<A extends Message, B, C, D, E>
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     Quintet<A, B, C, Optional<D>, Optional<E>>
     withNullable2(A a, B b, C c, @Nullable D d, @Nullable E e) {
-        checkAllNotNullOrEmpty(Quintet.class, a, b, c);
-        checkAllNotEmpty(Quintet.class, e, d);
+        checkAllNotNullOrEmpty(a, b, c);
+        checkAllNotEmpty(e, d);
         Quintet<A, B, C, Optional<D>, Optional<E>> result =
                 new Quintet<>(a, b, c, ofNullable(d), ofNullable(e));
         return result;
@@ -108,8 +109,8 @@ public final class Quintet<A extends Message, B, C, D, E>
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     Quintet<A, B, Optional<C>, Optional<D>, Optional<E>>
     withNullable3(A a, B b, @Nullable C c, @Nullable D d, @Nullable E e) {
-        checkAllNotNullOrEmpty(Quintet.class, a, b);
-        checkAllNotEmpty(Quintet.class, c, d, e);
+        checkAllNotNullOrEmpty(a, b);
+        checkAllNotEmpty(c, d, e);
         Quintet<A, B, Optional<C>, Optional<D>, Optional<E>> result =
                 new Quintet<>(a, b, ofNullable(c), ofNullable(d), ofNullable(e));
         return result;
@@ -122,8 +123,8 @@ public final class Quintet<A extends Message, B, C, D, E>
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     Quintet<A, Optional<B>, Optional<C>, Optional<D>, Optional<E>>
     withNullable4(A a, @Nullable B b, @Nullable C c, @Nullable D d, @Nullable E e) {
-        checkNotNullOrEmpty(Quintet.class, a);
-        checkAllNotEmpty(Quintet.class, b, c, d, e);
+        checkNotNullOrEmpty(a);
+        checkAllNotEmpty(b, c, d, e);
         Quintet<A, Optional<B>, Optional<C>, Optional<D>, Optional<E>> result =
                 new Quintet<>(a, ofNullable(b), ofNullable(c), ofNullable(d), ofNullable(e));
         return result;
@@ -152,5 +153,25 @@ public final class Quintet<A extends Message, B, C, D, E>
     @Override
     public E getE() {
         return value(this, 4);
+    }
+
+    @CanIgnoreReturnValue
+    private static <M extends Message> M checkNotNullOrEmpty(M value) {
+        return checkNotNullOrEmpty(Quintet.class, value);
+    }
+
+    @CanIgnoreReturnValue
+    private static <M extends Message> @Nullable M checkNotEmpty(@Nullable M value) {
+        return checkNotEmpty(Quintet.class, value);
+    }
+
+    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
+    private static void checkAllNotNullOrEmpty(Message... values) {
+        checkAllNotNullOrEmpty(Quintet.class, values);
+    }
+
+    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
+    private static void checkAllNotEmpty(Message... values) {
+        checkAllNotEmpty(Quintet.class, values);
     }
 }

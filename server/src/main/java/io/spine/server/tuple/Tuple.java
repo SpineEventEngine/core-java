@@ -77,8 +77,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * @throws IllegalArgumentException if the passed value is {@link Empty}
      */
     @CanIgnoreReturnValue
-    static @Nullable <M extends Message, T extends Tuple>
-    M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
+    static <M extends Message, T extends Tuple>
+    @Nullable M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
         if (value == null) {
             return null;
         }
@@ -95,8 +95,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     @CanIgnoreReturnValue
     static <M extends Message, T extends Tuple>
     M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
-        checkNotNull(value);
         M result = checkNotEmpty(checkingClass, value);
+        checkNotNull(result);
         return result;
     }
 
