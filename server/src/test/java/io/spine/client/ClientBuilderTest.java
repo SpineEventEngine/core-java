@@ -21,7 +21,6 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Truth8;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.spine.core.TenantId;
@@ -39,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.client.Client.connectTo;
 import static io.spine.client.Client.usingChannel;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -175,8 +175,7 @@ class ClientBuilderTest {
         @DisplayName("assuming single-tenant context if not set")
         void singleTenant() {
             client = builder.build();
-            Truth8.assertThat(client.tenant())
-                  .isEmpty();
+            assertThat(client.tenant()).isEmpty();
         }
 
         @Test
@@ -185,8 +184,7 @@ class ClientBuilderTest {
             TenantId expected = GivenTenantId.generate();
             client = builder.forTenant(expected)
                             .build();
-            Truth8.assertThat(client.tenant())
-                  .hasValue(expected);
+            assertThat(client.tenant()).hasValue(expected);
         }
 
         @Test

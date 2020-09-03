@@ -20,7 +20,6 @@
 package io.spine.server;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.Truth8;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerServiceDefinition;
@@ -35,6 +34,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,8 +63,7 @@ class GrpcContainerTest {
         GrpcContainer.Builder builder = GrpcContainer
                 .atPort(port);
 
-        Truth8.assertThat(builder.port())
-              .hasValue(port);
+        assertThat(builder.port()).hasValue(port);
 
         int count = 3;
         for (int i = 0; i < count; i++) {

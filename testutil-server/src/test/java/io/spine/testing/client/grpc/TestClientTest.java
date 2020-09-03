@@ -20,7 +20,6 @@
 
 package io.spine.testing.client.grpc;
 
-import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.client.QueryResponse;
 import io.spine.core.Ack;
@@ -38,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Optional;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.core.Responses.statusOk;
@@ -113,8 +113,7 @@ class TestClientTest {
     @Test
     void shutdown() throws InterruptedException {
         // Ensure that the client is operational.
-        Truth8.assertThat(ping(RIGHT))
-              .isPresent();
+        assertThat(ping(RIGHT)).isPresent();
 
         assertFalse(client.isShutdown());
         client.shutdown();

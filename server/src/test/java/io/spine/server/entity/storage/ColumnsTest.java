@@ -22,7 +22,6 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Truth8;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.server.storage.LifecycleFlagField;
@@ -33,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -58,7 +58,7 @@ class ColumnsTest {
         ColumnName columnName = ColumnName.of("description");
         Optional<Column> descriptionColumn = columns.find(columnName);
 
-        Truth8.assertThat(descriptionColumn).isPresent();
+        assertThat(descriptionColumn).isPresent();
     }
 
     @Test
@@ -86,7 +86,7 @@ class ColumnsTest {
         ColumnName existent = ColumnName.of("name");
         Optional<Column> column = columns.find(existent);
 
-        Truth8.assertThat(column).isPresent();
+        assertThat(column).isPresent();
     }
 
     @Test
@@ -95,7 +95,7 @@ class ColumnsTest {
         ColumnName nonExistent = ColumnName.of("non-existent-column");
         Optional<Column> result = columns.find(nonExistent);
 
-        Truth8.assertThat(result).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test

@@ -21,7 +21,6 @@
 package io.spine.server.route;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Truth8;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.type.CommandEnvelope;
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.random;
@@ -115,8 +115,8 @@ class CommandRoutingTest {
         assertThat(commandRouting.route(RegisterUser.class, customRoute))
                 .isEqualTo(commandRouting);
 
-        Truth8.assertThat(commandRouting.get(RegisterUser.class))
-              .hasValue(customRoute);
+        assertThat(commandRouting.get(RegisterUser.class))
+                .hasValue(customRoute);
     }
 
     @Test

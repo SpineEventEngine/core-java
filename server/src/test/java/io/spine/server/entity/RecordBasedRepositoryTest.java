@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.collect.Lists;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.OptionalSubject;
-import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -56,6 +55,7 @@ import java.util.function.Supplier;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.all;
@@ -217,7 +217,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         }
 
         private void assertResult(Optional<E> optional) {
-            OptionalSubject assertResult = Truth8.assertThat(optional);
+            OptionalSubject assertResult = assertThat(optional);
             assertResult.isPresent();
             assertResult.hasValue(entity);
         }
@@ -517,7 +517,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
 
         private OptionalSubject assertFound(I id) {
             Optional<E> entity = repository().findActive(id);
-            return Truth8.assertThat(entity);
+            return assertThat(entity);
         }
     }
 

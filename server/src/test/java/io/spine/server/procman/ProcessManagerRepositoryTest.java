@@ -23,7 +23,6 @@ package io.spine.server.procman;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Correspondence;
-import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
@@ -104,6 +103,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
@@ -587,8 +587,8 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        Truth8.assertThat(filter.filter(arbitraryEvent))
-              .isPresent();
+        assertThat(filter.filter(arbitraryEvent))
+                .isPresent();
 
         Any newState = pack(currentTime());
         Any oldState = pack(Timestamp.getDefaultInstance());
@@ -604,8 +604,8 @@ class ProcessManagerRepositoryTest
                 .setOldState(oldState)
                 .setNewState(newState)
                 .build();
-        Truth8.assertThat(filter.filter(discardedEvent))
-              .isEmpty();
+        assertThat(filter.filter(discardedEvent))
+                .isEmpty();
     }
 
     @Test
@@ -807,7 +807,7 @@ class ProcessManagerRepositoryTest
         repository().applyMigration(id, new MarkPmArchived<>());
 
         Optional<TestProcessManager> found = repository().find(id);
-        Truth8.assertThat(found).isPresent();
+        assertThat(found).isPresent();
         assertThat(found.get()
                         .isArchived()).isTrue();
     }
@@ -822,7 +822,7 @@ class ProcessManagerRepositoryTest
         repository().applyMigration(id, new MarkPmDeleted<>());
 
         Optional<TestProcessManager> found = repository().find(id);
-        Truth8.assertThat(found).isPresent();
+        assertThat(found).isPresent();
         assertThat(found.get()
                         .isDeleted()).isTrue();
     }
@@ -837,7 +837,7 @@ class ProcessManagerRepositoryTest
         repository().applyMigration(id, new RemovePmFromStorage<>());
 
         Optional<TestProcessManager> found = repository().find(id);
-        Truth8.assertThat(found).isEmpty();
+        assertThat(found).isEmpty();
     }
 
     private static TargetFilters targetFilters(EntityColumn column, String value) {
