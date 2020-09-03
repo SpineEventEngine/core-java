@@ -723,8 +723,8 @@ class ProcessManagerRepositoryTest
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(foundAfterMigration);
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(idCorrespondence())
-                .containsExactly(id1, id2);
+                .comparingElementsUsing(stateWithPropagatedName())
+                .containsExactly(pm1, pm2);
     }
 
     @Test
@@ -793,8 +793,8 @@ class ProcessManagerRepositoryTest
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(found);
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(idCorrespondence())
-                .containsExactly(id1, id2);
+                .comparingElementsUsing(stateWithUpdatedColumns())
+                .containsExactly(pm1, pm2);
     }
 
     @Test
@@ -854,11 +854,33 @@ class ProcessManagerRepositoryTest
                 .build();
     }
 
-    private static Correspondence<TestProcessManager, ProjectId> idCorrespondence() {
-        return Correspondence.from(ProcessManagerRepositoryTest::hasId, "has ID");
+    private static Correspondence<TestProcessManager, TestProcessManager> stateWithPropagatedName() {
+        return Correspondence.from(ProcessManagerRepositoryTest::hasStateWithName, "has state");
     }
 
-    private static boolean hasId(TestProcessManager processManager, ProjectId id) {
-        return id.equals(processManager.id());
+    private static boolean
+    hasStateWithName(TestProcessManager actual, TestProcessManager expected) {
+        Project expectedState = expected
+                .state()
+                .toBuilder()
+                .setIdString(expected.getIdString())
+                .setName(SetTestProcessName.NEW_NAME)
+                .build();
+        return actual.state().equals(expectedState);
+    }
+
+    private static Correspondence<TestProcessManager, TestProcessManager>
+    stateWithUpdatedColumns() {
+        return Correspondence.from(ProcessManagerRepositoryTest::hasStateWithColumns, "has state");
+    }
+
+    private static boolean
+    hasStateWithColumns(TestProcessManager actual, TestProcessManager expected) {
+        Project expectedState = expected
+                .state()
+                .toBuilder()
+                .setIdString(expected.getIdString())
+                .build();
+        return actual.state().equals(expectedState);
     }
 }

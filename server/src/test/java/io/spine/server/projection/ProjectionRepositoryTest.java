@@ -626,8 +626,8 @@ class ProjectionRepositoryTest
         ImmutableList<TestProjection> results = ImmutableList.copyOf(foundAfterMigration);
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(idCorrespondence())
-                .containsExactly(id1, id2);
+                .comparingElementsUsing(stateWithPropagatedName())
+                .containsExactly(projection1, projection2);
     }
 
     @Test
@@ -696,8 +696,8 @@ class ProjectionRepositoryTest
         ImmutableList<TestProjection> results = ImmutableList.copyOf(found);
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(idCorrespondence())
-                .containsExactly(id1, id2);
+                .comparingElementsUsing(stateWithUpdatedColumns())
+                .containsExactly(projection1, projection2);
     }
 
     @Test
@@ -760,11 +760,30 @@ class ProjectionRepositoryTest
                 .build();
     }
 
-    private static Correspondence<TestProjection, ProjectId> idCorrespondence() {
-        return Correspondence.from(ProjectionRepositoryTest::hasId, "has ID");
+    private static Correspondence<TestProjection, TestProjection> stateWithPropagatedName() {
+        return Correspondence.from(ProjectionRepositoryTest::hasStateWithName, "has state");
     }
 
-    private static boolean hasId(TestProjection projection, ProjectId id) {
-        return id.equals(projection.id());
+    private static boolean hasStateWithName(TestProjection actual, TestProjection expected) {
+        Project expectedState = expected
+                .state()
+                .toBuilder()
+                .setIdString(expected.getIdString())
+                .setName(SetTestProjectionName.NEW_NAME)
+                .build();
+        return actual.state().equals(expectedState);
+    }
+
+    private static Correspondence<TestProjection, TestProjection> stateWithUpdatedColumns() {
+        return Correspondence.from(ProjectionRepositoryTest::hasStateWithColumns, "has state");
+    }
+
+    private static boolean hasStateWithColumns(TestProjection actual, TestProjection expected) {
+        Project expectedState = expected
+                .state()
+                .toBuilder()
+                .setIdString(expected.getIdString())
+                .build();
+        return actual.state().equals(expectedState);
     }
 }
