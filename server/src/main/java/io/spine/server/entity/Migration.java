@@ -57,7 +57,7 @@ import static io.spine.protobuf.Messages.isDefault;
  *
  * <p>To create a user-defined {@code Migration} in real life scenarios, consider inheriting from
  * {@link io.spine.server.projection.ProjectionMigration ProjectionMigration} and
- * {@link io.spine.server.procman.ProcessManagerMigration ProjectionMigration} types.
+ * {@link io.spine.server.procman.ProcessManagerMigration ProcessManagerMigration} types.
  *
  * @param <I>
  *         the entity ID type
@@ -76,8 +76,9 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     private @Nullable Operation<I, S, E> currentOperation;
 
     /**
-     * Applies the migration to a given entity, starting a new migration
-     * {@linkplain Operation operation}.
+     * Applies the migration {@linkplain Operation operation} to a given entity.
+     *
+     * @see Operation Migration.Operation for details
      */
     final void applyTo(E entity, RecordBasedRepository<I, E, S> repository) {
         currentOperation = new Operation<>(entity, repository);
@@ -229,8 +230,17 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     }
 
     /**
-     * A migration operation on an entity instance.
-     */
+     * A migration operation on a single entity.
+     *
+     * <p>The operation is performed in scope of an active {@link Transaction}.
+     *
+     * <p>All entity state and meta-data changes are propagated to the transaction and remain in
+     * pending state until a transaction {@linkplain Transaction#commit() commit} which is the
+     * last step of a migration operation.
+     *
+     * <p>On a transaction commit, all changes are propagated to the actual entity passed to
+     * {@link Migration#applyTo(TransactionalEntity, RecordBasedRepository)}, modifying it in-place.
+     * */
     private static class Operation<I,
                                    S extends EntityState,
                                    E extends TransactionalEntity<I, S, ?>> {
