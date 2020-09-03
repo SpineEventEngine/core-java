@@ -567,7 +567,7 @@ class ProjectionRepositoryTest
                 repository.find(targetFilters, ResponseFormat.getDefaultInstance());
         assertThat(found.hasNext()).isFalse();
 
-        // Apply the columns update.
+        // Apply the migration.
         repository.applyMigration(id, new SetTestProjectionId());
 
         // Check the entity is now found by the provided filters.
@@ -575,10 +575,14 @@ class ProjectionRepositoryTest
                 repository.find(targetFilters, ResponseFormat.getDefaultInstance());
         assertThat(afterMigration.hasNext()).isTrue();
 
-        // Check the column value is propagated to the entity state.
+        // Check the new entity state has all fields updated as expected.
         TestProjection entityWithColumns = afterMigration.next();
-        assertThat(entityWithColumns.state()
-                                    .getIdString()).isEqualTo(id.toString());
+        Project expectedState = projection
+                .state()
+                .toBuilder()
+                .setIdString(projection.getIdString())
+                .build();
+        assertThat(entityWithColumns.state()).isEqualTo(expectedState);
     }
 
     @Test
