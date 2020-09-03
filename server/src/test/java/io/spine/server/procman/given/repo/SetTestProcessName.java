@@ -30,7 +30,7 @@ import io.spine.test.procman.ProjectId;
 public final class SetTestProcessName
         extends ProcessManagerMigration<ProjectId, TestProcessManager, Project, Project.Builder> {
 
-    public static final String NEW_NAME = "Migrated project";
+    public static final String NEW_NAME = "Migrated process";
 
     @Override
     public Project apply(Project project) {
