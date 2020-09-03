@@ -25,7 +25,7 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 
 /**
- * A migration which sets the process name to a predefined {@linkplain #NEW_NAME value}.
+ * Sets the process {@code name} to a predefined {@linkplain #NEW_NAME value}.
  */
 public final class SetTestProcessName
         extends ProcessManagerMigration<ProjectId, TestProcessManager, Project, Project.Builder> {
