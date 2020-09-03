@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
@@ -239,9 +240,12 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         private boolean physicallyRemoveRecord;
 
         private final E entity;
-        private @MonotonicNonNull Transaction<I, E, S, ?> tx;
         private final RecordBasedRepository<I, E, S> repository;
 
+        @LazyInit
+        private @MonotonicNonNull Transaction<I, E, S, ?> tx;
+
+        @LazyInit
         private @MonotonicNonNull Event systemEvent;
 
         private Operation(E entity, RecordBasedRepository<I, E, S> repository) {
