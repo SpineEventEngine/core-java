@@ -203,7 +203,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     public void registerWith(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
-        if (this.context != null && !sameValue) {
+        if (hasContext() && !sameValue) {
             throw newIllegalStateException(
                     "The repository `%s` has the Bounded Context (`%s`) assigned." +
                             " This operation can be performed only once." +
@@ -222,14 +222,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Unlike, {@link #isOpen()}, once the repository is
-     * {@linkplain #registerWith(BoundedContext) initialized}, this method always returns {@code true}.
+     * Tells if the repository is registered in a {@code BoundedContext}.
      */
     @Override
     public boolean isRegistered() {
-        return context != null;
+        return hasContext();
     }
 
     /**
@@ -262,7 +259,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *         if the repository has no context assigned
      */
     protected final BoundedContext context() {
-        checkState(context != null,
+        checkState(hasContext(),
                    "The repository (class: `%s`) is not registered with a `BoundedContext`.",
                    getClass().getName());
         return context;
@@ -364,7 +361,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @Override
     public final boolean isOpen() {
-        return context != null;
+        return hasContext();
     }
 
     @Internal
