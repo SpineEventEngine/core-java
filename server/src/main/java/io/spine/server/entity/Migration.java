@@ -77,8 +77,6 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
 
     /**
      * Applies the migration {@linkplain Operation operation} to a given entity.
-     *
-     * @see Operation Migration.Operation for details
      */
     final void applyTo(E entity, RecordBasedRepository<I, E, S> repository) {
         currentOperation = new Operation<>(entity, repository);
