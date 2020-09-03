@@ -25,7 +25,7 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 
 /**
- * A migration which sets the projection name to a predefined {@linkplain #NEW_NAME value}.
+ * Sets the projection {@code name} to a predefined {@linkplain #NEW_NAME value}.
  */
 public final class SetTestProjectionName
         extends ProjectionMigration<ProjectId, TestProjection, Project, Project.Builder> {
