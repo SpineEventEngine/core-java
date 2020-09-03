@@ -234,7 +234,8 @@ class ProjectionRepositoryTest
                 .multitenant(getClass().getSimpleName())
                 .build();
         super.setUp();
-        context.internalAccess().register(this.repository());
+        context.internalAccess()
+               .register(this.repository());
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -338,7 +339,7 @@ class ProjectionRepositoryTest
         }
 
         @SuppressWarnings("OverlyCoupledMethod")
-            // A complex test case with many test domain messages.
+        // A complex test case with many test domain messages.
         @Test
         @DisplayName("entity state update")
         void entityState() throws Exception {
@@ -366,7 +367,8 @@ class ProjectionRepositoryTest
                     .build();
             EntitySubscriberProjection.Repository repository =
                     new EntitySubscriberProjection.Repository();
-            BoundedContext context = BoundedContextBuilder.assumingTests().build();
+            BoundedContext context = BoundedContextBuilder.assumingTests()
+                                                          .build();
             context.internalAccess()
                    .register(repository);
             EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
@@ -375,11 +377,13 @@ class ProjectionRepositoryTest
                     .newBuilder()
                     .setProjectId(id)
                     .setProjectName(projectCreated.getName())
-                    .addTaskName(taskAdded.getTask().getTitle())
+                    .addTaskName(taskAdded.getTask()
+                                          .getTitle())
                     .build();
             Optional<EntitySubscriberProjection> projection = repository.find(id);
             assertTrue(projection.isPresent());
-            assertEquals(expectedValue, projection.get().state());
+            assertEquals(expectedValue, projection.get()
+                                                  .state());
 
             context.close();
         }
@@ -472,7 +476,9 @@ class ProjectionRepositoryTest
         List<RoutingFailed> failures = monitor.routingFailures();
         assertThat(failures.size()).isEqualTo(1);
         RoutingFailed failure = failures.get(0);
-        assertThat(failure.getError().getMessage()).contains(repository().idClass().getName());
+        assertThat(failure.getError()
+                          .getMessage()).contains(repository().idClass()
+                                                              .getName());
     }
 
     @Nested
@@ -651,7 +657,8 @@ class ProjectionRepositoryTest
 
         // Check the column value is propagated to the entity state.
         TestProjection entityWithColumns = afterMigration.next();
-        assertThat(entityWithColumns.state().getIdString()).isEqualTo(id.toString());
+        assertThat(entityWithColumns.state()
+                                    .getIdString()).isEqualTo(id.toString());
     }
 
     @Test
@@ -699,8 +706,10 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new MarkProjectionArchived<>());
 
         Optional<TestProjection> found = repository().find(id);
-        Truth8.assertThat(found).isPresent();
-        assertThat(found.get().isArchived()).isTrue();
+        Truth8.assertThat(found)
+              .isPresent();
+        assertThat(found.get()
+                        .isArchived()).isTrue();
     }
 
     @Test
@@ -713,8 +722,10 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new MarkProjectionDeleted<>());
 
         Optional<TestProjection> found = repository().find(id);
-        Truth8.assertThat(found).isPresent();
-        assertThat(found.get().isDeleted()).isTrue();
+        Truth8.assertThat(found)
+              .isPresent();
+        assertThat(found.get()
+                        .isDeleted()).isTrue();
     }
 
     @Test
@@ -727,7 +738,8 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new RemoveProjectionFromStorage<>());
 
         Optional<TestProjection> found = repository().find(id);
-        Truth8.assertThat(found).isEmpty();
+        Truth8.assertThat(found)
+              .isEmpty();
     }
 
     private static TargetFilters targetFilters(EntityColumn column, String value) {
@@ -749,6 +761,6 @@ class ProjectionRepositoryTest
     }
 
     private static boolean hasId(TestProjection projection, ProjectId id) {
-        return projection.id().equals(id);
+        return id.equals(projection.id());
     }
 }

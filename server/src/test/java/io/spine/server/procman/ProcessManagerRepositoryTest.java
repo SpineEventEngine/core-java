@@ -854,8 +854,7 @@ class ProcessManagerRepositoryTest
         return Correspondence.from(ProcessManagerRepositoryTest::hasId, "has ID");
     }
 
-    private static boolean hasId(TestProcessManager projection, ProjectId id) {
-        return projection.id()
-                         .equals(id);
+    private static boolean hasId(TestProcessManager processManager, ProjectId id) {
+        return id.equals(processManager.id());
     }
 }
