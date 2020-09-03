@@ -754,8 +754,12 @@ class ProcessManagerRepositoryTest
 
         // Check the column value is propagated to the entity state.
         TestProcessManager entityWithColumns = afterMigration.next();
-        assertThat(entityWithColumns.state()
-                                    .getIdString()).isEqualTo(id.toString());
+        Project expectedState = pm
+                .state()
+                .toBuilder()
+                .setIdString(pm.getIdString())
+                .build();
+        assertThat(entityWithColumns.state()).isEqualTo(expectedState);
     }
 
     @Test

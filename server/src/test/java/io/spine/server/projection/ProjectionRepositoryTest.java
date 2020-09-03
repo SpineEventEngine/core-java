@@ -657,8 +657,12 @@ class ProjectionRepositoryTest
 
         // Check the column value is propagated to the entity state.
         TestProjection entityWithColumns = afterMigration.next();
-        assertThat(entityWithColumns.state()
-                                    .getIdString()).isEqualTo(id.toString());
+        Project expectedState = projection
+                .state()
+                .toBuilder()
+                .setIdString(projection.getIdString())
+                .build();
+        assertThat(entityWithColumns.state()).isEqualTo(expectedState);
     }
 
     @Test
