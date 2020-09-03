@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Truth8;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.server.storage.LifecycleFlagField;
@@ -57,7 +58,7 @@ class ColumnsTest {
         ColumnName columnName = ColumnName.of("description");
         Optional<Column> descriptionColumn = columns.find(columnName);
 
-        assertThat(descriptionColumn.isPresent()).isTrue();
+        Truth8.assertThat(descriptionColumn).isPresent();
     }
 
     @Test
@@ -85,7 +86,7 @@ class ColumnsTest {
         ColumnName existent = ColumnName.of("name");
         Optional<Column> column = columns.find(existent);
 
-        assertThat(column.isPresent()).isTrue();
+        Truth8.assertThat(column).isPresent();
     }
 
     @Test
@@ -94,7 +95,7 @@ class ColumnsTest {
         ColumnName nonExistent = ColumnName.of("non-existent-column");
         Optional<Column> result = columns.find(nonExistent);
 
-        assertThat(result.isPresent()).isFalse();
+        Truth8.assertThat(result).isEmpty();
     }
 
     @Test

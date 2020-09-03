@@ -21,6 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Truth8;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
@@ -71,7 +72,7 @@ class BusFilterTest {
     void letPass() {
         BusFilter<CommandEnvelope> filter = new BusFilters.Accepting();
         Optional<Ack> ack = filter.filter(commandEnvelope);
-        assertThat(ack.isPresent()).isFalse();
+        Truth8.assertThat(ack).isEmpty();
     }
 
     @Test
@@ -79,7 +80,7 @@ class BusFilterTest {
     void rejectWithOk() {
         BusFilter<CommandEnvelope> filter = new BusFilters.RejectingWithOk();
         Optional<Ack> ack = filter.filter(commandEnvelope);
-        assertThat(ack.isPresent()).isTrue();
+        Truth8.assertThat(ack).isPresent();
 
         Ack theAck = ack.get();
         assertIdEquals(theAck);
@@ -96,7 +97,7 @@ class BusFilterTest {
                 .build();
         BusFilter<CommandEnvelope> filter = new BusFilters.RejectingWithError(error);
         Optional<Ack> ack = filter.filter(commandEnvelope);
-        assertThat(ack.isPresent()).isTrue();
+        Truth8.assertThat(ack).isPresent();
 
         Ack theAck = ack.get();
         assertIdEquals(theAck);
@@ -116,7 +117,7 @@ class BusFilterTest {
         BusFilter<CommandEnvelope> filter =
                 new BusFilters.RejectingWithThrowableMessage(rejection);
         Optional<Ack> ack = filter.filter(commandEnvelope);
-        assertThat(ack.isPresent()).isTrue();
+        Truth8.assertThat(ack).isPresent();
 
         Ack theAck = ack.get();
         assertIdEquals(theAck);

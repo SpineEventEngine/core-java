@@ -803,7 +803,7 @@ class ProcessManagerRepositoryTest
         repository().applyMigration(id, new MarkPmArchived<>());
 
         Optional<TestProcessManager> found = repository().find(id);
-        assertThat(found.isPresent()).isTrue();
+        Truth8.assertThat(found).isPresent();
         assertThat(found.get()
                         .isArchived()).isTrue();
     }
@@ -818,7 +818,7 @@ class ProcessManagerRepositoryTest
         repository().applyMigration(id, new MarkPmDeleted<>());
 
         Optional<TestProcessManager> found = repository().find(id);
-        assertThat(found.isPresent()).isTrue();
+        Truth8.assertThat(found).isPresent();
         assertThat(found.get()
                         .isDeleted()).isTrue();
     }
@@ -833,7 +833,7 @@ class ProcessManagerRepositoryTest
         repository().applyMigration(id, new RemovePmFromStorage<>());
 
         Optional<TestProcessManager> found = repository().find(id);
-        assertThat(found.isPresent()).isFalse();
+        Truth8.assertThat(found).isEmpty();
     }
 
     private static TargetFilters targetFilters(EntityColumn column, String value) {

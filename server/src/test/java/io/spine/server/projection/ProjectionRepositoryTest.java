@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.truth.Correspondence;
+import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityColumn;
@@ -698,7 +699,7 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new MarkProjectionArchived<>());
 
         Optional<TestProjection> found = repository().find(id);
-        assertThat(found.isPresent()).isTrue();
+        Truth8.assertThat(found).isPresent();
         assertThat(found.get().isArchived()).isTrue();
     }
 
@@ -712,7 +713,7 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new MarkProjectionDeleted<>());
 
         Optional<TestProjection> found = repository().find(id);
-        assertThat(found.isPresent()).isTrue();
+        Truth8.assertThat(found).isPresent();
         assertThat(found.get().isDeleted()).isTrue();
     }
 
@@ -726,7 +727,7 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new RemoveProjectionFromStorage<>());
 
         Optional<TestProjection> found = repository().find(id);
-        assertThat(found.isPresent()).isFalse();
+        Truth8.assertThat(found).isEmpty();
     }
 
     private static TargetFilters targetFilters(EntityColumn column, String value) {
