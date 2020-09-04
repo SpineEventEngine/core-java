@@ -624,10 +624,22 @@ class ProjectionRepositoryTest
                 repository.find(filters, ResponseFormat.getDefaultInstance());
 
         ImmutableList<TestProjection> results = ImmutableList.copyOf(foundAfterMigration);
+        Project expectedState1 = projection1
+                .state()
+                .toBuilder()
+                .setName(SetTestProjectionName.NEW_NAME)
+                .setIdString(projection1.getIdString())
+                .build();
+        Project expectedState2 = projection2
+                .state()
+                .toBuilder()
+                .setName(SetTestProjectionName.NEW_NAME)
+                .setIdString(projection2.getIdString())
+                .build();
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(stateWithPropagatedName())
-                .containsExactly(projection1, projection2);
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState1, expectedState2);
     }
 
     @Test
@@ -694,10 +706,20 @@ class ProjectionRepositoryTest
                 repository.find(filters, ResponseFormat.getDefaultInstance());
 
         ImmutableList<TestProjection> results = ImmutableList.copyOf(found);
+        Project expectedState1 = projection1
+                .state()
+                .toBuilder()
+                .setIdString(projection1.getIdString())
+                .build();
+        Project expectedState2 = projection2
+                .state()
+                .toBuilder()
+                .setIdString(projection2.getIdString())
+                .build();
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(stateWithUpdatedColumns())
-                .containsExactly(projection1, projection2);
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState1, expectedState2);
     }
 
     @Test
@@ -757,30 +779,11 @@ class ProjectionRepositoryTest
                 .build();
     }
 
-    private static Correspondence<TestProjection, TestProjection> stateWithPropagatedName() {
-        return Correspondence.from(ProjectionRepositoryTest::hasStateWithName, "has state");
+    private static Correspondence<TestProjection, Project> entityState() {
+        return Correspondence.from(ProjectionRepositoryTest::hasState, "has state");
     }
 
-    private static boolean hasStateWithName(TestProjection actual, TestProjection expected) {
-        Project expectedState = expected
-                .state()
-                .toBuilder()
-                .setIdString(expected.getIdString())
-                .setName(SetTestProjectionName.NEW_NAME)
-                .build();
-        return actual.state().equals(expectedState);
-    }
-
-    private static Correspondence<TestProjection, TestProjection> stateWithUpdatedColumns() {
-        return Correspondence.from(ProjectionRepositoryTest::hasStateWithColumns, "has state");
-    }
-
-    private static boolean hasStateWithColumns(TestProjection actual, TestProjection expected) {
-        Project expectedState = expected
-                .state()
-                .toBuilder()
-                .setIdString(expected.getIdString())
-                .build();
-        return actual.state().equals(expectedState);
+    private static boolean hasState(TestProjection actual, Project expected) {
+        return actual.state().equals(expected);
     }
 }

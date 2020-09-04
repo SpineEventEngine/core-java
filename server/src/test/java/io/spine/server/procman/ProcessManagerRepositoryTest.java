@@ -721,10 +721,22 @@ class ProcessManagerRepositoryTest
                 repository.find(filters, ResponseFormat.getDefaultInstance());
 
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(foundAfterMigration);
+        Project expectedState1 = pm1
+                .state()
+                .toBuilder()
+                .setName(SetTestProcessName.NEW_NAME)
+                .setIdString(pm1.getIdString())
+                .build();
+        Project expectedState2 = pm2
+                .state()
+                .toBuilder()
+                .setName(SetTestProcessName.NEW_NAME)
+                .setIdString(pm2.getIdString())
+                .build();
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(stateWithPropagatedName())
-                .containsExactly(pm1, pm2);
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState1, expectedState2);
     }
 
     @Test
@@ -791,10 +803,20 @@ class ProcessManagerRepositoryTest
                 repository.find(filters, ResponseFormat.getDefaultInstance());
 
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(found);
+        Project expectedState1 = pm1
+                .state()
+                .toBuilder()
+                .setIdString(pm1.getIdString())
+                .build();
+        Project expectedState2 = pm2
+                .state()
+                .toBuilder()
+                .setIdString(pm2.getIdString())
+                .build();
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(stateWithUpdatedColumns())
-                .containsExactly(pm1, pm2);
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState1, expectedState2);
     }
 
     @Test
@@ -854,33 +876,11 @@ class ProcessManagerRepositoryTest
                 .build();
     }
 
-    private static Correspondence<TestProcessManager, TestProcessManager> stateWithPropagatedName() {
-        return Correspondence.from(ProcessManagerRepositoryTest::hasStateWithName, "has state");
+    private static Correspondence<TestProcessManager, Project> entityState() {
+        return Correspondence.from(ProcessManagerRepositoryTest::hasState, "has state");
     }
 
-    private static boolean
-    hasStateWithName(TestProcessManager actual, TestProcessManager expected) {
-        Project expectedState = expected
-                .state()
-                .toBuilder()
-                .setIdString(expected.getIdString())
-                .setName(SetTestProcessName.NEW_NAME)
-                .build();
-        return actual.state().equals(expectedState);
-    }
-
-    private static Correspondence<TestProcessManager, TestProcessManager>
-    stateWithUpdatedColumns() {
-        return Correspondence.from(ProcessManagerRepositoryTest::hasStateWithColumns, "has state");
-    }
-
-    private static boolean
-    hasStateWithColumns(TestProcessManager actual, TestProcessManager expected) {
-        Project expectedState = expected
-                .state()
-                .toBuilder()
-                .setIdString(expected.getIdString())
-                .build();
-        return actual.state().equals(expectedState);
+    private static boolean hasState(TestProcessManager actual, Project expected) {
+        return actual.state().equals(expected);
     }
 }
