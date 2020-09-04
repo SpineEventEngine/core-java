@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -57,7 +58,7 @@ class ColumnsTest {
         ColumnName columnName = ColumnName.of("description");
         Optional<Column> descriptionColumn = columns.find(columnName);
 
-        assertThat(descriptionColumn.isPresent()).isTrue();
+        assertThat(descriptionColumn).isPresent();
     }
 
     @Test
@@ -85,7 +86,7 @@ class ColumnsTest {
         ColumnName existent = ColumnName.of("name");
         Optional<Column> column = columns.find(existent);
 
-        assertThat(column.isPresent()).isTrue();
+        assertThat(column).isPresent();
     }
 
     @Test
@@ -94,7 +95,7 @@ class ColumnsTest {
         ColumnName nonExistent = ColumnName.of("non-existent-column");
         Optional<Column> result = columns.find(nonExistent);
 
-        assertThat(result.isPresent()).isFalse();
+        assertThat(result).isEmpty();
     }
 
     @Test

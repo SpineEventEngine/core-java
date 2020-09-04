@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
@@ -47,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
@@ -108,7 +108,7 @@ class ScheduledCommandTest {
         scheduler.postScheduled();
 
         Optional<ScheduledCommand> command = repository.findActive(scheduled.getId());
-        Truth8.assertThat(command).isEmpty();
+        assertThat(command).isEmpty();
 
         Optional<ScheduledCommand> optional = repository.find(scheduled.getId());
         assertTrue(optional.isPresent());
@@ -128,8 +128,7 @@ class ScheduledCommandTest {
         CommandId commandId = command.getId();
 
         Optional<ScheduledCommand> found = repository.find(commandId);
-        Truth8.assertThat(found)
-              .isEmpty();
+        assertThat(found).isEmpty();
     }
 
     private void checkScheduled(Command scheduled) {

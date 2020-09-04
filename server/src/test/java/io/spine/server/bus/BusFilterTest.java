@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
@@ -71,7 +72,7 @@ class BusFilterTest {
     void letPass() {
         BusFilter<CommandEnvelope> filter = new BusFilters.Accepting();
         Optional<Ack> ack = filter.filter(commandEnvelope);
-        assertThat(ack.isPresent()).isFalse();
+        assertThat(ack).isEmpty();
     }
 
     @Test
@@ -79,7 +80,7 @@ class BusFilterTest {
     void rejectWithOk() {
         BusFilter<CommandEnvelope> filter = new BusFilters.RejectingWithOk();
         Optional<Ack> ack = filter.filter(commandEnvelope);
-        assertThat(ack.isPresent()).isTrue();
+        assertThat(ack).isPresent();
 
         Ack theAck = ack.get();
         assertIdEquals(theAck);
@@ -96,7 +97,7 @@ class BusFilterTest {
                 .build();
         BusFilter<CommandEnvelope> filter = new BusFilters.RejectingWithError(error);
         Optional<Ack> ack = filter.filter(commandEnvelope);
-        assertThat(ack.isPresent()).isTrue();
+        assertThat(ack).isPresent();
 
         Ack theAck = ack.get();
         assertIdEquals(theAck);
@@ -116,7 +117,7 @@ class BusFilterTest {
         BusFilter<CommandEnvelope> filter =
                 new BusFilters.RejectingWithThrowableMessage(rejection);
         Optional<Ack> ack = filter.filter(commandEnvelope);
-        assertThat(ack.isPresent()).isTrue();
+        assertThat(ack).isPresent();
 
         Ack theAck = ack.get();
         assertIdEquals(theAck);

@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
-import com.google.common.truth.Truth8;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
@@ -55,6 +54,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
@@ -288,13 +288,12 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
         int negativeExpected = -1 * positiveExpected * 2;
 
-        Truth8.assertThat(projectionRepo.find(excludedTarget))
-              .isEmpty();
+        assertThat(projectionRepo.find(excludedTarget))
+                .isEmpty();
         for (int idIndex = 1; idIndex < ids.length; idIndex++) {
             String identifier = ids[idIndex];
             Optional<ConsecutiveProjection> maybeState = projectionRepo.find(identifier);
-            Truth8.assertThat(maybeState)
-                  .isPresent();
+            assertThat(maybeState).isPresent();
 
             ConsecutiveNumberView state = maybeState.get()
                                                     .state();

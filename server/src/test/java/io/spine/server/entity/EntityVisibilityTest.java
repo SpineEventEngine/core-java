@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Truth8;
 import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.option.EntityOption;
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.option.EntityOption.Visibility.FULL;
 import static io.spine.option.EntityOption.Visibility.NONE;
 import static io.spine.option.EntityOption.Visibility.QUERY;
@@ -57,7 +57,7 @@ class EntityVisibilityTest {
     @DisplayName("not accept null `Visibility` values")
     void notAcceptNulls() {
         Optional<EntityVisibility> value = EntityVisibility.of(Password.class);
-        Truth8.assertThat(value).isPresent();
+        assertThat(value).isPresent();
         EntityVisibility instance = value.get();
         new NullPointerTester()
                 .testAllPublicInstanceMethods(instance);
@@ -138,8 +138,7 @@ class EntityVisibilityTest {
 
     private static EntityVisibility visibilityOf(Class<? extends EntityState> stateClass) {
         Optional<EntityVisibility> visibility = EntityVisibility.of(stateClass);
-        Truth8.assertThat(visibility)
-              .isPresent();
+        assertThat(visibility).isPresent();
         return visibility.get();
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
@@ -56,7 +57,7 @@ import static io.spine.protobuf.Messages.isDefault;
  *
  * <p>To create a user-defined {@code Migration} in real life scenarios, consider inheriting from
  * {@link io.spine.server.projection.ProjectionMigration ProjectionMigration} and
- * {@link io.spine.server.procman.ProcessManagerMigration ProjectionMigration} types.
+ * {@link io.spine.server.procman.ProcessManagerMigration ProcessManagerMigration} types.
  *
  * @param <I>
  *         the entity ID type
@@ -75,8 +76,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     private @Nullable Operation<I, S, E> currentOperation;
 
     /**
-     * Applies the migration to a given entity, starting a new migration
-     * {@linkplain Operation operation}.
+     * Applies the migration {@linkplain Operation operation} to a given {@code entity}.
      */
     final void applyTo(E entity, RecordBasedRepository<I, E, S> repository) {
         currentOperation = new Operation<>(entity, repository);
@@ -195,6 +195,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         Transaction<I, E, S, ?> tx = startTransaction(entity);
         EntityLifecycleMonitor<I> monitor = configureLifecycleMonitor(id);
         tx.setListener(monitor);
+        currentOperation().tx = tx;
         return tx;
     }
 
@@ -227,8 +228,17 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
     }
 
     /**
-     * A migration operation on an entity instance.
-     */
+     * A migration operation on a single entity.
+     *
+     * <p>The operation is performed in scope of an active {@link Transaction}.
+     *
+     * <p>All entity state and meta-data changes are propagated to the transaction and remain in
+     * pending state until the transaction is {@linkplain Transaction#commit() committed}, which is
+     * the last step of a migration operation.
+     *
+     * <p>On a transaction commit, all changes are propagated to the actual entity passed to
+     * {@link Migration#applyTo(TransactionalEntity, RecordBasedRepository)}, modifying it in-place.
+     * */
     private static class Operation<I,
                                    S extends EntityState,
                                    E extends TransactionalEntity<I, S, ?>> {
@@ -240,6 +250,10 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
         private final E entity;
         private final RecordBasedRepository<I, E, S> repository;
 
+        @LazyInit
+        private @MonotonicNonNull Transaction<I, E, S, ?> tx;
+
+        @LazyInit
         private @MonotonicNonNull Event systemEvent;
 
         private Operation(E entity, RecordBasedRepository<I, E, S> repository) {
@@ -249,16 +263,18 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
 
         private void updateState(S newState) {
             if (!entity.state().equals(newState)) {
-                entity.updateState(newState, increment(entity.version()));
+                tx.builder().mergeFrom(newState);
+                Version version = increment(entity.version());
+                tx.setVersion(version);
             }
         }
 
         private void updateLifecycle() {
             if (archive) {
-                entity.setArchived(true);
+                tx.setArchived(true);
             }
             if (delete) {
-                entity.setDeleted(true);
+                tx.setDeleted(true);
             }
         }
 

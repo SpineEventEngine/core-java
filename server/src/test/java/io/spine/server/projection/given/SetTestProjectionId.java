@@ -18,32 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
+package io.spine.server.projection.given;
+
+import io.spine.server.projection.ProjectionMigration;
+import io.spine.test.projection.Project;
+import io.spine.test.projection.ProjectId;
 
 /**
- * Version of this library.
+ * Sets the {@code id_string} from the {@code id} field.
  */
-val coreJava = "1.5.30"
+public final class SetTestProjectionId
+        extends ProjectionMigration<ProjectId, TestProjection, Project, Project.Builder> {
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "1.5.31"
-val time = "1.5.24"
-
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineTimeVersion"] = time
+    @Override
+    public Project apply(Project project) {
+        ProjectId id = id();
+        Project result = project
+                .toBuilder()
+                .setIdString(id.toString())
+                .vBuild();
+        return result;
+    }
 }
