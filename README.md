@@ -18,7 +18,7 @@ This repository contains the code of:
 The project is under active ongoing development. 
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.5.0][latest-release].  
+The latest stable version is [1.6.0][latest-release].  
 
 ## Quick start and examples
 
@@ -49,7 +49,7 @@ Gradle is used as a build and dependency management system.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:spine-developers@teamdev.com
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.5.0
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.6.0
 [spine-site]: https://spine.io/
 [quick-start]: https://spine.io/docs/quick-start
 [spine-examples]: https://github.com/spine-examples
