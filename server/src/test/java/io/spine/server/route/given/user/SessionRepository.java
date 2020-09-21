@@ -51,7 +51,7 @@ public class SessionRepository
                                        .userId()
                                        .is(id)
                                        .build();
-        Iterator<RSessionId> identifiers = recordStorage().entityIndex(query);
+        Iterator<RSessionId> identifiers = recordStorage().index(query);
         ImmutableSet<RSessionId> result = ImmutableSet.copyOf(identifiers);
         return result;
     }

@@ -110,7 +110,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * @throws IllegalStateException
      *         if the storage is already closed
      */
-    public Iterator<I> entityIndex(EntityQuery<I, S, ?> query) {
+    public Iterator<I> index(EntityQuery<I, S, ?> query) {
         RecordQuery<I, EntityRecord> recordQuery = transform(query);
         return index(recordQuery);
     }
