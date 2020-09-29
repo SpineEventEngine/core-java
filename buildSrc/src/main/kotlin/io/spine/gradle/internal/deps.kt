@@ -70,7 +70,7 @@ object Versions {
     val checkerFramework = "3.3.0"
     val errorProne       = "2.3.4"
     val errorProneJavac  = "9+181-r4173-1" // taken from here: https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
-    val errorPronePlugin = "1.1.1"
+    val errorPronePlugin = "1.2.1"
     val pmd              = "6.24.0"
     val checkstyle       = "8.29"
     val protobufPlugin   = "0.8.12"
@@ -94,14 +94,19 @@ object Versions {
     val javaPoet         = "1.12.1"
     val autoService      = "1.0-rc6"
     val autoCommon       = "0.10"
-    val jackson          = "2.9.10.4"
+    val jackson          = "2.9.10.5"
     val animalSniffer    = "1.18"
     val apiguardian      = "1.1.0"
+    val javaxAnnotation  = "1.3.2"
+    val klaxon           = "5.4"
+    val ouathJwt         = "3.10.3"
+    val bouncyCastlePkcs = "1.66"
+    val assertK          = "0.22"
 
     /**
      * Version of the SLF4J library.
      *
-     * Spine used to log with SLF4J. Now we use Flogger. Whenever a coice comes up, we recommend to
+     * Spine used to log with SLF4J. Now we use Flogger. Whenever a choice comes up, we recommend to
      * use the latter.
      *
      * Some third-party libraries may clash with different versions of the library. Thus, we specify
@@ -158,12 +163,20 @@ object Build {
 
     object AutoService {
         val annotations = "com.google.auto.service:auto-service-annotations:${Versions.autoService}"
-        val processor = "com.google.auto.service:auto-service:${Versions.autoService}"
+        val processor   = "com.google.auto.service:auto-service:${Versions.autoService}"
     }
 }
 
 object Gen {
-    val javaPoet = "com.squareup:javapoet:${Versions.javaPoet}"
+    val javaPoet        = "com.squareup:javapoet:${Versions.javaPoet}"
+    val javaxAnnotation = "javax.annotation:javax.annotation-api:${Versions.javaxAnnotation}"
+}
+
+object Publishing {
+    val klaxon           = "com.beust:klaxon:${Versions.klaxon}"
+    val oauthJwt         = "com.auth0:java-jwt:${Versions.ouathJwt}"
+    val bouncyCastlePkcs = "org.bouncycastle:bcpkix-jdk15on:${Versions.bouncyCastlePkcs}"
+    val assertK          = "com.willowtreeapps.assertk:assertk-jvm:${Versions.assertK}"
 }
 
 object Grpc {
@@ -227,7 +240,7 @@ object Test {
             "com.google.truth.extensions:truth-proto-extension:${Versions.truth}"
     )
     @Deprecated("Use Flogger over SLF4J.",
-                replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend"))
+            replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend"))
     @Suppress("DEPRECATION") // Version of SLF4J.
     val slf4j         = "org.slf4j:slf4j-jdk14:${Versions.slf4j}"
 }
@@ -273,6 +286,7 @@ object Deps {
     val test = Test
     val versions = Versions
     val scripts = Scripts
+    val publishing = Publishing
 }
 
 object DependencyResolution {
