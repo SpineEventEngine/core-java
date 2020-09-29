@@ -20,10 +20,8 @@
 
 package io.spine.server.bus;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
@@ -32,7 +30,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.bus.Buses.reject;
 
 /**
  * The {@link BusFilter} preventing the messages that have no dispatchers from being posted to
@@ -55,16 +52,14 @@ final class DeadMessageFilter<T extends Message,
     }
 
     @Override
-    public Optional<Ack> accept(E envelope) {
+    public Optional<Ack> filter(E envelope) {
         Collection<D> dispatchers = registry.dispatchersOf(envelope);
         if (dispatchers.isEmpty()) {
             MessageUnhandled report = deadMessageHandler.handle(envelope);
             Error error = report.asError();
-            Any packedId = Identifier.pack(envelope.id());
-            Ack result = reject(packedId, error);
-            return Optional.of(result);
+            return reject(envelope, error);
         } else {
-            return Optional.empty();
+            return letPass();
         }
     }
 }

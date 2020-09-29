@@ -20,6 +20,7 @@
 
 package io.spine.server.tuple;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
@@ -66,7 +67,7 @@ public final class Quartet<A extends Message, B, C, D>
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, C, D> of(A a, B b, C c, D d) {
-        checkAllNotNullOrEmpty(Quartet.class, a, b, c, d);
+        checkAllNotNullOrEmpty(a, b, c, d);
         Quartet<A, B, C, D> result = new Quartet<>(a, b, c, d);
         return result;
     }
@@ -76,8 +77,8 @@ public final class Quartet<A extends Message, B, C, D>
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, C, Optional<D>> withNullable(A a, B b, C c, @Nullable D d) {
-        checkAllNotNullOrEmpty(Quartet.class, a, b, c);
-        checkNotEmpty(Quartet.class, d);
+        checkAllNotNullOrEmpty(a, b, c);
+        checkNotEmpty(d);
         Quartet<A, B, C, Optional<D>> result = new Quartet<>(a, b, c, ofNullable(d));
         return result;
     }
@@ -87,8 +88,8 @@ public final class Quartet<A extends Message, B, C, D>
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, Optional<C>, Optional<D>> withNullable2(A a, B b, @Nullable C c, @Nullable D d) {
-        checkAllNotNullOrEmpty(Quartet.class, a, b);
-        checkAllNotEmpty(Quartet.class, c, d);
+        checkAllNotNullOrEmpty(a, b);
+        checkAllNotEmpty(c, d);
         Quartet<A, B, Optional<C>, Optional<D>> result =
                 new Quartet<>(a, b, ofNullable(c), ofNullable(d));
         return result;
@@ -100,8 +101,8 @@ public final class Quartet<A extends Message, B, C, D>
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, Optional<B>, Optional<C>, Optional<D>>
     withNullable3(A a, @Nullable B b, @Nullable C c, @Nullable D d) {
-        checkNotNullOrEmpty(Quartet.class, a);
-        checkAllNotEmpty(Quartet.class, b, c, d);
+        checkNotNullOrEmpty(a);
+        checkAllNotEmpty(b, c, d);
         Quartet<A, Optional<B>, Optional<C>, Optional<D>> result =
                 new Quartet<>(a, ofNullable(b), ofNullable(c), ofNullable(d));
         return result;
@@ -148,5 +149,25 @@ public final class Quartet<A extends Message, B, C, D>
     public boolean hasD() {
         D value = getD();
         return isOptionalPresent(value);
+    }
+
+    @CanIgnoreReturnValue
+    private static <M extends Message> M checkNotNullOrEmpty(M value) {
+        return checkNotNullOrEmpty(Quartet.class, value);
+    }
+
+    @CanIgnoreReturnValue
+    private static <M extends Message> @Nullable M checkNotEmpty(@Nullable M value) {
+        return checkNotEmpty(Quartet.class, value);
+    }
+
+    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
+    private static void checkAllNotNullOrEmpty(Message... values) {
+        checkAllNotNullOrEmpty(Quartet.class, values);
+    }
+
+    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
+    private static void checkAllNotEmpty(Message... values) {
+        checkAllNotEmpty(Quartet.class, values);
     }
 }

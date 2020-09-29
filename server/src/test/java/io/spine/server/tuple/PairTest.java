@@ -164,6 +164,18 @@ class PairTest {
 
             assertThat(pair.hasB()).isTrue();
         }
+
+        @Test
+        @DisplayName("via `Optional`")
+        void viaOptional() {
+            StringValue a = TestValues.newUuidValue();
+            Optional<BoolValue> b = Optional.of(BoolValue.of(true));
+
+            Pair<StringValue, Optional<BoolValue>> pair = Pair.withOptional(a, b);
+
+            assertEquals(a, pair.getA());
+            assertEquals(b, pair.getB());
+        }
     }
 
     @Test

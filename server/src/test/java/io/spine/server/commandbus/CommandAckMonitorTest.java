@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -31,9 +32,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.TenantId;
-import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
-import io.spine.server.bus.Buses;
+import io.spine.server.bus.Acks;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
@@ -41,6 +40,7 @@ import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandErrored;
+import io.spine.system.server.event.CommandRejected;
 import io.spine.test.commandbus.ProjectId;
 import io.spine.test.commandbus.command.CmdBusStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -52,14 +52,11 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("InnerClassMayBeStatic")
-@DisplayName("CommandAckMonitor should")
+@DisplayName("`CommandAckMonitor` should")
 class CommandAckMonitorTest {
 
     private CommandId commandId;
@@ -108,16 +105,14 @@ class CommandAckMonitorTest {
         @Test
         @DisplayName("tenant ID")
         void tenant() {
-            builder.setDelegate(noOpObserver())
-                   .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);
+            builder.setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);
             assertFailsToBuild();
         }
 
         @Test
         @DisplayName("system write side")
         void system() {
-            builder.setDelegate(noOpObserver())
-                   .setTenantId(TenantId.getDefaultInstance());
+            builder.setTenantId(TenantId.getDefaultInstance());
             assertFailsToBuild();
         }
 
@@ -127,8 +122,8 @@ class CommandAckMonitorTest {
     }
 
     @Nested
-    @DisplayName("if Ack contains")
-    class PostSystemCommands {
+    @DisplayName("if `Ack` contains")
+    class PostSystemEvent {
 
         private CommandAckMonitor monitor;
         private MemoizingWriteSide writeSide;
@@ -138,7 +133,6 @@ class CommandAckMonitorTest {
             writeSide = MemoizingWriteSide.singleTenant();
             monitor = CommandAckMonitor
                     .newBuilder()
-                    .setDelegate(noOpObserver())
                     .setSystemWriteSide(writeSide)
                     .setTenantId(TenantId.getDefaultInstance())
                     .setPostedCommands(ImmutableSet.of(mockCommand))
@@ -146,7 +140,7 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("OK marker, post MarkCommandAsAcknowledged")
+        @DisplayName("OK marker, post `CommandAcknowledged`")
         void onOk() {
             Ack ack = okAck(commandId);
             monitor.onNext(ack);
@@ -161,7 +155,7 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("error, post MarkCommandAsErrored")
+        @DisplayName("error, post `CommandErrored`")
         void onError() {
             Ack ack = errorAck(commandId);
             monitor.onNext(ack);
@@ -179,85 +173,39 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("rejection, throw an exception")
+        @DisplayName("rejection, post `CommandRejected`")
         void onRejection() {
             Ack ack = rejectionAck(commandId);
-            assertThrows(IllegalArgumentException.class, () -> monitor.onNext(ack));
+            monitor.onNext(ack);
+
+            Message lastSeenEvent = writeSide.lastSeenEvent()
+                                             .message();
+            assertThat(lastSeenEvent).isInstanceOf(CommandRejected.class);
+
+            CommandRejected actualEvent = (CommandRejected) lastSeenEvent;
+            assertThat(actualEvent.getId()).isEqualTo(commandId);
+            assertThat(actualEvent.getRejectionEvent()).isEqualTo(ack.getStatus().getRejection());
         }
     }
 
-    @Nested
-    @DisplayName("delegate to a given observer")
-    class DelegateCalls {
-
-        private MemoizingObserver<Ack> delegate;
-        private CommandAckMonitor monitor;
-
-        @BeforeEach
-        void setUp() {
-            delegate = StreamObservers.memoizingObserver();
-            monitor = CommandAckMonitor
-                    .newBuilder()
-                    .setTenantId(TenantId.getDefaultInstance())
-                    .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
-                    .setDelegate(delegate)
-                    .setPostedCommands(ImmutableSet.of(mockCommand))
-                    .build();
-        }
-
-        @Test
-        @DisplayName("onNext(OK)")
-        void nextOk() {
-            Ack ack = okAck(commandId);
-            checkOnNext(ack);
-        }
-
-        @Test
-        @DisplayName("onNext(Error)")
-        void nextError() {
-            Ack ack = errorAck(commandId);
-            checkOnNext(ack);
-        }
-
-        @Test
-        @DisplayName("onNext(Rejection)")
-        void nextRejection() {
-            Ack ack = rejectionAck(commandId);
-            checkOnNext(ack);
-        }
-
-        @Test
-        @DisplayName("onError(...)")
-        void error() {
-            Throwable error = new Throwable();
-            monitor.onError(error);
-
-            assertEquals(error, delegate.getError());
-        }
-
-        @SuppressWarnings("DuplicateStringLiteralInspection") // Method name used in other scope.
-        @Test
-        @DisplayName("onCompleted()")
-        void complete() {
-            monitor.onCompleted();
-
-            assertTrue(delegate.isCompleted());
-        }
-
-        private void checkOnNext(Ack ack) {
-            try {
-                monitor.onNext(ack);
-            } catch (RuntimeException ignored) {
-                // May throw an exception after delegating the call.
-            }
-
-            Ack received = delegate.firstResponse();
-            assertEquals(ack, received);
-        }
+    @Test
+    @DisplayName("re-throw errors passed to `onError` as `IllegalStateException`")
+    void rethrowOnError() {
+        MemoizingWriteSide writeSide = MemoizingWriteSide.singleTenant();
+        CommandAckMonitor monitor = CommandAckMonitor
+                .newBuilder()
+                .setSystemWriteSide(writeSide)
+                .setTenantId(TenantId.getDefaultInstance())
+                .setPostedCommands(ImmutableSet.of(mockCommand))
+                .build();
+        RuntimeException error = new RuntimeException("The command Ack monitor test error.");
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                                                       () -> monitor.onError(error));
+        Truth.assertThat(exception).hasCauseThat().isEqualTo(error);
     }
 
     private static Ack okAck(CommandId commandId) {
-        return Buses.acknowledge(commandId);
+        return Acks.acknowledge(commandId);
     }
 
     private static Ack errorAck(CommandId commandId) {
@@ -266,7 +214,7 @@ class CommandAckMonitorTest {
                 .setCode(42)
                 .setMessage("Wrong question")
                 .build();
-        return Buses.reject(commandId, error);
+        return Acks.reject(commandId, error);
     }
 
     private static Ack rejectionAck(CommandId commandId) {
@@ -293,6 +241,6 @@ class CommandAckMonitorTest {
         RuntimeException wrapperThrowable = new RuntimeException(rejectionThrowable);
         RejectionEnvelope rejection = RejectionEnvelope.from(envelope, wrapperThrowable);
 
-        return Buses.reject(commandId, rejection);
+        return Acks.reject(commandId, rejection);
     }
 }

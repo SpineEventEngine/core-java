@@ -45,6 +45,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @MuteLogging
@@ -78,139 +79,182 @@ class CommandRequestTest extends AbstractClientTest {
         return ImmutableList.of(ClientTestContext.users());
     }
 
-    @Test
-    @DisplayName("deliver an event to a consumer")
-    void eventConsumer() {
-        commandRequest.observe(UserLoggedIn.class, counter::add)
-                      .observe(UserAccountCreated.class, counter::add)
-                      .post();
-        assertThat(counter.containsAll(UserLoggedIn.class, UserAccountCreated.class))
-                .isTrue();
-    }
-
-    @Test
-    @DisplayName("deliver an event and its context to a consumer")
-    void eventAndContextConsumer() {
-        commandRequest.observe(UserLoggedIn.class, (e, c) -> counter.add(e))
-                      .observe(UserAccountCreated.class, (e, c) -> counter.add(e))
-                      .post();
-        assertThat(counter.containsAll(UserLoggedIn.class, UserAccountCreated.class))
-                .isTrue();
-    }
-
-    @Test
-    @DisplayName("deliver a rejection to its consumers")
-    void rejections() {
-        // Post the command so that the user is logged in. We are not interested in events here.
-        commandRequest.post();
-        // Now post the command again, expecting the rejection.
-        commandRequest.observe(UserAlreadyLoggedIn.class, counter::add)
-                      .post();
-
-        assertThat(counter.contains(UserAlreadyLoggedIn.class))
-                .isTrue();
-    }
-
     @Nested
-    @DisplayName("Allow setting custom streaming error handler")
-    class CustomStreamingErrorHandler {
+    @DisplayName("Allow posting without subscriptions")
+    class NoSubscriptions {
 
         @Test
-        @DisplayName("rejecting `null`")
-        void rejectingNull() {
-            assertThrows(NullPointerException.class, () -> commandRequest.onStreamingError(null));
+        @DisplayName("Rejecting when a subscription was made")
+        void illegalUse() {
+            commandRequest.observe(UserLoggedIn.class, counter::add);
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> commandRequest.postAndForget()
+            );
+        }
+
+        @Test
+        @DisplayName("Delivering no events")
+        void noEvents() {
+            assertDoesNotThrow(() -> commandRequest.postAndForget());
         }
     }
 
     @Nested
-    @DisplayName("Allow setting custom consumer error handler")
-    class CustomConsumerErrorHandler {
+    @DisplayName("Deliver")
+    class OfDelivery {
 
-        private boolean handlerInvoked;
-        private @Nullable Throwable passedThrowable;
-
-        @BeforeEach
-        void setup() {
-            handlerInvoked = false;
-            passedThrowable = null;
+        @Test
+        @DisplayName("an event to a consumer")
+        void eventConsumer() {
+            commandRequest.observe(UserLoggedIn.class, counter::add)
+                          .observe(UserAccountCreated.class, counter::add)
+                          .post();
+            assertDelivered(UserLoggedIn.class, UserAccountCreated.class);
         }
 
         @Test
-        @DisplayName("rejecting `null`")
-        void rejectingNull() {
-            assertThrows(NullPointerException.class, () -> commandRequest.onConsumingError(null));
+        @DisplayName("an event and its context to a consumer")
+        void eventAndContextConsumer() {
+            commandRequest.observe(UserLoggedIn.class, (e, c) -> counter.add(e))
+                          .observe(UserAccountCreated.class, (e, c) -> counter.add(e))
+                          .post();
+            assertDelivered(UserLoggedIn.class, UserAccountCreated.class);
         }
 
         @Test
-        @DisplayName("invoking the handler when a consumer fails")
-        void invocation() {
-            ConsumerErrorHandler<EventMessage> handler = (c, th) -> {
-                handlerInvoked = true;
-                passedThrowable = th;
-            };
-            RuntimeException exception = new RuntimeException("Consumer-generated error.");
-
-            commandRequest.onConsumingError(handler)
-                          .observe(UserLoggedIn.class, e -> {
-                              throw exception;
-                          })
+        @DisplayName("a rejection to its consumers")
+        void rejections() {
+            // Post the command so that the user is logged in. We are not interested in events here.
+            commandRequest.postAndForget();
+            // Now post the command again, expecting the rejection.
+            commandRequest.observe(UserAlreadyLoggedIn.class, counter::add)
                           .post();
 
-            assertThat(handlerInvoked)
+            assertDelivered(UserAlreadyLoggedIn.class);
+        }
+
+        @SafeVarargs
+        private final void assertDelivered(Class<? extends EventMessage>... classes) {
+            assertThat(counter.containsAll(classes))
                     .isTrue();
-            assertThat(passedThrowable)
-                    .isEqualTo(exception);
         }
     }
 
+    @Test
+    @DisplayName("Suggest `postAndForget()` call if no subscriptions were made")
+    void noSubscriptions() {
+        assertThrows(
+                IllegalStateException.class,
+                () -> commandRequest.post()
+        );
+    }
+
     @Nested
-    @DisplayName("Allow setting custom posting error handler")
-    class CustomServerErrorHandler {
+    @DisplayName("Support custom error handler for")
+    class OfErrorHandler {
 
-        private @Nullable Message postedMessage;
-        private @Nullable Error returnedError;
+        @Nested
+        @DisplayName("streaming error")
+        class CustomStreamingErrorHandler {
 
-        @BeforeEach
-        void setup() {
-            postedMessage = null;
-            returnedError = null;
+            @Test
+            @DisplayName("rejecting `null`")
+            void rejectingNull() {
+                assertThrows(NullPointerException.class, () -> commandRequest.onStreamingError(null));
+            }
         }
 
-        @Test
-        @DisplayName("rejecting `null`")
-        void rejectingNull() {
-            assertThrows(NullPointerException.class, () -> commandRequest.onServerError(null));
+        @Nested
+        @DisplayName("consumer error")
+        class CustomConsumerErrorHandler {
+
+            private boolean handlerInvoked;
+            private @Nullable Throwable passedThrowable;
+
+            @BeforeEach
+            void setup() {
+                handlerInvoked = false;
+                passedThrowable = null;
+            }
+
+            @Test
+            @DisplayName("rejecting `null`")
+            void rejectingNull() {
+                assertThrows(NullPointerException.class, () -> commandRequest.onConsumingError(null));
+            }
+
+            @Test
+            @DisplayName("invoking the handler when a consumer fails")
+            void invocation() {
+                ConsumerErrorHandler<EventMessage> handler = (c, th) -> {
+                    handlerInvoked = true;
+                    passedThrowable = th;
+                };
+                RuntimeException exception = new RuntimeException("Consumer-generated error.");
+
+                commandRequest.onConsumingError(handler)
+                              .observe(UserLoggedIn.class, e -> {
+                                  throw exception;
+                              })
+                              .post();
+
+                assertThat(handlerInvoked)
+                        .isTrue();
+                assertThat(passedThrowable)
+                        .isEqualTo(exception);
+            }
         }
 
-        @Test
-        @DisplayName("invoking handler when an invalid command posted")
-        void invocation() {
-            ServerErrorHandler handler = (message, error) -> {
-                postedMessage = message;
-                returnedError = error;
-            };
+        @Nested
+        @DisplayName("posting error")
+        class CustomServerErrorHandler {
 
-            UnsupportedCommand commandMessage = UnsupportedCommand
-                    .newBuilder()
-                    .setUser(GivenUserId.generated())
-                    .build();
-            CommandRequest request =
-                    client().asGuest()
-                            .command(commandMessage)
-                            .onServerError(handler);
-            request.post();
+            private @Nullable Message postedMessage;
+            private @Nullable Error returnedError;
 
-            assertThat(returnedError)
-                    .isNotNull();
-            assertThat(postedMessage)
-                    .isInstanceOf(Command.class);
-            Command expected = Command
-                    .newBuilder()
-                    .setMessage(AnyPacker.pack(commandMessage))
-                    .build();
-            assertThat(postedMessage)
-                    .comparingExpectedFieldsOnly()
-                    .isEqualTo(expected);
+            @BeforeEach
+            void setup() {
+                postedMessage = null;
+                returnedError = null;
+            }
+
+            @Test
+            @DisplayName("rejecting `null`")
+            void rejectingNull() {
+                assertThrows(NullPointerException.class, () -> commandRequest.onServerError(null));
+            }
+
+            @Test
+            @DisplayName("invoking handler when an invalid command posted")
+            void invocation() {
+                ServerErrorHandler handler = (message, error) -> {
+                    postedMessage = message;
+                    returnedError = error;
+                };
+
+                UnsupportedCommand commandMessage = UnsupportedCommand
+                        .newBuilder()
+                        .setUser(GivenUserId.generated())
+                        .build();
+                CommandRequest request =
+                        client().asGuest()
+                                .command(commandMessage)
+                                .onServerError(handler);
+                request.postAndForget();
+
+                assertThat(returnedError)
+                        .isNotNull();
+                assertThat(postedMessage)
+                        .isInstanceOf(Command.class);
+                Command expected = Command
+                        .newBuilder()
+                        .setMessage(AnyPacker.pack(commandMessage))
+                        .build();
+                assertThat(postedMessage)
+                        .comparingExpectedFieldsOnly()
+                        .isEqualTo(expected);
+            }
         }
     }
 }

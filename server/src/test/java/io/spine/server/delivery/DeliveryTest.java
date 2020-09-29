@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.Truth8;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
 import io.spine.base.Tests;
@@ -59,6 +58,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
@@ -210,8 +210,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                          .run(() -> assertStatsMatch(delivery, index));
 
         Optional<ShardProcessingSession> session = registry.pickUp(index, env.nodeId());
-        Truth8.assertThat(session)
-              .isPresent();
+        assertThat(session).isPresent();
 
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsEmpty(delivery, index));
@@ -253,8 +252,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
     private static void assertStatsEmpty(Delivery delivery, ShardIndex index) {
         Optional<DeliveryStats> emptyStats = delivery.deliverMessagesFrom(index);
-        Truth8.assertThat(emptyStats)
-              .isEmpty();
+        assertThat(emptyStats).isEmpty();
     }
 
     @Test
@@ -369,8 +367,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
     @SuppressWarnings("OptionalGetWithoutIsPresent"/* unchecked exception fails the test. */)
     private static void assertStatsMatch(Delivery delivery, ShardIndex index) {
         Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
-        Truth8.assertThat(stats)
-              .isPresent();
+        assertThat(stats).isPresent();
         assertThat(stats.get()
                         .shardIndex()).isEqualTo(index);
     }

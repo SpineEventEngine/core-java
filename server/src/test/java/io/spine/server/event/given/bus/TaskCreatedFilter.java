@@ -20,9 +20,7 @@
 
 package io.spine.server.event.given.bus;
 
-import com.google.protobuf.Any;
 import io.spine.base.Error;
-import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.type.EventClass;
@@ -31,9 +29,6 @@ import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Task;
 
 import java.util.Optional;
-
-import static io.spine.server.bus.Buses.reject;
-import static java.util.Optional.empty;
 
 /**
  * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()}
@@ -44,18 +39,16 @@ public final class TaskCreatedFilter implements BusFilter<EventEnvelope> {
     private static final EventClass TASK_ADDED_CLASS = EventClass.from(EBTaskAdded.class);
 
     @Override
-    public Optional<Ack> accept(EventEnvelope envelope) {
+    public Optional<Ack> filter(EventEnvelope envelope) {
         if (TASK_ADDED_CLASS.equals(envelope.messageClass())) {
             EBTaskAdded message = (EBTaskAdded) envelope.message();
             Task task = message.getTask();
             if (task.getDone()) {
                 Error error = error();
-                Any packedId = Identifier.pack(envelope.id());
-                Ack result = reject(packedId, error);
-                return Optional.of(result);
+                return reject(envelope, error);
             }
         }
-        return empty();
+        return letPass();
     }
 
     private static Error error() {

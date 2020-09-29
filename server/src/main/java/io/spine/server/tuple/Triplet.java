@@ -20,6 +20,7 @@
 
 package io.spine.server.tuple;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
@@ -63,7 +64,7 @@ public final class Triplet<A extends Message, B, C>
      */
     public static <A extends Message, B extends Message, C extends Message>
     Triplet<A, B, C> of(A a, B b, C c) {
-        checkAllNotNullOrEmpty(Triplet.class, a, b, c);
+        checkAllNotNullOrEmpty(a, b, c);
         Triplet<A, B, C> result = new Triplet<>(a, b, c);
         return result;
     }
@@ -73,8 +74,8 @@ public final class Triplet<A extends Message, B, C>
      */
     public static <A extends Message, B extends Message, C extends Message>
     Triplet<A, B, Optional<C>> withNullable(A a, B b, @Nullable C c) {
-        checkAllNotNullOrEmpty(Triplet.class, a, b);
-        checkNotEmpty(Triplet.class, c);
+        checkAllNotNullOrEmpty(a, b);
+        checkNotEmpty(c);
         Triplet<A, B, Optional<C>> result = new Triplet<>(a, b, ofNullable(c));
         return result;
     }
@@ -84,8 +85,8 @@ public final class Triplet<A extends Message, B, C>
      */
     public static <A extends Message, B extends Message, C extends Message>
     Triplet<A, Optional<B>, Optional<C>> withNullable2(A a, @Nullable B b, @Nullable C c) {
-        checkNotNullOrEmpty(Triplet.class, a);
-        checkAllNotEmpty(Triplet.class, b, c);
+        checkNotNullOrEmpty(a);
+        checkAllNotEmpty(b, c);
         Triplet<A, Optional<B>, Optional<C>> result =
                 new Triplet<>(a, ofNullable(b), ofNullable(c));
         return result;
@@ -121,5 +122,25 @@ public final class Triplet<A extends Message, B, C>
     public boolean hasC() {
         C value = getC();
         return isOptionalPresent(value);
+    }
+
+    @CanIgnoreReturnValue
+    private static <M extends Message> M checkNotNullOrEmpty(M value) {
+        return checkNotNullOrEmpty(Triplet.class, value);
+    }
+
+    @CanIgnoreReturnValue
+    private static <M extends Message> @Nullable M checkNotEmpty(@Nullable M value) {
+        return checkNotEmpty(Triplet.class, value);
+    }
+
+    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
+    private static void checkAllNotNullOrEmpty(Message... values) {
+        checkAllNotNullOrEmpty(Triplet.class, values);
+    }
+
+    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
+    private static void checkAllNotEmpty(Message... values) {
+        checkAllNotEmpty(Triplet.class, values);
     }
 }

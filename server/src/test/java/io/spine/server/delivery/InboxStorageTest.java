@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.truth.Truth8;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.server.ServerEnvironment;
@@ -43,6 +42,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 import static io.spine.server.delivery.InboxIds.newSignalId;
@@ -120,12 +120,10 @@ public class InboxStorageTest
 
             Optional<Page<InboxMessage>> maybeNext = actualPage.next();
             if (iterator.hasNext()) {
-                Truth8.assertThat(maybeNext)
-                      .isPresent();
+                assertThat(maybeNext).isPresent();
                 actualPage = maybeNext.get();
             } else {
-                Truth8.assertThat(maybeNext)
-                      .isEmpty();
+                assertThat(maybeNext).isEmpty();
             }
         }
     }
@@ -163,8 +161,7 @@ public class InboxStorageTest
         Page<InboxMessage> page = readContents(index);
         assertThat(page.contents()
                        .isEmpty()).isTrue();
-        Truth8.assertThat(page.next())
-              .isEmpty();
+        assertThat(page.next()).isEmpty();
     }
 
     private InboxMessage newCommandInInbox(ShardIndex index, String targetId) {

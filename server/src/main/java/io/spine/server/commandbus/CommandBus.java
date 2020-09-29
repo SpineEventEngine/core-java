@@ -32,6 +32,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
+import io.spine.grpc.CompositeObserver;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
@@ -39,6 +40,7 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
+import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -51,6 +53,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.bus.BusBuilder.FieldCheck.systemNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
@@ -93,6 +96,18 @@ public final class CommandBus
     private @MonotonicNonNull CommandValidator commandValidator;
 
     /**
+     * An observer which processes the {@linkplain io.spine.base.ThrowableMessage rejections}
+     * thrown by the bus {@linkplain BusFilter filters}.
+     *
+     * <p>When the bus is first created, this observer does nothing. Once an {@link EventBus} is
+     * {@linkplain #initObservers(EventBus) injected} into this command bus instance, the observer
+     * will start publishing the rejections to the said event bus.
+     *
+     * <p>This observer can stay NO-OP in test environment for the simplicity of tests.
+     */
+    private StreamObserver<Ack> immediateRejectionObserver = noOpObserver();
+
+    /**
      * Creates new instance according to the passed {@link Builder}.
      */
     private CommandBus(Builder builder) {
@@ -117,6 +132,22 @@ public final class CommandBus
     @VisibleForTesting
     public final boolean isMultitenant() {
         return multitenant;
+    }
+
+    /**
+     * Initializes the {@link #immediateRejectionObserver} with the passed {@link EventBus}.
+     *
+     * <p>This enables posting of rejections received from command filters to the corresponding
+     * {@link EventBus}.
+     *
+     * <p>This method is called by the {@link io.spine.server.BoundedContext BoundedContext} and is
+     * a part of context initialization process.
+     *
+     * @see AckRejectionPublisher
+     */
+    public void initObservers(EventBus eventBus) {
+        checkNotNull(eventBus);
+        immediateRejectionObserver = new AckRejectionPublisher(eventBus);
     }
 
     /**
@@ -153,13 +184,17 @@ public final class CommandBus
                                                   StreamObserver<Ack> source) {
         StreamObserver<Ack> wrappedSource = super.prepareObserver(commands, source);
         TenantId tenant = tenantOf(commands);
-        StreamObserver<Ack> result = CommandAckMonitor
+        StreamObserver<Ack> commandAckMonitor = CommandAckMonitor
                 .newBuilder()
-                .setDelegate(wrappedSource)
                 .setTenantId(tenant)
                 .setPostedCommands(ImmutableSet.copyOf(commands))
                 .setSystemWriteSide(systemWriteSide)
                 .build();
+        StreamObserver<Ack> result = new CompositeObserver<>(ImmutableList.of(
+                wrappedSource,
+                immediateRejectionObserver,
+                commandAckMonitor
+        ));
         return result;
     }
 

@@ -22,25 +22,24 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Origin;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.grpc.DelegatingObserver;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandErrored;
+import io.spine.system.server.event.CommandRejected;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static io.spine.core.Acks.toCommandId;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -48,19 +47,14 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * A {@link StreamObserver} for {@link io.spine.core.Command Command}
  * {@linkplain Ack acknowledgement}.
  *
- * <p>Posts a system command whenever a command is acknowledged or errored.
- *
- * <p>{@code CommandAckMonitor} is designed to wrap instances of {@link StreamObserver}.
- * All the calls to {@link StreamObserver} methods on an instance of {@code CommandAckMonitor}
- * invoke respective methods on a {@code delegate} instance.
+ * <p>Posts a system event whenever a command is acknowledged or rejected.
  */
-final class CommandAckMonitor extends DelegatingObserver<Ack> {
+final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private final SystemWriteSide writeSide;
     private final ImmutableMap<CommandId, Command> commands;
 
     private CommandAckMonitor(Builder builder) {
-        super(builder.delegate);
         this.writeSide = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
         this.commands = builder
                 .commands
@@ -71,31 +65,33 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
     /**
      * {@inheritDoc}
      *
-     * <p>Posts either {@link CommandAcknowledged} or {@link CommandErrored} system
-     * event depending on the value of the given {@code Ack}.
-     *
-     * @param value
+     * <p>Posts either {@link CommandAcknowledged}, {@link CommandErrored}, or
+     * {@link CommandRejected} system event depending on the value of the given {@code Ack}.
      */
     @Override
     public void onNext(Ack value) {
-        super.onNext(value);
         postSystemEvent(value);
+    }
+
+    @Override
+    public void onError(Throwable t) {
+        throw new IllegalStateException(t);
+    }
+
+    @Override
+    public void onCompleted() {
+        // NO-OP.
     }
 
     private void postSystemEvent(Ack ack) {
         Status status = ack.getStatus();
-        CommandId commandId = commandIdFrom(ack);
+        CommandId commandId = toCommandId(ack);
         EventMessage systemEvent = systemEventFor(status, commandId);
         Command command = commands.get(commandId);
         checkState(command != null, "Unknown command ID encountered: `%s`.", commandId.value());
         Origin systemEventOrigin = CommandEnvelope.of(command)
                                                   .asMessageOrigin();
         writeSide.postEvent(systemEvent, systemEventOrigin);
-    }
-
-    private static CommandId commandIdFrom(Ack ack) {
-        Any messageId = ack.getMessageId();
-        return Identifier.unpack(messageId, CommandId.class);
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Default values.
@@ -111,6 +107,10 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
                                      .setError(status.getError())
                                      .build();
             case REJECTION:
+                return CommandRejected.newBuilder()
+                                      .setId(commandId)
+                                      .setRejectionEvent(status.getRejection())
+                                      .build();
             default:
                 throw newIllegalArgumentException(
                         "Command `%s` has invalid status `%s`.",
@@ -134,7 +134,6 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
      */
     static final class Builder {
 
-        private StreamObserver<Ack> delegate;
         private TenantId tenantId;
         private SystemWriteSide systemWriteSide;
         private ImmutableSet<Command> commands;
@@ -143,14 +142,6 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
          * Prevents direct instantiation.
          */
         private Builder() {
-        }
-
-        /**
-         * Sets the {@link StreamObserver} to delegate calls to.
-         */
-        Builder setDelegate(StreamObserver<Ack> delegate) {
-            this.delegate = checkNotNull(delegate);
-            return this;
         }
 
         /**
@@ -185,7 +176,6 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
          * @return new instance of {@code CommandAckMonitor}
          */
         CommandAckMonitor build() {
-            checkNotNull(delegate);
             checkNotNull(tenantId);
             checkNotNull(systemWriteSide);
             checkNotNull(commands);

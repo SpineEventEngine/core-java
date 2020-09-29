@@ -49,6 +49,8 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMe
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
+import io.spine.server.projection.given.SetTestProjectionId;
+import io.spine.server.projection.given.SetTestProjectionName;
 import io.spine.server.projection.given.TestProjection;
 import io.spine.server.projection.migration.MarkProjectionArchived;
 import io.spine.server.projection.migration.MarkProjectionDeleted;
@@ -86,6 +88,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
@@ -231,7 +234,8 @@ class ProjectionRepositoryTest
                 .multitenant(getClass().getSimpleName())
                 .build();
         super.setUp();
-        context.internalAccess().register(this.repository());
+        context.internalAccess()
+               .register(this.repository());
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -363,7 +367,8 @@ class ProjectionRepositoryTest
                     .build();
             EntitySubscriberProjection.Repository repository =
                     new EntitySubscriberProjection.Repository();
-            BoundedContext context = BoundedContextBuilder.assumingTests().build();
+            BoundedContext context = BoundedContextBuilder.assumingTests()
+                                                          .build();
             context.internalAccess()
                    .register(repository);
             EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
@@ -372,11 +377,13 @@ class ProjectionRepositoryTest
                     .newBuilder()
                     .setProjectId(id)
                     .setProjectName(projectCreated.getName())
-                    .addTaskName(taskAdded.getTask().getTitle())
+                    .addTaskName(taskAdded.getTask()
+                                          .getTitle())
                     .build();
             Optional<EntitySubscriberProjection> projection = repository.find(id);
             assertTrue(projection.isPresent());
-            assertEquals(expectedValue, projection.get().state());
+            assertEquals(expectedValue, projection.get()
+                                                  .state());
 
             context.close();
         }
@@ -469,7 +476,9 @@ class ProjectionRepositoryTest
         List<RoutingFailed> failures = monitor.routingFailures();
         assertThat(failures.size()).isEqualTo(1);
         RoutingFailed failure = failures.get(0);
-        assertThat(failure.getError().getMessage()).contains(repository().idClass().getName());
+        assertThat(failure.getError()
+                          .getMessage()).contains(repository().idClass()
+                                                              .getName());
     }
 
     @Nested
@@ -549,6 +558,91 @@ class ProjectionRepositoryTest
     }
 
     @Test
+    @DisplayName("update entity via a custom migration")
+    void performCustomMigration() {
+        // Store a new process manager instance in the repository.
+        ProjectId id = createId(42);
+        TestProjectionRepository repository = repository();
+        TestProjection projection = new TestProjection(id);
+        repository.store(projection);
+
+        // Init filters by the `id_string` column.
+        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+
+        // Check nothing is found as column now should be empty.
+        Iterator<TestProjection> found =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the migration.
+        repository.applyMigration(id, new SetTestProjectionId());
+
+        // Check the entity is now found by the provided filters.
+        Iterator<TestProjection> afterMigration =
+                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        assertThat(afterMigration.hasNext()).isTrue();
+
+        // Check the new entity state has all fields updated as expected.
+        TestProjection entityWithColumns = afterMigration.next();
+        Project expectedState = projection
+                .state()
+                .toBuilder()
+                .setIdString(projection.getIdString())
+                .build();
+        assertThat(entityWithColumns.state()).isEqualTo(expectedState);
+    }
+
+    @Test
+    @DisplayName("update multiple entities via a custom migration")
+    void performCustomMigrationForMultiple() {
+        // Store three entities to the repository.
+        ProjectId id1 = createId(1);
+        ProjectId id2 = createId(2);
+        ProjectId id3 = createId(3);
+        TestProjectionRepository repository = repository();
+        TestProjection projection1 = new TestProjection(id1);
+        TestProjection projection2 = new TestProjection(id2);
+        TestProjection projection3 = new TestProjection(id3);
+        repository.store(projection1);
+        repository.store(projection2);
+        repository.store(projection3);
+
+        // Init filters by the `name` column.
+        TargetFilters filters =
+                targetFilters(Project.Column.name(), SetTestProjectionName.NEW_NAME);
+
+        // Check nothing is found as the entity states were not yet updated.
+        Iterator<TestProjection> found =
+                repository.find(filters, ResponseFormat.getDefaultInstance());
+        assertThat(found.hasNext()).isFalse();
+
+        // Apply the column update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new SetTestProjectionName());
+
+        // Check the entities are now found by the provided filters.
+        Iterator<TestProjection> foundAfterMigration =
+                repository.find(filters, ResponseFormat.getDefaultInstance());
+
+        ImmutableList<TestProjection> results = ImmutableList.copyOf(foundAfterMigration);
+        Project expectedState1 = projection1
+                .state()
+                .toBuilder()
+                .setName(SetTestProjectionName.NEW_NAME)
+                .setIdString(projection1.getIdString())
+                .build();
+        Project expectedState2 = projection2
+                .state()
+                .toBuilder()
+                .setName(SetTestProjectionName.NEW_NAME)
+                .setIdString(projection2.getIdString())
+                .build();
+        assertThat(results).hasSize(2);
+        assertThat(results)
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState1, expectedState2);
+    }
+
+    @Test
     @DisplayName("update state through migration operation")
     void updateState() {
         // Store a new projection instance in the repository.
@@ -575,7 +669,12 @@ class ProjectionRepositoryTest
 
         // Check the column value is propagated to the entity state.
         TestProjection entityWithColumns = afterMigration.next();
-        assertThat(entityWithColumns.state().getIdString()).isEqualTo(id.toString());
+        Project expectedState = projection
+                .state()
+                .toBuilder()
+                .setIdString(projection.getIdString())
+                .build();
+        assertThat(entityWithColumns.state()).isEqualTo(expectedState);
     }
 
     @Test
@@ -607,10 +706,20 @@ class ProjectionRepositoryTest
                 repository.find(filters, ResponseFormat.getDefaultInstance());
 
         ImmutableList<TestProjection> results = ImmutableList.copyOf(found);
+        Project expectedState1 = projection1
+                .state()
+                .toBuilder()
+                .setIdString(projection1.getIdString())
+                .build();
+        Project expectedState2 = projection2
+                .state()
+                .toBuilder()
+                .setIdString(projection2.getIdString())
+                .build();
         assertThat(results).hasSize(2);
         assertThat(results)
-                .comparingElementsUsing(idCorrespondence())
-                .containsExactly(id1, id2);
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState1, expectedState2);
     }
 
     @Test
@@ -623,8 +732,9 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new MarkProjectionArchived<>());
 
         Optional<TestProjection> found = repository().find(id);
-        assertThat(found.isPresent()).isTrue();
-        assertThat(found.get().isArchived()).isTrue();
+        assertThat(found).isPresent();
+        assertThat(found.get()
+                        .isArchived()).isTrue();
     }
 
     @Test
@@ -637,8 +747,9 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new MarkProjectionDeleted<>());
 
         Optional<TestProjection> found = repository().find(id);
-        assertThat(found.isPresent()).isTrue();
-        assertThat(found.get().isDeleted()).isTrue();
+        assertThat(found).isPresent();
+        assertThat(found.get()
+                        .isDeleted()).isTrue();
     }
 
     @Test
@@ -651,7 +762,7 @@ class ProjectionRepositoryTest
         repository().applyMigration(id, new RemoveProjectionFromStorage<>());
 
         Optional<TestProjection> found = repository().find(id);
-        assertThat(found.isPresent()).isFalse();
+        assertThat(found).isEmpty();
     }
 
     private static TargetFilters targetFilters(EntityColumn<?, String> column, String value) {
@@ -668,11 +779,11 @@ class ProjectionRepositoryTest
                 .build();
     }
 
-    private static Correspondence<TestProjection, ProjectId> idCorrespondence() {
-        return Correspondence.from(ProjectionRepositoryTest::hasId, "has ID");
+    private static Correspondence<TestProjection, Project> entityState() {
+        return Correspondence.from(ProjectionRepositoryTest::hasState, "has state");
     }
 
-    private static boolean hasId(TestProjection projection, ProjectId id) {
-        return projection.id().equals(id);
+    private static boolean hasState(TestProjection actual, Project expected) {
+        return actual.state().equals(expected);
     }
 }

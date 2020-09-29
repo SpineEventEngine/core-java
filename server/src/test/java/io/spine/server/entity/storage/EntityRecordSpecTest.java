@@ -40,6 +40,7 @@ import static io.spine.server.entity.storage.AssertColumns.assertContains;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.server.entity.storage.EntityRecordColumn.version;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -67,7 +68,7 @@ class EntityRecordSpecTest {
         ColumnName columnName = ColumnName.of("description");
         Optional<Column<?, ?>> descriptionColumn = spec.findColumn(columnName);
 
-        assertThat(descriptionColumn.isPresent()).isTrue();
+        assertThat(descriptionColumn).isPresent();
     }
 
     @Test
@@ -95,7 +96,7 @@ class EntityRecordSpecTest {
         ColumnName existingColumn = ColumnName.of("name");
         Optional<Column<?, ?>> column = spec().findColumn(existingColumn);
 
-        assertThat(column.isPresent()).isTrue();
+        assertThat(column).isPresent();
     }
 
     @Test
@@ -104,7 +105,7 @@ class EntityRecordSpecTest {
         ColumnName nonExistent = ColumnName.of("non-existent-column");
         Optional<Column<?, ?>> result = spec().findColumn(nonExistent);
 
-        assertThat(result.isPresent()).isFalse();
+        assertThat(result).isEmpty();
     }
 
     @Test

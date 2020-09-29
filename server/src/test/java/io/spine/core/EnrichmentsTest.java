@@ -22,7 +22,6 @@ package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.OptionalSubject;
-import com.google.common.truth.Truth8;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
@@ -43,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.containerIn;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -141,7 +141,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
 
     private static
     OptionalSubject assertEnrichment(EventContext ctx, Class<? extends Message> cls) {
-        return Truth8.assertThat(ctx.find(cls));
+        return assertThat(ctx.find(cls));
     }
 
     @Test

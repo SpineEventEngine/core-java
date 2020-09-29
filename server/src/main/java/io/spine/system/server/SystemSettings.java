@@ -24,7 +24,7 @@ import com.google.common.base.Objects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.base.Environment;
-import io.spine.base.Production;
+import io.spine.base.Tests;
 
 /**
  * A configuration of features of a system context.
@@ -58,10 +58,10 @@ public final class SystemSettings implements SystemFeatures {
         SystemSettings settings = new SystemSettings()
                 .disableCommandLog()
                 .forgetEvents();
-        if (Environment.instance().is(Production.class)) {
-            settings.enableParallelPosting();
-        } else {
+        if (Environment.instance().is(Tests.class)) {
             settings.disableParallelPosting();
+        } else {
+            settings.enableParallelPosting();
         }
         return settings;
     }

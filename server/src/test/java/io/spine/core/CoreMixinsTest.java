@@ -20,7 +20,6 @@
 
 package io.spine.core;
 
-import com.google.common.truth.Truth8;
 import io.spine.core.given.CoreMixinsTestEnv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 
 /**
  * Tests of mixins for {@code core} {@code Message}s.
@@ -87,8 +87,7 @@ class CoreMixinsTest {
     void originIdMixin() {
         Optional<Origin> origin = CoreMixinsTestEnv.event()
                                                    .origin();
-        Truth8.assertThat(origin)
-              .isPresent();
+        assertThat(origin).isPresent();
         assertThat(origin.get()
                          .checkFieldsReachable()).isTrue();
     }

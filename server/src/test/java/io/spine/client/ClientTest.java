@@ -177,7 +177,7 @@ class ClientTest extends AbstractClientTest {
                                          .build();
             client.asGuest()
                   .command(command)
-                  .post();
+                  .postAndForget();
             ActiveUsers.Query query = ActiveUsers
                     .newQuery()
                     .id()

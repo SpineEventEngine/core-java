@@ -20,6 +20,7 @@
 
 package io.spine.server.tuple;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
@@ -60,19 +61,42 @@ public final class Pair<A extends Message, B>
      * Creates a new pair of values.
      */
     public static <A extends Message, B extends Message> Pair<A, B> of(A a, B b) {
-        Pair<A, B> result = new Pair<>(checkNotNullOrEmpty(Pair.class, a),
-                                       checkNotNullOrEmpty(Pair.class, b));
+        A safeA = checkNotNullOrEmpty(a);
+        B safeB = checkNotNullOrEmpty(b);
+        Pair<A, B> result = new Pair<>(safeA, safeB);
         return result;
     }
 
     /**
      * Creates a pair with optionally present second value.
+     *
+     * @see #withOptional(Message, Optional)
      */
     public static <A extends Message, B extends Message>
     Pair<A, Optional<B>> withNullable(A a, @Nullable B b) {
-        checkNotNullOrEmpty(Pair.class, a);
-        checkNotEmpty(Pair.class, b);
+        checkNotNullOrEmpty(a);
+        checkNotEmpty(b);
         Pair<A, Optional<B>> result = new Pair<>(a, ofNullable(b));
+        return result;
+    }
+
+    /**
+     * Creates a pair with optionally present second value.
+     *
+     * @see #withNullable(Message, Message)
+     * @apiNote This method treats a special case of construction using already available
+     *         instance of {@code Optional}. This avoids unwrapping of {@code Optional} which would
+     *         have been required for passing an optional value to
+     *         {@link #withNullable(Message, Message)}.
+     */
+    public static <A extends Message, B extends Message>
+    Pair<A, Optional<B>> withOptional(
+            A a,
+            @SuppressWarnings("OptionalUsedAsFieldOrParameterType") /* see @apiNote */ Optional<B> b
+    ) {
+        checkNotNullOrEmpty(a);
+        checkNotNull(b);
+        Pair<A, Optional<B>> result = new Pair<>(a, b);
         return result;
     }
 
@@ -80,7 +104,7 @@ public final class Pair<A extends Message, B>
      * Creates a pair with the second element of a type descending from {@link Either}.
      */
     public static <A extends Message, B extends Either> Pair<A, B> withEither(A a, B b) {
-        checkNotNullOrEmpty(Pair.class, a);
+        checkNotNullOrEmpty(a);
         checkNotNull(b);
         Pair<A, B> result = new Pair<>(a, b);
         return result;
@@ -105,5 +129,15 @@ public final class Pair<A extends Message, B>
     public boolean hasB() {
         B value = getB();
         return isOptionalPresent(value);
+    }
+
+    @CanIgnoreReturnValue
+    private static <M extends Message> M checkNotNullOrEmpty(M value) {
+        return checkNotNullOrEmpty(Pair.class, value);
+    }
+
+    @CanIgnoreReturnValue
+    private static <M extends Message> @Nullable M checkNotEmpty(@Nullable M value) {
+        return checkNotEmpty(Pair.class, value);
     }
 }

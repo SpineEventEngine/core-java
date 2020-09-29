@@ -20,6 +20,7 @@ env:
 before_install:
   - chmod +x gradlew
   - chmod +x config/scripts/register-ssh-key.sh
+  - chmod +x ./config/scripts/publish-artifacts.sh
   # Decrypt and un-archive Maven and Google Cloud credentials and an RSA private key (deploy_key_rsa).
   - openssl aes-256-cbc -K $encrypted_e308efbe7a9a_key -iv $encrypted_e308efbe7a9a_iv -in credentials.tar.enc -out credentials.tar -d
   - tar xvf credentials.tar
@@ -30,8 +31,7 @@ script:
 
   # The publishing script should be executed in `script` section in order to
   # fail the Travis build if execution of this script is failed.
-  - chmod +x ./scripts/publish.sh
-  - ./scripts/publish.sh
+  - ./config/scripts/publish-artifacts.sh
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
@@ -40,6 +40,8 @@ after_success:
     if [[ $TRAVIS_BRANCH == master ]] && [[ $TRAVIS_PULL_REQUEST == false ]]; then
       chmod +x ./scripts/dependent-repositories/update-dependent-repositories.sh
       ./scripts/dependent-repositories/update-dependent-repositories.sh $GITHUB_TOKEN
+      chmod +x ./config/scripts/trigger-publishing.sh
+      sh ./config/scripts/trigger-publishing.sh
     fi
 
 after_script:

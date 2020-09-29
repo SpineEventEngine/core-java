@@ -29,7 +29,6 @@ option java_multiple_files = true;
 option java_outer_classname = "EventProto";
 
 import "google/protobuf/any.proto";
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/core/actor_context.proto";
@@ -126,7 +125,7 @@ message EventContext {
 
     // An ID of the root command, which lead to this event.
     //
-    // If the event is a reaction to another event, then this attribute holds the identifier 
+    // If the event is a reaction to another event, then this attribute holds the identifier
     // of the very first command in this chain.
     //
     // This field is not populated if the event was imported.

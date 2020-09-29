@@ -23,7 +23,6 @@ package io.spine.server;
 import com.example.ForeignContextConfig;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.common.truth.Truth8;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.logging.Logging;
@@ -67,6 +66,7 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -379,9 +379,9 @@ class BoundedContextTest {
 
         context.register(new SecretProjectRepository());
 
-        Truth8.assertThat(context.internalAccess()
-                                 .findRepository(SecretProject.class))
-              .isEmpty();
+        assertThat(context.internalAccess()
+                          .findRepository(SecretProject.class))
+                .isEmpty();
     }
 
     @Test

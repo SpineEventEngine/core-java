@@ -306,7 +306,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
         int negativeExpected = -1 * positiveExpected * 2;
 
-        assertThat(projectionRepo.find(excludedTarget)).isEmpty();
+        assertThat(projectionRepo.find(excludedTarget))
+                .isEmpty();
         for (int idIndex = 1; idIndex < ids.length; idIndex++) {
             String identifier = ids[idIndex];
             Optional<ConsecutiveProjection> maybeState = projectionRepo.find(identifier);
