@@ -240,7 +240,8 @@ public class EntityRecordStorageTest
             storage.write(create(activeEntity, activeRecord));
             storage.write(create(archivedEntity, archivedRecord));
 
-            StgProject.Query query = StgProject.newQuery()
+            StgProject.Query query =
+                    StgProject.query()
                                                .where(archived.lifecycle(), true)
                                                .build();
             assertQueryHasSingleResult(query, archivedRecord, storage);
@@ -280,13 +281,11 @@ public class EntityRecordStorageTest
             writeRecord(storage, idWrong1, wrong1);
             writeRecord(storage, idWrong2, wrong2);
 
-            StgProject.Query query = StgProject
-                    .newQuery()
-                    .projectStatusValue()
-                    .is(DONE_VALUE)
-                    .projectVersion()
-                    .is(projectVersion())
-                    .build();
+            StgProject.Query query =
+                    StgProject.query()
+                              .projectStatusValue().is(DONE_VALUE)
+                              .projectVersion().is(projectVersion())
+                              .build();
             assertQueryHasSingleResult(query, fineRecord, storage);
         }
 
@@ -334,15 +333,13 @@ public class EntityRecordStorageTest
 
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
 
-            StgProject.Query query = StgProject
-                    .newQuery()
-                    .id()
-                    .is(targetId)
-                    .projectStatusValue()
-                    .is(CANCELLED_VALUE)
-                    .where(archived.lifecycle(), false)
-                    .where(deleted.lifecycle(), false)
-                    .build();
+            StgProject.Query query =
+                    StgProject.query()
+                              .id().is(targetId)
+                              .projectStatusValue().is(CANCELLED_VALUE)
+                              .where(archived.lifecycle(), false)
+                              .where(deleted.lifecycle(), false)
+                              .build();
 
             Iterator<EntityRecord> read = storage.findAll(query);
             List<EntityRecord> readRecords = newArrayList(read);
@@ -362,10 +359,10 @@ public class EntityRecordStorageTest
             writeRecord(newId(), storage);
             writeRecord(newId(), storage);
 
-            StgProject.Query query = StgProject.newQuery()
-                                               .id()
-                                               .is(matchingId)
-                                               .build();
+            StgProject.Query query =
+                    StgProject.query()
+                              .id().is(matchingId)
+                              .build();
             assertQueryHasSingleResult(query, matchingRecord, storage);
         }
 
@@ -423,14 +420,16 @@ public class EntityRecordStorageTest
             EntityRecord expectedArchived = writeRecordAndArchive(newId(), storage);
             EntityRecord expectedDeleted = writeRecordAndDelete(newId(), storage);
 
-            StgProject.Query queryArchived = StgProject.newQuery()
-                                                       .where(archived.lifecycle(), true)
-                                                       .build();
+            StgProject.Query queryArchived =
+                    StgProject.query()
+                              .where(archived.lifecycle(), true)
+                              .build();
             assertQueryHasSingleResult(queryArchived, expectedArchived, storage);
 
-            StgProject.Query queryDeleted = StgProject.newQuery()
-                                                      .where(deleted.lifecycle(), true)
-                                                      .build();
+            StgProject.Query queryDeleted =
+                    StgProject.query()
+                              .where(deleted.lifecycle(), true)
+                              .build();
             assertQueryHasSingleResult(queryDeleted, expectedDeleted, storage);
         }
 
@@ -446,11 +445,10 @@ public class EntityRecordStorageTest
             EntityRecord archivedRecord = writeRecordAndArchive(archivedId, storage);
             EntityRecord deletedRecord = writeRecordAndDelete(deletedId, storage);
 
-            StgProject.Query query = StgProject
-                    .newQuery()
-                    .id()
-                    .in(activeId, archivedId, deletedId)
-                    .build();
+            StgProject.Query query =
+                    StgProject.query()
+                              .id().in(activeId, archivedId, deletedId)
+                              .build();
             Iterator<EntityRecord> actual = storage.findAll(query);
 
             assertThat(ImmutableSet.copyOf(actual))
@@ -573,10 +571,10 @@ public class EntityRecordStorageTest
             // Write with `DONE` status at first.
             StgProject.Status initialStatus = DONE;
             record = writeWithStatus(entity, initialStatus, record, storage);
-            StgProject.Query query = StgProject.newQuery()
-                                               .projectStatusValue()
-                                               .is(initialStatus.getNumber())
-                                               .build();
+            StgProject.Query query =
+                    StgProject.query()
+                              .projectStatusValue().is(initialStatus.getNumber())
+                              .build();
             Iterator<EntityRecord> recordsBefore = storage.findAll(query);
             assertSingleRecord(record, recordsBefore);
 

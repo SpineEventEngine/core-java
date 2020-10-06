@@ -51,8 +51,6 @@ import static com.google.protobuf.util.Durations.fromMinutes;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
-import static io.spine.query.Direction.ASC;
-import static io.spine.query.Direction.DESC;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.server.storage.given.RecordStorageDelegateTestEnv.assertOnlyIdAndDueDate;
 import static io.spine.server.storage.given.RecordStorageDelegateTestEnv.coupleOfDone;
@@ -167,7 +165,7 @@ public class RecordStorageDelegateTest
             storage().writeBatch(ImmutableList.of(newest, older, oldest, almostNew));
 
             int limit = 2;
-            RecordQuery<StgProjectId, StgProject> query = queryBuilder().orderBy(due_date, ASC)
+            RecordQuery<StgProjectId, StgProject> query = queryBuilder().sortAscendingBy(due_date)
                               .limit(limit)
                               .build();
             Iterator<StgProject> iterator = storage().readAll(query);
@@ -244,7 +242,7 @@ public class RecordStorageDelegateTest
             storage().writeBatch(createdProjects);
 
             RecordQuery<StgProjectId, StgProject> queryDone =
-                    queryDoneProjects().orderBy(due_date, ASC)
+                    queryDoneProjects().sortAscendingBy(due_date)
                                        .limit(10)
                                        .build();
 
@@ -260,7 +258,7 @@ public class RecordStorageDelegateTest
                     queryBuilder()
                               .where(status)
                               .is(CREATED.name())
-                              .orderBy(due_date, ASC)
+                              .sortAscendingBy(due_date)
                               .limit(limit)
                               .build();
             Iterator<StgProject> limitedIterator = storage().readAll(queryCreated);
@@ -286,7 +284,7 @@ public class RecordStorageDelegateTest
             RecordQuery<StgProjectId, StgProject> query =
                     queryDoneProjects().where(due_date)
                                        .isLessThan(now)
-                                       .orderBy(due_date, ASC)
+                                       .sortAscendingBy(due_date)
                                        .limit(2)
                                        .build();
 
@@ -314,7 +312,7 @@ public class RecordStorageDelegateTest
                     queryDoneProjects().where(due_date)
                                        .isLessThan(now)
                                        .withMask(idAndDueDate())
-                                       .orderBy(due_date, DESC)
+                                       .sortDescendingBy(due_date)
                                        .limit(2)
                                        .build();
 

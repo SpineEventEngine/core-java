@@ -47,10 +47,10 @@ public class SessionRepository
     }
 
     private Set<RSessionId> findByUserId(UserId id) {
-        RSession.Query query = RSession.newQuery()
-                                       .userId()
-                                       .is(id)
-                                       .build();
+        RSession.Query query =
+                RSession.query()
+                        .userId().is(id)
+                        .build();
         Iterator<RSessionId> identifiers = recordStorage().index(query);
         ImmutableSet<RSessionId> result = ImmutableSet.copyOf(identifiers);
         return result;

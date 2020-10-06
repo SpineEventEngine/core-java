@@ -27,19 +27,21 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.query.Column;
 import io.spine.query.ComparisonOperator;
+import io.spine.query.Direction;
 import io.spine.query.EntityQuery;
 import io.spine.query.LogicalOperator;
-import io.spine.query.OrderBy;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordCriterion;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
+import io.spine.query.SortBy;
 import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
 import io.spine.server.entity.EntityRecord;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.query.Direction.ASC;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -78,7 +80,7 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         Subject<I, S> subject = source.subject();
         this.setIdParameter(subject.id());
         copyPredicates(subject);
-        copyOrdering(source);
+        copySorting(source);
         copyLimit(source);
         copyMask(source);
     }
@@ -97,12 +99,17 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         }
     }
 
-    private void copyOrdering(EntityQuery<I, S, ?> source) {
-        ImmutableList<OrderBy<?, S>> ordering = source.ordering();
-        for (OrderBy<?, S> orderByOrigin : ordering) {
+    private void copySorting(EntityQuery<I, S, ?> source) {
+        ImmutableList<SortBy<?, S>> sorting = source.sorting();
+        for (SortBy<?, S> sortByOrigin : sorting) {
             RecordColumn<EntityRecord, ?> thisColumn =
-                    AsEntityRecordColumn.apply(orderByOrigin.column());
-            this.orderBy(thisColumn, orderByOrigin.direction());
+                    AsEntityRecordColumn.apply(sortByOrigin.column());
+            Direction direction = sortByOrigin.direction();
+            if(ASC == direction) {
+                this.sortAscendingBy(thisColumn);
+            } else {
+                this.sortDescendingBy(thisColumn);
+            }
         }
     }
 

@@ -20,11 +20,10 @@
 
 package io.spine.server.storage.memory.given;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.protobuf.AnyPacker;
-import io.spine.query.IdParameter;
 import io.spine.query.RecordColumn;
+import io.spine.query.RecordQuery;
 import io.spine.query.Subject;
 import io.spine.server.entity.EntityRecord;
 import io.spine.test.storage.StgProject;
@@ -46,12 +45,9 @@ public final class RecordQueryMatcherTestEnv {
      * Creates an empty {@code Subject} for the {@link EntityRecord}.
      */
     public static Subject<Object, EntityRecord> recordSubject() {
-        Subject<Object, EntityRecord> sampleSubject =
-                new Subject<>(IdParameter.empty(),
-                              Object.class,
-                              EntityRecord.class,
-                              ImmutableList.of());
-        return sampleSubject;
+        return RecordQuery.newBuilder(Object.class, EntityRecord.class)
+                          .build()
+                          .subject();
     }
 
 
@@ -59,15 +55,14 @@ public final class RecordQueryMatcherTestEnv {
      * Creates a {@code Subject} for the {@link EntityRecord} with the given ID.
      */
     public static <I> Subject<I, EntityRecord> recordSubject(I id) {
-        Subject<I, EntityRecord> sampleSubject =
-                new Subject<>(IdParameter.is(id), parameterizedCls(id),
-                              EntityRecord.class,
-                              ImmutableList.of());
-        return sampleSubject;
+        return RecordQuery.newBuilder(parameterizedClsOf(id), EntityRecord.class)
+                          .id().is(id)
+                          .build()
+                          .subject();
     }
 
     @SuppressWarnings("unchecked")  // as per the declaration.
-    private static <I> Class<I> parameterizedCls(I id) {
+    private static <I> Class<I> parameterizedClsOf(I id) {
         return (Class<I>) id.getClass();
     }
 

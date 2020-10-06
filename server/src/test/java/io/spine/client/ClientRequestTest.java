@@ -98,7 +98,7 @@ class ClientRequestTest extends AbstractClientTest {
     @Test
     @DisplayName("run `EntityQuery`")
     void runEntityQuery() {
-        ActiveUsers.Query query = ActiveUsers.newQuery()
+        ActiveUsers.Query query = ActiveUsers.query()
                                              .build();
         ImmutableList<ActiveUsers> results = request.run(query);
         assertThat(results).isNotNull();

@@ -111,7 +111,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         Subject<?, ?> subject = query.subject();
         addIds(builder, subject);
         addPredicates(builder, subject.predicates());
-        addOrdering(builder, query);
+        addSorting(builder, query);
         addLimit(builder, query);
         addFieldMask(builder, query);
         return builder.build();
@@ -131,12 +131,12 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         }
     }
 
-    private static void addOrdering(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
-        for (io.spine.query.OrderBy<?, ?> orderBy : query.ordering()) {
-            String columnName = orderBy.column()
-                                       .name()
-                                       .value();
-            OrderBy.Direction direction = orderBy.direction() == ASC ? ASCENDING : DESCENDING;
+    private static void addSorting(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
+        for (io.spine.query.SortBy<?, ?> sortBy : query.sorting()) {
+            String columnName = sortBy.column()
+                                      .name()
+                                      .value();
+            OrderBy.Direction direction = sortBy.direction() == ASC ? ASCENDING : DESCENDING;
             builder.orderBy(columnName, direction);
         }
     }

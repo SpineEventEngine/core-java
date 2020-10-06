@@ -96,7 +96,7 @@ class AggregateMirroringTest {
         @Test
         @DisplayName("all instances")
         void includeAll() {
-            Query query = MRPhoto.newQuery()
+            Query query = MRPhoto.query()
                                  .build(transformWith(queries));
             List<? extends EntityState<?>> readMessages = execute(query);
             assertThat(readMessages).containsExactlyElementsIn(givenPhotos);
@@ -115,12 +115,11 @@ class AggregateMirroringTest {
             MRPhoto target = onePhoto();
             archiveItem(target);
             MRPhotoId targetId = target.getId();
-            Query query = MRPhoto
-                    .newQuery()
-                    .id()
-                    .is(targetId)
-                    .where(archived.lifecycle(), true)
-                    .build(transformWith(queries));
+            Query query =
+                    MRPhoto.query()
+                           .id().is(targetId)
+                           .where(archived.lifecycle(), true)
+                           .build(transformWith(queries));
             checkRead(query, target);
         }
 
@@ -130,12 +129,11 @@ class AggregateMirroringTest {
             MRPhoto target = onePhoto();
             deleteItem(target);
             MRPhotoId targetId = target.getId();
-            Query query = MRPhoto
-                    .newQuery()
-                    .id()
-                    .is(targetId)
-                    .where(deleted.lifecycle(), true)
-                    .build(transformWith(queries));
+            Query query =
+                    MRPhoto.query()
+                           .id().is(targetId)
+                           .where(deleted.lifecycle(), true)
+                           .build(transformWith(queries));
             checkRead(query, target);
         }
 
@@ -146,11 +144,11 @@ class AggregateMirroringTest {
             MRPhoto secondPhoto = anotherPhoto();
             archiveItem(firstPhoto);
             archiveItem(secondPhoto);
-            Query query = MRPhoto
-                    .newQuery()
-                    .where(archived.lifecycle(), true)
-                    .where(deleted.lifecycle(), false)
-                    .build(transformWith(queries));
+            Query query =
+                    MRPhoto.query()
+                           .where(archived.lifecycle(), true)
+                           .where(deleted.lifecycle(), false)
+                           .build(transformWith(queries));
             checkRead(query, firstPhoto, secondPhoto);
         }
 
@@ -161,55 +159,48 @@ class AggregateMirroringTest {
             MRPhoto secondPhoto = anotherPhoto();
             deleteItem(firstPhoto);
             deleteItem(secondPhoto);
-            Query query = MRPhoto
-                    .newQuery()
-                    .where(archived.lifecycle(), false)
-                    .where(deleted.lifecycle(), true)
-                    .build(transformWith(queries));
+            Query query = MRPhoto.query()
+                                 .where(archived.lifecycle(), false)
+                                 .where(deleted.lifecycle(), true)
+                                 .build(transformWith(queries));
             checkRead(query, firstPhoto, secondPhoto);
         }
 
         @Test
         @DisplayName("by the a single entity column")
         void bySingleEntityColumn() {
-            Query queryForNothing = MRPhoto
-                    .newQuery()
-                    .height()
-                    .isLessThan(20)
-                    .build(transformWith(queries));
+            Query queryForNothing =
+                    MRPhoto.query()
+                           .height().isLessThan(20)
+                           .build(transformWith(queries));
             checkReadsNothing(queryForNothing);
 
-            Query queryForOneElement = MRPhoto
-                    .newQuery()
-                    .height()
-                    .isLessThan(201)
-                    .build(transformWith(queries));
+            Query queryForOneElement =
+                    MRPhoto.query()
+                           .height().isLessThan(201)
+                           .build(transformWith(queries));
             checkRead(queryForOneElement, spineLogo200by200());
         }
 
         @Test
         @DisplayName("by the two entity columns joined with `AND`")
         void byTwoEntityColumnsWithAndOperator() {
-            Query query = MRPhoto
-                    .newQuery()
-                    .height()
-                    .isGreaterOrEqualTo(7000)
-                    .width()
-                    .isGreaterThan(6999)
-                    .build(transformWith(queries));
+            Query query =
+                    MRPhoto.query()
+                           .height().isGreaterOrEqualTo(7000)
+                           .width().isGreaterThan(6999)
+                           .build(transformWith(queries));
             checkRead(query, jxBrowserLogo7K());
         }
 
         @Test
         @DisplayName("by the two entity columns joined with `OR`")
         void byTwoEntityColumnsWithOrOperator() {
-            Query query = MRPhoto
-                    .newQuery()
-                    .either(q -> q.width()
-                                  .isLessOrEqualTo(200),
-                            q -> q.height()
-                                  .isGreaterThan(6999))
-                    .build(transformWith(queries));
+            Query query =
+                    MRPhoto.query()
+                           .either(q -> q.width().isLessOrEqualTo(200),
+                                   q -> q.height().isGreaterThan(6999))
+                           .build(transformWith(queries));
             checkRead(query, spineLogo200by200(), jxBrowserLogo7K());
         }
 
@@ -217,15 +208,12 @@ class AggregateMirroringTest {
         @DisplayName("by the two parameters for the same columns with `OR` " +
                 "and by one more column joined with `AND`")
         void byCombinationAndOr() {
-            Query query = MRPhoto
-                    .newQuery()
-                    .either(q -> q.sourceType()
-                                  .is(CROP_FRAME),
-                            q -> q.sourceType()
-                                  .is(FULL_FRAME))
-                    .height()
-                    .isLessThan(7000)
-                    .build(transformWith(queries));
+            Query query =
+                    MRPhoto.query()
+                           .either(q -> q.sourceType().is(CROP_FRAME),
+                                   q -> q.sourceType().is(FULL_FRAME))
+                           .height().isLessThan(7000)
+                           .build(transformWith(queries));
             checkRead(query, projectLogo1000by800());
         }
 
@@ -233,21 +221,19 @@ class AggregateMirroringTest {
         @DisplayName("by both entity and lifecycle columns")
         void byEntityAndLifecycleCols() {
             archiveItem(projectLogo1000by800());
-            Query query = MRPhoto
-                    .newQuery()
-                    .either(q -> q.where(archived.lifecycle(), true),
-                            q -> q.height().isGreaterThan(1000))
-                    .width()
-                    .isLessThan(7000)
-                    .build(transformWith(queries));
+            Query query =
+                    MRPhoto.query()
+                           .either(q -> q.where(archived.lifecycle(), true),
+                                   q -> q.height().isGreaterThan(1000))
+                           .width().isLessThan(7000)
+                           .build(transformWith(queries));
             checkRead(query, projectLogo1000by800());
         }
 
         private void readAndCheck(MRPhoto target) {
             MRPhotoId targetId = target.getId();
-            Query query = MRPhoto.newQuery()
-                                 .id()
-                                 .is(targetId)
+            Query query = MRPhoto.query()
+                                 .id().is(targetId)
                                  .build(transformWith(queries));
             checkRead(query, target);
         }
@@ -304,7 +290,7 @@ class AggregateMirroringTest {
     @Test
     @DisplayName("only for those Aggregate types which are not invisible")
     void onlyForVisible() {
-        Query query = MRSoundRecord.newQuery().build(transformWith(queries));
+        Query query = MRSoundRecord.query().build(transformWith(queries));
         assertThrows(IllegalStateException.class,
                      () -> InvisibleSound.repository()
                                          .findRecords(query.filters(), query.responseFormat()));

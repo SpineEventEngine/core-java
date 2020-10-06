@@ -178,11 +178,9 @@ class ClientTest extends AbstractClientTest {
             client.asGuest()
                   .command(command)
                   .postAndForget();
-            ActiveUsers.Query query = ActiveUsers
-                    .newQuery()
-                    .id()
-                    .is(THE_ID)
-                    .build();
+            ActiveUsers.Query query = ActiveUsers.query()
+                                                 .id().is(THE_ID)
+                                                 .build();
             ImmutableList<ActiveUsers> users =
                     client.onBehalfOf(user)
                           .run(query);

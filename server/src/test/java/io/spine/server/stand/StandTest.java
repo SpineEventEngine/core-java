@@ -289,11 +289,10 @@ class StandTest extends TenantAwareTest {
             }
 
             QueryFactory queryFactory = requestFactory.query();
-            Project.QueryBuilder builder = Project
-                    .newQuery()
-                    .id()
-                    .with(ids)
-                    .withMask(maskingFields);
+            Project.QueryBuilder builder =
+                    Project.query()
+                           .id().in(ids)
+                           .withMask(maskingFields);
             @SuppressWarnings("OptionalGetWithoutIsPresent")    // The value just set above.
             FieldMask fieldMask = builder.whichMask()
                                          .get();
@@ -575,10 +574,10 @@ class StandTest extends TenantAwareTest {
                              .build();
         stand.registerTypeSupplier(repository);
         QueryFactory queryFactory = getRequestFactory().query();
-        Query query = Customer.newQuery()
-                              .firstName()
-                              .is("George")
-                              .build(transformWith(queryFactory));
+        Query query =
+                Customer.query()
+                        .firstName().is("George")
+                        .build(transformWith(queryFactory));
         stand.execute(query, noOpObserver());
 
         Optional<TargetFilters> actualFilter = repository.memoizedFilters();
@@ -609,7 +608,7 @@ class StandTest extends TenantAwareTest {
                                   .addPaths("invalid_field_path_example")
                                   .addPaths(thirdField)
                                   .build();
-        Query query = Project.newQuery()
+        Query query = Project.query()
                              .withMask(mask)
                              .build(transformWith(queryFactory));
         MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
@@ -835,10 +834,10 @@ class StandTest extends TenantAwareTest {
         Stand stand = standWithRepo(projectionRepository);
 
         QueryFactory queryFactory = requestFactory.query();
-        Query readMultipleProjects = Project.newQuery()
-                                            .id()
-                                            .with(sampleProjects.keySet())
-                                            .build(transformWith(queryFactory));
+        Query readMultipleProjects =
+                Project.query()
+                       .id().in(sampleProjects.keySet())
+                       .build(transformWith(queryFactory));
 
         MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);

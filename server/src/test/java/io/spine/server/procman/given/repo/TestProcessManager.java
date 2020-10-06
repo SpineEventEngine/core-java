@@ -224,4 +224,11 @@ public class TestProcessManager
     protected void onBeforeCommit() {
         builder().setIdString(id().toString());
     }
+
+    /**
+     * Returns the identifier of this process manager, as a {@code String}.
+     */
+    public String getIdString() {
+        return id().toString();
+    }
 }

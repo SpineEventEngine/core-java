@@ -34,7 +34,6 @@ import io.spine.client.TargetFilters;
 import io.spine.protobuf.TypeConverter;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
-import io.spine.query.Direction;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
@@ -207,8 +206,7 @@ public final class QueryConverter {
                                   .map(Identifier::unpack)
                                   .map(id -> (I) id)
                                   .collect(toList());
-            builder.id()
-                   .with(ids);
+            builder.id().in(ids);
         }
     }
 
@@ -231,8 +229,11 @@ public final class QueryConverter {
 
                 Column<?, ?> column = findColumn(spec, columnName);
                 AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
-                Direction direction = convertDirection(protoDirection);
-                builder.orderBy(convertedColumn, direction);
+                if(protoDirection == OrderBy.Direction.ASCENDING) {
+                    builder.sortAscendingBy(convertedColumn);
+                } else {
+                    builder.sortDescendingBy(convertedColumn);
+                }
             }
         }
 
@@ -245,13 +246,6 @@ public final class QueryConverter {
             }
             builder.limit(limit);
         }
-    }
-
-    private static Direction convertDirection(OrderBy.Direction protoDirection) {
-        Direction direction = protoDirection == OrderBy.Direction.ASCENDING
-                              ? Direction.ASC
-                              : Direction.DESC;
-        return direction;
     }
 
     private static <I, R extends Message> Column<?, ?>

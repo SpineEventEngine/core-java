@@ -35,8 +35,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Streams.stream;
-import static io.spine.query.Direction.ASC;
-import static io.spine.query.Direction.DESC;
 import static io.spine.server.delivery.InboxColumn.inbox_shard;
 import static io.spine.server.delivery.InboxColumn.received_at;
 import static io.spine.server.delivery.InboxColumn.status;
@@ -125,8 +123,8 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
     private static RecordQueryBuilder<InboxMessageId, InboxMessage>
     limitAndOrder(int pageSize, RecordQueryBuilder<InboxMessageId, InboxMessage> builder) {
         return builder.limit(pageSize)
-                      .orderBy(received_at, ASC)
-                      .orderBy(version, ASC);
+                      .sortAscendingBy(received_at)
+                      .sortAscendingBy(version);
     }
 
     /**
@@ -142,7 +140,7 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
         RecordQuery<InboxMessageId, InboxMessage> query =
                 queryBuilder().where(inbox_shard).is(index)
                               .where(status).is(TO_DELIVER)
-                              .orderBy(received_at, DESC)
+                              .sortDescendingBy(received_at)
                               .limit(1)
                               .build();
         Iterator<InboxMessage> iterator = readAll(query);

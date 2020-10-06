@@ -30,7 +30,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 
-import static io.spine.query.Direction.DESC;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.aggregate_id;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.created;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.version;
@@ -71,8 +70,8 @@ public class HistoryBackward<I> {
 
     static <B extends RecordQueryBuilder<AggregateEventRecordId, AggregateEventRecord>> B
     inChronologicalOrder(B builder, @Nullable Integer batchSize) {
-        builder.orderBy(version, DESC)
-               .orderBy(created, DESC);
+        builder.sortDescendingBy(version)
+               .sortDescendingBy(created);
         if(batchSize != null) {
             builder.limit(batchSize);
         }

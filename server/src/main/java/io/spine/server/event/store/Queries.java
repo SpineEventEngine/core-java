@@ -23,7 +23,6 @@ package io.spine.server.event.store;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.query.Direction;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import io.spine.server.event.EventFilter;
@@ -90,7 +89,7 @@ final class Queries {
 
     private static RecordQuery<EventId, Event>
     addOrderAndLimit(EventStreamQuery query, RecordQueryBuilder<EventId, Event> builder) {
-        builder.orderBy(created, Direction.ASC);
+        builder.sortAscendingBy(created);
         if (query.hasLimit()) {
             builder.limit(query.getLimit()
                                .getValue());

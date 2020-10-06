@@ -25,8 +25,8 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.query.ColumnName;
 import io.spine.query.Direction;
-import io.spine.query.OrderBy;
 import io.spine.query.RecordColumn;
+import io.spine.query.SortBy;
 import io.spine.server.storage.RecordWithColumns;
 
 import java.io.Serializable;
@@ -39,13 +39,13 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A comparator for sorting the contents of {@link TenantRecords}
- * in a provided {@link OrderBy order}.
+ * in a provided {@linkplain SortBy sorting order}.
  *
- * @implNote More sophisticated storage implementations can order records by
+ * @implNote More sophisticated storage implementations can sort records by
  *         non-{@link Comparable} fields like {@link com.google.protobuf.Message message}-type
  *         fields, depending on their storage method (e.g. comparing the string content of
  *         messages).The in-memory implementation stores all column values "as-is" and cannot do
- *         that. Trying to {@linkplain OrderBy order by} column of non-comparable type will lead to
+ *         that. Trying to {@linkplain SortBy sort by} column of non-comparable type will lead to
  *         an exception being thrown.
  */
 public class RecordComparator<I, R extends Message>
@@ -61,24 +61,24 @@ public class RecordComparator<I, R extends Message>
 
     /**
      * A static factory for {@code EntityRecordComparator} instances, which sort the
-     * {@link TenantRecords} contents in the specified {@link OrderBy orderBy} list.
+     * {@link TenantRecords} contents in the specified list.
      *
-     * @param orderByList
-     *         a specification of columns and the directions for ordering
+     * @param sortByList
+     *         a specification of columns and the directions for sorting
      * @return a new comparator instance, which uses specified columns and aligns items
      *         in the provided directions
      * @throws IllegalArgumentException
-     *         if the provided {@code OrderBy} list is empty
+     *         if the provided {@code SortBy} list is empty
      */
     static <I, R extends Message>
-    Comparator<RecordWithColumns<I, R>> orderedBy(List<OrderBy<?, R>> orderByList) {
-        checkArgument(!orderByList.isEmpty(),
-                      "`RecordComparator` requires at least one `OrderBy` instance.");
+    Comparator<RecordWithColumns<I, R>> accordingTo(List<SortBy<?, R>> sortByList) {
+        checkArgument(!sortByList.isEmpty(),
+                      "`RecordComparator` requires at least one `SortBy` instance.");
         Comparator<RecordWithColumns<I, R>> result = null;
-        for (OrderBy<?, R> orderBy : orderByList) {
+        for (SortBy<?, R> sortBy : sortByList) {
             Comparator<RecordWithColumns<I, R>> thisComparator;
-            Direction direction = orderBy.direction();
-            RecordColumn<R, ?> column = orderBy.column();
+            Direction direction = sortBy.direction();
+            RecordColumn<R, ?> column = sortBy.column();
             thisComparator = direction == Direction.ASC
                              ? ascending(column)
                              : descending(column);

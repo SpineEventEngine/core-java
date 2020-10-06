@@ -25,8 +25,8 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.query.OrderBy;
 import io.spine.query.RecordQuery;
+import io.spine.query.SortBy;
 import io.spine.query.Subject;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordWithColumns;
@@ -45,7 +45,7 @@ import static com.google.common.collect.Maps.filterValues;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.storage.memory.RecordComparator.orderedBy;
+import static io.spine.server.storage.memory.RecordComparator.accordingTo;
 import static java.util.Collections.synchronizedMap;
 import static java.util.stream.Collectors.toList;
 
@@ -113,16 +113,16 @@ class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWith
             Map<I, RecordWithColumns<I, R>> filtered = filterRecords(query.subject());
             Stream<RecordWithColumns<I, R>> stream = filtered.values()
                                                              .stream();
-            return orderAndLimit(stream, query).collect(toList());
+            return sortAndLimit(stream, query).collect(toList());
         }
     }
 
     private static <I, R extends Message> Stream<RecordWithColumns<I, R>>
-    orderAndLimit(Stream<RecordWithColumns<I, R>> data, RecordQuery<I, R> query) {
+    sortAndLimit(Stream<RecordWithColumns<I, R>> data, RecordQuery<I, R> query) {
         Stream<RecordWithColumns<I, R>> stream = data;
-        ImmutableList<OrderBy<?, R>> ordering = query.ordering();
-        if (ordering.size() > 0) {
-            stream = stream.sorted(orderedBy(ordering.asList()));
+        ImmutableList<SortBy<?, R>> sortingSpecs = query.sorting();
+        if (sortingSpecs.size() > 0) {
+            stream = stream.sorted(accordingTo(sortingSpecs.asList()));
         }
         Integer limit = query.limit();
         if (limit != null && limit > 0) {

@@ -133,6 +133,13 @@ public class TestProjection
         builder().setIdString(id().toString());
     }
 
+    /**
+     * Returns the identifier of this projection, as {@code String}.
+     */
+    public String getIdString() {
+       return id().toString();
+    }
+
     public static class Repository
             extends ProjectionRepository<ProjectId, TestProjection, Project> {
     }
