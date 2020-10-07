@@ -54,6 +54,7 @@ import io.spine.testing.TestValues;
 import io.spine.testing.Tests;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.model.ModelTests;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -117,6 +118,7 @@ public class AggregateStorageTest
     @BeforeEach
     public void setUpAbstractStorageTest() {
         super.setUpAbstractStorageTest();
+        ModelTests.dropAllModels();
         storage = storage();
     }
 
