@@ -74,6 +74,9 @@ public interface Entity<I, S extends EntityState<I>> extends WithLifecycle {
      */
     Version version();
 
+    /**
+     * Obtains the model class for this entity.
+     */
     EntityClass<?> modelClass();
 
     /**
