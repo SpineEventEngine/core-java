@@ -111,7 +111,7 @@ public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
      * @throws IllegalArgumentException
      *         if the value is zero or negative
      */
-    static void checkLimit(long count) {
+    private static void checkLimit(long count) {
         checkArgument(count > 0, "A query limit must be a positive value.");
     }
 
@@ -121,6 +121,7 @@ public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
      * @return the built {@link Query}
      */
     @Override
+    @SuppressWarnings("OptionalIsPresent")  // For better readability.
     public Query build() {
         Optional<OrderBy> orderBy = orderBy();
         Target target = buildTarget();
