@@ -39,7 +39,7 @@ import static java.lang.String.format;
 /**
  * A factory of {@link Query} instances.
  *
- * <p>Uses the given {@link ActorRequestFactory} as a source of the query meta information,
+ * <p>Uses the supplied {@link ActorRequestFactory} as a source of the query meta information,
  * such as the actor.
  *
  * @see ActorRequestFactory#query()
