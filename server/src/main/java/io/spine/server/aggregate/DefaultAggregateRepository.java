@@ -30,6 +30,12 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 /**
  * Default implementation of {@code AggregateRepository}.
  *
+ * @param <I>
+ *         the type of aggregate IDs
+ * @param <A>
+ *         the type of the stored aggregate part
+ * @param <S>
+ *         the type of aggregate state
  * @see io.spine.server.DefaultRepository
  */
 @Internal

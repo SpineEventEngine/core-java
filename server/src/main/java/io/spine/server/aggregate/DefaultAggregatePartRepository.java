@@ -30,6 +30,14 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
 /**
  * Default implementation of {@code AggregatePartRepository}.
  *
+ * @param <I>
+ *         the type of aggregate IDs
+ * @param <A>
+ *         the type of the stored aggregate part
+ * @param <S>
+ *         the type of aggregate state
+ * @param <R>
+ *         the type of an aggregate root
  * @see io.spine.server.DefaultRepository
  */
 @Internal
