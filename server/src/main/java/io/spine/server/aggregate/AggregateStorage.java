@@ -53,7 +53,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A storage of aggregate events, snapshots and the most recent aggregate states.
  *
  *
- * //TODO:2020-10-08:alex.tymchenko: tell about mirroring.
+ * //TODO:2020-10-08:alex.tymchenko: tell about mirroring and two storages here.
  * @param <I>
  *         the type of IDs of aggregates managed by this storage
  * @param <S>
@@ -73,6 +73,18 @@ public class AggregateStorage<I, S extends EntityState<I>>
     private final Truncate truncation;
     private final HistoryBackward<I> historyBackward;
 
+    /**
+     * Creates an instance of the storage for a certain aggregate class registered
+     * in a specific context.
+     *
+     * @param context
+     *         the specification of the context within which this storage is being created
+     * @param aggregateClass
+     *         the class of stored aggregates
+     * @param factory
+     *         a storage factory to create the underlying storages for event/snapshot records
+     *         and aggregate states
+     */
     public AggregateStorage(ContextSpec context,
                             Class<? extends Aggregate<I, S, ?>> aggregateClass,
                             StorageFactory factory) {
@@ -92,6 +104,10 @@ public class AggregateStorage<I, S extends EntityState<I>>
         this.historyBackward = delegate.historyBackward;
     }
 
+    /**
+     * Enables the mirroring of the business states of the stored aggregates into the
+     * underlying state storage.
+     */
     void enableMirror() {
         mirrorEnabled = true;
     }
