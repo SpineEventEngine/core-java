@@ -35,9 +35,7 @@ final class QueryRequest<S extends EntityState<?>> extends ClientRequest {
     /** The type of entities returned by the request. */
     private final Class<S> entityStateType;
 
-    /**
-     * The query to run.
-     */
+    /** The query to run. */
     private final EntityQuery<?, S, ?> entityQuery;
 
     /**
