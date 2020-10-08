@@ -41,8 +41,7 @@ public final class QueryFilter extends TypedFilter<EntityState<?>> {
     private static final long serialVersionUID = 0L;
 
     private QueryFilter(EntityColumn<?, ?> column, Object expected, Operator operator) {
-        super(createFilter(column.name()
-                                 .value(), expected, operator));
+        super(createFilter(column.name(), expected, operator));
     }
 
     /**

@@ -35,6 +35,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContextField;
 import io.spine.core.Version;
 import io.spine.query.Column;
+import io.spine.query.ColumnName;
 import io.spine.query.EntityStateField;
 
 import java.util.Collection;
@@ -116,7 +117,7 @@ public final class Filters {
     public static Filter eq(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(nameOf(column), value, EQUAL);
+        return createFilter(column.name(), value, EQUAL);
     }
 
     /**
@@ -199,7 +200,7 @@ public final class Filters {
     public static Filter gt(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(nameOf(column), value, GREATER_THAN);
+        return createFilter(column.name(), value, GREATER_THAN);
     }
 
     /**
@@ -288,7 +289,7 @@ public final class Filters {
     public static Filter lt(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(nameOf(column), value, LESS_THAN);
+        return createFilter(column.name(), value, LESS_THAN);
     }
 
     /**
@@ -377,7 +378,7 @@ public final class Filters {
     public static Filter ge(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(nameOf(column), value, GREATER_OR_EQUAL);
+        return createFilter(column.name(), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -466,7 +467,7 @@ public final class Filters {
     public static Filter le(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(nameOf(column), value, LESS_OR_EQUAL);
+        return createFilter(column.name(), value, LESS_OR_EQUAL);
     }
 
     /**
@@ -608,6 +609,12 @@ public final class Filters {
         return createFilter(field, value, operator);
     }
 
+    static Filter createFilter(ColumnName columnName, Object value, Operator operator) {
+        String fieldPath = columnName.value();
+        return createFilter(fieldPath, value, operator);
+    }
+
+
     static Filter createFilter(FieldName fieldName, Object value, Operator operator) {
         FieldPath fieldPath = fieldName.asPath();
         return createFilter(fieldPath, value, operator);
@@ -680,11 +687,6 @@ public final class Filters {
         boolean result = (Number.class.isAssignableFrom(wrapperClass)
                 && Comparable.class.isAssignableFrom(wrapperClass));
         return result;
-    }
-
-    private static String nameOf(Column<?, ?> column) {
-        return column.name()
-                     .value();
     }
 
     /**
