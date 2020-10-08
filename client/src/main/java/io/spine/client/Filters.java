@@ -61,7 +61,7 @@ import static java.util.Arrays.stream;
  * <p>Public methods of this class represent the recommended way to create a {@link Filter}.
  *
  * <a name="types"></a>
- * <h1>Supported Types</h1>
+ * <h3>Supported Types</h3>
  *
  * <p>The filters allow to put criteria on fields with comparison operations. The criteria either
  * define the particular values for the fields or specify some ordering.
