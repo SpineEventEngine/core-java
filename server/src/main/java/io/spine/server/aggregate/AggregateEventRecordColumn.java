@@ -31,23 +31,38 @@ import io.spine.query.RecordColumn;
  * Columns stored along with an {@link AggregateEventRecord}.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")   // column names repeat in different records.
-public final class AggregateEventRecordColumn {
+final class AggregateEventRecordColumn {
 
+    /**
+     * Stores the identifier of an aggregate.
+     */
     static final RecordColumn<AggregateEventRecord, Any> aggregate_id =
             new RecordColumn<>("aggregate_id", Any.class, AggregateEventRecord::getAggregateId);
 
+    /**
+     * Stores the time when the event record was created.
+     */
     static final RecordColumn<AggregateEventRecord, Timestamp> created =
             new RecordColumn<>("created", Timestamp.class, AggregateEventRecord::getTimestamp);
 
+    /**
+     * Stores the version of the record, either of the stored event, or the snapshot.
+     */
     static final RecordColumn<AggregateEventRecord, Integer> version =
             new RecordColumn<>("version", Integer.class, new GetVersion());
 
+    /**
+     * Stores {@code true} for the records which hold snapshots, {@code false} otherwise.
+     */
     static final RecordColumn<AggregateEventRecord, Boolean> snapshot =
             new RecordColumn<>("snapshot", Boolean.class, AggregateEventRecord::hasSnapshot);
 
     private AggregateEventRecordColumn() {
     }
 
+    /**
+     * Returns all the column definitions.
+     */
     static ImmutableList<RecordColumn<AggregateEventRecord, ?>> definitions() {
         return ImmutableList.of(aggregate_id, created, version, snapshot);
     }
