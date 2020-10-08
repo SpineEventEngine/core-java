@@ -100,7 +100,7 @@ public class ClientRequest {
      * <p>Usage example:
      * <pre>
      *
-     * Customer.Query query = Customer.newQuery()
+     * Customer.Query query = Customer.query()
      *              .id().in(westCoastCustomerIds())
      *              .type().is(CustomerType.PERMANENT)
      *              .discountPercent().is(10)
