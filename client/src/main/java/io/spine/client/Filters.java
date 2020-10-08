@@ -116,8 +116,7 @@ public final class Filters {
     public static Filter eq(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name()
-                                  .value(), value, EQUAL);
+        return createFilter(nameOf(column), value, EQUAL);
     }
 
     /**
@@ -200,7 +199,7 @@ public final class Filters {
     public static Filter gt(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name().value(), value, GREATER_THAN);
+        return createFilter(nameOf(column), value, GREATER_THAN);
     }
 
     /**
@@ -289,7 +288,7 @@ public final class Filters {
     public static Filter lt(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name().value(), value, LESS_THAN);
+        return createFilter(nameOf(column), value, LESS_THAN);
     }
 
     /**
@@ -378,7 +377,7 @@ public final class Filters {
     public static Filter ge(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name().value(), value, GREATER_OR_EQUAL);
+        return createFilter(nameOf(column), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -467,7 +466,7 @@ public final class Filters {
     public static Filter le(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name().value(), value, LESS_OR_EQUAL);
+        return createFilter(nameOf(column), value, LESS_OR_EQUAL);
     }
 
     /**
@@ -681,6 +680,11 @@ public final class Filters {
         boolean result = (Number.class.isAssignableFrom(wrapperClass)
                 && Comparable.class.isAssignableFrom(wrapperClass));
         return result;
+    }
+
+    private static String nameOf(Column<?, ?> column) {
+        return column.name()
+                     .value();
     }
 
     /**
