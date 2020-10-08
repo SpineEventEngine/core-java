@@ -120,8 +120,8 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for this central concept.
 public abstract class Aggregate<I,
-        S extends EntityState<I>,
-        B extends ValidatingBuilder<S>>
+                                S extends EntityState<I>,
+                                B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventPlayer, EventReactor, HasLifecycleColumns<I, S> {
 
