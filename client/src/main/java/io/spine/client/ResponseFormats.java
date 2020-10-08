@@ -24,64 +24,16 @@ import com.google.protobuf.FieldMask;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A utility for working with {@link ResponseFormat}s.
  */
-public final class ResponseFormats {
+final class ResponseFormats {
 
     /**
      * Prevents this utility class from instantiation.
      */
     private ResponseFormats() {
-    }
-
-    /**
-     * Creates a new {@code ResponseFormat} with just the field mask.
-     *
-     * <p>The {@linkplain ResponseFormat#getLimit() limit} and
-     * {@linkplain ResponseFormat#getOrderByList() ordering} are not set for the resulting instance.
-     *
-     * @param mask
-     *         the field mask to apply to each item in the response
-     */
-    public static ResponseFormat formatWith(FieldMask mask) {
-        checkNotNull(mask);
-        return responseFormat(mask, null, null);
-    }
-
-    /**
-     * Creates a new {@code ResponseFormat} with the ordering and the limit
-     *
-     * <p>The {@linkplain ResponseFormat#getFieldMask() field mask} is not set.
-     *
-     * @param orderBy
-     *         the ordering to apply
-     * @param limit
-     *         the maximum number of records set to be returned
-     */
-    public static ResponseFormat formatWith(OrderBy orderBy, Integer limit) {
-        checkNotNull(orderBy);
-        checkNotNull(limit);
-        return responseFormat(null, orderBy, limit);
-    }
-
-    /**
-     * Creates a new {@code ResponseFormat} with the ordering, limit and the field mask.
-     *
-     * @param orderBy
-     *         the ordering to apply
-     * @param limit
-     *         the maximum number of records set to be returned
-     * @param fieldMask
-     *         the field mask to apply to each item in the response
-     */
-    public static ResponseFormat formatWith(FieldMask fieldMask, OrderBy orderBy, Integer limit) {
-        checkNotNull(fieldMask);
-        checkNotNull(orderBy);
-        checkNotNull(limit);
-        return responseFormat(fieldMask, orderBy, limit);
     }
 
     /**
@@ -100,6 +52,7 @@ public final class ResponseFormats {
      *         the maximum number of records to return in the scope of response,
      *         or {@code null} if no particular limit should be applied
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")      // Conditionally configuring the builder.
     static ResponseFormat responseFormat(@Nullable FieldMask mask,
                                          @Nullable OrderBy ordering,
                                          @Nullable Integer limit) {
