@@ -28,6 +28,9 @@ import io.spine.base.SubscribableField;
  */
 public class EventField extends SubscribableField {
 
+    /**
+     * Creates a new event field using the passed reference to the field declaration.
+     */
     public EventField(Field field) {
         super(field);
     }
