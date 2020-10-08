@@ -39,7 +39,7 @@ import io.spine.test.stand.DishAdded;
 import io.spine.test.stand.Menu;
 import io.spine.test.stand.MenuId;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.type.TypeName;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.AfterEach;
@@ -57,7 +57,7 @@ import static io.spine.server.stand.given.MenuProjection.UUID_COLUMN;
 import static java.util.Comparator.comparing;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("EntityQueryProcessor should")
+@DisplayName("`EntityQueryProcessor` should")
 class EntityQueryProcessorTest {
 
     private static final int MENU_COUNT = 16;
@@ -65,15 +65,14 @@ class EntityQueryProcessorTest {
             new TestActorRequestFactory(EntityQueryProcessorTest.class);
     private static final QueryFactory queries = factory.query();
 
-    private BlackBoxContext context;
+    private BlackBox context;
     private EntityQueryProcessor processor;
 
     @BeforeEach
     void setUp() {
         ProjectionRepository<?, ?, ?> repository = new MenuRepository();
-        context = BlackBoxContext
-                .from(BoundedContext
-                              .singleTenant("Cafeteria")
+        context = BlackBox.from(
+                BoundedContext.singleTenant("Cafeteria")
                               .add(repository));
         processor = new EntityQueryProcessor(repository);
         fill();

@@ -48,7 +48,7 @@ public enum NoOpSystemClient implements SystemClient {
     }
 
     @Override
-    public Optional<Repository<?, ?>> systemRepositoryFor(Class<? extends EntityState> stateClass) {
+    public Optional<Repository<?, ?>> systemRepoFor(Class<? extends EntityState<?>> stateClass) {
         return Optional.empty();
     }
 

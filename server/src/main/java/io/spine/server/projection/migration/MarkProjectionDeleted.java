@@ -39,7 +39,7 @@ import io.spine.server.projection.ProjectionMigration;
 @Experimental
 public final class MarkProjectionDeleted<I,
                                          P extends Projection<I, S, B>,
-                                         S extends EntityState,
+                                         S extends EntityState<I>,
                                          B extends ValidatingBuilder<S>>
         extends ProjectionMigration<I, P, S, B> {
 

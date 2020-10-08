@@ -50,14 +50,14 @@ public final class InvalidEntityStateException extends ValidationException {
     /**
      * The entity state which is invalid.
      */
-    private final EntityState state;
+    private final EntityState<?> state;
 
     /**
      * The error passed with the exception.
      */
     private final Error error;
 
-    private InvalidEntityStateException(EntityState state, Error error) {
+    private InvalidEntityStateException(EntityState<?> state, Error error) {
         super(error.getValidationError()
                    .getConstraintViolationList());
         this.state = state;
@@ -74,7 +74,7 @@ public final class InvalidEntityStateException extends ValidationException {
      *         the constraint violations for the entity state
      */
     public static InvalidEntityStateException
-    onConstraintViolations(EntityState state, Iterable<ConstraintViolation> violations) {
+    onConstraintViolations(EntityState<?> state, Iterable<ConstraintViolation> violations) {
         Factory factory = new Factory(state, violations);
         return factory.newException();
     }
@@ -82,7 +82,7 @@ public final class InvalidEntityStateException extends ValidationException {
     /**
      * Returns a related event message.
      */
-    EntityState entityState() {
+    EntityState<?> entityState() {
         return state;
     }
 
@@ -99,8 +99,8 @@ public final class InvalidEntityStateException extends ValidationException {
      */
     private static final class Factory
             extends ExceptionFactory<InvalidEntityStateException,
-                                     EntityState,
-                                     StateClass,
+                                     EntityState<?>,
+                                     StateClass<?>,
                                      EntityStateValidationError> {
 
         /**
@@ -111,16 +111,16 @@ public final class InvalidEntityStateException extends ValidationException {
          */
         private static final String ATTR_ENTITY_STATE_TYPE_NAME = "entityStateType";
 
-        private final StateClass stateClass;
+        private final StateClass<?> stateClass;
 
-        private Factory(EntityState state,
+        private Factory(EntityState<?> state,
                         Iterable<ConstraintViolation> violations) {
             super(state, violations);
             this.stateClass = StateClass.of(state);
         }
 
         @Override
-        protected StateClass getMessageClass() {
+        protected StateClass<?> getMessageClass() {
             return stateClass;
         }
 

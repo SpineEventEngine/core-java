@@ -22,8 +22,10 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
@@ -274,6 +276,22 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      */
     public B where(CompositeFilter... predicate) {
         filters = ImmutableSet.copyOf(predicate);
+        return self();
+    }
+
+    /**
+     * Performs the same action as {@link #where(CompositeFilter...)}, but acts as a shortcut
+     * overload for internal use.
+     *
+     * <p>If the passed set is empty, does nothing.
+     */
+    @CanIgnoreReturnValue
+    @Internal
+    B where(ImmutableSet<CompositeFilter> predicates) {
+        checkNotNull(predicates);
+        if(predicates.size() > 0) {
+            filters = predicates;
+        }
         return self();
     }
 

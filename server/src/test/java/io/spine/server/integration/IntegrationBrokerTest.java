@@ -42,7 +42,7 @@ import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -260,11 +260,11 @@ class IntegrationBrokerTest {
     @DisplayName("send messages between two contexts regardless of registration order")
     void mutual() {
         String suffix = IntegrationBrokerTest.class.getSimpleName();
-        BlackBoxContext photos = BlackBoxContext.from(
+        BlackBox photos = BlackBox.from(
                 BoundedContext.singleTenant("Photos-" + suffix)
                               .add(PhotosProcMan.class)
         );
-        BlackBoxContext billing = BlackBoxContext.from(
+        BlackBox billing = BlackBox.from(
                 BoundedContext.singleTenant("Billing-" + suffix)
                               .add(BillingAggregate.class)
         );
@@ -277,7 +277,7 @@ class IntegrationBrokerTest {
         billing.close();
     }
 
-    private static void assertReceived(BlackBoxContext context,
+    private static void assertReceived(BlackBox context,
                                        Class<? extends EventMessage> eventClass) {
         context.assertEvents()
                .withType(eventClass)

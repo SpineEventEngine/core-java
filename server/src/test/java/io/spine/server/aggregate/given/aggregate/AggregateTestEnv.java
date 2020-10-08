@@ -20,7 +20,9 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
+import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -30,6 +32,7 @@ import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
+import io.spine.test.storage.StateImported;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.TestEventFactory;
@@ -108,5 +111,12 @@ public class AggregateTestEnv {
 
     public static TestEventFactory eventFactory() {
         return TestEventFactory.newInstance(requestFactory());
+    }
+
+    public static EventMessage event(EntityState<?> state) {
+        return StateImported
+                .newBuilder()
+                .setState(Any.pack(state))
+                .vBuild();
     }
 }

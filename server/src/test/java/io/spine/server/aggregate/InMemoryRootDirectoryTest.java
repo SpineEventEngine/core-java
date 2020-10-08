@@ -36,7 +36,7 @@ import static com.google.common.truth.Truth8.assertThat;
 class InMemoryRootDirectoryTest {
 
     private AggregateRootDirectory directory;
-    private AggregatePartRepository<?, ?, ?> repository;
+    private AggregatePartRepository<?, ?, ?, ?> repository;
 
     @BeforeEach
     void setUp() {
@@ -48,7 +48,7 @@ class InMemoryRootDirectoryTest {
     @DisplayName("find a registered repository")
     void findRepository() {
         directory.register(repository);
-        Optional<? extends AggregatePartRepository<?, ?, ?>> found =
+        Optional<? extends AggregatePartRepository<?, ?, ?, ?>> found =
                 directory.findPart(TaskRoot.class, AggTask.class);
         OptionalSubject assertRepository = assertThat(found);
         assertRepository.isPresent();
@@ -58,7 +58,7 @@ class InMemoryRootDirectoryTest {
     @Test
     @DisplayName("not find a non-registered repository")
     void notFindRepository() {
-        Optional<? extends AggregatePartRepository<?, ?, ?>> found =
+        Optional<? extends AggregatePartRepository<?, ?, ?, ?>> found =
                 directory.findPart(TaskRoot.class, AggTask.class);
         OptionalSubject assertRepository = assertThat(found);
         assertRepository.isEmpty();

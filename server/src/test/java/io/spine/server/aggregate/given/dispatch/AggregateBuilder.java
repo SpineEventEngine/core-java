@@ -39,7 +39,7 @@ import io.spine.server.entity.EntityBuilder;
 @VisibleForTesting
 public class AggregateBuilder<A extends Aggregate<I, S, ?>,
                               I,
-                              S extends EntityState>
+                              S extends EntityState<I>>
         extends EntityBuilder<A, I, S> {
 
     public AggregateBuilder() {

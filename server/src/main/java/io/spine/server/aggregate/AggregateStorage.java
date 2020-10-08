@@ -20,87 +20,77 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.base.Identifier;
-import io.spine.client.CompositeFilter;
+import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.protobuf.AnyPacker;
+import io.spine.core.Version;
+import io.spine.query.RecordQuery;
+import io.spine.server.ContextSpec;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.EntityRecordStorage;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.AbstractStorage;
-import io.spine.server.storage.StorageWithLifecycleFlags;
-import io.spine.server.tenant.TenantAwareRunner;
-import io.spine.system.server.MirrorId;
-import io.spine.system.server.MirrorProjection;
-import io.spine.system.server.MirrorRepository;
-import io.spine.type.TypeUrl;
+import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Streams.stream;
-import static com.google.protobuf.util.Timestamps.checkValid;
-import static io.spine.client.Filters.all;
-import static io.spine.client.Filters.eq;
-import static io.spine.system.server.MirrorProjection.TYPE_COLUMN_NAME;
-import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
+import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
+import static io.spine.server.storage.QueryConverter.convert;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * An event-sourced storage of aggregate part events and snapshots.
+ * A storage of aggregate events, snapshots and the most recent aggregate states.
  *
  * @param <I>
  *         the type of IDs of aggregates managed by this storage
+ * @param <S>
+ *         the type of states of aggregates managed by this storage
  */
 @SPI
-public abstract class AggregateStorage<I>
-        extends AbstractStorage<I, AggregateHistory, AggregateReadRequest<I>>
-        implements StorageWithLifecycleFlags<I, AggregateHistory, AggregateReadRequest<I>> {
+public class AggregateStorage<I, S extends EntityState<I>>
+        extends AbstractStorage<I, AggregateHistory> {
 
     private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
-            "The specified snapshot index is incorrect";
+            "The specified snapshot index `%d` must be non-negative.";
 
-    /**
-     * Executes certain kinds of aggregate reads using the
-     * {@linkplain MirrorProjection mirror projections} of aggregates.
-     *
-     * <p>Used to optimize performance-heavy storage operations.
-     *
-     * <p>Is {@code null} either if not yet configured or if the corresponding aggregate type
-     * is not mirrored.
-     *
-     * @see MirrorRepository
-     */
-    private @Nullable Mirror<I> aggregateMirror;
+    private final AggregateEventStorage eventStorage;
+    private final EntityRecordStorage<I, S> stateStorage;
+    private boolean mirrorEnabled = false;
+    private final Truncate truncation;
+    private final HistoryBackward<I> historyBackward;
 
-    protected AggregateStorage(boolean multitenant) {
-        super(multitenant);
+    public AggregateStorage(ContextSpec context,
+                            Class<? extends Aggregate<I, S, ?>> aggregateClass,
+                            StorageFactory factory) {
+        super(context.isMultitenant());
+        eventStorage = factory.createAggregateEventStorage(context.isMultitenant());
+        stateStorage = factory.createEntityRecordStorage(context, aggregateClass);
+        truncation = new Truncate(eventStorage);
+        historyBackward = new HistoryBackward<>(eventStorage);
     }
 
-    /**
-     * Configures an aggregate {@code Mirror} to optimize certain kinds of aggregate reads.
-     *
-     * @param mirrorRepository
-     *         the repository storing mirror {@linkplain MirrorProjection projections}
-     * @param stateType
-     *         the state type of a stored {@code Aggregate}
-     * @throws IllegalStateException
-     *         if the state type of a stored {@code Aggregate} is not mirrored by the
-     *         {@code MirrorRepository}
-     */
-    void configureMirror(MirrorRepository mirrorRepository, TypeUrl stateType) {
-        checkState(mirrorRepository.isMirroring(stateType),
-                   "An aggregate of type `%s` is not mirrored by a `MirrorRepository`.",
-                   stateType);
-        aggregateMirror = new Mirror<>(mirrorRepository, stateType, isMultitenant());
+    protected AggregateStorage(AggregateStorage<I, S> delegate) {
+        super(delegate.isMultitenant());
+        this.eventStorage = delegate.eventStorage;
+        this.stateStorage = delegate.stateStorage;
+        this.mirrorEnabled = delegate.mirrorEnabled;
+        this.truncation = delegate.truncation;
+        this.historyBackward = delegate.historyBackward;
+    }
+
+    void enableMirror() {
+        mirrorEnabled = true;
     }
 
     /**
@@ -116,36 +106,40 @@ public abstract class AggregateStorage<I>
     /**
      * {@inheritDoc}
      *
-     * <p>Attempts to read aggregate IDs from the {@link MirrorRepository}, as they are already
-     * stored there in a convenient form.
+     * <p>While it is possible to write individual event records only, in scope of the expected
+     * usage scenarios, the IDs, lifecycle and versions of the {@code Aggregates} are
+     * {@link #writeState(Aggregate) written} to this storage as well.
      *
-     * <p>If an aggregate {@link MirrorRepository} is not configured to use for reads with this
-     * repository, falls back to the default method of getting distinct aggregate IDs
-     * from the event records.
+     * <p>Therefore, this index contains only the identifiers of the {@code Aggregates} which
+     * state was written to the storage.
      */
     @Override
     public Iterator<I> index() {
-        if (aggregateMirror != null) {
-            return aggregateMirror.index();
-        }
-        return distinctAggregateIds();
+        return stateStorage.index();
     }
 
     /**
      * Forms and returns an {@link AggregateHistory} based on the
-     * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
+     * {@linkplain #historyBackward(Object, int)}  aggregate history}.
      *
-     * @param request
-     *         the aggregate read request based on which to form a record
+     * @param id
+     *         the identifier of the aggregate for which to return the history
+     * @param batchSize
+     *         the maximum number of the events to read
      * @return the record instance or {@code Optional.empty()} if the
-     *         {@linkplain #historyBackward(AggregateReadRequest) aggregate history} is empty
-     * @throws IllegalStateException if the storage was closed before
+     *         {@linkplain #historyBackward(Object, int) aggregate history} is empty
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method
-    @Override
-    public Optional<AggregateHistory> read(AggregateReadRequest<I> request) {
-        ReadOperation<I> op = new ReadOperation<>(this, request);
+    public Optional<AggregateHistory> read(I id, int batchSize) {
+        ReadOperation<I, S> op = new ReadOperation<>(this, id, batchSize);
         return op.perform();
+    }
+
+    @Override
+    public Optional<AggregateHistory> read(I id) {
+        return read(id, DEFAULT_SNAPSHOT_TRIGGER);
     }
 
     /**
@@ -156,7 +150,8 @@ public abstract class AggregateStorage<I>
      *
      * @param id
      *         the ID for the record
-     * @param events non empty aggregate state record to store
+     * @param events
+     *         non empty aggregate state record to store
      */
     @Override
     public void write(I id, AggregateHistory events) {
@@ -166,8 +161,8 @@ public abstract class AggregateStorage<I>
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
         for (Event event : eventList) {
-            AggregateEventRecord record = toStorageRecord(event);
-            writeRecord(id, record);
+            AggregateEventRecord record = AggregateRecords.newEventRecord(id, event);
+            writeEventRecord(id, record);
         }
         if (events.hasSnapshot()) {
             writeSnapshot(id, events.getSnapshot());
@@ -189,8 +184,8 @@ public abstract class AggregateStorage<I>
         checkNotClosedAndArguments(id, event);
 
         Event eventWithoutEnrichments = event.clearEnrichments();
-        AggregateEventRecord record = toStorageRecord(eventWithoutEnrichments);
-        writeRecord(id, record);
+        AggregateEventRecord record = AggregateRecords.newEventRecord(id, eventWithoutEnrichments);
+        writeEventRecord(id, record);
     }
 
     /**
@@ -204,42 +199,9 @@ public abstract class AggregateStorage<I>
     void writeSnapshot(I aggregateId, Snapshot snapshot) {
         checkNotClosedAndArguments(aggregateId, snapshot);
 
-        AggregateEventRecord record = toStorageRecord(snapshot);
-        writeRecord(aggregateId, record);
+        AggregateEventRecord record = AggregateRecords.newEventRecord(aggregateId, snapshot);
+        writeEventRecord(aggregateId, record);
     }
-
-    private void checkNotClosedAndArguments(I id, Object argument) {
-        checkNotClosed();
-        checkNotNull(id);
-        checkNotNull(argument);
-    }
-
-    private static AggregateEventRecord toStorageRecord(Event event) {
-        checkArgument(event.hasContext(), "Event context must be set.");
-        EventContext context = event.context();
-
-        String eventIdStr = Identifier.toString(event.getId());
-        checkNotEmptyOrBlank(eventIdStr, "Event ID cannot be empty or blank.");
-
-        checkArgument(event.hasMessage(), "Event message must be set.");
-
-        Timestamp timestamp = checkValid(context.getTimestamp());
-
-        return AggregateEventRecord.newBuilder()
-                                   .setTimestamp(timestamp)
-                                   .setEvent(event)
-                                   .build();
-    }
-
-    private static AggregateEventRecord toStorageRecord(Snapshot snapshot) {
-        Timestamp value = checkValid(snapshot.getTimestamp());
-        return AggregateEventRecord.newBuilder()
-                                   .setTimestamp(value)
-                                   .setSnapshot(snapshot)
-                                   .build();
-    }
-
-    // Storage implementation API.
 
     /**
      * Writes the passed record into the storage.
@@ -249,7 +211,76 @@ public abstract class AggregateStorage<I>
      * @param record
      *         the record to write
      */
-    protected abstract void writeRecord(I id, AggregateEventRecord record);
+    protected void writeEventRecord(I id, AggregateEventRecord record) {
+        eventStorage.write(record.getId(), record);
+    }
+
+    /**
+     * Reads the aggregate states from the storage according to the passed filters and returns
+     * the results in the specified response format.
+     *
+     * <p>The results of this call are eventually consistent with the latest states of aggregates,
+     * as instances are <em>not</em> restored from their events for querying.
+     * Instead, this method works on top of the storage of the latest known aggregate states,
+     * for better performance. In a distributed environment, the records in this storage may be
+     * outdated, as new events may have been emitted by an aggregate instance on other server nodes.
+     *
+     * @param filters
+     *         the filters to use when querying the aggregate states
+     * @param format
+     *         the format of the response
+     * @return an iterator over the matching {@code EntityRecord}s
+     */
+    protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
+        ensureVisible();
+        RecordQuery<I, EntityRecord> query = convert(stateStorage.recordSpec(), filters, format);
+        return stateStorage.readAll(query);
+    }
+
+    /**
+     * Reads the aggregate states from the storage and returns the results in the specified format.
+     *
+     * <p>This method performs no filtering. Other than that, it works in the same manner
+     * as {@link #readStates(TargetFilters, ResponseFormat) readStates(filters, format)}.
+     *
+     * @param format
+     *         the format of the response
+     * @return an iterator over the records
+     */
+    protected Iterator<EntityRecord> readStates(ResponseFormat format) {
+        ensureVisible();
+        RecordQuery<I, EntityRecord> query = convert(stateStorage.recordSpec(), format);
+        return stateStorage.readAll(query);
+    }
+
+    private void ensureVisible() {
+        if (!mirrorEnabled) {
+            throw newIllegalStateException(
+                    "The aggregate state `%s` is NOT marked as visible for querying.",
+                    stateClass());
+        }
+    }
+
+    private Class<? extends EntityState<?>> stateClass() {
+        return stateStorage.recordSpec()
+                           .entityClass()
+                           .stateClass();
+    }
+
+    protected void writeState(Aggregate<I, ?, ?> aggregate) {
+        EntityRecord record = AggregateRecords.newStateRecord(aggregate, mirrorEnabled);
+        EntityRecordWithColumns<I> result =
+                EntityRecordWithColumns.create(aggregate, record);
+        stateStorage.write(result);
+    }
+
+    protected void writeAll(Aggregate<I, ?, ?> aggregate,
+                            ImmutableList<AggregateHistory> historySegments) {
+        for (AggregateHistory history : historySegments) {
+            write(aggregate.id(), history);
+        }
+        writeState(aggregate);
+    }
 
     /**
      * Creates iterator of aggregate event history with the reverse traversal.
@@ -257,15 +288,23 @@ public abstract class AggregateStorage<I>
      * <p>Records are sorted by timestamp descending (from newer to older).
      * The iterator is empty if there's no history for the aggregate with passed ID.
      *
-     * @param request
-     *         the read request
+     * @param id
+     *         the identifier of the aggregate
+     * @param batchSize
+     *         the maximum number of the history records to read
      * @return new iterator instance
      */
-    protected abstract Iterator<AggregateEventRecord>
-    historyBackward(AggregateReadRequest<I> request);
+    Iterator<AggregateEventRecord> historyBackward(I id, int batchSize) {
+        return historyBackward(id, batchSize, null);
+    }
+
+    protected Iterator<AggregateEventRecord>
+    historyBackward(I id, int batchSize, @Nullable Version startingFrom) {
+        return historyBackward.read(id, batchSize, startingFrom);
+    }
 
     /**
-     * Truncates the storage, dropping all records which occur before the Nth snapshot for each
+     * Truncates the storage, dropping all records which occur before the N-th snapshot for each
      * entity.
      *
      * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
@@ -299,75 +338,29 @@ public abstract class AggregateStorage<I>
     @Internal
     public void truncateOlderThan(int snapshotIndex, Timestamp date) {
         checkNotNull(date);
-        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
+        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE, snapshotIndex);
         truncate(snapshotIndex, date);
     }
 
     /**
      * Drops all records which occur before the Nth snapshot for each entity.
      */
-    protected abstract void truncate(int snapshotIndex);
+    protected void truncate(int snapshotIndex) {
+        truncation.performWith(snapshotIndex, (r) -> true);
+    }
 
     /**
      * Drops all records older than {@code date} but not newer than the Nth snapshot for each
      * entity.
      */
-    protected abstract void truncate(int snapshotIndex, Timestamp date);
+    protected void truncate(int snapshotIndex, Timestamp date) {
+        truncation.performWith(snapshotIndex,
+                               (r) -> Timestamps.compare(r.getTimestamp(), date) < 0);
+    }
 
-    /**
-     * Obtains distinct aggregate IDs from the stored event records.
-     */
-    protected abstract Iterator<I> distinctAggregateIds();
-
-    /**
-     * Executes certain kinds of aggregate reads through the {@link MirrorRepository}.
-     *
-     * <p>Used to optimize performance-heavy operations on the storage.
-     *
-     * @param <I>
-     *         the type of IDs of aggregates managed by this storage
-     */
-    private static class Mirror<I> {
-
-        private final MirrorRepository mirrorRepository;
-        private final TypeUrl stateType;
-        private final boolean multitenant;
-
-        private Mirror(MirrorRepository repository, TypeUrl stateType, boolean multitenant) {
-            this.mirrorRepository = repository;
-            this.stateType = stateType;
-            this.multitenant = multitenant;
-        }
-
-        /**
-         * Performs a storage {@code index} operation.
-         *
-         * @return distinct aggregate IDs
-         */
-        @SuppressWarnings("unchecked") // Ensured logically.
-        private Iterator<I> index() {
-            Iterator<I> result = evaluateForCurrentTenant(() -> {
-                CompositeFilter allOfType = all(eq(TYPE_COLUMN_NAME, stateType.value()));
-                TargetFilters filters = TargetFilters
-                        .newBuilder()
-                        .addFilter(allOfType)
-                        .vBuild();
-                Iterator<MirrorProjection> found =
-                        mirrorRepository.find(filters, ResponseFormat.getDefaultInstance());
-                Iterator<I> iterator = stream(found)
-                        .map(MirrorProjection::id)
-                        .map(MirrorId::getValue)
-                        .map(id -> (I) AnyPacker.unpack(id))
-                        .iterator();
-                return iterator;
-            });
-            return result;
-        }
-
-        private <T> T evaluateForCurrentTenant(Supplier<T> operation) {
-            TenantAwareRunner runner = TenantAwareRunner.withCurrentTenant(multitenant);
-            T result = runner.evaluate(operation);
-            return result;
-        }
+    private void checkNotClosedAndArguments(I id, Object argument) {
+        checkNotClosed();
+        checkNotNull(id);
+        checkNotNull(argument);
     }
 }

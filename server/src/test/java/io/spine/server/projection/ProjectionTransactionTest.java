@@ -47,6 +47,8 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.given.tx.ProjectionState.ProjectionType.VERY_USEFUL;
+import static io.spine.server.entity.given.tx.TxProjection.calculateLength;
+import static io.spine.server.entity.given.tx.TxProjection.typeValueOf;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -165,7 +167,7 @@ class ProjectionTransactionTest
     @Test
     @DisplayName("propagate column values to the entity state on commit")
     void propagateColumnValues() {
-        TxProjection entity = (TxProjection) createEntity();
+        TxProjection entity = (TxProjection) createEntity(/* nullType = false */);
         String name = "some-projection-name";
         TxCreated txCreated = TxCreated
                 .newBuilder()
@@ -177,11 +179,11 @@ class ProjectionTransactionTest
 
         int nameLength = entity.state()
                                .getNameLength();
-        assertThat(nameLength).isEqualTo(entity.getNameLength());
+        assertThat(nameLength).isEqualTo(calculateLength(name));
 
         ProjectionType type = entity.state()
                                     .getType();
-        assertThat(type).isEqualTo(entity.getType());
+        assertThat(type).isEqualTo(typeValueOf(false));
     }
 
     @Test

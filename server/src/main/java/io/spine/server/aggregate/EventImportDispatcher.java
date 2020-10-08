@@ -47,13 +47,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class EventImportDispatcher<I> implements EventDispatcher, Logging {
 
-    private final AggregateRepository<I, ?> repository;
+    private final AggregateRepository<I, ?, ?> repository;
 
-    private EventImportDispatcher(AggregateRepository<I, ?> repository) {
+    private EventImportDispatcher(AggregateRepository<I, ?, ?> repository) {
         this.repository = repository;
     }
 
-    static <I> EventImportDispatcher<I> of(AggregateRepository<I, ?> repository) {
+    static <I> EventImportDispatcher<I> of(AggregateRepository<I, ?, ?> repository) {
         checkNotNull(repository);
         return new EventImportDispatcher<>(repository);
     }

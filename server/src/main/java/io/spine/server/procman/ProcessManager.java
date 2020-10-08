@@ -73,7 +73,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the process manager state
  */
 public abstract class ProcessManager<I,
-                                     S extends EntityState,
+                                     S extends EntityState<I>,
                                      B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventReactor, Commander, HasVersionColumn<I, S>, HasLifecycleColumns<I, S> {
@@ -97,7 +97,7 @@ public abstract class ProcessManager<I,
 
     @Internal
     @Override
-    protected ProcessManagerClass<?> modelClass() {
+    public final ProcessManagerClass<?> modelClass() {
         return asProcessManagerClass(getClass());
     }
 

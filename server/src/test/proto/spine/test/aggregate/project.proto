@@ -28,9 +28,10 @@ option java_package = "io.spine.test.aggregate";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 
 message ProjectId {
-    string id = 1;
+    string uuid = 1;
 }
 
 enum Status {
@@ -41,14 +42,49 @@ enum Status {
     CANCELLED = 4;
 }
 
-message Project {
+message AggProject {
     option (entity) = {kind: AGGREGATE visibility: FULL};
 
-    // The aggregate ID.
-    //
-    // In order to skip verbose test set up, this ID may be not set.
-    //
-    ProjectId id = 1 [(required) = false];
+    ProjectId id = 1;
+
+    string name = 2 [(column) = true];
+
+    repeated Task task = 3;
+
+    Status status = 4 [(column) = true];
+
+    google.protobuf.Timestamp last_modified = 5 [(column) = true];
+
+    int32 view_count = 6 [(column) = true, (min).value = "0"];
+}
+
+// An aggregate with a `String` identifier.
+message StringProject {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    string id = 1 [(required) = false];
+
+    string name = 2;
+    repeated Task task = 3;
+    Status status = 4;
+}
+
+// An aggregate with an `Integer` identifier.
+message IntegerProject {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    int32 id = 1 [(required) = false];
+
+    string name = 2;
+    repeated Task task = 3;
+    Status status = 4;
+}
+
+// An aggregate with a `Long` identifier.
+message LongProject {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    int64 id = 1 [(required) = false];
 
     string name = 2;
     repeated Task task = 3;
@@ -84,6 +120,14 @@ message Task {
 
 message SubProjectList {
     option (entity) = {kind: AGGREGATE visibility: FULL};
+
     ProjectId parent_project = 1 [(required) = false, (validate) = false];
     repeated ProjectId item = 2;
+}
+
+message ParentState {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    ProjectId parent_project = 1;
+    string value = 2;
 }

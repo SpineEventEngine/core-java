@@ -20,11 +20,7 @@
 
 package io.spine.system.server;
 
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
 import io.spine.server.event.EventDispatcher;
-
-import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -53,25 +49,6 @@ public interface SystemReadSide {
      * @see #register(EventDispatcher)
      */
     void unregister(EventDispatcher dispatcher);
-
-    /**
-     * Executes the given query for a domain aggregate state.
-     *
-     * <p>This read operation supports following types of queries:
-     * <ul>
-     *     <li>queries for all instances of an aggregate type (which are not archived or deleted);
-     *     <li>queries by the aggregate IDs;
-     *     <li>queries for archived or/and deleted instance (combined with the other query types,
-     *         if necessary).
-     * </ul>
-     *
-     * @param query
-     *         a query for a domain aggregate
-     * @return an {@code Iterator} over the query results packed as {@link EntityStateWithVersion}.
-     * @see MirrorProjection
-     * @see io.spine.client.QueryFactory
-     */
-    Iterator<EntityStateWithVersion> readDomainAggregate(Query query);
 
     /**
      * Creates a new instance of {@code SystemReadSide} for the given system context.

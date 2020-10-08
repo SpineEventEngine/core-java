@@ -43,7 +43,7 @@ import java.util.Set;
  *         the type of the entity IDs to which the updates are routed
  */
 public final class StateUpdateRouting<I>
-        extends MessageRouting<EntityState, EventContext, Set<I>> {
+        extends MessageRouting<EntityState<?>, EventContext, Set<I>> {
 
     private static final long serialVersionUID = 0L;
 
@@ -72,7 +72,7 @@ public final class StateUpdateRouting<I>
      * the message has a field matching the type of identifiers served by this routing.
      */
     @Override
-    public boolean supports(Class<? extends EntityState> stateType) {
+    public boolean supports(Class<? extends EntityState<?>> stateType) {
         boolean customRouteSet = super.supports(stateType);
         @SuppressWarnings({"unchecked", "RedundantSuppression"}) // cast to the type used in ctor.
         DefaultStateRoute<I> defaultRoute = (DefaultStateRoute<I>) defaultRoute();
@@ -97,12 +97,12 @@ public final class StateUpdateRouting<I>
      *         if the route for this class is already set
      */
     @CanIgnoreReturnValue
-    public <S extends EntityState>
+    public <S extends EntityState<?>>
     StateUpdateRouting<I> route(Class<S> stateClass, StateUpdateRoute<I, S> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // Logically valid.
-        Route<EntityState, EventContext, Set<I>> route =
-                (Route<EntityState, EventContext, Set<I>>) via;
+        Route<EntityState<?>, EventContext, Set<I>> route =
+                (Route<EntityState<?>, EventContext, Set<I>>) via;
         addRoute(stateClass, route);
         return this;
     }
@@ -116,7 +116,8 @@ public final class StateUpdateRouting<I>
      */
     EventRoute<I, EntityStateChanged> eventRoute() {
         return (event, context) -> {
-            EntityState state = (EntityState) AnyPacker.unpack(event.getNewState());
+            @SuppressWarnings("unchecked")      // `EntityStateChanged` passes the `EntityState`s.
+            EntityState<I> state = (EntityState<I>) AnyPacker.unpack(event.getNewState());
             return apply(state, context);
         };
     }

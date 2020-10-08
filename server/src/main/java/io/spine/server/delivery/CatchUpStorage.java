@@ -21,27 +21,33 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
-import io.spine.server.storage.Storage;
+import io.spine.query.RecordQuery;
+import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
+
+import java.util.Iterator;
+
+import static io.spine.server.delivery.CatchUpColumn.projection_type;
 
 /**
  * A storage for the state of the ongoing catch-up processes.
  */
 @SPI
-public interface CatchUpStorage extends Storage<CatchUpId, CatchUp, CatchUpReadRequest> {
+public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
 
-    /**
-     * Writes a message to the storage.
-     *
-     * @param message
-     *         a message to write
-     */
-    void write(CatchUp message);
+    public CatchUpStorage(StorageFactory factory, boolean multitenant) {
+        super(factory.createRecordStorage(getSpec(), multitenant));
+    }
 
-    /**
-     * Returns an {@code Iterable} over all the stored catch-up processes.
-     */
-    Iterable<CatchUp> readAll();
+    @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}.
+    private static MessageRecordSpec<CatchUpId, CatchUp> getSpec() {
+        return new MessageRecordSpec<>(CatchUpId.class,
+                                       CatchUp.class,
+                                       CatchUp::getId,
+                                       CatchUpColumn.definitions());
+    }
 
     /**
      * Reads all the catch-up processes which update the projection of the specified type.
@@ -49,5 +55,32 @@ public interface CatchUpStorage extends Storage<CatchUpId, CatchUp, CatchUpReadR
      * @param projectionType
      *         the type of the projection state to use for filtering
      */
-    Iterable<CatchUp> readByType(TypeUrl projectionType);
+    public Iterator<CatchUp> readByType(TypeUrl projectionType) {
+        RecordQuery<CatchUpId, CatchUp> query =
+                queryBuilder().where(projection_type)
+                              .is(projectionType.value())
+                              .build();
+        Iterator<CatchUp> result = readAll(query);
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to open as a part of the public API.
+     */
+    @Override
+    protected Iterator<CatchUp> readAll() {
+        return super.readAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to open as a part of the public API.
+     */
+    @Override
+    public void write(CatchUp message) {
+        super.write(message);
+    }
 }

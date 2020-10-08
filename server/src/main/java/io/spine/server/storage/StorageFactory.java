@@ -20,66 +20,67 @@
 
 package io.spine.server.storage;
 
+import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateEventStorage;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.DefaultEventStore;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
 
 /**
- * A factory for creating storages used by repositories
- * {@link EventStore EventStore}
+ * A factory for creating storages used by repositories {@link EventStore EventStore}
  * and {@link io.spine.server.stand.Stand Stand}.
  */
 public interface StorageFactory extends AutoCloseable {
+
+    /**
+     * Creates a new {@link RecordStorage}.
+     *
+     * @param recordSpec
+     *         the specification of the record format in which the items are stored
+     * @param multitenant
+     *         whether the storage should be multi-tenant
+     * @param <I>
+     *         the type of the record identifiers
+     * @param <R>
+     *         the type of the stored records
+     */
+    <I, R extends Message> RecordStorage<I, R>
+    createRecordStorage(RecordSpec<I, R, ?> recordSpec, boolean multitenant);
 
     /**
      * Creates a new {@link AggregateStorage}.
      *
      * @param <I>
      *         the type of aggregate IDs
+     * @param <S>
+     *         the type of aggregate state
      * @param context
      *         specification of the Bounded Context {@code AggregateRepository} of which
      *         requests the creation of the storage
-     * @param aggregateClass
+     * @param aggregateCls
      *         the class of {@code Aggregate}s to be stored
      */
-    <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> aggregateClass);
+    default <I, S extends EntityState<I>> AggregateStorage<I, S>
+    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, S, ?>> aggregateCls) {
+        return new AggregateStorage<>(context, aggregateCls, this);
+    }
 
     /**
-     * Creates a new {@link RecordStorage}.
+     * Creates a new {@link AggregateEventStorage}.
      *
-     * @param <I>
-     *         the type of entity IDs
-     * @param context
-     *         specification of the Bounded Context {@code RecordBasedRepository} of which
-     *         requests the creation of the storage
-     * @param entityClass
-     *         the class of entities to be stored
+     * @param multitenant
+     *         whether the created storage should be multi-tenant
      */
-    <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass);
-
-    /**
-     * Creates a new {@link ProjectionStorage}.
-     *
-     * @param <I>
-     *         the type of stream projection IDs
-     * @param context
-     *         specification of the Bounded Context {@code ProjectionRepository} of which
-     *         requests the creation of the storage
-     * @param projectionClass
-     *         the class of {@code Projection}s to be stored
-     */
-    <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context,
-                            Class<? extends Projection<I, ?, ?>> projectionClass);
+    default AggregateEventStorage createAggregateEventStorage(boolean multitenant) {
+        return new AggregateEventStorage(this, multitenant);
+    }
 
     /**
      * Creates a new {@link InboxStorage}.
@@ -90,9 +91,12 @@ public interface StorageFactory extends AutoCloseable {
      * ServerEnvironment} instance, unlike other {@code Storage} types which instances are created
      * per-{@link io.spine.server.BoundedContext BoundedContext}.
      *
-     * @param multitenant whether the created storage should be multi-tenant
+     * @param multitenant
+     *         whether the created storage should be multi-tenant
      */
-    InboxStorage createInboxStorage(boolean multitenant);
+    default InboxStorage createInboxStorage(boolean multitenant) {
+        return new InboxStorage(this, multitenant);
+    }
 
     /**
      * Creates a new {@link CatchUpStorage}.
@@ -102,9 +106,12 @@ public interface StorageFactory extends AutoCloseable {
      * instance of {@code CatchUpStorage} per {@link io.spine.server.ServerEnvironment
      * ServerEnvironment}.
      *
-     * @param multitenant whether the created storage should be multi-tenant
+     * @param multitenant
+     *         whether the created storage should be multi-tenant
      */
-    CatchUpStorage createCatchUpStorage(boolean multitenant);
+    default CatchUpStorage createCatchUpStorage(boolean multitenant) {
+        return new CatchUpStorage(this, multitenant);
+    }
 
     /**
      * Creates a new {@link EventStore}.
@@ -113,6 +120,26 @@ public interface StorageFactory extends AutoCloseable {
      *         specification of the Bounded Context events of which the store would serve
      */
     default EventStore createEventStore(@SuppressWarnings("unused") ContextSpec context) {
-        return new DefaultEventStore();
+        return new DefaultEventStore(this, context.isMultitenant());
+    }
+
+    /**
+     * Creates a new {@link EntityRecordStorage}.
+     *
+     * @param <I>
+     *         the type of entity IDs
+     * @param <S>
+     *         the type of the entity state
+     * @param context
+     *         specification of the Bounded Context {@code RecordBasedRepository} of which
+     *         requests the creation of the storage
+     * @param entityClass
+     *         the class of entities to be stored
+     */
+    default <I, S extends EntityState<I>> EntityRecordStorage<I, S>
+    createEntityRecordStorage(ContextSpec context, Class<? extends Entity<I, S>> entityClass) {
+        EntityRecordStorage<I, S> result =
+                new EntityRecordStorage<>(this, entityClass, context.isMultitenant());
+        return result;
     }
 }

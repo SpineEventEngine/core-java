@@ -27,7 +27,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
@@ -43,7 +43,7 @@ public class AggregateCommandEndpointTestEnv {
     }
 
     public static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, Project.Builder> {
+            extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
         private static final CommandHistory commandsHandled = new CommandHistory();
@@ -102,6 +102,6 @@ public class AggregateCommandEndpointTestEnv {
     }
 
     public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
+            extends AggregateRepository<ProjectId, ProjectAggregate, AggProject> {
     }
 }

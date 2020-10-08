@@ -20,18 +20,11 @@
 
 package io.spine.system.server;
 
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.tenant.TenantFunction;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-
-import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.emptyIterator;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * A {@link SystemReadSide} which memoizes the queries passed to it.
@@ -43,8 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * {@link #unregister} for the details.
  */
 public final class MemoizingReadSide implements SystemReadSide {
-
-    private @MonotonicNonNull MemoizedSystemMessage lastSeenQuery;
 
     private final boolean multitenant;
 
@@ -94,20 +85,6 @@ public final class MemoizingReadSide implements SystemReadSide {
         throw new UnsupportedOperationException("Method unregister is not implemented!");
     }
 
-    /**
-     * Memoizes the given query and returns an empty iterator.
-     *
-     * @param query
-     *         a query to memoize
-     * @return always an empty iterator
-     */
-    @Override
-    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
-        TenantId tenantId = currentTenant();
-        lastSeenQuery = new MemoizedSystemMessage(query, tenantId);
-        return emptyIterator();
-    }
-
     /** Obtains the ID of the current tenant. */
     private TenantId currentTenant() {
         TenantId result = new TenantFunction<TenantId>(multitenant) {
@@ -118,15 +95,4 @@ public final class MemoizingReadSide implements SystemReadSide {
         }.execute();
         return checkNotNull(result);
     }
-
-    /**
-     * Obtains the last query submitted to this {@link SystemReadSide}.
-     *
-     * <p>Fails if no queries were submitted yet.
-     */
-    public MemoizedSystemMessage lastSeenQuery() {
-        assertNotNull(lastSeenQuery);
-        return lastSeenQuery;
-    }
-
 }

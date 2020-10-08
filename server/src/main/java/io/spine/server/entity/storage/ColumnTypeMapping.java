@@ -26,7 +26,7 @@ import io.spine.annotation.SPI;
 import java.util.function.Function;
 
 /**
- * A persistence strategy of an entity {@linkplain Column column}.
+ * A persistence strategy of an entity {@linkplain io.spine.query.Column column}.
  *
  * <p>Maps a column value to a stored value of type {@code R}.
  *

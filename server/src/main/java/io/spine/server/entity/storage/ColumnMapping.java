@@ -24,7 +24,7 @@ import io.spine.annotation.SPI;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * The value mapping rules of entity {@linkplain Column columns}.
+ * The value mapping rules of entity {@linkplain io.spine.query.Column columns}.
  *
  * <p>A {@link ColumnTypeMapping} allows to map column values of certain type to their value
  * in the storage.

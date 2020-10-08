@@ -33,9 +33,9 @@ import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 
 /**
  * A composite query filter which targets one or more entity
- * {@link io.spine.base.EntityColumn columns}.
+ * {@link io.spine.query.EntityColumn columns}.
  */
-public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState> {
+public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState<?>> {
 
     private static final long serialVersionUID = 0L;
 

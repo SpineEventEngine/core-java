@@ -85,6 +85,13 @@ final class Conveyor implements Iterable<InboxMessage> {
         return new ArrayList<>(messages.values()).iterator();
     }
 
+    /**
+     * Creates a new stream from the contents.
+     */
+    public Stream<InboxMessage> stream() {
+        return messages.values().stream();
+    }
+
     private void markDelivered(InboxMessage message) {
         changeStatus(message, DELIVERED);
         deliveredMessages.recordDelivered(message);
@@ -132,6 +139,18 @@ final class Conveyor implements Iterable<InboxMessage> {
      */
     void markCatchUp(InboxMessage message) {
         changeStatus(message, TO_CATCH_UP);
+    }
+
+    /**
+     * Updates the message residing on this conveyor by the identifier of the message.
+     *
+     * <p>If there is no such message on the conveyor, does nothing.
+     */
+    void update(InboxMessage message) {
+        InboxMessageId id = message.getId();
+        if (messages.containsKey(id)) {
+            messages.put(id, message);
+        }
     }
 
     private void changeStatus(InboxMessage message, InboxMessageStatus status) {
@@ -218,8 +237,8 @@ final class Conveyor implements Iterable<InboxMessage> {
                         .stream()
                         .filter(message -> this.dirtyMessages.contains(message.getId()))
                         .collect(toList());
-        storage.writeAll(dirtyMessages);
-        storage.removeAll(removals);
+        storage.writeBatch(dirtyMessages);
+        storage.removeBatch(removals);
         dirtyMessages.clear();
         removals.clear();
         duplicates.clear();

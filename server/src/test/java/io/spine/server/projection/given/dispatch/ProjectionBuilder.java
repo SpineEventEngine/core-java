@@ -39,7 +39,7 @@ import io.spine.server.projection.ProjectionTransaction;
 @VisibleForTesting
 public class ProjectionBuilder<P extends Projection<I, S, B>,
                                I,
-                               S extends EntityState,
+                               S extends EntityState<I>,
                                B extends ValidatingBuilder<S>>
         extends EntityBuilder<P, I, S> {
 

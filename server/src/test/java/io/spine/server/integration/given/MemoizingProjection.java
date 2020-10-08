@@ -30,7 +30,9 @@ import java.util.Collection;
 
 import static com.google.common.collect.Lists.newLinkedList;
 
-public abstract class MemoizingProjection<I, M extends EntityState, B extends ValidatingBuilder<M>>
+public abstract class MemoizingProjection<I,
+                                          M extends EntityState<I>,
+                                          B extends ValidatingBuilder<M>>
         extends Projection<I, M, B> {
 
     private static final Collection<Message> events = newLinkedList();

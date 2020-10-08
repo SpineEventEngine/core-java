@@ -37,5 +37,5 @@ public interface ShardEvent extends EventMessage {
      *
      * <p>Determines the shard through which this message is delivered.
      */
-    ShardIndex getId();
+    ShardIndex getIndex();
 }

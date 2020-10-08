@@ -55,7 +55,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CannotDispatchDuplicateCommand;
 import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -75,7 +75,7 @@ import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.AfterEach;
@@ -124,7 +124,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregateTest {
 
     private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("prj-01")
+                                                 .setUuid("prj-01")
                                                  .build();
 
     private static final AggCreateProject createProject = Given.CommandMessage.createProject(ID);
@@ -181,14 +181,6 @@ public class AggregateTest {
     @AfterEach
     void tearDown() throws Exception {
         context.close();
-    }
-
-    @Test
-    @DisplayName("not allow a negative event count after last snapshot")
-    void negativeEventCount() {
-        Aggregate<?, ?, ?> aggregate = this.aggregate;
-        assertThrows(IllegalArgumentException.class,
-                     () -> aggregate.setEventCountAfterLastSnapshot(-1));
     }
 
     @Nested
@@ -312,7 +304,8 @@ public class AggregateTest {
 
         // Get the first event since the command handler produces only one event message.
         Aggregate<?, ?, ?> agg = this.aggregate;
-        List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
+        List<Event> uncommittedEvents = agg.getUncommittedEvents()
+                                           .list();
         Event event = uncommittedEvents.get(0);
 
         assertEquals(this.aggregate.version(), event.context()
@@ -390,7 +383,7 @@ public class AggregateTest {
         void updatedUponCommandHandled() {
             dispatchCommand(aggregate, command(createProject));
 
-            Project state = aggregate.state();
+            AggProject state = aggregate.state();
 
             assertEquals(ID, state.getId());
             assertEquals(Status.CREATED, state.getStatus());
@@ -413,7 +406,7 @@ public class AggregateTest {
     }
 
     @Test
-    @DisplayName("play events")
+    @DisplayName("replay historical events")
     void playEvents() {
         List<Event> events = generateProjectEvents();
         AggregateHistory aggregateHistory =
@@ -422,7 +415,7 @@ public class AggregateTest {
                                 .build();
 
         AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
-        aggregate().play(aggregateHistory);
+        aggregate().replay(aggregateHistory);
         tx.commit();
 
         assertTrue(aggregate.projectCreatedEventApplied);
@@ -440,9 +433,9 @@ public class AggregateTest {
         Aggregate<?, ?, ?> anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(anotherAggregate);
-        anotherAggregate.play(AggregateHistory.newBuilder()
-                                              .setSnapshot(snapshot)
-                                              .build());
+        anotherAggregate.replay(AggregateHistory.newBuilder()
+                                                .setSnapshot(snapshot)
+                                                .build());
         tx.commit();
 
         assertEquals(aggregate, anotherAggregate);
@@ -533,7 +526,7 @@ public class AggregateTest {
         dispatchCommand(aggregate, command(createProject));
 
         Snapshot snapshot = aggregate().toSnapshot();
-        Project state = unpack(snapshot.getState(), Project.class);
+        AggProject state = unpack(snapshot.getState(), AggProject.class);
 
         assertEquals(ID, state.getId());
         assertEquals(Status.CREATED, state.getStatus());
@@ -650,7 +643,7 @@ public class AggregateTest {
                     .addEvent(event)
                     .build();
             BatchDispatchOutcome batchDispatchOutcome =
-                    ((Aggregate<?, ?, ?>) faultyAggregate).play(history);
+                    ((Aggregate<?, ?, ?>) faultyAggregate).replay(history);
             assertThat(batchDispatchOutcome.getSuccessful()).isFalse();
             MessageId expectedTarget = MessageId
                     .newBuilder()
@@ -713,7 +706,8 @@ public class AggregateTest {
 
         private ProtoSubject assertNextCommandId() {
             Event event = history.next();
-            return assertThat(event.rootMessage().asCommandId());
+            return assertThat(event.rootMessage()
+                                   .asCommandId());
         }
 
         @Test
@@ -812,7 +806,8 @@ public class AggregateTest {
     private static void dispatch(TenantId tenant,
                                  Supplier<MessageEndpoint<ProjectId, ?>> endpoint) {
         with(tenant).run(
-                () -> endpoint.get().dispatchTo(ID)
+                () -> endpoint.get()
+                              .dispatchTo(ID)
         );
     }
 
@@ -820,11 +815,11 @@ public class AggregateTest {
     @DisplayName("create a single event when emitting a pair without second value")
     class CreateSingleEventForPair {
 
-        private BlackBoxContext context;
+        private BlackBox context;
 
         @BeforeEach
         void prepareContext() {
-            context = BlackBoxContext.from(
+            context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TaskAggregateRepository())
             );

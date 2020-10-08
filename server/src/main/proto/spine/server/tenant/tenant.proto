@@ -32,13 +32,12 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/core/tenant_id.proto";
 
-// The state of entities implementing default Tenant Index.
+// The information about a tenant stored by default in the `TenantIndex`.
 message Tenant {
     option (internal_type) = true;
-    option (entity) = { kind: ENTITY visibility: QUERY };
 
     spine.core.TenantId id = 1;
 
-    // The time when the entity holding the tenant data was created.
+    // The time when the tenant was first created in the system.
     google.protobuf.Timestamp when_created = 2 [(required) = true];
 }

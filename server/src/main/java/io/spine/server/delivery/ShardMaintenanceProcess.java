@@ -20,10 +20,13 @@
 
 package io.spine.server.delivery;
 
-import io.spine.core.Subscribe;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
+import io.spine.server.delivery.event.ShardProcessed;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.React;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
@@ -35,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>Has its own {@link Inbox}, so the messages arriving to it are dispatched
  * by the {@link Delivery}.
  */
-final class ShardMaintenanceProcess extends AbstractEventSubscriber {
+final class ShardMaintenanceProcess extends AbstractEventReactor {
 
     static final TypeUrl TYPE = TypeUrl.of(ShardMaintenance.getDefaultInstance());
 
@@ -48,26 +51,33 @@ final class ShardMaintenanceProcess extends AbstractEventSubscriber {
     ShardMaintenanceProcess(Delivery delivery) {
         super();
         Inbox.Builder<ShardIndex> builder = delivery.newInbox(TYPE);
-        builder.addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER, EventEndpoint::new);
+        builder.addEventEndpoint(InboxLabel.REACT_UPON_EVENT, EventEndpoint::new);
         this.inbox = builder.build();
     }
 
     /**
      * By handling this event, guarantees that the messages in the
-     * {@linkplain ShardProcessingRequested#getId() specified shard} have been processed
+     * {@linkplain ShardProcessingRequested#getIndex() specified shard} have been processed
      * by the {@link Delivery}.
      */
     @SuppressWarnings("unused")     // see the Javadoc.
-    @Subscribe
-    void on(ShardProcessingRequested event) {
-        // do nothing.
+    @React
+    ShardProcessed on(ShardProcessingRequested event) {
+        Timestamp now = Time.currentTime();
+        ShardProcessed processed = ShardProcessed
+                .newBuilder()
+                .setIndex(event.getIndex())
+                .setRequesterId(event.getRequesterId())
+                .setContext(event.getContext())
+                .vBuild();
+        return processed;
     }
 
     @Override
-    public void handle(EventEnvelope event) {
+    public void dispatch(EventEnvelope event) {
         ShardEvent message = (ShardEvent) event.message();
         inbox.send(event)
-             .toSubscriber(message.getId());
+             .toReactor(message.getIndex());
     }
 
     /**

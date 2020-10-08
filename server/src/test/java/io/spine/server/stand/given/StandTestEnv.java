@@ -20,27 +20,85 @@
 
 package io.spine.server.stand.given;
 
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Identifier;
+import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityStateUpdate;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
+import io.spine.client.Topic;
 import io.spine.core.Event;
+import io.spine.core.Responses;
+import io.spine.core.TenantId;
+import io.spine.core.Version;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.people.PersonName;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Given.CustomerAggregateRepository;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.SubscriptionCallback;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
+import io.spine.test.commandservice.customer.Customer;
+import io.spine.test.commandservice.customer.CustomerId;
+import io.spine.test.projection.Project;
+import io.spine.test.projection.ProjectId;
+import io.spine.testing.core.given.GivenUserId;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
-public class StandTestEnv {
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.given.Given.projectionOfClass;
+import static io.spine.test.projection.Project.Status.STARTED;
+import static io.spine.testing.Tests.assertMatchesMask;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public final class StandTestEnv {
+
+    private static final ImmutableList<String> FIRST_NAMES = ImmutableList.of(
+            "Emma", "Liam", "Mary", "John"
+    );
+    private static final ImmutableList<String> LAST_NAMES = ImmutableList.of(
+            "Smith", "Doe", "Steward", "Lee"
+    );
 
     /** Prevents instantiation of this utility class. */
     private StandTestEnv() {
@@ -51,12 +109,211 @@ public class StandTestEnv {
                         new CustomerAggregateRepository(), new StandTestProjectionRepository());
     }
 
-    public static Stand newStand(boolean multitenant, Repository... repositories) {
+    public static Stand newStand(boolean multitenant, Repository<?, ?>... repositories) {
         BoundedContextBuilder builder = BoundedContextBuilder.assumingTests(multitenant);
         Arrays.stream(repositories)
               .forEach(builder::add);
         BoundedContext context = builder.build();
         return context.stand();
+    }
+
+    public static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
+        ActorRequestFactory.Builder builder = ActorRequestFactory
+                .newBuilder()
+                .setActor(GivenUserId.of(newUuid()));
+        if (tenant != null) {
+            builder.setTenantId(tenant);
+        }
+        return builder.build();
+    }
+
+    public static CustomerId customerIdFor(int numericId) {
+        return CustomerId.newBuilder()
+                         .setNumber(numericId)
+                         .build();
+    }
+
+    public static ProjectId projectIdFor(int numericId) {
+        return ProjectId.newBuilder()
+                        .setId(String.valueOf(numericId))
+                        .build();
+    }
+
+    private static PersonName personName() {
+        String givenName = selectOne(FIRST_NAMES);
+        String familyName = selectOne(LAST_NAMES);
+        return PersonName
+                .newBuilder()
+                .setGivenName(givenName)
+                .setFamilyName(familyName)
+                .build();
+    }
+
+    private static <T> T selectOne(List<T> choices) {
+        checkArgument(!choices.isEmpty());
+        Random random = new SecureRandom();
+        int index = random.nextInt(choices.size());
+        return choices.get(index);
+    }
+
+    public static int storeSampleProject(StandTestProjectionRepository repository) {
+        ProjectId id = projectIdFor(42);
+        int projectVersion = 42;
+        storeSampleProject(repository, id, "Some sample project", projectVersion);
+        return projectVersion;
+    }
+
+    public static void storeSampleProject(StandTestProjectionRepository repository,
+                                          ProjectId id, String name, int projectVersion) {
+        Project project = Project
+                .newBuilder()
+                .setId(id)
+                .setName(name)
+                .setStatus(STARTED)
+                .build();
+        repository.store(projectionOfClass(Given.StandTestProjection.class)
+                                 .withId(project.getId())
+                                 .withState(project)
+                                 .withVersion(projectVersion)
+                                 .build());
+    }
+
+    @CanIgnoreReturnValue
+    public static Subscription
+    subscribeAndActivate(Stand stand, Topic topic, SubscriptionCallback callback) {
+        MemoizingObserver<Subscription> observer = memoizingObserver();
+        stand.subscribe(topic, observer);
+        Subscription subscription = observer.firstResponse();
+        stand.activate(subscription, callback, noOpObserver());
+
+        assertNotNull(subscription);
+        return subscription;
+    }
+
+    public static void verifyObserver(MemoizeQueryResponseObserver observer) {
+        assertNotNull(observer.responseHandled());
+        assertTrue(observer.isCompleted());
+        assertNull(observer.throwable());
+    }
+
+    public static void setupExpectedFindAllBehaviour(StandTestProjectionRepository repo,
+                                                     Map<ProjectId, Project> contentToReturn) {
+        Set<ProjectId> projectIds = contentToReturn.keySet();
+        ImmutableCollection<EntityRecord> allRecords = toProjectionRecords(projectIds);
+
+        repo.setRecords(allRecords.iterator());
+    }
+
+    private static ImmutableCollection<EntityRecord>
+    toProjectionRecords(Collection<ProjectId> projectionIds) {
+        Collection<EntityRecord> transformed = Collections2.transform(
+                projectionIds,
+                input -> {
+                    checkNotNull(input);
+                    Given.StandTestProjection projection = new Given.StandTestProjection(input);
+                    Any id = Identifier.pack(projection.id());
+                    Any state = AnyPacker.pack(projection.state());
+                    EntityRecord record = EntityRecord
+                            .newBuilder()
+                            .setEntityId(id)
+                            .setState(state)
+                            .build();
+                    return record;
+                });
+        ImmutableList<EntityRecord> result = ImmutableList.copyOf(transformed);
+        return result;
+    }
+
+    public static Collection<Customer> fillSampleCustomers(int numberOfCustomers) {
+        return generate(numberOfCustomers,
+                        numericId -> Customer.newBuilder()
+                                             .setId(customerIdFor(numericId))
+                                             .setName(personName())
+                                             .build());
+    }
+
+    public static Customer einSampleCustomer() {
+        return fillSampleCustomers(1).iterator()
+                                     .next();
+    }
+
+    public static Collection<Project> fillSampleProjects(int numberOfProjects) {
+        return generate(numberOfProjects,
+                        numericId -> Project.newBuilder()
+                                            .setId(projectIdFor(numericId))
+                                            .setName(String.valueOf(numericId))
+                                            .build());
+    }
+
+    public static Project einSampleProject() {
+        return fillSampleProjects(1).iterator()
+                                    .next();
+    }
+
+    private static <T extends Message> Collection<T> generate(int count, IntFunction<T> idMapper) {
+        Random random = new SecureRandom();
+        List<T> result = IntStream.generate(random::nextInt)
+                                  .limit(count)
+                                  .map(Math::abs)
+                                  .mapToObj(idMapper)
+                                  .collect(toList());
+        return result;
+    }
+
+    public static void fillSampleProjects(Map<ProjectId, Project> sampleProjects,
+                                          int numberOfProjects) {
+        for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
+            Project project = Project.getDefaultInstance();
+            ProjectId projectId = ProjectId.newBuilder()
+                                           .setId(UUID.randomUUID()
+                                                      .toString())
+                                           .build();
+            sampleProjects.put(projectId, project);
+        }
+    }
+
+    public static List<EntityStateWithVersion>
+    checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
+        assertTrue(responseObserver.isCompleted(), "Query has not completed successfully");
+        assertNull(responseObserver.throwable(), "Throwable has been caught upon query execution");
+
+        QueryResponse response = responseObserver.responseHandled();
+        assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
+        assertNotNull(response, "Query response must not be null");
+
+        List<EntityStateWithVersion> messages = response.getMessageList();
+        assertNotNull(messages, "Query response has null message list");
+        return messages;
+    }
+
+    public static void checkTypesEmpty(Stand stand) {
+        assertTrue(stand.exposedTypes()
+                        .isEmpty());
+        assertTrue(stand.exposedAggregateTypes()
+                        .isEmpty());
+    }
+
+    public static void checkHasExactlyOne(Collection<TypeUrl> availableTypes,
+                                          Descriptors.Descriptor expectedType) {
+        assertEquals(1, availableTypes.size());
+
+        TypeUrl actualTypeUrl = availableTypes.iterator()
+                                              .next();
+        TypeUrl expectedTypeUrl = TypeUrl.from(expectedType);
+        assertEquals(expectedTypeUrl, actualTypeUrl, "Type was registered incorrectly");
+    }
+
+    @SuppressWarnings("UnnecessaryLambda") // To give a name to an empty callback.
+    public static SubscriptionCallback emptyUpdateCallback() {
+        return newEntityState -> {
+            //do nothing
+        };
+    }
+
+    public static Set<CustomerId> ids(Collection<Customer> customers) {
+        return customers.stream()
+                        .map(Customer::getId)
+                        .collect(toSet());
     }
 
     /**
@@ -141,6 +398,49 @@ public class StandTestEnv {
 
         public int countAcceptedUpdates() {
             return acceptedUpdates.size();
+        }
+    }
+
+    /**
+     * Observes the results of the query sent to read the {@link Project} entity states via Stand.
+     */
+    public static final class AssertProjectQueryResults extends MemoizeQueryResponseObserver {
+
+        private final ImmutableSet<ProjectId> ids;
+        private final int projectVersion;
+        private final FieldMask fieldMask;
+
+        /**
+         * Creates a new version of this observer taking the expected values as parameters.
+         *
+         * @param ids
+         *         the IDs of the projects which should be returned in the query results
+         * @param version
+         *         the version each of the {@code Project}s in the query results
+         * @param mask
+         *         the field mask to which each of the returned entity states is expected to conform
+         */
+        public AssertProjectQueryResults(Set<ProjectId> ids, int version, FieldMask mask) {
+            this.ids = ImmutableSet.copyOf(ids);
+            projectVersion = version;
+            fieldMask = mask;
+        }
+
+        @Override
+        public void onNext(QueryResponse value) {
+            super.onNext(value);
+            List<EntityStateWithVersion> messages = value.getMessageList();
+            assertThat(messages).hasSize(ids.size());
+            for (EntityStateWithVersion stateWithVersion : messages) {
+                Any state = stateWithVersion.getState();
+                Project project = unpack(state, Project.class);
+                assertThat(project).isNotNull();
+                assertMatchesMask(project, fieldMask);
+
+                Version version = stateWithVersion.getVersion();
+                assertThat(version.getNumber())
+                        .isEqualTo(projectVersion);
+            }
         }
     }
 }

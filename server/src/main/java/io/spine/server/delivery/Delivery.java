@@ -89,9 +89,11 @@ import static java.util.Collections.synchronizedList;
  *
  * <p>{@code Delivery} is responsible for providing the {@link InboxStorage} for every inbox
  * registered. Framework users may {@linkplain DeliveryBuilder#setInboxStorage(InboxStorage)
- * configure} the storage, taking into account that it is typically multi-tenant. By default,
- * the {@code InboxStorage} for the delivery is provided by the environment-specific
- * {@linkplain ServerEnvironment#storageFactory() storage factory} and is multi-tenant.
+ * configure} the storage. By default, the {@code InboxStorage} for the delivery is provided
+ * by the environment-specific {@linkplain ServerEnvironment#storageFactory() storage factory}
+ * and is single-tenant. In case there is at least one multi-tenant {@code BoundedContext}
+ * served by the {@code Delivery}, the {@code InboxStorage} should be configured
+ * to support the multi-tenancy.
  *
  * <h2>Catch-up</h2>
  *
@@ -108,7 +110,10 @@ import static java.util.Collections.synchronizedList;
  * <p>The statuses of the ongoing catch-up processes are stored in a dedicated
  * {@link CatchUpStorage}. The {@code DeliveryBuilder} {@linkplain
  * DeliveryBuilder#setCatchUpStorage(CatchUpStorage) exposes an API} for the customization of this
- * storage.
+ * storage. By default, the {@code CatchUpStorage} is single-tenant. However,
+ * as with the {@code InboxStorage} used by the {@code Delivery}, it should be configured
+ * as multi-tenant if at least one {@code BoundedContext} served by the {@code Delivery}
+ * is multi-tenant.
  *
  * <h2>Observers</h2>
  *
@@ -449,19 +454,22 @@ public final class Delivery implements Logging {
 
         boolean continueAllowed = true;
         List<DeliveryStage> stages = new ArrayList<>();
+        Iterable<CatchUp> catchUpJobs = ImmutableList.copyOf(catchUpStorage.readAll());
         while (continueAllowed && maybePage.isPresent()) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
                 DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
                 Conveyor conveyor = new Conveyor(messages, deliveredMessages);
-                Iterable<CatchUp> catchUpJobs = catchUpStorage.readAll();
                 List<Station> stations = conveyorStationsFor(catchUpJobs, action);
                 DeliveryStage stage = launch(conveyor, stations, index);
                 continueAllowed = monitorTellsToContinue(stage);
                 stages.add(stage);
             }
             if (continueAllowed) {
+                if(messages.size() < pageSize) {
+                    catchUpJobs = ImmutableList.copyOf(catchUpStorage.readAll());
+                }
                 maybePage = currentPage.next();
             }
         }
@@ -499,10 +507,17 @@ public final class Delivery implements Logging {
     private ImmutableList<Station> conveyorStationsFor(Iterable<CatchUp> catchUpJobs,
                                                        DeliveryAction action) {
         return ImmutableList.of(
+                new MaintenanceStation(deliveryContextWith(catchUpJobs)),
                 new CatchUpStation(action, catchUpJobs),
                 new LiveDeliveryStation(action, deduplicationWindow),
                 new CleanupStation()
         );
+    }
+
+    private static DeliveryContext deliveryContextWith(Iterable<CatchUp> catchUpJobs) {
+        return DeliveryContext.newBuilder()
+                              .addAllCatchUpJob(catchUpJobs)
+                              .vBuild();
     }
 
     private void notifyOfDuplicatesIn(Conveyor conveyor) {
@@ -640,9 +655,20 @@ public final class Delivery implements Logging {
         deliveries.unregister(inbox);
     }
 
+    /**
+     * Returns the instance of {@link InboxStorage} used by this {@code Delivery}.
+     */
     @VisibleForTesting
     InboxStorage inboxStorage() {
         return inboxStorage;
+    }
+
+    /**
+     * Returns the instance of {@link CatchUpStorage} used by this {@code Delivery}.
+     */
+    @VisibleForTesting
+    CatchUpStorage catchUpStorage() {
+        return catchUpStorage;
     }
 
     int shardCount() {

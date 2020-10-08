@@ -20,13 +20,16 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.ResponseFormat;
+import io.spine.query.RecordQuery;
+import io.spine.query.SortBy;
+import io.spine.query.Subject;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
@@ -39,39 +42,55 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
-import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
+import static io.spine.server.storage.memory.RecordComparator.accordingTo;
+import static java.util.Collections.synchronizedMap;
 import static java.util.stream.Collectors.toList;
 
 /**
- * The memory-based storage for {@link EntityRecord} that represents
- * all storage operations available for data of a single tenant.
+ * The memory-based storage for message records.
+ *
+ * <p>Acts like a facade API for the operations available over the data of a single tenant.
  */
-final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
+class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWithColumns<I, R>> {
 
-    private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
-    private final Map<I, EntityRecordWithColumns> activeRecords =
-            filterValues(records, r -> r != null && r.isActive());
-    private static final EntityRecordUnpacker UNPACKER = EntityRecordUnpacker.INSTANCE;
+    private final Map<I, RecordWithColumns<I, R>> records = synchronizedMap(new HashMap<>());
 
     @Override
     public Iterator<I> index() {
-        Iterator<I> result = activeRecords.keySet()
-                                          .iterator();
+        Iterator<I> result = records.keySet()
+                                    .iterator();
+        return result;
+    }
+
+    /**
+     * Obtains the iterator over the identifiers of the records which match the passed query.
+     */
+    public Iterator<I> index(RecordQuery<I, R> query) {
+        List<RecordWithColumns<I, R>> subset = findRecords(query);
+        Iterator<I> result = Iterators.transform(subset.iterator(), RecordWithColumns::id);
         return result;
     }
 
     @Override
-    public void put(I id, EntityRecordWithColumns record) {
+    public void put(I id, RecordWithColumns<I, R> record) {
         records.put(id, record);
     }
 
+    /**
+     * Returns the message with the passed identifier and applies the given field mask to it.
+     *
+     * <p>If there is no such a message stored, returns {@code Optional.empty()}.
+     */
+    public Optional<R> get(I id, FieldMask mask) {
+        return get(id).map(r -> new FieldMaskApplier(mask).apply(r.record()));
+    }
+
     @Override
-    public Optional<EntityRecordWithColumns> get(I id) {
-        EntityRecordWithColumns record = records.get(id);
+    public Optional<RecordWithColumns<I, R>> get(I id) {
+        RecordWithColumns<I, R> record = records.get(id);
         return Optional.ofNullable(record);
     }
 
@@ -79,47 +98,34 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
         return records.remove(id) != null;
     }
 
-    private Map<I, EntityRecordWithColumns> activeRecords() {
-        return activeRecords;
-    }
-
-    Iterator<EntityRecord> readAll(ResponseFormat format) {
-        Stream<EntityRecordWithColumns> records = activeRecords()
-                .values()
-                .stream();
-        FieldMask fieldMask = format.getFieldMask();
-        return orderAndLimit(records, format)
-                .map(UNPACKER)
-                .map(new FieldMaskApplier(fieldMask))
-                .iterator();
-    }
-
-    Iterator<EntityRecord> readAll(EntityQuery<I> query, ResponseFormat format) {
-        FieldMask fieldMask = format.getFieldMask();
-        List<EntityRecordWithColumns> records = findRecords(query, format).collect(toList());
+    Iterator<R> readAll(RecordQuery<I, R> query) {
+        FieldMask fieldMask = query.mask();
+        List<RecordWithColumns<I, R>> records = findRecords(query);
         return records
                 .stream()
-                .map(UNPACKER)
+                .map(RecordWithColumns::record)
                 .map(new FieldMaskApplier(fieldMask))
                 .iterator();
     }
 
-    private Stream<EntityRecordWithColumns>
-    findRecords(EntityQuery<I> query, ResponseFormat format) {
-        Map<I, EntityRecordWithColumns> records = new HashMap<>(filterRecords(query));
-        Stream<EntityRecordWithColumns> stream = records.values()
-                                                        .stream();
-        return orderAndLimit(stream, format);
+    private List<RecordWithColumns<I, R>> findRecords(RecordQuery<I, R> query) {
+        synchronized (records) {
+            Map<I, RecordWithColumns<I, R>> filtered = filterRecords(query.subject());
+            Stream<RecordWithColumns<I, R>> stream = filtered.values()
+                                                             .stream();
+            return sortAndLimit(stream, query).collect(toList());
+        }
     }
 
-    private static Stream<EntityRecordWithColumns>
-    orderAndLimit(Stream<EntityRecordWithColumns> data, ResponseFormat format) {
-        Stream<EntityRecordWithColumns> stream = data;
-        if (format.hasOrderBy()) {
-            stream = stream.sorted(orderedBy(format.getOrderBy()));
+    private static <I, R extends Message> Stream<RecordWithColumns<I, R>>
+    sortAndLimit(Stream<RecordWithColumns<I, R>> data, RecordQuery<I, R> query) {
+        Stream<RecordWithColumns<I, R>> stream = data;
+        ImmutableList<SortBy<?, R>> sortingSpecs = query.sorting();
+        if (sortingSpecs.size() > 0) {
+            stream = stream.sorted(accordingTo(sortingSpecs.asList()));
         }
-        int limit = format.getLimit();
-        if (limit > 0) {
+        Integer limit = query.limit();
+        if (limit != null && limit > 0) {
             stream = stream.limit(limit);
         }
         return stream;
@@ -127,31 +133,16 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
 
     /**
      * Filters the records returning only the ones matching the
-     * {@linkplain EntityQuery entity query}.
+     * {@linkplain Subject subject of the record query}.
      */
-    private Map<I, EntityRecordWithColumns> filterRecords(EntityQuery<I> query) {
-        EntityQueryMatcher<I> matcher = new EntityQueryMatcher<>(query);
+    private Map<I, RecordWithColumns<I, R>> filterRecords(Subject<I, R> subject) {
+        RecordQueryMatcher<I, R> matcher = new RecordQueryMatcher<>(subject);
         return filterValues(records, matcher::test);
-    }
-
-    @Nullable
-    EntityRecord findAndApplyFieldMask(I targetId, FieldMask fieldMask) {
-        EntityRecordWithColumns recordWithColumns = activeRecords().get(targetId);
-        if (recordWithColumns == null) {
-            return null;
-        }
-        EntityRecord record = recordWithColumns.record();
-        Any recordState = record.getState();
-        Any maskedState = new FieldMaskApplier(fieldMask).maskAny(recordState);
-        EntityRecord maskedRecord = record.toBuilder()
-                                          .setState(maskedState)
-                                          .build();
-        return maskedRecord;
     }
 
     @Override
     public boolean isEmpty() {
-        return activeRecords.isEmpty();
+        return records.isEmpty();
     }
 
     /**
@@ -161,7 +152,7 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
      * <p>The resulting {@link EntityRecord} has the same fields as the given one except
      * the {@code state} field, which is masked.
      */
-    private static class FieldMaskApplier implements Function<EntityRecord, EntityRecord> {
+    private class FieldMaskApplier implements Function<R, R> {
 
         private final FieldMask fieldMask;
 
@@ -169,8 +160,21 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
             this.fieldMask = fieldMask;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public @Nullable EntityRecord apply(@Nullable EntityRecord input) {
+        public @Nullable R apply(@Nullable R input) {
+            checkNotNull(input);
+            if (fieldMask.getPathsList()
+                         .isEmpty()) {
+                return input;
+            }
+            if (input instanceof EntityRecord) {
+                return (R) maskEntityRecord((EntityRecord) input);
+            }
+            return applyMask(fieldMask, input);
+        }
+
+        private EntityRecord maskEntityRecord(@Nullable EntityRecord input) {
             checkNotNull(input);
             Any maskedState = maskAny(input.getState());
             EntityRecord result = EntityRecord

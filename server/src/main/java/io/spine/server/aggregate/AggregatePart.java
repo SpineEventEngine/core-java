@@ -61,7 +61,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  */
 @Experimental
 public abstract class AggregatePart<I,
-                                    S extends EntityState,
+                                    S extends EntityState<I>,
                                     B extends ValidatingBuilder<S>,
                                     R extends AggregateRoot<I>>
                       extends Aggregate<I, S, B> {
@@ -88,7 +88,7 @@ public abstract class AggregatePart<I,
 
     @Internal
     @Override
-    protected final AggregatePartClass<?> modelClass() {
+    public final AggregatePartClass<?> modelClass() {
         return asAggregatePartClass(getClass());
     }
 
@@ -102,7 +102,7 @@ public abstract class AggregatePart<I,
      *                               or the ID type of the part state does not match
      *                               the ID type of the {@code root}
      */
-    protected <P extends EntityState> P partState(Class<P> partStateClass) {
+    protected <P extends EntityState<I>> P partState(Class<P> partStateClass) {
         P partState = root.partState(partStateClass);
         return partState;
     }
@@ -110,7 +110,7 @@ public abstract class AggregatePart<I,
     /**
      * Enumeration of generic type parameters of this class.
      */
-    public enum GenericParameter implements GenericTypeIndex<AggregatePart> {
+    public enum GenericParameter implements GenericTypeIndex<AggregatePart<?, ?, ?, ?>> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),

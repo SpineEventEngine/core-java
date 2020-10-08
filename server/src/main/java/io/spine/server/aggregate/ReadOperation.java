@@ -20,7 +20,9 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.base.EntityState;
 import io.spine.core.Event;
+import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Deque;
@@ -31,50 +33,104 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Preconditions2.checkPositive;
 
 /**
  * Method object for reading {@link AggregateHistory}s.
  *
  * @param <I> the type of aggregate IDs
+ * @param <S> the type of aggregate state
  */
-final class ReadOperation<I> {
+final class ReadOperation<I, S extends EntityState<I>> {
 
-    private final AggregateStorage<I> storage;
-    private final AggregateReadRequest<I> request;
+    private final AggregateStorage<I, S> storage;
     private final Deque<Event> history;
+    private final I id;
+    private final int batchSize;
 
     private @MonotonicNonNull Snapshot snapshot = null;
 
-    ReadOperation(AggregateStorage<I> storage, AggregateReadRequest<I> request) {
+    /**
+     * Creates a new history read operation for the {@code Aggregate} history
+     * with the given identifier.
+     *
+     * @param storage
+     *         the storage to use for reading
+     * @param id
+     *         the identifier of the {@code Aggregate} instance
+     * @param batchSize
+     *         how many records to read from the storage at a time
+     */
+    ReadOperation(AggregateStorage<I, S> storage, I id, int batchSize) {
         storage.checkNotClosed();
         this.storage = storage;
-        this.request = checkNotNull(request);
+        this.id = checkNotNull(id);
+        checkPositive(batchSize);
+        this.batchSize = batchSize;
         this.history = newLinkedList();
     }
 
+    /**
+     * Reads the history of the {@code Aggregate} starting from the most recent events until
+     * either the snapshot is read or the bottom of the history is reached.
+     *
+     * <p>The reading is performed in batches, which size is determined by
+     * the {@linkplain ReadOperation#ReadOperation(AggregateStorage, Object, int) pre-configured}
+     * batch size.
+     *
+     * <p>If neither snapshot nor the bottom of the history is reached when the batch
+     * is read, a new batch of records is read from the storage starting from the version of
+     * the last record read in the previous batch.
+     *
+     * @return the {@code Aggregate} history,
+     *         or {@code Optional.empty()} if this {@code Aggregate} has no history
+     */
     Optional<AggregateHistory> perform() {
-        Iterator<AggregateEventRecord> historyBackward = storage.historyBackward(request);
+        Iterator<AggregateEventRecord> historyBackward = storage.historyBackward(id, batchSize);
         if (!historyBackward.hasNext()) {
             return Optional.empty();
         }
 
-        while (historyBackward.hasNext() && snapshot == null) {
-            AggregateEventRecord record = historyBackward.next();
-            handleRecord(record);
+        boolean historyBottomReached = false;
+        while(snapshot == null && !historyBottomReached) {
+            Optional<Version> lastVersion = process(historyBackward);
+            if(snapshot == null) {
+                if(!lastVersion.isPresent()) {
+                    historyBottomReached = true;
+                } else {
+                    historyBackward = storage.historyBackward(id, batchSize, lastVersion.get());
+                }
+            }
         }
 
         AggregateHistory result = buildRecord();
         return Optional.of(result);
     }
 
-    private void handleRecord(AggregateEventRecord record) {
+    /**
+     * Handle the records provided by the history-backward iterator and return the version
+     * of the last record handled.
+     *
+     * @return the version of the last handled event or snapshot, whichever is the last;
+     * or {@code Optional.empty} if no records were handled
+     */
+    private Optional<Version> process(Iterator<AggregateEventRecord> historyBackward) {
+        Version lastHandledVersion = null;
+        while(historyBackward.hasNext() && snapshot == null) {
+            AggregateEventRecord record = historyBackward.next();
+            lastHandledVersion = handleRecord(record);
+        }
+        return Optional.ofNullable(lastHandledVersion);
+    }
+
+    private Version handleRecord(AggregateEventRecord record) {
         switch (record.getKindCase()) {
             case EVENT:
                 history.addFirst(record.getEvent());
-                break;
+                return record.getEvent().getContext().getVersion();
             case SNAPSHOT:
                 snapshot = record.getSnapshot();
-                break;
+                return snapshot.getVersion();
             case KIND_NOT_SET:
             default:
                 throw newIllegalStateException("Event or snapshot missing in record: \"%s\"",
@@ -82,7 +138,8 @@ final class ReadOperation<I> {
         }
     }
 
-    @SuppressWarnings("CheckReturnValue") // calling builder
+
+    @SuppressWarnings("ResultOfMethodCallIgnored") // calling builder
     private AggregateHistory buildRecord() {
         AggregateHistory.Builder builder = AggregateHistory.newBuilder();
         if (snapshot != null) {

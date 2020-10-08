@@ -21,10 +21,10 @@
 package io.spine.server.integration.given;
 
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.test.shared.Int64Projection;
+import io.spine.test.integration.AnotherMemoizingView;
 import io.spine.test.integration.ProjectId;
 
 public class MemoizingProjectDetails2Repository
-        extends ProjectionRepository<ProjectId, MemoizingProjectDetails2, Int64Projection> {
+        extends ProjectionRepository<ProjectId, MemoizingProjectDetails2, AnotherMemoizingView> {
 
 }

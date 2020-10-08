@@ -55,7 +55,7 @@ import static java.lang.String.format;
  *         the type of the state objects holding projection data
  */
 public abstract class Projection<I,
-                                 M extends EntityState,
+                                 M extends EntityState<I>,
                                  B extends ValidatingBuilder<M>>
         extends TransactionalEntity<I, M, B>
         implements EventPlayer, EventSubscriber,
@@ -85,7 +85,7 @@ public abstract class Projection<I,
 
     @Internal
     @Override
-    protected ProjectionClass<?> modelClass() {
+    public final ProjectionClass<?> modelClass() {
         return asProjectionClass(getClass());
     }
 

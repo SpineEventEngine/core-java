@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.common.truth.Correspondence;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EntityColumn;
 import io.spine.base.EventMessage;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeQueryFilter;
@@ -38,11 +37,13 @@ import io.spine.core.MessageId;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.query.EntityColumn;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
@@ -54,8 +55,7 @@ import io.spine.server.projection.given.TestProjection;
 import io.spine.server.projection.migration.MarkProjectionArchived;
 import io.spine.server.projection.migration.MarkProjectionDeleted;
 import io.spine.server.projection.migration.RemoveProjectionFromStorage;
-import io.spine.server.projection.migration.UpdateProjectionColumns;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.projection.migration.UpdateProjectionState;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
@@ -186,7 +186,7 @@ class ProjectionRepositoryTest
     }
 
     @Override
-    protected List<TestProjection> createNamed(int count, Supplier<String> nameSupplier) {
+    protected List<TestProjection> createWithNames(int count, Supplier<String> nameSupplier) {
         List<TestProjection> projections = Lists.newArrayList();
 
         for (int i = 0; i < count; i++) {
@@ -339,7 +339,7 @@ class ProjectionRepositoryTest
         }
 
         @SuppressWarnings("OverlyCoupledMethod")
-        // A complex test case with many test domain messages.
+            // A complex test case with many test domain messages.
         @Test
         @DisplayName("entity state update")
         void entityState() throws Exception {
@@ -498,7 +498,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("entity storage")
         void entityStorage() {
-            RecordStorage<ProjectId> recordStorage = repository().recordStorage();
+            EntityRecordStorage<ProjectId, ?> recordStorage = repository().recordStorage();
             assertNotNull(recordStorage);
         }
     }
@@ -643,8 +643,8 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns through migration operation")
-    void updateColumns() {
+    @DisplayName("update state through migration operation")
+    void updateState() {
         // Store a new projection instance in the repository.
         ProjectId id = createId(42);
         TestProjectionRepository repository = repository();
@@ -659,8 +659,8 @@ class ProjectionRepositoryTest
                 repository.find(targetFilters, ResponseFormat.getDefaultInstance());
         assertThat(found.hasNext()).isFalse();
 
-        // Apply the columns update.
-        repository.applyMigration(id, new UpdateProjectionColumns<>());
+        // Apply the state update.
+        repository.applyMigration(id, new UpdateProjectionState<>());
 
         // Check the entity is now found by the provided filters.
         Iterator<TestProjection> afterMigration =
@@ -678,8 +678,8 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns for multiple entities")
-    void updateColumnsForMultiple() {
+    @DisplayName("update state of multiple entities")
+    void updateStateForMultiple() {
         // Store three projections to the repository.
         ProjectId id1 = createId(1);
         ProjectId id2 = createId(2);
@@ -692,8 +692,8 @@ class ProjectionRepositoryTest
         repository.store(projection2);
         repository.store(projection3);
 
-        // Apply the column update to two of the three entities.
-        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateProjectionColumns<>());
+        // Apply the state update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateProjectionState<>());
 
         // Check that entities to which migration has been applied now have column values updated.
         QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
@@ -765,7 +765,7 @@ class ProjectionRepositoryTest
         assertThat(found).isEmpty();
     }
 
-    private static TargetFilters targetFilters(EntityColumn column, String value) {
+    private static TargetFilters targetFilters(EntityColumn<?, String> column, String value) {
         QueryFilter filter = QueryFilter.eq(column, value);
         return targetFilters(filter);
     }

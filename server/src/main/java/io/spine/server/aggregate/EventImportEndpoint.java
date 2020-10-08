@@ -37,7 +37,7 @@ import io.spine.server.type.EventEnvelope;
 final class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
     extends AggregateEventEndpoint<I, A> {
 
-    EventImportEndpoint(AggregateRepository<I, A> repository, EventEnvelope event) {
+    EventImportEndpoint(AggregateRepository<I, A, ?> repository, EventEnvelope event) {
         super(repository, event);
     }
 

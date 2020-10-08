@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <P>
  *         the type of projections
  */
-public final class ProjectionClass<P extends Projection>
+public final class ProjectionClass<P extends Projection<?, ?, ?>>
         extends EntityClass<P>
         implements EventReceiverClass, SubscribingClass, StateSubscribingClass {
 
@@ -57,7 +57,8 @@ public final class ProjectionClass<P extends Projection>
     /**
      * Obtains a model class for the passed raw class.
      */
-    public static <P extends Projection> ProjectionClass<P> asProjectionClass(Class<P> cls) {
+    public static <P extends Projection<?, ?, ?>> ProjectionClass<P>
+    asProjectionClass(Class<P> cls) {
         checkNotNull(cls);
         ProjectionClass<P> result = (ProjectionClass<P>)
                 get(cls, ProjectionClass.class, () -> new ProjectionClass<>(cls));
@@ -80,18 +81,18 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public final ImmutableSet<StateClass> domesticStates() {
+    public final ImmutableSet<StateClass<?>> domesticStates() {
         return delegate.domesticStates();
     }
 
     @Override
-    public final ImmutableSet<StateClass> externalStates() {
+    public final ImmutableSet<StateClass<?>> externalStates() {
         return delegate.externalStates();
     }
 
     @Override
     public final ImmutableSet<SubscriberMethod>
-    subscribersOf(EventClass eventClass, MessageClass originClass) {
+    subscribersOf(EventClass eventClass, MessageClass<?> originClass) {
         return delegate.handlersOf(eventClass, originClass);
     }
 }

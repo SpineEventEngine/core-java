@@ -20,35 +20,10 @@
 
 package io.spine.server.entity.storage.given;
 
-import com.google.protobuf.Timestamp;
 import io.spine.server.projection.Projection;
 import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
-import io.spine.test.entity.TaskViewWithColumns;
-
-import static io.spine.test.entity.TaskView.Status.CREATED;
 
 public final class TaskViewProjection
-        extends Projection<TaskViewId, TaskView, TaskView.Builder>
-        implements TaskViewWithColumns {
-
-    @Override
-    public String getName() {
-        return "some-name";
-    }
-
-    @Override
-    public int getEstimateInDays() {
-        return 42;
-    }
-
-    @Override
-    public TaskView.Status getStatus() {
-        return CREATED;
-    }
-
-    @Override
-    public Timestamp getDueDate() {
-        return state().getDueDate();
-    }
+        extends Projection<TaskViewId, TaskView, TaskView.Builder> {
 }

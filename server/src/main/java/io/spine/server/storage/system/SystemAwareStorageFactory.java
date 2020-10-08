@@ -21,17 +21,17 @@
 package io.spine.server.storage.system;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
-import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -79,23 +79,10 @@ public final class SystemAwareStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> AggregateStorage<I>
+    public <I, S extends EntityState<I>> AggregateStorage<I, S>
     createAggregateStorage(ContextSpec context,
-                           Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
+                           Class<? extends Aggregate<I, S, ?>> aggregateClass) {
         return delegate.createAggregateStorage(context, aggregateClass);
-    }
-
-    @Override
-    public <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
-        return delegate.createRecordStorage(context, entityClass);
-    }
-
-    @Override
-    public <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context,
-                            Class<? extends Projection<I, ?, ?>> projectionClass) {
-        return delegate.createProjectionStorage(context, projectionClass);
     }
 
     @Override
@@ -119,6 +106,12 @@ public final class SystemAwareStorageFactory implements StorageFactory {
         return context.storesEvents()
                ? delegate.createEventStore(context)
                : new EmptyEventStore();
+    }
+
+    @Override
+    public <I, M extends Message> RecordStorage<I, M>
+    createRecordStorage(RecordSpec<I, M, ?> recordSpec, boolean multitenant) {
+        return delegate.createRecordStorage(recordSpec, multitenant);
     }
 
     /**

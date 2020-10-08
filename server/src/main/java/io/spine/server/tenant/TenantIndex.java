@@ -21,14 +21,15 @@
 package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.server.ContextAware;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.storage.StorageFactory;
 
 import java.util.Set;
 
 /**
  * The index of tenant IDs in a multi-tenant application.
  */
-public interface TenantIndex extends ContextAware, AutoCloseable {
+public interface TenantIndex extends AutoCloseable {
 
     /**
      * Stores the passed tenant ID in the index.
@@ -52,8 +53,10 @@ public interface TenantIndex extends ContextAware, AutoCloseable {
      * Creates default implementation of {@code TenantIndex} for a multi-tenant context.
      */
     static TenantIndex createDefault() {
+        StorageFactory factory = ServerEnvironment.instance()
+                                                  .storageFactory();
         @SuppressWarnings("ClassReferencesSubclass") // OK for this default impl.
-        DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
+                DefaultTenantStorage tenantRepo = new DefaultTenantStorage(factory);
         return tenantRepo;
     }
 

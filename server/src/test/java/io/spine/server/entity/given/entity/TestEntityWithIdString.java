@@ -21,9 +21,9 @@
 package io.spine.server.entity.given.entity;
 
 import io.spine.server.entity.AbstractEntity;
-import io.spine.test.entity.Project;
+import io.spine.server.test.shared.EmptyAggregate;
 
-public class TestEntityWithIdString extends AbstractEntity<String, Project> {
+public class TestEntityWithIdString extends AbstractEntity<String, EmptyAggregate> {
     public TestEntityWithIdString(String id) {
         super(id);
     }

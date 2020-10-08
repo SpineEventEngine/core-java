@@ -21,8 +21,8 @@
 package io.spine.client;
 
 import io.spine.base.EntityState;
-import io.spine.base.EntityStateField;
 import io.spine.client.Filter.Operator;
+import io.spine.query.EntityStateField;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator.EQUAL;
@@ -36,7 +36,7 @@ import static io.spine.client.Filters.createFilter;
 /**
  * A subscription filter which targets an {@link EntityState}.
  */
-public final class EntityStateFilter extends TypedFilter<EntityState> {
+public final class EntityStateFilter extends TypedFilter<EntityState<?>> {
 
     private static final long serialVersionUID = 0L;
 

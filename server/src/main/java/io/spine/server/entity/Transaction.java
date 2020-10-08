@@ -21,12 +21,8 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Message;
-import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
@@ -37,8 +33,6 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.InterfaceBasedColumn;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
@@ -83,7 +77,7 @@ import static java.lang.String.format;
 @Internal
 public abstract class Transaction<I,
                                   E extends TransactionalEntity<I, S, B>,
-                                  S extends EntityState,
+                                  S extends EntityState<I>,
                                   B extends ValidatingBuilder<S>> {
 
     /**
@@ -197,7 +191,7 @@ public abstract class Transaction<I,
     @VisibleForTesting
     static <I,
             E extends TransactionalEntity<I, S, B>,
-            S extends EntityState,
+            S extends EntityState<I>,
             B extends ValidatingBuilder<S>>
     B toBuilder(E entity) {
         S currentState = entity.state();
@@ -241,7 +235,7 @@ public abstract class Transaction<I,
         return active;
     }
 
-    final LifecycleFlags lifecycleFlags() {
+    protected LifecycleFlags lifecycleFlags() {
         return lifecycleFlags;
     }
 
@@ -265,7 +259,7 @@ public abstract class Transaction<I,
     /**
      * Returns the version of the entity, modified within this transaction.
      */
-    final Version version() {
+    protected final Version version() {
         return version;
     }
 
@@ -369,16 +363,9 @@ public abstract class Transaction<I,
      */
     @VisibleForTesting
     public final void commit() throws InvalidEntityStateException, IllegalStateException {
-        B builder = builder();
-        // If the transaction is running with phases, the entity already got its state.
-        S newState = withPhases()
-                     ? entity.state()
-                     : builder.buildPartial();
+        executeOnBeforeCommit();
+        S newState = builder().buildPartial();
         doCommit(newState);
-    }
-
-    private boolean withPhases() {
-        return !phases.isEmpty();
     }
 
     /**
@@ -395,7 +382,6 @@ public abstract class Transaction<I,
             Version pendingVersion = version();
             beforeCommit(newState, pendingVersion);
             updateState(newState);
-            updateColumns();
             updateVersion();
             updateStateChanged();
             commitAttributeChanges();
@@ -414,19 +400,6 @@ public abstract class Transaction<I,
     private void updateState(@NonValidated S newState) {
         if (!initialState.equals(newState)) {
             entity.updateState(newState);
-        }
-    }
-
-    /**
-     * Propagates the entity column values to the entity state.
-     *
-     * <p>This method should only be invoked after all entity state changes are already applied to
-     * the entity, so the column getters that rely on entity state are evaluated correctly.
-     */
-    private void updateColumns() {
-        S stateWithColumns = stateWithColumns();
-        if (!stateWithColumns.equals(entity.state())) {
-            entity.updateState(stateWithColumns);
         }
     }
 
@@ -452,56 +425,15 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Returns an entity state with updated entity columns.
-     *
-     * <p>Some of the columns may be {@linkplain InterfaceBasedColumn implemented} with custom
-     * getters declared in the entity class. The values of such columns need to be propagated to
-     * the entity state during the transaction commit.
-     */
-    @SuppressWarnings("unchecked") // Logically correct.
-    private S stateWithColumns() {
-        ImmutableMap<ColumnName, InterfaceBasedColumn> columns = entity.thisClass()
-                                                                       .columns()
-                                                                       .interfaceBasedColumns();
-        if (columns.isEmpty()) {
-            return entity.state();
-        }
-        Message.Builder stateWithColumns = entity.state()
-                                                 .toBuilder();
-        columns.values()
-               .forEach(column -> propagateValue(column, stateWithColumns));
-        S result = (S) stateWithColumns.build();
-        return result;
-    }
-
-    /**
-     * Propagates a column value which is obtained with the help of a manually implemented column
-     * getter to the entity state.
-     *
-     * <p>The enum-typed columns require an additional conversion as the
-     * {@link Message.Builder#setField(FieldDescriptor, Object)} method should receive
-     * a {@link com.google.protobuf.Descriptors.EnumValueDescriptor EnumValueDescriptor} instance
-     * by the Protobuf rules.
-     */
-    private void propagateValue(InterfaceBasedColumn column, Message.Builder entityState) {
-        Object value = column.valueIn(entity);
-        FieldDescriptor fieldDescriptor = column.protoField()
-                                                .descriptor();
-        if (value == null) {
-            value = fieldDescriptor.getDefaultValue();
-        }
-        if (value instanceof ProtocolMessageEnum) {
-            value = ((ProtocolMessageEnum) value).getValueDescriptor();
-        }
-        entityState.setField(fieldDescriptor, value);
-    }
-
-    /**
      * Turns the transaction into inactive state.
      */
     @VisibleForTesting
     final void deactivate() {
         this.active = false;
+    }
+
+    private void executeOnBeforeCommit() {
+        entity.onBeforeCommit();
     }
 
     private void beforeCommit(S newState, Version newVersion) {

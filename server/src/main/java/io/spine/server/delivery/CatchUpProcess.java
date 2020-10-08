@@ -22,6 +22,7 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -40,6 +41,8 @@ import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.delivery.event.HistoryEventsRecalled;
 import io.spine.server.delivery.event.HistoryFullyRecalled;
 import io.spine.server.delivery.event.LiveEventsPickedUp;
+import io.spine.server.delivery.event.ProjectionStateCleared;
+import io.spine.server.delivery.event.ShardProcessed;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.event.AbstractStatefulReactor;
 import io.spine.server.event.EventFactory;
@@ -48,8 +51,10 @@ import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.EventStreamQuery.Limit;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tuple.EitherOf2;
+import io.spine.server.tuple.EitherOf3;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -74,11 +79,15 @@ import static io.spine.server.delivery.CatchUpMessages.recalled;
 import static io.spine.server.delivery.CatchUpMessages.shardProcessingRequested;
 import static io.spine.server.delivery.CatchUpMessages.started;
 import static io.spine.server.delivery.CatchUpMessages.toFilters;
+import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
+import static io.spine.server.delivery.CatchUpStatus.FINALIZING;
+import static io.spine.server.delivery.CatchUpStatus.IN_PROGRESS;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 /**
+ * //TODO:2020-04-27:alex.tymchenko: update the description.
  * A process that performs a projection catch-up.
  *
  * <p>Starts the catch-up process by emitting the {@link CatchUpRequested} event.
@@ -187,7 +196,7 @@ import static java.util.stream.Collectors.toSet;
  *         impossible to register the process managers with the same state in
  *         a multi-{@code BoundedContext} application.
  */
-@SuppressWarnings("OverlyCoupledClass")    // It does a lot.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})    // It does a lot.
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
@@ -248,9 +257,9 @@ public final class CatchUpProcess<I>
      * @param ids
      *         identifiers of the projections to catch up, or {@code null} if all of the
      *         instances should be caught up
+     * @return identifier of the catch-up operation
      * @throws CatchUpAlreadyStartedException
      *         if at least one of the selected instances is already catching up at the moment
-     * @return identifier of the catch-up operation
      */
     @Internal
     public CatchUpId startCatchUp(Timestamp since, @Nullable Set<I> ids)
@@ -261,31 +270,34 @@ public final class CatchUpProcess<I>
     /**
      * Moves the process from {@code Not Started} to {@code IN_PROGRESS} state.
      *
-     * <p>There are several key actions performed at this stage.
-     *
+     * Two important things happen at this stage:
      * <ul>
+     *
      *      <li>The reading timestamp of the process is set to the one specified in the request.
      *      However, people are used to say "I want to catch-up since 1 PM" meaning "counting
      *      the events happened at 1 PM sharp". Therefore process always subtracts a single
      *      nanosecond from the specified catch-up start time and then treats this interval as
      *      exclusive.
      *
-     *      <li>The identifiers of the catch-up targets are defined. They are either specified
-     *      in the original request, or, if all projections are to be caught-up, they are the
-     *      {@linkplain io.spine.server.entity.Repository#index() ID index} of the selected
-     *      repository.
+     *      <li>{@link CatchUpStarted} event is dispatched directly to the inboxes of the
+     *      catching-up targets based on the original catch-up request.
+     *
+     *      <li>The identifiers of the catch-up targets are defined. They are set according to
+     *      the actual IDs of the projections to which the {@code CatchUpStarted} has been
+     *      dispatched.
      *      It is important to know the target IDs, since their state has to be reset to default
      *      before the dispatching of the first historical event.
      *
-     *      <li>{@link CatchUpStarted} event is dispatched directly to the inboxes of the catching-up
-     *      targets.
-     *
-     *      <li>The same {@code CatchUpStarted} event is returned to be dispatched to this very
-     *      process via its inbox and move it to the next phase.
+     *      <p>The number of the projection instances to catch-up is remembered. The process
+     *      then waits for {@link ProjectionStateCleared} events to arrive for each of
+     *      the instances before reading the events from the history.
      * </ul>
+     *
+     * <p>The event handler returns {@code Nothing}, as the results of its work are dispatched
+     * directly to the inboxes of the catching-up projections.
      */
     @React
-    CatchUpStarted handle(CatchUpRequested e, EventContext ctx) {
+    Nothing handle(CatchUpRequested e, EventContext ctx) {
         CatchUpId id = e.getId();
 
         CatchUp.Request request = e.getRequest();
@@ -295,27 +307,47 @@ public final class CatchUpProcess<I>
         builder().setWhenLastRead(withWindow)
                  .setRequest(request);
         CatchUpStarted started = started(id);
-        builder().setStatus(CatchUpStatus.IN_PROGRESS);
+        builder().setStatus(CatchUpStatus.STARTED);
         flushState();
 
-        Event event = wrapAsEvent(started, ctx);
-        Set<I> ids = targetsForCatchUpSignals(request);
-        dispatchAll(ImmutableList.of(event), ids);
+        dispatchCatchUpStarted(started, ctx);
+        return nothing();
+    }
 
-        return started;
+    private void dispatchCatchUpStarted(CatchUpStarted started, EventContext ctx) {
+        Event event = wrapAsEvent(started, ctx);
+        Set<I> ids = targetsForCatchUpSignals(builder().getRequest());
+        Set<I> targetIds = dispatchAll(ImmutableList.of(event), ids);
+        builder().setInstancesToClear(targetIds.size());
     }
 
     /**
-     * Performs the first read from the event history and dispatches the results to the inboxes
-     * of respective projections.
+     * Waits until all the projection instances report their state has been cleared and they
+     * are ready for the historical events to be dispatched.
+     *
+     * <p>Once all the instances are ready, performs the first reading from the event history
+     * and dispatches the results to the inboxes of respective projections.
      *
      * <p>If the history has been read fully (i.e. until the start of the {@linkplain Turbulence
      * turbulence period}), emits {@code HistoryFullyRecalled} event. Otherwise, emits
      * {@code HistoryEventsRecalled} by which it triggers the next round of history reading.
      */
     @React
-    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
-        return recallMoreEvents();
+    EitherOf3<HistoryEventsRecalled, HistoryFullyRecalled, Nothing>
+    handle(ProjectionStateCleared event) {
+        int leftToClear = builder().getInstancesToClear() - 1;
+        builder().setInstancesToClear(leftToClear);
+        if (leftToClear > 0) {
+            return EitherOf3.withC(nothing());
+        }
+        builder().setStatus(IN_PROGRESS);
+
+        EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> result = recallMoreEvents();
+        if (result.hasA()) {
+            return EitherOf3.withA(result.getA());
+        } else {
+            return EitherOf3.withB(result.getB());
+        }
     }
 
     /**
@@ -379,28 +411,74 @@ public final class CatchUpProcess<I>
      * process in the next round.
      */
     @React
-    EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled event) {
+    LiveEventsPickedUp handle(HistoryFullyRecalled event, EventContext context) {
         CatchUpId id = event.getId();
-        builder().setStatus(CatchUpStatus.FINALIZING);
-        flushState();
-
-        CatchUp.Request request = builder().getRequest();
-        List<Event> events = readMore(request, null, null);
-
-        if (events.isEmpty()) {
-            return EitherOf2.withB(completeProcess(id));
+        if (builder().getStatus() != FINALIZING) {
+            builder().setStatus(FINALIZING);
+            flushState();
         }
-        dispatchAll(events);
-        return EitherOf2.withA(liveEventsPickedUp(id));
+        return runFinalization(id);
     }
 
-    /**
-     * Completes the process once all the events, including live events emitted during
-     * the {@linkplain Turbulence turbulence} are dispatched to the target inboxes.
-     */
+    private LiveEventsPickedUp runFinalization(CatchUpId id) {
+        CatchUp.Request request = builder().getRequest();
+        List<Event> events = readMore(request, null, null);
+        if (events.size() > 0) {
+            Timestamp lastEventTimestamp = events.get(events.size() - 1)
+                                                 .timestamp();
+            builder().setWhenLastRead(lastEventTimestamp);
+            dispatchAll(events);
+        }
+        return liveEventsPickedUp(id);
+    }
+
     @React
-    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
-        return completeProcess(event.getId());
+    List<ShardProcessingRequested> handle(LiveEventsPickedUp event, EventContext context) {
+        List<Integer> affectedShards = builder().getAffectedShardList();
+        int totalShards = builder().getTotalShards();
+        List<ShardProcessingRequested> messages = toShardEvents(totalShards, affectedShards);
+        return messages;
+    }
+
+    @React
+    EitherOf3<CatchUpCompleted, ShardProcessingRequested, Nothing> handle(ShardProcessed event) {
+        if (builder().getStatus() == COMPLETED) {
+            return EitherOf3.withC(nothing());
+        }
+
+        CatchUpId id = builder().getId();
+        DeliveryContext deliveryContext = event.getContext();
+        Optional<CatchUp> stateVisibileToDelivery =
+                deliveryContext.getCatchUpJobList()
+                               .stream()
+                               .filter((job) -> job.getId()
+                                                   .equals(id))
+                               .findFirst();
+        if (stateVisibileToDelivery.isPresent()) {
+            CatchUp observedJob = stateVisibileToDelivery.get();
+            if (observedJob.getStatus() == FINALIZING) {
+                int indexOfFinalized = event.getIndex()
+                                            .getIndex();
+
+                if (!builder().getFinalizedShardList()
+                              .contains(indexOfFinalized)) {
+                    builder().addFinalizedShard(indexOfFinalized);
+                }
+                List<Integer> affectedShards = builder().getAffectedShardList();
+                List<Integer> finalizedShards = builder().getFinalizedShardList();
+                if (finalizedShards.containsAll(affectedShards)) {
+                    CatchUpCompleted completed = completeProcess(builder().getId());
+                    return EitherOf3.withA(completed);
+                }
+                return EitherOf3.withC(nothing());
+            }
+        }
+        ShardProcessingRequested stillRequested =
+                ShardProcessingRequested.newBuilder()
+                                        .setIndex(event.getIndex())
+                                        .setRequesterId(Identifier.pack(id))
+                                        .vBuild();
+        return EitherOf3.withB(stillRequested);
     }
 
     /**
@@ -416,12 +494,13 @@ public final class CatchUpProcess<I>
     List<ShardProcessingRequested> on(CatchUpCompleted ignored) {
         int shardCount = builder().getTotalShards();
         List<Integer> affectedShards = builder().getAffectedShardList();
+
         List<ShardProcessingRequested> events = toShardEvents(shardCount, affectedShards);
         return events;
     }
 
     private CatchUpCompleted completeProcess(CatchUpId id) {
-        builder().setStatus(CatchUpStatus.COMPLETED);
+        builder().setStatus(COMPLETED);
         flushState();
         CatchUpCompleted completed = catchUpCompleted(id);
         return completed;
@@ -436,7 +515,7 @@ public final class CatchUpProcess<I>
         return ids;
     }
 
-    private Event wrapAsEvent(CatchUpSignal event, EventContext context) {
+    private Event wrapAsEvent(EventMessage event, EventContext context) {
         Event firstEvent;
         EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
         firstEvent = factory.createEvent(event, null);
@@ -460,13 +539,13 @@ public final class CatchUpProcess<I>
         return events;
     }
 
-    private static List<ShardProcessingRequested> toShardEvents(int totalShards,
-                                                                List<Integer> indexes) {
+    private List<ShardProcessingRequested> toShardEvents(int totalShards, List<Integer> indexes) {
+        CatchUpId id = builder().getId();
         return indexes
                 .stream()
                 .map(indexValue -> {
                     ShardIndex shardIndex = newIndex(indexValue, totalShards);
-                    ShardProcessingRequested event = shardProcessingRequested(shardIndex);
+                    ShardProcessingRequested event = shardProcessingRequested(id, shardIndex);
                     return event;
                 })
                 .collect(toList());
@@ -494,23 +573,37 @@ public final class CatchUpProcess<I>
                  .setTotalShards(totalShards);
     }
 
-    private void dispatchAll(List<Event> events) {
+    @CanIgnoreReturnValue
+    private Set<I> dispatchAll(List<Event> events) {
         if (events.isEmpty()) {
-            return;
+            return ImmutableSet.of();
         }
         CatchUp.Request request = builder().getRequest();
         List<Any> packedIds = request.getTargetList();
         if (packedIds.isEmpty()) {
-            dispatchAll(events, new HashSet<>());
+            return dispatchAll(events, new HashSet<>());
         } else {
             Set<I> ids = unpack(packedIds);
-            dispatchAll(events, ids);
+            return dispatchAll(events, ids);
         }
     }
 
-    private void dispatchAll(List<Event> events, Set<I> targets) {
+    /**
+     * Dispatches the given list of events to the passed targets and returns the actual set of
+     * entity identifiers to which the dispatching has been performed.
+     *
+     * @param events
+     *         the events to dispatch
+     * @param targets
+     *         the set of identifiers of the targets to dispatch the events to;
+     *         if empty, no particular targets are selected, so the target repository will
+     *         decide on its own
+     * @return the list of the identifiers to which the dispatching has been made in fact
+     */
+    @CanIgnoreReturnValue
+    private Set<I> dispatchAll(List<Event> events, Set<I> targets) {
         if (events.isEmpty()) {
-            return;
+            return ImmutableSet.of();
         }
         Set<I> actualTargets = new HashSet<>();
         @Nullable Set<I> targetsForDispatch = targets.isEmpty()
@@ -523,6 +616,7 @@ public final class CatchUpProcess<I>
         if (!actualTargets.isEmpty()) {
             recordAffectedShards(actualTargets);
         }
+        return actualTargets;
     }
 
     private List<Event> readMore(CatchUp.Request request,
@@ -571,33 +665,51 @@ public final class CatchUpProcess<I>
     /**
      * {@inheritDoc}
      *
-     * <p>Tells if the passed envelope can be dispatched to this instance of the process
-     * by verifying that the projection type URL passed with the event matches the one of the
-     * projection repository configured for this instance.
+     * <p>If the passed envelope is a {@link CatchUpSignal}, it is verified that the projection type
+     * URL passed with the event matches the one of the projection repository configured
+     * for this instance.
      */
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
         EventMessage raw = envelope.message();
-        if (!(raw instanceof CatchUpSignal)) {
-            return false;
+        if (raw instanceof CatchUpSignal) {
+            CatchUpSignal asSignal = (CatchUpSignal) raw;
+            String actualType = asSignal.getId()
+                                        .getProjectionType();
+            String expectedType = repository.entityStateType()
+                                            .value();
+            return expectedType.equals(actualType);
         }
-        CatchUpSignal asSignal = (CatchUpSignal) raw;
-        String actualType = asSignal.getId()
-                                    .getProjectionType();
-        String expectedType = repository.entityStateType()
-                                        .value();
-        return expectedType.equals(actualType);
+        return true;
     }
 
+    @SuppressWarnings("ChainOfInstanceofChecks")    // Handling two distinct cases.
     @Override
     protected ImmutableSet<CatchUpId> route(EventEnvelope event) {
-        CatchUpSignal message = (CatchUpSignal) event.message();
-        return ImmutableSet.of(message.getId());
+        EventMessage message = event.message();
+        if (message instanceof CatchUpSignal) {
+            return routeCatchUpSignal(message);
+        }
+        if (message instanceof ShardProcessed) {
+            return routeShardProcessed((ShardProcessed) message);
+        }
+        return ImmutableSet.of();
+    }
+
+    private static ImmutableSet<CatchUpId> routeShardProcessed(ShardProcessed message) {
+        Any requester = message.getRequesterId();
+        CatchUpId id = Identifier.unpack(requester, CatchUpId.class);
+        return ImmutableSet.of(id);
+    }
+
+    private static ImmutableSet<CatchUpId> routeCatchUpSignal(EventMessage message) {
+        CatchUpSignal signal = (CatchUpSignal) message;
+        return ImmutableSet.of(signal.getId());
     }
 
     @Override
     protected Optional<CatchUp> load(CatchUpId id) {
-        return storage.read(new CatchUpReadRequest(id));
+        return storage.read(id);
     }
 
     @Override

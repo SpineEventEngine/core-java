@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Test fixture for multi-tenant Bounded Contexts.
  */
-final class MultiTenantContext extends BlackBoxContext {
+final class MultiTenantContext extends BlackBox {
 
     private @MonotonicNonNull TenantId tenantId;
 

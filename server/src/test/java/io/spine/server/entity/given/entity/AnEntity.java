@@ -21,9 +21,9 @@
 package io.spine.server.entity.given.entity;
 
 import io.spine.server.entity.AbstractEntity;
-import io.spine.test.entity.Project;
+import io.spine.server.test.shared.LongIdAggregate;
 
-public class AnEntity extends AbstractEntity<Long, Project> {
+public class AnEntity extends AbstractEntity<Long, LongIdAggregate> {
     public AnEntity(Long id) {
         super(id);
     }

@@ -51,7 +51,7 @@ public class EitEnricherSetup {
         return enricher;
     }
 
-    private static <I, R extends Repository<I, E>, E extends Entity<I, S>, S extends EntityState>
+    private static <I, R extends Repository<I, E>, E extends Entity<I, S>, S extends EntityState<I>>
     S find(R repo, I id) {
         return repo.find(id)
                    .map(Entity::state)

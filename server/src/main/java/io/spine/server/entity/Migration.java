@@ -67,7 +67,7 @@ import static io.spine.protobuf.Messages.isDefault;
  *         the entity state type
  */
 @Experimental
-public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S extends EntityState>
+public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S extends EntityState<I>>
         implements Function<S, S>, Logging {
 
     /**
@@ -240,7 +240,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      * {@link Migration#applyTo(TransactionalEntity, RecordBasedRepository)}, modifying it in-place.
      * */
     private static class Operation<I,
-                                   S extends EntityState,
+                                   S extends EntityState<I>,
                                    E extends TransactionalEntity<I, S, ?>> {
 
         private boolean archive;

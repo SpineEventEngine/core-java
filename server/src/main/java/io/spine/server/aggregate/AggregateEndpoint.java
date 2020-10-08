@@ -63,7 +63,7 @@ abstract class AggregateEndpoint<I,
         extends EntityMessageEndpoint<I, A, M>
         implements Logging {
 
-    AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
+    AggregateEndpoint(AggregateRepository<I, A, ?> repository, M envelope) {
         super(repository, envelope);
     }
 
@@ -73,8 +73,7 @@ abstract class AggregateEndpoint<I,
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
         DispatchOutcome outcome = handleAndApplyEvents(aggregate);
         if (outcome.hasSuccess()) {
-            updateLifecycle(aggregate, flagsBefore);
-            storeAndPost(aggregate, outcome);
+            storeAndPost(aggregate, outcome, flagsBefore);
         } else if (outcome.hasError()) {
             Error error = outcome.getError();
             repository().lifecycleOf(aggregateId)
@@ -82,10 +81,14 @@ abstract class AggregateEndpoint<I,
         }
     }
 
-    private void storeAndPost(A aggregate, DispatchOutcome outcome) {
+    private void storeAndPost(A aggregate, DispatchOutcome outcome, LifecycleFlags flagsBefore) {
         Success success = outcome.getSuccess();
-        if (success.hasProducedEvents()) {
+        LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
+        if (success.hasProducedEvents() ||
+                (flagsAfter != null && !flagsBefore.equals(flagsAfter))) {
             store(aggregate);
+        }
+        if (success.hasProducedEvents()) {
             List<Event> events = success.getProducedEvents()
                                         .getEventList();
             post(events);
@@ -95,13 +98,6 @@ abstract class AggregateEndpoint<I,
             onEmptyResult(aggregate);
         }
         afterDispatched(aggregate.id());
-    }
-
-    private void updateLifecycle(A aggregate, LifecycleFlags flagsBefore) {
-        LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
-        if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
-            storage().writeLifecycleFlags(aggregate.id(), flagsAfter);
-        }
     }
 
     private void post(Collection<Event> events) {
@@ -140,7 +136,8 @@ abstract class AggregateEndpoint<I,
                                            .getProducedEvents()
                                            .getEventList();
         AggregateTransaction<I, ?, ?> tx = startTransaction(aggregate);
-        BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events);
+        int snapshotTrigger = repository().snapshotTrigger();
+        BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events, snapshotTrigger);
         if (batchDispatchOutcome.getSuccessful()) {
             tx.commitIfActive();
             return correctProducedEvents(commandOutcome, batchDispatchOutcome);
@@ -217,16 +214,11 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected final boolean isModified(A aggregate) {
-        UncommittedEvents events = aggregate.getUncommittedEvents();
-        return events.nonEmpty();
+        return aggregate.hasUncommittedEvents();
     }
 
     @Override
-    public final AggregateRepository<I, A> repository() {
-        return (AggregateRepository<I, A>) super.repository();
-    }
-
-    private AggregateStorage<I> storage() {
-        return repository().aggregateStorage();
+    public final AggregateRepository<I, A, ?> repository() {
+        return (AggregateRepository<I, A, ?>) super.repository();
     }
 }

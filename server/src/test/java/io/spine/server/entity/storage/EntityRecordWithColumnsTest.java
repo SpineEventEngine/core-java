@@ -24,22 +24,22 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
+import io.spine.base.Identifier;
+import io.spine.query.ColumnName;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.server.entity.storage.given.TestColumnMapping;
-import io.spine.test.storage.TaskId;
-import io.spine.testdata.Sample;
+import io.spine.test.storage.StgTask;
+import io.spine.test.storage.StgTaskId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
-import static io.spine.server.storage.LifecycleFlagField.archived;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,100 +50,62 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("`EntityRecordWithColumns` should")
 class EntityRecordWithColumnsTest {
 
-    private static EntityRecordWithColumns newRecord() {
-        return EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
-                                          Collections.emptyMap());
+    private static final StgTaskId SAMPLE_ID = StgTaskId.newBuilder()
+                                                        .setId(42)
+                                                        .build();
+    private static final Any PACKED_SAMPLE_ID = Identifier.pack(SAMPLE_ID);
+
+    private static EntityRecordWithColumns<?> sampleRecordWithEmptyColumns() {
+        return EntityRecordWithColumns.of(sampleEntityRecord());
     }
 
-    private static EntityRecordWithColumns newEmptyRecord() {
-        return EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(),
-                                          Collections.emptyMap());
+    private static EntityRecordWithColumns<?> randomRecordWithEmptyColumns() {
+        return EntityRecordWithColumns.of(randomEntityRecord());
+    }
+
+    private static EntityRecord sampleEntityRecord() {
+        return EntityRecord.newBuilder()
+                           .setEntityId(PACKED_SAMPLE_ID)
+                           .build();
+    }
+
+    private static EntityRecord randomEntityRecord() {
+        return EntityRecord.newBuilder()
+                           .setEntityId(Identifier.pack(Identifier.newUuid()))
+                           .build();
     }
 
     @Test
     @DisplayName("not accept `null`s in constructor")
     void rejectNullInCtor() {
         new NullPointerTester()
-                .setDefault(EntityRecord.class, EntityRecord.getDefaultInstance())
+                .setDefault(EntityRecord.class, sampleEntityRecord())
                 .testAllPublicConstructors(EntityRecordWithColumns.class);
     }
 
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ColumnName columnName = ColumnName.of(archived.name());
+        ColumnName columnName = EntityRecordColumn.archived.columnName();
         Object value = false;
-        EntityRecordWithColumns emptyFieldsEnvelope = EntityRecordWithColumns.of(
-                EntityRecord.getDefaultInstance(),
-                Collections.emptyMap()
-        );
-        EntityRecordWithColumns notEmptyFieldsEnvelope =
-                EntityRecordWithColumns.of(
-                        EntityRecord.getDefaultInstance(),
-                        singletonMap(columnName, value)
-                );
+        EntityRecordWithColumns<?> emptyFieldsEnvelope =
+                EntityRecordWithColumns.of(sampleEntityRecord());
+        EntityRecordWithColumns<?> notEmptyFieldsEnvelope =
+                EntityRecordWithColumns.of(sampleEntityRecord(), singletonMap(columnName, value));
         new EqualsTester()
-                .addEqualityGroup(emptyFieldsEnvelope, notEmptyFieldsEnvelope)
-                .addEqualityGroup(newRecord())
-                .addEqualityGroup(newRecord()) // Each one has different EntityRecord
+                .addEqualityGroup(emptyFieldsEnvelope)
+                .addEqualityGroup(notEmptyFieldsEnvelope)
+                .addEqualityGroup(randomRecordWithEmptyColumns())
+                .addEqualityGroup(
+                        randomRecordWithEmptyColumns()  // Each one has a different `EntityRecord`.
+                )
                 .testEquals();
-    }
-
-    @Nested
-    @DisplayName("support being initialized with")
-    class BeInitializedWith {
-
-        @Test
-        @DisplayName("record and storage fields")
-        void recordAndColumns() {
-            EntityRecordWithColumns record = EntityRecordWithColumns.of(
-                    EntityRecord.getDefaultInstance(),
-                    Collections.emptyMap()
-            );
-            assertNotNull(record);
-        }
-
-        @Test
-        @DisplayName("record only")
-        void recordOnly() {
-            EntityRecordWithColumns record = newEmptyRecord();
-            assertNotNull(record);
-        }
-    }
-
-    @Nested
-    @DisplayName("store")
-    class Store {
-
-        @Test
-        @DisplayName("record")
-        void record() {
-            EntityRecordWithColumns recordWithFields = newRecord();
-            EntityRecord record = recordWithFields.record();
-            assertNotNull(record);
-        }
-
-        @Test
-        @DisplayName("column values")
-        void columnValues() {
-            ColumnName columnName = ColumnName.of(archived.name());
-            Object value = false;
-            Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
-            EntityRecordWithColumns record = EntityRecordWithColumns.of(
-                    Sample.messageOfType(EntityRecord.class),
-                    columnsExpected
-            );
-            ImmutableSet<ColumnName> columnNames = record.columnNames();
-            assertThat(columnNames).hasSize(1);
-            assertTrue(columnNames.contains(columnName));
-            assertEquals(value, record.columnValue(columnName));
-        }
     }
 
     @Test
     @DisplayName("return empty names collection if no storage fields are set")
     void returnEmptyColumns() {
-        EntityRecordWithColumns record = newEmptyRecord();
+        EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
         assertFalse(record.hasColumns());
         ImmutableSet<ColumnName> names = record.columnNames();
         assertTrue(names.isEmpty());
@@ -152,7 +114,7 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("throw `ISE` on attempt to get value by non-existent name")
     void throwOnNonExistentColumn() {
-        EntityRecordWithColumns record = newEmptyRecord();
+        EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
         ColumnName nonExistentName = ColumnName.of("non-existent-column");
         assertThrows(IllegalStateException.class, () -> record.columnValue(nonExistentName));
     }
@@ -160,20 +122,15 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("have default system columns even if the entity does not define custom ones")
     void supportEmptyColumns() {
-        TaskId taskId = TaskId
-                .newBuilder()
-                .setId(42)
-                .build();
-        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(taskId);
+        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(SAMPLE_ID);
 
-        Columns columns = Columns.of(entity.getClass());
+        EntityRecordSpec<StgTaskId, StgTask, EntityWithoutCustomColumns> columns =
+                EntityRecordSpec.of(entity);
         Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
 
-        EntityRecordWithColumns record = EntityRecordWithColumns.of(
-                EntityRecord.getDefaultInstance(),
-                storageFields
-        );
-        assertThat(record.columnNames()).containsExactlyElementsIn(defaultColumns);
+        EntityRecordWithColumns<?> record =
+                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+        assertThat(record.columnNames()).containsExactlyElementsIn(EntityRecordColumn.names());
     }
 
     @Test
@@ -182,8 +139,8 @@ class EntityRecordWithColumnsTest {
         ColumnName columnName = ColumnName.of("some-boolean-column");
         boolean columnValue = false;
         ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
-        EntityRecordWithColumns record =
-                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        EntityRecordWithColumns<?> record =
+                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
         Object value = record.columnValue(columnName);
 
         assertThat(value).isEqualTo(columnValue);
@@ -196,8 +153,8 @@ class EntityRecordWithColumnsTest {
         int columnValue = 42;
 
         ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
-        EntityRecordWithColumns record =
-                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        EntityRecordWithColumns<?> record =
+                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
         String value = record.columnValue(columnName, new TestColumnMapping());
 
         assertThat(value).isEqualTo(String.valueOf(columnValue));
@@ -209,10 +166,56 @@ class EntityRecordWithColumnsTest {
         ColumnName columnName = ColumnName.of("the-null-column");
         Map<ColumnName, Object> storageFields = new HashMap<>();
         storageFields.put(columnName, null);
-        EntityRecordWithColumns record =
-                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(), storageFields);
+        EntityRecordWithColumns<?> record =
+                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
         Object value = record.columnValue(columnName);
 
         assertThat(value).isNull();
+    }
+
+    @Nested
+    @DisplayName("support being initialized with")
+    class BeInitializedWith {
+
+        @Test
+        @DisplayName("record and storage fields")
+        void recordAndColumns() {
+            EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(sampleEntityRecord());
+            assertNotNull(record);
+        }
+
+        @Test
+        @DisplayName("record only")
+        void recordOnly() {
+            EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
+            assertNotNull(record);
+        }
+    }
+
+    @Nested
+    @DisplayName("store")
+    class Store {
+
+        @Test
+        @DisplayName("record")
+        void record() {
+            EntityRecordWithColumns<?> recordWithFields = sampleRecordWithEmptyColumns();
+            EntityRecord record = recordWithFields.record();
+            assertNotNull(record);
+        }
+
+        @Test
+        @DisplayName("column values")
+        void columnValues() {
+            ColumnName columnName = EntityRecordColumn.archived.columnName();
+            Object value = false;
+            Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
+            EntityRecordWithColumns<?> record =
+                    EntityRecordWithColumns.of(sampleEntityRecord(), columnsExpected);
+            ImmutableSet<ColumnName> columnNames = record.columnNames();
+            assertThat(columnNames).hasSize(1);
+            assertTrue(columnNames.contains(columnName));
+            assertEquals(value, record.columnValue(columnName));
+        }
     }
 }

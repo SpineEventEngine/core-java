@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 
 import static io.spine.server.tuple.Element.value;
+import static io.spine.server.tuple.Values.isOptionalPresent;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -136,8 +137,19 @@ public final class Quintet<A extends Message, B, C, D, E>
     }
 
     @Override
+    public boolean hasA() {
+        return true;
+    }
+
+    @Override
     public B getB() {
         return value(this, 1);
+    }
+
+    @Override
+    public boolean hasB() {
+        B value = getB();
+        return isOptionalPresent(value);
     }
 
     @Override
@@ -146,13 +158,31 @@ public final class Quintet<A extends Message, B, C, D, E>
     }
 
     @Override
+    public boolean hasC() {
+        C value = getC();
+        return isOptionalPresent(value);
+    }
+
+    @Override
     public D getD() {
         return value(this, 3);
     }
 
     @Override
+    public boolean hasD() {
+        D value = getD();
+        return isOptionalPresent(value);
+    }
+
+    @Override
     public E getE() {
         return value(this, 4);
+    }
+
+    @Override
+    public boolean hasE() {
+        E value = getE();
+        return isOptionalPresent(value);
     }
 
     @CanIgnoreReturnValue

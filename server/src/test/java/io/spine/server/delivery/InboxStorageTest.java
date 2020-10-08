@@ -24,12 +24,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.spine.base.Time;
 import io.spine.core.Command;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,30 +51,31 @@ import static io.spine.server.delivery.InboxIds.newSignalId;
  * An abstract base for tests of {@link InboxStorage} implementations.
  */
 @DisplayName("`InboxStorage` should")
-public abstract class InboxStorageTest {
+public class InboxStorageTest
+        extends AbstractStorageTest<InboxMessageId, InboxMessage, InboxStorage> {
 
     private static final String TARGET_ID = "the-storage-calc";
 
     private final TestActorRequestFactory factory =
             new TestActorRequestFactory(InboxStorageTest.class);
     private final SecureRandom random = new SecureRandom();
-    private InboxStorage storage;
 
-    /**
-     * Creates a new instance of {@code InboxStorage}.
-     */
-    protected abstract InboxStorage storage();
-
-    @BeforeEach
-    protected void setUp() {
-        this.storage = storage();
+    @Override
+    protected InboxStorage newStorage() {
+        return ServerEnvironment.instance()
+                                .storageFactory()
+                                .createInboxStorage(false);
     }
 
-    @AfterEach
-    protected void tearDown() {
-        if (this.storage != null) {
-            this.storage.close();
-        }
+    @Override
+    protected InboxMessage newStorageRecord(InboxMessageId id) {
+        return newCommandInInbox(id, TARGET_ID);
+    }
+
+    @Override
+    protected InboxMessageId newId() {
+        ShardIndex index = newIndex(4, 2020);
+        return InboxMessageMixin.generateIdWith(index);
     }
 
     @Test
@@ -87,14 +88,14 @@ public abstract class InboxStorageTest {
 
         InboxMessage firstMessage = messages.get(0);
 
-        storage.write(firstMessage);
+        storage().write(firstMessage);
         Page<InboxMessage> pageWithSingleRecord = readContents(index);
         assertThat(pageWithSingleRecord.contents()
                                        .size()).isEqualTo(1);
         assertThat(pageWithSingleRecord.contents()
                                        .get(0)).isEqualTo(firstMessage);
 
-        storage.writeAll(messages.subList(1, messages.size()));
+        storage().writeBatch(messages.subList(1, messages.size()));
         Page<InboxMessage> pageWithAllRecords = readContents(index);
         assertSameContent(messages, pageWithAllRecords);
     }
@@ -107,12 +108,12 @@ public abstract class InboxStorageTest {
         int pageSize = 13;
 
         ImmutableList<InboxMessage> messages = generateMessages(index, totalMessages);
-        storage.writeAll(messages);
-        storage.writeAll(generateMessages(newIndex(19, 2019), 19));
-        storage.writeAll(generateMessages(newIndex(21, 2019), 23));
+        storage().writeBatch(messages);
+        storage().writeBatch(generateMessages(newIndex(19, 2019), 19));
+        storage().writeBatch(generateMessages(newIndex(21, 2019), 23));
 
         List<List<InboxMessage>> expected = Lists.partition(messages, pageSize);
-        Page<InboxMessage> actualPage = storage.readAll(index, pageSize);
+        Page<InboxMessage> actualPage = storage().readAll(index, pageSize);
         for (Iterator<List<InboxMessage>> iterator = expected.iterator(); iterator.hasNext(); ) {
             List<InboxMessage> expectedPage = iterator.next();
             assertSameContent(expectedPage, actualPage);
@@ -153,7 +154,7 @@ public abstract class InboxStorageTest {
     }
 
     private Page<InboxMessage> readContents(ShardIndex index) {
-        return storage.readAll(index, Integer.MAX_VALUE);
+        return storage().readAll(index, Integer.MAX_VALUE);
     }
 
     private void assertStorageEmpty(ShardIndex index) {
@@ -164,15 +165,18 @@ public abstract class InboxStorageTest {
     }
 
     private InboxMessage newCommandInInbox(ShardIndex index, String targetId) {
+        return newCommandInInbox(InboxMessageMixin.generateIdWith(index), targetId);
+    }
+
+
+    private InboxMessage newCommandInInbox(InboxMessageId id, String targetId) {
         Command command = factory.createCommand(AddNumber.newBuilder()
                                                          .setCalculatorId(targetId)
                                                          .setValue(random.nextInt())
                                                          .vBuild());
         InboxId inboxId = InboxIds.wrap(targetId, TypeUrl.of(Calc.class));
-
         InboxSignalId signalId = newSignalId(targetId, command.getId()
                                                               .value());
-        InboxMessageId id = InboxMessageMixin.generateIdWith(index);
         return InboxMessage
                 .newBuilder()
                 .setId(id)

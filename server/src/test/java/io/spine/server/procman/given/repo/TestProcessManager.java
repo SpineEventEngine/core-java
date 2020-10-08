@@ -36,7 +36,6 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.ProjectWithColumns;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmArchiveProject;
@@ -59,8 +58,7 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.testdata.Sample.builderForType;
 
 public class TestProcessManager
-        extends ProcessManager<ProjectId, Project, Project.Builder>
-        implements ProjectWithColumns {
+        extends ProcessManager<ProjectId, Project, Project.Builder> {
 
     /** The event message we store for inspecting in delivery tests. */
     private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
@@ -223,11 +221,13 @@ public class TestProcessManager
     }
 
     @Override
-    public String getName() {
-        return state().getName();
+    protected void onBeforeCommit() {
+        builder().setIdString(id().toString());
     }
 
-    @Override
+    /**
+     * Returns the identifier of this process manager, as a {@code String}.
+     */
     public String getIdString() {
         return id().toString();
     }

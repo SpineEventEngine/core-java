@@ -1,0 +1,85 @@
+/*
+ * Copyright 2020, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.spine.server.tenant;
+
+import io.spine.core.TenantId;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.storage.StorageFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+
+import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.testing.core.given.GivenTenantId.generate;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@DisplayName("`TenantStorage` should")
+class TenantStorageTest {
+
+    private TenantStorage<?> storage;
+
+    @BeforeEach
+    void setUp() {
+        StorageFactory storageFactory = ServerEnvironment.instance().storageFactory();
+        storage = new DefaultTenantStorage(storageFactory);
+        BoundedContextBuilder
+                .assumingTests(true)
+                .setTenantIndex(storage)
+                .build();
+    }
+
+    @Test
+    @DisplayName("cache passed value")
+    void cachePassedValue() {
+        TenantId tenantId = generate();
+        storage.keep(tenantId);
+
+        Optional<?> optional = storage.read(tenantId);
+        assertThat(optional).isPresent();
+        assertTrue(storage.cached(tenantId));
+    }
+
+    @Test
+    @DisplayName("evict from cache")
+    void evictFromCache() {
+        TenantId tenantId = generate();
+
+        storage.keep(tenantId);
+        assertTrue(storage.unCache(tenantId));
+        assertFalse(storage.unCache(tenantId));
+    }
+
+    @Test
+    @DisplayName("clear cache")
+    void clearCache() {
+        TenantId tenantId = generate();
+
+        storage.keep(tenantId);
+
+        storage.clearCache();
+
+        assertFalse(storage.unCache(tenantId));
+    }
+}

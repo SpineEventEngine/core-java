@@ -26,8 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityColumn;
-import io.spine.base.EntityStateField;
 import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
@@ -36,6 +34,8 @@ import io.spine.code.proto.FieldName;
 import io.spine.core.Event;
 import io.spine.core.EventContextField;
 import io.spine.core.Version;
+import io.spine.query.Column;
+import io.spine.query.EntityStateField;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -58,17 +58,13 @@ import static java.util.Arrays.stream;
 /**
  * A factory of {@link Filter} instances.
  *
- * <p>Public methods of this class represent the recommended way to create
- * a {@link Filter}.
+ * <p>Public methods of this class represent the recommended way to create a {@link Filter}.
  *
  * <a name="types"></a>
- * <h1>Comparison types</h1>
+ * <h1>Supported Types</h1>
  *
- * <p>The filters support two generic kinds of comparison:
- * <ol>
- *     <li>equality comparison;
- *     <li>ordering comparison.
- * </ol>
+ * <p>The filters allow to put criteria on fields with comparison operations. The criteria either
+ * define the particular values for the fields or specify some ordering.
  *
  * <p>The {@linkplain #eq equality comparison} supports any data type for the compared objects.
  *
@@ -112,15 +108,16 @@ public final class Filters {
      * Creates a new equality {@link Filter}.
      *
      * @param column
-     *         the entity column to filter by
+     *         the column to filter by
      * @param value
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter eq(EntityColumn column, Object value) {
+    public static Filter eq(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, EQUAL);
+        return createFilter(column.name()
+                                  .value(), value, EQUAL);
     }
 
     /**
@@ -200,10 +197,10 @@ public final class Filters {
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter gt(EntityColumn column, Object value) {
+    public static Filter gt(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, GREATER_THAN);
+        return createFilter(column.name().value(), value, GREATER_THAN);
     }
 
     /**
@@ -289,10 +286,10 @@ public final class Filters {
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter lt(EntityColumn column, Object value) {
+    public static Filter lt(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, LESS_THAN);
+        return createFilter(column.name().value(), value, LESS_THAN);
     }
 
     /**
@@ -378,10 +375,10 @@ public final class Filters {
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter ge(EntityColumn column, Object value) {
+    public static Filter ge(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, GREATER_OR_EQUAL);
+        return createFilter(column.name().value(), value, GREATER_OR_EQUAL);
     }
 
     /**
@@ -467,10 +464,10 @@ public final class Filters {
      *         the requested value
      * @return a new instance of {@code Filter}
      */
-    public static Filter le(EntityColumn column, Object value) {
+    public static Filter le(Column<?, ?> column, Object value) {
         checkNotNull(column);
         checkNotNull(value);
-        return createFilter(column.name(), value, LESS_OR_EQUAL);
+        return createFilter(column.name().value(), value, LESS_OR_EQUAL);
     }
 
     /**
@@ -563,6 +560,27 @@ public final class Filters {
         checkNotNull(first);
         checkNotNull(rest);
         return composeFilters(asList(first, rest), EITHER);
+    }
+
+    /**
+     * Creates a new disjunction composite filter.
+     *
+     * <p>A record is considered matching this filter if it matches at least one of the aggregated
+     * filters.
+     *
+     * <p>This method is used to create the default {@code EITHER} filter if the user
+     * chooses to pass instances of {@link Filter} directly to the {@link QueryBuilder}.
+     *
+     * @param filters
+     *         the aggregated filters
+     * @return new instance of {@link CompositeFilter}
+     * @see #either(Filter, Filter...) for the public API equivalent
+     */
+     static CompositeFilter either(Collection<Filter> filters) {
+        checkNotNull(filters);
+        checkArgument(!filters.isEmpty(),
+                      "Composite filter must contain at least one plain filter in it.");
+        return composeFilters(filters, EITHER);
     }
 
     /**

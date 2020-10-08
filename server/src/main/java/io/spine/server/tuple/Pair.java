@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.tuple.Element.value;
+import static io.spine.server.tuple.Values.isOptionalPresent;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -115,8 +116,19 @@ public final class Pair<A extends Message, B>
     }
 
     @Override
+    public boolean hasA() {
+        return true;
+    }
+
+    @Override
     public B getB() {
         return value(this, 1);
+    }
+
+    @Override
+    public boolean hasB() {
+        B value = getB();
+        return isOptionalPresent(value);
     }
 
     @CanIgnoreReturnValue

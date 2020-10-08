@@ -29,7 +29,7 @@ import io.spine.server.type.CommandEnvelope;
 /**
  * Increments a counter on receiving a command of the specified type.
  *
- * @see io.spine.testing.server.blackbox.BlackBoxBoundedContextTest#registerCommandDispatchers
+ * @see io.spine.testing.server.blackbox.BlackBoxTest
  */
 public final class BbCommandDispatcher extends AbstractCommandDispatcher {
 

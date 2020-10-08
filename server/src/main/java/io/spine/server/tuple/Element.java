@@ -104,10 +104,9 @@ final class Element implements Serializable {
             case EITHER:
                 return ((Either) value).value();
             case OPTIONAL: {
-                Optional optional = (Optional) value;
-                Message result = optional.isPresent()
-                                 ? (Message) optional.get()
-                                 : Empty.getDefaultInstance();
+                Optional<?> optional = (Optional<?>) value;
+                Message result = optional.map(o -> (Message) o)
+                                         .orElseGet(Empty::getDefaultInstance);
                 return result;
             }
             default:
@@ -126,7 +125,7 @@ final class Element implements Serializable {
             obj = (Serializable) value;
             out.writeObject(obj);
         } else /* (type == Type.OPTIONAL) */ {
-            Optional<?> optionalValue = (Optional) value;
+            Optional<?> optionalValue = (Optional<?>) value;
             obj = (Serializable) optionalValue.orElse(null);
         }
         out.writeObject(obj);
@@ -177,6 +176,11 @@ final class Element implements Serializable {
          * Obtains the first element of the tuple.
          */
         T getA();
+
+        /**
+         * Tells whether the first element of the tuple is set.
+         */
+        boolean hasA();
     }
 
     /**
@@ -191,6 +195,11 @@ final class Element implements Serializable {
          * Obtains the second element of the tuple.
          */
         T getB();
+
+        /**
+         * Tells whether the second element of the tuple is set.
+         */
+        boolean hasB();
     }
 
     interface CValue<T> extends OptionalValue {
@@ -198,6 +207,11 @@ final class Element implements Serializable {
          * Obtains the third element of the tuple.
          */
         T getC();
+
+        /**
+         * Tells whether the third element of the tuple is set.
+         */
+        boolean hasC();
     }
 
     interface DValue<T> extends OptionalValue {
@@ -205,6 +219,11 @@ final class Element implements Serializable {
          * Obtains the fourth element of the tuple.
          */
         T getD();
+
+        /**
+         * Tells whether the fourth element of the tuple is set.
+         */
+        boolean hasD();
     }
 
     interface EValue<T> extends OptionalValue {
@@ -212,5 +231,10 @@ final class Element implements Serializable {
          * Obtains the fifth element of the tuple.
          */
         T getE();
+
+        /**
+         * Tells whether the fifth element of the tuple is set.
+         */
+        boolean hasE();
     }
 }

@@ -32,7 +32,7 @@ import io.spine.server.entity.Transaction;
 @Experimental
 public abstract class ProcessManagerMigration<I,
                                               P extends ProcessManager<I, S, B>,
-                                              S extends EntityState,
+                                              S extends EntityState<I>,
                                               B extends ValidatingBuilder<S>>
         extends Migration<I, P, S> {
 

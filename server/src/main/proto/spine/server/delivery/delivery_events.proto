@@ -12,10 +12,30 @@ option java_package = "io.spine.server.delivery.event";
 option java_outer_classname = "DeliveryEventsProto";
 option java_multiple_files = true;
 
+import "google/protobuf/any.proto";
+
 import "spine/server/delivery/delivery.proto";
 
-// The processing of the messages in the particular shards was requested by the framework.
+// The processing of the messages in the particular shard was requested by the framework.
 message ShardProcessingRequested {
 
-    ShardIndex id = 1;
+    ShardIndex index = 1 [(required) = true, (validate) = true];
+
+    // The context of the delivery at the moment when this event has been dispatched.
+    DeliveryContext context = 2;
+
+    // An identifier of an entity which originally requested the shard processing.
+    google.protobuf.Any requester_id = 3 [(required) = true];
+}
+
+// The processing of the messages in the particular shard was performed
+message ShardProcessed {
+
+    ShardIndex index = 1 [(required) = true, (validate) = true];
+
+    // The context of the delivery at the moment when the shard was processed.
+    DeliveryContext context = 2;
+
+    // An identifier of an entity which originally requested the shard processing.
+    google.protobuf.Any requester_id = 3 [(required) = true];
 }

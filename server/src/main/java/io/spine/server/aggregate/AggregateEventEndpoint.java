@@ -36,7 +36,7 @@ abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, EventEnvelope>
         implements EventEndpoint<I> {
 
-    AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope event) {
+    AggregateEventEndpoint(AggregateRepository<I, A, ?> repository, EventEnvelope event) {
         super(repository, event);
     }
 }

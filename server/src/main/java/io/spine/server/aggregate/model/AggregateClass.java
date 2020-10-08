@@ -40,7 +40,7 @@ import static com.google.common.collect.Sets.union;
  *
  * @param <A> the type of aggregates
  */
-public class AggregateClass<A extends Aggregate>
+public class AggregateClass<A extends Aggregate<?, ?, ?>>
         extends CommandHandlingEntityClass<A>
         implements ReactingClass {
 
@@ -61,7 +61,7 @@ public class AggregateClass<A extends Aggregate>
     /**
      * Obtains an aggregate class for the passed raw class.
      */
-    public static <A extends Aggregate> AggregateClass<A> asAggregateClass(Class<A> cls) {
+    public static <A extends Aggregate<?, ?, ?>> AggregateClass<A> asAggregateClass(Class<A> cls) {
         checkNotNull(cls);
         AggregateClass<A> result = (AggregateClass<A>)
                 get(cls, AggregateClass.class, () -> new AggregateClass<>(cls));
@@ -142,7 +142,7 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
         return delegate.reactorOf(eventClass, originClass);
     }
 

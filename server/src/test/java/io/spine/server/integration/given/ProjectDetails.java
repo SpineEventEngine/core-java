@@ -23,14 +23,14 @@ package io.spine.server.integration.given;
 import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
-import io.spine.server.test.shared.StringProjection;
+import io.spine.test.integration.ItgProjection;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 
 @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
 public class ProjectDetails
-        extends Projection<ProjectId, StringProjection, StringProjection.Builder> {
+        extends Projection<ProjectId, ItgProjection, ItgProjection.Builder> {
 
     private static ItgProjectCreated externalEvent = null;
 

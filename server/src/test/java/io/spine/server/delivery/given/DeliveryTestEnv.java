@@ -34,6 +34,7 @@ import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardObserver;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
+import io.spine.test.delivery.Calc;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -72,7 +73,8 @@ public class DeliveryTestEnv {
                 .vBuild();
     }
 
-    public static class CalculatorRepository extends AggregateRepository<String, CalcAggregate> {
+    public static class CalculatorRepository
+            extends AggregateRepository<String, CalcAggregate, Calc> {
 
         /** How many calls there were to {@link #doStore(CalcAggregate)} method, grouped by ID. */
         private static final Map<String, Integer> storeCalls = Maps.newConcurrentMap();

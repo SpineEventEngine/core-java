@@ -70,12 +70,12 @@ public interface SubscribingClass extends Logging {
      * <p>There can be more than one method, if the subscriptions used
      * the {@linkplain io.spine.core.Where field filtering}.
      *
-     * @param eventClass
+     * @param eventCls
      *          the class of the events
-     * @param originClass
+     * @param originCls
      *          the class of the messages that resulted in the event, or
      *          {@link io.spine.server.type.EmptyClass EmptyClass} for all origins
      * @return methods handling the requested class of the events
      */
-    ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass);
+    ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventCls, MessageClass<?> originCls);
 }

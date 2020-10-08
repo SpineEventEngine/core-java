@@ -29,39 +29,63 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A class of an {@linkplain Entity#state() entity state}.
+ *
+ * @param <I> the type of entity identifiers
  */
-public final class StateClass extends MessageClass<EntityState> {
+public final class StateClass<I> extends MessageClass<EntityState<?>> {
 
     private static final long serialVersionUID = 0L;
     private static final EventClass UPDATE_EVENT = EventClass.from(EntityStateChanged.class);
 
-    private StateClass(Class<? extends EntityState> value) {
+    private StateClass(Class<? extends EntityState<?>> value) {
         super(value);
     }
 
     /**
      * Obtains the class of the state of the given entity.
      */
-    public static StateClass of(Entity entity) {
+    public static <I> StateClass<I> of(Entity<I, ?> entity) {
         checkNotNull(entity);
-        EntityState state = entity.state();
+        EntityState<I> state = entity.state();
         return of(state);
     }
 
     /**
-     * Creates an instance of {@code EntityStateClass} from the class of the given message.
+     * Creates an instance of {@code StateClass} from the class of the given message.
      */
-    public static StateClass of(EntityState state) {
+    public static <I> StateClass<I> of(EntityState<I> state) {
         checkNotNull(state);
-        return from(state.getClass());
+        Class<? extends EntityState<I>> value = typedWithGeneric(state.getClass());
+        return from(value);
     }
 
     /**
-     * Creates an instance of {@code EntityStateClass} from the given class.
+     * Creates an instance of {@code StateClass} from the given class.
      */
-    public static StateClass from(Class<? extends EntityState> value) {
+    public static <I> StateClass<I> from(Class<? extends EntityState<I>> value) {
+        checkNotNull(value);
+        return new StateClass<>(value);
+    }
+
+    /**
+     * Creates an instance of {@code StateClass} from the given class.
+     *
+     * @apiNote Use this method instead of a {@linkplain #from(Class) parameterized one}
+     *         when the generic parameter {@code I} is unknown
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})    // see API note
+    public static StateClass<?> of(Class<? extends EntityState> value) {
         checkNotNull(value);
         return new StateClass(value);
+    }
+
+    @Override
+    public Class<? extends EntityState<I>> value() {
+        return typedWithGeneric(super.value());
+    }
+
+    public <P> Class<? extends EntityState<P>> typedValue() {
+        return typedWithGeneric(super.value());
     }
 
     /**
@@ -69,5 +93,10 @@ public final class StateClass extends MessageClass<EntityState> {
      */
     public static EventClass updateEvent() {
         return UPDATE_EVENT;
+    }
+
+    @SuppressWarnings("unchecked")    // See usages; ensured by the `I` declaration of the class.
+    private static <P> Class<? extends EntityState<P>> typedWithGeneric(Class<?> value) {
+        return (Class<? extends EntityState<P>>) value;
     }
 }

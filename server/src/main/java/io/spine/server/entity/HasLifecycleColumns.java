@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.server.entity.storage.EntityRecordColumn;
 import io.spine.server.entity.storage.SystemColumn;
 
 /**
@@ -29,14 +30,13 @@ import io.spine.server.entity.storage.SystemColumn;
  *
  * @see SystemColumn
  */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literals in annotation.
 @Internal
-public interface HasLifecycleColumns<I, S extends EntityState> extends Entity<I, S> {
+public interface HasLifecycleColumns<I, S extends EntityState<I>> extends Entity<I, S> {
 
     /**
      * Obtains the value of {@code archived} flag.
      */
-    @SystemColumn(name = "archived")
+    @SystemColumn(impl = EntityRecordColumn.archived)
     default boolean getArchived() {
         return isArchived();
     }
@@ -44,7 +44,7 @@ public interface HasLifecycleColumns<I, S extends EntityState> extends Entity<I,
     /**
      * Obtains the value of {@code deleted} flag.
      */
-    @SystemColumn(name = "deleted")
+    @SystemColumn(impl = EntityRecordColumn.deleted)
     default boolean getDeleted() {
         return isDeleted();
     }

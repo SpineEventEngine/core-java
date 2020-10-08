@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * The basic implementation of mapping rules for entity {@linkplain Column columns}.
+ * The basic implementation of mapping rules for entity {@linkplain io.spine.query.Column columns}.
  *
  * <p>Since entity columns are proto-based and have a limited amount of possible types, this class
  * allows descendants to override concrete type mapping rules in a convenient way.

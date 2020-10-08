@@ -24,9 +24,9 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.test.shared.EmptyEntity;
 
 public class TeEntity
-        extends TransactionalEntity<Long, EmptyEntity, EmptyEntity.Builder> {
+        extends TransactionalEntity<String, EmptyEntity, EmptyEntity.Builder> {
 
-    public TeEntity(Long id) {
+    public TeEntity(String id) {
         super(id);
     }
 

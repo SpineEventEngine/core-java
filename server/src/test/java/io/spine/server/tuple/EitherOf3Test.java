@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -86,6 +87,22 @@ class EitherOf3Test {
         assertEquals(a, eitherWithA.getA());
         assertEquals(b, eitherWithB.getB());
         assertEquals(c, eitherWithC.getC());
+    }
+
+    @Test
+    @DisplayName("tell if the values are set")
+    void reportHasValues() {
+        assertThat(eitherWithA.hasA()).isTrue();
+        assertThat(eitherWithA.hasB()).isFalse();
+        assertThat(eitherWithA.hasC()).isFalse();
+
+        assertThat(eitherWithB.hasB()).isTrue();
+        assertThat(eitherWithB.hasA()).isFalse();
+        assertThat(eitherWithB.hasC()).isFalse();
+
+        assertThat(eitherWithC.hasC()).isTrue();
+        assertThat(eitherWithC.hasA()).isFalse();
+        assertThat(eitherWithC.hasB()).isFalse();
     }
 
     @Test
