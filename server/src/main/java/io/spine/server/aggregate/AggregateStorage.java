@@ -52,10 +52,13 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A storage of aggregate events, snapshots and the most recent aggregate states.
  *
+ *
+ * //TODO:2020-10-08:alex.tymchenko: tell about mirroring.
  * @param <I>
  *         the type of IDs of aggregates managed by this storage
  * @param <S>
  *         the type of states of aggregates managed by this storage
+ *
  */
 @SPI
 public class AggregateStorage<I, S extends EntityState<I>>
