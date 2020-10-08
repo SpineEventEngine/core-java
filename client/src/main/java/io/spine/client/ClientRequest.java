@@ -101,14 +101,14 @@ public class ClientRequest {
      * <pre>
      *
      * Customer.Query query = Customer.newQuery()
-     *          .id().in(westCoastCustomerIds())
-     *          .type().is(CustomerType.PERMANENT)
-     *          .discountPercent().is(10)
-     *          .companySize().is(Company.Size.SMALL)
-     *          .withMask(nameAddressAndEmail)
-     *          .orderBy(name(), ASC)
-     *          .limit(20)
-     *          .build();
+     *              .id().in(westCoastCustomerIds())
+     *              .type().is(CustomerType.PERMANENT)
+     *              .discountPercent().is(10)
+     *              .companySize().is(Company.Size.SMALL)
+     *              .withMask(nameAddressAndEmail)
+     *              .sortAscendingBy(name())
+     *              .limit(20)
+     *              .build();
      *{@literal ImmutableList<Customer> customers = client.onBehalfOf(currentUser).run(query);}
      * </pre>
      *
