@@ -81,7 +81,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <A>
  *         the type of the aggregates managed by this repository
  * @param <S>
- *         the type of the state of aggregate managed by this repository
+ *         the type of the state of aggregates managed by this repository
  * @see Aggregate
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
