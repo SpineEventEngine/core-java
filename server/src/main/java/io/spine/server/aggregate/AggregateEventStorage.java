@@ -33,6 +33,9 @@ import java.util.Iterator;
 public class AggregateEventStorage
         extends MessageStorage<AggregateEventRecordId, AggregateEventRecord> {
 
+    /**
+     * A specification on how to store the event records of an aggregate.
+     */
     @SuppressWarnings("ConstantConditions")     // Protobuf getters return non-{@code null} values.
     private static final MessageRecordSpec<AggregateEventRecordId, AggregateEventRecord> spec =
             new MessageRecordSpec<>(
@@ -42,6 +45,17 @@ public class AggregateEventStorage
                     AggregateEventRecordColumn.definitions()
             );
 
+    /**
+     * Creates a new storage.
+     *
+     * <p>Uses the passed factory to create a {@code RecordStorage} delegate, and configures it with
+     * the columns stored for the {@link AggregateEventRecord}.
+     *
+     * @param factory
+     *         the storage factory to use when creating a record storage delegate
+     * @param multitenant
+     *         tells whether this storage should be multi-tenant
+     */
     public AggregateEventStorage(StorageFactory factory, boolean multitenant) {
         super(factory.createRecordStorage(spec, multitenant));
     }
