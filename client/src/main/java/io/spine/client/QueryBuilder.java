@@ -58,6 +58,7 @@ import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
  * @see Filters
  * @see TargetBuilder
  */
+//TODO:2020-10-08:alex.tymchenko: review again and deprecate
 public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
 
     private final QueryFactory queryFactory;
