@@ -562,10 +562,10 @@ public final class Filters {
     }
 
     /**
-     * Creates a new disjunction composite filter.
+     * Creates a new composite filter with a disjunction applied to the aggregated filters.
      *
-     * <p>A record is considered matching this filter if it matches at least one of the aggregated
-     * filters.
+     * <p>A record is considered matching this filter if it matches at least one of
+     * the aggregated filters.
      *
      * <p>This method is used to create the default {@code EITHER} filter if the user
      * chooses to pass instances of {@link Filter} directly to the {@link QueryBuilder}.
