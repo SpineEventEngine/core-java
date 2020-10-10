@@ -93,6 +93,13 @@ public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>
         return boolColumn;
     }
 
+    /**
+     * Returns the column as a {@link RecordColumn}.
+     *
+     * <p>This is required in order to reuse a querying mechanism defined for all stored messages.
+     *
+     * @param <V> the type of the column values
+     */
     <V> RecordColumn<EntityRecord, V> asRecordColumn(Class<V> valueType) {
         return AsEntityRecordColumn.apply(column, valueType);
     }
