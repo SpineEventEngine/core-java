@@ -30,12 +30,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static io.spine.server.aggregate.HistoryBackward.inChronologicalOrder;
+import static io.spine.server.aggregate.HistoryBackwardOperation.inChronologicalOrder;
 
 /**
  * Performs the truncation of the aggregate history.
  */
-final class Truncate {
+final class TruncateOperation {
 
     private final AggregateEventStorage eventStorage;
 
@@ -47,7 +47,7 @@ final class Truncate {
      * {@link #performWith(int, Predicate) performWith(shapshotIndex, predicate)} to run
      * the operation.
      */
-    Truncate(AggregateEventStorage storage) {
+    TruncateOperation(AggregateEventStorage storage) {
         eventStorage = storage;
     }
 

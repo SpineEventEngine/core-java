@@ -39,7 +39,7 @@ import static io.spine.server.aggregate.AggregateEventRecordColumn.version;
  *
  * @param <I> the type of the identifiers of the stored aggregates
  */
-final class HistoryBackward<I> {
+final class HistoryBackwardOperation<I> {
 
     private final AggregateEventStorage eventStorage;
 
@@ -47,7 +47,7 @@ final class HistoryBackward<I> {
      * Creates an instance of this read operation for the given storage of the historical
      * aggregate events.
      */
-    HistoryBackward(AggregateEventStorage storage) {
+    HistoryBackwardOperation(AggregateEventStorage storage) {
         eventStorage = storage;
     }
 

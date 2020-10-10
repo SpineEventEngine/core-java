@@ -70,8 +70,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
     private final AggregateEventStorage eventStorage;
     private final EntityRecordStorage<I, S> stateStorage;
     private boolean mirrorEnabled = false;
-    private final Truncate truncation;
-    private final HistoryBackward<I> historyBackward;
+    private final TruncateOperation truncation;
+    private final HistoryBackwardOperation<I> historyBackward;
 
     /**
      * Creates an instance of the storage for a certain aggregate class registered
@@ -91,8 +91,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
         super(context.isMultitenant());
         eventStorage = factory.createAggregateEventStorage(context.isMultitenant());
         stateStorage = factory.createEntityRecordStorage(context, aggregateClass);
-        truncation = new Truncate(eventStorage);
-        historyBackward = new HistoryBackward<>(eventStorage);
+        truncation = new TruncateOperation(eventStorage);
+        historyBackward = new HistoryBackwardOperation<>(eventStorage);
     }
 
     protected AggregateStorage(AggregateStorage<I, S> delegate) {
