@@ -114,7 +114,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p><b>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</b>
  *
- * <p>The process is created in to this status upon receiving {@code CatchUpRequested} event.
+ * <p>The process is created in this status upon receiving the {@code CatchUpRequested} event.
  * The further actions include:
  *
  * <ul>
