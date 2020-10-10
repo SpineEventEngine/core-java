@@ -108,7 +108,7 @@ final class ReadOperation<I, S extends EntityState<I>> {
     }
 
     /**
-     * Handle the records provided by the history-backward iterator and return the version
+     * Handles the records provided by the history-backward iterator and return the version
      * of the last record handled.
      *
      * @return the version of the last handled event or snapshot, whichever is the last;
