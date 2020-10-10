@@ -445,19 +445,12 @@ public final class CatchUpProcess<I>
         }
 
         CatchUpId id = builder().getId();
-        DeliveryContext deliveryContext = event.getContext();
-        Optional<CatchUp> stateVisibileToDelivery =
-                deliveryContext.getCatchUpJobList()
-                               .stream()
-                               .filter((job) -> job.getId()
-                                                   .equals(id))
-                               .findFirst();
-        if (stateVisibileToDelivery.isPresent()) {
-            CatchUp observedJob = stateVisibileToDelivery.get();
+        Optional<CatchUp> stateVisibleToDelivery = findJob(id, event.getContext());
+        if (stateVisibleToDelivery.isPresent()) {
+            CatchUp observedJob = stateVisibleToDelivery.get();
             if (observedJob.getStatus() == FINALIZING) {
                 int indexOfFinalized = event.getIndex()
                                             .getIndex();
-
                 if (!builder().getFinalizedShardList()
                               .contains(indexOfFinalized)) {
                     builder().addFinalizedShard(indexOfFinalized);
@@ -471,12 +464,26 @@ public final class CatchUpProcess<I>
                 return EitherOf3.withC(nothing());
             }
         }
-        ShardProcessingRequested stillRequested =
-                ShardProcessingRequested.newBuilder()
-                                        .setIndex(event.getIndex())
-                                        .setRequesterId(Identifier.pack(id))
-                                        .vBuild();
+        ShardProcessingRequested stillRequested = processingStillRequested(id, event);
         return EitherOf3.withB(stillRequested);
+    }
+
+    private static ShardProcessingRequested
+    processingStillRequested(CatchUpId id, ShardProcessed event) {
+        return ShardProcessingRequested.newBuilder()
+                                       .setIndex(event.getIndex())
+                                       .setRequesterId(Identifier.pack(id))
+                                       .vBuild();
+    }
+
+    private static Optional<CatchUp> findJob(CatchUpId id, DeliveryContext deliveryContext) {
+        Optional<CatchUp> stateVisibileToDelivery =
+                deliveryContext.getCatchUpJobList()
+                               .stream()
+                               .filter((job) -> job.getId()
+                                                   .equals(id))
+                               .findFirst();
+        return stateVisibileToDelivery;
     }
 
     /**
