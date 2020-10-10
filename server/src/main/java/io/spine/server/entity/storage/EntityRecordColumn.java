@@ -36,6 +36,10 @@ import static java.util.Arrays.stream;
 
 /**
  * Columns storing the internal framework-specific attributes of an {@code Entity}.
+ *
+ * <p>As they are not declared in the Proto messages of entity states, they are implemented as
+ * several {@linkplain CustomColumn custom columns}. Their actual values are obtained from
+ * the entity attributes at the very moment of persisting a corresponding {@code Entity} instance.
  */
 @Internal
 public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>> {
@@ -61,6 +65,9 @@ public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>
         this.column = column;
     }
 
+    /**
+     * Returns the definition of the column.
+     */
     @Override
     public CustomColumn<Entity<?, ?>, ?> get() {
         return column;
