@@ -46,14 +46,11 @@ import static io.spine.server.entity.model.EntityClass.asParameterizedEntityClas
  * Instructs the storage on how to handle {@link EntityRecord}s storing the information about
  * {@link Entity} instances.
  *
- * <p>Lists the columns defined for the {@code Entity}, including the system columns,
- * interface-based columns and the columns defined in the Protobuf message
- * of the {@code Entity} state.
+ * <p>Lists the columns defined for the {@code Entity}, including the columns defined
+ * in the Protobuf message of the {@code Entity} state, and system columns.
  *
  * <p>In order to describe the specification of a plain Protobuf message stored,
  * see {@link io.spine.server.storage.MessageRecordSpec MessageRecordSpec}.
- *
- * @see io.spine.server.storage.MessageRecordSpec
  */
 @Immutable
 @Internal
