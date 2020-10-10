@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Any;
-import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.query.RecordQuery;
@@ -30,23 +29,41 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.aggregate_id;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.created;
 import static io.spine.server.aggregate.AggregateEventRecordColumn.version;
 
 /**
  * Reads the history of an {@link Aggregate} in a chronological order.
+ *
+ * @param <I> the type of the identifiers of the stored aggregates
  */
-@SPI
-public class HistoryBackward<I> {
+final class HistoryBackward<I> {
 
     private final AggregateEventStorage eventStorage;
 
-    protected HistoryBackward(AggregateEventStorage storage) {
+    /**
+     * Creates an instance of this read operation for the given storage of the historical
+     * aggregate events.
+     */
+    HistoryBackward(AggregateEventStorage storage) {
         eventStorage = storage;
     }
 
-    protected Iterator<AggregateEventRecord>
+    /**
+     * Reads the history.
+     *
+     * @param aggregateId
+     *         the identifier of the aggregate to read the history for
+     * @param batchSize
+     *         the maximum number of the records to read per a single query to the storage
+     * @param startingFrom
+     *         the version of the event to start from, exclusive;
+     *         this parameter is optional, end-users should pass {@code null}
+     *         if no such a conditional restriction is required
+     */
+    Iterator<AggregateEventRecord>
     read(I aggregateId, int batchSize, @Nullable Version startingFrom) {
         RecordQueryBuilder<AggregateEventRecordId, AggregateEventRecord> builder =
                 historyBackwardQuery(aggregateId);
@@ -68,12 +85,28 @@ public class HistoryBackward<I> {
                            .is(packedId);
     }
 
+    /**
+     * Adds the criteria to the passed query builder making the query results to be sorted
+     * in a chronological order.
+     *
+     * <p>Optionally, allows to limit the number of returned event records to some number.
+     *
+     * @param builder
+     *         the query builder to append the chronological sorting to
+     * @param limit
+     *         maximum size of the event records returned; optional, end-users should pass
+     *         {@code null} if the limiting the query results to some size isn't required
+     * @param <B>
+     *         the type of the query builder
+     * @return the query builder with the chronological criteria and, optionally, limit appended
+     */
     static <B extends RecordQueryBuilder<AggregateEventRecordId, AggregateEventRecord>> B
-    inChronologicalOrder(B builder, @Nullable Integer batchSize) {
+    inChronologicalOrder(B builder, @Nullable Integer limit) {
+        checkNotNull(builder);
         builder.sortDescendingBy(version)
                .sortDescendingBy(created);
-        if(batchSize != null) {
-            builder.limit(batchSize);
+        if (limit != null) {
+            builder.limit(limit);
         }
         return builder;
     }
