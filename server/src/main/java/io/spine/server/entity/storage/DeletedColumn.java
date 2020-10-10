@@ -27,7 +27,7 @@ import io.spine.server.entity.Entity;
 /**
  * A column of an entity, which tells if the entity is deleted.
  */
-class DeletedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
+final class DeletedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
 
     @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
     private static final ColumnName DELETED = ColumnName.of("deleted");

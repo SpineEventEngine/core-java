@@ -27,7 +27,7 @@ import io.spine.server.entity.Entity;
 /**
  * A column of an entity, which tells if the entity is archived.
  */
-class ArchivedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
+final class ArchivedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
 
     @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
     private static final ColumnName ARCHIVED = ColumnName.of("archived");

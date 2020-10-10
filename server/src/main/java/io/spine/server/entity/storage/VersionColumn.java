@@ -28,7 +28,7 @@ import io.spine.server.entity.Entity;
 /**
  * A column of an entity to store the {@linkplain Entity#version() entity version}.
  */
-class VersionColumn extends CustomColumn<Entity<?, ?>, Version> {
+final class VersionColumn extends CustomColumn<Entity<?, ?>, Version> {
 
     @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
     private static final ColumnName VERSION = ColumnName.of("version");
