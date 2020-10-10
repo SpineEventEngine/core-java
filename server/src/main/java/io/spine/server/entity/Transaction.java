@@ -235,6 +235,9 @@ public abstract class Transaction<I,
         return active;
     }
 
+    /**
+     * Returns the value of the lifecycle flags, as of current state within this transaction.
+     */
     protected LifecycleFlags lifecycleFlags() {
         return lifecycleFlags;
     }
