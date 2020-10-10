@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Any;
-import io.spine.annotation.SPI;
 import io.spine.query.RecordQuery;
 
 import java.util.HashMap;
@@ -34,18 +33,44 @@ import java.util.function.Predicate;
 import static io.spine.server.aggregate.HistoryBackward.inChronologicalOrder;
 
 /**
- * Performs the truncation of the Aggregate history.
+ * Performs the truncation of the aggregate history.
  */
-@SPI
-public class Truncate {
+final class Truncate {
 
     private final AggregateEventStorage eventStorage;
 
-    protected Truncate(AggregateEventStorage storage) {
+    /**
+     * Creates an operation for the given storage of the historical event records for the aggregate
+     * of a particular type.
+     *
+     * <p>Invoking the constructor does not start the truncation. Please use
+     * {@link #performWith(int, Predicate) performWith(shapshotIndex, predicate)} to run
+     * the operation.
+     */
+    Truncate(AggregateEventStorage storage) {
         eventStorage = storage;
     }
 
-    protected void performWith(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
+    /**
+     * Runs the history truncation.
+     *
+     * <p>The history records are truncated starting from the most recent one and deep into the
+     * history. The operation is performed until all the following conditions are true:
+     *
+     * <ul>
+     *     <li>the number of aggregate snapshots among the deleted history records is less than
+     *     a given number passed as {@code snapshotIndex};</li>
+     *     <li>the passed predicate is {@code true};</li>
+     *     <li>the bottom of the aggregate history is not reached</li>
+     * </ul>
+     *
+     * @param snapshotIndex
+     *         a zero-based snapshot index, until which the history should be truncated, exclusive
+     * @param predicate
+     *         a condition telling whether the truncation should be stopped, judging on
+     *         the currently examined history record
+     */
+    void performWith(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
         Iterator<AggregateEventRecord> eventRecords = eventStorage.readAll(chronologically());
         Map<Any, Integer> snapshotHitsByAggregateId = new HashMap<>();
         Set<AggregateEventRecordId> toDelete = new HashSet<>();
