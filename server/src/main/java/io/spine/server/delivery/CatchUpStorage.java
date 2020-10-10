@@ -67,7 +67,7 @@ public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
     /**
      * {@inheritDoc}
      *
-     * <p>Overrides to open as a part of the public API.
+     * <p>Overrides to open as a part of the protected API.
      */
     @Override
     protected Iterator<CatchUp> readAll() {
