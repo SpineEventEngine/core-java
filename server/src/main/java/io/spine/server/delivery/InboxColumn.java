@@ -30,36 +30,66 @@ import io.spine.query.RecordColumn;
 @SuppressWarnings("DuplicateStringLiteralInspection")  // column names may repeat across records.
 final class InboxColumn {
 
+    /**
+     * Stores the identifier of the signal packed into this inbox message.
+     */
     static final RecordColumn<InboxMessage, InboxSignalId> signal_id =
             new RecordColumn<>("signal_id", InboxSignalId.class, InboxMessage::getSignalId);
 
+    /**
+     * Stores the identifier of the parent inbox.
+     */
     static final RecordColumn<InboxMessage, InboxId> inbox_id =
             new RecordColumn<>("inbox_id", InboxId.class, InboxMessage::getInboxId);
 
+    /**
+     * Stores the index of the shard in which this inbox message resides.
+     */
     static final RecordColumn<InboxMessage, ShardIndex> inbox_shard =
             new RecordColumn<>("inbox_shard", ShardIndex.class, InboxMessage::shardIndex);
 
+    /**
+     * Stores {@code true} if this inbox message hold an event; stores {@code false} otherwise.
+     */
     static final RecordColumn<InboxMessage, Boolean> is_event =
             new RecordColumn<>("is_event", Boolean.class, InboxMessage::hasEvent);
 
+    /**
+     * Stores {@code true} if this inbox message hold a command; stores {@code false} otherwise.
+     */
     static final RecordColumn<InboxMessage, Boolean> is_command =
             new RecordColumn<>("is_command", Boolean.class, InboxMessage::hasCommand);
 
+    /**
+     * Stores the label of this inbox message.
+     */
     static final RecordColumn<InboxMessage, InboxLabel> label =
             new RecordColumn<>("label", InboxLabel.class, InboxMessage::getLabel);
 
+    /**
+     * Stores the status of the delivery for this inbox message.
+     */
     static final RecordColumn<InboxMessage, InboxMessageStatus> status =
             new RecordColumn<>("status", InboxMessageStatus.class, InboxMessage::getStatus);
 
+    /**
+     * Stores the time when the inbox message has been received and placed into the inbox.
+     */
     static final RecordColumn<InboxMessage, Timestamp> received_at =
             new RecordColumn<>("received_at", Timestamp.class, InboxMessage::getWhenReceived);
 
+    /**
+     * Stores the version of the inbox message.
+     */
     static final RecordColumn<InboxMessage, Integer> version =
             new RecordColumn<>("version", Integer.class, InboxMessage::getVersion);
 
     private InboxColumn() {
     }
 
+    /**
+     * Returns all the column definitions.
+     */
     static ImmutableList<RecordColumn<InboxMessage, ?>> definitions() {
         return ImmutableList.of(signal_id, inbox_id, inbox_shard, is_event,
                                 is_command, label, status, received_at, version);

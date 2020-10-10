@@ -25,24 +25,37 @@ import com.google.protobuf.Timestamp;
 import io.spine.query.RecordColumn;
 
 /**
- * The columns stored for {@link CatchUp} statuses.
+ * The columns stored for {@link CatchUp} states.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // column names may repeat in different types.
 public class CatchUpColumn {
 
+    /**
+     * Stores the status of the catch-up process.
+     */
     public static final RecordColumn<CatchUp, CatchUpStatus> status =
             new RecordColumn<>("status", CatchUpStatus.class, CatchUp::getStatus);
 
+    /**
+     * Stores the time when the history has been last read by the catch-up process.
+     */
     public static final RecordColumn<CatchUp, Timestamp> when_last_read =
             new RecordColumn<>("when_last_read", Timestamp.class, CatchUp::getWhenLastRead);
 
+    /**
+     * Stores the type URL of the projection-under-catch-up.
+     */
     public static final RecordColumn<CatchUp, String> projection_type =
-            new RecordColumn<>("projection_type", String.class, (m) -> m.getId()
-                                                                        .getProjectionType());
+            new RecordColumn<>("projection_type",
+                               String.class, (m) -> m.getId()
+                                                     .getProjectionType());
 
     private CatchUpColumn() {
     }
 
+    /**
+     * Returns all the column definitions.
+     */
     public static ImmutableList<RecordColumn<CatchUp, ?>> definitions() {
         return ImmutableList.of(status, when_last_read, projection_type);
     }

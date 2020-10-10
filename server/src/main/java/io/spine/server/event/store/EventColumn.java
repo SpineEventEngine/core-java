@@ -31,7 +31,7 @@ import io.spine.query.RecordColumn;
 final class EventColumn {
 
     /**
-     * The name of the column storing the Protobuf type name of the event.
+     * Stores the Protobuf type name of the event.
      *
      * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition
      * is enclosed in the {@code spine.test} Protobuf package would have this column
@@ -43,7 +43,7 @@ final class EventColumn {
                                                              .value());
 
     /**
-     * The name of the column storing the time, when the event was fired.
+     * Stores the time when the event was created.
      */
     @SuppressWarnings("DuplicateStringLiteralInspection")   // popular column name.
     static final RecordColumn<Event, Timestamp> created =
@@ -53,6 +53,9 @@ final class EventColumn {
     private EventColumn() {
     }
 
+    /**
+     * Returns all the column definitions.
+     */
     static ImmutableList<RecordColumn<Event, ?>> definitions() {
         return ImmutableList.of(type, created);
     }
