@@ -39,6 +39,10 @@ final class MaintenanceStation extends Station {
     private final DeliveryContext context;
     private final ImmutableList<CatchUp> finalizingJobs;
 
+    /**
+     * Creates a station in this delivery context and initializes itself by searching
+     * for the matching catch-up jobs.
+     */
     MaintenanceStation(DeliveryContext context) {
         super();
         this.context = context;
