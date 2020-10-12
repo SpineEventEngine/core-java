@@ -20,13 +20,13 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
@@ -116,7 +116,7 @@ public class AggregateTestEnv {
     public static EventMessage event(EntityState<?> state) {
         return StateImported
                 .newBuilder()
-                .setState(Any.pack(state))
+                .setState(AnyPacker.pack(state))
                 .vBuild();
     }
 }
