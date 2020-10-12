@@ -177,18 +177,27 @@ class EntityRecordWithColumnsTest {
     @DisplayName("support being initialized with")
     class BeInitializedWith {
 
+        //TODO:2020-10-12:alex.tymchenko: complete the tests and remove those which target the `@VisibleForTesting` methods.
         @Test
-        @DisplayName("record and storage fields")
-        void recordAndColumns() {
+        @DisplayName("just a record")
+        void recordOnly() {
             EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(sampleEntityRecord());
             assertNotNull(record);
         }
 
         @Test
-        @DisplayName("record only")
-        void recordOnly() {
-            EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
-            assertNotNull(record);
+        @DisplayName("a record and columns")
+        void recordAndColumns() {
+        }
+
+        @Test
+        @DisplayName("an Entity and a record")
+        void entityAndRecord() {
+        }
+
+        @Test
+        @DisplayName("an Entity identifier and a record")
+        void idAndRecord() {
         }
     }
 
