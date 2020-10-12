@@ -20,11 +20,6 @@
 
 package io.spine.system.server;
 
-import io.spine.base.EntityState;
-import io.spine.server.entity.Repository;
-
-import java.util.Optional;
-
 /**
  * An implementation of {@link SystemClient} which never performs an action.
  *
@@ -45,11 +40,6 @@ public enum NoOpSystemClient implements SystemClient {
     @Override
     public NoOpSystemReadSide readSide() {
         return NoOpSystemReadSide.INSTANCE;
-    }
-
-    @Override
-    public Optional<Repository<?, ?>> systemRepoFor(Class<? extends EntityState<?>> stateClass) {
-        return Optional.empty();
     }
 
     @Override
