@@ -33,6 +33,22 @@ import java.util.Optional;
  * A {@link RecordStorage} which delegates all of its operations to another instance
  * of {@code RecordStorage}.
  *
+ * <p>The framework code deals with many objects that need to be stored. Some of them are
+ * the records of {@code Entity} states, some aren't (e.g. {@code Event}s). The concrete
+ * storage implementations for these objects vary in API and functionality. However, neither
+ * of them performs the save/load operations themselves. Instead, they create a separate
+ * {@code RecordStorage}, configure it according to the properties of respective stored objects,
+ * and use it as a delegate. This type serves as a base for all such storages.
+ *
+ * <p>Such an approach standardizes the way to store and query all objects in the system. It makes
+ * the creation of a new storage type as simple as extending this type and passing
+ * the {@link RecordSpec} corresponding to the stored object, into its
+ * {@code super(..)} constructor.
+ *
+ * <p>In order to allow the descendants to configure the visibility of their API themselves,
+ * most of the methods of this type is made {@code protected}. The particular implementations
+ * are able to override these methods with the required level of visibility, if needed.
+ *
  * @param <I>
  *         the type of the record identifiers
  * @param <R>
