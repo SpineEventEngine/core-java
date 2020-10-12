@@ -39,12 +39,15 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.Streams.stream;
 
 /**
- * Instructs storage implementations on how to store a plain Protobuf message record.
+ * Instructs storage implementations on how to store a plain Protobuf message as a storage record.
  *
- * <p>Defines the collection of the columns to store along with the message record
- * for further querying.
+ * <p>Defines the identifier column and the collection of the data columns to store along with
+ * the message record for further querying. Each column defines a way to calculate the stored value
+ * basing on the passed message.
  *
- * <p>This specification does not describe the storage mechanism of entity records.
+ * <p>This specification is not well-suited for describing the storage of
+ * {@link io.spine.server.entity.EntityRecord}s, as the values of their columns may be calculated
+ * from both the entity state and {@code Entity} instance attributes.
  * See {@link io.spine.server.entity.storage.EntityRecordSpec EntityRecordSpec} for more details.
  *
  * @param <R>
