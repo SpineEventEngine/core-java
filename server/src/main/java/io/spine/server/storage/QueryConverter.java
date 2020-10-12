@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -60,20 +61,20 @@ public final class QueryConverter {
     /**
      * Converts the Protobuf-based filters and the response format into a {@code RecordQuery}.
      *
-     * @param spec
-     *         the specification of the columns stored for the particular record type
-     * @param filters
-     *         the original Protobuf-based filters to convert
-     * @param format
-     *         the original response format to convert
      * @param <I>
      *         the type of the record identifiers
      * @param <R>
      *         the type of the records which are queried
+     * @param filters
+     *         the original Protobuf-based filters to convert
+     * @param format
+     *         the original response format to convert
+     * @param spec
+     *         the specification of the columns stored for the particular record type
      * @return a new record query with the same semantic as the original filters and response format
      */
     public static <I, R extends Message> RecordQuery<I, R>
-    convert(RecordSpec<I, R, ?> spec, TargetFilters filters, ResponseFormat format) {
+    convert(TargetFilters filters, ResponseFormat format, RecordSpec<I, R, ?> spec) {
         checkNotNull(spec);
         checkNotNull(filters);
         checkNotNull(format);
@@ -91,7 +92,8 @@ public final class QueryConverter {
     }
 
     /**
-     * Creates a new {@code RecordQuery} based on the given response format.
+     * Creates a new {@code RecordQuery} based on the given response format and
+     * the storage specification of the queried record.
      *
      * <p>The result contains no filters on any record field.
      *
@@ -106,17 +108,15 @@ public final class QueryConverter {
      * @return a new record query
      */
     public static <I, R extends Message> RecordQuery<I, R>
-    convert(RecordSpec<I, R, ?> spec, ResponseFormat format) {
+    newQuery(RecordSpec<I, R, ?> spec, ResponseFormat format) {
         checkNotNull(spec);
         checkNotNull(format);
 
         Class<I> idType = spec.idType();
         Class<R> recordType = spec.recordType();
         RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(idType, recordType);
-
         fieldMask(builder, format);
         orderByAndLimit(builder, spec, format);
-
         return builder.build();
     }
 
@@ -129,10 +129,10 @@ public final class QueryConverter {
 
                 switch (compositeOperator) {
                     case ALL:
-                        parts(builder, spec, composite);
+                        convert(composite, spec, builder);
                         break;
                     case EITHER:
-                        builder.either((either) -> parts(either, spec, composite));
+                        builder.either((either) -> convert(composite, spec, either));
                         break;
                     case UNRECOGNIZED:
                     case CCF_CO_UNDEFINED:
@@ -141,25 +141,32 @@ public final class QueryConverter {
                                 "Unsupported composite operator `%s` encountered.",
                                 compositeOperator);
                 }
-
             }
         }
     }
 
+    /**
+     * Converts the passed composite filter into a set of conditions and adds them to the passed
+     * builder according to the record specification.
+     */
+    @CanIgnoreReturnValue
     private static <I, R extends Message> RecordQueryBuilder<I, R>
-    parts(RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec, CompositeFilter filter) {
+    convert(CompositeFilter filter, RecordSpec<I, R, ?> spec, RecordQueryBuilder<I, R> builder) {
         if (filter.getFilterCount() > 0) {
             List<Filter> childFilters = filter.getFilterList();
             for (Filter childFilter : childFilters) {
-                singleFilterPart(builder, spec, childFilter);
-
+                convertSingle(childFilter, builder, spec);
             }
         }
         return builder;
     }
 
+    /**
+     * Converts the a single filter into a condition and adds it to the passed builder
+     * according to the record specification.
+     */
     private static <I, R extends Message> void
-    singleFilterPart(RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec, Filter filter) {
+    convertSingle(Filter filter, RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec) {
         ColumnName name = columnNameOf(filter);
         Column<?, ?> column = findColumn(spec, name);
         AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
@@ -169,24 +176,19 @@ public final class QueryConverter {
         Filter.Operator operator = filter.getOperator();
         switch (operator) {
             case EQUAL:
-                builder.where(convertedColumn)
-                       .is(value);
+                builder.where(convertedColumn).is(value);
                 break;
             case GREATER_THAN:
-                builder.where(convertedColumn)
-                       .isGreaterThan(value);
+                builder.where(convertedColumn).isGreaterThan(value);
                 break;
             case GREATER_OR_EQUAL:
-                builder.where(convertedColumn)
-                       .isGreaterOrEqualTo(value);
+                builder.where(convertedColumn).isGreaterOrEqualTo(value);
                 break;
             case LESS_THAN:
-                builder.where(convertedColumn)
-                       .isLessThan(value);
+                builder.where(convertedColumn).isLessThan(value);
                 break;
             case LESS_OR_EQUAL:
-                builder.where(convertedColumn)
-                       .isLessOrEqualTo(value);
+                builder.where(convertedColumn).isLessOrEqualTo(value);
                 break;
 
             case UNRECOGNIZED:
@@ -198,8 +200,8 @@ public final class QueryConverter {
     }
 
     @SuppressWarnings("unchecked")
-    private static <I, R extends Message> void identifiers(RecordQueryBuilder<I, R> builder,
-                                                           IdFilter idFilter) {
+    private static <I, R extends Message>
+    void identifiers(RecordQueryBuilder<I, R> builder, IdFilter idFilter) {
         if (idFilter.getIdCount() > 0) {
             List<I> ids = idFilter.getIdList()
                                   .stream()
@@ -210,16 +212,17 @@ public final class QueryConverter {
         }
     }
 
-    private static <I, R extends Message> void fieldMask(RecordQueryBuilder<I, R> builder,
-                                                         ResponseFormat format) {
+    private static <I, R extends Message>
+    void fieldMask(RecordQueryBuilder<I, R> builder, ResponseFormat format) {
         if (format.hasFieldMask()) {
             builder.withMask(format.getFieldMask());
         }
     }
 
-    private static <I, R extends Message> void
-    orderByAndLimit(RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec,
-                    ResponseFormat format) {
+    private static <I, R extends Message>
+    void orderByAndLimit(RecordQueryBuilder<I, R> builder,
+                         RecordSpec<I, R, ?> spec,
+                         ResponseFormat format) {
         boolean hasOrderBy = false;
         if (format.getOrderByCount() > 0) {
             hasOrderBy = true;
@@ -229,7 +232,7 @@ public final class QueryConverter {
 
                 Column<?, ?> column = findColumn(spec, columnName);
                 AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
-                if(protoDirection == OrderBy.Direction.ASCENDING) {
+                if (protoDirection == OrderBy.Direction.ASCENDING) {
                     builder.sortAscendingBy(convertedColumn);
                 } else {
                     builder.sortDescendingBy(convertedColumn);
@@ -263,7 +266,7 @@ public final class QueryConverter {
     private static ColumnName columnNameOf(Filter filter) {
         FieldPath fieldPath = filter.getFieldPath();
         checkArgument(fieldPath.getFieldNameCount() == 1,
-                      "Incorrect Column name in Entity Filter: %s",
+                      "Incorrect Column name in Entity Filter: `%s`.",
                       join(".", fieldPath.getFieldNameList()));
         String column = fieldPath.getFieldName(0);
         return ColumnName.of(column);
@@ -283,8 +286,7 @@ public final class QueryConverter {
         private static final long serialVersionUID = 0L;
 
         private AsRecordColumn(Column<?, ?> origin) {
-            super(origin.name()
-                        .value(), Object.class, new NoGetter<>());
+            super(origin.name().value(), Object.class, new NoGetter<>());
         }
     }
 

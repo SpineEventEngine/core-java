@@ -365,7 +365,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public Iterator<EntityRecord> findRecords(ResponseFormat format) {
         checkNotNull(format);
         EntityRecordStorage<I, S> storage = recordStorage();
-        RecordQuery<I, EntityRecord> query = QueryConverter.convert(storage.recordSpec(), format);
+        RecordQuery<I, EntityRecord> query = QueryConverter.newQuery(storage.recordSpec(), format);
         Iterator<EntityRecord> records = storage.readAll(query);
         return records;
     }
@@ -412,7 +412,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         EntityRecordStorage<I, S> storage = recordStorage();
         RecordQuery<I, EntityRecord> query =
-                QueryConverter.convert(storage.recordSpec(), filters, format);
+                QueryConverter.convert(filters, format, storage.recordSpec());
         Iterator<EntityRecord> records = storage.readAll(query);
         return records;
     }
