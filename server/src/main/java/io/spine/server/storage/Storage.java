@@ -29,8 +29,10 @@ import java.util.Optional;
 /**
  * The base interface for storages.
  *
- * @param <I> the type of identifiers
- * @param <M> the type of records
+ * @param <I>
+ *         the type of identifiers
+ * @param <M>
+ *         the type of records
  */
 @SPI
 public interface Storage<I, M extends Message> extends AutoCloseable {
@@ -51,10 +53,12 @@ public interface Storage<I, M extends Message> extends AutoCloseable {
     /**
      * Reads a record from the storage by the specified record identifier.
      *
-     * @param id the identifier  to read the record
+     * @param id
+     *         the identifier of the record to read
      * @return a record instance
      *         or {@code Optional.empty()} if there is no record matching this request
-     * @throws IllegalStateException if the storage was closed before
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
     Optional<M> read(I id);
 
@@ -63,9 +67,12 @@ public interface Storage<I, M extends Message> extends AutoCloseable {
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param id     the ID for the record
-     * @param record the record to store
-     * @throws IllegalStateException if the storage is closed
+     * @param id
+     *         the ID for the record
+     * @param record
+     *         the record to store
+     * @throws IllegalStateException
+     *         if the storage is closed
      */
     void write(I id, M record);
 
