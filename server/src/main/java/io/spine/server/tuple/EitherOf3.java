@@ -101,6 +101,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
      *
      * @throws IllegalStateException if a value of another type is stored instead.
      * @return the stored value
+     * @see #hasB()
      */
     @Override
     public B getB() {
