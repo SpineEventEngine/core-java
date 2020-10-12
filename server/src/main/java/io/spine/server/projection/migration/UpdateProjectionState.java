@@ -32,14 +32,14 @@ import io.spine.server.projection.ProjectionMigration;
  * to the logic defined in {@code onBeforeCommit()} method, if it is defined.
  *
  * <p>{@code onBeforeCommit()} is designed to contain common logic on setting
- * the calculated state fields. In a normal operational mode it is executed after a projection
+ * the calculated state fields. In a normal operational mode, it is executed after a projection
  * handles some signal and before the respective transaction is committed.
  *
- * <p>However, in case this logic is changed, it may be inconvenient to feed all existing
- * projections with some signal just to enforce the updated {@code onBeforeCommit()} to be executed.
+ * <p>If this calculation logic is changed in the code, end-users may need to update the calculated
+ * state of many projections at once. This migration operation is a straightforward way
+ * to invoke the {@code onBeforeCommit()} method within a separate transaction and save the changes
+ * made by it to the states of projections.
  *
- * <p>{@code UpdateProjectionColumns} creates a transaction which does nothing other than running
- * the {@code onBeforeCommit()} and saving the state changes.
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental
