@@ -464,17 +464,11 @@ public final class CatchUpProcess<I>
                 return EitherOf3.withC(nothing());
             }
         }
-        ShardProcessingRequested stillRequested = processingStillRequested(id, event);
+        ShardProcessingRequested stillRequested = shardProcessingRequested(id, event.getIndex());
         return EitherOf3.withB(stillRequested);
     }
 
-    private static ShardProcessingRequested
-    processingStillRequested(CatchUpId id, ShardProcessed event) {
-        return ShardProcessingRequested.newBuilder()
-                                       .setIndex(event.getIndex())
-                                       .setRequesterId(Identifier.pack(id))
-                                       .vBuild();
-    }
+
 
     private static Optional<CatchUp> findJob(CatchUpId id, DeliveryContext deliveryContext) {
         Optional<CatchUp> stateVisibileToDelivery =
@@ -702,8 +696,7 @@ public final class CatchUpProcess<I>
     }
 
     private static ImmutableSet<CatchUpId> routeShardProcessed(ShardProcessed message) {
-        Any requester = message.getRequesterId();
-        CatchUpId id = Identifier.unpack(requester, CatchUpId.class);
+        CatchUpId id = message.getProcess();
         return ImmutableSet.of(id);
     }
 

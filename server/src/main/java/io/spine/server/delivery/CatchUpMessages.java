@@ -22,7 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ProtocolStringList;
-import io.spine.base.Identifier;
 import io.spine.server.delivery.event.CatchUpCompleted;
 import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.delivery.event.HistoryEventsRecalled;
@@ -125,7 +124,7 @@ final class CatchUpMessages {
         return ShardProcessingRequested
                 .newBuilder()
                 .setIndex(shardIndex)
-                .setRequesterId(Identifier.pack(id))
+                .setProcess(id)
                 .vBuild();
     }
 }

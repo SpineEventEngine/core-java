@@ -15,6 +15,7 @@ option java_multiple_files = true;
 import "google/protobuf/any.proto";
 
 import "spine/server/delivery/delivery.proto";
+import "spine/server/catchup/catch_up.proto";
 
 // The processing of the messages in the particular shard was requested by the framework.
 message ShardProcessingRequested {
@@ -24,8 +25,10 @@ message ShardProcessingRequested {
     // The context of the delivery at the moment when this event has been dispatched.
     DeliveryContext context = 2;
 
-    // An identifier of an entity which originally requested the shard processing.
-    google.protobuf.Any requester_id = 3 [(required) = true];
+    // An identifier of a `CatchUp` process in scope of which the shard processing
+    // was originally requested.
+    //
+    spine.server.catchup.CatchUpId process = 3 [(required) = true];
 }
 
 // The processing of the messages in the particular shard was performed
@@ -36,6 +39,8 @@ message ShardProcessed {
     // The context of the delivery at the moment when the shard was processed.
     DeliveryContext context = 2;
 
-    // An identifier of an entity which originally requested the shard processing.
-    google.protobuf.Any requester_id = 3 [(required) = true];
+    // An identifier of a `CatchUp` process in scope of which the shard processing
+    // was originally requested.
+    //
+    spine.server.catchup.CatchUpId process = 3 [(required) = true];
 }
