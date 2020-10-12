@@ -30,17 +30,19 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * An abstract base for the storage implementations persisting the plain {@link Message}s.
- *
- * <p>All the operations are delegated to the underlying {@link RecordStorage}.
+ * A storage which allows persisting the {@link Message}s as storage records.
  *
  * <p>The {@linkplain #recordSpec() record specification} is used to determine the record identifier
  * and the columns.
  *
  * <p>To persist the {@link io.spine.server.entity.Entity Entity} data,
  * see {@link io.spine.server.entity.storage.EntityRecordStorage EntityRecordStorage}, which
- * uses the {@code Entity} state, Java-based columns and identifier to prepare the storage record.
+ * uses not only the {@code Entity} state, but the {@code Entity} lifecycle attributes to prepare
+ * the storage record.
  *
+ * @implNote This storage delegates all the operations to the underlying
+ *         {@link RecordStorage}, which is configured according to the record specification
+ *         for the persisted {@code Message}s
  * @see io.spine.server.entity.storage.EntityRecordStorage EntityRecordStorage
  */
 @SPI
