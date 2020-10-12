@@ -61,7 +61,7 @@ class QueriesTest {
 
     @Test
     @DisplayName("convert an empty query to an empty `RecordQuery`")
-    void convertEmptyToFilters() {
+    void convertEmptyQuery() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
         RecordQuery<EventId, Event> result = convert(query);
@@ -73,7 +73,7 @@ class QueriesTest {
 
     @Test
     @DisplayName("convert the time-constrained query to the corresponding `RecordQuery`")
-    void convertTimeToFilters() {
+    void convertTimeConstrainedQuery() {
         EventStreamQuery query = EventStreamQuery
                 .newBuilder()
                 .setAfter(Timestamps.MIN_VALUE)
@@ -91,7 +91,7 @@ class QueriesTest {
 
     @Test
     @DisplayName("convert the event-type query to the corresponding `RecordQuery`")
-    void convertTypeToFilters() {
+    void convertEventTypeConstrainedQuery() {
         String somethingHappened = " com.acme.SomethingHappened ";
         String somethingElseHappened = "com.acme.SomethingElseHappened";
         EventFilter firstFilter = filterForType(somethingHappened);
