@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static io.spine.server.entity.storage.ColumnTypeMapping.identity;
+import static io.spine.server.storage.ColumnTypeMapping.identity;
 
 /**
  * A default column mapping which stores all values "as-is".

@@ -52,7 +52,7 @@ message TaskView {
 }
 
 message TaskViewId {
-    option (is).java_type = "io.spine.server.entity.storage.given.IntIdentifier";
+    option (is).java_type = "io.spine.server.storage.given.IntIdentifier";
     int32 id = 1;
 }
 
@@ -67,6 +67,6 @@ message TaskListView {
 }
 
 message TaskListViewId {
-    option (is).java_type = "io.spine.server.entity.storage.given.IntIdentifier";
+    option (is).java_type = "io.spine.server.storage.given.IntIdentifier";
     int32 id = 1;
 }

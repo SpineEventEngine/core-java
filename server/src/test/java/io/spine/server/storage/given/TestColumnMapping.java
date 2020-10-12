@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.storage.given;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.spine.server.entity.storage.AbstractColumnMapping;
-import io.spine.server.entity.storage.ColumnTypeMapping;
+import io.spine.server.storage.AbstractColumnMapping;
+import io.spine.server.storage.ColumnTypeMapping;
 import io.spine.test.entity.TaskView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

@@ -24,8 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.query.ColumnName;
-import io.spine.server.entity.storage.ColumnMapping;
-import io.spine.server.entity.storage.DefaultColumnMapping;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
@@ -65,7 +63,8 @@ public class RecordWithColumns<I, R extends Message> {
     }
 
     /**
-     * Creates a new record extracting the column values from the passed entity.
+     * Creates a new record extracting the column values from the passed {@code Message} and setting
+     * the passed identifier value as the record identifier.
      */
     public static <I, R extends Message>
     RecordWithColumns<I, R> create(I identifier, R record, RecordSpec<I, R, R> recordSpec) {
@@ -77,7 +76,7 @@ public class RecordWithColumns<I, R extends Message> {
     }
 
     /**
-     * Creates a new record extracting the column values from the passed entity.
+     * Creates a new record extracting the column values from the passed {@code Message}.
      */
     public static <I, R extends Message>
     RecordWithColumns<I, R> create(R record, RecordSpec<I, R, R> recordSpec) {
@@ -89,9 +88,9 @@ public class RecordWithColumns<I, R extends Message> {
     }
 
     /**
-     * Wraps a passed entity record.
+     * Wraps a passed record.
      *
-     * <p>Such instance of {@code EntityRecordWithColumns} will contain no storage fields.
+     * <p>Such instance of {@code RecordWithColumns} will contain no storage fields.
      */
     public static <I, R extends Message> RecordWithColumns<I, R> of(I id, R record) {
         return new RecordWithColumns<>(id, record, Collections.emptyMap());
@@ -106,12 +105,15 @@ public class RecordWithColumns<I, R extends Message> {
         return new RecordWithColumns<>(identifier, record, storageFields);
     }
 
+    /**
+     * Returns the identifier of the record.
+     */
     public I id() {
         return id;
     }
 
     /**
-     * Returns the enclosed entity record.
+     * Returns the message of the record.
      */
     public R record() {
         return record;

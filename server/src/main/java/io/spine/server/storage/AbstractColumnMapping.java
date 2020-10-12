@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;

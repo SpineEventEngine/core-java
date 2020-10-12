@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.storage.given;
 
 import com.google.protobuf.Message;
 

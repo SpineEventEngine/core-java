@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.server.entity.storage.given.TestColumnMapping;
+import io.spine.server.storage.given.TestColumnMapping;
 import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,9 +31,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.storage.given.TestColumnMapping.CONVERTED_MESSAGE;
-import static io.spine.server.entity.storage.given.TestColumnMapping.CONVERTED_STRING;
-import static io.spine.server.entity.storage.given.TestColumnMapping.NULL_VALUE;
+import static io.spine.server.storage.given.TestColumnMapping.CONVERTED_MESSAGE;
+import static io.spine.server.storage.given.TestColumnMapping.CONVERTED_STRING;
+import static io.spine.server.storage.given.TestColumnMapping.NULL_VALUE;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
