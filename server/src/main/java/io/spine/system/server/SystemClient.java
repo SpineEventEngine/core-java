@@ -21,10 +21,6 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.base.EntityState;
-import io.spine.server.entity.Repository;
-
-import java.util.Optional;
 
 /**
  * The entry point of a system context API exposed to its domain counterpart.
@@ -41,11 +37,6 @@ public interface SystemClient {
      * Obtains the system context read side.
      */
     SystemReadSide readSide();
-
-    /**
-     * Finds a system repository by the state class of entities.
-     */
-    Optional<Repository<?, ?>> systemRepoFor(Class<? extends EntityState<?>> stateClass);
 
     /**
      * Closes the underlying system context.
