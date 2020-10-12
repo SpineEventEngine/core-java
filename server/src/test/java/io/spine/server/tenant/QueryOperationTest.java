@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class QueryOperationTest {
 
     @Test
-    @DisplayName("reject null input")
+    @DisplayName("reject `null` input")
     void rejectNullInput() {
         Query nullQuery = nullRef();
         assertThrows(NullPointerException.class,
