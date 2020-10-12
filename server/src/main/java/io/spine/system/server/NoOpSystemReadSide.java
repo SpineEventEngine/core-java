@@ -43,9 +43,4 @@ public enum NoOpSystemReadSide implements SystemReadSide {
     public void unregister(EventDispatcher dispatcher) {
         // NOP.
     }
-
-//    @Override
-//    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
-//        return emptyIterator();
-//    }
 }
