@@ -298,7 +298,10 @@ public class AggregateStorageTest
         assertFalse(iterator.hasNext());
     }
 
-    // Ignore this test because several records can be stored by an aggregate ID.
+    /**
+     *  This test is not applicable to the aggregate storage, as several records may be stored
+     *  by the same aggregate ID. That's why it is disabled.
+     */
     @SuppressWarnings("RefusedBequest")
     @Override
     @Test
