@@ -29,7 +29,7 @@ import java.util.Optional;
  * @param <I> the type of entity IDs
  * @param <R> the type of stored records
  */
-interface TenantStorage<I, R> {
+interface TenantDataStorage<I, R> {
 
     /**
      * Returns an iterator over identifiers of stored records.

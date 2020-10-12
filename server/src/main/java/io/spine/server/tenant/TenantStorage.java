@@ -34,7 +34,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Abstract base for storage storing information about tenants.
+ * Abstract base for a storage holding the information about tenants.
  *
  * @param <T>
  *         the type of data associated with the tenant ID

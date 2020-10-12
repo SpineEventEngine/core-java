@@ -54,7 +54,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Acts like a facade API for the operations available over the data of a single tenant.
  */
-class TenantRecords<I, R extends Message> implements TenantStorage<I, RecordWithColumns<I, R>> {
+class TenantRecords<I, R extends Message> implements TenantDataStorage<I, RecordWithColumns<I, R>> {
 
     private final Map<I, RecordWithColumns<I, R>> records = synchronizedMap(new HashMap<>());
 

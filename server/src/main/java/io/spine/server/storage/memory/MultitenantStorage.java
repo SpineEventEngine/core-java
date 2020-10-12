@@ -37,7 +37,7 @@ import static java.util.Collections.synchronizedMap;
  *
  * @param <S> the type of the storage "slice" for each tenant
  */
-abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
+abstract class MultitenantStorage<S extends TenantDataStorage<?, ?>> {
 
     /** The lock for {@code MultitenantStorage} accessor methods. */
     private final Lock lock = new ReentrantLock();
