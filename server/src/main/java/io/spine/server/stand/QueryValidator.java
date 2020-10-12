@@ -35,7 +35,7 @@ import static io.spine.option.EntityOption.Visibility.QUERY;
 import static java.lang.String.format;
 
 /**
- * Validates the {@linkplain Query} instances submitted to {@linkplain Stand}.
+ * Validates the {@link Query} instances submitted to {@link Stand}.
  */
 final class QueryValidator extends AbstractTargetValidator<Query> {
 
