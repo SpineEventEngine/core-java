@@ -161,8 +161,8 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
      * Tests that the storage overwrites the existing record when storing a new record with the
      * same ID.
      *
-     * This test should be overridden by the descendants working with storages which can store
-     * multiple records by the same ID.
+     * <p>This test should be overridden by the descendants working with storages which are able
+     * to store multiple records by the same ID.
      */
     @Test
     @DisplayName("re-write record if writing by the same ID")
