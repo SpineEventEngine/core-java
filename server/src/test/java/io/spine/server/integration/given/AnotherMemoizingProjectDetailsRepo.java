@@ -24,7 +24,9 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.integration.AnotherMemoizingView;
 import io.spine.test.integration.ProjectId;
 
-public class MemoizingProjectDetails2Repository
-        extends ProjectionRepository<ProjectId, MemoizingProjectDetails2, AnotherMemoizingView> {
+public final class AnotherMemoizingProjectDetailsRepo
+        extends ProjectionRepository<ProjectId,
+                                     AnotherMemoizingProjectDetails,
+                                     AnotherMemoizingView> {
 
 }

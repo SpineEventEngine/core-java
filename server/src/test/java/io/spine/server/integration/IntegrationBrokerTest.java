@@ -30,9 +30,9 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.given.AnotherMemoizingProjectDetailsRepo;
 import io.spine.server.integration.given.BillingAggregate;
-import io.spine.server.integration.given.MemoizingProjectDetails1Repository;
-import io.spine.server.integration.given.MemoizingProjectDetails2Repository;
+import io.spine.server.integration.given.MemoizingProjectDetailsRepo;
 import io.spine.server.integration.given.MemoizingProjection;
 import io.spine.server.integration.given.PhotosProcMan;
 import io.spine.server.integration.given.ProjectCommander;
@@ -142,11 +142,11 @@ class IntegrationBrokerTest {
 
             BoundedContext destination1 = newContext();
             destination1.internalAccess()
-                        .register(new MemoizingProjectDetails1Repository());
+                        .register(new MemoizingProjectDetailsRepo());
 
             BoundedContext destination2 = newContext();
             destination2.internalAccess()
-                        .register(new MemoizingProjectDetails2Repository());
+                        .register(new AnotherMemoizingProjectDetailsRepo());
 
             assertTrue(MemoizingProjection.events()
                                           .isEmpty());

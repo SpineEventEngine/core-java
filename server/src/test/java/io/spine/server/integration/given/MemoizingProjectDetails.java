@@ -26,7 +26,7 @@ import io.spine.test.integration.MemoizingView;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 
-public class MemoizingProjectDetails1
+public class MemoizingProjectDetails
         extends MemoizingProjection<ProjectId, MemoizingView, MemoizingView.Builder> {
 
     /**
@@ -37,7 +37,7 @@ public class MemoizingProjectDetails1
      * @throws IllegalArgumentException
      *         if the ID is not of one of the supported types
      */
-    protected MemoizingProjectDetails1(ProjectId id) {
+    protected MemoizingProjectDetails(ProjectId id) {
         super(id);
     }
 
