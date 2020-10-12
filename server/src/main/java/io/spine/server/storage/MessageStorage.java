@@ -65,7 +65,7 @@ public abstract class MessageStorage<I, M extends Message> extends RecordStorage
      */
     protected void write(M message) {
         RecordWithColumns<I, M> withCols = toRecord(message);
-        super.write(withCols);
+        write(withCols);
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class MessageStorage<I, M extends Message> extends RecordStorage
     @Override
     public synchronized void write(I id, M message) {
         RecordWithColumns<I, M> record = RecordWithColumns.create(id, message, recordSpec());
-        super.write(record);
+        write(record);
     }
 
     /**
@@ -103,7 +103,7 @@ public abstract class MessageStorage<I, M extends Message> extends RecordStorage
     protected void writeBatch(Iterable<M> messages) {
         List<RecordWithColumns<I, M>> records = stream(messages).map(this::toRecord)
                                                                 .collect(toList());
-        super.writeAll(records);
+        writeAll(records);
     }
 
     /**
