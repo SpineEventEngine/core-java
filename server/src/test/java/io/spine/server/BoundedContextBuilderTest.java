@@ -375,8 +375,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("commands")
         void forCommands() {
-            Listener<CommandEnvelope> listener = c -> {
-            };
+            Listener<CommandEnvelope> listener = c -> {};
 
             builder.addCommandListener(listener);
 
@@ -388,8 +387,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("events")
         void forEvents() {
-            Listener<EventEnvelope> listener = c -> {
-            };
+            Listener<EventEnvelope> listener = c -> {};
 
             builder.addEventListener(listener);
 
