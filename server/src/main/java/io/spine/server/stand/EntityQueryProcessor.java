@@ -49,7 +49,7 @@ class EntityQueryProcessor implements QueryProcessor {
                                           ? loadAll(query.responseFormat())
                                           : loadByQuery(query);
         ImmutableList<EntityStateWithVersion> result = stream(entities)
-                .map(this::toEntityState)
+                .map(EntityQueryProcessor::toEntityState)
                 .collect(toImmutableList());
         return result;
     }
@@ -65,4 +65,12 @@ class EntityQueryProcessor implements QueryProcessor {
         return entities;
     }
 
+    private static EntityStateWithVersion toEntityState(EntityRecord record) {
+        EntityStateWithVersion result = EntityStateWithVersion
+                .newBuilder()
+                .setState(record.getState())
+                .setVersion(record.getVersion())
+                .build();
+        return result;
+    }
 }
