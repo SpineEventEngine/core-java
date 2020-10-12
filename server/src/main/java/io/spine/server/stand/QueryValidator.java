@@ -79,9 +79,8 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
     }
 
     @Override
-    protected InvalidQueryException invalidMessageException(String exceptionMsg,
-                                                            Query request,
-                                                            Error error) {
+    protected InvalidQueryException
+    invalidMessageException(String exceptionMsg, Query request, Error error) {
         return new InvalidQueryException(exceptionMsg, request, error);
     }
 
