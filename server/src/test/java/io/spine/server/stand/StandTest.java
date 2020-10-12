@@ -91,16 +91,16 @@ import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.server.entity.given.Given.projectionOfClass;
 import static io.spine.server.stand.given.Given.StandTestProjection;
+import static io.spine.server.stand.given.StandTestEnv.appendWithGeneratedProjects;
 import static io.spine.server.stand.given.StandTestEnv.checkAndGetMessageList;
 import static io.spine.server.stand.given.StandTestEnv.checkHasExactlyOne;
 import static io.spine.server.stand.given.StandTestEnv.checkTypesEmpty;
 import static io.spine.server.stand.given.StandTestEnv.createRequestFactory;
 import static io.spine.server.stand.given.StandTestEnv.customerIdFor;
-import static io.spine.server.stand.given.StandTestEnv.einSampleCustomer;
-import static io.spine.server.stand.given.StandTestEnv.einSampleProject;
+import static io.spine.server.stand.given.StandTestEnv.einCustomer;
+import static io.spine.server.stand.given.StandTestEnv.einProject;
 import static io.spine.server.stand.given.StandTestEnv.emptyUpdateCallback;
-import static io.spine.server.stand.given.StandTestEnv.fillSampleCustomers;
-import static io.spine.server.stand.given.StandTestEnv.fillSampleProjects;
+import static io.spine.server.stand.given.StandTestEnv.generateCustomers;
 import static io.spine.server.stand.given.StandTestEnv.ids;
 import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.server.stand.given.StandTestEnv.projectIdFor;
@@ -325,7 +325,7 @@ class StandTest extends TenantAwareTest {
             assertNull(callback.newEntityState());
 
             // Post a new entity state.
-            Customer customer = einSampleCustomer();
+            Customer customer = einCustomer();
             CustomerId customerId = customer.getId();
             int version = 1;
             CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
@@ -355,7 +355,7 @@ class StandTest extends TenantAwareTest {
             assertNull(callback.newEntityState());
 
             // Post a new entity state.
-            Project project = einSampleProject();
+            Project project = einProject();
             ProjectId projectId = project.getId();
             int version = 1;
             StandTestProjection entity = projectionOfClass(StandTestProjection.class)
@@ -383,7 +383,7 @@ class StandTest extends TenantAwareTest {
             subscribeAndActivate(stand, topic, callback);
 
             // Send a command creating a new Customer and triggering a CustomerCreated event.
-            Customer customer = einSampleCustomer();
+            Customer customer = einCustomer();
             CustomerId customerId = customer.getId();
             CreateCustomer createCustomer = CreateCustomer
                     .newBuilder()
@@ -422,7 +422,7 @@ class StandTest extends TenantAwareTest {
         CustomerAggregateRepository repository = new CustomerAggregateRepository();
         Stand stand = createStand(repository);
 
-        Collection<Customer> sampleCustomers = fillSampleCustomers(10);
+        Collection<Customer> sampleCustomers = generateCustomers(10);
 
         Topic someCustomers = requestFactory.topic()
                                             .select(Customer.class)
@@ -467,7 +467,7 @@ class StandTest extends TenantAwareTest {
 
         stand.cancel(subscription, noOpObserver());
 
-        Customer customer = fillSampleCustomers(1)
+        Customer customer = generateCustomers(1)
                 .iterator()
                 .next();
         CustomerId customerId = customer.getId();
@@ -510,7 +510,7 @@ class StandTest extends TenantAwareTest {
             callbacks.add(callback);
         }
 
-        Customer customer = fillSampleCustomers(1)
+        Customer customer = generateCustomers(1)
                 .iterator()
                 .next();
         CustomerId customerId = customer.getId();
@@ -537,7 +537,7 @@ class StandTest extends TenantAwareTest {
         Stand stand = createStand(repository, projectionRepository);
         Target allProjects = Targets.allOf(Project.class);
         MemoizeSubscriptionCallback callback = subscribeWithCallback(stand, allProjects);
-        Customer customer = einSampleCustomer();
+        Customer customer = einCustomer();
         CustomerId customerId = customer.getId();
         int version = 1;
         CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
@@ -826,7 +826,7 @@ class StandTest extends TenantAwareTest {
     private void doCheckReadingProjectsById(int numberOfProjects) {
         // Define the types and values used as a test data.
         Map<ProjectId, Project> sampleProjects = new HashMap<>();
-        fillSampleProjects(sampleProjects, numberOfProjects);
+        appendWithGeneratedProjects(sampleProjects, numberOfProjects);
 
         StandTestProjectionRepository projectionRepository = new StandTestProjectionRepository();
         setupExpectedFindAllBehaviour(projectionRepository, sampleProjects);

@@ -100,7 +100,7 @@ public final class StandTestEnv {
             "Smith", "Doe", "Steward", "Lee"
     );
 
-    /** Prevents instantiation of this utility class. */
+    /** Prevents this utility class from instantiation. */
     private StandTestEnv() {
     }
 
@@ -137,23 +137,6 @@ public final class StandTestEnv {
         return ProjectId.newBuilder()
                         .setId(String.valueOf(numericId))
                         .build();
-    }
-
-    private static PersonName personName() {
-        String givenName = selectOne(FIRST_NAMES);
-        String familyName = selectOne(LAST_NAMES);
-        return PersonName
-                .newBuilder()
-                .setGivenName(givenName)
-                .setFamilyName(familyName)
-                .build();
-    }
-
-    private static <T> T selectOne(List<T> choices) {
-        checkArgument(!choices.isEmpty());
-        Random random = new SecureRandom();
-        int index = random.nextInt(choices.size());
-        return choices.get(index);
     }
 
     public static int storeSampleProject(StandTestProjectionRepository repository) {
@@ -204,6 +187,61 @@ public final class StandTestEnv {
         repo.setRecords(allRecords.iterator());
     }
 
+    public static Collection<Customer> generateCustomers(int howMany) {
+        return generate(howMany,
+                        numericId -> Customer.newBuilder()
+                                             .setId(customerIdFor(numericId))
+                                             .setName(personName())
+                                             .build());
+    }
+
+    public static Customer einCustomer() {
+        return generateCustomers(1).iterator()
+                                   .next();
+    }
+
+    public static void appendWithGeneratedProjects(Map<ProjectId, Project> destination,
+                                                   int howMany) {
+        for (int projectIndex = 0; projectIndex < howMany; projectIndex++) {
+            Project project = Project.getDefaultInstance();
+            ProjectId projectId = ProjectId.newBuilder()
+                                           .setId(UUID.randomUUID()
+                                                      .toString())
+                                           .build();
+            destination.put(projectId, project);
+        }
+    }
+
+    public static Project einProject() {
+        return generateProjects(1).iterator()
+                                  .next();
+    }
+
+    private static Collection<Project> generateProjects(int howMany) {
+        return generate(howMany,
+                        numericId -> Project.newBuilder()
+                                            .setId(projectIdFor(numericId))
+                                            .setName(String.valueOf(numericId))
+                                            .build());
+    }
+
+    private static PersonName personName() {
+        String givenName = selectOne(FIRST_NAMES);
+        String familyName = selectOne(LAST_NAMES);
+        return PersonName
+                .newBuilder()
+                .setGivenName(givenName)
+                .setFamilyName(familyName)
+                .build();
+    }
+
+    private static <T> T selectOne(List<T> choices) {
+        checkArgument(!choices.isEmpty());
+        Random random = new SecureRandom();
+        int index = random.nextInt(choices.size());
+        return choices.get(index);
+    }
+
     private static ImmutableCollection<EntityRecord>
     toProjectionRecords(Collection<ProjectId> projectionIds) {
         Collection<EntityRecord> transformed = Collections2.transform(
@@ -224,32 +262,6 @@ public final class StandTestEnv {
         return result;
     }
 
-    public static Collection<Customer> fillSampleCustomers(int numberOfCustomers) {
-        return generate(numberOfCustomers,
-                        numericId -> Customer.newBuilder()
-                                             .setId(customerIdFor(numericId))
-                                             .setName(personName())
-                                             .build());
-    }
-
-    public static Customer einSampleCustomer() {
-        return fillSampleCustomers(1).iterator()
-                                     .next();
-    }
-
-    public static Collection<Project> fillSampleProjects(int numberOfProjects) {
-        return generate(numberOfProjects,
-                        numericId -> Project.newBuilder()
-                                            .setId(projectIdFor(numericId))
-                                            .setName(String.valueOf(numericId))
-                                            .build());
-    }
-
-    public static Project einSampleProject() {
-        return fillSampleProjects(1).iterator()
-                                    .next();
-    }
-
     private static <T extends Message> Collection<T> generate(int count, IntFunction<T> idMapper) {
         Random random = new SecureRandom();
         List<T> result = IntStream.generate(random::nextInt)
@@ -258,18 +270,6 @@ public final class StandTestEnv {
                                   .mapToObj(idMapper)
                                   .collect(toList());
         return result;
-    }
-
-    public static void fillSampleProjects(Map<ProjectId, Project> sampleProjects,
-                                          int numberOfProjects) {
-        for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
-            Project project = Project.getDefaultInstance();
-            ProjectId projectId = ProjectId.newBuilder()
-                                           .setId(UUID.randomUUID()
-                                                      .toString())
-                                           .build();
-            sampleProjects.put(projectId, project);
-        }
     }
 
     public static List<EntityStateWithVersion>
