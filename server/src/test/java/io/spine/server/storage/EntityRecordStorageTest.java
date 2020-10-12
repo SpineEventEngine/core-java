@@ -597,7 +597,5 @@ public class EntityRecordStorageTest
             storage.write(recordWithColumns);
             return record;
         }
-
     }
-
 }
