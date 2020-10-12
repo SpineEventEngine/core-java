@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
@@ -38,12 +39,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Matches the records to the subject of the given {@link io.spine.query.RecordQuery RecordQuery}.
+ * Matches the records to the {@linkplain RecordQuery#subject() subject} of a {@link RecordQuery}.
  *
  * @param <I>
- *         the type of the identifiers of the matched records
+ *         the type of the identifiers of the records
  * @param <R>
- *         the type of the matched records
+ *         the type of the messages stored as records
  */
 public class RecordQueryMatcher<I, R extends Message>
         implements Predicate<@Nullable RecordWithColumns<I, R>> {
@@ -51,16 +52,20 @@ public class RecordQueryMatcher<I, R extends Message>
     private final ImmutableSet<I> acceptedIds;
     private final ImmutableList<QueryPredicate<R>> predicates;
 
-    RecordQueryMatcher(RecordQuery<I, R> query) {
-        this(checkNotNull(query).subject());
-    }
-
+    /**
+     * Creates a new matcher for the given subject.
+     */
     RecordQueryMatcher(Subject<I, R> subject) {
         checkNotNull(subject);
         // Pack IDs from the query for faster search using packed IDs from loaded records.
         this.acceptedIds = subject.id()
                                   .values();
         this.predicates = subject.predicates();
+    }
+
+    @VisibleForTesting
+    RecordQueryMatcher(RecordQuery<I, R> query) {
+        this(checkNotNull(query).subject());
     }
 
     @Override
