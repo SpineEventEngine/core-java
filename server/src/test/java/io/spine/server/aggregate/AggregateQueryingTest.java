@@ -67,7 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("`AggregateRepository` should mirror aggregate states")
-class AggregateMirroringTest {
+class AggregateQueryingTest {
 
     private QueryFactory queries;
     private Collection<MRPhoto> givenPhotos;
@@ -82,7 +82,7 @@ class AggregateMirroringTest {
                                        .add(repository)
                                        .build();
         TestActorRequestFactory requestFactory =
-                new TestActorRequestFactory(AggregateMirroringTest.class);
+                new TestActorRequestFactory(AggregateQueryingTest.class);
         queries = requestFactory.query();
         commands = requestFactory.command();
         givenPhotos = givenPhotos();
