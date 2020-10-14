@@ -27,9 +27,13 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.query.ColumnName;
+import io.spine.query.RecordColumn;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
+import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.storage.given.TestColumnMapping;
+import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.StgTask;
 import io.spine.test.storage.StgTaskId;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +43,10 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,10 +57,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("`EntityRecordWithColumns` should")
 class EntityRecordWithColumnsTest {
 
-    private static final StgTaskId SAMPLE_ID = StgTaskId.newBuilder()
-                                                        .setId(42)
-                                                        .build();
-    private static final Any PACKED_SAMPLE_ID = Identifier.pack(SAMPLE_ID);
+    private static final StgTaskId TASK_ID = StgTaskId.newBuilder()
+                                                      .setId(42)
+                                                      .vBuild();
+    private static final StgProjectId PROJECT_ID = StgProjectId.newBuilder()
+                                                            .setId("42")
+                                                            .vBuild();
+    private static final Any PACKED_TASK_ID = Identifier.pack(TASK_ID);
 
     private static EntityRecordWithColumns<?> sampleRecordWithEmptyColumns() {
         return EntityRecordWithColumns.of(sampleEntityRecord());
@@ -65,7 +75,7 @@ class EntityRecordWithColumnsTest {
 
     private static EntityRecord sampleEntityRecord() {
         return EntityRecord.newBuilder()
-                           .setEntityId(PACKED_SAMPLE_ID)
+                           .setEntityId(PACKED_TASK_ID)
                            .build();
     }
 
@@ -86,7 +96,7 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ColumnName columnName = EntityRecordColumn.archived.columnName();
+        ColumnName columnName = archived.columnName();
         Object value = false;
         EntityRecordWithColumns<?> emptyFieldsEnvelope =
                 EntityRecordWithColumns.of(sampleEntityRecord());
@@ -122,7 +132,7 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("have default system columns even if the entity does not define custom ones")
     void supportEmptyColumns() {
-        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(SAMPLE_ID);
+        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(TASK_ID);
 
         EntityRecordSpec<StgTaskId, StgTask, EntityWithoutCustomColumns> columns =
                 EntityRecordSpec.of(entity);
@@ -177,27 +187,36 @@ class EntityRecordWithColumnsTest {
     @DisplayName("support being initialized with")
     class BeInitializedWith {
 
-        //TODO:2020-10-12:alex.tymchenko: complete the tests and remove those which target the `@VisibleForTesting` methods.
         @Test
-        @DisplayName("just a record")
-        void recordOnly() {
-            EntityRecordWithColumns<?> record = EntityRecordWithColumns.of(sampleEntityRecord());
-            assertNotNull(record);
-        }
-
-        @Test
-        @DisplayName("a record and columns")
-        void recordAndColumns() {
+        @DisplayName("an Entity identifier and a record")
+        void idAndRecord() {
+            EntityRecord rawRecord = sampleEntityRecord();
+            Long id = 199L;
+            EntityRecordWithColumns<Long> result = EntityRecordWithColumns.create(id, rawRecord);
+            assertThat(result).isNotNull();
+            assertThat(result.id()).isEqualTo(id);
+            assertThat(result.record()).isEqualTo(rawRecord);
         }
 
         @Test
         @DisplayName("an Entity and a record")
         void entityAndRecord() {
-        }
-
-        @Test
-        @DisplayName("an Entity identifier and a record")
-        void idAndRecord() {
+            TestEntity entity = new TestEntity(PROJECT_ID);
+            EntityRecord rawRecord = sampleEntityRecord();
+            EntityRecordWithColumns<StgProjectId> result =
+                    EntityRecordWithColumns.create(entity, rawRecord);
+            assertThat(result).isNotNull();
+            assertThat(result.id()).isEqualTo(PROJECT_ID);
+            assertThat(result.record()).isEqualTo(rawRecord);
+            ImmutableSet<ColumnName> names = result.columnNames();
+            ImmutableSet<ColumnName> expectedNames =
+                    StgProject.Column.definitions()
+                                     .stream()
+                                     .map(RecordColumn::name)
+                                     .collect(toImmutableSet());
+            assertThat(names).containsAtLeastElementsIn(expectedNames);
+            assertThat(names).containsAtLeastElementsIn(
+                    ImmutableSet.of(archived.columnName(), deleted.columnName()));
         }
     }
 
@@ -216,7 +235,7 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("column values")
         void columnValues() {
-            ColumnName columnName = EntityRecordColumn.archived.columnName();
+            ColumnName columnName = archived.columnName();
             Object value = false;
             Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
             EntityRecordWithColumns<?> record =

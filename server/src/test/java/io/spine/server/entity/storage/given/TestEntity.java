@@ -28,4 +28,8 @@ import io.spine.test.storage.StgProjectId;
 public class TestEntity
         extends AbstractEntity<StgProjectId, StgProject>
         implements HasLifecycleColumns<StgProjectId, StgProject> {
+
+    public TestEntity(StgProjectId id) {
+        super(id);
+    }
 }
