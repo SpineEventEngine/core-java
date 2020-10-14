@@ -119,7 +119,7 @@ public final class EntityRecordWithColumns<I>
      *
      * @apiNote This test-only method unpacks the identifier of the passed record and casts
      *         it to the type {@code I}. It is a responsibility of the caller to provide the record
-     *         with the matching identifier
+     *         with the matching identifier.
      */
     @VisibleForTesting
     public static <I> EntityRecordWithColumns<I>
