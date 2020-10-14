@@ -105,7 +105,8 @@ public final class EntityRecordWithColumns<I>
     /**
      * Wraps a passed entity record into a {@code EntityWithColumns} with no storage fields.
      *
-     * <p>This is a shortcut for {@link #of(EntityRecord, Map) of(EntityRecord, Map)}.
+     * <p>This is a shortcut for {@link #of(EntityRecord, Map) of(EntityRecord, Map)} with
+     * an empty {@code Map} of storage fields.
      *
      * @see #of(EntityRecord, Map) for the notes on usage
      */
