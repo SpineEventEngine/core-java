@@ -42,19 +42,10 @@ import "google/protobuf/timestamp.proto";
 message StringChange {
 
     // The value of the field that's changing.
-    //
-    // This field is blank if the target field is blank too.
-    //
     string previous_value = 1;
 
     // The new value of the field.
-    //
-    // This field must be populated. If you want to clear a field, use a special command.
-    // We encourage separate commands for removal to make event handlers more straightforward.
-    // Usually removal of a value and changing a value should have different consequences.
-    // Hence separate handles.
-    //
-    string new_value = 2 [(required) = true];
+    string new_value = 2;
 }
 
 // A change in a `Timestamp` field.
@@ -204,5 +195,5 @@ message BytesChange {
     bytes previous_value = 1;
 
     // The new value of the field.
-    bytes new_value = 2 [(required) = true];
+    bytes new_value = 2;
 }
