@@ -38,7 +38,7 @@ import "google/protobuf/timestamp.proto";
 // For all types the following rule apply: `new_value` field must not be equal to `previous_value`.
 //
 
-// Definition of a change in a string field.
+// A change in a string field.
 message StringChange {
 
     // The value of the field that's changing.
@@ -57,7 +57,7 @@ message StringChange {
     string new_value = 2 [(required) = true];
 }
 
-// Definition of a change in a `Timestamp` field.
+// A change in a `Timestamp` field.
 message TimestampChange {
 
     // The value of the field that's changing.
@@ -67,7 +67,7 @@ message TimestampChange {
     google.protobuf.Timestamp new_value = 2;
 }
 
-// Definition of a change in a `double` field.
+// A change in a `double` field.
 message DoubleChange {
 
     // The value of the field that's changing.
@@ -77,7 +77,7 @@ message DoubleChange {
     double new_value = 2;
 }
 
-// Definition of a change in a `float` field.
+// A change in a `float` field.
 message FloatChange {
 
     // The value of the field that's changing.
@@ -87,7 +87,7 @@ message FloatChange {
     float new_value = 2;
 }
 
-// Definition of a change in a `int32` field.
+// A change in a `int32` field.
 message Int32Change {
 
     // The value of the field that's changing.
@@ -97,7 +97,7 @@ message Int32Change {
     int32 new_value = 2;
 }
 
-// Definition of a change in a `int64` field.
+// A change in a `int64` field.
 message Int64Change {
 
     // The value of the field that's changing.
@@ -107,7 +107,7 @@ message Int64Change {
     int64 new_value = 2;
 }
 
-// Definition of a change in a `uint32` field.
+// A change in a `uint32` field.
 message UInt32Change {
 
     // The value of the field that's changing.
@@ -117,7 +117,7 @@ message UInt32Change {
     uint32 new_value = 2;
 }
 
-// Definition of a change in a `uint64` field.
+// A change in a `uint64` field.
 message UInt64Change {
 
     // The value of the field that's changing.
@@ -127,7 +127,7 @@ message UInt64Change {
     uint64 new_value = 2;
 }
 
-// Definition of a change in a `sint32` field.
+// A change in a `sint32` field.
 message SInt32Change {
 
     // The value of the field that's changing.
@@ -137,7 +137,7 @@ message SInt32Change {
     sint32 new_value = 2;
 }
 
-// Definition of a change in a `sint64` field.
+// A change in a `sint64` field.
 message SInt64Change {
 
     // The value of the field that's changing.
@@ -147,7 +147,7 @@ message SInt64Change {
     sint64 new_value = 2;
 }
 
-// Definition of a change in a `fixed32` field.
+// A change in a `fixed32` field.
 message Fixed32Change {
 
     // The value of the field that's changing.
@@ -157,7 +157,7 @@ message Fixed32Change {
     fixed32 new_value = 2;
 }
 
-// Definition of a change in a `fixed64` field.
+// A change in a `fixed64` field.
 message Fixed64Change {
 
     // The value of the field that's changing.
@@ -167,7 +167,7 @@ message Fixed64Change {
     fixed64 new_value = 2;
 }
 
-// Definition of a change in a `sfixed32` field.
+// A change in a `sfixed32` field.
 message Sfixed32Change {
 
     // The value of the field that's changing.
@@ -177,7 +177,7 @@ message Sfixed32Change {
     sfixed32 new_value = 2;
 }
 
-// Definition of a change in a `sfixed64` field.
+// A change in a `sfixed64` field.
 message Sfixed64Change {
 
     // The value of the field that's changing.
@@ -187,7 +187,7 @@ message Sfixed64Change {
     sfixed64 new_value = 2;
 }
 
-// Definition of a change in a `bool` field.
+// A change in a `bool` field.
 message BooleanChange {
 
     // The value of the field that's changing.
@@ -197,7 +197,7 @@ message BooleanChange {
     bool new_value = 2;
 }
 
-// Definition of a change in a `bytes` field.
+// A change in a `bytes` field.
 message BytesChange {
 
     // The value of the field that's changing.
