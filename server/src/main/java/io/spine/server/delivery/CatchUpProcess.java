@@ -87,7 +87,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * //TODO:2020-04-27:alex.tymchenko: update the description.
  * A process that performs a projection catch-up.
  *
  * <p>Starts the catch-up process by emitting the {@link CatchUpRequested} event.
@@ -125,6 +124,20 @@ import static java.util.stream.Collectors.toSet;
  *     IN_PROGRESS}.
  * </ul>
  *
+ * <p><b>{@linkplain CatchUpStatus#STARTED STARTED}</b>
+ *
+ * <p>The process is created in this status upon receiving the {@code CatchUpRequested} event.
+ * The further actions include:
+ *
+ * <ul>
+ *     <li>A {@link CatchUpStarted} event is emitted. The target projection repository listens to
+ *     this event and kills the state of the matching entities.
+ *
+ *     <li>The status if the catch-up process is set to {@link CatchUpStatus#IN_PROGRESS
+ *     IN_PROGRESS}.
+ * </ul>
+
+ *
  * <p><b>{@link CatchUpStatus#IN_PROGRESS IN_PROGRESS}</b>
  *
  * <p>When the process is in this status, the event history is read and the matching events are sent
@@ -158,38 +171,85 @@ import static java.util.stream.Collectors.toSet;
  * <p><b>{@link CatchUpStatus#FINALIZING FINALIZING}</b>
  *
  * <p>The process moves to this status when the event history has been fully recalled and the
- * corresponding {@code HistoryFullyRecalled} is received. At this stage the {@code Delivery} stops
+ * corresponding {@code HistoryFullyRecalled} is received. At this stage, the {@code Delivery} stops
  * the propagation of the events to the catch-up messages, waiting for this process to populate
  * the inboxes with the messages arriving to be dispatched during the turbulence period.
  * Potentially, the inboxes will contain the duplicates produced by both the live users
  * and this process. To deal with it, a deduplication is performed by the {@code Delivery}.
  * See {@link CatchUpStation} for more details.
  *
- * <p>The actions are as follows.
+ * <p>The historical data pushed by the catch-up is dispatched through a number of shards,
+ * each processed by the {@code Delivery} independently from each other. Starting to dispatch
+ * the events from a shard, {@code Delivery} reads the details of the ongoing catch-up processes.
+ * By interpreting the status of each catch-up, {@code Delivery} decides on the actions to apply
+ * to the historical events. For instance, the historical events dispatched from a catch-up which
+ * is already {@code COMPLETED} are considered junk and are immediately deleted.
+ *
+ * <p>Before moving to the catch-up completion, it is required to make sure every historical event
+ * has been seen and dispatched by the {@code Delivery}. So if the catch-up process is moved
+ * to the {@code COMPLETED} state too early, some historical events will get stuck in limbo, and
+ * will eventually be deleted.
+ *
+ * <p>It's important to understand that different shards may be processed at different speeds and
+ * potentially by different application nodes. Therefore, in order to switch to the
+ * {@code COMPLETED} status, a catch-up process must ensure that <b>each</b> shard was processed
+ * by the {@code Delivery} which witnessed the catch-up process in its {@code FINALIZING} state.
+ * Such an evidence would mean that this {@code Delivery} run is at the point in time by which
+ * the catch-up process a) emitted all historical events, b) emitted {@link HistoryFullyRecalled}
+ * event after them, and c) all these events were dispatched already — otherwise, the process
+ * wasn't going to be in {@code FINALIZING} state.
+ *
+ * <p>In order to guarantee that prior to moving to the {@code COMPLETED} status, the catch-up
+ * process emits special {@link ShardProcessingRequested} events for each shard. The events are
+ * dispatched to a {@link ShardMaintenanceProcess}, which responds back by emitting
+ * {@link ShardProcessed} events. The {@code Delivery} knows about this special-case signals
+ * and appends the data in these events with its own picture of ongoing catch-up
+ * processes and their statuses. By receiving {@code ShardProcessed} events populated with this
+ * information the catch-up process knows which status was seen by the {@code Delivery}
+ * at the moment when it had been dispatching the events from a certain shard.
+ *
+ * <p>The actions at this stage are as follows.
  *
  * <ul>
  *      <li>All the remaining messages of the matching event types are read {@link EventStore}.
  *      In this operation the read limits set by the {@code Delivery} are NOT used, since
  *      the goal is to read the remainder of the events.
  *
- *      <li>If there were no events read, the {@link CatchUpCompleted} is emitted and the process
- *      is moved to the {@link CatchUpStatus#COMPLETED COMPLETED} status.
+ *      <li>The {@link LiveEventsPickedUp} event is emitted. This allows some time for the posted
+ *      events to become visible to the {@code Delivery}.
  *
- *      <li>If there were some events read, the {@link LiveEventsPickedUp} event is emitted.
- *      This allows some time for the posted events to become visible to the {@code Delivery}.
- *      The reacting handler of the {@code LiveEventsPickedUp} completes the process.
+ *      <li>In the next round of delivery, the emitted {@link LiveEventsPickedUp} event is
+ *      dispatched back to this process. By this time, the last batch of the historical events
+ *      has already been sent to their destinations. However, not all of them may have been yet
+ *      delivered due to their large number or to the I/O performance. To ensure that every
+ *      historical event was seen by the {@code Delivery}, a special
+ *      {@link ShardProcessingRequested} event is emitted for every shard involved into
+ *      dispatching the historical events up until now.
+ *
+ *      <p>Each {@link ShardProcessingRequested} event triggers the {@code Delivery} to read
+ *      and dispatch the signals from a specific shard. Being sent, these events are dispatched
+ *      to a special system {@link ShardMaintenanceProcess} serving as a handler. By reacting
+ *      to a {@code ShardProcessingRequested}, the latter maintenance process emits
+ *      a {@link ShardProcessed} event, telling that the {@code Delivery} has worked its way
+ *      through the messages present in this shard.
+ *
+ *      <p>The catch-up process handles each {@link ShardProcessed} event. By gathering the data
+ *      from these events, the catch-up is able to tell when all the affected shards were
+ *      fully processed by the {@code Delivery}. Once all shards are processed,
+ *      a {@link CatchUpCompleted} event is emitted.
  * </ul>
  *
  * <p><b>{@link CatchUpStatus#COMPLETED COMPLETED}</b>
  *
- * <p>Once the process moves to the {@code COMPLETED} status, the corresponding {@code Delivery}
- * routines deduplicate, reorder and dispatch the "paused" events. Then the normal live delivery
- * flow is resumed.
+ * <p>Once the {@code CatchUpCompleted} event is received, the process moves
+ * to the {@code COMPLETED} status. At this point, some live events and some historical events which
+ * were located in the "turbulence" window are still paused for dispatching. To ensure they are
+ * processed in each shard, the catch-up emits a number of {@code ShardProcessingRequested} events
+ * again. By dispatching them, it makes sure that the {@code Delivery} observes the change of
+ * catch-up status to {@code COMPLETED} and moves onto de-duplicating and delivering the previously
+ * "paused" events.
  *
- * <p>To ensure that all the shards in which the "paused" historical events reside are processed,
- * this process additionally emits the "maintenance" {@link ShardProcessingRequested} events for
- * each shard involved. By dispatching them, the system guarantees that the {@code Delivery}
- * observes the {@code COMPLETED} status of this process and delivers the remainer of the messages.
+ * <p>After that, a normal delivery flow is resumed. The catch-up process stops its execution.
  *
  * @implNote Technically, the instances of this class are not
  *         {@linkplain io.spine.server.procman.ProcessManager process managers}, since it is
@@ -268,7 +328,7 @@ public final class CatchUpProcess<I>
     }
 
     /**
-     * Moves the process from {@code Not Started} to {@code IN_PROGRESS} state.
+     * Moves the process from {@code Not Started} to {@code STARTED} state.
      *
      * Two important things happen at this stage:
      * <ul>
@@ -404,9 +464,8 @@ public final class CatchUpProcess<I>
      * Sets the process status to {@link CatchUpStatus#FINALIZING FINALIZING} and reads all
      * the remaining events, then dispatching those to the projection inboxes.
      *
-     * <p>If there were no events read, sets the process status to {@link CatchUpStatus#COMPLETED
-     * COMPLETED}. Otherwise, emits {@code LiveEventsPickedUp} event, which is dispatched to this
-     * process in the next round.
+     * <p>Emits {@code LiveEventsPickedUp} event, which is dispatched to this process
+     * in the next round.
      */
     @React
     LiveEventsPickedUp handle(HistoryFullyRecalled event, EventContext context) {
@@ -430,6 +489,21 @@ public final class CatchUpProcess<I>
         return liveEventsPickedUp(id);
     }
 
+    /**
+     * Emits an additional {@link ShardProcessingRequested} event and thus triggers the processing
+     * of the potentially omitted live events in each of the shards affected in this
+     * catch-up process.
+     *
+     * <p>The {@code Delivery} is equipped with a {@link MaintenanceStation}, which
+     *
+     * <p>The main goal of such a trick is to ensure that all shards do not contain any
+     * of the historical events, and each of the shards is in {@code FINALIZING} status. Otherwise,
+     * moving to the {@code COMPLETED} status right away would kill these historical events
+     * as irrelevant.
+     *
+     * <p>See the {@link ShardMaintenanceProcess} which handles each of the emitted requests
+     * for the shard processing.
+     */
     @React
     List<ShardProcessingRequested> handle(LiveEventsPickedUp event, EventContext context) {
         List<Integer> affectedShards = builder().getAffectedShardList();
@@ -438,6 +512,19 @@ public final class CatchUpProcess<I>
         return messages;
     }
 
+    /**
+     * Waits until all of the shards are guaranteed to have all of their historical events
+     * seen and dispatched by the {@code Delivery}.
+     *
+     * <p>By gathering the data from {@code ShardProcessed} events, the catch-up
+     * process tracks the shards which are already ready for the catch-up completion. Once all
+     * of the shards affected by this process become ready, a {@code CatchUpCompleted} is emitted.
+     *
+     * <p>If, for some reason, a {@code ShardProcessed} event is dispatched to this process when
+     * its status is already {@code COMPLETED}, this reactor method does nothing.
+     *
+     * <p>See the class-level documentation for more details and the big picture.
+     */
     @React
     EitherOf3<CatchUpCompleted, ShardProcessingRequested, Nothing> handle(ShardProcessed event) {
         if (builder().getStatus() == COMPLETED) {
