@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.IdInTenant;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -91,7 +92,10 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         List<Batch<I>> batches = Batch.byInboxId(incoming, this::asEnvelope);
 
         for (Batch<I> batch : batches) {
-            batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents);
+            TenantId tenant = batch.inboxId.tenant();
+            TenantAwareRunner.with(tenant).run(
+                () -> batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents)
+            );
         }
     }
 
