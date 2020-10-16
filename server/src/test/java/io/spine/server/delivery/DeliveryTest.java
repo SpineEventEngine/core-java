@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
 import io.spine.base.Tests;
-import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.Messages;
 import io.spine.server.BoundedContextBuilder;
@@ -39,11 +38,9 @@ import io.spine.server.delivery.given.TaskAggregate;
 import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
-import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.test.delivery.DTaskView;
 import io.spine.testing.SlowTest;
-import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
@@ -205,15 +202,11 @@ public class DeliveryTest extends AbstractDeliveryTest {
         env.use(delivery, Tests.class);
 
         ShardIndex index = strategy.nonEmptyShard();
-        TenantId tenantId = GivenTenantId.generate();
-        TenantAwareRunner.with(tenantId)
-                         .run(() -> assertStatsMatch(delivery, index));
+        assertStatsMatch(delivery, index);
 
         Optional<ShardProcessingSession> session = registry.pickUp(index, env.nodeId());
         assertThat(session).isPresent();
-
-        TenantAwareRunner.with(tenantId)
-                         .run(() -> assertStatsEmpty(delivery, index));
+        assertStatsEmpty(delivery, index);
     }
 
     @Test
