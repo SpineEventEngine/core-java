@@ -152,18 +152,18 @@ public final class ThirdPartyContext implements Closeable {
 
     private void checkTenant(ActorContext actorContext, EventMessage event) {
         boolean tenantSupplied = actorContext.hasTenantId();
+        String contextName = context.name().getValue();
+        String eventType = event.getClass().getName();
         if (context.isMultitenant()) {
             checkArgument(tenantSupplied,
-                          "Cannot post `%s` into a third-party multitenant context %s." +
+                          "Cannot post `%s` into a third-party multitenant context `%s`." +
                                   " No tenant ID supplied.",
-                          event.getClass().getSimpleName(),
-                          context.name().getValue());
+                          eventType, contextName);
         } else {
             checkArgument(!tenantSupplied,
-                          "Cannot post `%s` into a third-party single-tenant context %s." +
+                          "Cannot post `%s` into a third-party single-tenant context `%s`." +
                                   " Tenant ID must NOT be supplied.",
-                          event.getClass().getSimpleName(),
-                          context.name().getValue());
+                          eventType, contextName);
         }
     }
 
