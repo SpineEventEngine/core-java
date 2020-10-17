@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordStorage;
 
@@ -46,8 +47,8 @@ public abstract class TenantStorage<T extends Message>
 
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
 
-    protected TenantStorage(RecordStorage<TenantId, T> delegate) {
-        super(delegate);
+    protected TenantStorage(ContextSpec context, RecordStorage<TenantId, T> delegate) {
+        super(context, delegate);
     }
 
     /**

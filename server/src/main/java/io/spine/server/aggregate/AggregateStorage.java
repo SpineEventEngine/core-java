@@ -90,7 +90,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
                             Class<? extends Aggregate<I, S, ?>> aggregateClass,
                             StorageFactory factory) {
         super(context.isMultitenant());
-        eventStorage = factory.createAggregateEventStorage(context.isMultitenant());
+        eventStorage = factory.createAggregateEventStorage(context);
         stateStorage = factory.createEntityRecordStorage(context, aggregateClass);
         truncation = new TruncateOperation(eventStorage);
         historyBackward = new HistoryBackwardOperation<>(eventStorage);

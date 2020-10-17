@@ -56,8 +56,8 @@ public interface TenantIndex extends AutoCloseable {
         StorageFactory factory = ServerEnvironment.instance()
                                                   .storageFactory();
         @SuppressWarnings("ClassReferencesSubclass") // OK for this default impl.
-                DefaultTenantStorage tenantStorage = new DefaultTenantStorage(factory);
-        return tenantStorage;
+        DefaultTenantStorage tenantRepo = new DefaultTenantStorage(factory);
+        return tenantRepo;
     }
 
     /**

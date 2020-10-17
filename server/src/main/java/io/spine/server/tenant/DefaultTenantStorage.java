@@ -22,6 +22,7 @@ package io.spine.server.tenant;
 
 import io.spine.base.Time;
 import io.spine.core.TenantId;
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.StorageFactory;
 
@@ -32,12 +33,18 @@ import io.spine.server.storage.StorageFactory;
  */
 final class DefaultTenantStorage extends TenantStorage<Tenant> {
 
+    /**
+     * A name of a Bounded Context in scope of which the tenant data is stored.
+     */
+    @SuppressWarnings("TestOnlyProblems")   // The called API is not test-only.
+    private static final ContextSpec contextSpec = ContextSpec.singleTenant("__SYSTEM_TENANTS__");
+
     DefaultTenantStorage(StorageFactory factory) {
-        super(factory.createRecordStorage(getSpec(), false));
+        super(contextSpec, factory.createRecordStorage(contextSpec, spec()));
     }
 
     @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.
-    private static MessageRecordSpec<TenantId, Tenant> getSpec() {
+    private static MessageRecordSpec<TenantId, Tenant> spec() {
         return new MessageRecordSpec<>(TenantId.class, Tenant.class, Tenant::getId);
     }
 

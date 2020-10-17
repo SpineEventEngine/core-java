@@ -42,17 +42,17 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Creates a new {@link RecordStorage}.
      *
+     * @param context
+     *         specification of the Bounded Context in scope of which the storage will be used
      * @param recordSpec
      *         the specification of the record format in which the items are stored
-     * @param multitenant
-     *         whether the storage should be multi-tenant
      * @param <I>
      *         the type of the record identifiers
      * @param <R>
      *         the type of the stored records
      */
     <I, R extends Message> RecordStorage<I, R>
-    createRecordStorage(RecordSpec<I, R, ?> recordSpec, boolean multitenant);
+    createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec);
 
     /**
      * Creates a new {@link AggregateStorage}.
@@ -62,8 +62,7 @@ public interface StorageFactory extends AutoCloseable {
      * @param <S>
      *         the type of aggregate state
      * @param context
-     *         specification of the Bounded Context {@code AggregateRepository} of which
-     *         requests the creation of the storage
+     *         specification of the Bounded Context, in scope of which the storage will be used
      * @param aggregateCls
      *         the class of {@code Aggregate}s to be stored
      */
@@ -75,11 +74,41 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Creates a new {@link AggregateEventStorage}.
      *
-     * @param multitenant
-     *         whether the created storage should be multi-tenant
+     * @param context
+     *         specification of the Bounded Context in scope of which the storage will be used
      */
-    default AggregateEventStorage createAggregateEventStorage(boolean multitenant) {
-        return new AggregateEventStorage(this, multitenant);
+    default AggregateEventStorage
+    createAggregateEventStorage(ContextSpec context) {
+        return new AggregateEventStorage(context, this);
+    }
+
+    /**
+     * Creates a new {@link EventStore}.
+     *
+     * @param context
+     *         specification of the Bounded Context events of which the store would serve
+     */
+    default EventStore createEventStore(ContextSpec context) {
+        return new DefaultEventStore(context, this);
+    }
+
+    /**
+     * Creates a new {@link EntityRecordStorage}.
+     *
+     * @param <I>
+     *         the type of entity IDs
+     * @param <S>
+     *         the type of the entity state
+     * @param context
+     *         specification of the Bounded Context, in scope of which this storage will be used
+     * @param entityClass
+     *         the class of entities to be stored
+     */
+    default <I, S extends EntityState<I>> EntityRecordStorage<I, S>
+    createEntityRecordStorage(ContextSpec context, Class<? extends Entity<I, S>> entityClass) {
+        EntityRecordStorage<I, S> result =
+                new EntityRecordStorage<>(this, entityClass, context.isMultitenant());
+        return result;
     }
 
     /**
@@ -111,35 +140,5 @@ public interface StorageFactory extends AutoCloseable {
      */
     default CatchUpStorage createCatchUpStorage(boolean multitenant) {
         return new CatchUpStorage(this, multitenant);
-    }
-
-    /**
-     * Creates a new {@link EventStore}.
-     *
-     * @param context
-     *         specification of the Bounded Context events of which the store would serve
-     */
-    default EventStore createEventStore(@SuppressWarnings("unused") ContextSpec context) {
-        return new DefaultEventStore(this, context.isMultitenant());
-    }
-
-    /**
-     * Creates a new {@link EntityRecordStorage}.
-     *
-     * @param <I>
-     *         the type of entity IDs
-     * @param <S>
-     *         the type of the entity state
-     * @param context
-     *         specification of the Bounded Context {@code RecordBasedRepository} of which
-     *         requests the creation of the storage
-     * @param entityClass
-     *         the class of entities to be stored
-     */
-    default <I, S extends EntityState<I>> EntityRecordStorage<I, S>
-    createEntityRecordStorage(ContextSpec context, Class<? extends Entity<I, S>> entityClass) {
-        EntityRecordStorage<I, S> result =
-                new EntityRecordStorage<>(this, entityClass, context.isMultitenant());
-        return result;
     }
 }

@@ -30,6 +30,7 @@ import io.spine.core.Signal;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.query.RecordQuery;
+import io.spine.server.ContextSpec;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.MessageRecordSpec;
@@ -67,8 +68,8 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
     /**
      * Constructs new instance.
      */
-    public DefaultEventStore(StorageFactory factory, boolean multitenant) {
-        super(factory.createRecordStorage(spec(), multitenant));
+    public DefaultEventStore(ContextSpec context, StorageFactory factory) {
+        super(context, factory.createRecordStorage(context, spec()));
         this.log = new Log();
     }
 

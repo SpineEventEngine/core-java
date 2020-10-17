@@ -23,6 +23,7 @@ package io.spine.server.storage;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
+import io.spine.server.ContextSpec;
 
 import java.util.List;
 
@@ -48,8 +49,16 @@ import static java.util.stream.Collectors.toList;
 @SPI
 public abstract class MessageStorage<I, M extends Message> extends RecordStorageDelegate<I, M> {
 
-    protected MessageStorage(RecordStorage<I, M> delegate) {
-        super(delegate);
+    /**
+     * Creates a new instance.
+     *
+     * @param context
+     *         a specification of Bounded Context in which the created storage is used
+     * @param delegate
+     *         the instance of storage to delegate all operations to
+     */
+    protected MessageStorage(ContextSpec context, RecordStorage<I, M> delegate) {
+        super(context, delegate);
     }
 
     /**

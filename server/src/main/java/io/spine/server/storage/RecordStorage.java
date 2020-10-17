@@ -28,6 +28,7 @@ import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
+import io.spine.server.ContextSpec;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -54,13 +55,13 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     /**
      * Creates the new storage instance.
      *
+     * @param context
+     *         specification of the Bounded Context in scope of which the storage will be used
      * @param recordSpec
      *         definitions of the columns to store along with each record
-     * @param multitenant
-     *         whether this storage should support multi-tenancy
      */
-    protected RecordStorage(RecordSpec<I, R, ?> recordSpec, boolean multitenant) {
-        super(multitenant);
+    protected RecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
+        super(context.isMultitenant());
         this.recordSpec = recordSpec;
     }
 

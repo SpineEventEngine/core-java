@@ -56,7 +56,8 @@ import static java.util.stream.Collectors.toList;
 public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
 
     public InboxStorage(StorageFactory factory, boolean multitenant) {
-        super(factory.createRecordStorage(spec(), multitenant));
+        super(Delivery.contextSpec(multitenant),
+              factory.createRecordStorage(Delivery.contextSpec(multitenant), spec()));
     }
 
     private static MessageRecordSpec<InboxMessageId, InboxMessage> spec() {

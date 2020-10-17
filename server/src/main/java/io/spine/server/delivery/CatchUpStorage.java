@@ -38,7 +38,8 @@ import static io.spine.server.delivery.CatchUpColumn.projection_type;
 public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
 
     public CatchUpStorage(StorageFactory factory, boolean multitenant) {
-        super(factory.createRecordStorage(getSpec(), multitenant));
+        super(Delivery.contextSpec(multitenant),
+              factory.createRecordStorage(Delivery.contextSpec(multitenant), getSpec()));
     }
 
     @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}.

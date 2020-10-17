@@ -25,6 +25,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.query.RecordQuery;
+import io.spine.server.ContextSpec;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -58,8 +59,16 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
 
     private final RecordStorage<I, R> delegate;
 
-    protected RecordStorageDelegate(RecordStorage<I, R> delegate) {
-        super(delegate.recordSpec(), delegate.isMultitenant());
+    /**
+     * Initializes this storage with the instance to delegate the execution of operations to.
+     *
+     * @param context
+     *         specification of Bounded Context in scope of which this storage is used
+     * @param delegate
+     *         storage instance to delegate all operations to
+     */
+    protected RecordStorageDelegate(ContextSpec context, RecordStorage<I, R> delegate) {
+        super(context, delegate.recordSpec());
         this.delegate = delegate;
     }
 

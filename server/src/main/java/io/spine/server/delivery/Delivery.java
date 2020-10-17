@@ -25,8 +25,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.Internal;
+import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.MulticastDispatchListener;
@@ -222,6 +225,14 @@ public final class Delivery implements Logging {
      * <p>Selected to be pretty big to avoid dispatching duplicates to any entities.
      */
     private static final Duration LOCAL_DEDUPLICATION_WINDOW = Durations.fromSeconds(30);
+
+    /**
+     * The name of the system bounded context which performs the delivery of signals.
+     *
+     * <p>This name is used to initialize the storage implementations.
+     */
+    private static final BoundedContextName SYSTEM_DELIVERY =
+            BoundedContextNames.newName("__System_Delivery__");
 
     /**
      * The strategy of assigning a shard index for a message that is delivered to a particular
@@ -688,5 +699,17 @@ public final class Delivery implements Logging {
                 Delivery.this.dispatchListener.notifyOf(message);
             }
         };
+    }
+
+    /**
+     * Returns the specification of a Bounded Context describing the {@code Delivery} flow.
+     * @param multitenant whether the Bounded Context supports multi-tenancy
+     */
+    @SuppressWarnings("TestOnlyProblems")   // The called code is not test-only.
+    static ContextSpec contextSpec(boolean multitenant) {
+        String name = SYSTEM_DELIVERY.value();
+        return multitenant ?
+               ContextSpec.multitenant(name) :
+               ContextSpec.singleTenant(name);
     }
 }
