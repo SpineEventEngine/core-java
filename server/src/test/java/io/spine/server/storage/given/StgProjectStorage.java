@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.given;
 
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.StorageFactory;
@@ -39,8 +40,8 @@ import io.spine.test.storage.StgProjectId;
  */
 public class StgProjectStorage extends MessageStorage<StgProjectId, StgProject> {
 
-    public StgProjectStorage(StorageFactory factory, boolean multitenant) {
-        super(factory.createRecordStorage(spec(), multitenant));
+    public StgProjectStorage(ContextSpec context, StorageFactory factory) {
+        super(context, factory.createRecordStorage(context, spec()));
     }
 
     private static MessageRecordSpec<StgProjectId, StgProject> spec() {

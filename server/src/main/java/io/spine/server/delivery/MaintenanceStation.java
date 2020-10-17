@@ -31,27 +31,27 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.protobuf.AnyPacker.pack;
 
 /**
- * A station which supplies the {@link DeliveryContext} to certain events being dispatched
+ * A station which supplies the {@link DeliveryRunInfo} to certain events being dispatched
  * to {@link ShardMaintenanceProcess}.
  */
 final class MaintenanceStation extends Station {
 
-    private final DeliveryContext context;
+    private final DeliveryRunInfo runInfo;
     private final ImmutableList<CatchUp> finalizingJobs;
 
     /**
-     * Creates a station in this delivery context and initializes itself by searching
+     * Creates a station in this delivery run-time information and initializes itself by searching
      * for the matching catch-up jobs.
      */
-    MaintenanceStation(DeliveryContext context) {
+    MaintenanceStation(DeliveryRunInfo runInfo) {
         super();
-        this.context = context;
-        this.finalizingJobs = findFinalizingJobs(context);
+        this.runInfo = runInfo;
+        this.finalizingJobs = findFinalizingJobs(runInfo);
     }
 
     /**
      * Updates the {@code ShardProcessingRequested} events by setting
-     * the current {@link DeliveryContext} into each, if there is at least one
+     * the current {@link DeliveryRunInfo} into each, if there is at least one
      * {@code CatchUp} job in {@link CatchUpStatus#FINALIZING FINALIZING} status.
      *
      * <p>The updated messages are put back into the conveyor and later they are delivered
@@ -98,13 +98,13 @@ final class MaintenanceStation extends Station {
 
     private ShardProcessingRequested updateWithContext(ShardProcessingRequested signal) {
         ShardProcessingRequested modifiedSignal = signal.toBuilder()
-                                                        .setContext(context)
+                                                        .setRunInfo(runInfo)
                                                         .vBuild();
         return modifiedSignal;
     }
 
-    private static ImmutableList<CatchUp> findFinalizingJobs(DeliveryContext context) {
-        List<CatchUp> jobs = context.getCatchUpJobList();
+    private static ImmutableList<CatchUp> findFinalizingJobs(DeliveryRunInfo runInfo) {
+        List<CatchUp> jobs = runInfo.getCatchUpJobList();
         ImmutableList<CatchUp> finalizingJobs =
                 jobs.stream()
                     .filter((job) -> job.getStatus() == CatchUpStatus.FINALIZING)

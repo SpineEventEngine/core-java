@@ -532,7 +532,7 @@ public final class CatchUpProcess<I>
         }
 
         CatchUpId id = builder().getId();
-        Optional<CatchUp> stateVisibleToDelivery = findJob(id, event.getContext());
+        Optional<CatchUp> stateVisibleToDelivery = findJob(id, event.getRunInfo());
         if (stateVisibleToDelivery.isPresent()) {
             CatchUp observedJob = stateVisibleToDelivery.get();
             if (observedJob.getStatus() == FINALIZING) {
@@ -557,9 +557,9 @@ public final class CatchUpProcess<I>
 
 
 
-    private static Optional<CatchUp> findJob(CatchUpId id, DeliveryContext deliveryContext) {
+    private static Optional<CatchUp> findJob(CatchUpId id, DeliveryRunInfo deliveryInfo) {
         Optional<CatchUp> stateVisibileToDelivery =
-                deliveryContext.getCatchUpJobList()
+                deliveryInfo.getCatchUpJobList()
                                .stream()
                                .filter((job) -> job.getId()
                                                    .equals(id))

@@ -29,6 +29,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
+import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.storage.given.RecordStorageDelegateTestEnv;
 import io.spine.server.storage.given.StgProjectStorage;
@@ -79,7 +80,8 @@ public class RecordStorageDelegateTest
     protected StgProjectStorage newStorage() {
         StorageFactory factory = ServerEnvironment.instance()
                                                   .storageFactory();
-        return new StgProjectStorage(factory, false);
+        ContextSpec ctxSpec = ContextSpec.singleTenant(getClass().getName());
+        return new StgProjectStorage(ctxSpec, factory);
     }
 
     @Override

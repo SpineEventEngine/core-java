@@ -22,8 +22,8 @@ message ShardProcessingRequested {
 
     ShardIndex index = 1 [(required) = true, (validate) = true];
 
-    // The context of the delivery at the moment when this event has been dispatched.
-    DeliveryContext context = 2;
+    // The run-time data of the delivery at the moment when this event has been dispatched.
+    DeliveryRunInfo run_info = 2;
 
     // An identifier of a `CatchUp` process in scope of which the shard processing
     // was originally requested.
@@ -36,8 +36,8 @@ message ShardProcessed {
 
     ShardIndex index = 1 [(required) = true, (validate) = true];
 
-    // The context of the delivery at the moment when the shard was processed.
-    DeliveryContext context = 2;
+    // The run-time data of the delivery at the moment when the shard was processed.
+    DeliveryRunInfo run_info = 2;
 
     // An identifier of a `CatchUp` process in scope of which the shard processing
     // was originally requested.

@@ -89,8 +89,14 @@ message ShardMaintenance {
     ShardIndex id = 1;
 }
 
-// The context in which some delivery occurs.
-message DeliveryContext {
+// The configuration data `Delivery` used at its run-time to make decisions on how
+// to dispatch messages.
+//
+// The system-wide processes, such as `CatchUp` need to know the details on how the messages
+// were dispatched by `Delivery`. Therefore, `Delivery` records some of its parameters
+// when it is delivering the signals, and passes this data on to all interested parties.
+//
+message DeliveryRunInfo {
 
     // The catch-up jobs observed by the Delivery.
     repeated spine.server.catchup.CatchUp catch_up_job = 1;

@@ -518,15 +518,15 @@ public final class Delivery implements Logging {
     private ImmutableList<Station> conveyorStationsFor(Iterable<CatchUp> catchUpJobs,
                                                        DeliveryAction action) {
         return ImmutableList.of(
-                new MaintenanceStation(deliveryContextWith(catchUpJobs)),
+                new MaintenanceStation(deliveryInfoWith(catchUpJobs)),
                 new CatchUpStation(action, catchUpJobs),
                 new LiveDeliveryStation(action, deduplicationWindow),
                 new CleanupStation()
         );
     }
 
-    private static DeliveryContext deliveryContextWith(Iterable<CatchUp> catchUpJobs) {
-        return DeliveryContext.newBuilder()
+    private static DeliveryRunInfo deliveryInfoWith(Iterable<CatchUp> catchUpJobs) {
+        return DeliveryRunInfo.newBuilder()
                               .addAllCatchUpJob(catchUpJobs)
                               .vBuild();
     }

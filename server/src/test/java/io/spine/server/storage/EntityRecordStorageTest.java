@@ -28,6 +28,7 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.query.RecordQuery;
+import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -97,7 +98,8 @@ public class EntityRecordStorageTest
     protected EntityRecordStorage<StgProjectId, StgProject> newStorage() {
         StorageFactory factory = ServerEnvironment.instance()
                                                   .storageFactory();
-        return new EntityRecordStorage<>(factory, TestCounterEntity.class, false);
+        ContextSpec ctxSpec = ContextSpec.singleTenant(EntityRecordStorageTest.class.getName());
+        return new EntityRecordStorage<>(ctxSpec, factory, TestCounterEntity.class);
     }
 
     @Override

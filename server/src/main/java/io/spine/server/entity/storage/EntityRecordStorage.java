@@ -33,6 +33,7 @@ import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import io.spine.query.Subject;
+import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageDelegate;
@@ -48,7 +49,13 @@ import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.server.entity.storage.ToEntityRecordQuery.transform;
 
 /**
- * A {@code MessageStorage} which stores {@link EntityRecord}s.
+ * A storage for {@link EntityRecord}s.
+ *
+ * <p>Delegates all storage operations to the underlying
+ * {@link io.spine.server.storage.RecordStorage RecordStorage}. For that, creates a new
+ * {@code RecordStorage} instance through the provided {@code StorageFactory} and configures
+ * it with the {@linkplain EntityRecordSpec record specification} corresponding
+ * to the stored Entity.
  *
  * @param <I>
  *         the type of the identifiers of stored entities
@@ -74,10 +81,21 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     private final boolean hasDeletedColumn;
 
-    public EntityRecordStorage(StorageFactory factory,
-                               Class<? extends Entity<I, S>> entityClass,
-                               boolean multitenant) {
-        super(factory.createRecordStorage(spec(entityClass), multitenant));
+    /**
+     * Creates a new instance.
+     *
+     * <p>This constructor takes the specification of the Bounded Context in which the storage
+     * is created. It may be used by other framework libraries and SPI users to set properties
+     * of an underlying DBMS (such as DB table names), with which this record storage interacts.
+     *
+     * @param context specification of the Bounded Context in which the created storage will be used
+     * @param factory storage factory
+     * @param entityClass class of an Entity which data is stored in the created storage
+     */
+    public EntityRecordStorage(ContextSpec context,
+                               StorageFactory factory,
+                               Class<? extends Entity<I, S>> entityClass) {
+        super(context, factory.createRecordStorage(context, spec(entityClass)));
         this.hasArchivedColumn = hasColumn(archived);
         this.hasDeletedColumn = hasColumn(deleted);
         FindActiveEntites<I, S> entityQuery = findActiveEntities().build();
