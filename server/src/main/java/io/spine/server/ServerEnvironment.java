@@ -66,10 +66,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         ...
  *     }
  *
- *     // Can also be
- *     // `ServerEnvironment.use(inMemoryStorageFactory, new Staging(stagingServiceDiscovery));`,
- *     // if `Staging` expects dependencies to its constructor.
  *     ServerEnvironment.use(inMemoryStorageFactory, Staging.class);
+ *
+ *     // Or, if `Staging` expects dependencies to its constructor, it can turn into this:
+ *     // `ServerEnvironment.use(inMemoryStorageFactory, new StagingEnvironment(dependencies));`,
+ *
  * </pre>
  *
  * <p>If {@code Staging} is {@link Environment#type() enabled}, the specified value is going to be
