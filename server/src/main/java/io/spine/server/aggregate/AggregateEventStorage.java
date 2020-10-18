@@ -30,6 +30,8 @@ import java.util.Iterator;
 
 /**
  * Storage of events for each {@link Aggregate}.
+ *
+ * @see AggregateStorage
  */
 public class AggregateEventStorage
         extends MessageStorage<AggregateEventRecordId, AggregateEventRecord> {

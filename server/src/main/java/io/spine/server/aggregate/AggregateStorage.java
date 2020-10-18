@@ -53,8 +53,56 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A storage of aggregate events, snapshots and the most recent aggregate states.
  *
+ * <p>The instances of this type solve two problems.
  *
- * //TODO:2020-10-08:alex.tymchenko: tell about mirroring and two storages here.
+ * <ol>
+ *     <li>efficient loading of an Aggregate instance from its events;</li>
+ *
+ *     <li>mirroring the latest state of an Aggregate along with its lifecycle flags.</li>
+ * </ol>
+ *
+ * <h3>Storing Aggregate events</h3>
+ *
+ * <p>Each Aggregate is an event-sourced Entity. To load an Aggregate instance, one plays all
+ * of the events emitted by it, eventually obtaining the last known state. While the Event Store
+ * of a Bounded Context, to which some Aggregate belongs, stores all domain events, using it
+ * for the sake of loading an Aggregate is inefficient in most cases. An overwhelming number of
+ * the domain events emitted in a Bounded Context and the restrictions applied by an underlying
+ * storage tools make searching for the events of a particular Aggregate a difficult task, given
+ * that the events are constantly being appended to the respective Event Store.
+ *
+ * <p>This storage duplicates a portion of events emitted by the Aggregates of a certain type.
+ * It dramatically narrows down the number of storage records to traverse when loading.
+ * Additionally, this storage is responsible for storing the intermediate snapshots of Aggregate
+ * states, incorporating them into an optimized loading routines. The history of an Aggregate
+ * is being read from the most recent event till its most recent snapshot, which reduces
+ * the I/O between the underlying storage and application even more and enhances the overall
+ * system performance.
+ *
+ * <p>In order to store events and snapshots, an intermediate {@link AggregateEventStorage} is
+ * created. It persists data as Protobuf message records in its pre-configured
+ * {@link io.spine.server.storage.RecordStorage RecordStorage}.
+ *
+ * <h3>Persisting Aggregate states</h3>
+ *
+ * <p>End-users of the framework are able {@linkplain #enableMirror() to enable this storage}
+ * to mirror the latest states of Aggregates. To some extent, it makes this storage a part
+ * of an application's read-side. If enabled, this state mirroring feature makes it possible
+ * {@linkplain #readStates(TargetFilters, ResponseFormat) to read the latest known states} of
+ * Aggregates by querying. Similar to other entities and their storages, {@code AggregateStorage}
+ * supports querying the Aggregate states by the values of their declared entity columns.
+ * See {@link io.spine.query} package for more details on the query language.
+ *
+ * <p>However, even if mirroring is not enabled, the storage persists the essential bits of
+ * Aggregate as an Entity. Namely, its identifier, its lifecycle flags and version. Such a behavior
+ * allows to speed up the execution of calls such as {@linkplain #index() obtaining an index}
+ * of Aggregate identifiers, which otherwise would involve major storage scans along with
+ * {@code DISTINCT} group operation applied.
+ *
+ * <p>As long as the Aggregate states are no different in their persistence from other Entities,
+ * the {@code AggregateStorage} uses an intermediate {@link EntityRecordStorage} by delegating
+ * all state-related operations to it.
+ *
  * @param <I>
  *         the type of IDs of aggregates managed by this storage
  * @param <S>
