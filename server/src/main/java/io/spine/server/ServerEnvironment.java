@@ -80,9 +80,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>A {@code ServerEnvironment} instance is a singleton. It means that all Bounded Contexts
  * which are deployed within the same JVM share the configuration of the server environment.
  * Namely, under the same environment type, all Bounded Contexts will share the same storage
- * factory, transport factory and tracing tools.
+ * factory, transport factory, delivery and tracing tools.
  *
- * <p>If one decides that some of the Bounded Contexts of an application requires its custom
+ * <p>If one decides that some of the Bounded Contexts of an application requires custom
  * settings, they should arrange a separate deployable artifact and distinct configuration
  * of the respective {@code ServerEnvironment} for those Bounded Contexts. In this way,
  * the Contexts would reside in their own JVMs and not overlap on interacting with this singleton.
