@@ -46,10 +46,10 @@ import io.spine.server.event.store.DefaultEventStore;
  * types. It is capable of storing and querying any Protobuf messages, and provides
  * a configuration API for detailing on how each message is transformed into a stored record.
  *
- * <p>In order to achieve that, each of the storage classes starts its own initialization
- * by creating an underlying {@code RecordStorage} and customizing it with a
- * {@linkplain RecordSpec specification of the Proto message} to store. Once that is done,
- * all operations are run through this delegate instance.
+ * <p>To achieve that, each of the storage classes starts its own initialization by creating
+ * an underlying {@code RecordStorage} and customizing it with a {@linkplain RecordSpec
+ * specification of the Proto message} to store. Once that is done, all operations are
+ * run through this delegate instance.
  *
  * <p>Such an approach brings another advantage for SPI users, too. It is sufficient to provide
  * just a new {@code RecordStorage} implementation in order to extend the storage factory
