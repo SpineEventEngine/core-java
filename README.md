@@ -58,7 +58,7 @@ latest version of the configuration files.
 
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
-[email-developers]: mailto:spine-developers@teamdev.com
+[email-developers]: mailto:developers@spine.io
 [latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.6.0
 [spine-site]: https://spine.io/
 [quick-start]: https://spine.io/docs/quick-start
