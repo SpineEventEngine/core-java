@@ -28,6 +28,8 @@ import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -149,6 +151,54 @@ public final class EventRouting<I>
                 (Route<EventMessage, EventContext, Set<I>>) via;
         addRoute(eventType, casted);
         return this;
+    }
+
+    /**
+     * Sets a custom route for the passed event type by obtaining the target entity
+     * ID from the passed function.
+     *
+     * <p>This is a convenience method for configuring routing when an event is to be delivered
+     * to only one entity which ID is calculated from the event message. A simplest case of that
+     * would be passing a method reference for an accessor of a field of the event message
+     * which contains the ID of interest.
+     *
+     * @param eventType
+     *         the type of the event to route
+     * @param via
+     *         the function for obtaining the target entity ID
+     * @param <E>
+     *         the type of the event message
+     * @return {@code this} to allow chained calls when configuring routing
+     * @see #route(Class, EventRoute)
+     * @see #unicast(Class, BiFunction)
+     */
+    @CanIgnoreReturnValue
+    public <E extends EventMessage>
+    EventRouting<I> unicast(Class<E> eventType, Function<E, I> via) {
+        return route(eventType, new EventFnRoute<>(via));
+    }
+
+    /**
+     * Sets a custom route for the passed event type by obtaining the target entity
+     * ID from the passed function over event message and its context.
+     *
+     * <p>This is a convenience method for configuring routing when an event is to be delivered
+     * to only one entity which ID is calculated from the event message and its context.
+     *
+     * @param eventType
+     *         the type of the event to route
+     * @param via
+     *         the supplier of the target entity ID
+     * @param <E>
+     *         the type of the event message
+     * @return {@code this} to allow chained calls when configuring routing
+     * @see #route(Class, EventRoute)
+     * @see #unicast(Class, Function)
+     */
+    @CanIgnoreReturnValue
+    public <E extends EventMessage>
+    EventRouting<I> unicast(Class<E> eventType, BiFunction<E, EventContext, I> via) {
+        return route(eventType, new EventFnRoute<>(via));
     }
 
     /**

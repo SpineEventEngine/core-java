@@ -18,24 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.server.route;
 
-import io.spine.server.route.EventRouting;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.event.AggProjectPaused;
-import io.spine.test.aggregate.event.AggTaskStarted;
+import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
+
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
- * IdempotencyGuard tests}.
+ * An event route with one target entity which ID is obtained as a function
+ * on an event message.
+ *
+ * @param <I>
+ *         the type of the target entity ID
+ * @param <E>
+ *         the type of the event message
  */
-public final class IgTestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
+final class EventFnRoute<I, E extends EventMessage> implements EventRoute<I, E> {
+
+    private static final long serialVersionUID = 0L;
+    private final BiFunction<E, EventContext, I> fn;
+
+    EventFnRoute(Function<E, I> fn) {
+        checkNotNull(fn);
+        this.fn = (e, ctx) -> fn.apply(e);
+    }
+
+    EventFnRoute(BiFunction<E, EventContext, I> fn) {
+        this.fn = checkNotNull(fn);
+    }
 
     @Override
-    protected void setupEventRouting(EventRouting<ProjectId> routing) {
-        super.setupEventRouting(routing);
-        routing.unicast(AggTaskStarted.class, AggTaskStarted::getProjectId)
-               .unicast(AggProjectPaused.class, AggProjectPaused::getProjectId);
+    public Set<I> apply(E message, EventContext context) {
+        I id = fn.apply(message, context);
+        return EventRoute.withId(id);
     }
 }

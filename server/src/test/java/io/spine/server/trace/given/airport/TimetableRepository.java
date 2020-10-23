@@ -29,8 +29,6 @@ import io.spine.test.trace.FlightRescheduled;
 import io.spine.test.trace.FlightScheduled;
 import io.spine.test.trace.Timetable;
 
-import static io.spine.server.route.EventRoute.withId;
-
 public final class TimetableRepository
         extends ProjectionRepository<AirportId, TimetableProjection, Timetable> {
 
@@ -38,11 +36,8 @@ public final class TimetableRepository
     @Override
     protected void setupEventRouting(EventRouting<AirportId> routing) {
         super.setupEventRouting(routing);
-        routing.route(FlightScheduled.class,
-                      (message, context) -> withId(message.getFrom().getId()))
-               .route(FlightRescheduled.class,
-                      (message, context) -> withId(context.get(AirportId.class)))
-               .route(FlightCanceled.class,
-                      (message, context) -> withId(context.get(AirportId.class)));
+        routing.unicast(FlightScheduled.class, (e) -> e.getFrom().getId())
+               .unicast(FlightRescheduled.class, (e, ctx) -> ctx.get(AirportId.class))
+               .unicast(FlightCanceled.class, (e, ctx) -> ctx.get(AirportId.class));
     }
 }
