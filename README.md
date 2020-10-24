@@ -36,6 +36,16 @@ The support of JDK 11 is planned for the [version 2.0.0][v2] of the framework.
 
 Gradle is used as a build and dependency management system.
 
+This repository uses [configuration files][config] shared across several Spine libs. They are
+plugged in as a Git sub-module. Please use the following command to initialize it:
+
+```sh
+git submodule update --init --recursive
+```  
+
+Also, a `pull` script is located in the root of `core-java` repository. Use it to update to the 
+latest version of the configuration files.
+
 ## Important warnings
 * The code annotated with `@Internal` are not parts of public API of the framework, therefore should
   not be used from outside of the framework.
@@ -48,10 +58,11 @@ Gradle is used as a build and dependency management system.
 
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
-[email-developers]: mailto:spine-developers@teamdev.com
+[email-developers]: mailto:developers@spine.io
 [latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.6.0
 [spine-site]: https://spine.io/
 [quick-start]: https://spine.io/docs/quick-start
 [spine-examples]: https://github.com/spine-examples
 [todo-list]: https://github.com/spine-examples/todo-list
 [v2]: https://github.com/orgs/SpineEventEngine/projects/11
+[config]: https://github.com/SpineEventEngine/config/
