@@ -32,7 +32,7 @@ the [Spine Examples][spine-examples] GitHub organization.
 
 Building Spine modules and libraries requires JDK 8. 
 
-The support of JDK 11 is planned for the [version 2.0.0][v2] of the framework.
+The support of JDK 11 is planned for the [version 3.0][v3] of the framework.
 
 Gradle is used as a build and dependency management system.
 
@@ -64,5 +64,5 @@ If you need to use API with one of these annotations, please [contact us][email-
 [quick-start]: https://spine.io/docs/quick-start
 [spine-examples]: https://github.com/spine-examples
 [todo-list]: https://github.com/spine-examples/todo-list
-[v2]: https://github.com/orgs/SpineEventEngine/projects/11
+[v3]: https://github.com/orgs/SpineEventEngine/projects/11
 [config]: https://github.com/SpineEventEngine/config/
