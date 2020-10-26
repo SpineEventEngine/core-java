@@ -21,23 +21,20 @@
 package io.spine.server.type;
 
 import com.google.common.testing.SerializableTester;
+import io.spine.testing.SingletonTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-
 @DisplayName("EmptyClass should")
-class EmptyClassTest {
+class EmptyClassTest extends SingletonTest<EmptyClass> {
+
+    EmptyClassTest() {
+        super(EmptyClass.class, EmptyClass::instance);
+    }
 
     @Test
     @DisplayName("be serializable")
     void serialize() {
         SerializableTester.reserializeAndAssert(EmptyClass.instance());
-    }
-
-    @Test
-    @DisplayName("return the same instance")
-    void sameInstance() {
-        assertSame(EmptyClass.instance(), EmptyClass.instance());
     }
 }
