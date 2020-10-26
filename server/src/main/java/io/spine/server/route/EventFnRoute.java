@@ -30,8 +30,8 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An event route with one target entity which ID is obtained as a function
- * on an event message.
+ * An event route with one target entity ID of which is obtained as a function
+ * on an event message or {@code BiFunction} on an event message and its context.
  *
  * @param <I>
  *         the type of the target entity ID
