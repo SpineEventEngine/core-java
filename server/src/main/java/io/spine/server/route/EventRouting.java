@@ -175,6 +175,7 @@ public final class EventRouting<I>
     @CanIgnoreReturnValue
     public <E extends EventMessage>
     EventRouting<I> unicast(Class<E> eventType, Function<E, I> via) {
+        checkNotNull(via);
         return route(eventType, new EventFnRoute<>(via));
     }
 
@@ -198,6 +199,7 @@ public final class EventRouting<I>
     @CanIgnoreReturnValue
     public <E extends EventMessage>
     EventRouting<I> unicast(Class<E> eventType, BiFunction<E, EventContext, I> via) {
+        checkNotNull(via);
         return route(eventType, new EventFnRoute<>(via));
     }
 
