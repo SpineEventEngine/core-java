@@ -25,7 +25,6 @@ import io.spine.test.delivery.Calc;
 import io.spine.testing.UtilityClassTest;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests of the {@link InboxIds} utility.
@@ -34,7 +33,7 @@ import org.junit.jupiter.api.Test;
 class InboxIdsTest extends UtilityClassTest<InboxIds> {
 
     InboxIdsTest() {
-        super(InboxIds.class);
+        super(InboxIds.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Override
@@ -42,15 +41,5 @@ class InboxIdsTest extends UtilityClassTest<InboxIds> {
         super.configure(tester);
         tester.setDefault(InboxId.class, InboxId.getDefaultInstance())
               .setDefault(TypeUrl.class, TypeUrl.of(Calc.class));
-    }
-
-    @Test
-    @DisplayName("not accept nulls in package-private static methods if the arg is non-Nullable")
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-        /* This test does assert via `NullPointerTester. */
-    void nullCheckPublicStaticMethods() {
-        NullPointerTester tester = new NullPointerTester();
-        configure(tester);
-        tester.testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
     }
 }
