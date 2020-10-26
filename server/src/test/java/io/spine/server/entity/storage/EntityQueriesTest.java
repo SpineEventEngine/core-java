@@ -63,7 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
 
     private EntityQueriesTest() {
-        super(EntityQueries.class);
+        super(EntityQueries.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Override
@@ -76,8 +76,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
               .setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
               .setDefault(RecordStorage.class, storage)
-              .setDefault(Columns.class, Columns.of(TestEntity.class))
-              .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);
+              .setDefault(Columns.class, Columns.of(TestEntity.class));
     }
 
     private static EntityQuery<?> createEntityQuery(TargetFilters filters,
