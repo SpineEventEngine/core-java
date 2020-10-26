@@ -43,11 +43,17 @@ final class EventFnRoute<I, E extends EventMessage> implements EventRoute<I, E> 
     private static final long serialVersionUID = 0L;
     private final BiFunction<E, EventContext, I> fn;
 
+    /**
+     * Creates a new event route which obtains target entity ID from an event message.
+     */
     EventFnRoute(Function<E, I> fn) {
-        checkNotNull(fn);
-        this.fn = (e, ctx) -> fn.apply(e);
+        this((e, ctx) -> fn.apply(e));
     }
 
+    /**
+     * Creates an event route which obtains target entity ID from an event message and
+     * a its context.
+     */
     EventFnRoute(BiFunction<E, EventContext, I> fn) {
         this.fn = checkNotNull(fn);
     }
