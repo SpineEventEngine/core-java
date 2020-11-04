@@ -129,6 +129,7 @@ message ResponseFormat {
     // directive is used to judge on the order of the records considered to have the same index
     // of order by the first directive. Same behaviour is expected for each N-th and (N+1)-th of
     // ordering directives.
+    //
     repeated OrderBy order_by = 2 [(validate) = true,
                                    (if_invalid).msg_format = "Invalid query order"];
 
