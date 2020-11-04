@@ -119,14 +119,14 @@ final class AggregateRecords {
      *
      * @param aggregate
      *         an instance of the aggregate
-     * @param mirrorState
+     * @param includeState
      *         whether the {@linkplain Aggregate#state() business state}
      *         of the Aggregate should be stored
      * @param <I>
      *         type of Aggregate identifiers
      * @return a new record
      */
-    static <I> EntityRecord newStateRecord(Aggregate<I, ?, ?> aggregate, boolean mirrorState) {
+    static <I> EntityRecord newStateRecord(Aggregate<I, ?, ?> aggregate, boolean includeState) {
         checkNotNull(aggregate);
 
         LifecycleFlags flags = aggregate.lifecycleFlags();
@@ -138,7 +138,7 @@ final class AggregateRecords {
                             .setEntityId(Identifier.pack(id))
                             .setLifecycleFlags(flags)
                             .setVersion(version);
-        if (mirrorState) {
+        if (includeState) {
             EntityState<I> state = aggregate.state();
             builder.setState(AnyPacker.pack(state));
         }

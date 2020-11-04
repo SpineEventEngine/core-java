@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.mirror;
+package io.spine.server.aggregate.given.query;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.EventMessage;
@@ -35,30 +35,30 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
-import io.spine.system.server.MRArchivePhoto;
-import io.spine.system.server.MRDeletePhoto;
-import io.spine.system.server.MRUploadPhoto;
-import io.spine.system.server.MRUploadSound;
-import io.spine.test.system.server.MRPhoto;
-import io.spine.test.system.server.MRPhotoArchived;
-import io.spine.test.system.server.MRPhotoDeleted;
-import io.spine.test.system.server.MRPhotoId;
-import io.spine.test.system.server.MRPhotoType;
-import io.spine.test.system.server.MRPhotoUploaded;
-import io.spine.test.system.server.MRSoundRecord;
-import io.spine.test.system.server.MRSoundUploaded;
+import io.spine.test.aggregate.query.MRPhoto;
+import io.spine.test.aggregate.query.MRPhotoId;
+import io.spine.test.aggregate.query.MRPhotoType;
+import io.spine.test.aggregate.query.MRSoundRecord;
+import io.spine.test.aggregate.query.command.MRArchivePhoto;
+import io.spine.test.aggregate.query.command.MRDeletePhoto;
+import io.spine.test.aggregate.query.command.MRUploadPhoto;
+import io.spine.test.aggregate.query.command.MRUploadSound;
+import io.spine.test.aggregate.query.event.MRPhotoArchived;
+import io.spine.test.aggregate.query.event.MRPhotoDeleted;
+import io.spine.test.aggregate.query.event.MRPhotoUploaded;
+import io.spine.test.aggregate.query.event.MRSoundUploaded;
 import io.spine.testing.server.TestEventFactory;
 
 import java.util.Collection;
 
-import static io.spine.test.system.server.MRPhotoType.CROP_FRAME;
-import static io.spine.test.system.server.MRPhotoType.FULL_FRAME;
-import static io.spine.test.system.server.MRPhotoType.THUMBNAIL;
+import static io.spine.test.aggregate.query.MRPhotoType.CROP_FRAME;
+import static io.spine.test.aggregate.query.MRPhotoType.FULL_FRAME;
+import static io.spine.test.aggregate.query.MRPhotoType.THUMBNAIL;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
-public final class AggregateMirroringTestEnv {
+public final class AggregateQueryingTestEnv {
 
-    public static final TestEventFactory events = newInstance(AggregateMirroringTestEnv.class);
+    public static final TestEventFactory events = newInstance(AggregateQueryingTestEnv.class);
     private static final MRPhoto spineLogo = newPhoto(THUMBNAIL,
                                                       "spine.io/logo",
                                                       "Spine Logo",
@@ -78,7 +78,7 @@ public final class AggregateMirroringTestEnv {
     /**
      * Prevents the utility class instantiation.
      */
-    private AggregateMirroringTestEnv() {
+    private AggregateQueryingTestEnv() {
     }
 
     public static Collection<MRPhoto> givenPhotos() {
@@ -141,7 +141,7 @@ public final class AggregateMirroringTestEnv {
         return events.createEvent(eventMessage);
     }
 
-    // This suppression makes sense only for Error Prone.
+    // This suppression makes sense only to Error Prone.
     @SuppressWarnings("unchecked")  // as per declaration of the `DefaultRepository`;
     public static AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto> newPhotosRepository() {
         Repository<MRPhotoId, PhotoAggregate> repo = DefaultRepository.of(PhotoAggregate.class);
@@ -229,24 +229,28 @@ public final class AggregateMirroringTestEnv {
     public static final class InvisibleSound
             extends Aggregate<String, MRSoundRecord, MRSoundRecord.Builder> {
 
+        // This suppression makes sense only to Error Prone.
         @SuppressWarnings("unchecked")  // as per declaration of the `DefaultRepository`.
         private static final
         AggregateRepository<String, InvisibleSound, MRSoundRecord> repo =
                 (AggregateRepository<String, InvisibleSound, MRSoundRecord>)
-                DefaultRepository.of(InvisibleSound.class);
+                        DefaultRepository.of(InvisibleSound.class);
 
         static {
-            BoundedContextBuilder.assumingTests(false).add(repo).build();
+            BoundedContextBuilder.assumingTests(false)
+                                 .add(repo)
+                                 .build();
         }
 
-        public static
-        AggregateRepository<String, InvisibleSound, MRSoundRecord> repository() {
+        public static AggregateRepository<String, InvisibleSound, MRSoundRecord> repository() {
             return repo;
         }
 
         @Assign
         MRSoundUploaded handle(MRUploadSound cmd) {
-            return MRSoundUploaded.newBuilder().setId(cmd.getId()).vBuild();
+            return MRSoundUploaded.newBuilder()
+                                  .setId(cmd.getId())
+                                  .vBuild();
         }
 
         @Apply

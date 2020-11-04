@@ -29,14 +29,13 @@ import io.spine.client.QueryFactory;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv;
-import io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.InvisibleSound;
-import io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.PhotoAggregate;
+import io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.InvisibleSound;
+import io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.PhotoAggregate;
 import io.spine.server.entity.EntityRecord;
-import io.spine.system.server.MRUploadPhoto;
-import io.spine.test.system.server.MRPhoto;
-import io.spine.test.system.server.MRPhotoId;
-import io.spine.test.system.server.MRSoundRecord;
+import io.spine.test.aggregate.query.MRPhoto;
+import io.spine.test.aggregate.query.MRPhotoId;
+import io.spine.test.aggregate.query.MRSoundRecord;
+import io.spine.test.aggregate.query.command.MRUploadPhoto;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,22 +50,23 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.EntityQueryToProto.transformWith;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpackFunc;
-import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.archive;
-import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.delete;
-import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.givenPhotos;
-import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.jxBrowserLogo7K;
-import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.newPhotosRepository;
-import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.projectLogo1000by800;
-import static io.spine.server.aggregate.given.mirror.AggregateMirroringTestEnv.spineLogo200by200;
+import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.archive;
+import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.delete;
+import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.givenPhotos;
+import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.jxBrowserLogo7K;
+import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.newPhotosRepository;
+import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.projectLogo1000by800;
+import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.spineLogo200by200;
+import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.upload;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
-import static io.spine.test.system.server.MRPhotoType.CROP_FRAME;
-import static io.spine.test.system.server.MRPhotoType.FULL_FRAME;
+import static io.spine.test.aggregate.query.MRPhotoType.CROP_FRAME;
+import static io.spine.test.aggregate.query.MRPhotoType.FULL_FRAME;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("`AggregateRepository` should mirror aggregate states")
+@DisplayName("`AggregateRepository` should allow to query for the aggregate states")
 class AggregateQueryingTest {
 
     private QueryFactory queries;
@@ -90,7 +90,7 @@ class AggregateQueryingTest {
     }
 
     @Nested
-    @DisplayName("returning them when querying")
+    @DisplayName("when the query asks for")
     class ExecuteQueries {
 
         @Test
@@ -110,7 +110,7 @@ class AggregateQueryingTest {
         }
 
         @Test
-        @DisplayName("by instance ID if the aggregate is archived")
+        @DisplayName("an instance by its ID in case this aggregate instance is archived")
         void archivedInstance() {
             MRPhoto target = onePhoto();
             archiveItem(target);
@@ -124,7 +124,7 @@ class AggregateQueryingTest {
         }
 
         @Test
-        @DisplayName("by instance ID if the aggregate is deleted")
+        @DisplayName("an instance by its ID in case this aggregate instance is deleted")
         void deletedInstance() {
             MRPhoto target = onePhoto();
             deleteItem(target);
@@ -167,7 +167,7 @@ class AggregateQueryingTest {
         }
 
         @Test
-        @DisplayName("by the a single entity column")
+        @DisplayName("instances matching them by the a single entity column")
         void bySingleEntityColumn() {
             Query queryForNothing =
                     MRPhoto.query()
@@ -183,7 +183,7 @@ class AggregateQueryingTest {
         }
 
         @Test
-        @DisplayName("by the two entity columns joined with `AND`")
+        @DisplayName("instances matching them by the two entity columns joined with `AND`")
         void byTwoEntityColumnsWithAndOperator() {
             Query query =
                     MRPhoto.query()
@@ -194,7 +194,7 @@ class AggregateQueryingTest {
         }
 
         @Test
-        @DisplayName("by the two entity columns joined with `OR`")
+        @DisplayName("instances matching them by the two entity columns joined with `OR`")
         void byTwoEntityColumnsWithOrOperator() {
             Query query =
                     MRPhoto.query()
@@ -205,7 +205,8 @@ class AggregateQueryingTest {
         }
 
         @Test
-        @DisplayName("by the two parameters for the same columns with `OR` " +
+        @DisplayName("instances matching them " +
+                "by the two parameters for the same columns with `OR` " +
                 "and by one more column joined with `AND`")
         void byCombinationAndOr() {
             Query query =
@@ -218,7 +219,7 @@ class AggregateQueryingTest {
         }
 
         @Test
-        @DisplayName("by both entity and lifecycle columns")
+        @DisplayName("instances matching them by both entity and lifecycle columns")
         void byEntityAndLifecycleCols() {
             archiveItem(projectLogo1000by800());
             Query query =
@@ -298,7 +299,7 @@ class AggregateQueryingTest {
 
     private void prepareAggregates(Collection<MRPhoto> aggregateStates) {
         for (MRPhoto state : aggregateStates) {
-            MRUploadPhoto upload = AggregateMirroringTestEnv.upload(state);
+            MRUploadPhoto upload = upload(state);
             dispatchCommand(upload);
         }
     }

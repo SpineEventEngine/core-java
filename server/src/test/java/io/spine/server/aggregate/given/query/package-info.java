@@ -25,7 +25,7 @@
 
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.aggregate.given.mirror;
+package io.spine.server.aggregate.given.query;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

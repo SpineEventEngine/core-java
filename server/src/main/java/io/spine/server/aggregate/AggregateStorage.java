@@ -88,12 +88,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <h3>Storing and querying the latest Aggregate states</h3>
  *
  * <p>End-users of the framework are able {@linkplain #enableStateQuerying() to enable this storage}
- * to mirror the latest states of Aggregates. To some extent, it makes this storage a part
- * of an application's read-side. If enabled, this state mirroring feature makes it possible
- * {@linkplain #readStates(TargetFilters, ResponseFormat) to query the latest known states} of
- * Aggregates. Similar to storages of other Entity types, {@code AggregateStorage}
- * supports querying the Aggregate states by the values of their declared entity columns.
- * See {@link io.spine.query} package for more details on the query language.
+ * to store the latest states of Aggregates and allow their
+ * {@linkplain #readStates(TargetFilters, ResponseFormat) querying}. To some extent, it makes
+ * this storage a part of an application's read-side. Similar to storages of other Entity types,
+ * {@code AggregateStorage} supports querying the Aggregate states by the values of their declared
+ * entity columns. See {@link io.spine.query} package for more details on the query language.
  *
  * <p>However, even if this feature is not enabled, the storage persists the essential bits of
  * Aggregate as an Entity. Namely, its identifier, its lifecycle flags and version. Such a behavior

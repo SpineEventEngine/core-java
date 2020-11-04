@@ -159,7 +159,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         }
         initCache(context.isMultitenant());
         initInbox();
-        initMirror();
+        configureQuerying();
     }
 
     @Override
@@ -491,25 +491,24 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * Checks if the aggregate should be mirrored, and configures
      * the underlying storage accordingly.
      */
-    //TODO:2020-11-04:alex.tymchenko: get rid of `mirroring` as-a-term.
-    private void initMirror() {
-        if(shouldBeMirrored()) {
+    private void configureQuerying() {
+        if(exposedToQuerying()) {
             aggregateStorage().enableStateQuerying();
         }
     }
 
     /**
-     * Returns {@code true} if the aggregates of this repository should be mirrored.
+     * Returns {@code true} if the aggregates of this repository should be available for querying.
      *
-     * <p>When the entity is mirrored, its latest state is stored in an {@link AggregateStorage},
-     * allowing for efficient querying from outside.
+     * <p>When enabled, the underlying storage persists the latest state of the corresponding
+     * Aggregate instance.
      *
-     * <p>All aggregates visible for querying or subscribing should be mirrored.
+     * <p>This feature is enabled for all aggregates visible for querying or subscribing.
      */
-    private boolean shouldBeMirrored() {
-        boolean shouldBeMirrored = aggregateClass().visibility()
-                                                   .isNotNone();
-        return shouldBeMirrored;
+    private boolean exposedToQuerying() {
+        boolean result = aggregateClass().visibility()
+                                         .isNotNone();
+        return result;
     }
 
     /**
