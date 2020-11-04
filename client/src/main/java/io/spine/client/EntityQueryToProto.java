@@ -32,7 +32,6 @@ import io.spine.query.LogicalOperator;
 import io.spine.query.QueryPredicate;
 import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
@@ -161,7 +160,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
             ComparisonOperator comparison = parameter.operator();
             Object value = parameter.value();
 
-            @Nullable Filter filter;
+            Filter filter;
             switch (comparison) {
                 case EQUALS:
                     filter = eq(column, value); break;
