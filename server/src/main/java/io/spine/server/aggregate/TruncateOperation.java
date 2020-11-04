@@ -59,9 +59,11 @@ final class TruncateOperation {
      *
      * <ul>
      *     <li>the number of aggregate snapshots among the deleted history records is less than
-     *     a given number passed as {@code snapshotIndex};</li>
-     *     <li>the passed predicate is {@code true};</li>
-     *     <li>the bottom of the aggregate history is not reached</li>
+     *     a given number passed as {@code snapshotIndex};
+     *
+     *     <li>the passed predicate is {@code true};
+     *
+     *     <li>the bottom of the aggregate history is not reached
      * </ul>
      *
      * @param snapshotIndex

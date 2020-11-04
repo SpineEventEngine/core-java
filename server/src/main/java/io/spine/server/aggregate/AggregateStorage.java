@@ -56,9 +56,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>The instances of this type solve two problems.
  *
  * <ol>
- *     <li>efficient loading of an Aggregate instance from its events;</li>
+ *     <li>efficient loading of an Aggregate instance from its events;
  *
- *     <li>mirroring the latest state of an Aggregate along with its lifecycle flags.</li>
+ *     <li>storing the latest state of an Aggregate along with its lifecycle flags to allow
+ *     its further querying.
  * </ol>
  *
  * <h3>Storing Aggregate events</h3>
