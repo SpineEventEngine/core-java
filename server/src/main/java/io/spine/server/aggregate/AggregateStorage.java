@@ -427,15 +427,14 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     /**
-     * //TODO:2020-11-04:alex.tymchenko: add an illustration here.
-     * Truncates the storage, dropping all records older than {@code date} but not newer than the
-     * Nth snapshot.
+     * Truncates the storage, dropping all records which are older than both the passed {@code date}
+     * and N-th snapshot.
      *
      * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
      * the latest snapshot for each entity.
      *
-     * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
-     * records remain intact in this case.
+     * <p>If the passed value of snapshot index is higher than the overall snapshot count of
+     * the Aggregate, this method does nothing.
      *
      * @throws IllegalArgumentException
      *         if the {@code snapshotIndex} is negative
