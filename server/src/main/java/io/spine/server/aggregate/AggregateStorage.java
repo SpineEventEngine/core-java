@@ -192,20 +192,24 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     /**
-     * {@inheritDoc}
+     * Returns an iterator over identifiers of Aggregates served by this storage.
      *
-     * <p>While it is possible to write individual event records only, in scope of the expected
-     * usage scenarios, the IDs, lifecycle and versions of the Aggregates are
-     * {@link #writeState(Aggregate) written} to this storage as well.
+     * <p>If this storage has persisting and querying of the Aggregate states
+     * {@linkplain #enableStateQuerying() enabled}, the returned index is an iterator over
+     * the IDs of Aggregates, which state resides in this storage.
      *
-     * <p>Therefore, this index contains only the identifiers of the {@code Aggregates} which
-     * state was written to the storage.
-     *
-     * //TODO:2020-11-04:alex.tymchenko: clarify even more.
+     * <p>In case this storage is not configured to persist the latest states of Aggregates,
+     * all stored events are scanned for Aggregate IDs. The returned index then is an iterator
+     * over the de-duplicated results of such a scan. This operation may be
+     * performance-ineffective, since much more records are analyzed to produce the result.
      */
     @Override
     public Iterator<I> index() {
-        return stateStorage.index();
+        if(queryingEnabled) {
+            return stateStorage.index();
+        } else {
+            return eventStorage.distinctAggregateIds();
+        }
     }
 
     /**

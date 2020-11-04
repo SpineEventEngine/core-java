@@ -20,6 +20,9 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.UnmodifiableIterator;
+import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageRecordSpec;
@@ -27,6 +30,9 @@ import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.Streams.stream;
 
 /**
  * Storage of events for each {@link Aggregate}.
@@ -92,5 +98,25 @@ public class AggregateEventStorage
     @Override
     protected void deleteAll(Iterable<AggregateEventRecordId> ids) {
         super.deleteAll(ids);
+    }
+
+    /**
+     * Returns an iterator over the distinct set of Aggregate IDs, which events reside
+     * in this storage.
+     *
+     * @param <I>
+     *         the type of the identifiers of the served Aggregates
+     * @return a new instance of iterator
+     */
+    @Internal
+    public <I> Iterator<I> distinctAggregateIds() {
+        Iterator<AggregateEventRecord> allRecords = readAll();
+        @SuppressWarnings("unchecked")  // Only the IDs of the matching type are stored.
+        UnmodifiableIterator<I> iterator =
+                stream(allRecords).map(AggregateEventRecord::getAggregateId)
+                                  .map(id -> (I) Identifier.unpack(id))
+                                  .collect(toImmutableSet())
+                                  .iterator();
+        return iterator;
     }
 }
