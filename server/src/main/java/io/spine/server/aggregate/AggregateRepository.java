@@ -491,9 +491,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * Checks if the aggregate should be mirrored, and configures
      * the underlying storage accordingly.
      */
+    //TODO:2020-11-04:alex.tymchenko: get rid of `mirroring` as-a-term.
     private void initMirror() {
         if(shouldBeMirrored()) {
-            aggregateStorage().enableMirror();
+            aggregateStorage().enableStateQuerying();
         }
     }
 

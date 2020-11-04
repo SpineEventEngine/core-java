@@ -46,6 +46,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.aggregate.AggregateRecords.newEventRecord;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.storage.QueryConverter.convert;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -84,17 +85,17 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * created. It persists data as Protobuf message records in its pre-configured
  * {@link io.spine.server.storage.RecordStorage RecordStorage}.
  *
- * <h3>Persisting Aggregate states</h3>
+ * <h3>Storing and querying the latest Aggregate states</h3>
  *
- * <p>End-users of the framework are able {@linkplain #enableMirror() to enable this storage}
+ * <p>End-users of the framework are able {@linkplain #enableStateQuerying() to enable this storage}
  * to mirror the latest states of Aggregates. To some extent, it makes this storage a part
  * of an application's read-side. If enabled, this state mirroring feature makes it possible
- * {@linkplain #readStates(TargetFilters, ResponseFormat) to read the latest known states} of
- * Aggregates by querying. Similar to other entities and their storages, {@code AggregateStorage}
+ * {@linkplain #readStates(TargetFilters, ResponseFormat) to query the latest known states} of
+ * Aggregates. Similar to storages of other Entity types, {@code AggregateStorage}
  * supports querying the Aggregate states by the values of their declared entity columns.
  * See {@link io.spine.query} package for more details on the query language.
  *
- * <p>However, even if mirroring is not enabled, the storage persists the essential bits of
+ * <p>However, even if this feature is not enabled, the storage persists the essential bits of
  * Aggregate as an Entity. Namely, its identifier, its lifecycle flags and version. Such a behavior
  * allows to speed up the execution of calls such as {@linkplain #index() obtaining an index}
  * of Aggregate identifiers, which otherwise would involve major storage scans along with
@@ -105,9 +106,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * all state-related operations to it.
  *
  * @param <I>
- *         the type of IDs of aggregates managed by this storage
+ *         the type of IDs of aggregates served by this storage
  * @param <S>
- *         the type of states of aggregates managed by this storage
+ *         the type of states of aggregates served by this storage
  *
  */
 @SPI
@@ -117,10 +118,29 @@ public class AggregateStorage<I, S extends EntityState<I>>
     private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
             "The specified snapshot index `%d` must be non-negative.";
 
+    /**
+     * Stores the events and snapshots for the served Aggregates.
+     */
     private final AggregateEventStorage eventStorage;
+
+    /**
+     * If enabled, stores the latest states of Aggregates.
+     */
     private final EntityRecordStorage<I, S> stateStorage;
-    private boolean mirrorEnabled = false;
+
+    /**
+     * Tells whether the latest aggregate states should be stored and exposed for querying.
+     */
+    private boolean queryingEnabled = false;
+
+    /**
+     * A method object performing a truncation of an Aggregate history.
+     */
     private final TruncateOperation truncation;
+
+    /**
+     * A method object reading the Aggregate event history.
+     */
     private final HistoryBackwardOperation<I> historyBackward;
 
     /**
@@ -149,17 +169,16 @@ public class AggregateStorage<I, S extends EntityState<I>>
         super(delegate.isMultitenant());
         this.eventStorage = delegate.eventStorage;
         this.stateStorage = delegate.stateStorage;
-        this.mirrorEnabled = delegate.mirrorEnabled;
+        this.queryingEnabled = delegate.queryingEnabled;
         this.truncation = delegate.truncation;
         this.historyBackward = delegate.historyBackward;
     }
 
     /**
-     * Enables the mirroring of the business states of the stored aggregates into the
-     * underlying state storage.
+     * Enables this storage to persist the latest Aggregate states and allows their querying.
      */
-    void enableMirror() {
-        mirrorEnabled = true;
+    void enableStateQuerying() {
+        queryingEnabled = true;
     }
 
     /**
@@ -176,11 +195,13 @@ public class AggregateStorage<I, S extends EntityState<I>>
      * {@inheritDoc}
      *
      * <p>While it is possible to write individual event records only, in scope of the expected
-     * usage scenarios, the IDs, lifecycle and versions of the {@code Aggregates} are
+     * usage scenarios, the IDs, lifecycle and versions of the Aggregates are
      * {@link #writeState(Aggregate) written} to this storage as well.
      *
      * <p>Therefore, this index contains only the identifiers of the {@code Aggregates} which
      * state was written to the storage.
+     *
+     * //TODO:2020-11-04:alex.tymchenko: clarify even more.
      */
     @Override
     public Iterator<I> index() {
@@ -214,13 +235,13 @@ public class AggregateStorage<I, S extends EntityState<I>>
     /**
      * Writes events into the storage.
      *
-     * <p><b>NOTE</b>: does not rewrite any events. Several events can be associated with one
-     * aggregate ID.
+     * <p><b>NOTE</b>: This method does not rewrite any events, just appends them. Many events
+     * can be associated with a single aggregate ID.
      *
      * @param id
      *         the ID for the record
      * @param events
-     *         non empty aggregate state record to store
+     *         non-empty piece of {@code AggregateHistory} to store
      */
     @Override
     public void write(I id, AggregateHistory events) {
@@ -230,7 +251,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
         for (Event event : eventList) {
-            AggregateEventRecord record = AggregateRecords.newEventRecord(id, event);
+            AggregateEventRecord record = newEventRecord(id, event);
             writeEventRecord(id, record);
         }
         if (events.hasSnapshot()) {
@@ -241,8 +262,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
     /**
      * Writes an event to the storage by an aggregate ID.
      *
-     * <p>Before the storing, {@linkplain io.spine.core.Event#clearEnrichments() enrichments}
-     * will be removed from the event.
+     * <p>Before storing, all {@linkplain io.spine.core.Event#clearEnrichments() enrichments}
+     * are removed from the passed event.
      *
      * @param id
      *         the aggregate ID
@@ -253,7 +274,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
         checkNotClosedAndArguments(id, event);
 
         Event eventWithoutEnrichments = event.clearEnrichments();
-        AggregateEventRecord record = AggregateRecords.newEventRecord(id, eventWithoutEnrichments);
+        AggregateEventRecord record = newEventRecord(id, eventWithoutEnrichments);
         writeEventRecord(id, record);
     }
 
@@ -268,7 +289,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
     void writeSnapshot(I aggregateId, Snapshot snapshot) {
         checkNotClosedAndArguments(aggregateId, snapshot);
 
-        AggregateEventRecord record = AggregateRecords.newEventRecord(aggregateId, snapshot);
+        AggregateEventRecord record = newEventRecord(aggregateId, snapshot);
         writeEventRecord(aggregateId, record);
     }
 
@@ -285,7 +306,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     /**
-     * Reads the aggregate states from the storage according to the passed filters and returns
+     * Queries the storage for the Aggregate states according to the passed filters and returns
      * the results in the specified response format.
      *
      * <p>The results of this call are eventually consistent with the latest states of aggregates,
@@ -301,7 +322,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
      * @return an iterator over the matching {@code EntityRecord}s
      */
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
-        ensureVisible();
+        ensureStatesQueryable();
         RecordQuery<I, EntityRecord> query = convert(filters, format, stateStorage.recordSpec());
         return stateStorage.readAll(query);
     }
@@ -317,15 +338,17 @@ public class AggregateStorage<I, S extends EntityState<I>>
      * @return an iterator over the records
      */
     protected Iterator<EntityRecord> readStates(ResponseFormat format) {
-        ensureVisible();
+        ensureStatesQueryable();
         RecordQuery<I, EntityRecord> query = QueryConverter.newQuery(stateStorage.recordSpec(), format);
         return stateStorage.readAll(query);
     }
 
-    private void ensureVisible() {
-        if (!mirrorEnabled) {
+    private void ensureStatesQueryable() {
+        if (!queryingEnabled) {
             throw newIllegalStateException(
-                    "The aggregate state `%s` is NOT marked as visible for querying.",
+                    "The storage of Aggregate of type `%s` is not configured to store " +
+                            "the latest Aggregate states. " +
+                            "Check the entity visibility level of the Aggregate.",
                     stateClass());
         }
     }
@@ -337,7 +360,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
-        EntityRecord record = AggregateRecords.newStateRecord(aggregate, mirrorEnabled);
+        EntityRecord record = AggregateRecords.newStateRecord(aggregate, queryingEnabled);
         EntityRecordWithColumns<I> result =
                 EntityRecordWithColumns.create(aggregate, record);
         stateStorage.write(result);
@@ -352,13 +375,13 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     /**
-     * Creates iterator of aggregate event history with the reverse traversal.
+     * Creates an iterator by the Aggregate event history, ordering the items
+     * from the newer to older.
      *
-     * <p>Records are sorted by timestamp descending (from newer to older).
-     * The iterator is empty if there's no history for the aggregate with passed ID.
+     * <p>The iterator is empty if there's no history for the aggregate with passed ID.
      *
      * @param id
-     *         the identifier of the aggregate
+     *         the identifier of the Aggregate
      * @param batchSize
      *         the maximum number of the history records to read
      * @return new iterator instance
@@ -367,6 +390,18 @@ public class AggregateStorage<I, S extends EntityState<I>>
         return historyBackward(id, batchSize, null);
     }
 
+    /**
+     * Acts similar to {@link #historyBackward(Object, int) historyBackward(id, batchSize)},
+     * but also allows to set the Aggregate version to start the reading from.
+     *
+     * @param id
+     *         identifier of the Aggregate
+     * @param batchSize
+     *         the maximum number of the history records to read
+     * @param startingFrom
+     *         an Aggregate version from which the historical events are read
+     * @return a new instance of iterator over the results
+     */
     protected Iterator<AggregateEventRecord>
     historyBackward(I id, int batchSize, @Nullable Version startingFrom) {
         return historyBackward.read(id, batchSize, startingFrom);
@@ -379,8 +414,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
      * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
      * the latest snapshot.
      *
-     * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
-     * entity records remain intact in this case.
+     * <p>If the passed value of snapshot index is higher than the overall snapshot count of
+     * the Aggregate, this method does nothing.
      *
      * @throws IllegalArgumentException
      *         if the {@code snapshotIndex} is negative
@@ -388,10 +423,11 @@ public class AggregateStorage<I, S extends EntityState<I>>
     @Internal
     public void truncateOlderThan(int snapshotIndex) {
         checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
-        truncate(snapshotIndex);
+        doTruncate(snapshotIndex);
     }
 
     /**
+     * //TODO:2020-11-04:alex.tymchenko: add an illustration here.
      * Truncates the storage, dropping all records older than {@code date} but not newer than the
      * Nth snapshot.
      *
@@ -408,21 +444,21 @@ public class AggregateStorage<I, S extends EntityState<I>>
     public void truncateOlderThan(int snapshotIndex, Timestamp date) {
         checkNotNull(date);
         checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE, snapshotIndex);
-        truncate(snapshotIndex, date);
+        doTruncate(snapshotIndex, date);
     }
 
     /**
-     * Drops all records which occur before the Nth snapshot for each entity.
+     * Drops all records which occur before the N-th snapshot for each entity.
      */
-    protected void truncate(int snapshotIndex) {
+    protected void doTruncate(int snapshotIndex) {
         truncation.performWith(snapshotIndex, (r) -> true);
     }
 
     /**
-     * Drops all records older than {@code date} but not newer than the Nth snapshot for each
+     * Drops all records older than {@code date} but not newer than the N-th snapshot for each
      * entity.
      */
-    protected void truncate(int snapshotIndex, Timestamp date) {
+    protected void doTruncate(int snapshotIndex, Timestamp date) {
         truncation.performWith(snapshotIndex,
                                (r) -> Timestamps.compare(r.getTimestamp(), date) < 0);
     }

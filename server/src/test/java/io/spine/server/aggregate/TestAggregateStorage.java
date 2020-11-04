@@ -57,8 +57,8 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId, AggProject>
     }
 
     @Override
-    public void enableMirror() {
-        delegate.enableMirror();
+    public void enableStateQuerying() {
+        delegate.enableStateQuerying();
     }
 
     @Override
@@ -135,13 +135,13 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId, AggProject>
     }
 
     @Override
-    public void truncate(int snapshotIndex) {
-        delegate.truncate(snapshotIndex);
+    public void doTruncate(int snapshotIndex) {
+        delegate.doTruncate(snapshotIndex);
     }
 
     @Override
-    public void truncate(int snapshotIndex, Timestamp date) {
-        delegate.truncate(snapshotIndex, date);
+    public void doTruncate(int snapshotIndex, Timestamp date) {
+        delegate.doTruncate(snapshotIndex, date);
     }
 
     ProjectId memoizedId() {
