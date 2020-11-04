@@ -289,7 +289,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
     @Internal
     B where(ImmutableSet<CompositeFilter> predicates) {
         checkNotNull(predicates);
-        if(predicates.size() > 0) {
+        if (predicates.size() > 0) {
             filters = predicates;
         }
         return self();
