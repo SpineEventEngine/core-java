@@ -463,23 +463,20 @@ public final class Delivery implements Logging {
         Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
-        boolean continueAllowed = true;
+        boolean shouldContinue = true;
         List<DeliveryStage> stages = new ArrayList<>();
-        Iterable<CatchUp> catchUpJobs = ImmutableList.copyOf(catchUpStorage.readAll());
-        while (continueAllowed && maybePage.isPresent()) {
+        Iterable<CatchUp> catchUpJobs = refreshCatchUpJobs();
+        while (shouldContinue && maybePage.isPresent()) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
-                DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
-                Conveyor conveyor = new Conveyor(messages, deliveredMessages);
-                List<Station> stations = conveyorStationsFor(catchUpJobs, action);
-                DeliveryStage stage = launch(conveyor, stations, index);
-                continueAllowed = monitorTellsToContinue(stage);
+                DeliveryStage stage = deliverMessages(messages, index, catchUpJobs);
                 stages.add(stage);
+                shouldContinue = monitorTellsToContinueAfter(stage);
             }
-            if (continueAllowed) {
+            if (shouldContinue) {
                 if(messages.size() < pageSize) {
-                    catchUpJobs = ImmutableList.copyOf(catchUpStorage.readAll());
+                    catchUpJobs = refreshCatchUpJobs();
                 }
                 maybePage = currentPage.next();
             }
@@ -488,7 +485,21 @@ public final class Delivery implements Logging {
         int totalMessagesDelivered = stages.stream()
                                            .map(DeliveryStage::getMessagesDelivered)
                                            .reduce(0, Integer::sum);
-        return new RunResult(totalMessagesDelivered, !continueAllowed);
+        return new RunResult(totalMessagesDelivered, !shouldContinue);
+    }
+
+    private ImmutableList<CatchUp> refreshCatchUpJobs() {
+        return ImmutableList.copyOf(catchUpStorage.readAll());
+    }
+
+    private DeliveryStage deliverMessages(ImmutableList<InboxMessage> messages,
+                                          ShardIndex index,
+                                          Iterable<CatchUp> catchUpJobs) {
+        DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
+        Conveyor conveyor = new Conveyor(messages, deliveredMessages);
+        List<Station> stations = conveyorStationsFor(catchUpJobs, action);
+        DeliveryStage stage = launch(conveyor, stations, index);
+        return stage;
     }
 
     /**
@@ -547,7 +558,7 @@ public final class Delivery implements Logging {
                 .vBuild();
     }
 
-    private boolean monitorTellsToContinue(DeliveryStage stage) {
+    private boolean monitorTellsToContinueAfter(DeliveryStage stage) {
         return monitor.shouldContinueAfter(stage);
     }
 
