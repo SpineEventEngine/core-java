@@ -251,11 +251,9 @@ public final class QueryConverter {
     private static <I, R extends Message> Column<?, ?>
     findColumn(RecordSpec<I, R, ?> spec, ColumnName columnName) {
         Optional<Column<?, ?>> maybeColumn = spec.findColumn(columnName);
-        if (!maybeColumn.isPresent()) {
-            throw newIllegalArgumentException(
-                    "Cannot find the column `%s` for the type `%s`.", columnName,
-                    spec.recordType());
-        }
+        checkArgument(maybeColumn.isPresent(),
+                      "Cannot find the column `%s` for the type `%s`.",
+                      columnName, spec.recordType());
         Column<?, ?> column = maybeColumn.get();
         return column;
     }
