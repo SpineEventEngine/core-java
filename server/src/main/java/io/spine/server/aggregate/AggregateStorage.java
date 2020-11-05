@@ -87,18 +87,24 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <h3>Storing and querying the latest Aggregate states</h3>
  *
- * <p>End-users of the framework are able {@linkplain #enableStateQuerying() to enable this storage}
- * to store the latest states of Aggregates and allow their
- * {@linkplain #readStates(TargetFilters, ResponseFormat) querying}. To some extent, it makes
- * this storage a part of an application's read-side. Similar to storages of other Entity types,
- * {@code AggregateStorage} supports querying the Aggregate states by the values of their declared
- * entity columns. See {@code io.spine.query} package docs for more details on the query language.
+ * <p>End-users of the framework are able to set the visibility level for each Aggregate state
+ * by using an {@linkplain io.spine.server.entity.EntityVisibility (entity).visibility} option
+ * in the Protobuf message corresponding to the Aggregate state. For those Aggregates which are
+ * visible, the framework routines {@linkplain #enableStateQuerying() enable this storage}
+ * to persist the latest states of Aggregates and allow their further
+ * {@linkplain #readStates(TargetFilters, ResponseFormat) querying}. To some extent, it makes this
+ * storage a part of an application's read-side.
  *
- * <p>However, even if this feature is not enabled, the storage persists the essential bits of
- * Aggregate as an Entity. Namely, its identifier, its lifecycle flags and version. Such a behavior
- * allows to speed up the execution of calls such as {@linkplain #index() obtaining an index}
- * of Aggregate identifiers, which otherwise would involve major storage scans along with
- * {@code DISTINCT} group operation applied.
+ * <p>Similar to storages of other Entity types, {@code AggregateStorage} supports querying
+ * the Aggregate states by the values of their declared entity columns. See {@code io.spine.query}
+ * package docs for more details on the query language.
+ *
+ * <p>However, even if the Aggregate visibility is set to
+ * {@link io.spine.option.EntityOption.Visibility#NONE NONE}, the storage still persists
+ * the essential bits of Aggregate as-an-Entity. Namely, its identifier, its lifecycle flags
+ * and version. Such a behavior allows to speed up the execution of calls such
+ * as {@linkplain #index() obtaining an index} of Aggregate identifiers, which otherwise would
+ * involve major scans of event storage, with {@code DISTINCT} group operation applied.
  *
  * <p>As long as the Aggregate states are no different in their persistence from other Entities,
  * the {@code AggregateStorage} uses an intermediate {@link EntityRecordStorage} by delegating
