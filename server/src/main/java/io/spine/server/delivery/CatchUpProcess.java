@@ -83,6 +83,7 @@ import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
 import static io.spine.server.delivery.CatchUpStatus.FINALIZING;
 import static io.spine.server.delivery.CatchUpStatus.IN_PROGRESS;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
+import static io.spine.server.route.EventRoute.noTargets;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -693,7 +694,7 @@ public final class CatchUpProcess<I>
     @CanIgnoreReturnValue
     private Set<I> dispatchAll(List<Event> events, Set<I> targets) {
         if (events.isEmpty()) {
-            return ImmutableSet.of();
+            return noTargets();
         }
         Set<I> actualTargets = new HashSet<>();
         @Nullable Set<I> targetsForDispatch = targets.isEmpty()
