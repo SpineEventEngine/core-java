@@ -562,8 +562,6 @@ public final class CatchUpProcess<I>
         return EitherOf3.withB(stillRequested);
     }
 
-
-
     private static Optional<CatchUp> findJob(CatchUpId id, DeliveryRunInfo deliveryInfo) {
         Optional<CatchUp> stateVisibileToDelivery =
                 deliveryInfo.getCatchUpJobList()
