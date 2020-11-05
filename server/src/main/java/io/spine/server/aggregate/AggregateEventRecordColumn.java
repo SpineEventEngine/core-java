@@ -40,26 +40,26 @@ final class AggregateEventRecordColumn {
     /**
      * Stores the identifier of an aggregate.
      */
-    static final RecordColumn<AggregateEventRecord, Any> aggregate_id =
-            create("aggregate_id", Any.class, AggregateEventRecord::getAggregateId);
+    static final RecordColumn<AggregateEventRecord, Any>
+            aggregate_id = create("aggregate_id", Any.class, AggregateEventRecord::getAggregateId);
 
     /**
      * Stores the time when the event record was created.
      */
-    static final RecordColumn<AggregateEventRecord, Timestamp> created =
-            create("created", Timestamp.class, AggregateEventRecord::getTimestamp);
+    static final RecordColumn<AggregateEventRecord, Timestamp>
+            created = create("created", Timestamp.class, AggregateEventRecord::getTimestamp);
 
     /**
      * Stores the version of the record, either of the stored event, or the snapshot.
      */
-    static final RecordColumn<AggregateEventRecord, Integer> version =
-            create("version", Integer.class, new GetVersion());
+    static final RecordColumn<AggregateEventRecord, Integer>
+            version = create("version", Integer.class, new GetVersion());
 
     /**
      * Stores {@code true} for the records which hold snapshots, {@code false} otherwise.
      */
-    static final RecordColumn<AggregateEventRecord, Boolean> snapshot =
-            create("snapshot", Boolean.class, AggregateEventRecord::hasSnapshot);
+    static final RecordColumn<AggregateEventRecord, Boolean>
+            snapshot = create("snapshot", Boolean.class, AggregateEventRecord::hasSnapshot);
 
     /**
      * Prevents this type from instantiation.

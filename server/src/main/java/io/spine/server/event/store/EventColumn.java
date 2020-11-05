@@ -41,18 +41,18 @@ final class EventColumn {
      * is enclosed in the {@code spine.test} Protobuf package would have this column
      * equal to {@code "spine.test.TaskAdded"}.
      */
-    static final RecordColumn<Event, String> type =
-            create("type", String.class, (m) -> m.enclosedTypeUrl()
-                                                 .toTypeName()
-                                                 .value());
+    static final RecordColumn<Event, String>
+            type = create("type", String.class, (m) -> m.enclosedTypeUrl()
+                                                        .toTypeName()
+                                                        .value());
 
     /**
      * Stores the time when the event was created.
      */
     @SuppressWarnings("DuplicateStringLiteralInspection")   // popular column name.
-    static final RecordColumn<Event, Timestamp> created =
-            create("created", Timestamp.class, (m) -> m.getContext()
-                                                       .getTimestamp());
+    static final RecordColumn<Event, Timestamp>
+            created = create("created", Timestamp.class, (m) -> m.getContext()
+                                                                 .getTimestamp());
 
     /**
      * Prevents this type from instantiation.

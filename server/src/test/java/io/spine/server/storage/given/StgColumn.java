@@ -35,16 +35,16 @@ import static io.spine.query.RecordColumn.create;
 @RecordColumns(ofType = StgProject.class)
 public final class StgColumn {
 
-    public static final RecordColumn<StgProject, Integer> project_version =
-            create("project_version", Integer.class, (r) -> r.getProjectVersion()
-                                                             .getNumber());
+    public static final RecordColumn<StgProject, Integer>
+            project_version = create("project_version", Integer.class, (r) -> r.getProjectVersion()
+                                                                               .getNumber());
 
-    public static final RecordColumn<StgProject, Timestamp> due_date =
-            create("due_date", Timestamp.class, StgProject::getDueDate);
+    public static final RecordColumn<StgProject, Timestamp>
+            due_date = create("due_date", Timestamp.class, StgProject::getDueDate);
 
-    public static final RecordColumn<StgProject, String> status =
-            create("status", String.class, (r) -> r.getStatus()
-                                                   .name());
+    public static final RecordColumn<StgProject, String>
+            status = create("status", String.class, (r) -> r.getStatus()
+                                                            .name());
 
     /**
      * Prevents this type from instantiation.

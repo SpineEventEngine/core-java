@@ -37,56 +37,56 @@ final class InboxColumn {
     /**
      * Stores the identifier of the signal packed into this inbox message.
      */
-    static final RecordColumn<InboxMessage, InboxSignalId> signal_id =
-            create("signal_id", InboxSignalId.class, InboxMessage::getSignalId);
+    static final RecordColumn<InboxMessage, InboxSignalId>
+            signal_id = create("signal_id", InboxSignalId.class, InboxMessage::getSignalId);
 
     /**
      * Stores the identifier of the parent inbox.
      */
-    static final RecordColumn<InboxMessage, InboxId> inbox_id =
-            create("inbox_id", InboxId.class, InboxMessage::getInboxId);
+    static final RecordColumn<InboxMessage, InboxId>
+            inbox_id = create("inbox_id", InboxId.class, InboxMessage::getInboxId);
 
     /**
      * Stores the index of the shard in which this inbox message resides.
      */
-    static final RecordColumn<InboxMessage, ShardIndex> inbox_shard =
-            create("inbox_shard", ShardIndex.class, InboxMessage::shardIndex);
+    static final RecordColumn<InboxMessage, ShardIndex>
+            inbox_shard = create("inbox_shard", ShardIndex.class, InboxMessage::shardIndex);
 
     /**
      * Stores {@code true} if this inbox message hold an event; stores {@code false} otherwise.
      */
-    static final RecordColumn<InboxMessage, Boolean> is_event =
-            create("is_event", Boolean.class, InboxMessage::hasEvent);
+    static final RecordColumn<InboxMessage, Boolean>
+            is_event = create("is_event", Boolean.class, InboxMessage::hasEvent);
 
     /**
      * Stores {@code true} if this inbox message hold a command; stores {@code false} otherwise.
      */
-    static final RecordColumn<InboxMessage, Boolean> is_command =
-            create("is_command", Boolean.class, InboxMessage::hasCommand);
+    static final RecordColumn<InboxMessage, Boolean>
+            is_command = create("is_command", Boolean.class, InboxMessage::hasCommand);
 
     /**
      * Stores the label of this inbox message.
      */
-    static final RecordColumn<InboxMessage, InboxLabel> label =
-            create("label", InboxLabel.class, InboxMessage::getLabel);
+    static final RecordColumn<InboxMessage, InboxLabel>
+            label = create("label", InboxLabel.class, InboxMessage::getLabel);
 
     /**
      * Stores the status of the delivery for this inbox message.
      */
-    static final RecordColumn<InboxMessage, InboxMessageStatus> status =
-            create("status", InboxMessageStatus.class, InboxMessage::getStatus);
+    static final RecordColumn<InboxMessage, InboxMessageStatus>
+            status = create("status", InboxMessageStatus.class, InboxMessage::getStatus);
 
     /**
      * Stores the time when the inbox message has been received and placed into the inbox.
      */
-    static final RecordColumn<InboxMessage, Timestamp> received_at =
-            create("received_at", Timestamp.class, InboxMessage::getWhenReceived);
+    static final RecordColumn<InboxMessage, Timestamp>
+            received_at = create("received_at", Timestamp.class, InboxMessage::getWhenReceived);
 
     /**
      * Stores the version of the inbox message.
      */
-    static final RecordColumn<InboxMessage, Integer> version =
-            create("version", Integer.class, InboxMessage::getVersion);
+    static final RecordColumn<InboxMessage, Integer>
+            version = create("version", Integer.class, InboxMessage::getVersion);
 
     /**
      * Prevents this type from instantiation.

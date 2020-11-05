@@ -37,21 +37,21 @@ public class CatchUpColumn {
     /**
      * Stores the status of the catch-up process.
      */
-    public static final RecordColumn<CatchUp, CatchUpStatus> status =
-            create("status", CatchUpStatus.class, CatchUp::getStatus);
+    public static final RecordColumn<CatchUp, CatchUpStatus>
+            status = create("status", CatchUpStatus.class, CatchUp::getStatus);
 
     /**
      * Stores the time when the history has been last read by the catch-up process.
      */
-    public static final RecordColumn<CatchUp, Timestamp> when_last_read =
-            create("when_last_read", Timestamp.class, CatchUp::getWhenLastRead);
+    public static final RecordColumn<CatchUp, Timestamp>
+            when_last_read = create("when_last_read", Timestamp.class, CatchUp::getWhenLastRead);
 
     /**
      * Stores the type URL of the projection-under-catch-up.
      */
-    public static final RecordColumn<CatchUp, String> projection_type =
-            create("projection_type", String.class, (m) -> m.getId()
-                                                            .getProjectionType());
+    public static final RecordColumn<CatchUp, String>
+            projection_type = create("projection_type", String.class, (m) -> m.getId()
+                                                                              .getProjectionType());
 
     /**
      * Prevents this type from instantiation.
