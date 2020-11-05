@@ -78,10 +78,10 @@ final class FindActiveEntites<I, S extends EntityState<I>>
         }
 
         private void setLifecycle() {
-            if(hasArchivedColumn) {
+            if (hasArchivedColumn) {
                 where(archived.lifecycle(), false);
             }
-            if(hasDeletedColumn) {
+            if (hasDeletedColumn) {
                 where(deleted.lifecycle(), false);
             }
         }
