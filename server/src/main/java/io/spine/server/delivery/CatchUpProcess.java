@@ -337,8 +337,8 @@ public final class CatchUpProcess<I>
     /**
      * Moves the process from {@code Not Started} to {@code STARTED} state.
      *
-     * Two important things happen at this stage:
-     * <ul>
+     * Several important things happen at this stage:
+     * <ol>
      *      <li>The reading timestamp of the process is set to the one specified in the request.
      *      However, people are used to say "I want to catch-up since 1 PM" meaning "counting
      *      the events happened at 1 PM sharp". Therefore process always subtracts a single
@@ -353,10 +353,10 @@ public final class CatchUpProcess<I>
      *      dispatched. It is important to know the target IDs, since their state has to be reset
      *      to default before the dispatching of the first historical event.
      *
-     *      <p>The number of the projection instances to catch-up is remembered. The process
+     *      <li>The number of the projection instances to catch-up is remembered. The process
      *      then waits for {@link ProjectionStateCleared} events to arrive for each of
      *      the instances before reading the events from the history.
-     * </ul>
+     * </ol>
      *
      * <p>The event handler returns {@code Nothing}, as the results of its work are dispatched
      * directly to the inboxes of the catching-up projections.
