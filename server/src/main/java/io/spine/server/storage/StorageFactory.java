@@ -69,7 +69,8 @@ import io.spine.server.event.store.DefaultEventStore;
  * for an initialization, it is a part of a special {@code Tenants} context, which is also shared
  * between domain Bounded Contexts of an application.
  *
- * @see io.spine.query io.spine.query on record speficiation and querying
+ * <p>See the package-level documentation of {@code io.spine.query} for more details on
+ * record specification and querying.
  */
 public interface StorageFactory extends AutoCloseable {
 
