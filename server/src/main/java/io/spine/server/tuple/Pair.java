@@ -115,6 +115,11 @@ public final class Pair<A extends Message, B>
         return value(this, 0);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always returns {@code true}.
+     */
     @Override
     public boolean hasA() {
         return true;

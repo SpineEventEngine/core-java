@@ -136,6 +136,11 @@ public final class Quintet<A extends Message, B, C, D, E>
         return value(this, 0);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always returns {@code true}.
+     */
     @Override
     public boolean hasA() {
         return true;

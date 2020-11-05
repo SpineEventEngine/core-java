@@ -97,6 +97,11 @@ public final class Triplet<A extends Message, B, C>
         return value(this, 0);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always returns {@code true}.
+     */
     @Override
     public boolean hasA() {
         return true;

@@ -113,6 +113,11 @@ public final class Quartet<A extends Message, B, C, D>
         return value(this, 0);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always returns {@code true}.
+     */
     @Override
     public boolean hasA() {
         return true;
