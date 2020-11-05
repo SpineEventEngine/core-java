@@ -116,26 +116,26 @@ import static java.util.stream.Collectors.toSet;
  * <p>The process is created in this status upon receiving the {@code CatchUpRequested} event.
  * The further actions include:
  *
- * <ul>
+ * <ol>
  *     <li>A {@link CatchUpStarted} event is emitted. The target projection repository listens to
  *     this event and kills the state of the matching entities.
  *
  *     <li>The status if the catch-up process is set to {@link CatchUpStatus#IN_PROGRESS
  *     IN_PROGRESS}.
- * </ul>
+ * </ol>
  *
  * <h3>{@linkplain CatchUpStatus#STARTED STARTED}</h3>
  *
  * <p>The process is created in this status upon receiving the {@code CatchUpRequested} event.
  * The further actions include:
  *
- * <ul>
+ * <ol>
  *     <li>A {@link CatchUpStarted} event is emitted. The target projection repository listens to
  *     this event and kills the state of the matching entities.
  *
  *     <li>The status if the catch-up process is set to {@link CatchUpStatus#IN_PROGRESS
  *     IN_PROGRESS}.
- * </ul>
+ * </ol>
 
  *
  * <h3>{@link CatchUpStatus#IN_PROGRESS IN_PROGRESS}</h3>
@@ -151,7 +151,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>At this stage the actions are as follows.
  *
- * <ul>
+ * <ol>
  *      <li>The historical event messages are read from the {@link EventStore} respecting
  *      the time range requested and the time of the last read operation performed by this process.
  *      The maximum number of the events read is determined by
@@ -166,7 +166,7 @@ import static java.util.stream.Collectors.toSet;
  *
  *      <p>If the timestamps of the events read on this step are as close to the current time as
  *      the turbulence period, the {@link HistoryFullyRecalled} is emitted.
- * </ul>
+ * </ol>
  *
  * <h3>{@link CatchUpStatus#FINALIZING FINALIZING}</h3>
  *
@@ -197,7 +197,7 @@ import static java.util.stream.Collectors.toSet;
  * Such an evidence would mean that this {@code Delivery} run is at the point in time by which
  * three things already happened:
  *
- * <ol>
+ * <ol type="a">
  *     <li>the catch-up process has emitted all the events from the history,
  *
  *     <li>the catch-up process has sent {@link HistoryFullyRecalled} after the historical events,
@@ -217,7 +217,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>The actions at this stage are as follows.
  *
- * <ul>
+ * <ol>
  *      <li>All the remaining messages of the matching event types are read {@link EventStore}.
  *      In this operation the read limits set by the {@code Delivery} are NOT used, since
  *      the goal is to read the remainder of the events.
@@ -244,7 +244,7 @@ import static java.util.stream.Collectors.toSet;
  *      from these events, the catch-up is able to tell when all the affected shards were
  *      fully processed by the {@code Delivery}. Once all shards are processed,
  *      a {@link CatchUpCompleted} event is emitted.
- * </ul>
+ * </ol>
  *
  * <h3>{@link CatchUpStatus#COMPLETED COMPLETED}</h3>
  *
