@@ -33,7 +33,7 @@ import java.util.Optional;
  * <p>Provides the navigation to the next page basing on the time of the last message read in the
  * scope of current page.
  */
-public class InboxPage implements Page<InboxMessage> {
+public final class InboxPage implements Page<InboxMessage> {
 
     private final Lookup lookup;
     private final ImmutableList<InboxMessage> contents;
@@ -98,8 +98,8 @@ public class InboxPage implements Page<InboxMessage> {
     }
 
     /**
-     * A method object performing a lookup of {@link InboxMessage}s in the storage according to
-     * the passed timestamp.
+     * A strategy on fetching the {@link InboxMessage}s from the storage based
+     * on the passed timestamp.
      */
     interface Lookup {
 
