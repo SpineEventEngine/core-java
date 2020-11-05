@@ -111,7 +111,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>In its lifecycle, the process moves through the several statuses.
  *
- * <p><b>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</b>
+ * <h3>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</h3>
  *
  * <p>The process is created in this status upon receiving the {@code CatchUpRequested} event.
  * The further actions include:
@@ -124,7 +124,7 @@ import static java.util.stream.Collectors.toSet;
  *     IN_PROGRESS}.
  * </ul>
  *
- * <p><b>{@linkplain CatchUpStatus#STARTED STARTED}</b>
+ * <h3>{@linkplain CatchUpStatus#STARTED STARTED}</h3>
  *
  * <p>The process is created in this status upon receiving the {@code CatchUpRequested} event.
  * The further actions include:
@@ -138,7 +138,7 @@ import static java.util.stream.Collectors.toSet;
  * </ul>
 
  *
- * <p><b>{@link CatchUpStatus#IN_PROGRESS IN_PROGRESS}</b>
+ * <h3>{@link CatchUpStatus#IN_PROGRESS IN_PROGRESS}</h3>
  *
  * <p>When the process is in this status, the event history is read and the matching events are sent
  * to the {@code Inbox}es of the corresponding projections
@@ -168,7 +168,7 @@ import static java.util.stream.Collectors.toSet;
  *      the turbulence period, the {@link HistoryFullyRecalled} is emitted.
  * </ul>
  *
- * <p><b>{@link CatchUpStatus#FINALIZING FINALIZING}</b>
+ * <h3>{@link CatchUpStatus#FINALIZING FINALIZING}</h3>
  *
  * <p>The process moves to this status when the event history has been fully recalled and the
  * corresponding {@code HistoryFullyRecalled} is received. At this stage, the {@code Delivery} stops
@@ -246,7 +246,7 @@ import static java.util.stream.Collectors.toSet;
  *      a {@link CatchUpCompleted} event is emitted.
  * </ul>
  *
- * <p><b>{@link CatchUpStatus#COMPLETED COMPLETED}</b>
+ * <h3>{@link CatchUpStatus#COMPLETED COMPLETED}</h3>
  *
  * <p>Once the {@code CatchUpCompleted} event is received, the process moves
  * to the {@code COMPLETED} status. At this point, some live events and some historical events which
