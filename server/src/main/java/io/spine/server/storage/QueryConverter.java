@@ -242,11 +242,8 @@ public final class QueryConverter {
 
         int limit = format.getLimit();
         if (limit > 0) {
-            if (!hasOrderBy) {
-                throw newIllegalArgumentException("Storage query must have " +
-                                                          "at least one ordering directive " +
-                                                          "if the limit is set.");
-            }
+            checkArgument(hasOrderBy, "Storage query must have at least one ordering directive " +
+                    "if the limit is set.");
             builder.limit(limit);
         }
     }
