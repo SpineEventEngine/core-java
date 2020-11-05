@@ -534,25 +534,25 @@ public final class CatchUpProcess<I>
      */
     @React
     EitherOf3<CatchUpCompleted, ShardProcessingRequested, Nothing> handle(ShardProcessed event) {
-        if (builder().getStatus() == COMPLETED) {
+        CatchUp.Builder builder = builder();
+        if (builder.getStatus() == COMPLETED) {
             return EitherOf3.withC(nothing());
         }
 
-        CatchUpId id = builder().getId();
+        CatchUpId id = builder.getId();
         Optional<CatchUp> stateVisibleToDelivery = findJob(id, event.getRunInfo());
         if (stateVisibleToDelivery.isPresent()) {
             CatchUp observedJob = stateVisibleToDelivery.get();
             if (observedJob.getStatus() == FINALIZING) {
                 int indexOfFinalized = event.getIndex()
                                             .getIndex();
-                if (!builder().getFinalizedShardList()
-                              .contains(indexOfFinalized)) {
-                    builder().addFinalizedShard(indexOfFinalized);
+                List<Integer> finalizedShards = builder.getFinalizedShardList();
+                if (!finalizedShards.contains(indexOfFinalized)) {
+                    builder.addFinalizedShard(indexOfFinalized);
                 }
-                List<Integer> affectedShards = builder().getAffectedShardList();
-                List<Integer> finalizedShards = builder().getFinalizedShardList();
+                List<Integer> affectedShards = builder.getAffectedShardList();
                 if (finalizedShards.containsAll(affectedShards)) {
-                    CatchUpCompleted completed = completeProcess(builder().getId());
+                    CatchUpCompleted completed = completeProcess(builder.getId());
                     return EitherOf3.withA(completed);
                 }
                 return EitherOf3.withC(nothing());
