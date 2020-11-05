@@ -63,7 +63,7 @@ final class GroupByTargetAndDeliver implements DeliveryAction {
                 delivery.deliver(deliveryPackage);
             } catch (RuntimeException exception) {
                 errors.addException(exception);
-            } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {
+            } catch (@SuppressWarnings("ErrorNotRethrown") /* False-positive */ ModelError error) {
                 errors.addError(error);
             }
         }
