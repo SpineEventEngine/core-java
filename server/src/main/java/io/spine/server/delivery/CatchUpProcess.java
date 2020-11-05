@@ -195,9 +195,16 @@ import static java.util.stream.Collectors.toSet;
  * {@code COMPLETED} status, a catch-up process must ensure that <b>each</b> shard was processed
  * by the {@code Delivery} which witnessed the catch-up process in its {@code FINALIZING} state.
  * Such an evidence would mean that this {@code Delivery} run is at the point in time by which
- * the catch-up process a) emitted all historical events, b) emitted {@link HistoryFullyRecalled}
- * event after them, and c) all these events were dispatched already — otherwise, the process
- * wasn't going to be in {@code FINALIZING} state.
+ * three things already happened:
+ *
+ * <ol>
+ *     <li>the catch-up process has emitted all the events from the history,
+ *
+ *     <li>the catch-up process has sent {@link HistoryFullyRecalled} after the historical events,
+ *
+ *     <li>all these events were dispatched already — otherwise, the process wasn't going
+ *     to be in its {@code FINALIZING} state.
+ * </ol>
  *
  * <p>In order to guarantee that prior to moving to the {@code COMPLETED} status, the catch-up
  * process emits special {@link ShardProcessingRequested} events for each shard. The events are
@@ -226,14 +233,14 @@ import static java.util.stream.Collectors.toSet;
  *      {@link ShardProcessingRequested} event is emitted for every shard involved into
  *      dispatching the historical events up until now.
  *
- *      <p>Each {@link ShardProcessingRequested} event triggers the {@code Delivery} to read
+ *      <li>Each {@link ShardProcessingRequested} event triggers the {@code Delivery} to read
  *      and dispatch the signals from a specific shard. Being sent, these events are dispatched
  *      to a special system {@link ShardMaintenanceProcess} serving as a handler. By reacting
  *      to a {@code ShardProcessingRequested}, the latter maintenance process emits
  *      a {@link ShardProcessed} event, telling that the {@code Delivery} has worked its way
  *      through the messages present in this shard.
  *
- *      <p>The catch-up process handles each {@link ShardProcessed} event. By gathering the data
+ *      <li>The catch-up process handles each {@code ShardProcessed} event. By gathering the data
  *      from these events, the catch-up is able to tell when all the affected shards were
  *      fully processed by the {@code Delivery}. Once all shards are processed,
  *      a {@link CatchUpCompleted} event is emitted.
