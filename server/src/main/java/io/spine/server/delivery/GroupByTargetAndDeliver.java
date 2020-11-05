@@ -22,8 +22,6 @@ package io.spine.server.delivery;
 
 import io.spine.server.model.ModelError;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -56,11 +54,11 @@ final class GroupByTargetAndDeliver implements DeliveryAction {
      */
     @Override
     public DeliveryErrors executeFor(List<InboxMessage> messages) {
-        List<Segment> segments = groupByTargetType(messages);
+        List<Segment> segments = Segment.groupByTargetType(messages);
         DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
         for (Segment segment : segments) {
-            ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(segment.typeUrl);
-            List<InboxMessage> deliveryPackage = segment.messages;
+            ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(segment.typeUrl());
+            List<InboxMessage> deliveryPackage = segment.messages();
             try {
                 delivery.deliver(deliveryPackage);
             } catch (RuntimeException exception) {
@@ -70,61 +68,5 @@ final class GroupByTargetAndDeliver implements DeliveryAction {
             }
         }
         return errors.build();
-    }
-
-    /**
-     * Groups the messages into {@code Segments} keeping the original order across segments.
-     *
-     * @param source
-     *         the messages to group
-     * @return an ordered list of {@code Segment}s
-     */
-    private static List<Segment> groupByTargetType(Collection<InboxMessage> source) {
-        List<Segment> result = new ArrayList<>();
-
-        if (source.isEmpty()) {
-            return result;
-        }
-        Segment segment = null;
-        for (InboxMessage message : source) {
-            String typeUrl = message.getInboxId()
-                                    .getTypeUrl();
-            if (segment == null) {
-                segment = new Segment(typeUrl);
-            } else {
-                if (!segment.typeUrl.equals(typeUrl)) {
-                    result.add(segment);
-                    segment = new Segment(typeUrl);
-                }
-            }
-            segment.add(message);
-        }
-        if (!segment.messages.isEmpty()) {
-            result.add(segment);
-        }
-        return result;
-    }
-
-    /**
-     * Portion of the inbox messages which are headed to the same target.
-     */
-    private static final class Segment {
-
-        private final String typeUrl;
-        private final List<InboxMessage> messages = new ArrayList<>();
-
-        /**
-         * Creates a new {@code Segment}.
-         *
-         * @param typeUrl
-         *         type URL of the target common for all messages in this segment
-         */
-        private Segment(String typeUrl) {
-            this.typeUrl = typeUrl;
-        }
-
-        private void add(InboxMessage message) {
-            messages.add(message);
-        }
     }
 }
