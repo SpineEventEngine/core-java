@@ -26,6 +26,7 @@ import io.spine.query.RecordColumn;
 import io.spine.server.entity.EntityRecord;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.query.RecordColumn.create;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -46,16 +47,19 @@ final class AsEntityRecordColumn {
      * <p>The resulting view loses an ability to {@linkplain Column#valueIn(Object) obtain
      * the values from the record instance}.
      *
-     * @param original the column to create a view for
-     * @param typeOfValues the type of the column values
-     * @param <V> the type of the column values
+     * @param original
+     *         the column to create a view for
+     * @param typeOfValues
+     *         the type of the column values
+     * @param <V>
+     *         the type of the column values
      * @return a view on the column
      */
     static <V> RecordColumn<EntityRecord, V> apply(Column<?, ?> original, Class<V> typeOfValues) {
         checkNotNull(original);
         checkNotNull(typeOfValues);
         String columnName = columnName(original);
-        return new RecordColumn<>(columnName, typeOfValues, new NoGetter<>());
+        return create(columnName, typeOfValues, new NoGetter<>());
     }
 
     /**
@@ -65,7 +69,8 @@ final class AsEntityRecordColumn {
      * <p>The resulting view loses an ability to {@linkplain Column#valueIn(Object) obtain
      * the values from the record instance}.
      *
-     * @param original the column to create a view for
+     * @param original
+     *         the column to create a view for
      * @return a view on the column
      */
     static RecordColumn<EntityRecord, Object> apply(Column<?, ?> original) {

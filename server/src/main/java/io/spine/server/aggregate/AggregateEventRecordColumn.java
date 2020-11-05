@@ -28,6 +28,8 @@ import io.spine.query.Column;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 
+import static io.spine.query.RecordColumn.create;
+
 /**
  * Columns stored along with an {@link AggregateEventRecord}.
  */
@@ -39,25 +41,25 @@ final class AggregateEventRecordColumn {
      * Stores the identifier of an aggregate.
      */
     static final RecordColumn<AggregateEventRecord, Any> aggregate_id =
-            new RecordColumn<>("aggregate_id", Any.class, AggregateEventRecord::getAggregateId);
+            create("aggregate_id", Any.class, AggregateEventRecord::getAggregateId);
 
     /**
      * Stores the time when the event record was created.
      */
     static final RecordColumn<AggregateEventRecord, Timestamp> created =
-            new RecordColumn<>("created", Timestamp.class, AggregateEventRecord::getTimestamp);
+            create("created", Timestamp.class, AggregateEventRecord::getTimestamp);
 
     /**
      * Stores the version of the record, either of the stored event, or the snapshot.
      */
     static final RecordColumn<AggregateEventRecord, Integer> version =
-            new RecordColumn<>("version", Integer.class, new GetVersion());
+            create("version", Integer.class, new GetVersion());
 
     /**
      * Stores {@code true} for the records which hold snapshots, {@code false} otherwise.
      */
     static final RecordColumn<AggregateEventRecord, Boolean> snapshot =
-            new RecordColumn<>("snapshot", Boolean.class, AggregateEventRecord::hasSnapshot);
+            create("snapshot", Boolean.class, AggregateEventRecord::hasSnapshot);
 
     /**
      * Prevents this type from instantiation.

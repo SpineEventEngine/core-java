@@ -25,6 +25,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 
+import static io.spine.query.RecordColumn.create;
+
 /**
  * The columns stored for {@link CatchUp} states.
  */
@@ -36,21 +38,20 @@ public class CatchUpColumn {
      * Stores the status of the catch-up process.
      */
     public static final RecordColumn<CatchUp, CatchUpStatus> status =
-            new RecordColumn<>("status", CatchUpStatus.class, CatchUp::getStatus);
+            create("status", CatchUpStatus.class, CatchUp::getStatus);
 
     /**
      * Stores the time when the history has been last read by the catch-up process.
      */
     public static final RecordColumn<CatchUp, Timestamp> when_last_read =
-            new RecordColumn<>("when_last_read", Timestamp.class, CatchUp::getWhenLastRead);
+            create("when_last_read", Timestamp.class, CatchUp::getWhenLastRead);
 
     /**
      * Stores the type URL of the projection-under-catch-up.
      */
     public static final RecordColumn<CatchUp, String> projection_type =
-            new RecordColumn<>("projection_type",
-                               String.class, (m) -> m.getId()
-                                                     .getProjectionType());
+            create("projection_type", String.class, (m) -> m.getId()
+                                                            .getProjectionType());
 
     /**
      * Prevents this type from instantiation.

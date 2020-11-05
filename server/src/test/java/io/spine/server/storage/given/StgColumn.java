@@ -26,6 +26,8 @@ import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 import io.spine.test.storage.StgProject;
 
+import static io.spine.query.RecordColumn.create;
+
 /**
  * Columns of the {@link StgProject} stored as a plain {@link Message}.
  */
@@ -34,15 +36,15 @@ import io.spine.test.storage.StgProject;
 public final class StgColumn {
 
     public static final RecordColumn<StgProject, Integer> project_version =
-            new RecordColumn<>("project_version", Integer.class, (r) -> r.getProjectVersion()
-                                                                         .getNumber());
+            create("project_version", Integer.class, (r) -> r.getProjectVersion()
+                                                             .getNumber());
 
     public static final RecordColumn<StgProject, Timestamp> due_date =
-            new RecordColumn<>("due_date", Timestamp.class, StgProject::getDueDate);
+            create("due_date", Timestamp.class, StgProject::getDueDate);
 
     public static final RecordColumn<StgProject, String> status =
-            new RecordColumn<>("status", String.class, (r) -> r.getStatus()
-                                                               .name());
+            create("status", String.class, (r) -> r.getStatus()
+                                                   .name());
 
     /**
      * Prevents this type from instantiation.

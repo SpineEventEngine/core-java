@@ -26,6 +26,8 @@ import io.spine.core.Event;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 
+import static io.spine.query.RecordColumn.create;
+
 /**
  * Columns stored along with {@link Event}.
  */
@@ -40,17 +42,17 @@ final class EventColumn {
      * equal to {@code "spine.test.TaskAdded"}.
      */
     static final RecordColumn<Event, String> type =
-            new RecordColumn<>("type", String.class, (m) -> m.enclosedTypeUrl()
-                                                             .toTypeName()
-                                                             .value());
+            create("type", String.class, (m) -> m.enclosedTypeUrl()
+                                                 .toTypeName()
+                                                 .value());
 
     /**
      * Stores the time when the event was created.
      */
     @SuppressWarnings("DuplicateStringLiteralInspection")   // popular column name.
     static final RecordColumn<Event, Timestamp> created =
-            new RecordColumn<>("created", Timestamp.class, (m) -> m.getContext()
-                                                                   .getTimestamp());
+            create("created", Timestamp.class, (m) -> m.getContext()
+                                                       .getTimestamp());
 
     /**
      * Prevents this type from instantiation.

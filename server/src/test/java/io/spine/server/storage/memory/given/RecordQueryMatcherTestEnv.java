@@ -29,6 +29,8 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.test.storage.StgProject;
 import io.spine.testdata.Sample;
 
+import static io.spine.query.RecordColumn.create;
+
 /**
  * The test environment for {@link io.spine.server.storage.memory.RecordQueryMatcher} tests.
  *
@@ -50,7 +52,6 @@ public final class RecordQueryMatcherTestEnv {
                           .subject();
     }
 
-
     /**
      * Creates a {@code Subject} for the {@link EntityRecord} with the given ID.
      */
@@ -70,7 +71,7 @@ public final class RecordQueryMatcherTestEnv {
      * A {@code Column} which holds an {@link Any} instance.
      */
     public static RecordColumn<EntityRecord, Any> anyColumn() {
-        return new RecordColumn<>("wrapped_state", Any.class, (r) -> anyValue());
+        return create("wrapped_state", Any.class, (r) -> anyValue());
     }
 
     /**
@@ -86,14 +87,14 @@ public final class RecordQueryMatcherTestEnv {
      * A {@code Column} which holds a {@code boolean} value.
      */
     public static RecordColumn<EntityRecord, Boolean> booleanColumn() {
-        return new RecordColumn<>("internal", Boolean.class, (r) -> booleanValue());
+        return create("internal", Boolean.class, (r) -> booleanValue());
     }
 
     /**
      * A {@code Column} which holds a {@code boolean} value.
      */
     public static RecordColumn<EntityRecord, Boolean> booleanColumn(String name) {
-        return new RecordColumn<>(name, Boolean.class, (r) -> booleanValue());
+        return create(name, Boolean.class, (r) -> booleanValue());
     }
 
     /**
