@@ -40,22 +40,23 @@ final class Segment {
      * @param typeUrl
      *         type URL of the target common for all messages in this segment
      */
-    Segment(String typeUrl) {
+    private Segment(String typeUrl) {
         this.typeUrl = typeUrl;
     }
 
     /**
-     * Groups the messages into {@code Segments} keeping the original order across segments.
+     * Groups the messages into {@code Segments} keeping the original order of messages
+     * across the returned list of segments.
      *
      * @param source
      *         the messages to group
      * @return an ordered list of {@code Segment}s
      */
-    static List<Segment> groupByTargetType(Collection<InboxMessage> source) {
-        List<Segment> result = new ArrayList<>();
+    static ImmutableList<Segment> groupByTargetType(Collection<InboxMessage> source) {
+        ImmutableList.Builder<Segment> builder = ImmutableList.builder();
 
         if (source.isEmpty()) {
-            return result;
+            return ImmutableList.of();
         }
         Segment segment = null;
         for (InboxMessage message : source) {
@@ -65,30 +66,17 @@ final class Segment {
                 segment = new Segment(typeUrl);
             } else {
                 if (!segment.typeUrl().equals(typeUrl)) {
-                    result.add(segment);
+                    builder.add(segment);
                     segment = new Segment(typeUrl);
                 }
             }
             segment.add(message);
         }
         if (segment.hasMessages()) {
-            result.add(segment);
+            builder.add(segment);
         }
+        ImmutableList<Segment> result = builder.build();
         return result;
-    }
-
-    /**
-     * Adds another message into this segment.
-     */
-    private void add(InboxMessage message) {
-        messages.add(message);
-    }
-
-    /**
-     * Tells if this segment has any messages.
-     */
-    boolean hasMessages() {
-        return !messages.isEmpty();
     }
 
     /**
@@ -104,5 +92,19 @@ final class Segment {
      */
     ImmutableList<InboxMessage> messages() {
         return ImmutableList.copyOf(messages);
+    }
+
+    /**
+     * Adds another message into this segment.
+     */
+    private void add(InboxMessage message) {
+        messages.add(message);
+    }
+
+    /**
+     * Tells if this segment has any messages.
+     */
+    private boolean hasMessages() {
+        return !messages.isEmpty();
     }
 }
