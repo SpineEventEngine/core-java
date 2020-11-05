@@ -566,8 +566,7 @@ public final class CatchUpProcess<I>
         Optional<CatchUp> stateVisibileToDelivery =
                 deliveryInfo.getCatchUpJobList()
                                .stream()
-                               .filter((job) -> job.getId()
-                                                   .equals(id))
+                               .filter((job) -> id.equals(job.getId()))
                                .findFirst();
         return stateVisibileToDelivery;
     }
