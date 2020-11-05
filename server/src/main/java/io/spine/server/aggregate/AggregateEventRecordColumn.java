@@ -26,11 +26,13 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.query.Column;
 import io.spine.query.RecordColumn;
+import io.spine.query.RecordColumns;
 
 /**
  * Columns stored along with an {@link AggregateEventRecord}.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")   // column names repeat in different records.
+@RecordColumns(ofType = AggregateEventRecord.class)
 final class AggregateEventRecordColumn {
 
     /**
@@ -57,6 +59,13 @@ final class AggregateEventRecordColumn {
     static final RecordColumn<AggregateEventRecord, Boolean> snapshot =
             new RecordColumn<>("snapshot", Boolean.class, AggregateEventRecord::hasSnapshot);
 
+    /**
+     * Prevents this type from instantiation.
+     *
+     * <p>This class exists exclusively as a container of the column definitions. Thus it isn't
+     * expected to be instantiated at all. See the {@link RecordColumns} docs for more details on
+     * this approach.
+     */
     private AggregateEventRecordColumn() {
     }
 

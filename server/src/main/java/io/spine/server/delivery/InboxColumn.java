@@ -23,11 +23,13 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.query.RecordColumn;
+import io.spine.query.RecordColumns;
 
 /**
  * Columns stored along with each {@link InboxMessage}.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")  // column names may repeat across records.
+@RecordColumns(ofType = InboxMessage.class)
 final class InboxColumn {
 
     /**
@@ -84,6 +86,13 @@ final class InboxColumn {
     static final RecordColumn<InboxMessage, Integer> version =
             new RecordColumn<>("version", Integer.class, InboxMessage::getVersion);
 
+    /**
+     * Prevents this type from instantiation.
+     *
+     * <p>This class exists exclusively as a container of the column definitions. Thus it isn't
+     * expected to be instantiated at all. See the {@link RecordColumns} docs for more details on
+     * this approach.
+     */
     private InboxColumn() {
     }
 

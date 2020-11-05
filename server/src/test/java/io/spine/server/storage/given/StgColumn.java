@@ -23,12 +23,14 @@ package io.spine.server.storage.given;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.query.RecordColumn;
+import io.spine.query.RecordColumns;
 import io.spine.test.storage.StgProject;
 
 /**
  * Columns of the {@link StgProject} stored as a plain {@link Message}.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // column names repeat across different types.
+@RecordColumns(ofType = StgProject.class)
 public final class StgColumn {
 
     public static final RecordColumn<StgProject, Integer> project_version =
@@ -42,6 +44,13 @@ public final class StgColumn {
             new RecordColumn<>("status", String.class, (r) -> r.getStatus()
                                                                .name());
 
+    /**
+     * Prevents this type from instantiation.
+     *
+     * <p>This class exists exclusively as a container of the column definitions. Thus it isn't
+     * expected to be instantiated at all. See the {@link RecordColumns} docs for more details on
+     * this approach.
+     */
     private StgColumn() {
     }
 

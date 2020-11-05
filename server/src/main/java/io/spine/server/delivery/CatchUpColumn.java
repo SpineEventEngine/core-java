@@ -23,11 +23,13 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.query.RecordColumn;
+import io.spine.query.RecordColumns;
 
 /**
  * The columns stored for {@link CatchUp} states.
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // column names may repeat in different types.
+@RecordColumns(ofType = CatchUp.class)
 public class CatchUpColumn {
 
     /**
@@ -50,6 +52,13 @@ public class CatchUpColumn {
                                String.class, (m) -> m.getId()
                                                      .getProjectionType());
 
+    /**
+     * Prevents this type from instantiation.
+     *
+     * <p>This class exists exclusively as a container of the column definitions. Thus it isn't
+     * expected to be instantiated at all. See the {@link RecordColumns} docs for more details on
+     * this approach.
+     */
     private CatchUpColumn() {
     }
 

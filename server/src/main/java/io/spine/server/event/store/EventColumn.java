@@ -24,10 +24,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.query.RecordColumn;
+import io.spine.query.RecordColumns;
 
 /**
  * Columns stored along with {@link Event}.
  */
+@RecordColumns(ofType = Event.class)
 final class EventColumn {
 
     /**
@@ -50,6 +52,13 @@ final class EventColumn {
             new RecordColumn<>("created", Timestamp.class, (m) -> m.getContext()
                                                                    .getTimestamp());
 
+    /**
+     * Prevents this type from instantiation.
+     *
+     * <p>This class exists exclusively as a container of the column definitions. Thus it isn't
+     * expected to be instantiated at all. See the {@link RecordColumns} docs for more details on
+     * this approach.
+     */
     private EventColumn() {
     }
 
