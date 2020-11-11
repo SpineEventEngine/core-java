@@ -547,12 +547,11 @@ public final class CatchUpProcess<I>
             if (observedJob.getStatus() == FINALIZING) {
                 int indexOfFinalized = event.getIndex()
                                             .getIndex();
-                List<Integer> finalizedShards = builder.getFinalizedShardList();
-                if (!finalizedShards.contains(indexOfFinalized)) {
+                if (!builder.getFinalizedShardList().contains(indexOfFinalized)) {
                     builder.addFinalizedShard(indexOfFinalized);
                 }
                 List<Integer> affectedShards = builder.getAffectedShardList();
-                if (finalizedShards.containsAll(affectedShards)) {
+                if (builder.getFinalizedShardList().containsAll(affectedShards)) {
                     CatchUpCompleted completed = completeProcess(builder.getId());
                     return EitherOf3.withA(completed);
                 }
