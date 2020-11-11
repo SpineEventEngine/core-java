@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
@@ -88,6 +89,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setSignalId(signalIdFrom(envelope, entityId))
                 .setInboxId(inboxId)
                 .setLabel(label)
+                .setWhenReceived(Time.currentTime())
                 .setStatus(determineStatus(envelope, label))
                 .setVersion(VersionCounter.next());
         setRecordPayload(envelope, builder);
