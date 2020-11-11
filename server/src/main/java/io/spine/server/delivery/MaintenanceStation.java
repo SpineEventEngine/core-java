@@ -70,6 +70,7 @@ final class MaintenanceStation extends Station {
         return emptyResult();
     }
 
+    //TODO:2020-11-05:alex.tymchenko: more clarity is required here.
     private void updateShardProcessingEvents(Conveyor conveyor) {
         for (InboxMessage message : conveyor) {
             if (message.hasEvent()) {
