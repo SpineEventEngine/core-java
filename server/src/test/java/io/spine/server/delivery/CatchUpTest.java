@@ -27,6 +27,7 @@ import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.ConsecutiveNumberProcess;
 import io.spine.server.delivery.given.ConsecutiveProjection;
 import io.spine.server.delivery.given.CounterCatchUp;
@@ -91,6 +92,14 @@ public class CatchUpTest extends AbstractDeliveryTest {
     public void tearDown() {
         super.tearDown();
         Time.resetProvider();
+        clearCatchUps();
+    }
+
+    private static void clearCatchUps() {
+        ServerEnvironment.instance()
+                         .delivery()
+                         .catchUpStorage()
+                         .clear();
     }
 
     @Test

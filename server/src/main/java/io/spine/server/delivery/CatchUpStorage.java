@@ -20,6 +20,8 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.query.RecordQuery;
 import io.spine.server.storage.MessageRecordSpec;
@@ -83,5 +85,15 @@ public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
     @Override
     public void write(CatchUp message) {
         super.write(message);
+    }
+
+    /**
+     * Clears this storage by removing all records.
+     */
+    @VisibleForTesting
+    void clear() {
+        Iterator<CatchUpId> iterator = index();
+        ImmutableList<CatchUpId> allIds = ImmutableList.copyOf(iterator);
+        deleteAll(allIds);
     }
 }
