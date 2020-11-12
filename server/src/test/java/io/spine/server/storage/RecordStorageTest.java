@@ -196,11 +196,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         RecordStorage<ProjectId> storage = storage();
 
         EntityRecordWithColumns recordRight =
-                create(fineRecord, matchingEntity, storage);
+                EntityRecordWithColumns.create(fineRecord, matchingEntity, storage);
         EntityRecordWithColumns recordWrong1 =
-                create(notFineRecord1, wrongEntity1, storage);
+                EntityRecordWithColumns.create(notFineRecord1, wrongEntity1, storage);
         EntityRecordWithColumns recordWrong2 =
-                create(notFineRecord2, wrongEntity2, storage);
+                EntityRecordWithColumns.create(notFineRecord2, wrongEntity2, storage);
 
         // Fill the storage
         storage.write(idWrong1, recordWrong1);
