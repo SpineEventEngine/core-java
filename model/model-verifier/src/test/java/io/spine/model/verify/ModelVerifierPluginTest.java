@@ -23,6 +23,7 @@ package io.spine.model.verify;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import io.spine.testing.SlowTest;
+import io.spine.testing.TempDir;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.TaskName;
@@ -33,9 +34,6 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.TempDirectory;
-import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
 import java.nio.file.Path;
 
@@ -45,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SlowTest
-@ExtendWith(TempDirectory.class)
 @DisplayName("ModelVerifierPlugin should")
 class ModelVerifierPluginTest {
 
@@ -61,8 +58,8 @@ class ModelVerifierPluginTest {
     private Path tempDir;
 
     @BeforeEach
-    void setUp(@TempDir Path junitCreatedDir) {
-        tempDir = junitCreatedDir;
+    void setUp() {
+        tempDir = TempDir.forClass(getClass()).toPath();
         ModelTests.dropAllModels();
     }
 

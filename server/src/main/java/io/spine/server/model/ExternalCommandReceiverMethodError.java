@@ -26,7 +26,7 @@ import io.spine.server.type.CommandClass;
 
 import java.util.Collection;
 
-import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
+import static io.spine.server.model.MessageFormatter.toStringEnumeration;
 
 /**
  * An error thrown when one or more of the command accepting methods are marked {@code external}
@@ -48,14 +48,12 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String MESSAGE =
-            "The class `%s` declares `external` command receiver methods for command types: %s. " +
-                    "Only event accepting methods should be marked as `external`.";
-
     public ExternalCommandReceiverMethodError(
-            CommandHandlingClass classWithViolation,
+            CommandHandlingClass<?, ?> classWithViolation,
             Collection<? extends CommandAcceptingMethod<?, ?>> invalidMethods) {
-        super(MESSAGE, classWithViolation, handledCommandTypes(invalidMethods));
+        super("The class `%s` declares `external` command receiver methods for command types: %s."
+                      + " Only event accepting methods should be marked as `external`.",
+              classWithViolation, handledCommandTypes(invalidMethods));
     }
 
     private static String

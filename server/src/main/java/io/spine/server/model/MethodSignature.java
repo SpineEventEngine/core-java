@@ -82,7 +82,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     public abstract ImmutableSet<? extends ParameterSpec<E>> paramSpecs();
 
     /**
-     * Obtains the set of allowed access modifiers for the method.
+     * Obtains the set of recommended access modifiers for the method.
      *
      * <p>Default implementation returns a set with a single value
      * {@link AccessModifier#PACKAGE_PRIVATE}. Override this method to change

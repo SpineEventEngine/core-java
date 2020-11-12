@@ -39,7 +39,7 @@ import java.util.function.Function;
  *         int32 year_of_registration = 8 [(column) = true];
  *         </pre>
  *     <li>Implemented using custom Spine-generated interface:
- *         <pre>
+ *         <pre>{@code
  *         interface UserProfileWithColumns extends EntityWithColumns {
  *             int getYearOfRegistration();
  *         }
@@ -54,7 +54,7 @@ import java.util.function.Function;
  *                 return yearOfRegistration;
  *             }
  *         }
- *         </pre>
+ *         }</pre>
  *     <li>Extracted from the entity and propagated to the entity state at the moment of
  *         transaction commit. The column value is finalized by this moment.
  * </ol>

@@ -37,6 +37,7 @@ import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
  * Serves as a converter from {@link Error} to {@link Metadata} and vice versa.
  */
 @Internal
+@SuppressWarnings("BadImport") // Using just `Key` instead of `Metadata.Key` is OK in this scope.
 public class MetadataConverter {
 
     private static final String ERROR_KEY_NAME = "spine-error-bin";

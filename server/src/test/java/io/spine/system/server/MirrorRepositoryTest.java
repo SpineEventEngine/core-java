@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.client.Filters.eq;
@@ -69,8 +70,6 @@ import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.event;
 import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.givenPhotos;
 import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.newPhotosRepository;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -113,8 +112,8 @@ class MirrorRepositoryTest {
             void includeAll() {
                 Query query = queries.all(MRPhoto.class);
                 List<? extends EntityState> readMessages = execute(query);
-                assertThat(readMessages, containsInAnyOrder(givenPhotos.values()
-                                                                       .toArray()));
+                assertThat(readMessages)
+                        .containsAtLeastElementsIn(givenPhotos.values());
             }
 
             @Test
@@ -188,7 +187,8 @@ class MirrorRepositoryTest {
 
             private void checkRead(Query query, MRPhoto... expected) {
                 List<? extends EntityState> readMessages = execute(query);
-                assertThat(readMessages, containsInAnyOrder(expected));
+                assertThat(readMessages)
+                        .containsExactlyElementsIn(expected);
             }
 
             private MRPhoto onePhoto() {

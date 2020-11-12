@@ -18,36 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.EventReceiver;
-import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+import io.spine.string.Diags;
+
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
- * The helper class for holding messaging information on behalf of another model class.
- *
- * @param <T>
- *         the type of the raw class for obtaining messaging information
+ * An error message formatting helper.
  */
-public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
-        implements ReactingClass {
+final class MessageFormatter {
 
-    private static final long serialVersionUID = 0L;
-
-    public ReactorClassDelegate(Class<T> cls) {
-        super(cls, new EventReactorSignature());
+    private MessageFormatter() {
     }
 
-    @Override
-    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
-        return handlerOf(eventClass, originClass);
+    static String backtick(Object object) {
+        return Diags.backtick(object);
     }
 
-    @Override
-    public ImmutableSet<EventClass> reactionOutput() {
-        return producedTypes();
+    static Collector<CharSequence, ?, String> toStringEnumeration() {
+        return Collectors.joining(", ");
     }
 }

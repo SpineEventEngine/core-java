@@ -58,13 +58,14 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
     public static <S extends EventReactor> EventReactorClass<S>
     asReactorClass(Class<S> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         EventReactorClass<S> result = (EventReactorClass<S>)
                 get(cls, EventReactorClass.class, () -> new EventReactorClass<>(cls));
         return (result);
     }
 
     @Override
-    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
         return reactors.handlerOf(eventClass, originClass);
     }
 
