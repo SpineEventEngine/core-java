@@ -100,7 +100,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         Entity<ProjectId, ?> testEntity = newEntity(id);
         RecordStorage<ProjectId> storage = storage();
         EntityRecordWithColumns recordWithColumns =
-                create(record, testEntity, storage);
+                EntityRecordWithColumns.create(record, testEntity, storage);
         storage.write(id, recordWithColumns);
 
         RecordReadRequest<ProjectId> readRequest = newReadRequest(id);
