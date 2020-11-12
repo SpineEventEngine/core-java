@@ -36,7 +36,7 @@ import static java.lang.reflect.Modifier.isPublic;
 /**
  * The predicate for {@linkplain Modifier access modifiers} of {@linkplain Method methods}.
  */
-public class AccessModifier implements Predicate<Method> {
+public final class AccessModifier implements Predicate<Method> {
 
     public static final AccessModifier PUBLIC =
             new AccessModifier(Modifier::isPublic, "public");
@@ -100,7 +100,7 @@ public class AccessModifier implements Predicate<Method> {
      *         the modifiers to compose into a {@code String}
      * @return the string with modifier-as-strings
      */
-    static Object asString(Iterable<AccessModifier> modifiers) {
+    static String asString(Iterable<AccessModifier> modifiers) {
         return Joiner.on(", ")
                      .join(modifiers);
     }
