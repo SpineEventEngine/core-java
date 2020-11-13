@@ -113,7 +113,7 @@ public final class QueryFilter extends TypedFilter<EntityState<?>> {
      * @param <V>
      *         the type of the column values
      */
-    public static <V> QueryFilter ge(EntityColumn<?, ?> column, V value) {
+    public static <V> QueryFilter ge(EntityColumn<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());

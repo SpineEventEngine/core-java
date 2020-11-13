@@ -37,9 +37,11 @@ import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.core.Event;
 import io.spine.core.Signal;
+import io.spine.query.EntityQuery;
 import io.spine.query.RecordQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
@@ -104,7 +106,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected EntityRecordStorage<I, S> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-                EntityRecordStorage<I, S> storage = (EntityRecordStorage<I, S>) storage();
+        EntityRecordStorage<I, S> storage = (EntityRecordStorage<I, S>) storage();
         return storage;
     }
 
@@ -338,7 +340,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         EntityRecordStorage<I, S> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll(ids,  fieldMask);
+        Iterator<EntityRecord> records = storage.readAll(ids, fieldMask);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
@@ -398,6 +400,25 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(format);
 
         Iterator<EntityRecord> records = findRecords(filters, format);
+        Function<EntityRecord, E> toEntity = storageConverter().reverse();
+        Iterator<E> result = transform(records, toEntity::apply);
+        return result;
+    }
+
+    /**
+     * Finds the entities according to the given {@code EntityQuery}.
+     *
+     * <p>Note: The storage must be assigned before calling this method.
+     *
+     * @param query
+     *         the entity query
+     * @return all the entities in this repository which satisfy the query
+     */
+    public Iterator<E> find(EntityQuery<I, S, ?> query) {
+        checkNotNull(query);
+
+        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
+        Iterator<EntityRecord> records = recordStorage().readAll(recordQuery);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;

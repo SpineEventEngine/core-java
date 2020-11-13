@@ -27,11 +27,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.client.CompositeFilter;
-import io.spine.client.CompositeQueryFilter;
-import io.spine.client.QueryFilter;
-import io.spine.client.ResponseFormat;
-import io.spine.client.TargetFilters;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
@@ -40,7 +35,6 @@ import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
-import io.spine.query.EntityColumn;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.EventFilter;
@@ -119,6 +113,7 @@ import static io.spine.server.procman.given.repo.GivenCommandMessage.projectCrea
 import static io.spine.server.procman.given.repo.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.taskAdded;
+import static io.spine.server.procman.given.repo.SetTestProcessName.NEW_NAME;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
@@ -130,7 +125,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ProcessManagerRepository should")
+@DisplayName("`ProcessManagerRepository` should")
 class ProcessManagerRepositoryTest
         extends RecordBasedRepositoryTest<TestProcessManager, ProjectId, Project> {
 
@@ -661,19 +656,20 @@ class ProcessManagerRepositoryTest
         repository.store(pm);
 
         // Init filters by the `id_string` column.
-        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+        Project.Query query =
+                Project.query()
+                       .idString().is(id.toString())
+                       .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProcessManager> found =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the migration.
         repository.applyMigration(id, new SetTestProcessId());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProcessManager> afterMigration =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the new entity state has all fields updated as expected.
@@ -702,31 +698,32 @@ class ProcessManagerRepositoryTest
         repository.store(pm3);
 
         // Init filters by the `name` column.
-        TargetFilters filters = targetFilters(Project.Column.name(), SetTestProcessName.NEW_NAME);
+        Project.Query query =
+                Project.query()
+                       .name().is(NEW_NAME)
+                       .build();
 
         // Check nothing is found as the entity states were not yet updated.
-        Iterator<TestProcessManager> found =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the column update to two of the three entities.
         repository.applyMigration(ImmutableSet.of(id1, id2), new SetTestProcessName());
 
         // Check the entities are now found by the provided filters.
-        Iterator<TestProcessManager> foundAfterMigration =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> foundAfterMigration = repository.find(query);
 
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(foundAfterMigration);
         Project expectedState1 = pm1
                 .state()
                 .toBuilder()
-                .setName(SetTestProcessName.NEW_NAME)
+                .setName(NEW_NAME)
                 .setIdString(pm1.getIdString())
                 .build();
         Project expectedState2 = pm2
                 .state()
                 .toBuilder()
-                .setName(SetTestProcessName.NEW_NAME)
+                .setName(NEW_NAME)
                 .setIdString(pm2.getIdString())
                 .build();
         assertThat(results).hasSize(2);
@@ -745,19 +742,20 @@ class ProcessManagerRepositoryTest
         repository.store(pm);
 
         // Init filters by the `id_string` column.
-        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+        Project.Query query =
+                Project.query()
+                       .idString().is(id.toString())
+                       .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProcessManager> found =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the state update.
         repository.applyMigration(id, new UpdatePmState<>());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProcessManager> afterMigration =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the column value is propagated to the entity state.
@@ -789,14 +787,13 @@ class ProcessManagerRepositoryTest
         repository.applyMigration(ImmutableSet.of(id1, id2), new UpdatePmState<>());
 
         // Check that entities to which the migration has been applied now have columns updated.
-        QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
-        QueryFilter filter2 = QueryFilter.eq(Project.Column.idString(), id2.toString());
-        QueryFilter filter3 = QueryFilter.eq(Project.Column.idString(), id3.toString());
-
-        TargetFilters filters = targetFilters(filter1, filter2, filter3);
-
-        Iterator<TestProcessManager> found =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Project.Query query =
+                Project.query()
+                       .either(p -> p.idString().is(id1.toString()),
+                               p -> p.idString().is(id2.toString()),
+                               p -> p.idString().is(id3.toString()))
+                       .build();
+        Iterator<TestProcessManager> found = repository.find(query);
 
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(found);
         Project expectedState1 = pm1
@@ -856,20 +853,6 @@ class ProcessManagerRepositoryTest
 
         Optional<TestProcessManager> found = repository().find(id);
         assertThat(found).isEmpty();
-    }
-
-    private static TargetFilters targetFilters(EntityColumn<?, String> column, String value) {
-        QueryFilter filter = QueryFilter.eq(column, value);
-        return targetFilters(filter);
-    }
-
-    private static TargetFilters targetFilters(QueryFilter first, QueryFilter... rest) {
-        CompositeQueryFilter composite = CompositeQueryFilter.either(first, rest);
-        CompositeFilter filterValue = composite.value();
-        return TargetFilters
-                .newBuilder()
-                .addFilter(filterValue)
-                .build();
     }
 
     private static Correspondence<TestProcessManager, Project> entityState() {
