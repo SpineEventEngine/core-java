@@ -33,10 +33,7 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.EntityQueries;
-import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectWithColumns;
@@ -123,11 +120,6 @@ public class RecordStorageTestEnv {
         assertEquals(expected, singleRecord);
     }
 
-    public static <T> EntityQuery<T>
-    newEntityQuery(TargetFilters filters, RecordStorage<T> storage) {
-        return EntityQueries.from(filters, storage);
-    }
-
     public static TargetFilters emptyFilters() {
         return TargetFilters.getDefaultInstance();
     }
@@ -145,10 +137,11 @@ public class RecordStorageTestEnv {
             extends TransactionalEntity<ProjectId, Project, Project.Builder>
             implements ProjectWithColumns, HasLifecycleColumns<ProjectId, Project> {
 
-        public static final Timestamp PROJECT_VERSION_TIMESTAMP = Timestamp.newBuilder()
-                                                                           .setSeconds(124565)
-                                                                           .setNanos(2434535)
-                                                                           .build();
+        public static final Timestamp PROJECT_VERSION_TIMESTAMP =
+                Timestamp.newBuilder()
+                         .setSeconds(124565)
+                         .setNanos(2434535)
+                         .build();
 
         private int counter = 0;
 
