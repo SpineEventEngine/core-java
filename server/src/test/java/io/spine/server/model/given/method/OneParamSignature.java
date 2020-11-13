@@ -30,9 +30,6 @@ import io.spine.server.type.EventEnvelope;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import static io.spine.server.model.AccessModifier.PACKAGE_PRIVATE;
-import static io.spine.server.model.AccessModifier.PRIVATE;
-import static io.spine.server.model.AccessModifier.PROTECTED;
 import static io.spine.server.model.AccessModifier.PUBLIC;
 
 public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnvelope> {
@@ -47,8 +44,8 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> modifiers() {
-        return allModifiers();
+    protected AccessModifier modifier() {
+        return PUBLIC;
     }
 
     @Override
@@ -64,9 +61,5 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     @Override
     public boolean mayReturnIgnored() {
         return true;
-    }
-
-    private static ImmutableSet<AccessModifier> allModifiers() {
-        return ImmutableSet.of(PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE);
     }
 }

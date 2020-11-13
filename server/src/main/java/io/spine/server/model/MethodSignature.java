@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.toList;
  * <ul>
  *     <li>{@linkplain #MethodSignature(Class) the method annotation},
  *     <li>{@linkplain #paramSpecs() the specification of method parameters},
- *     <li>{@linkplain #modifiers() the set of allowed access modifiers},
+ *     <li>{@linkplain #modifier() the set of allowed access modifiers},
  *     <li>{@linkplain #returnTypes() the set of valid return types},
  *     <li>{@linkplain #allowedThrowable() the set of allowed exceptions}, that the method
  *          declares to throw (empty by default),
@@ -62,9 +62,6 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                                       E extends MessageEnvelope<?, ?, ?>> implements Logging {
-
-    private static final ImmutableSet<AccessModifier>
-            MODIFIER = ImmutableSet.of(PACKAGE_PRIVATE);
 
     private final Class<? extends Annotation> annotation;
 
@@ -84,12 +81,12 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the set of recommended access modifiers for the method.
      *
-     * <p>Default implementation returns a set with a single value
-     * {@link AccessModifier#PACKAGE_PRIVATE}. Override this method to change
-     * the allowed access modifiers.
+     * <p>Override this method to change the allowed access modifiers.
+     *
+     * @return {@link AccessModifier#PACKAGE_PRIVATE}
      */
-    protected ImmutableSet<AccessModifier> modifiers() {
-        return MODIFIER;
+    protected AccessModifier modifier() {
+        return PACKAGE_PRIVATE;
     }
 
     /**

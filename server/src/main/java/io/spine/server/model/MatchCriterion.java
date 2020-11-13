@@ -21,7 +21,6 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import io.spine.annotation.Internal;
@@ -115,17 +114,15 @@ public enum MatchCriterion {
 
     /**
      * The criterion, which ensures that the method access modifier is among the
-     * {@linkplain MethodSignature#modifiers() expected}.
+     * {@linkplain MethodSignature#modifier() expected}.
      */
     ACCESS_MODIFIER(WARN,
                     "The access modifier of `%s` method is `%s`. We recommend it to be `%s`. "
                             + "Refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            ImmutableSet<AccessModifier> recommended = signature.modifiers();
-            boolean hasMatch =
-                    recommended.stream()
-                               .anyMatch(m -> m.test(method));
+            AccessModifier recommended = signature.modifier();
+            boolean hasMatch = recommended.test(method);
             if (hasMatch) {
                 return Optional.empty();
             }
@@ -135,13 +132,12 @@ public enum MatchCriterion {
         private Optional<SignatureMismatch>
         createMismatch(Method method,
                        MethodSignature<?, ?> signature,
-                       ImmutableSet<AccessModifier> recommended) {
+                       AccessModifier recommended) {
             String methodReference = methodAsString(method);
             String annotationName = signature.annotation().getSimpleName();
             AccessModifier currentModifier = AccessModifier.fromMethod(method);
-            String rec = AccessModifier.asString(recommended);
             return SignatureMismatch.create(
-                    this, methodReference, currentModifier, rec, annotationName);
+                    this, methodReference, currentModifier, recommended, annotationName);
         }
     }
     ,

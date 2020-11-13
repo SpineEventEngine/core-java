@@ -43,10 +43,8 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
 
     private static final ImmutableSet<TypeToken<?>>
             RETURN_TYPES = ImmutableSet.of(TypeToken.of(void.class));
-    private static final ImmutableSet<AccessModifier>
-            MODIFIERS = ImmutableSet.of(AccessModifier.PRIVATE);
     private static final ImmutableSet<EventApplierParams>
-            PARAM_SPEC = ImmutableSet.copyOf(EventApplierParams.values());
+            PARAM_SPEC = ImmutableSet.of(EventApplierParams.MESSAGE);
 
     EventApplierSignature() {
         super(Apply.class);
@@ -63,8 +61,8 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> modifiers() {
-        return MODIFIERS;
+    protected AccessModifier modifier() {
+        return AccessModifier.PRIVATE;
     }
 
     @Override
