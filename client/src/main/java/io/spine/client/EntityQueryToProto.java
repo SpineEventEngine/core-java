@@ -26,6 +26,7 @@ import com.google.protobuf.FieldMask;
 import io.spine.base.EntityState;
 import io.spine.core.UserId;
 import io.spine.query.Column;
+import io.spine.query.ColumnName;
 import io.spine.query.ComparisonOperator;
 import io.spine.query.EntityQuery;
 import io.spine.query.LogicalOperator;
@@ -36,13 +37,14 @@ import io.spine.query.SubjectParameter;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.Filter.Operator.EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_THAN;
+import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.client.Filters.all;
+import static io.spine.client.Filters.createFilter;
 import static io.spine.client.Filters.either;
-import static io.spine.client.Filters.eq;
-import static io.spine.client.Filters.ge;
-import static io.spine.client.Filters.gt;
-import static io.spine.client.Filters.le;
-import static io.spine.client.Filters.lt;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.query.Direction.ASC;
@@ -156,26 +158,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
     toFilter(ImmutableList<SubjectParameter<?, ?, ?>> params, LogicalOperator logicalOp) {
         ImmutableList.Builder<Filter> filters = ImmutableList.builder();
         for (SubjectParameter<?, ?, ?> parameter : params) {
-            Column<?, ?> column = parameter.column();
-            ComparisonOperator comparison = parameter.operator();
-            Object value = parameter.value();
-
-            Filter filter;
-            switch (comparison) {
-                case EQUALS:
-                    filter = eq(column, value); break;
-                case GREATER_THAN:
-                    filter = gt(column, value); break;
-                case GREATER_OR_EQUALS:
-                    filter = ge(column, value); break;
-                case LESS_THAN:
-                    filter = lt(column, value); break;
-                case LESS_OR_EQUALS:
-                    filter = le(column, value); break;
-                default:
-                    throw newIllegalStateException("Unsupported comparison operator `%s`",
-                                                   comparison);
-            }
+            Filter filter = asProtoFilter(parameter);
             filters.add(filter);
         }
         ImmutableList<Filter> filterList = filters.build();
@@ -183,6 +166,31 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
                 logicalOp == LogicalOperator.AND ? all(filterList)
                                                  : either(filterList);
         return compositeFilter;
+    }
+
+    private static Filter asProtoFilter(SubjectParameter<?, ?, ?> parameter) {
+        Object value = parameter.value();
+        ComparisonOperator comparison = parameter.operator();
+        Column<?, ?> column = parameter.column();
+        ColumnName colName = column.name();
+
+        Filter result;
+        switch (comparison) {
+            case EQUALS:
+                result = createFilter(colName, value, EQUAL); break;
+            case GREATER_THAN:
+                result = createFilter(colName, value, GREATER_THAN); break;
+            case GREATER_OR_EQUALS:
+                result = createFilter(colName, value, GREATER_OR_EQUAL); break;
+            case LESS_THAN:
+                result = createFilter(colName, value, LESS_THAN); break;
+            case LESS_OR_EQUALS:
+                result = createFilter(colName, value, LESS_OR_EQUAL); break;
+            default:
+                throw newIllegalStateException("Unsupported comparison operator `%s`",
+                                               comparison);
+        }
+        return result;
     }
 
     private static void addIds(QueryBuilder builder, Subject<?, ?> subject) {
