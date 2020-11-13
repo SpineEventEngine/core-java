@@ -36,7 +36,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.model.HandlerMap.create;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -93,8 +92,8 @@ class HandlerMapTest {
     @Test
     @DisplayName("fail if no method found")
     void failIfNotFound() {
-        HandlerMap<EventClass, ?, ?> map = create(StubHandler.class,
-                                                  new OneParamSignature());
+        HandlerMap<EventClass, ?, ?> map =
+                HandlerMap.create(StubHandler.class, new OneParamSignature());
         assertThrows(IllegalStateException.class,
                      () -> map.handlerOf(EventClass.from(ProjectStarred.class)));
     }
