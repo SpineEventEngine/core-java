@@ -195,17 +195,17 @@ public class RecordWithColumns<I, R extends Message> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof RecordWithColumns)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         RecordWithColumns<?, ?> columns = (RecordWithColumns<?, ?>) o;
-        return Objects.equals(record, columns.record) &&
-                Objects.equals(id, columns.id) &&
+        return Objects.equals(id, columns.id) &&
+                Objects.equals(record, columns.record) &&
                 Objects.equals(storageFields, columns.storageFields);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(record, id, storageFields);
+        return Objects.hash(id, record, storageFields);
     }
 }
