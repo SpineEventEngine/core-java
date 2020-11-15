@@ -62,7 +62,7 @@ public class CommandReactionSignature
 
     @Override
     public AllowedParams<EventEnvelope> paramSpecs() {
-        return CommandReactionParams.PARAMS;
+        return CommandReactionParams.ALLOWED;
     }
 
     @Override
@@ -139,7 +139,7 @@ public class CommandReactionSignature
             }
         };
 
-        private static final AllowedParams<EventEnvelope> PARAMS = new AllowedParams<>(values());
+        private static final AllowedParams<EventEnvelope> ALLOWED = new AllowedParams<>(values());
 
         private final ImmutableList<TypeMatcher> criteria;
 

@@ -59,7 +59,7 @@ abstract class CommandAcceptingSignature
 
     @Override
     public AllowedParams<CommandEnvelope> paramSpecs() {
-        return CommandAcceptingMethodParams.PARAMS;
+        return CommandAcceptingMethodParams.ALLOWED;
     }
 
     /**
@@ -103,7 +103,7 @@ abstract class CommandAcceptingSignature
             }
         };
 
-        private static final AllowedParams<CommandEnvelope> PARAMS = new AllowedParams<>(values());
+        private static final AllowedParams<CommandEnvelope> ALLOWED = new AllowedParams<>(values());
 
         private final ImmutableList<TypeMatcher> criteria;
 

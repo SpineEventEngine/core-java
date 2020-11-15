@@ -66,7 +66,7 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
 
     @Override
     public AllowedParams<EventEnvelope> paramSpecs() {
-        return EventApplierParams.PARAMS;
+        return EventApplierParams.ALLOWED;
     }
 
     /**
@@ -96,6 +96,6 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
             }
         };
 
-        private static final AllowedParams<EventEnvelope> PARAMS = new AllowedParams<>(MESSAGE);
+        private static final AllowedParams<EventEnvelope> ALLOWED = new AllowedParams<>(MESSAGE);
     }
 }
