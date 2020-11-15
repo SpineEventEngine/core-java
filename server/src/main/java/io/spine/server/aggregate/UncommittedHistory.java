@@ -35,7 +35,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Uncommitted events and snapshots created for this aggregate during the dispatching.
  *
- * <p>Watches the how the events {@linkplain Aggregate#invokeApplier(EventEnvelope) are sent}
+ * <p>Watches how the events {@linkplain Aggregate#invokeApplier(EventEnvelope) are sent}
  * to the {@link Aggregate} applier methods. Remembers all such events as uncommitted.
  *
  * <p>Once an aggregate is loaded from the storage, the {@code UncommittedHistory}
