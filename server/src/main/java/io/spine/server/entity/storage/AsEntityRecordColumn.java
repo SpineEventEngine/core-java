@@ -30,7 +30,13 @@ import static io.spine.query.RecordColumn.create;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Utility which creates views on the {@linkplain Column columns}.
+ * Utility which creates views on the {@linkplain Column columns} posting them as instances
+ * of {@link RecordColumn}s.
+ *
+ * <p>Such a "type cast" is required in order to adapt the all the column types available
+ * to the framework users into the {@code RecordColumn}s, which are used in
+ * {@linkplain io.spine.query.RecordQuery the common data structures} for
+ * {@linkplain io.spine.server.storage.RecordStorage storage and retrieval} of the records data.
  */
 final class AsEntityRecordColumn {
 
