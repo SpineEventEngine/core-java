@@ -40,7 +40,7 @@ abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelo
     }
 
     @Override
-    public AllowedParams<EventEnvelope> paramSpecs() {
+    public AllowedParams<EventEnvelope> params() {
         return EventAcceptingMethodParams.allowed();
     }
 }

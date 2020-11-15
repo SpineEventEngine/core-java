@@ -61,7 +61,7 @@ public class CommandReactionSignature
     }
 
     @Override
-    public AllowedParams<EventEnvelope> paramSpecs() {
+    public AllowedParams<EventEnvelope> params() {
         return CommandReactionParams.ALLOWED;
     }
 

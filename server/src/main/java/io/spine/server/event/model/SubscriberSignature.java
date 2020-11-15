@@ -60,7 +60,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    public AllowedParams<EventEnvelope> paramSpecs() {
+    public AllowedParams<EventEnvelope> params() {
         return PARAMS;
     }
 

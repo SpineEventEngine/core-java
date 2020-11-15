@@ -40,7 +40,7 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    public AllowedParams<EventEnvelope> paramSpecs() {
+    public AllowedParams<EventEnvelope> params() {
         return new AllowedParams<>(OneParamSpec.values());
     }
 

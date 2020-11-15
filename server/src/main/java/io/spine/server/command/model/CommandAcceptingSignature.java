@@ -58,7 +58,7 @@ abstract class CommandAcceptingSignature
     }
 
     @Override
-    public AllowedParams<CommandEnvelope> paramSpecs() {
+    public AllowedParams<CommandEnvelope> params() {
         return CommandAcceptingMethodParams.ALLOWED;
     }
 

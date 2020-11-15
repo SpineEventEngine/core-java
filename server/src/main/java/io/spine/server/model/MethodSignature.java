@@ -46,7 +46,7 @@ import static java.util.stream.Collectors.toList;
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
  *     <li>{@linkplain #MethodSignature(Class) the method annotation},
- *     <li>{@linkplain #paramSpecs() the specification of method parameters},
+ *     <li>{@linkplain #params() the specification of method parameters},
  *     <li>{@linkplain #modifier() the set of allowed access modifiers},
  *     <li>{@linkplain #returnTypes() the set of valid return types},
  *     <li>{@linkplain #allowedThrowable() the set of allowed exceptions}, that the method
@@ -76,7 +76,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the specification of handler parameters to meet.
      */
-    public abstract AllowedParams<E> paramSpecs();
+    public abstract AllowedParams<E> params();
 
     /**
      * Obtains the set of recommended access modifiers for the method.
@@ -228,7 +228,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         if (!matches) {
             return Optional.empty();
         }
-        Optional<? extends ParameterSpec<E>> matchingSpec = paramSpecs().findMatching(method);
+        Optional<? extends ParameterSpec<E>> matchingSpec = params().findMatching(method);
         return matchingSpec.map(spec -> {
             H handler = create(method, spec);
             handler.discoverAttributes();
