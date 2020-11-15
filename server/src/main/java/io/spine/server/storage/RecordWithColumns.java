@@ -110,14 +110,14 @@ public class RecordWithColumns<I, R extends Message> {
     /**
      * Returns the identifier of the record.
      */
-    public I id() {
+    public final I id() {
         return id;
     }
 
     /**
      * Returns the message of the record.
      */
-    public R record() {
+    public final R record() {
         return record;
     }
 
