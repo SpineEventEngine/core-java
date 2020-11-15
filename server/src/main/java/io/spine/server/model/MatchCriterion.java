@@ -21,8 +21,6 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.Invokable;
-import com.google.common.reflect.TypeToken;
 import io.spine.annotation.Internal;
 import io.spine.string.Diags;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,37 +53,15 @@ public enum MatchCriterion {
      * The criterion, which checks that the method return type is among the
      * {@linkplain MethodSignature#returnTypes() expected}.
      */
-    @SuppressWarnings("UnstableApiUsage")   // Using Guava's `TypeToken`.
     RETURN_TYPE(ERROR,
                 "The return type of `%s` method does not match the constraints "
                         + "set for `%s`-annotated method.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            TypeToken<?> actualReturnType = Invokable.from(method).getReturnType();
-            if (conforms(signature, actualReturnType)) {
+            if (signature.returnTypeMatches(method)) {
                 return Optional.empty();
             }
             return createMismatch(method, signature.annotation());
-        }
-
-        private boolean conforms(MethodSignature<?, ?> signature, TypeToken<?> actualReturnType) {
-            boolean conforms =
-                    signature.returnTypes()
-                             .stream()
-                             .anyMatch(type -> conforms(signature, type, actualReturnType));
-            return conforms;
-        }
-
-        private boolean conforms(MethodSignature<?, ?> signature,
-                                 TypeToken<?> returnType,
-                                 TypeToken<?> actualReturnType) {
-            boolean typeMatches = TypeMatcher.matches(returnType, actualReturnType);
-            boolean isNotIgnored =
-                    signature.mayReturnIgnored()
-                            || TypeMatcher.messagesFitting(actualReturnType)
-                                          .stream()
-                                          .noneMatch(MethodResult::isIgnored);
-            return typeMatches && isNotIgnored;
         }
     },
 
@@ -96,8 +72,8 @@ public enum MatchCriterion {
      * @see AllowedParams#findMatching(Method)
      */
     PARAMETERS(ERROR,
-               "The method `%s` has invalid parameters. Please refer to `%s` annotation"
-                       + " documentation for allowed parameter types.") {
+               "The method `%s` has invalid parameters. Please refer to the documentation"
+                       + " of `@%s` for allowed parameter types.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Optional<? extends ParameterSpec<?>> matching =
@@ -108,7 +84,6 @@ public enum MatchCriterion {
             return createMismatch(method, signature.annotation());
         }
     },
-
 
     /**
      * The criterion, which ensures that the method access modifier is among the
@@ -137,8 +112,7 @@ public enum MatchCriterion {
             return SignatureMismatch.create(
                     this, methodReference, currentModifier, recommended, annotationName);
         }
-    }
-    ,
+    },
 
     /**
      * The criterion checking that the tested method throws only

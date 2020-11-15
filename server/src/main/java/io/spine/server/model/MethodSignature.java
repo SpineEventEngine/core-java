@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import io.spine.logging.Logging;
 import io.spine.server.type.MessageEnvelope;
@@ -123,7 +124,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         because in future the extended diagnostic, based upon {@linkplain SignatureMismatch
      *         signature mismatches} found is going to be implemented.
      */
-    public boolean matches(Method method) throws SignatureMismatchException {
+    public final boolean matches(Method method) throws SignatureMismatchException {
         if (skipMethod(method)) {
             return false;
         }
@@ -144,6 +145,29 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                     .forEach(this._warn()::log);
         }
         return true;
+    }
+
+    /**
+     * Verifies if the passed return type conforms this method signature.
+     */
+    @SuppressWarnings("UnstableApiUsage") // Using Guava's `TypeToken`.
+    final boolean returnTypeMatches(Method method) {
+        TypeToken<?> actualReturnType = Invokable.from(method).getReturnType();
+        boolean conforms =
+                returnTypes().stream()
+                             .anyMatch(type -> conforms(type, actualReturnType));
+        return conforms;
+    }
+
+    @SuppressWarnings("UnstableApiUsage") // Using Guava's `TypeToken`.
+    private boolean conforms(TypeToken<?> returnType, TypeToken<?> actualReturnType) {
+        boolean typeMatches = TypeMatcher.matches(returnType, actualReturnType);
+        boolean isNotIgnored =
+                mayReturnIgnored()
+                        || TypeMatcher.messagesFitting(actualReturnType)
+                                      .stream()
+                                      .noneMatch(MethodResult::isIgnored);
+        return typeMatches && isNotIgnored;
     }
 
     /**
@@ -183,7 +207,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
      */
-    public Class<? extends Annotation> annotation() {
+    public final Class<? extends Annotation> annotation() {
         return annotation;
     }
 
@@ -199,7 +223,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         in case there are {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
      *         encountered
      */
-    public Optional<H> classify(Method method) throws SignatureMismatchException {
+    public final Optional<H> classify(Method method) throws SignatureMismatchException {
         boolean matches = matches(method);
         if (!matches) {
             return Optional.empty();
@@ -222,7 +246,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         the method to match.
      * @return the collection of signature mismatches, if any
      */
-    public Collection<SignatureMismatch> match(Method method) {
+    public final Collection<SignatureMismatch> match(Method method) {
         Collection<SignatureMismatch> result =
                 Stream.of(MatchCriterion.values())
                       .map(criterion -> criterion.test(method, this))
