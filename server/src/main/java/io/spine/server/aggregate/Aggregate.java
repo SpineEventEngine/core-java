@@ -430,7 +430,7 @@ public abstract class Aggregate<I,
         Version version;
         LifecycleFlags lifecycle;
         if (isTransactionInProgress()) {
-            AggregateTransaction tx = (AggregateTransaction) tx();
+            AggregateTransaction<?, ?, ?> tx = (AggregateTransaction<?, ?, ?>) tx();
             state = builder().buildPartial();
             version = tx.currentVersion();
             lifecycle = tx.lifecycleFlags();
