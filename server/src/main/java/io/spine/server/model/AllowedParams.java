@@ -26,7 +26,6 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.server.type.MessageEnvelope;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -60,36 +59,16 @@ public final class AllowedParams<E extends MessageEnvelope<?, ?, ?>> {
      *
      * @param method
      *         the method, which parameter list is used to match the parameter specification
-     * @param paramSpecs
-     *         the class of parameter specification
-     * @param <E>
-     *         the type of message envelope, which the parameter specification class handles
-     * @param <S>
-     *         the type of the parameter specification
-     * @return the matching parameter spec,
-     *         or {@link Optional#empty() Optional.empty()} if no matching specification is found
-     */
-    private static <E extends MessageEnvelope<?, ?, ?>, S extends ParameterSpec<E>>
-    Optional<S> doFindMatching(Method method, Collection<S> paramSpecs) {
-        MethodParams params = MethodParams.of(method);
-        Optional<S> result =
-                paramSpecs.stream()
-                          .filter(spec -> spec.matches(params))
-                          .findFirst();
-        return result;
-    }
-
-    /**
-     * Finds matching parameter specification based on the parameters of the given method and
-     * the class, describing the parameter specification.
-     *
-     * @param method
-     *         the method, which parameter list is used to match the parameter specification
      * @return the matching parameter spec,
      *         or {@link Optional#empty() Optional.empty()} if no matching specification is found
      */
     Optional<? extends ParameterSpec<E>> findMatching(Method method) {
-        return doFindMatching(method, asList());
+        MethodParams params = MethodParams.of(method);
+        Optional<? extends ParameterSpec<E>> result =
+                specs.stream()
+                     .filter(spec -> spec.matches(params))
+                     .findFirst();
+        return result;
     }
 
     /**
