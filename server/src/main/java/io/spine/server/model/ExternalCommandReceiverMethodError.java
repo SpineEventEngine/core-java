@@ -63,7 +63,7 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
                 .stream()
                 .map(CommandAcceptingMethod::messageClass)
                 .map(CommandClass::toString)
-                .map(object -> Diags.backtick(object))
+                .map(Diags::backtick)
                 .collect(toStringEnumeration());
         return result;
     }
