@@ -41,6 +41,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.model.EntityClass.asParameterizedEntityClass;
+import static java.util.Collections.unmodifiableMap;
 
 /**
  * Instructs the storage on how to handle {@link EntityRecord}s storing the information about
@@ -117,6 +118,10 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
      *
      * <p>The Protobuf-based columns are extracted from the entity state while the system columns
      * are obtained from the entity itself via the corresponding getters.
+     *
+     * @apiNote This method returns an unmodifiable version of a {@code Map}.
+     *         An {@link com.google.common.collect.ImmutableMap ImmutableMap} is not used, as long
+     *         as it prohibits the {@code null} values.
      */
     @Override
     public Map<ColumnName, @Nullable Object> valuesIn(E entity) {
@@ -128,7 +133,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
         simpleColumns.forEach(
                 column -> result.put(column.name(), column.valueIn(entity.state()))
         );
-        return result;
+        return unmodifiableMap(result);
     }
 
     @Override
