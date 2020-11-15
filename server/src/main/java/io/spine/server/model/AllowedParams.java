@@ -71,16 +71,6 @@ public final class AllowedParams<E extends MessageEnvelope<?, ?, ?>> {
         return result;
     }
 
-    /**
-     * Obtains specification of allowed parameters as a list.
-     *
-     * <p>The order of the parameters is the same as passed during
-     * {@linkplain #AllowedParams(ParameterSpec[]) construction}.
-     */
-    public ImmutableList<? extends ParameterSpec<E>> asList() {
-        return specs;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
