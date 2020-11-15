@@ -82,7 +82,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     }
 
     /**
-     * Gathers columns of the entity class.
+     * Gathers columns declared by the entity class.
      */
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityRecordSpec<I, S, E> of(EntityClass<E> entityClass) {
@@ -91,6 +91,9 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
         return new EntityRecordSpec<>(entityClass, scan.simpleColumns(), scan.systemColumns());
     }
 
+    /**
+     * Gathers columns declared by the class of the passed entity.
+     */
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityRecordSpec<I, S, E> of(E entity) {
         checkNotNull(entity);
