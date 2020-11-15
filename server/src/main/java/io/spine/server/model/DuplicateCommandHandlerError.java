@@ -23,6 +23,7 @@ package io.spine.server.model;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
+import io.spine.string.Diags;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,8 +31,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.model.MessageFormatter.backtick;
 import static io.spine.server.model.MessageFormatter.toStringEnumeration;
+import static io.spine.string.Diags.backtick;
 import static java.lang.String.format;
 
 /**
@@ -91,7 +92,7 @@ public final class DuplicateCommandHandlerError extends ModelError {
                 builder.append(" Commands ");
                 String commandsBackTicked =
                         commandClasses.stream()
-                                      .map(MessageFormatter::backtick)
+                                      .map(Diags::backtick)
                                       .collect(toStringEnumeration());
                 builder.append(commandsBackTicked);
                 builder.append(" are handled by ");

@@ -23,6 +23,7 @@ package io.spine.server.model;
 import io.spine.server.command.model.CommandAcceptingMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
+import io.spine.string.Diags;
 
 import java.util.Collection;
 
@@ -62,7 +63,7 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
                 .stream()
                 .map(CommandAcceptingMethod::messageClass)
                 .map(CommandClass::toString)
-                .map(MessageFormatter::backtick)
+                .map(object -> Diags.backtick(object))
                 .collect(toStringEnumeration());
         return result;
     }
