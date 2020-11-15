@@ -20,11 +20,12 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ObjectArrays;
 import com.google.common.reflect.TypeToken;
 import io.spine.base.EntityState;
 import io.spine.core.Subscribe;
+import io.spine.server.model.AllowedParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
@@ -35,15 +36,19 @@ import java.lang.reflect.Method;
  */
 public class SubscriberSignature extends EventAcceptingSignature<SubscriberMethod> {
 
-    private static final ImmutableSet<ParameterSpec<EventEnvelope>>
-            PARAM_SPEC = ImmutableSet
-            .<ParameterSpec<EventEnvelope>>builder()
-            .addAll(EventAcceptingSignature.PARAM_SPEC)
-            .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
-            .build();
-
     private static final ImmutableSet<TypeToken<?>>
             RETURN_TYPE = ImmutableSet.of(TypeToken.of(void.class));
+
+    private static final AllowedParams<EventEnvelope> PARAMS = new AllowedParams<>(combinedSpecs());
+
+    private static ParameterSpec<EventEnvelope>[] combinedSpecs() {
+        ParameterSpec<EventEnvelope>[] values1 = EventAcceptingMethodParams.values();
+        ParameterSpec<EventEnvelope>[] values2 = StateSubscriberSpec.values();
+        @SuppressWarnings("unchecked") // ensured by the content of the merged arrays.
+        ParameterSpec<EventEnvelope>[] result =
+                ObjectArrays.concat(values1, values2, ParameterSpec.class);
+        return result;
+    }
 
     public SubscriberSignature() {
         super(Subscribe.class);
@@ -55,8 +60,8 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return PARAM_SPEC;
+    public AllowedParams<EventEnvelope> paramSpecs() {
+        return PARAMS;
     }
 
     @Override

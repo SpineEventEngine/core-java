@@ -23,6 +23,7 @@ package io.spine.server.model.given.method;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import io.spine.server.model.AccessModifier;
+import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
@@ -39,8 +40,8 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return ImmutableSet.copyOf(OneParamSpec.values());
+    public AllowedParams<EventEnvelope> paramSpecs() {
+        return new AllowedParams<>(OneParamSpec.values());
     }
 
     @Override

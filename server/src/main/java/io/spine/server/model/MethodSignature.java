@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.AccessModifier.PACKAGE_PRIVATE;
-import static io.spine.server.model.MethodParams.findMatching;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -76,7 +75,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the specification of handler parameters to meet.
      */
-    public abstract ImmutableSet<? extends ParameterSpec<E>> paramSpecs();
+    public abstract AllowedParams<E> paramSpecs();
 
     /**
      * Obtains the set of recommended access modifiers for the method.
@@ -205,7 +204,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         if (!matches) {
             return Optional.empty();
         }
-        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, paramSpecs());
+        Optional<? extends ParameterSpec<E>> matchingSpec = paramSpecs().findMatching(method);
         return matchingSpec.map(spec -> {
             H handler = create(method, spec);
             handler.discoverAttributes();

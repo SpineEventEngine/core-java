@@ -30,6 +30,7 @@ import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.command.Command;
+import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
@@ -48,9 +49,6 @@ import static io.spine.server.model.TypeMatcher.exactly;
 public class CommandReactionSignature
         extends MethodSignature<CommandReactionMethod, EventEnvelope> {
 
-    private static final ImmutableSet<CommandReactionParams>
-            PARAM_SPECS = ImmutableSet.copyOf(CommandReactionParams.values());
-
     private static final ImmutableSet<TypeToken<?>>
             RETURN_TYPES = ImmutableSet.of(
                     TypeToken.of(CommandMessage.class),
@@ -63,8 +61,8 @@ public class CommandReactionSignature
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return PARAM_SPECS;
+    public AllowedParams<EventEnvelope> paramSpecs() {
+        return CommandReactionParams.PARAMS;
     }
 
     @Override
@@ -140,6 +138,8 @@ public class CommandReactionSignature
                 return new Object[]{event.message(), originContext};
             }
         };
+
+        private static final AllowedParams<EventEnvelope> PARAMS = new AllowedParams<>(values());
 
         private final ImmutableList<TypeMatcher> criteria;
 

@@ -29,13 +29,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
 import static io.spine.server.model.MessageFormatter.toStringEnumeration;
 import static io.spine.server.model.MethodExceptionCheck.check;
-import static io.spine.server.model.MethodParams.findMatching;
 import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
 import static io.spine.server.model.SignatureMismatch.Severity.WARN;
 import static java.lang.String.format;
@@ -95,7 +93,7 @@ public enum MatchCriterion {
      * The criterion for the method parameters to conform the
      * {@linkplain MethodSignature#paramSpecs() requirements}.
      *
-     * @see MethodParams#findMatching(Method, Collection)
+     * @see AllowedParams#findMatching(Method)
      */
     PARAMETERS(ERROR,
                "The method `%s` has invalid parameters. Please refer to `%s` annotation"
@@ -103,7 +101,7 @@ public enum MatchCriterion {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Optional<? extends ParameterSpec<?>> matching =
-                    findMatching(method, signature.paramSpecs());
+                    signature.paramSpecs().findMatching(method);
             if (matching.isPresent()) {
                 return Optional.empty();
             }
