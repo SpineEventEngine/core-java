@@ -31,6 +31,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import static io.spine.server.model.AccessModifier.PUBLIC;
+import static io.spine.server.model.ReturnTypes.onlyVoid;
 
 public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnvelope> {
 
@@ -50,7 +51,7 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
 
     @Override
     protected ReturnTypes returnTypes() {
-        return ReturnTypes.onlyVoid();
+        return onlyVoid();
     }
 
     @Override

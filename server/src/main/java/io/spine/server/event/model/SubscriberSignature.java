@@ -30,6 +30,8 @@ import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
+import static io.spine.server.model.ReturnTypes.onlyVoid;
+
 /**
  * A signature of {@link SubscriberMethod}.
  */
@@ -52,7 +54,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
 
     @Override
     protected ReturnTypes returnTypes() {
-        return ReturnTypes.onlyVoid();
+        return onlyVoid();
     }
 
     @Override

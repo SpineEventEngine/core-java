@@ -34,6 +34,7 @@ import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
+import static io.spine.server.model.ReturnTypes.onlyVoid;
 import static io.spine.server.model.TypeMatcher.classImplementing;
 
 /**
@@ -47,7 +48,7 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
 
     @Override
     protected ReturnTypes returnTypes() {
-        return ReturnTypes.onlyVoid();
+        return onlyVoid();
     }
 
     @Override
