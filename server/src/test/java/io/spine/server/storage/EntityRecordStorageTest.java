@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
@@ -44,7 +45,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
@@ -81,6 +82,7 @@ import static io.spine.test.storage.StgProject.Status.DONE_VALUE;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.Tests.nullRef;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -191,18 +193,37 @@ public class EntityRecordStorageTest
             assertFalse(isDefault(unpacked));
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("multiple records according to the given field mask")
         void multipleRecords() {
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            int count = 10;
-            List<StgProjectId> ids = new ArrayList<>();
+            int recordCount = 10;
+            ImmutableList<StgProjectId> ids =
+                    range(0, recordCount).mapToObj(i -> newId())
+                                         .collect(toImmutableList());
             @SuppressWarnings("rawtypes")
-            Class<? extends EntityState> stateClass = null;
+            Class<? extends EntityState> stateClass = writeRandomRecords(storage , ids);
 
-            for (int i = 0; i < count; i++) {
-                StgProjectId id = newId();
+            int halfSize = recordCount / 2;
+            List<StgProjectId> halfOfIds = ids.subList(0, halfSize);
+
+            FieldMask fieldMask = fromFieldNumbers(stateClass, 2);
+            Iterator<EntityRecord> iterator = storage.readAll(halfOfIds, fieldMask);
+            List<EntityRecord> actualRecords = ImmutableList.copyOf(iterator);
+
+            assertThat(actualRecords).hasSize(halfSize);
+            for (EntityRecord record : actualRecords) {
+                Message state = unpack(record.getState());
+                assertMatchesMask(state, fieldMask);
+            }
+        }
+
+        @SuppressWarnings("rawtypes")
+        private Class<? extends EntityState>
+        writeRandomRecords(EntityRecordStorage<StgProjectId, StgProject> storage,
+                           List<StgProjectId> ids) {
+            Class<? extends EntityState> stateClass = null;
+            for (StgProjectId id : ids) {
                 EntityState<StgProjectId> state = newState(id);
                 if (stateClass == null) {
                     stateClass = state.getClass();
@@ -211,17 +232,7 @@ public class EntityRecordStorageTest
                 storage.write(id, record);
                 ids.add(id);
             }
-
-            int bulkCount = count / 2;
-            FieldMask fieldMask = fromFieldNumbers(stateClass, 2);
-            Iterator<EntityRecord> readRecords = storage.readAll(ids.subList(0, bulkCount),
-                                                                 fieldMask);
-            List<EntityRecord> readList = newArrayList(readRecords);
-            assertThat(readList).hasSize(bulkCount);
-            for (EntityRecord record : readList) {
-                Message state = unpack(record.getState());
-                assertMatchesMask(state, fieldMask);
-            }
+            return stateClass;
         }
 
         @Test
