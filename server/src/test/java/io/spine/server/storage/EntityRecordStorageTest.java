@@ -60,6 +60,7 @@ import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
@@ -71,6 +72,7 @@ import static io.spine.server.storage.given.EntityRecordStorageTestEnv.assertSin
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.buildStorageRecord;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.delete;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newEntity;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newRecord;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.test.storage.StgProject.Status.CANCELLED;
 import static io.spine.test.storage.StgProject.Status.CANCELLED_VALUE;
@@ -98,13 +100,13 @@ public class EntityRecordStorageTest
     protected EntityRecordStorage<StgProjectId, StgProject> newStorage() {
         StorageFactory factory = ServerEnvironment.instance()
                                                   .storageFactory();
-        ContextSpec ctxSpec = ContextSpec.singleTenant(EntityRecordStorageTest.class.getName());
+        ContextSpec ctxSpec = singleTenant(EntityRecordStorageTest.class.getName());
         return new EntityRecordStorage<>(ctxSpec, factory, TestCounterEntity.class);
     }
 
     @Override
     protected EntityRecord newStorageRecord(StgProjectId id) {
-        return EntityRecordStorageTestEnv.newStorageRecord(id, newState(id));
+        return newRecord(id, newState(id));
     }
 
     @Override
@@ -205,7 +207,7 @@ public class EntityRecordStorageTest
                 if (stateClass == null) {
                     stateClass = state.getClass();
                 }
-                EntityRecord record = EntityRecordStorageTestEnv.newStorageRecord(id, state);
+                EntityRecord record = newRecord(id, state);
                 storage.write(id, record);
                 ids.add(id);
             }

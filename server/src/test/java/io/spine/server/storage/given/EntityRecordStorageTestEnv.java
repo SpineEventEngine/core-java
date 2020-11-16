@@ -142,7 +142,7 @@ public final class EntityRecordStorageTestEnv {
         assertThat(firstCollection).containsExactlyElementsIn(secondCollection);
     }
 
-    public static EntityRecord newStorageRecord(StgProjectId id, EntityState<StgProjectId> state) {
+    public static EntityRecord newRecord(StgProjectId id, EntityState<StgProjectId> state) {
         Any wrappedState = pack(state);
         EntityRecord record = EntityRecord
                 .newBuilder()
