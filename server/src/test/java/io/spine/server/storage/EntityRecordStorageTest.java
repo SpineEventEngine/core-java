@@ -230,7 +230,6 @@ public class EntityRecordStorageTest
                 }
                 EntityRecord record = newRecord(id, state);
                 storage.write(id, record);
-                ids.add(id);
             }
             return stateClass;
         }
