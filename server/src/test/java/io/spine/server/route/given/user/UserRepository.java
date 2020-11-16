@@ -35,6 +35,7 @@ public final class UserRepository extends AggregateRepository<UserId, UserAggreg
     protected void setupEventRouting(EventRouting<UserId> routing) {
         super.setupEventRouting(routing);
 
+        //TODO:2020-11-16:alex.tymchenko: migrate to `EventRouting.unicast()`.
         routing.route(RUserSignedIn.class,
                       (e, ctx) -> withId(e.getUserId()));
         routing.route(RUserConsentRequested.class,
