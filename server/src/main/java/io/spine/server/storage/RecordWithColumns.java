@@ -34,6 +34,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Collections.unmodifiableMap;
 
 /**
  * A value of some message record along with the values
@@ -190,12 +191,23 @@ public class RecordWithColumns<I, R extends Message> {
         return result;
     }
 
+    /**
+     * Returns an unmodifiable copy of the values of storage fields associated with this record.
+     *
+     * @apiNote This method does not return an {@link com.google.common.collect.ImmutableMap
+     * ImmutableMap} since the map values are {@code null}-able.
+     */
+    @Internal
+    protected final Map<ColumnName, @Nullable Object> storageFields() {
+        return unmodifiableMap(storageFields);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof RecordWithColumns)) {
             return false;
         }
         RecordWithColumns<?, ?> columns = (RecordWithColumns<?, ?>) o;

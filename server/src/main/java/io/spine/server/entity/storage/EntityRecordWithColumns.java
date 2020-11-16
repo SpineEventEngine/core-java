@@ -34,6 +34,7 @@ import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
@@ -157,5 +158,26 @@ public final class EntityRecordWithColumns<I>
     @Override
     public boolean isActive() {
         return record().isActive();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        EntityRecordWithColumns<?> other = (EntityRecordWithColumns<?>) o;
+
+        return Objects.equals(id(), other.id()) &&
+                Objects.equals(record(), other.record()) &&
+                Objects.equals(storageFields(), other.storageFields());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id(), record(), storageFields());
     }
 }
