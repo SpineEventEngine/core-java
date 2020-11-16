@@ -38,11 +38,11 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
         /* Short vars are OK for tuple tests. */
@@ -106,35 +106,35 @@ class EitherOf5Test {
     @Test
     @DisplayName("tell if the values are set")
     void reportHasValues() {
-        assertThat(eitherWithA.hasA()).isTrue();
-        assertThat(eitherWithA.hasB()).isFalse();
-        assertThat(eitherWithA.hasC()).isFalse();
-        assertThat(eitherWithA.hasD()).isFalse();
-        assertThat(eitherWithA.hasE()).isFalse();
+        assertTrue(eitherWithA.hasA());
+        assertFalse(eitherWithA.hasB());
+        assertFalse(eitherWithA.hasC());
+        assertFalse(eitherWithA.hasD());
+        assertFalse(eitherWithA.hasE());
 
-        assertThat(eitherWithB.hasB()).isTrue();
-        assertThat(eitherWithB.hasA()).isFalse();
-        assertThat(eitherWithB.hasC()).isFalse();
-        assertThat(eitherWithB.hasD()).isFalse();
-        assertThat(eitherWithB.hasE()).isFalse();
+        assertTrue(eitherWithB.hasB());
+        assertFalse(eitherWithB.hasA());
+        assertFalse(eitherWithB.hasC());
+        assertFalse(eitherWithB.hasD());
+        assertFalse(eitherWithB.hasE());
 
-        assertThat(eitherWithC.hasC()).isTrue();
-        assertThat(eitherWithC.hasA()).isFalse();
-        assertThat(eitherWithC.hasB()).isFalse();
-        assertThat(eitherWithC.hasD()).isFalse();
-        assertThat(eitherWithC.hasE()).isFalse();
+        assertTrue(eitherWithC.hasC());
+        assertFalse(eitherWithC.hasA());
+        assertFalse(eitherWithC.hasB());
+        assertFalse(eitherWithC.hasD());
+        assertFalse(eitherWithC.hasE());
 
-        assertThat(eitherWithD.hasD()).isTrue();
-        assertThat(eitherWithD.hasA()).isFalse();
-        assertThat(eitherWithD.hasB()).isFalse();
-        assertThat(eitherWithD.hasC()).isFalse();
-        assertThat(eitherWithD.hasE()).isFalse();
+        assertTrue(eitherWithD.hasD());
+        assertFalse(eitherWithD.hasA());
+        assertFalse(eitherWithD.hasB());
+        assertFalse(eitherWithD.hasC());
+        assertFalse(eitherWithD.hasE());
 
-        assertThat(eitherWithE.hasE()).isTrue();
-        assertThat(eitherWithE.hasA()).isFalse();
-        assertThat(eitherWithE.hasB()).isFalse();
-        assertThat(eitherWithE.hasC()).isFalse();
-        assertThat(eitherWithE.hasD()).isFalse();
+        assertTrue(eitherWithE.hasE());
+        assertFalse(eitherWithE.hasA());
+        assertFalse(eitherWithE.hasB());
+        assertFalse(eitherWithE.hasC());
+        assertFalse(eitherWithE.hasD());
     }
 
     @Test
