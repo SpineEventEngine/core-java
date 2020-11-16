@@ -21,7 +21,6 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
@@ -34,6 +33,7 @@ import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.ReturnTypes;
 import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
 
@@ -49,12 +49,11 @@ import static io.spine.server.model.TypeMatcher.exactly;
 public class CommandReactionSignature
         extends MethodSignature<CommandReactionMethod, EventEnvelope> {
 
-    private static final ImmutableSet<TypeToken<?>>
-            RETURN_TYPES = ImmutableSet.of(
-                    TypeToken.of(CommandMessage.class),
-                    new TypeToken<Iterable<CommandMessage>>() {},
-                    new TypeToken<Optional<CommandMessage>>() {}
-                    );
+    private static final ReturnTypes TYPES = new ReturnTypes(
+            TypeToken.of(CommandMessage.class),
+            new TypeToken<Iterable<CommandMessage>>() {},
+            new TypeToken<Optional<CommandMessage>>() {}
+    );
 
     CommandReactionSignature() {
         super(Command.class);
@@ -66,8 +65,8 @@ public class CommandReactionSignature
     }
 
     @Override
-    protected ImmutableSet<TypeToken<?>> returnTypes() {
-        return RETURN_TYPES;
+    protected ReturnTypes returnTypes() {
+        return TYPES;
     }
 
     @Override

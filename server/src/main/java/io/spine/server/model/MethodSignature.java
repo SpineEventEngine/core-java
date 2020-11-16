@@ -20,9 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.Invokable;
-import com.google.common.reflect.TypeToken;
 import io.spine.logging.Logging;
 import io.spine.server.type.MessageEnvelope;
 
@@ -92,7 +89,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<TypeToken<?>> returnTypes();
+    protected abstract ReturnTypes returnTypes();
 
     /**
      * Obtains the type of a {@code Throwable} which a method can declare.
@@ -150,24 +147,9 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Verifies if the passed return type conforms this method signature.
      */
-    @SuppressWarnings("UnstableApiUsage") // Using Guava's `TypeToken`.
     final boolean returnTypeMatches(Method method) {
-        TypeToken<?> actualReturnType = Invokable.from(method).getReturnType();
-        boolean conforms =
-                returnTypes().stream()
-                             .anyMatch(type -> conforms(type, actualReturnType));
+        boolean conforms = returnTypes().matches(method, mayReturnIgnored());
         return conforms;
-    }
-
-    @SuppressWarnings("UnstableApiUsage") // Using Guava's `TypeToken`.
-    private boolean conforms(TypeToken<?> returnType, TypeToken<?> actualReturnType) {
-        boolean typeMatches = TypeMatcher.matches(returnType, actualReturnType);
-        boolean isNotIgnored =
-                mayReturnIgnored()
-                        || TypeMatcher.messagesFitting(actualReturnType)
-                                      .stream()
-                                      .noneMatch(MethodResult::isIgnored);
-        return typeMatches && isNotIgnored;
     }
 
     /**

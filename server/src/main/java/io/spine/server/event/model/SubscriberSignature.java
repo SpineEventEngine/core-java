@@ -20,13 +20,12 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ObjectArrays;
-import com.google.common.reflect.TypeToken;
 import io.spine.base.EntityState;
 import io.spine.core.Subscribe;
 import io.spine.server.model.AllowedParams;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.ReturnTypes;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
@@ -35,9 +34,6 @@ import java.lang.reflect.Method;
  * A signature of {@link SubscriberMethod}.
  */
 public class SubscriberSignature extends EventAcceptingSignature<SubscriberMethod> {
-
-    private static final ImmutableSet<TypeToken<?>>
-            RETURN_TYPE = ImmutableSet.of(TypeToken.of(void.class));
 
     private static final AllowedParams<EventEnvelope> PARAMS = new AllowedParams<>(combinedSpecs());
 
@@ -55,8 +51,8 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    protected ImmutableSet<TypeToken<?>> returnTypes() {
-        return RETURN_TYPE;
+    protected ReturnTypes returnTypes() {
+        return ReturnTypes.onlyVoid();
     }
 
     @Override

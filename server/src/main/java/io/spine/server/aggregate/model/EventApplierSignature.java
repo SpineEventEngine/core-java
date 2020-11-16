@@ -21,8 +21,6 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Apply;
@@ -31,6 +29,7 @@ import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.ReturnTypes;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
@@ -42,16 +41,13 @@ import static io.spine.server.model.TypeMatcher.classImplementing;
  */
 final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
 
-    private static final ImmutableSet<TypeToken<?>>
-            RETURN_TYPES = ImmutableSet.of(TypeToken.of(void.class));
-
     EventApplierSignature() {
         super(Apply.class);
     }
 
     @Override
-    protected ImmutableSet<TypeToken<?>> returnTypes() {
-        return RETURN_TYPES;
+    protected ReturnTypes returnTypes() {
+        return ReturnTypes.onlyVoid();
     }
 
     @Override

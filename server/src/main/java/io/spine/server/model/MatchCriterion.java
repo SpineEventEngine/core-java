@@ -54,8 +54,8 @@ public enum MatchCriterion {
      * {@linkplain MethodSignature#returnTypes() expected}.
      */
     RETURN_TYPE(ERROR,
-                "The return type of `%s` method does not match the constraints "
-                        + "set for `%s`-annotated method.") {
+                "The return type of `%s` method does not match the constraints"
+                        + " set for `%s`-annotated method.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             if (signature.returnTypeMatches(method)) {
@@ -90,8 +90,8 @@ public enum MatchCriterion {
      * {@linkplain MethodSignature#modifier() expected}.
      */
     ACCESS_MODIFIER(WARN,
-                    "The access modifier of `%s` method is `%s`. We recommend it to be `%s`. "
-                            + "Refer to the `%s` annotation docs for details.") {
+                    "The access modifier of `%s` method is `%s`. We recommend it to be `%s`."
+                            + " Refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             AccessModifier recommended = signature.modifier();
