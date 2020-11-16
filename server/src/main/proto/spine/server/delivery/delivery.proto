@@ -99,5 +99,5 @@ message ShardMaintenance {
 message DeliveryRunInfo {
 
     // The catch-up jobs observed by the Delivery.
-    repeated spine.server.catchup.CatchUp catch_up_job = 1;
+    repeated catchup.CatchUp catch_up_job = 1;
 }

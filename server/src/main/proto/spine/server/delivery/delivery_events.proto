@@ -28,7 +28,7 @@ message ShardProcessingRequested {
     // An identifier of a `CatchUp` process in scope of which the shard processing
     // was originally requested.
     //
-    spine.server.catchup.CatchUpId process = 3 [(required) = true];
+    catchup.CatchUpId process = 3 [(required) = true];
 }
 
 // The processing of the messages in the particular shard was performed
@@ -42,5 +42,5 @@ message ShardProcessed {
     // An identifier of a `CatchUp` process in scope of which the shard processing
     // was originally requested.
     //
-    spine.server.catchup.CatchUpId process = 3 [(required) = true];
+    catchup.CatchUpId process = 3 [(required) = true];
 }
