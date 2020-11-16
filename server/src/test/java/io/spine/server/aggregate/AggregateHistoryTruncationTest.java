@@ -68,14 +68,13 @@ import static java.lang.Integer.MAX_VALUE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Tests the truncation of an Aggregate history on the storage retrieved from
- * the {@linkplain ServerEnvironment#storageFactory() current storage factory} for tests.
+ * Tests the truncation of an Aggregate history.
  *
- * <p>Descendant classes should supply their own storage factory for tests via
+ * <p>Wishing to customize the storage for these tests, descendants may configure it via
  * {@link ServerEnvironment#use(StorageFactory, EnvironmentType)
  * ServerEnvironment.use(customStorageFactory, Tests.class)}.
  *
- * <p>Please note, that for the test name to make sense the descendants should have some
+ * <p>Please note that for the test name to make sense the descendants should have some
  * meaningful display names, e.g. {@code "InMemoryAggregateStorage"}.
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // designed for the various storage impls.
@@ -87,7 +86,7 @@ public abstract class AggregateHistoryTruncationTest {
             .vBuild();
 
     @Nested
-    @DisplayName(" after the history truncation should ")
+    @DisplayName("after the history truncation should ")
     class VerifyIntegrity {
 
         @Test
@@ -146,7 +145,8 @@ public abstract class AggregateHistoryTruncationTest {
         }
 
         private int recordCount(AggregateStorage<SequenceId, Sequence> storage) {
-            Iterator<AggregateEventRecord> iterator = storage.historyBackward(ID, Integer.MAX_VALUE);
+            Iterator<AggregateEventRecord> iterator = storage.historyBackward(ID,
+                                                                              Integer.MAX_VALUE);
             return Iterators.size(iterator);
         }
     }
@@ -166,9 +166,9 @@ public abstract class AggregateHistoryTruncationTest {
             currentVersion = zero();
 
             ContextSpec spec = ContextSpec.singleTenant("Aggregate truncation tests");
-            storage =  ServerEnvironment.instance()
-                                     .storageFactory()
-                                     .createAggregateStorage(spec, TestAggregate.class);
+            storage = ServerEnvironment.instance()
+                                       .storageFactory()
+                                       .createAggregateStorage(spec, TestAggregate.class);
         }
 
         @Test
