@@ -41,6 +41,7 @@ import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
 @DisplayName("`QueryFilter` should")
+@SuppressWarnings("deprecation")    // Testing the deprecated type.
 class QueryFilterTest {
 
     @Test
