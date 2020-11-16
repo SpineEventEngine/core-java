@@ -168,7 +168,6 @@ public class InboxStorageTest
         return newCommandInInbox(InboxMessageMixin.generateIdWith(index), targetId);
     }
 
-
     private InboxMessage newCommandInInbox(InboxMessageId id, String targetId) {
         Command command = factory.createCommand(AddNumber.newBuilder()
                                                          .setCalculatorId(targetId)
