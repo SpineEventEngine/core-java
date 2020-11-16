@@ -20,7 +20,6 @@
 
 package io.spine.server.route.given.user;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.UserId;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRouting;
@@ -28,12 +27,17 @@ import io.spine.server.route.given.user.event.RUserConsentRequested;
 import io.spine.server.route.given.user.event.RUserSignedIn;
 import io.spine.test.event.RUser;
 
+import static io.spine.server.route.EventRoute.withId;
+
 public final class UserRepository extends AggregateRepository<UserId, UserAggregate, RUser> {
 
     @Override
     protected void setupEventRouting(EventRouting<UserId> routing) {
         super.setupEventRouting(routing);
-        routing.route(RUserSignedIn.class, (e, ctx) -> ImmutableSet.of(e.getUserId()));
-        routing.route(RUserConsentRequested.class, (e, ctx) -> ImmutableSet.of(e.getUserId()));
+
+        routing.route(RUserSignedIn.class,
+                      (e, ctx) -> withId(e.getUserId()));
+        routing.route(RUserConsentRequested.class,
+                      (e, ctx) -> withId(e.getUserId()));
     }
 }
