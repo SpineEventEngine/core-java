@@ -94,8 +94,8 @@ public abstract class TransactionalEntity<I,
     /**
      * A callback invoked before the transaction is committed.
      *
-     * <p>End-users may want to override this method to implement some common logic on modifying
-     * the entity state.
+     * <p>The developers of descending types may wish to override this method to implement
+     * some common logic on modifying the entity state.
      */
     @SuppressWarnings("NoopMethodInAbstractClass")  // The method does nothing by default.
     protected void onBeforeCommit() {
