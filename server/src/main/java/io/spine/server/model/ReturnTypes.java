@@ -44,7 +44,7 @@ public final class ReturnTypes {
     /**
      * Creates an instance for the passed type.
      */
-    public ReturnTypes(Class<?> cls) {
+    private ReturnTypes(Class<?> cls) {
         checkNotNull(cls);
         this.types = ImmutableList.of(TypeToken.of(cls));
     }
@@ -65,7 +65,7 @@ public final class ReturnTypes {
      * @param mayReturnIgnored
      *         is {@code true} if the method can return {@link Nothing}
      */
-    public boolean matches(Method method, boolean mayReturnIgnored) {
+    boolean matches(Method method, boolean mayReturnIgnored) {
         TypeToken<?> actualReturnType = Invokable.from(method).getReturnType();
         boolean conforms =
                 types.stream()
