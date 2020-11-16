@@ -202,7 +202,7 @@ public class EntityRecordStorageTest
                     range(0, recordCount).mapToObj(i -> newId())
                                          .collect(toImmutableList());
             @SuppressWarnings("rawtypes")
-            Class<? extends EntityState> stateClass = writeRandomRecords(storage , ids);
+            Class<? extends EntityState> stateClass = writeRandomRecords(storage, ids);
 
             int halfSize = recordCount / 2;
             List<StgProjectId> halfOfIds = ids.subList(0, halfSize);
@@ -257,8 +257,8 @@ public class EntityRecordStorageTest
 
             StgProject.Query query =
                     StgProject.query()
-                                               .where(archived.lifecycle(), true)
-                                               .build();
+                              .where(archived.lifecycle(), true)
+                              .build();
             assertQueryHasSingleResult(query, archivedRecord, storage);
         }
     }
