@@ -147,7 +147,9 @@ public final class StandTestEnv {
     }
 
     public static void storeSampleProject(StandTestProjectionRepository repository,
-                                          ProjectId id, String name, int projectVersion) {
+                                          ProjectId id,
+                                          String name,
+                                          int projectVersion) {
         Project project = Project
                 .newBuilder()
                 .setId(id)
@@ -162,8 +164,8 @@ public final class StandTestEnv {
     }
 
     @CanIgnoreReturnValue
-    public static Subscription
-    subscribeAndActivate(Stand stand, Topic topic, SubscriptionCallback callback) {
+    public static Subscription subscribeAndActivate(Stand stand, Topic topic,
+                                                    SubscriptionCallback callback) {
         MemoizingObserver<Subscription> observer = memoizingObserver();
         stand.subscribe(topic, observer);
         Subscription subscription = observer.firstResponse();
