@@ -129,7 +129,7 @@ class TripletTest {
     }
 
     @Test
-    @DisplayName("tell if elements are absent if set as `null")
+    @DisplayName("tell if elements are absent if set as `null`")
     void tellElementsAbsent() {
         assertThat(Triplet.withNullable(a, b, null)
                           .hasC()).isFalse();

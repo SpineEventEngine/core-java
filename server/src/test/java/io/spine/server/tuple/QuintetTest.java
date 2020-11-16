@@ -107,7 +107,7 @@ class QuintetTest {
     }
 
     @Test
-    @DisplayName("tell if elements are absent if set as `null")
+    @DisplayName("tell if elements are absent if set as `null`")
     void tellElementsAbsent() {
         assertThat(Quintet.withNullable(newViola(), newViola(), newViola(), newViola(), null)
                           .hasE()).isFalse();

@@ -137,7 +137,7 @@ class QuartetTest {
     }
 
     @Test
-    @DisplayName("tell if elements are absent if set as `null")
+    @DisplayName("tell if elements are absent if set as `null`")
     void tellElementsAbsent() {
         assertThat(Quartet.withNullable(monkey, donkey, goat, null)
                           .hasD()).isFalse();
