@@ -48,7 +48,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static java.util.Collections.singletonMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,12 +56,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("`EntityRecordWithColumns` should")
 class EntityRecordWithColumnsTest {
 
-    private static final StgTaskId TASK_ID = StgTaskId.newBuilder()
-                                                      .setId(42)
-                                                      .vBuild();
-    private static final StgProjectId PROJECT_ID = StgProjectId.newBuilder()
-                                                            .setId("42")
-                                                            .vBuild();
+    private static final StgTaskId TASK_ID =
+            StgTaskId.newBuilder()
+                     .setId(42)
+                     .vBuild();
+
+    private static final StgProjectId PROJECT_ID =
+            StgProjectId.newBuilder()
+                        .setId("42")
+                        .vBuild();
+
     private static final Any PACKED_TASK_ID = Identifier.pack(TASK_ID);
 
     private static EntityRecordWithColumns<?> sampleRecordWithEmptyColumns() {
@@ -140,7 +143,8 @@ class EntityRecordWithColumnsTest {
 
         EntityRecordWithColumns<?> record =
                 EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        assertThat(record.columnNames()).containsExactlyElementsIn(EntityRecordColumn.names());
+        assertThat(record.columnNames())
+                .containsExactlyElementsIn(EntityRecordColumn.names());
     }
 
     @Test
@@ -243,7 +247,7 @@ class EntityRecordWithColumnsTest {
             ImmutableSet<ColumnName> columnNames = record.columnNames();
             assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
-            assertEquals(value, record.columnValue(columnName));
+            assertThat(value).isEqualTo(record.columnValue(columnName));
         }
     }
 }
