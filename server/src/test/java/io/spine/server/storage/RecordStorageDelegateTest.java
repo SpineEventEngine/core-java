@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -385,85 +386,70 @@ public class RecordStorageDelegateTest
             storage().close();
         }
 
+        private void assertISE(Executable executable) {
+            assertThrows(IllegalStateException.class, executable);
+        }
+
         @Test
         @DisplayName("`write(record)` method")
         void write() {
-            assertThrows(IllegalStateException.class, () -> storage().write(randomRecord()));
+            assertISE(() -> storage().write(randomRecord()));
         }
 
         @Test
         @DisplayName("`writeAll(Iterable)` method")
         void writeAll() {
-            assertThrows(IllegalStateException.class,
-                         () -> storage().writeBatch(ImmutableSet.of(randomRecord()))
-            );
+            assertISE(() -> storage().writeBatch(ImmutableSet.of(randomRecord())));
         }
 
         @Test
         @DisplayName("`write(id, record)` method")
         void writeIdRecord() {
             StgProject record = randomRecord();
-            assertThrows(IllegalStateException.class,
-                         () -> storage().write(record.getId(), record)
-            );
+            assertISE(() -> storage().write(record.getId(), record));
         }
 
         @Test
         @DisplayName("`read(id, FieldMask)` method")
         void readIdFieldMask() {
-            assertThrows(IllegalStateException.class,
-                         () -> storage().read(newId(), idAndDueDate())
-            );
+            assertISE(() -> storage().read(newId(), idAndDueDate()));
         }
 
         @Test
         @DisplayName("`readAll()` method")
         void readAll() {
-            assertThrows(IllegalStateException.class,
-                         () -> storage().readAll()
-            );
+            assertISE(() -> storage().readAll());
         }
 
         @Test
         @DisplayName("`readAll(RecordQuery)` method")
         void readAllByQuery() {
             RecordQuery<StgProjectId, StgProject> query = queryBuilder().build();
-            assertThrows(IllegalStateException.class,
-                         () -> storage().readAll(query)
-            );
+            assertISE(() -> storage().readAll(query));
         }
 
         @Test
         @DisplayName("`readAll(IDs)` method")
         void readAllByIds() {
-            assertThrows(IllegalStateException.class,
-                         () -> storage().readAll(ImmutableSet.of(newId(), newId()))
-            );
+            assertISE(() -> storage().readAll(ImmutableSet.of(newId(), newId())));
         }
 
         @Test
         @DisplayName("`readAll(IDs, FieldMask)` method")
         void readAllByIdsAndMask() {
-            assertThrows(IllegalStateException.class,
-                         () -> storage().readAll(ImmutableSet.of(newId()),
-                                                 idAndDueDate())
-            );
+            assertISE(() -> storage().readAll(ImmutableSet.of(newId()), idAndDueDate()));
         }
 
         @Test
         @DisplayName("`delete(ID)` method")
         void delete() {
-            assertThrows(IllegalStateException.class,
-                         () -> storage().delete(newId())
-            );
+            assertISE(() -> storage().delete(newId()));
         }
 
         @Test
         @DisplayName("`deleteAll(IDs)` method")
         void deleteAll() {
-            assertThrows(IllegalStateException.class,
-                         () -> storage().deleteAll(ImmutableList.of(newId(), newId()))
-            );
+            assertISE(() -> storage().deleteAll(ImmutableList.of(newId(), newId())));
         }
     }
 
