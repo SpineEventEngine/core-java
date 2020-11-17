@@ -31,6 +31,13 @@ final class MessageFormatter {
     private MessageFormatter() {
     }
 
+    /**
+     * Collects items into a string separating them with commas.
+     *
+     * @apiNote Migrate off this method once the API resulted from
+     * <a href="https://github.com/SpineEventEngine/base/issues/590">this issue in {@code base}</a>
+     * is available.
+     */
     static Collector<CharSequence, ?, String> toStringEnumeration() {
         return Collectors.joining(", ");
     }
