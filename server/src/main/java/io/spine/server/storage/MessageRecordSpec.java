@@ -68,7 +68,7 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
     private final ImmutableMap<ColumnName, RecordColumn<R, ?>> columns;
 
     /**
-     * Creates a new record specification.
+     * Creates a new record specification listing the columns to store along with the record.
      *
      * @param idType
      *         the type of the record identifier
@@ -88,6 +88,20 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
         this.extractId = extractId;
     }
 
+    /**
+     * Creates a new record specification.
+     *
+     * <p>The specifications created implies that no columns are stored for the record.
+     * To define the stored columns,
+     * please use {@linkplain #MessageRecordSpec(Class, Class, ExtractId, Iterable) another ctor}.
+     *
+     * @param idType
+     *         the type of the record identifier
+     * @param recordType
+     *         the type of the record
+     * @param extractId
+     *         a method object to extract the value of an identifier given an instance of a record
+     */
     public MessageRecordSpec(Class<I> idType, Class<R> recordType, ExtractId<R, I> extractId) {
         this(idType, recordType, extractId, ImmutableList.of());
     }
