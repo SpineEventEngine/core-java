@@ -46,7 +46,7 @@ final class FindActiveEntites<I, S extends EntityState<I>>
      *         the type of entity states
      * @return a new builder instance
      */
-    public static <I, S extends EntityState<I>> Builder<I, S>
+    static <I, S extends EntityState<I>> Builder<I, S>
     newBuilder(Class<I> idType, Class<S> stateType,
                boolean hasArchivedColumn, boolean hasDeletedColumn) {
         return new Builder<>(idType, stateType, hasArchivedColumn, hasDeletedColumn);
