@@ -52,7 +52,7 @@ public abstract class AbstractStorage<I, M extends Message> implements Storage<I
      * @param message exception message
      * @throws IllegalStateException if the storage is closed
      */
-    protected void checkNotClosed(String message) throws IllegalStateException {
+    protected final void checkNotClosed(String message) throws IllegalStateException {
         if (isClosed()) {
             throw new IllegalStateException(message);
         }
@@ -65,7 +65,7 @@ public abstract class AbstractStorage<I, M extends Message> implements Storage<I
      *
      * @throws IllegalStateException if the storage is closed
      */
-    protected void checkNotClosed() throws IllegalStateException {
+    protected final void checkNotClosed() throws IllegalStateException {
         checkNotClosed("The storage is closed.");
     }
 
@@ -87,8 +87,8 @@ public abstract class AbstractStorage<I, M extends Message> implements Storage<I
      * @return {@code true} if the storage is closed, {@code false} otherwise
      * @see #close()
      */
-    public boolean isClosed() {
-        return !open;
+    public final boolean isClosed() {
+        return !isOpen();
     }
 
     /**

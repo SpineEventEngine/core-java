@@ -188,28 +188,13 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
     }
 
     @Override
-    public boolean isMultitenant() {
+    public final boolean isMultitenant() {
         return delegate.isMultitenant();
     }
 
     @Override
-    protected void checkNotClosed(String message) throws IllegalStateException {
-        delegate.checkNotClosed(message);
-    }
-
-    @Override
-    protected void checkNotClosed() throws IllegalStateException {
-        delegate.checkNotClosed();
-    }
-
-    @Override
-    public boolean isOpen() {
+    public final boolean isOpen() {
         return delegate.isOpen();
-    }
-
-    @Override
-    public boolean isClosed() {
-        return delegate.isClosed();
     }
 
     @Override

@@ -62,7 +62,7 @@ final class ReadOperation<I, S extends EntityState<I>> {
      *         how many records to read from the storage at a time
      */
     ReadOperation(AggregateStorage<I, S> storage, I id, int batchSize) {
-        storage.checkNotClosed();
+        storage.ensureNotClosed();
         this.storage = storage;
         this.id = checkNotNull(id);
         checkPositive(batchSize);

@@ -187,16 +187,6 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Opens the method for the package.
-     */
-    @Override
-    protected void checkNotClosed() throws IllegalStateException {
-        super.checkNotClosed();
-    }
-
-    /**
      * Returns an iterator over identifiers of Aggregates served by this storage.
      *
      * <p>The results include IDs corresponding only to those Aggregate instances which were
@@ -462,6 +452,14 @@ public class AggregateStorage<I, S extends EntityState<I>>
     protected void doTruncate(int snapshotIndex, Timestamp date) {
         truncation.performWith(snapshotIndex,
                                (r) -> Timestamps.compare(r.getTimestamp(), date) < 0);
+    }
+
+    /**
+     * This method exposes {@linkplain #checkNotClosed() checkNotClosed()} part of API to
+     * this package.
+     */
+    void ensureNotClosed() {
+        checkNotClosed();
     }
 
     private void checkNotClosedAndArguments(I id, Object argument) {

@@ -62,11 +62,6 @@ final class TestAggregateStorage extends AggregateStorage<ProjectId, AggProject>
     }
 
     @Override
-    public void checkNotClosed() throws IllegalStateException {
-        delegate.checkNotClosed();
-    }
-
-    @Override
     public Iterator<ProjectId> index() {
         return delegate.index();
     }
