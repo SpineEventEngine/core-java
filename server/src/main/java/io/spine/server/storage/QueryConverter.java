@@ -122,25 +122,22 @@ public final class QueryConverter {
 
     private static <I, R extends Message> void
     filters(RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec, TargetFilters filters) {
-        if (filters.getFilterCount() > 0) {
-            List<CompositeFilter> compositeFilters = filters.getFilterList();
-            for (CompositeFilter composite : compositeFilters) {
-                CompositeFilter.CompositeOperator compositeOperator = composite.getOperator();
+        for (CompositeFilter composite : filters.getFilterList()) {
+            CompositeFilter.CompositeOperator compositeOperator = composite.getOperator();
 
-                switch (compositeOperator) {
-                    case ALL:
-                        convert(composite, spec, builder);
-                        break;
-                    case EITHER:
-                        builder.either((either) -> convert(composite, spec, either));
-                        break;
-                    case UNRECOGNIZED:
-                    case CCF_CO_UNDEFINED:
-                    default:
-                        throw newIllegalArgumentException(
-                                "Unsupported composite operator `%s` encountered.",
-                                compositeOperator);
-                }
+            switch (compositeOperator) {
+                case ALL:
+                    convert(composite, spec, builder);
+                    break;
+                case EITHER:
+                    builder.either((either) -> convert(composite, spec, either));
+                    break;
+                case UNRECOGNIZED:
+                case CCF_CO_UNDEFINED:
+                default:
+                    throw newIllegalArgumentException(
+                            "Unsupported composite operator `%s` encountered.",
+                            compositeOperator);
             }
         }
     }
@@ -152,11 +149,8 @@ public final class QueryConverter {
     @CanIgnoreReturnValue
     private static <I, R extends Message> RecordQueryBuilder<I, R>
     convert(CompositeFilter filter, RecordSpec<I, R, ?> spec, RecordQueryBuilder<I, R> builder) {
-        if (filter.getFilterCount() > 0) {
-            List<Filter> childFilters = filter.getFilterList();
-            for (Filter childFilter : childFilters) {
-                convertSingle(childFilter, builder, spec);
-            }
+        for (Filter childFilter : filter.getFilterList()) {
+            convertSingle(childFilter, builder, spec);
         }
         return builder;
     }
@@ -224,19 +218,17 @@ public final class QueryConverter {
                          RecordSpec<I, R, ?> spec,
                          ResponseFormat format) {
         boolean hasOrderBy = false;
-        if (format.getOrderByCount() > 0) {
+        for (OrderBy protoOrderBy : format.getOrderByList()) {
             hasOrderBy = true;
-            for (OrderBy protoOrderBy : format.getOrderByList()) {
-                ColumnName columnName = ColumnName.of(protoOrderBy.getColumn());
-                OrderBy.Direction protoDirection = protoOrderBy.getDirection();
+            ColumnName columnName = ColumnName.of(protoOrderBy.getColumn());
+            OrderBy.Direction protoDirection = protoOrderBy.getDirection();
 
-                Column<?, ?> column = findColumn(spec, columnName);
-                AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
-                if (protoDirection == OrderBy.Direction.ASCENDING) {
-                    builder.sortAscendingBy(convertedColumn);
-                } else {
-                    builder.sortDescendingBy(convertedColumn);
-                }
+            Column<?, ?> column = findColumn(spec, columnName);
+            AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
+            if (protoDirection == OrderBy.Direction.ASCENDING) {
+                builder.sortAscendingBy(convertedColumn);
+            } else {
+                builder.sortDescendingBy(convertedColumn);
             }
         }
 
