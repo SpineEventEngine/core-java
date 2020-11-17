@@ -115,6 +115,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
     private final ImmutableList<TypeMatcher> criteria;
 
+    /**
+     * Obtains specification of parameters allowed for event-handling methods.
+     */
     static AllowedParams<EventEnvelope> allowed() {
         return PARAMS;
     }
