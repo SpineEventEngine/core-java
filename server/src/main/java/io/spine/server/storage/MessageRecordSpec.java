@@ -84,7 +84,10 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
                              ExtractId<R, I> extractId,
                              Iterable<RecordColumn<R, ?>> columns) {
         super(idType, recordType);
-        this.columns = stream(columns).collect(toImmutableMap(RecordColumn::name, (c) -> c));
+        this.columns =
+                stream(columns).collect(
+                        toImmutableMap(RecordColumn::name, (c) -> c)
+                );
         this.extractId = extractId;
     }
 
