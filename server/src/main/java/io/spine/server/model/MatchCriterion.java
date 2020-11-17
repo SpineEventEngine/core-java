@@ -215,7 +215,7 @@ public enum MatchCriterion {
                 );
             }
             return format(
-                    "The method `%s.%s` throws %s. But only `%s` is allowed for"
+                    "The method `%s.%s` throws `%s`. But only `%s` is allowed for"
                             + " this kind of methods.",
                     method.getDeclaringClass().getCanonicalName(),
                     method.getName(),
@@ -225,7 +225,7 @@ public enum MatchCriterion {
         }
 
         /**
-         * Prints {@link Iterable} to {@link String}, separating elements with comma.
+         * Prints {@code Iterable} to {@code String}, separating elements with comma.
          */
         private String enumerateThrown() {
             return declared.stream()
