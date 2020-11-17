@@ -46,7 +46,7 @@ import java.util.function.Function;
  *
  *         // ...
  *         class UserProfileProjection
- *             extends Projection<UserId, UserProfile, UserProfile.Builder>
+ *             extends Projection{@literal <}UserId, UserProfile, UserProfile.Builder>
  *             implements UserProfileWithColumns {
  *
  *            {@literal @}Override

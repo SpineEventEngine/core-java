@@ -22,6 +22,7 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
+import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.ActorContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,25 +46,17 @@ import static java.lang.String.format;
  */
 public final class QueryFactory {
 
-    /**
-     * The format of all {@linkplain QueryId query identifiers}.
-     */
-    private static final String QUERY_ID_FORMAT = "query-%s";
-
     private static final String ENTITY_IDS_EMPTY_MSG = "Entity ID set must not be empty.";
 
     private final ActorContext actorContext;
 
+    /**
+     * Creates a new {@code QueryFactory} that uses supplied {@code actorRequestFactory}
+     * to generate the {@code ActorContext}.
+     */
     QueryFactory(ActorRequestFactory actorRequestFactory) {
         checkNotNull(actorRequestFactory);
         this.actorContext = actorRequestFactory.newActorContext();
-    }
-
-    private static QueryId newQueryId() {
-        String formattedId = format(QUERY_ID_FORMAT, newUuid());
-        return QueryId.newBuilder()
-                      .setValue(formattedId)
-                      .build();
     }
 
     /**
@@ -112,7 +105,7 @@ public final class QueryFactory {
         checkSpecified(entityClass);
         checkNotNull(ids);
         checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
-        FieldMask fieldMask = fromStringList(null, ImmutableList.copyOf(maskPaths));
+        FieldMask fieldMask = fromStringList(ImmutableList.copyOf(maskPaths));
         Query result = composeQuery(entityClass, ids, null, fieldMask);
         return result;
     }
@@ -163,7 +156,7 @@ public final class QueryFactory {
     public Query allWithMask(Class<? extends EntityState> entityClass, String... maskPaths) {
         checkSpecified(entityClass);
         checkNotNull(maskPaths);
-        FieldMask fieldMask = fromStringList(null, ImmutableList.copyOf(maskPaths));
+        FieldMask fieldMask = fromStringList(ImmutableList.copyOf(maskPaths));
         Query result = composeQuery(entityClass, null, null, fieldMask);
         return result;
     }
@@ -188,8 +181,7 @@ public final class QueryFactory {
                                @Nullable Set<CompositeFilter> filters,
                                @Nullable FieldMask fieldMask) {
         ResponseFormat format = responseFormat(fieldMask, null, 0);
-        Query.Builder builder = queryBuilderFor(entityClass, ids, filters)
-                .setFormat(format);
+        Query.Builder builder = queryBuilderFor(entityClass, ids, filters).setFormat(format);
         Query query = newQuery(builder);
         return query;
     }
@@ -206,46 +198,40 @@ public final class QueryFactory {
         return builder;
     }
 
+    @Internal
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        ResponseFormat format = responseFormat(fieldMask, null, 0);
-        Query.Builder builder = queryBuilderFor(target)
-                .setFormat(format);
-        Query query = newQuery(builder);
-        return query;
+        return composeQuery(target, 0,null, fieldMask);
     }
 
-    @SuppressWarnings("CheckReturnValue")
-    private static Query.Builder queryBuilderFor(Target target) {
-        Query.Builder builder = Query.newBuilder()
-                                     .setTarget(target);
-        return builder;
-    }
-
-    Query composeQuery(Target target,
-                       OrderBy orderBy,
-                       @Nullable FieldMask fieldMask) {
+    @Internal
+    Query composeQuery(Target target, OrderBy orderBy, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
-        ResponseFormat format = responseFormat(fieldMask, orderBy, 0);
-        Query.Builder builder = queryBuilderFor(target)
-                .setFormat(format);
-        Query query = newQuery(builder);
-        return query;
+        return composeQuery(target, 0, orderBy, fieldMask);
     }
 
-    Query composeQuery(Target target,
-                       OrderBy orderBy,
-                       int limit,
-                       @Nullable FieldMask fieldMask) {
+    @Internal
+    Query composeQuery(Target target, OrderBy orderBy, int limit, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
+        return composeQuery(target, limit, orderBy, fieldMask);
+    }
 
+    private Query composeQuery(Target target,
+                               int limit,
+                               @Nullable OrderBy orderBy,
+                               @Nullable FieldMask fieldMask){
         ResponseFormat format = responseFormat(fieldMask, orderBy, limit);
-        Query.Builder builder = queryBuilderFor(target)
-                .setFormat(format);
+        Query.Builder builder = queryBuilderFor(target).setFormat(format);
         Query query = newQuery(builder);
         return query;
+    }
+
+    private static Query.Builder queryBuilderFor(Target target) {
+        return Query
+                .newBuilder()
+                .setTarget(target);
     }
 
     private static void checkTargetNotNull(Target target) {
@@ -253,16 +239,23 @@ public final class QueryFactory {
     }
 
     private Query newQuery(Query.Builder builder) {
-        return builder.setId(newQueryId())
-                      .setContext(actorContext)
-                      .vBuild();
+        return builder
+                .setId(newQueryId())
+                .setContext(actorContext)
+                .vBuild();
     }
 
-    private static ResponseFormat responseFormat(@Nullable FieldMask mask,
-                                                 @Nullable OrderBy ordering,
-                                                 int limit) {
-        ResponseFormat.Builder result = ResponseFormat
-                .newBuilder();
+    private static QueryId newQueryId() {
+        String formattedId = format("query-%s", newUuid());
+        return QueryId
+                .newBuilder()
+                .setValue(formattedId)
+                .build();
+    }
+
+    private static ResponseFormat
+    responseFormat(@Nullable FieldMask mask, @Nullable OrderBy ordering, int limit) {
+        ResponseFormat.Builder result = ResponseFormat.newBuilder();
         if (mask != null) {
             result.setFieldMask(mask);
         }

@@ -58,8 +58,9 @@ public final class ValidHandler extends AbstractCommandHandler {
 
     @Command
     SigProjectCreated declaredRejection(SigCreateProject cmd) throws SigCannotCreateProject {
-        throw SigCannotCreateProject.newBuilder()
-                                    .build();
+        throw SigCannotCreateProject
+                .newBuilder()
+                .build();
     }
 
     @Assign
@@ -117,14 +118,16 @@ public final class ValidHandler extends AbstractCommandHandler {
         return ImmutableList.of(EventMessages.taskStarted());
     }
 
-    @SuppressWarnings("MethodMayBeStatic")              // testing the visibility level.
     @Assign
+    // It is a use-case-under-test.
+    @SuppressWarnings("MethodMayBeStatic")
     private SigTaskPaused privateHandler(SigPauseTask command) {
         return EventMessages.taskPaused();
     }
 
-    @SuppressWarnings("ProtectedMemberInFinalClass")    // testing the visibility level.
     @Assign
+    // It is a use-case-under-test.
+    @SuppressWarnings({"ProtectedMembersInFinalClass", "ProtectedMemberInFinalClass"})
     protected SigTaskPaused protectedHandler(SigPauseTask command) {
         return EventMessages.taskPaused();
     }

@@ -20,7 +20,6 @@
 
 package io.spine.model.verify;
 
-import com.google.common.io.Files;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
 import io.spine.model.verify.given.DuplicateCommandHandler;
@@ -35,6 +34,7 @@ import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
 import io.spine.server.model.SignatureMismatchException;
+import io.spine.testing.TempDir;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
@@ -51,7 +51,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -62,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("ModelVerifier should")
+@DisplayName("`ModelVerifier` should")
 class ModelVerifierTest {
 
     private Project project = null;
@@ -204,11 +204,11 @@ class ModelVerifierTest {
 
     @Test
     @DisplayName("retrieve compilation destination directory from task")
-    void getCompilationDestDir() throws MalformedURLException {
+    void getCompilationDestDir() throws IOException {
         JavaCompile compileTask = actualProject().getTasks()
                                                  .withType(JavaCompile.class)
                                                  .getByName(compileJava.name());
-        File dest = Files.createTempDir();
+        File dest = TempDir.forClass(ModelVerifierTest.class);
         compileTask.setDestinationDir(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         URL destUrl = dest.toURI().toURL();

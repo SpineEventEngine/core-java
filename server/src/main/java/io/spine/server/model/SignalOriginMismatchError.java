@@ -27,13 +27,11 @@ public final class SignalOriginMismatchError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String ERROR_TEMPLATE =
-            "Mismatch of `external` value for the handler method %s. " +
-                    "Expected `external = %s`, but got `%s`.";
-
     SignalOriginMismatchError(HandlerMethod<?, ?, ?, ?> method,
                               boolean expectedExternal,
                               boolean actualExternal) {
-        super(ERROR_TEMPLATE, method, expectedExternal, actualExternal);
+        super("Mismatch of `external` value for the handler method %s. " +
+                      "Expected `external = %s`, but got `%s`.",
+              method, expectedExternal, actualExternal);
     }
 }

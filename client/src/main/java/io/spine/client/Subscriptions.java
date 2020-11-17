@@ -67,11 +67,6 @@ import static java.util.Collections.synchronizedSet;
 public final class Subscriptions implements Logging {
 
     /**
-     * The format of all {@linkplain SubscriptionId Subscription identifiers}.
-     */
-    private static final String SUBSCRIPTION_ID_FORMAT = "s-%s";
-
-    /**
      * The format for convenient subscription printing in logs and error messages.
      */
     static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
@@ -100,7 +95,7 @@ public final class Subscriptions implements Logging {
      * @return new subscription identifier.
      */
     public static SubscriptionId generateId() {
-        String formattedId = format(SUBSCRIPTION_ID_FORMAT, Identifier.newUuid());
+        String formattedId = format("s-%s", Identifier.newUuid());
         return newId(formattedId);
     }
 

@@ -142,7 +142,9 @@ class NastyClient {
     }
 
     /**
-     * Returns the number of calls to {@link #doStore(CalcAggregate)} method there were.
+     * Returns the number of calls to
+     * {@link io.spine.server.delivery.given.DeliveryTestEnv.CalculatorRepository#doStore(CalcAggregate)
+     * doStore(CalcAggregate)} method there were.
      *
      * @param id
      *         identifier of the {@link CalcAggregate}, calls to which are counted
@@ -153,7 +155,9 @@ class NastyClient {
 
 
     /**
-     * Returns the number of calls to {@link #doLoadOrCreate(String)} method there were.
+     * Returns the number of calls to
+     * {@link io.spine.server.delivery.given.DeliveryTestEnv.CalculatorRepository#doLoadOrCreate(String)
+     * doLoadOrCreate(String)} method there were.
      *
      * @param id
      *         identifier of the {@link CalcAggregate}, calls to which are counted

@@ -59,7 +59,6 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.RecordStorageTestEnv.archive;
@@ -100,7 +99,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         Entity<ProjectId, ?> testEntity = newEntity(id);
         RecordStorage<ProjectId> storage = storage();
         EntityRecordWithColumns recordWithColumns =
-                create(record, testEntity, storage);
+                EntityRecordWithColumns.create(record, testEntity, storage);
         storage.write(id, recordWithColumns);
 
         RecordReadRequest<ProjectId> readRequest = newReadRequest(id);
@@ -163,11 +162,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
         EntityRecordWithColumns recordRight =
-                create(fineRecord, matchingEntity, storage);
+                EntityRecordWithColumns.create(fineRecord, matchingEntity, storage);
         EntityRecordWithColumns recordWrong1 =
-                create(notFineRecord1, wrongEntity1, storage);
+                EntityRecordWithColumns.create(notFineRecord1, wrongEntity1, storage);
         EntityRecordWithColumns recordWrong2 =
-                create(notFineRecord2, wrongEntity2, storage);
+                EntityRecordWithColumns.create(notFineRecord2, wrongEntity2, storage);
 
         storage.write(idMatching, recordRight);
         storage.write(idWrong1, recordWrong1);
@@ -196,11 +195,11 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         RecordStorage<ProjectId> storage = storage();
 
         EntityRecordWithColumns recordRight =
-                create(fineRecord, matchingEntity, storage);
+                EntityRecordWithColumns.create(fineRecord, matchingEntity, storage);
         EntityRecordWithColumns recordWrong1 =
-                create(notFineRecord1, wrongEntity1, storage);
+                EntityRecordWithColumns.create(notFineRecord1, wrongEntity1, storage);
         EntityRecordWithColumns recordWrong2 =
-                create(notFineRecord2, wrongEntity2, storage);
+                EntityRecordWithColumns.create(notFineRecord2, wrongEntity2, storage);
 
         // Fill the storage
         storage.write(idWrong1, recordWrong1);
@@ -235,9 +234,9 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         RecordStorage<ProjectId> storage = storage();
         storage.write(activeRecordId,
-                      create(activeRecord, activeEntity, storage));
+                      EntityRecordWithColumns.create(activeRecord, activeEntity, storage));
         storage.write(archivedRecordId,
-                      create(archivedRecord, archivedEntity, storage));
+                      EntityRecordWithColumns.create(archivedRecord, archivedEntity, storage));
 
         TargetFilters filters = TargetFilters
                 .newBuilder()
@@ -269,9 +268,18 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                                                         deletedEntity.lifecycleFlags());
 
         RecordStorage<ProjectId> storage = storage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+        storage.write(
+                deletedId,
+                EntityRecordWithColumns.create(deletedRecord, deletedEntity, storage)
+        );
+        storage.write(
+                activeId,
+                EntityRecordWithColumns.create(activeRecord, activeEntity, storage)
+        );
+        storage.write(
+                archivedId,
+                EntityRecordWithColumns.create(archivedRecord, archivedEntity, storage)
+        );
 
         TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
         EntityQuery<ProjectId> query = newEntityQuery(emptyFilters(), storage);
@@ -301,9 +309,18 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                                                         deletedEntity.lifecycleFlags());
 
         RecordStorage<ProjectId> storage = storage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+        storage.write(
+                deletedId,
+                EntityRecordWithColumns.create(deletedRecord, deletedEntity, storage)
+        );
+        storage.write(
+                activeId,
+                EntityRecordWithColumns.create(activeRecord, activeEntity, storage)
+        );
+        storage.write(
+                archivedId,
+                EntityRecordWithColumns.create(archivedRecord, archivedEntity, storage)
+        );
 
         TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
@@ -334,9 +351,18 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                                                         deletedEntity.lifecycleFlags());
 
         RecordStorage<ProjectId> storage = storage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+        storage.write(
+                deletedId,
+                EntityRecordWithColumns.create(deletedRecord, deletedEntity, storage)
+        );
+        storage.write(
+                activeId,
+                EntityRecordWithColumns.create(activeRecord, activeEntity, storage)
+        );
+        storage.write(
+                archivedId,
+                EntityRecordWithColumns.create(archivedRecord, archivedEntity, storage)
+        );
 
         TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
@@ -366,9 +392,18 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                                                         deletedEntity.lifecycleFlags());
 
         RecordStorage<ProjectId> storage = storage();
-        storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
-        storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
+        storage.write(
+                deletedId,
+                EntityRecordWithColumns.create(deletedRecord, deletedEntity, storage)
+        );
+        storage.write(
+                activeId,
+                EntityRecordWithColumns.create(activeRecord, activeEntity, storage)
+        );
+        storage.write(
+                archivedId,
+                EntityRecordWithColumns.create(archivedRecord, archivedEntity, storage)
+        );
 
         ImmutableSet<ProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
         Iterable<EntityRecord> read =
@@ -394,7 +429,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
     void updateColumnValues() {
         Project.Status initialStatus = DONE;
         @SuppressWarnings("UnnecessaryLocalVariable") // is used for documentation purposes.
-                Project.Status statusAfterUpdate = CANCELLED;
+        Project.Status statusAfterUpdate = CANCELLED;
         Int32Value initialStatusValue = Int32Value
                 .newBuilder()
                 .setValue(initialStatus.getNumber())
@@ -420,7 +455,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         entity.assignStatus(initialStatus);
 
         EntityRecord record = buildStorageRecord(id, newState(id));
-        EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
+        EntityRecordWithColumns recordWithColumns =
+                EntityRecordWithColumns.create(record, entity, storage);
 
         FieldMask fieldMask = FieldMask.getDefaultInstance();
 
@@ -437,7 +473,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         entity.assignStatus(statusAfterUpdate);
 
         EntityRecordWithColumns updatedRecordWithColumns =
-                create(record, entity, storage);
+                EntityRecordWithColumns.create(record, entity, storage);
         storage.write(id, updatedRecordWithColumns);
 
         Iterator<EntityRecord> recordsAfter = storage.readAll(query, format);
@@ -517,6 +553,6 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         RecordStorage<ProjectId> storage = storage();
         EntityRecord record = buildStorageRecord(entity.id(), entity.state(),
                                                  entity.lifecycleFlags());
-        storage.write(entity.id(), create(record, entity, storage));
+        storage.write(entity.id(), EntityRecordWithColumns.create(record, entity, storage));
     }
 }

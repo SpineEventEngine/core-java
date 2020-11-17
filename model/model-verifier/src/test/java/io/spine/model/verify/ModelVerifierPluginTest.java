@@ -33,11 +33,8 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.TempDirectory;
-import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
-import java.nio.file.Path;
+import java.io.File;
 
 import static io.spine.tools.gradle.ModelVerifierTaskName.verifyModel;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
@@ -45,8 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SlowTest
-@ExtendWith(TempDirectory.class)
-@DisplayName("ModelVerifierPlugin should")
+@DisplayName("`ModelVerifierPlugin` should")
 class ModelVerifierPluginTest {
 
     private static final String PROJECT_NAME = "model-verifier-test";
@@ -58,11 +54,11 @@ class ModelVerifierPluginTest {
             "spine/model/verify/events.proto"
     );
 
-    private Path tempDir;
+    private File tempDir;
 
     @BeforeEach
-    void setUp(@TempDir Path junitCreatedDir) {
-        tempDir = junitCreatedDir;
+    void setUp() {
+        tempDir = io.spine.testing.TempDir.forClass(ModelVerifierPluginTest.class);
         ModelTests.dropAllModels();
     }
 
@@ -110,12 +106,13 @@ class ModelVerifierPluginTest {
     }
 
     private GradleProject newProjectWithJava(String... fileNames) {
-        return GradleProject.newBuilder()
-                            .setProjectName(PROJECT_NAME)
-                            .setProjectFolder(tempDir.toFile())
-                            .addJavaFiles(fileNames)
-                            .addProtoFiles(PROTO_FILES)
-                            .build();
+        return GradleProject
+                .newBuilder()
+                .setProjectName(PROJECT_NAME)
+                .setProjectFolder(tempDir)
+                .addJavaFiles(fileNames)
+                .addProtoFiles(PROTO_FILES)
+                .build();
     }
 
     private static String toPath(TaskName name) {

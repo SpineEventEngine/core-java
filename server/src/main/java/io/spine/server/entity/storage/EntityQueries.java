@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
@@ -37,7 +38,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
@@ -52,7 +52,9 @@ import static java.util.stream.Collectors.toList;
 @Internal
 public final class EntityQueries {
 
-    /** Prevents instantiation of this utility class. */
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private EntityQueries() {
     }
 
@@ -103,9 +105,10 @@ public final class EntityQueries {
     }
 
     private static QueryParameters newQueryParameters(List<CompositeQueryParameter> parameters) {
-        return QueryParameters.newBuilder()
-                              .addAll(parameters)
-                              .build();
+        return QueryParameters
+                .newBuilder()
+                .addAll(parameters)
+                .build();
     }
 
     private static CompositeQueryParameter
@@ -117,7 +120,7 @@ public final class EntityQueries {
 
     private static Multimap<Column, Filter>
     splitFilters(CompositeFilter filter, Columns columns) {
-        Multimap<Column, Filter> filters = create(filter.getFilterCount(), 1);
+        Multimap<Column, Filter> filters = HashMultimap.create(filter.getFilterCount(), 1);
         for (Filter columnFilter : filter.getFilterList()) {
             Column column = findMatchingColumn(columnFilter, columns);
             checkFilterType(column, columnFilter);

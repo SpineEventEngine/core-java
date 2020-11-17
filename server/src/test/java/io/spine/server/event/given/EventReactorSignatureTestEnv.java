@@ -54,7 +54,9 @@ import java.util.Optional;
         {"MethodOnlyUsedFromInnerClass", "Unused", "MethodMayBeStatic"})  // reflective access.
 public class EventReactorSignatureTestEnv {
 
-    /** Prevents this test environment from direct initialization. */
+    /**
+     * Prevents this test environment from direct initialization.
+     */
     private EventReactorSignatureTestEnv() {
     }
 
@@ -134,8 +136,9 @@ public class EventReactorSignatureTestEnv {
             return taskStarted();
         }
 
-        @SuppressWarnings("ProtectedMemberInFinalClass")    // It is a use-case-under-test.
         @React
+        // It is a use-case-under-test.
+        @SuppressWarnings({"ProtectedMembersInFinalClass", "ProtectedMemberInFinalClass"})
         protected SigTaskStarted protectedHandler(SigTaskAddedToProject event) {
             return taskStarted();
         }

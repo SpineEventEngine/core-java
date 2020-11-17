@@ -25,20 +25,15 @@ import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import io.spine.annotation.Internal;
 import io.spine.string.Diags;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import static io.spine.server.model.MethodExceptionCheck.check;
 import static io.spine.server.model.MethodParams.findMatching;
-import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
 import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
 import static io.spine.server.model.SignatureMismatch.Severity.WARN;
-import static io.spine.server.model.SignatureMismatch.create;
 import static java.lang.String.format;
 
 /**
@@ -61,6 +56,7 @@ public enum MatchCriterion {
     RETURN_TYPE(ERROR,
                 "The return type of `%s` method does not match the constraints " +
                         "set for `%s`-annotated method.") {
+
         @SuppressWarnings("UnstableApiUsage")   // Using Guava's `TypeToken`.
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
@@ -76,11 +72,11 @@ public enum MatchCriterion {
                                                .noneMatch(MethodResult::isIgnored))
                     );
             if (!conforms) {
-                SignatureMismatch mismatch =
-                        create(this,
-                               methodAsString(method),
-                               signature.annotation()
-                                        .getSimpleName());
+                SignatureMismatch mismatch = SignatureMismatch.create(
+                        this,
+                        methodAsString(method),
+                        signature.annotation().getSimpleName()
+                );
                 return Optional.of(mismatch);
             }
             return Optional.empty();
@@ -94,6 +90,7 @@ public enum MatchCriterion {
     ACCESS_MODIFIER(WARN,
                     "The access modifier of `%s` method is `%s`. We recommend it to be `%s`. " +
                             "Refer to the `%s` annotation docs for details.") {
+
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             ImmutableSet<AccessModifier> allowedModifiers = signature.modifiers();
@@ -101,70 +98,17 @@ public enum MatchCriterion {
                     .stream()
                     .anyMatch(m -> m.test(method));
             if (!hasMatch) {
-                SignatureMismatch mismatch =
-                        create(this,
-                               methodAsString(method),
-                               AccessModifier.fromMethod(method),
-                               AccessModifier.asString(allowedModifiers),
-                               signature.annotation()
-                                        .getSimpleName());
+                SignatureMismatch mismatch = SignatureMismatch.create(
+                        this,
+                        methodAsString(method),
+                        AccessModifier.fromMethod(method),
+                        AccessModifier.asString(allowedModifiers),
+                        signature.annotation().getSimpleName()
+                );
                 return Optional.of(mismatch);
 
             }
             return Optional.empty();
-        }
-    },
-
-    /**
-     * The criterion checking that the tested method throws only
-     * {@linkplain MethodSignature#allowedThrowable() allowed exceptions}.
-     */
-    PROHIBITED_EXCEPTION(ERROR, "%s") {
-
-        @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            @Nullable
-            Class<? extends Throwable> allowedThrowable =
-                    signature.allowedThrowable().orElse(null);
-            MethodExceptionCheck checker = check(method, allowedThrowable);
-            List<Class<? extends Throwable>> prohibited = checker.findProhibited();
-            if (prohibited.isEmpty()) {
-                return Optional.empty();
-            }
-            String errorMessage = toMessage(method, prohibited, allowedThrowable);
-            SignatureMismatch mismatch = create(this, errorMessage);
-            return Optional.of(mismatch);
-        }
-
-        private String toMessage(Method method,
-                                 List<Class<? extends Throwable>> exceptionsThrown,
-                                 @Nullable Class<? extends Throwable> allowedThrowable) {
-            if (allowedThrowable == null) {
-                return format(
-                        "The method `%s.%s` throws %s. But throwing is not allowed" +
-                                " for this kind of methods.",
-                        method.getDeclaringClass().getCanonicalName(),
-                        method.getName(),
-                        enumerate(exceptionsThrown)
-                );
-            }
-            return format(
-                    "The method `%s.%s` throws %s. But only `%s` is allowed for" +
-                            " this kind of methods.",
-                    method.getDeclaringClass().getCanonicalName(),
-                    method.getName(),
-                    enumerate(exceptionsThrown),
-                    allowedThrowable.getName()
-            );
-        }
-
-        /**
-         * Prints {@link Iterable} to {@link String}, separating elements with comma.
-         */
-        private String enumerate(List<Class<? extends Throwable>> throwables) {
-            return throwables.stream()
-                             .map(Diags::backtick)
-                             .collect(toStringEnumeration());
         }
     },
 
@@ -177,16 +121,17 @@ public enum MatchCriterion {
     PARAMETERS(ERROR,
                "The method `%s` has invalid parameters. " +
                "Please refer to `%s` annotation documentation for allowed parameter types.") {
+
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Optional<? extends ParameterSpec<?>> matching =
                     findMatching(method, signature.paramSpecs());
             if (!matching.isPresent()) {
-                SignatureMismatch mismatch =
-                        create(this,
-                               methodAsString(method),
-                               signature.annotation()
-                                        .getSimpleName());
+                SignatureMismatch mismatch = SignatureMismatch.create(
+                        this,
+                        methodAsString(method),
+                        signature.annotation().getSimpleName()
+                );
                 return Optional.of(mismatch);
             }
             return Optional.empty();

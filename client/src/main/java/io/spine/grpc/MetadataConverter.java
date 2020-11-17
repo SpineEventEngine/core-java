@@ -23,7 +23,6 @@ package io.spine.grpc;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
-import io.grpc.Metadata.Key;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.util.Exceptions;
@@ -37,7 +36,7 @@ import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
  * Serves as a converter from {@link Error} to {@link Metadata} and vice versa.
  */
 @Internal
-public class MetadataConverter {
+public final class MetadataConverter {
 
     private static final String ERROR_KEY_NAME = "spine-error-bin";
 
@@ -45,10 +44,12 @@ public class MetadataConverter {
      * The {@link Metadata.Key} to store and get an {@link Error} from a {@link Metadata}.
      */
     @VisibleForTesting
-    static final Key<byte[]> KEY = Key.of(ERROR_KEY_NAME, BINARY_BYTE_MARSHALLER);
+    static final Metadata.Key<byte[]> KEY = Metadata.Key.of(ERROR_KEY_NAME, BINARY_BYTE_MARSHALLER);
 
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private MetadataConverter() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

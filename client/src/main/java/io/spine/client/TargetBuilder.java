@@ -107,7 +107,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
         if (fieldMask == null || fieldMask.isEmpty()) {
             return null;
         }
-        FieldMask mask = fromStringList(null, ImmutableList.copyOf(fieldMask));
+        FieldMask mask = fromStringList(ImmutableList.copyOf(fieldMask));
         return mask;
     }
 
