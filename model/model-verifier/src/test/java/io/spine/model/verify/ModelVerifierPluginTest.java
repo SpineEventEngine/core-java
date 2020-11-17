@@ -23,7 +23,6 @@ package io.spine.model.verify;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import io.spine.testing.SlowTest;
-import io.spine.testing.TempDir;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.TaskName;
@@ -34,8 +33,9 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.file.Path;
+import java.io.File;
 
 import static io.spine.tools.gradle.ModelVerifierTaskName.verifyModel;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
@@ -55,11 +55,12 @@ class ModelVerifierPluginTest {
             "spine/model/verify/events.proto"
     );
 
-    private Path tempDir;
+    @TempDir
+    @SuppressWarnings("PackageVisibleField") // must be non-private for JUnit's annotation to work.
+    File tempDir;
 
     @BeforeEach
     void setUp() {
-        tempDir = TempDir.forClass(getClass()).toPath();
         ModelTests.dropAllModels();
     }
 
@@ -109,7 +110,7 @@ class ModelVerifierPluginTest {
     private GradleProject newProjectWithJava(String... fileNames) {
         return GradleProject.newBuilder()
                             .setProjectName(PROJECT_NAME)
-                            .setProjectFolder(tempDir.toFile())
+                            .setProjectFolder(tempDir)
                             .addJavaFiles(fileNames)
                             .addProtoFiles(PROTO_FILES)
                             .build();
