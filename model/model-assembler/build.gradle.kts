@@ -1,3 +1,5 @@
+import io.spine.gradle.internal.Deps
+
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
@@ -30,4 +32,5 @@ dependencies {
     implementation(project(":server"))
 
     testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation(Deps.test.hamcrest)
 }
