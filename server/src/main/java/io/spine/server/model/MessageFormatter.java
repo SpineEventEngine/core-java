@@ -18,29 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
- * Provides message handling information on a class that reacts on messages.
+ * An error message formatting helper.
  */
-public interface ReactingClass extends EventReceiverClass {
+final class MessageFormatter {
+
+    private MessageFormatter() {
+    }
 
     /**
-     * Obtains the method that reacts on the events of the passed class.
+     * Collects items into a string separating them with commas.
      *
-     * @param eventClass
-     *         the class of the events on which the method reacts
-     * @param originClass
-     *         the class of message from which the event originates
+     * @apiNote Migrate off this method once the API resulted from
+     * <a href="https://github.com/SpineEventEngine/base/issues/590">this issue in {@code base}</a>
+     * is available.
      */
-    EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass);
-
-    /**
-     * Obtains the classes of events produced from the event reaction.
-     */
-    ImmutableSet<EventClass> reactionOutput();
+    static Collector<CharSequence, ?, String> toStringEnumeration() {
+        return Collectors.joining(", ");
+    }
 }

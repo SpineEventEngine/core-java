@@ -23,8 +23,11 @@ package io.spine.core;
 import com.google.protobuf.Timestamp;
 import io.spine.time.InstantConverter;
 import io.spine.time.TimestampTemporal;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -82,8 +85,28 @@ public interface WithTime {
      * @see #timestamp()
      */
     default Instant instant() {
-        Instant result = InstantConverter.reversed()
-                                         .convert(timestamp());
-        return checkNotNull(result);
+        Timestamp timestamp = timestamp();
+        @SuppressWarnings("ConstantConditions") // `InstantConverter` guarantees non-null output.
+        @NonNull Instant result = InstantConverter.reversed()
+                                                  .convert(timestamp);
+        return result;
+    }
+
+    /**
+     * Obtains the local date of the {@linkplain #instant()} associated time point}.
+     */
+    default LocalDate localDate() {
+        @SuppressWarnings("FromTemporalAccessor") // `Instant` does have date info.
+        LocalDate result = LocalDate.from(instant());
+        return result;
+    }
+
+    /**
+     * Obtains the local date and time of the {@linkplain #instant()} associated time point}.
+     */
+    default LocalDateTime localDateTime() {
+        @SuppressWarnings("FromTemporalAccessor") // `Instant` does have date/time info.
+        LocalDateTime result = LocalDateTime.from(instant());
+        return result;
     }
 }

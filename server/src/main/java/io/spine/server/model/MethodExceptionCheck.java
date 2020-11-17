@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -62,7 +61,7 @@ final class MethodExceptionCheck {
      * @return the list containing prohibited exceptions, or
      *         an empty list if the method does not declare such exceptions
      */
-    List<Class<? extends Throwable>> findProhibited() {
+    ImmutableList<Class<? extends Throwable>> findProhibited() {
         Class<?>[] thrownExceptions = method.getExceptionTypes();
         if (thrownExceptions.length == 0) {
             return ImmutableList.of();

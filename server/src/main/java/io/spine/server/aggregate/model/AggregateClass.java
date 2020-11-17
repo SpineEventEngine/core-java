@@ -63,6 +63,7 @@ public class AggregateClass<A extends Aggregate>
      */
     public static <A extends Aggregate> AggregateClass<A> asAggregateClass(Class<A> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         AggregateClass<A> result = (AggregateClass<A>)
                 get(cls, AggregateClass.class, () -> new AggregateClass<>(cls));
         return result;
@@ -142,7 +143,7 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
         return delegate.reactorOf(eventClass, originClass);
     }
 

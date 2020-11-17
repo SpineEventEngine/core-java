@@ -23,6 +23,7 @@ package io.spine.server.model;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
+import io.spine.string.Diags;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,8 +31,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.model.ModelError.MessageFormatter.backtick;
-import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
+import static io.spine.server.model.MessageFormatter.toStringEnumeration;
+import static io.spine.string.Diags.backtick;
 import static java.lang.String.format;
 
 /**
@@ -43,13 +44,14 @@ public final class DuplicateCommandHandlerError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    DuplicateCommandHandlerError(CommandHandlingClass duplicatingClass,
-                                 Map<Set<CommandClass>, CommandHandlingClass> registeredHandlers) {
+    DuplicateCommandHandlerError(
+            CommandHandlingClass<?, ?> duplicatingClass,
+            Map<Set<CommandClass>, CommandHandlingClass<?, ?>> registeredHandlers) {
         super(fmt(duplicatingClass, registeredHandlers));
     }
 
-    private static String fmt(CommandHandlingClass duplicatingClass,
-                              Map<Set<CommandClass>, CommandHandlingClass> registeredHandlers) {
+    private static String fmt(CommandHandlingClass<?, ?> duplicatingClass,
+                              Map<Set<CommandClass>, CommandHandlingClass<?, ?>> registeredHandlers) {
         checkNotNull(duplicatingClass);
         checkNotNull(registeredHandlers);
         @SuppressWarnings("MagicNumber") // the buffer size that should cover most cases.
@@ -90,7 +92,7 @@ public final class DuplicateCommandHandlerError extends ModelError {
                 builder.append(" Commands ");
                 String commandsBackTicked =
                         commandClasses.stream()
-                                      .map(MessageFormatter::backtick)
+                                      .map(Diags::backtick)
                                       .collect(toStringEnumeration());
                 builder.append(commandsBackTicked);
                 builder.append(" are handled by ");
@@ -102,7 +104,7 @@ public final class DuplicateCommandHandlerError extends ModelError {
                 builder.append(backtick(cmdClass));
                 builder.append(" is handled by ");
             }
-            CommandHandlingClass handlingClass = registeredHandlers.get(commandClasses);
+            CommandHandlingClass<?, ?> handlingClass = registeredHandlers.get(commandClasses);
             builder.append(backtick(handlingClass));
             builder.append('.');
         }

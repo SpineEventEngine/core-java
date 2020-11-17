@@ -43,10 +43,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.option.EntityOption.Kind.ENTITY;
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -97,7 +96,8 @@ class EntityLifecycleTest {
                 .build();
         lifecycle.onEntityCreated(ENTITY);
         MemoizedSystemMessage lastSeenEvent = writeSide.lastSeenEvent();
-        assertThat(lastSeenEvent.message(), instanceOf(EntityCreated.class));
+        assertThat(lastSeenEvent.message())
+                .isInstanceOf(EntityCreated.class);
 
         EntityRecord previousRecord = EntityRecord
                 .newBuilder()

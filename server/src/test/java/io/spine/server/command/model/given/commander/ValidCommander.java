@@ -113,14 +113,15 @@ public final class ValidCommander extends AbstractCommander {
         return ImmutableList.of(startTask());
     }
 
-    @SuppressWarnings("MethodMayBeStatic")              // testing the visibility level.
+    @SuppressWarnings("MethodMayBeStatic") // testing the visibility level.
     @Command
     private SigStartTask privateHandler(SigAssignTask command) {
         return startTask();
     }
 
-    @SuppressWarnings("ProtectedMemberInFinalClass")    // testing the visibility level.
     @Command
+    @SuppressWarnings({"ProtectedMemberInFinalClass", "ProtectedMembersInFinalClass"})
+    // testing the visibility level. IDEA's warning is singular, ErrorProne's is plural.
     protected SigStartTask protectedHandler(SigAssignTask command) {
         return startTask();
     }

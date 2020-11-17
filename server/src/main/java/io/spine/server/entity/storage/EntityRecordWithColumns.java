@@ -161,7 +161,6 @@ public final class EntityRecordWithColumns implements WithLifecycle {
     /**
      * Determines if there is a column with the specified name among the storage fields.
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean hasColumn(ColumnName name) {
         boolean result = storageFields.containsKey(name);
         return result;

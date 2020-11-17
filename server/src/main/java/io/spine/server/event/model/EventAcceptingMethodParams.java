@@ -30,6 +30,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.TypeMatcher;
@@ -110,7 +111,16 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
     };
 
+    private static final AllowedParams<EventEnvelope> PARAMS = new AllowedParams<>(values());
+
     private final ImmutableList<TypeMatcher> criteria;
+
+    /**
+     * Obtains specification of parameters allowed for event-handling methods.
+     */
+    static AllowedParams<EventEnvelope> allowed() {
+        return PARAMS;
+    }
 
     EventAcceptingMethodParams(TypeMatcher... criteria) {
         this.criteria = ImmutableList.copyOf(criteria);

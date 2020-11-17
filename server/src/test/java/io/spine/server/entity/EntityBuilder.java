@@ -71,7 +71,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
     /**
      * Creates new instance of the builder.
      */
-    public EntityBuilder() {
+    protected EntityBuilder() {
         super();
         // Have the constructor for finding usages easier.
     }

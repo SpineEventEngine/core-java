@@ -21,11 +21,11 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
+import io.spine.server.model.AllowedParams;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
@@ -49,8 +49,6 @@ abstract class CommandAcceptingSignature
         <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
-    private static final ImmutableSet<CommandAcceptingMethodParams>
-            PARAM_SPECS = ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // to save on allocations.
     private static final Optional<Class<? extends Throwable>>
             ALLOWED_THROWABLE = Optional.of(ThrowableMessage.class);
@@ -60,8 +58,8 @@ abstract class CommandAcceptingSignature
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> paramSpecs() {
-        return PARAM_SPECS;
+    public AllowedParams<CommandEnvelope> params() {
+        return CommandAcceptingMethodParams.ALLOWED;
     }
 
     /**
@@ -87,7 +85,7 @@ abstract class CommandAcceptingSignature
      * Allowed combinations of parameters in the methods, that accept {@code Command}s.
      */
     @Immutable
-    public enum CommandAcceptingMethodParams implements ParameterSpec<CommandEnvelope> {
+    private enum CommandAcceptingMethodParams implements ParameterSpec<CommandEnvelope> {
 
         MESSAGE(classImplementing(CommandMessage.class)) {
 
@@ -104,6 +102,8 @@ abstract class CommandAcceptingSignature
                 return new Object[]{cmd.message(), cmd.context()};
             }
         };
+
+        private static final AllowedParams<CommandEnvelope> ALLOWED = new AllowedParams<>(values());
 
         private final ImmutableList<TypeMatcher> criteria;
 

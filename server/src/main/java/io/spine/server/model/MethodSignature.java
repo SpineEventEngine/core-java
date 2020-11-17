@@ -20,8 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
 import io.spine.logging.Logging;
 import io.spine.server.type.MessageEnvelope;
 
@@ -34,7 +32,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.AccessModifier.PACKAGE_PRIVATE;
-import static io.spine.server.model.MethodParams.findMatching;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -46,8 +43,8 @@ import static java.util.stream.Collectors.toList;
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
  *     <li>{@linkplain #MethodSignature(Class) the method annotation},
- *     <li>{@linkplain #paramSpecs() the specification of method parameters},
- *     <li>{@linkplain #modifiers() the set of allowed access modifiers},
+ *     <li>{@linkplain #params() the specification of method parameters},
+ *     <li>{@linkplain #modifier() the set of allowed access modifiers},
  *     <li>{@linkplain #returnTypes() the set of valid return types},
  *     <li>{@linkplain #allowedThrowable() the set of allowed exceptions}, that the method
  *          declares to throw (empty by default),
@@ -63,9 +60,6 @@ import static java.util.stream.Collectors.toList;
 public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                                       E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
-    private static final ImmutableSet<AccessModifier>
-            MODIFIER = ImmutableSet.of(PACKAGE_PRIVATE);
-
     private final Class<? extends Annotation> annotation;
 
     /**
@@ -79,23 +73,23 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the specification of handler parameters to meet.
      */
-    public abstract ImmutableSet<? extends ParameterSpec<E>> paramSpecs();
+    public abstract AllowedParams<E> params();
 
     /**
-     * Obtains the set of allowed access modifiers for the method.
+     * Obtains the set of recommended access modifiers for the method.
      *
-     * <p>Default implementation returns a set with a single value
-     * {@link AccessModifier#PACKAGE_PRIVATE}. Override this method to change
-     * the allowed access modifiers.
+     * <p>Override this method to change the allowed access modifiers.
+     *
+     * @return {@link AccessModifier#PACKAGE_PRIVATE}
      */
-    protected ImmutableSet<AccessModifier> modifiers() {
-        return MODIFIER;
+    protected AccessModifier modifier() {
+        return PACKAGE_PRIVATE;
     }
 
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<TypeToken<?>> returnTypes();
+    protected abstract ReturnTypes returnTypes();
 
     /**
      * Obtains the type of a {@code Throwable} which a method can declare.
@@ -127,7 +121,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         because in future the extended diagnostic, based upon {@linkplain SignatureMismatch
      *         signature mismatches} found is going to be implemented.
      */
-    public boolean matches(Method method) throws SignatureMismatchException {
+    public final boolean matches(Method method) throws SignatureMismatchException {
         if (skipMethod(method)) {
             return false;
         }
@@ -148,6 +142,14 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                     .forEach(this._warn()::log);
         }
         return true;
+    }
+
+    /**
+     * Verifies if the passed return type conforms this method signature.
+     */
+    final boolean returnTypeMatches(Method method) {
+        boolean conforms = returnTypes().matches(method, mayReturnIgnored());
+        return conforms;
     }
 
     /**
@@ -187,7 +189,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
      */
-    public Class<? extends Annotation> annotation() {
+    public final Class<? extends Annotation> annotation() {
         return annotation;
     }
 
@@ -203,12 +205,12 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         in case there are {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
      *         encountered
      */
-    public Optional<H> classify(Method method) throws SignatureMismatchException {
+    public final Optional<H> classify(Method method) throws SignatureMismatchException {
         boolean matches = matches(method);
         if (!matches) {
             return Optional.empty();
         }
-        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, paramSpecs());
+        Optional<? extends ParameterSpec<E>> matchingSpec = params().findMatching(method);
         return matchingSpec.map(spec -> {
             H handler = create(method, spec);
             handler.discoverAttributes();
@@ -226,7 +228,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         the method to match.
      * @return the collection of signature mismatches, if any
      */
-    public Collection<SignatureMismatch> match(Method method) {
+    public final Collection<SignatureMismatch> match(Method method) {
         Collection<SignatureMismatch> result =
                 Stream.of(MatchCriterion.values())
                       .map(criterion -> criterion.test(method, this))

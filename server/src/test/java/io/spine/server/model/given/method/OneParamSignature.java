@@ -20,20 +20,18 @@
 
 package io.spine.server.model.given.method;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
 import io.spine.server.model.AccessModifier;
+import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.ReturnTypes;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import static io.spine.server.model.AccessModifier.PACKAGE_PRIVATE;
-import static io.spine.server.model.AccessModifier.PRIVATE;
-import static io.spine.server.model.AccessModifier.PROTECTED;
 import static io.spine.server.model.AccessModifier.PUBLIC;
+import static io.spine.server.model.ReturnTypes.onlyVoid;
 
 public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnvelope> {
 
@@ -42,18 +40,18 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return ImmutableSet.copyOf(OneParamSpec.values());
+    public AllowedParams<EventEnvelope> params() {
+        return new AllowedParams<>(OneParamSpec.values());
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> modifiers() {
-        return allModifiers();
+    protected AccessModifier modifier() {
+        return PUBLIC;
     }
 
     @Override
-    protected ImmutableSet<TypeToken<?>> returnTypes() {
-        return ImmutableSet.of(TypeToken.of(void.class));
+    protected ReturnTypes returnTypes() {
+        return onlyVoid();
     }
 
     @Override
@@ -64,9 +62,5 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     @Override
     public boolean mayReturnIgnored() {
         return true;
-    }
-
-    private static ImmutableSet<AccessModifier> allModifiers() {
-        return ImmutableSet.of(PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE);
     }
 }

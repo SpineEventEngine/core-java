@@ -40,11 +40,6 @@ import static java.lang.String.format;
  */
 public final class TopicFactory {
 
-    /**
-     * The format of all {@linkplain TopicId topic identifiers}.
-     */
-    private static final String TOPIC_ID_FORMAT = "t-%s";
-
     private final ActorContext actorContext;
 
     TopicFactory(ActorRequestFactory actorRequestFactory) {
@@ -129,7 +124,7 @@ public final class TopicFactory {
     }
 
     private static TopicId generateId() {
-        String formattedId = format(TOPIC_ID_FORMAT, Identifier.newUuid());
+        String formattedId = format("t-%s", Identifier.newUuid());
         return TopicId
                 .newBuilder()
                 .setValue(formattedId)

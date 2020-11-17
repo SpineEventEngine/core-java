@@ -45,7 +45,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <h1>Fallback</h1>
  * <p>{@code EnvSetting} allows to configure a default value for an environment type. It is used
- * when the value for the environment hasn't been {@linkplain #use(V, Class) set explicitly}.
+ * when the value for the environment hasn't been {@linkplain #use(Object, Class) set explicitly}.
  * <pre>
  *      // Assuming the environment is `Tests`.
  *

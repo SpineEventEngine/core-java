@@ -22,8 +22,7 @@ package io.spine.system.server;
 
 import io.spine.server.BoundedContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import static com.google.common.truth.Truth.assertThat;
 
 /**
  * A test utility for working with system {@link BoundedContext}s.
@@ -41,7 +40,7 @@ public final class SystemBoundedContexts {
      */
     public static BoundedContext systemOf(BoundedContext context) {
         SystemClient client = context.systemClient();
-        assertThat(client, instanceOf(DefaultSystemClient.class));
+        assertThat(client).isInstanceOf(DefaultSystemClient.class);
         DefaultSystemClient defaultClient = (DefaultSystemClient) client;
         return defaultClient.target();
     }

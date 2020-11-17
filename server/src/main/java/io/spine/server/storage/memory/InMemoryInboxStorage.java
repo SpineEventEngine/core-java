@@ -71,6 +71,7 @@ public final class InMemoryInboxStorage
         TenantInboxRecords storage = multitenantStorage.currentSlice();
 
         AtomicInteger counter = new AtomicInteger();
+        @SuppressWarnings("JdkObsolete") // Migrate from `SortedSet` to `NavigableSet` later.
         Map<Integer, ImmutableList<InboxMessage>> pages =
                 storage.readAll()
                        .stream()
@@ -86,6 +87,7 @@ public final class InMemoryInboxStorage
     @Override
     public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
+        @SuppressWarnings("JdkObsolete") // Migrate from `SortedSet` to `NavigableSet` later.
         Optional<InboxMessage> result =
                 storage.readAll()
                        .stream()
