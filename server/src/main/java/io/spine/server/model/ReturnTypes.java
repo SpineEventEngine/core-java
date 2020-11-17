@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 public final class ReturnTypes {
 
-    /** Shared constant. */
+    /** A return type of a {@code void} handler method. */
     private static final ReturnTypes VOID = new ReturnTypes(void.class);
 
     private final ImmutableList<TypeToken<?>> types;
@@ -74,7 +74,7 @@ public final class ReturnTypes {
     }
 
     /**
-     * Obtains the instance representing {@code void} return type.
+     * Obtains the instance representing the {@code void} return type.
      */
     public static ReturnTypes onlyVoid() {
         return VOID;
