@@ -169,7 +169,6 @@ public abstract class RecordStorageDelegate<I, R extends Message> extends Record
         return delegate.queryForAll();
     }
 
-
     @Override
     protected Iterator<R> readAllRecords(RecordQuery<I, R> query) {
         return delegate.readAllRecords(query);
