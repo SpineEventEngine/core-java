@@ -40,11 +40,11 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     private static final AllowedParams<EventEnvelope> PARAMS = new AllowedParams<>(combinedSpecs());
 
     private static ParameterSpec<EventEnvelope>[] combinedSpecs() {
-        ParameterSpec<EventEnvelope>[] values1 = EventAcceptingMethodParams.values();
-        ParameterSpec<EventEnvelope>[] values2 = StateSubscriberSpec.values();
+        ParameterSpec<EventEnvelope>[] eventParams = EventAcceptingMethodParams.values();
+        ParameterSpec<EventEnvelope>[] stateParams = StateSubscriberSpec.values();
         @SuppressWarnings("unchecked") // ensured by the content of the merged arrays.
         ParameterSpec<EventEnvelope>[] result =
-                ObjectArrays.concat(values1, values2, ParameterSpec.class);
+                ObjectArrays.concat(eventParams, stateParams, ParameterSpec.class);
         return result;
     }
 
