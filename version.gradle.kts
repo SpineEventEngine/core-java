@@ -47,4 +47,3 @@ project.extra.apply {
     this["spineBaseVersion"] = base
     this["spineTimeVersion"] = time
 }
-Bu
