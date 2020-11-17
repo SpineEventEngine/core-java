@@ -134,37 +134,6 @@ public enum MatchCriterion {
             SignatureMismatch mismatch = SignatureMismatch.create(this, errorMessage);
             return Optional.of(mismatch);
         }
-
-        private String toMessage(Method method,
-                                 List<Class<? extends Throwable>> exceptionsThrown,
-                                 @Nullable Class<? extends Throwable> allowedThrowable) {
-            if (allowedThrowable == null) {
-                return format(
-                        "The method `%s.%s` throws %s. But throwing is not allowed" +
-                                " for this kind of methods.",
-                        method.getDeclaringClass().getCanonicalName(),
-                        method.getName(),
-                        enumerate(exceptionsThrown)
-                );
-            }
-            return format(
-                    "The method `%s.%s` throws %s. But only `%s` is allowed for" +
-                            " this kind of methods.",
-                    method.getDeclaringClass().getCanonicalName(),
-                    method.getName(),
-                    enumerate(exceptionsThrown),
-                    allowedThrowable.getName()
-            );
-        }
-
-        /**
-         * Prints {@link Iterable} to {@link String}, separating elements with comma.
-         */
-        private String enumerate(List<Class<? extends Throwable>> throwables) {
-            return throwables.stream()
-                             .map(Diags::backtick)
-                             .collect(toStringEnumeration());
-        }
     },
 
     /**
@@ -231,5 +200,36 @@ public enum MatchCriterion {
         String parameterTypes = Diags.join(method.getParameterTypes());
         String result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
         return result;
+    }
+
+    private static String toMessage(Method method,
+                                    List<Class<? extends Throwable>> exceptionsThrown,
+                                    @Nullable Class<? extends Throwable> allowedThrowable) {
+        if (allowedThrowable == null) {
+            return format(
+                    "The method `%s.%s` throws %s. But throwing is not allowed" +
+                            " for this kind of methods.",
+                    method.getDeclaringClass().getCanonicalName(),
+                    method.getName(),
+                    enumerate(exceptionsThrown)
+            );
+        }
+        return format(
+                "The method `%s.%s` throws %s. But only `%s` is allowed for" +
+                        " this kind of methods.",
+                method.getDeclaringClass().getCanonicalName(),
+                method.getName(),
+                enumerate(exceptionsThrown),
+                allowedThrowable.getName()
+        );
+    }
+
+    /**
+     * Prints {@link Iterable} to {@link String}, separating elements with comma.
+     */
+    private static String enumerate(List<Class<? extends Throwable>> throwables) {
+        return throwables.stream()
+                         .map(Diags::backtick)
+                         .collect(toStringEnumeration());
     }
 }
