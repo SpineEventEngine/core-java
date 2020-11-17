@@ -119,21 +119,21 @@ public final class ValidHandler extends AbstractCommandHandler {
     }
 
     @Assign
-    // It is a use-case-under-test.
     @SuppressWarnings("MethodMayBeStatic")
+    // It is a use-case-under-test.
     private SigTaskPaused privateHandler(SigPauseTask command) {
         return EventMessages.taskPaused();
     }
 
     @Assign
-    // It is a use-case-under-test.
-    @SuppressWarnings({"ProtectedMembersInFinalClass", "ProtectedMemberInFinalClass"})
+    @SuppressWarnings({"ProtectedMemberInFinalClass", "ProtectedMembersInFinalClass"})
+    // testing the visibility level. IDEA's warning is singular, ErrorProne's is plural.
     protected SigTaskPaused protectedHandler(SigPauseTask command) {
         return EventMessages.taskPaused();
     }
 
     @Assign
-    public SigTaskPaused publicHandler(SigPauseTask command) {
+    public SigTaskPaused publicHandler(@SuppressWarnings("unused") SigPauseTask command) {
         return EventMessages.taskPaused();
     }
 }

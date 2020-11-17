@@ -64,8 +64,8 @@ public class ConferenceSetup implements EventReactor {
     @React
     @SuppressWarnings("FromTemporalAccessor") // we're sure that context instant has a LocalDate
     TalkSubmissionRequested talkSubmissionPolicy(SpeakerJoined event, EventContext context) {
-        LocalDate talkSubmissionDeadline = LocalDate.from(context.instant())
-                                                    .plusWeeks(1);
+        LocalDate eventDate = context.localDate();
+        LocalDate talkSubmissionDeadline = eventDate.plusWeeks(1);
         return TalkSubmissionRequested
                 .newBuilder()
                 .setConference(event.getConference())

@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.type.TypeUrl;
 
-import static io.spine.client.Subscriptions.SUBSCRIPTION_PRINT_FORMAT;
 import static java.lang.String.format;
 
 /**
@@ -66,7 +65,7 @@ public interface SubscriptionMixin extends SubscriptionOrBuilder {
         String id = getId().getValue();
         String type = getTopic().getTarget()
                                 .getType();
-        String result = format(SUBSCRIPTION_PRINT_FORMAT, id, type);
+        String result = format("(ID: %s, target: %s)", id, type);
         return result;
     }
 }

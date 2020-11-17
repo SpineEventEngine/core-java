@@ -77,5 +77,5 @@ public interface SubscribingClass extends Logging {
      *          {@link io.spine.server.type.EmptyClass EmptyClass} for all origins
      * @return methods handling the requested class of the events
      */
-    ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass);
+    ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass<?> originClass);
 }

@@ -113,15 +113,15 @@ public final class ValidCommander extends AbstractCommander {
     }
 
     @Command
-    // It is a use-case-under-test.
     @SuppressWarnings("MethodMayBeStatic")
+    // It is a use-case-under-test.
     private SigStartTask privateHandler(SigAssignTask command) {
         return startTask();
     }
 
     @Command
-    // It is a use-case-under-test.
-    @SuppressWarnings({"ProtectedMembersInFinalClass", "ProtectedMemberInFinalClass"})
+    @SuppressWarnings({"ProtectedMemberInFinalClass", "ProtectedMembersInFinalClass"})
+    // testing the visibility level. IDEA's warning is singular, ErrorProne's is plural.
     protected SigStartTask protectedHandler(SigAssignTask command) {
         return startTask();
     }

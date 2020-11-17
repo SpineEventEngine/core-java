@@ -20,7 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
 import java.lang.reflect.Method;
@@ -36,7 +35,7 @@ import static java.lang.reflect.Modifier.isPublic;
 /**
  * The predicate for {@linkplain Modifier access modifiers} of {@linkplain Method methods}.
  */
-public class AccessModifier implements Predicate<Method> {
+public final class AccessModifier implements Predicate<Method> {
 
     public static final AccessModifier PUBLIC =
             new AccessModifier(Modifier::isPublic, "public");
@@ -87,22 +86,10 @@ public class AccessModifier implements Predicate<Method> {
                 .filter(modifier -> modifier.test(method))
                 .findFirst()
                 .orElseThrow(() -> newIllegalArgumentException(
-                        "Could not determine the access level of method %s.",
+                        "Could not determine the access level of the method `%s`.",
                         method
                 ));
         return matchedModifier;
-    }
-
-    /**
-     * Composes a string representation of several access modifiers.
-     *
-     * @param modifiers
-     *         the modifiers to compose into a {@code String}
-     * @return the string with modifier-as-strings
-     */
-    static Object asString(Iterable<AccessModifier> modifiers) {
-        return Joiner.on(", ")
-                     .join(modifiers);
     }
 
     /**

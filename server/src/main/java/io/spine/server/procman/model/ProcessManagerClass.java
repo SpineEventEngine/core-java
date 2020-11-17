@@ -62,9 +62,11 @@ public final class ProcessManagerClass<P extends ProcessManager>
     /**
      * Obtains the process manager class for the passed raw class.
      */
+    @SuppressWarnings("rawtypes")
     public static <P extends ProcessManager>
     ProcessManagerClass<P> asProcessManagerClass(Class<P> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         ProcessManagerClass<P> result = (ProcessManagerClass<P>)
                 get(cls, ProcessManagerClass.class, () -> new ProcessManagerClass<>(cls));
         return result;
@@ -108,7 +110,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
         return reactorDelegate.reactorOf(eventClass, originClass);
     }
 

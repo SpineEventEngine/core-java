@@ -20,7 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
@@ -29,23 +28,19 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
-import io.spine.server.model.given.MethodParamsTestEnv.ScheduleCommandParamSpec;
 import io.spine.test.model.ModCreateProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.model.MethodParams.findMatching;
 import static io.spine.server.model.MethodParams.firstIsCommand;
 import static io.spine.server.model.TypeMatcher.exactly;
 import static io.spine.server.model.given.MethodParamsTestEnv.fiveParamMethodStringAnyEmptyInt32UserId;
 import static io.spine.server.model.given.MethodParamsTestEnv.singleParamCommand;
 import static io.spine.server.model.given.MethodParamsTestEnv.twoParamCommandAndCtx;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -110,25 +105,6 @@ class MethodParamsTest {
     }
 
     @Test
-    @DisplayName("find a matching signature for the method among the predefined set of values")
-    void findMatchingSignature() {
-        Optional<ScheduleCommandParamSpec> matching =
-                findMatching(twoParamCommandAndCtx(),
-                             ImmutableList.copyOf(ScheduleCommandParamSpec.values()));
-        assertTrue(matching.isPresent());
-        assertEquals(ScheduleCommandParamSpec.MESSAGE_AND_CONTEXT, matching.get());
-    }
-
-    @Test
-    @DisplayName("return `Optional.empty()` if there is no matching signature")
-    void returnOptionalEmptyIfNoSignatureMatch() {
-        Optional<ScheduleCommandParamSpec> matching =
-                findMatching(singleParamCommand(),
-                             ImmutableList.copyOf(ScheduleCommandParamSpec.values()));
-        assertFalse(matching.isPresent());
-    }
-
-    @Test
     @DisplayName("detect if the first method parameter is a Command message")
     void detectFirstCommandParameter() {
         assertTrue(firstIsCommand(singleParamCommand()));
@@ -143,7 +119,8 @@ class MethodParamsTest {
         new EqualsTester().addEqualityGroup(oneParamMethod, oneParamMethod,
                                             MethodParams.of(singleParamCommand()))
                           .addEqualityGroup(firstIsCommand(twoParamCommandAndCtx()))
-                          .addEqualityGroup(MethodParams.of(fiveParamMethodStringAnyEmptyInt32UserId()))
+                          .addEqualityGroup(
+                                  MethodParams.of(fiveParamMethodStringAnyEmptyInt32UserId()))
                           .testEquals();
     }
 }

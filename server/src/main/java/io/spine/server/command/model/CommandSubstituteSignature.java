@@ -20,12 +20,12 @@
 
 package io.spine.server.command.model;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import io.spine.base.CommandMessage;
 import io.spine.server.command.Command;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.ReturnTypes;
 import io.spine.server.type.CommandEnvelope;
 
 import java.lang.reflect.Method;
@@ -36,11 +36,10 @@ import java.lang.reflect.Method;
  */
 public class CommandSubstituteSignature extends CommandAcceptingSignature<CommandSubstituteMethod> {
 
-    private static final ImmutableSet<TypeToken<?>>
-            RETURN_TYPES = ImmutableSet.of(
-                    TypeToken.of(CommandMessage.class),
-                    new TypeToken<Iterable<CommandMessage>>() {}
-                    );
+    private static final ReturnTypes TYPES = new ReturnTypes(
+            TypeToken.of(CommandMessage.class),
+            new TypeToken<Iterable<CommandMessage>>() {}
+    );
 
     CommandSubstituteSignature() {
         super(Command.class);
@@ -52,8 +51,8 @@ public class CommandSubstituteSignature extends CommandAcceptingSignature<Comman
     }
 
     @Override
-    protected ImmutableSet<TypeToken<?>> returnTypes() {
-        return RETURN_TYPES;
+    protected ReturnTypes returnTypes() {
+        return TYPES;
     }
 
     /**

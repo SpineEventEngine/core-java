@@ -57,6 +57,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     public static <A extends AggregatePart>
     AggregatePartClass<A> asAggregatePartClass(Class<A> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         AggregatePartClass<A> result = (AggregatePartClass<A>)
                 get(cls, AggregatePartClass.class, () -> new AggregatePartClass<>(cls));
         return result;

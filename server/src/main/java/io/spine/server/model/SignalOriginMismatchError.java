@@ -30,8 +30,8 @@ public final class SignalOriginMismatchError extends ModelError {
     SignalOriginMismatchError(HandlerMethod<?, ?, ?, ?> method,
                               boolean expectedExternal,
                               boolean actualExternal) {
-        super("Mismatch of `external` value for the handler method %s. " +
-                      "Expected `external = %s`, but got `%s`.",
+        super("Mismatch of `external` value for the handler method %s. "
+                      + "Expected `external = %s`, but got `%s`.",
               method, expectedExternal, actualExternal);
     }
 }

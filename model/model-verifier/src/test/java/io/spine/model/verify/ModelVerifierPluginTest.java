@@ -33,6 +33,7 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 
@@ -54,11 +55,12 @@ class ModelVerifierPluginTest {
             "spine/model/verify/events.proto"
     );
 
-    private File tempDir;
+    @TempDir
+    @SuppressWarnings("PackageVisibleField") // must be non-private for JUnit's annotation to work.
+    File tempDir;
 
     @BeforeEach
     void setUp() {
-        tempDir = io.spine.testing.TempDir.forClass(ModelVerifierPluginTest.class);
         ModelTests.dropAllModels();
     }
 

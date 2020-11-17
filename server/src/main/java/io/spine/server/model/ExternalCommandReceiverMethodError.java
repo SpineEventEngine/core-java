@@ -24,10 +24,11 @@ import io.spine.annotation.Internal;
 import io.spine.server.command.model.CommandAcceptingMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
+import io.spine.string.Diags;
 
 import java.util.Collection;
 
-import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
+import static io.spine.server.model.MessageFormatter.toStringEnumeration;
 
 /**
  * An error thrown when one or more of the command accepting methods are marked {@code external}
@@ -53,9 +54,8 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
      * Creates a new exception for the command handler that violates the {@code @Command} semantic.
      */
     @Internal
-    @SuppressWarnings("rawtypes") // we're not interested in generic here
     public ExternalCommandReceiverMethodError(
-            CommandHandlingClass classWithViolation,
+            CommandHandlingClass<?, ?> classWithViolation,
             Collection<? extends CommandAcceptingMethod<?, ?>> invalidMethods) {
         super("The class `%s` declares `external` command receiver methods for command types: %s. " +
                       "Only event accepting methods should be marked as `external`.",
@@ -68,7 +68,7 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
                 .stream()
                 .map(CommandAcceptingMethod::messageClass)
                 .map(CommandClass::toString)
-                .map(MessageFormatter::backtick)
+                .map(Diags::backtick)
                 .collect(toStringEnumeration());
         return result;
     }

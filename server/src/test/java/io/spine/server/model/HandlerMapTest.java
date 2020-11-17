@@ -58,9 +58,9 @@ class HandlerMapTest {
         @Test
         @DisplayName("duplicate message classes in handlers")
         void rejectDuplicateHandlers() {
-            assertDuplicate(
-                    () -> HandlerMap.create(DuplicateCommandHandlers.class, new CommandHandlerSignature())
-            );
+            assertDuplicate(() -> HandlerMap.create(
+                    DuplicateCommandHandlers.class, new CommandHandlerSignature()
+            ));
         }
 
         @Test

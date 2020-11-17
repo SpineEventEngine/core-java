@@ -20,11 +20,11 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import io.spine.base.EventMessage;
 import io.spine.server.event.React;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.ReturnTypes;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
@@ -35,20 +35,19 @@ import java.util.Optional;
  */
 final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
 
-    private static final ImmutableSet<TypeToken<?>>
-            RETURN_TYPES = ImmutableSet.of(
-                    TypeToken.of(EventMessage.class),
-                    new TypeToken<Iterable<EventMessage>>() {},
-                    new TypeToken<Optional<EventMessage>>() {}
-                    );
+    private static final ReturnTypes TYPES = new ReturnTypes(
+            TypeToken.of(EventMessage.class),
+            new TypeToken<Iterable<EventMessage>>() {},
+            new TypeToken<Optional<EventMessage>>() {}
+    );
 
     EventReactorSignature() {
         super(React.class);
     }
 
     @Override
-    protected ImmutableSet<TypeToken<?>> returnTypes() {
-        return RETURN_TYPES;
+    protected ReturnTypes returnTypes() {
+        return TYPES;
     }
 
     @Override

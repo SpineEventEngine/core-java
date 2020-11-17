@@ -51,7 +51,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -62,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`ModelVerifier` should")
+@DisplayName("ModelVerifier should")
 class ModelVerifierTest {
 
     private Project project = null;
@@ -204,11 +204,11 @@ class ModelVerifierTest {
 
     @Test
     @DisplayName("retrieve compilation destination directory from task")
-    void getCompilationDestDir() throws IOException {
+    void getCompilationDestDir() throws MalformedURLException {
         JavaCompile compileTask = actualProject().getTasks()
                                                  .withType(JavaCompile.class)
                                                  .getByName(compileJava.name());
-        File dest = TempDir.forClass(ModelVerifierTest.class);
+        File dest = TempDir.forClass(getClass());
         compileTask.setDestinationDir(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         URL destUrl = dest.toURI().toURL();

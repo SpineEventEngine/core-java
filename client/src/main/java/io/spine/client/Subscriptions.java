@@ -66,11 +66,6 @@ import static java.util.Collections.synchronizedSet;
  */
 public final class Subscriptions implements Logging {
 
-    /**
-     * The format for convenient subscription printing in logs and error messages.
-     */
-    static final String SUBSCRIPTION_PRINT_FORMAT = "(ID: %s, target: %s)";
-
     private final SubscriptionServiceStub service;
     private final SubscriptionServiceBlockingStub blockingServiceStub;
     private final Set<Subscription> items;

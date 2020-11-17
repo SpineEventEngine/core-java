@@ -46,8 +46,6 @@ import static java.lang.String.format;
  */
 public final class QueryFactory {
 
-    private static final String ENTITY_IDS_EMPTY_MSG = "Entity ID set must not be empty.";
-
     private final ActorContext actorContext;
 
     /**
@@ -104,10 +102,15 @@ public final class QueryFactory {
                                String... maskPaths) {
         checkSpecified(entityClass);
         checkNotNull(ids);
-        checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
-        FieldMask fieldMask = fromStringList(ImmutableList.copyOf(maskPaths));
+        checkArgument(!ids.isEmpty(), "Entity ID set must not be empty.");
+        FieldMask fieldMask = fromPaths(maskPaths);
         Query result = composeQuery(entityClass, ids, null, fieldMask);
         return result;
+    }
+
+    private static FieldMask fromPaths(String... maskPaths) {
+        FieldMask fieldMask = fromStringList(ImmutableList.copyOf(maskPaths));
+        return fieldMask;
     }
 
     /**
@@ -156,7 +159,7 @@ public final class QueryFactory {
     public Query allWithMask(Class<? extends EntityState> entityClass, String... maskPaths) {
         checkSpecified(entityClass);
         checkNotNull(maskPaths);
-        FieldMask fieldMask = fromStringList(ImmutableList.copyOf(maskPaths));
+        FieldMask fieldMask = fromPaths(maskPaths);
         Query result = composeQuery(entityClass, null, null, fieldMask);
         return result;
     }
@@ -201,7 +204,7 @@ public final class QueryFactory {
     @Internal
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        return composeQuery(target, 0,null, fieldMask);
+        return composeQuery(target, 0, null, fieldMask);
     }
 
     @Internal
@@ -221,7 +224,7 @@ public final class QueryFactory {
     private Query composeQuery(Target target,
                                int limit,
                                @Nullable OrderBy orderBy,
-                               @Nullable FieldMask fieldMask){
+                               @Nullable FieldMask fieldMask) {
         ResponseFormat format = responseFormat(fieldMask, orderBy, limit);
         Query.Builder builder = queryBuilderFor(target).setFormat(format);
         Query query = newQuery(builder);
@@ -235,7 +238,7 @@ public final class QueryFactory {
     }
 
     private static void checkTargetNotNull(Target target) {
-        checkNotNull(target, "Target must be specified to compose a `Query`.");
+        checkNotNull(target, "A `Target` must be specified to compose a `Query`.");
     }
 
     private Query newQuery(Query.Builder builder) {

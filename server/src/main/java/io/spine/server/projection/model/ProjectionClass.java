@@ -59,6 +59,7 @@ public final class ProjectionClass<P extends Projection>
      */
     public static <P extends Projection> ProjectionClass<P> asProjectionClass(Class<P> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         ProjectionClass<P> result = (ProjectionClass<P>)
                 get(cls, ProjectionClass.class, () -> new ProjectionClass<>(cls));
         return result;
@@ -91,7 +92,7 @@ public final class ProjectionClass<P extends Projection>
 
     @Override
     public final ImmutableSet<SubscriberMethod>
-    subscribersOf(EventClass eventClass, MessageClass originClass) {
+    subscribersOf(EventClass eventClass, MessageClass<?> originClass) {
         return delegate.handlersOf(eventClass, originClass);
     }
 }

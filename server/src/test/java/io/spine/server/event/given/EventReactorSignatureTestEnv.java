@@ -137,8 +137,8 @@ public class EventReactorSignatureTestEnv {
         }
 
         @React
-        // It is a use-case-under-test.
-        @SuppressWarnings({"ProtectedMembersInFinalClass", "ProtectedMemberInFinalClass"})
+        @SuppressWarnings({"ProtectedMemberInFinalClass", "ProtectedMembersInFinalClass"})
+        // It is a use-case-under-test. IDEA's warning is singular, ErrorProne's is plural.
         protected SigTaskStarted protectedHandler(SigTaskAddedToProject event) {
             return taskStarted();
         }
