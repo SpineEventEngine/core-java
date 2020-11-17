@@ -92,7 +92,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     /**
      * Returns the value of {@link #stateType() stateType()} as a {@link StateClass}.
      */
-    public final StateClass<?> stateClass() {
+    public StateClass<?> stateClass() {
         return StateClass.of(stateType());
     }
 
