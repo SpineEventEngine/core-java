@@ -32,7 +32,6 @@ dependencies {
     testImplementation("io.spine:spine-testlib:$spineBaseVersion")
     testImplementation(project(":testutil-client"))
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(Deps.test.hamcrest)
 }
 
 apply {

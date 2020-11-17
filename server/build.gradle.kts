@@ -35,7 +35,6 @@ dependencies {
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))
-    testImplementation(Deps.test.hamcrest)
 }
 
 apply {
