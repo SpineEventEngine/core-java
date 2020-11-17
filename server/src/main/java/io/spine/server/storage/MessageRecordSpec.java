@@ -67,6 +67,18 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
      */
     private final ImmutableMap<ColumnName, RecordColumn<R, ?>> columns;
 
+    /**
+     * Creates a new record specification.
+     *
+     * @param idType
+     *         the type of the record identifier
+     * @param recordType
+     *         the type of the record
+     * @param extractId
+     *         a method object to extract the value of an identifier given an instance of a record
+     * @param columns
+     *         the definitions of the columns to store along with the record
+     */
     public MessageRecordSpec(Class<I> idType,
                              Class<R> recordType,
                              ExtractId<R, I> extractId,
@@ -102,6 +114,19 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
         return Optional.ofNullable(result);
     }
 
+    /**
+     * A method object to extract the value of an record identifier given an instance of a record.
+     *
+     * <p>Once some storage is passed a record to store, the value of the record identifier has
+     * to be determined. To avoid passing the ID value for each record, one defines an way
+     * to obtain the identifier value from the record instance itself — by defining
+     * an {@code ExtractId} as a part of the record specification for the storage.
+     *
+     * @param <R>
+     *         the type of records from which to extract the ID value
+     * @param <I>
+     *         the type of the record identifiers to retrieve
+     */
     @Immutable
     @FunctionalInterface
     public interface ExtractId<R extends Message, I> extends Function<R, I> {
