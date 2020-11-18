@@ -23,7 +23,8 @@ package io.spine.system.server;
 import com.google.errorprone.annotations.Immutable;
 
 /**
- * A common interface for events that are emitted in response to dispatching of duplicate signals.
+ * A common marker interface for events that are emitted in response to the dispatching
+ * of duplicate signals.
  */
 @Immutable
 public interface CannotDispatchDuplicate extends DiagnosticEvent {

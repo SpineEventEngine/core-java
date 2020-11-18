@@ -24,7 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 
 /**
- * A common marker interface for events that occur within the System context in response to a
+ * A common marker interface for events that occur within the System context in response to
  * misconfigurations or runtime errors.
  */
 @Immutable
