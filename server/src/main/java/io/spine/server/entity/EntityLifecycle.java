@@ -27,7 +27,6 @@ import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
@@ -39,6 +38,7 @@ import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
+import io.spine.server.Identity;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.model.EntityClass;
@@ -135,11 +135,7 @@ public class EntityLifecycle {
         this.systemWriteSide = checkNotNull(writeSide);
         this.eventFilter = checkNotNull(eventFilter);
         this.typeName = checkNotNull(typeName);
-        this.entityId = MessageId
-                .newBuilder()
-                .setId(Identifier.pack(entityId))
-                .setTypeUrl(entityType.value())
-                .vBuild();
+        this.entityId = Identity.ofEntity(entityId, entityType);
     }
 
     private EntityLifecycle(Builder builder) {
@@ -366,15 +362,10 @@ public class EntityLifecycle {
                                       MessageId root,
                                       ValidationError error,
                                       Version version) {
-        MessageId entityId = MessageId
-                .newBuilder()
-                .setId(this.entityId.getId())
-                .setTypeUrl(this.entityId.getTypeUrl())
-                .setVersion(version)
-                .buildPartial();
+        MessageId withNewVersion = entityId.withVersion(version);
         ConstraintViolated event = ConstraintViolated
                 .newBuilder()
-                .setEntity(entityId)
+                .setEntity(withNewVersion)
                 .setLastMessage(lastMessage)
                 .setRootMessage(root)
                 .addAllViolation(error.getConstraintViolationList())
@@ -442,7 +433,12 @@ public class EntityLifecycle {
                 interruptedCount++;
             }
         }
-        checkNotNull(error);
+        if (error == null) {
+            error = Error.getDefaultInstance();
+        }
+        if (erroneous == null) {
+            erroneous = MessageId.getDefaultInstance();
+        }
         AggregateHistoryCorrupted event = AggregateHistoryCorrupted
                 .newBuilder()
                 .setEntity(entityId)
