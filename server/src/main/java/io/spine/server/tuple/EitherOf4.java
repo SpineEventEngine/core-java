@@ -45,8 +45,8 @@ public final class EitherOf4<A extends Message,
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOf4(Message value, int index) {
-        super(value, index);
+    private EitherOf4(Message value, IndexOf index) {
+        super(value, index.value());
     }
 
     /**
@@ -55,7 +55,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withA(A a) {
         checkNotNull(a);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(a, 0);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(a, IndexOf.A);
         return result;
     }
 
@@ -65,7 +65,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withB(B b) {
         checkNotNull(b);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(b, 1);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(b, IndexOf.B);
         return result;
     }
 
@@ -75,7 +75,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withC(C c) {
         checkNotNull(c);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(c, 2);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(c, IndexOf.C);
         return result;
     }
 
@@ -85,7 +85,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withD(D d) {
         checkNotNull(d);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(d, 3);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(d, IndexOf.D);
         return result;
     }
 
@@ -98,7 +98,7 @@ public final class EitherOf4<A extends Message,
      */
     @Override
     public A getA() {
-        return get(this, 0);
+        return get(this, IndexOf.A);
     }
 
     /**
@@ -108,7 +108,7 @@ public final class EitherOf4<A extends Message,
      */
     @Override
     public boolean hasA() {
-        return index() == 0;
+        return IndexOf.A.is(index());
     }
 
     /**
@@ -120,7 +120,7 @@ public final class EitherOf4<A extends Message,
      */
     @Override
     public B getB() {
-        return get(this, 1);
+        return get(this, IndexOf.B);
     }
 
     /**
@@ -130,7 +130,7 @@ public final class EitherOf4<A extends Message,
      */
     @Override
     public boolean hasB() {
-        return index() == 1;
+        return IndexOf.B.is(index());
     }
 
     /**
@@ -142,7 +142,7 @@ public final class EitherOf4<A extends Message,
      */
     @Override
     public C getC() {
-        return get(this, 2);
+        return get(this, IndexOf.C);
     }
 
     /**
@@ -152,7 +152,7 @@ public final class EitherOf4<A extends Message,
      */
     @Override
     public boolean hasC() {
-        return index() == 2;
+        return IndexOf.C.is(index());
     }
 
     /**
@@ -164,7 +164,7 @@ public final class EitherOf4<A extends Message,
      */
     @Override
     public D getD() {
-        return get(this, 3);
+        return get(this, IndexOf.D);
     }
 
     /**
@@ -174,6 +174,6 @@ public final class EitherOf4<A extends Message,
      */
     @Override
     public boolean hasD() {
-        return index() == 3;
+        return IndexOf.D.is(index());
     }
 }

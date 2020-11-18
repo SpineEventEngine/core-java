@@ -94,7 +94,7 @@ public final class Triplet<A extends Message, B, C>
 
     @Override
     public A getA() {
-        return value(this, 0);
+        return value(this, IndexOf.A);
     }
 
     /**
@@ -109,7 +109,7 @@ public final class Triplet<A extends Message, B, C>
 
     @Override
     public B getB() {
-        return value(this, 1);
+        return value(this, IndexOf.B);
     }
 
     @Override
@@ -120,7 +120,7 @@ public final class Triplet<A extends Message, B, C>
 
     @Override
     public C getC() {
-        return value(this, 2);
+        return value(this, IndexOf.C);
     }
 
     @Override

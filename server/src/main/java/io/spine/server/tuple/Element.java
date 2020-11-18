@@ -76,9 +76,9 @@ final class Element implements Serializable {
      * Obtains the value of the element by its index and casts it to the type {@code <T>}.
      */
     @SuppressWarnings("TypeParameterUnusedInFormals") // See Javadoc.
-    static <T> T value(Tuple tuple, int index) {
+    static <T> T value(Tuple tuple, IndexOf index) {
         @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
-        T value = (T) tuple.get(index);
+        T value = (T) tuple.get(index.value());
         return value;
     }
 

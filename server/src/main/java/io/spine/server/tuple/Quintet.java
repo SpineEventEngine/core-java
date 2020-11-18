@@ -133,7 +133,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public A getA() {
-        return value(this, 0);
+        return value(this, IndexOf.A);
     }
 
     /**
@@ -148,7 +148,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public B getB() {
-        return value(this, 1);
+        return value(this, IndexOf.B);
     }
 
     @Override
@@ -159,7 +159,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public C getC() {
-        return value(this, 2);
+        return value(this, IndexOf.C);
     }
 
     @Override
@@ -170,7 +170,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public D getD() {
-        return value(this, 3);
+        return value(this, IndexOf.D);
     }
 
     @Override
@@ -181,7 +181,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public E getE() {
-        return value(this, 4);
+        return value(this, IndexOf.E);
     }
 
     @Override

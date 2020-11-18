@@ -112,7 +112,7 @@ public final class Pair<A extends Message, B>
 
     @Override
     public A getA() {
-        return value(this, 0);
+        return value(this, IndexOf.A);
     }
 
     /**
@@ -127,7 +127,7 @@ public final class Pair<A extends Message, B>
 
     @Override
     public B getB() {
-        return value(this, 1);
+        return value(this, IndexOf.B);
     }
 
     @Override

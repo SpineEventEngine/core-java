@@ -110,7 +110,7 @@ public final class Quartet<A extends Message, B, C, D>
 
     @Override
     public A getA() {
-        return value(this, 0);
+        return value(this, IndexOf.A);
     }
 
     /**
@@ -125,7 +125,7 @@ public final class Quartet<A extends Message, B, C, D>
 
     @Override
     public B getB() {
-        return value(this, 1);
+        return value(this, IndexOf.B);
     }
 
     @Override
@@ -136,7 +136,7 @@ public final class Quartet<A extends Message, B, C, D>
 
     @Override
     public C getC() {
-        return value(this, 2);
+        return value(this, IndexOf.C);
     }
 
     @Override
@@ -147,7 +147,7 @@ public final class Quartet<A extends Message, B, C, D>
 
     @Override
     public D getD() {
-        return value(this, 3);
+        return value(this, IndexOf.D);
     }
 
     @Override

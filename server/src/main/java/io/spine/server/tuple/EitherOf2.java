@@ -38,8 +38,8 @@ public final class EitherOf2<A extends Message, B extends Message>
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOf2(Message value, int index) {
-        super(value, index);
+    private EitherOf2(Message value, IndexOf index) {
+        super(value, index.value());
     }
 
     /**
@@ -47,7 +47,7 @@ public final class EitherOf2<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> EitherOf2<A, B> withA(A a) {
         checkNotNull(a);
-        EitherOf2<A, B> result = new EitherOf2<>(a, 0);
+        EitherOf2<A, B> result = new EitherOf2<>(a, IndexOf.A);
         return result;
     }
 
@@ -56,7 +56,7 @@ public final class EitherOf2<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> EitherOf2<A, B> withB(B b) {
         checkNotNull(b);
-        EitherOf2<A, B> result = new EitherOf2<>(b, 1);
+        EitherOf2<A, B> result = new EitherOf2<>(b, IndexOf.B);
         return result;
     }
 
@@ -69,7 +69,7 @@ public final class EitherOf2<A extends Message, B extends Message>
      */
     @Override
     public A getA() {
-        return get(this, 0);
+        return get(this, IndexOf.A);
     }
 
     /**
@@ -79,7 +79,7 @@ public final class EitherOf2<A extends Message, B extends Message>
      */
     @Override
     public boolean hasA() {
-        return index() == 0;
+        return IndexOf.A.is(index());
     }
 
     /**
@@ -91,7 +91,7 @@ public final class EitherOf2<A extends Message, B extends Message>
      */
     @Override
     public B getB() {
-        return get(this, 1);
+        return get(this, IndexOf.B);
     }
 
     /**
@@ -101,6 +101,6 @@ public final class EitherOf2<A extends Message, B extends Message>
      */
     @Override
     public boolean hasB() {
-        return index() == 1;
+        return IndexOf.B.is(index());
     }
 }

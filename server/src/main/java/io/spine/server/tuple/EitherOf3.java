@@ -40,8 +40,8 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOf3(Message value, int index) {
-        super(value, index);
+    private EitherOf3(Message value, IndexOf index) {
+        super(value, index.value());
     }
 
     /**
@@ -50,7 +50,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
     public static <A extends Message, B extends Message, C extends Message>
     EitherOf3<A, B, C> withA(A a) {
         checkNotNull(a);
-        EitherOf3<A, B, C> result = new EitherOf3<>(a, 0);
+        EitherOf3<A, B, C> result = new EitherOf3<>(a, IndexOf.A);
         return result;
     }
 
@@ -60,7 +60,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
     public static <A extends Message, B extends Message, C extends Message>
     EitherOf3<A, B, C> withB(B b) {
         checkNotNull(b);
-        EitherOf3<A, B, C> result = new EitherOf3<>(b, 1);
+        EitherOf3<A, B, C> result = new EitherOf3<>(b, IndexOf.B);
         return result;
     }
 
@@ -70,7 +70,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
     public static <A extends Message, B extends Message, C extends Message>
     EitherOf3<A, B, C> withC(C c) {
         checkNotNull(c);
-        EitherOf3<A, B, C> result = new EitherOf3<>(c, 2);
+        EitherOf3<A, B, C> result = new EitherOf3<>(c, IndexOf.C);
         return result;
     }
 
@@ -83,7 +83,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
      */
     @Override
     public A getA() {
-        return get(this, 0);
+        return get(this, IndexOf.A);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
      */
     @Override
     public boolean hasA() {
-        return index() == 0;
+        return IndexOf.A.is(index());
     }
 
     /**
@@ -105,7 +105,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
      */
     @Override
     public B getB() {
-        return get(this, 1);
+        return get(this, IndexOf.B);
     }
 
     /**
@@ -115,7 +115,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
      */
     @Override
     public boolean hasB() {
-        return index() == 1;
+        return IndexOf.B.is(index());
     }
 
     /**
@@ -127,7 +127,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
      */
     @Override
     public C getC() {
-        return get(this, 2);
+        return get(this, IndexOf.C);
     }
 
     /**
@@ -137,6 +137,6 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
      */
     @Override
     public boolean hasC() {
-        return index() == 2;
+        return IndexOf.C.is(index());
     }
 }
