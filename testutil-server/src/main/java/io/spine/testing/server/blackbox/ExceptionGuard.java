@@ -20,8 +20,11 @@
 
 package io.spine.testing.server.blackbox;
 
-import io.spine.core.Subscribe;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 
 import static io.spine.json.Json.toJson;
@@ -37,7 +40,32 @@ final class ExceptionGuard extends AbstractEventSubscriber implements ExceptionL
 
     private ExceptionTolerance tolerance = ExceptionTolerance.RAISE;
 
-    @Subscribe
+    @Override
+    public ImmutableSet<EventClass> messageClasses() {
+        return EventClass.setOf(HandlerFailedUnexpectedly.class);
+    }
+
+    /**
+     * Always dispatched {@link HandlerFailedUnexpectedly} event.
+     */
+    @Override
+    public boolean canDispatch(EventEnvelope eventEnvelope) {
+        return true;
+    }
+
+    @Override
+    protected void handle(EventEnvelope eventEnvelope) {
+        HandlerFailedUnexpectedly event = (HandlerFailedUnexpectedly) eventEnvelope.message();
+        on(event);
+    }
+
+    /**
+     * Throws an {@link org.opentest4j.AssertionFailedError AssertionFailedError}
+     * unless the guard is configured to {@linkplain #tolerate() tolerate} exceptions.
+     *
+     * <p>If the guard is tolerating exceptions, logs the handler failure.
+     */
+    @VisibleForTesting
     void on(HandlerFailedUnexpectedly event) {
         String msg = format(
                 "The entity (state type `%s`) could not handle the signal `%s`:%n%s%n",
@@ -45,7 +73,7 @@ final class ExceptionGuard extends AbstractEventSubscriber implements ExceptionL
                 event.getHandledSignal().getTypeUrl(),
                 event.getError().getMessage()
         );
-        switch (tolerance){
+        switch (tolerance) {
             case LOG:
                 log(msg, event);
                 break;
@@ -60,5 +88,25 @@ final class ExceptionGuard extends AbstractEventSubscriber implements ExceptionL
      */
     void tolerate() {
         tolerance = ExceptionTolerance.LOG;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code BlackBoxBoundedContext} only consumes domestic events.
+     */
+    @Override
+    public ImmutableSet<EventClass> domesticEventClasses() {
+        return eventClasses();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code BlackBoxBoundedContext} does not consume external events.
+     */
+    @Override
+    public ImmutableSet<EventClass> externalEventClasses() {
+        return ImmutableSet.of();
     }
 }
