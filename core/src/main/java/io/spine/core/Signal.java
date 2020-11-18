@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.KnownMessage;
 import io.spine.base.MessageContext;
@@ -56,7 +57,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 @SPI
 @Immutable
 @GeneratedMixin
-@SuppressWarnings("override") // not marked with `@Override` in the generated code
 public interface Signal<I extends SignalId,
                         M extends KnownMessage,
                         C extends MessageContext>
@@ -136,11 +136,19 @@ public interface Signal<I extends SignalId,
      * Obtains the ID of this message.
      */
     default MessageId messageId() {
+        return identityBuilder().vBuild();
+    }
+
+    /**
+     * Creates the builder for identity of the message, by supplying the ID and the type URL
+     * of the enclosed message.
+     */
+    @Internal
+    default MessageId.Builder identityBuilder() {
         return MessageId
                 .newBuilder()
                 .setId(pack(id()))
-                .setTypeUrl(enclosedTypeUrl().value())
-                .vBuild();
+                .setTypeUrl(enclosedTypeUrl().value());
     }
 
     /**
@@ -149,11 +157,7 @@ public interface Signal<I extends SignalId,
      * <p>This origin is assigned to any signal message produced as a reaction to this one..
      */
     default Origin asMessageOrigin() {
-        MessageId commandQualifier = MessageId
-                .newBuilder()
-                .setId(pack(id()))
-                .setTypeUrl(enclosedTypeUrl().value())
-                .buildPartial();
+        MessageId commandQualifier = identityBuilder().buildPartial();
         Origin origin = Origin
                 .newBuilder()
                 .setActorContext(actorContext())
