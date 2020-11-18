@@ -20,27 +20,15 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.flogger.FluentLogger.Api;
-import com.google.common.flogger.StackSize;
-import com.google.errorprone.annotations.FormatMethod;
-import com.google.errorprone.annotations.FormatString;
-import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.MessageId;
 import io.spine.core.Subscribe;
-import io.spine.logging.Logging;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.system.server.AggregateHistoryCorrupted;
 import io.spine.system.server.CannotDispatchDuplicateCommand;
 import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.ConstraintViolated;
-import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.RoutingFailed;
-
-import java.io.PrintStream;
-
-import static io.spine.json.Json.toJson;
-import static java.lang.String.format;
 
 /**
  * A subscriber for all the diagnostic events.
@@ -49,7 +37,7 @@ import static java.lang.String.format;
  */
 final class DiagnosticLog
         extends AbstractEventSubscriber
-        implements Logging {
+        implements ExceptionLogging {
 
     private static final DiagnosticLog instance = new DiagnosticLog();
 
@@ -95,17 +83,6 @@ final class DiagnosticLog
     }
 
     @Subscribe
-    void on(HandlerFailedUnexpectedly event) {
-        log(event, "The entity (state type `%s`) could not handle the signal `%s`:%n%s%n",
-            event.getEntity()
-                 .getTypeUrl(),
-            event.getHandledSignal()
-                 .getTypeUrl(),
-            event.getError()
-                 .getMessage());
-    }
-
-    @Subscribe
     void on(RoutingFailed event) {
         log(event, "The signal `%s` could not be routed to `%s`:%n%s%n",
             event.getHandledSignal()
@@ -126,24 +103,5 @@ final class DiagnosticLog
             idAsString,
             event.getError()
                  .getMessage());
-    }
-
-    @FormatMethod
-    private void log(EventMessage event, @FormatString String errorMessage, Object... formatArgs) {
-        String msg = format(errorMessage, formatArgs);
-        Api severeLogger = logger()
-                .atSevere()
-                .withStackTrace(StackSize.NONE);
-        boolean loggingEnabled = severeLogger.isEnabled();
-        if (loggingEnabled) {
-            severeLogger.log(msg);
-            severeLogger.log(toJson(event));
-        } else {
-            @SuppressWarnings("UseOfSystemOutOrSystemErr")
-                // Edge case for disabled/misconfigured logging .
-            PrintStream stderr = System.err;
-            stderr.println(msg);
-            stderr.println(toJson(event));
-        }
     }
 }
