@@ -38,14 +38,14 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Test fixture for multi-tenant Bounded Contexts.
  */
-final class MultiTenantContext extends BlackBox {
+final class MtBlackBox extends BlackBox {
 
     private @MonotonicNonNull TenantId tenantId;
 
     /**
      * Creates a new multi-tenant instance.
      */
-    MultiTenantContext(BoundedContextBuilder b) {
+    MtBlackBox(BoundedContextBuilder b) {
         super(b);
     }
 
@@ -57,7 +57,7 @@ final class MultiTenantContext extends BlackBox {
      * @return current instance
      */
     @Override
-    public MultiTenantContext withTenant(TenantId tenant) {
+    public MtBlackBox withTenant(TenantId tenant) {
         this.tenantId = checkNotNull(tenant);
         return this;
     }

@@ -124,8 +124,8 @@ public abstract class BlackBox implements Logging {
     public static BlackBox from(BoundedContextBuilder builder) {
         BlackBox result =
                 builder.isMultitenant()
-                ? new MultiTenantContext(builder)
-                : new SingleTenantContext(builder);
+                ? new MtBlackBox(builder)
+                : new StBlackBox(builder);
         return result;
     }
 

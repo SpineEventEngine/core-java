@@ -35,8 +35,8 @@ import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Multi-tenant `BlackBox` context should")
-class MultiTenantContextTest
-        extends BlackBoxTest<MultiTenantContext> {
+class MtBlackBoxTest
+        extends BlackBoxTest<MtBlackBox> {
 
     @Override
     BoundedContextBuilder newBuilder() {

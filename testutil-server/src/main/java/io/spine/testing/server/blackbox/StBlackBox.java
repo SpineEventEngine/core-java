@@ -33,9 +33,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Test fixture for single-tenant Bounded Contexts.
  */
-final class SingleTenantContext extends BlackBox {
+final class StBlackBox extends BlackBox {
 
-    SingleTenantContext(BoundedContextBuilder b) {
+    StBlackBox(BoundedContextBuilder b) {
         super(b);
     }
 

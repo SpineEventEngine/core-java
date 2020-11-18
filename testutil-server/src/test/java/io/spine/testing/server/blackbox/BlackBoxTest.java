@@ -425,7 +425,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(false)
                     .enrichEventsUsing(enricher);
-            assertBlackBox(builder, SingleTenantContext.class);
+            assertBlackBox(builder, StBlackBox.class);
         }
 
         @Test
@@ -433,7 +433,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(true)
                     .enrichEventsUsing(enricher);
-            assertBlackBox(builder, MultiTenantContext.class);
+            assertBlackBox(builder, MtBlackBox.class);
         }
 
         private void assertBlackBox(BoundedContextBuilder builder,
