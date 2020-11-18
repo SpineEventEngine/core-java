@@ -209,7 +209,7 @@ class EntityTest {
                 .from(context)
                 .receivesCommand(signUpUser)
                 .receivesCommand(chooseInitial)
-                .tolerateExceptions();
+                .tolerateFailures();
         bbc.receivesCommand(chooseAgain);
         bbc.assertEntity(id, UserAggregate.class)
            .hasStateThat()

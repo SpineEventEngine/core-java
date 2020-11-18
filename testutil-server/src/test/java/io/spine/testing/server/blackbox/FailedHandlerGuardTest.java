@@ -32,20 +32,20 @@ import java.util.logging.Logger;
 import static io.spine.base.Errors.causeOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`ExceptionGuard` should")
-final class ExceptionGuardTest extends ExceptionLoggingTest {
+@DisplayName("`FailedHandlerGuard` should")
+final class FailedHandlerGuardTest extends DiagnosticLoggingTest {
 
-    private ExceptionGuard guard;
+    private FailedHandlerGuard guard;
 
     @BeforeEach
     void initGuard() {
-        guard = new ExceptionGuard();
+        guard = new FailedHandlerGuard();
     }
 
     @Test
     @DisplayName("log `HandlerFailedUnexpectedly` event")
     void tolerateException() {
-        guard.tolerate();
+        guard.tolerateFailures();
         Error error = causeOf(new IllegalStateException("Test exception. Handler is fine."));
         guard.on(
                 HandlerFailedUnexpectedly
@@ -72,6 +72,6 @@ final class ExceptionGuardTest extends ExceptionLoggingTest {
 
     @Override
     protected Logger logger() {
-        return Logger.getLogger(ExceptionGuard.class.getName());
+        return Logger.getLogger(FailedHandlerGuard.class.getName());
     }
 }

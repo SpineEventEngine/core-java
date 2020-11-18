@@ -118,7 +118,7 @@ public abstract class BlackBoxContext implements Logging {
     /**
      * Handles runtime exceptions thrown from signals handlers.
      */
-    private final ExceptionGuard exceptionGuard;
+    private final FailedHandlerGuard failedHandlerGuard;
 
     /**
      * Information about the current user and the time-zone.
@@ -142,7 +142,7 @@ public abstract class BlackBoxContext implements Logging {
         this.postedCommands = synchronizedSet(new HashSet<>());
         this.events = new EventCollector();
         this.postedEvents = synchronizedSet(new HashSet<>());
-        this.exceptionGuard = new ExceptionGuard();
+        this.failedHandlerGuard = new FailedHandlerGuard();
         BoundedContextBuilder wiredCopy = wiredCopyOf(builder);
         this.context = wiredCopy.build();
         this.actor = defaultActor();
@@ -152,7 +152,7 @@ public abstract class BlackBoxContext implements Logging {
         BoundedContextBuilder result = builder.testingCopy();
         result.addCommandListener(commands)
               .addEventListener(events)
-              .addEventDispatcher(exceptionGuard)
+              .addEventDispatcher(failedHandlerGuard)
               .addEventDispatcher(new UnsupportedCommandGuard(result.name().getValue()))
               .addEventDispatcher(DiagnosticLog.instance());
         return result;
@@ -192,10 +192,10 @@ public abstract class BlackBoxContext implements Logging {
     }
 
     /**
-     * Configures the context to only log runtime signal handler exceptions, but not fail the tests.
+     * Configures the context to log runtime signal handler failures, but not fail the tests.
      */
-    public final BlackBoxContext tolerateExceptions(){
-        exceptionGuard.tolerate();
+    public final BlackBoxContext tolerateFailures(){
+        failedHandlerGuard.tolerateFailures();
         return this;
     }
 

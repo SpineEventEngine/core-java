@@ -24,8 +24,8 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.StackSize;
 import com.google.errorprone.annotations.FormatMethod;
 import com.google.errorprone.annotations.FormatString;
-import io.spine.base.EventMessage;
 import io.spine.logging.Logging;
+import io.spine.system.server.DiagnosticEvent;
 
 import java.io.PrintStream;
 
@@ -34,9 +34,9 @@ import static java.lang.String.format;
 
 /**
  * Provides a handy shortcut for logging exceptions happened during
- * {@linkplain EventMessage events} handling.
+ * {@linkplain DiagnosticEvent events} handling.
  */
-interface ExceptionLogging extends Logging {
+interface DiagnosticLogging extends Logging {
 
     /**
      * Performs exception logging of the supplied {@code event}.
@@ -47,7 +47,7 @@ interface ExceptionLogging extends Logging {
      *         the arguments, if any, for the error message
      */
     @FormatMethod
-    default void log(EventMessage event, @FormatString String errorMessage, Object... formatArgs) {
+    default void log(DiagnosticEvent event, @FormatString String errorMessage, Object... formatArgs) {
         String msg = format(errorMessage, formatArgs);
         log(msg, event);
     }
@@ -58,7 +58,7 @@ interface ExceptionLogging extends Logging {
      * @param msg
      *         the formatted error message to log
      */
-    default void log(String msg, EventMessage event) {
+    default void log(String msg, DiagnosticEvent event) {
         FluentLogger.Api severeLogger = logger()
                 .atSevere()
                 .withStackTrace(StackSize.NONE);

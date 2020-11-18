@@ -44,7 +44,7 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 
 @DisplayName("`DiagnosticLog` should")
-class DiagnosticLogTest extends ExceptionLoggingTest {
+class DiagnosticLogTest extends DiagnosticLoggingTest {
 
     @Test
     @DisplayName("log `ConstraintViolated` event")

@@ -37,7 +37,7 @@ import io.spine.system.server.RoutingFailed;
  */
 final class DiagnosticLog
         extends AbstractEventSubscriber
-        implements ExceptionLogging {
+        implements DiagnosticLogging {
 
     private static final DiagnosticLog instance = new DiagnosticLog();
 

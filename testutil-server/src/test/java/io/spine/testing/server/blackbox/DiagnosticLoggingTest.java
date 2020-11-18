@@ -36,9 +36,9 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 
 /**
- * Provides API for testing {@link ExceptionLogging} functionality.
+ * Provides API for testing {@link DiagnosticLogging} functionality.
  */
-abstract class ExceptionLoggingTest {
+abstract class DiagnosticLoggingTest {
 
     private ByteArrayOutputStream output;
     private PrintStream saveErrorStream;

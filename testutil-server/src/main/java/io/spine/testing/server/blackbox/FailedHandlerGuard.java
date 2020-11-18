@@ -33,12 +33,12 @@ import static java.lang.System.lineSeparator;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Performs logging of failed signals handling or fails the test depending the current
+ * Performs logging of failed signals handlers or fails the test depending the current
  * context exception tolerance.
  */
-final class ExceptionGuard extends AbstractEventSubscriber implements ExceptionLogging {
+final class FailedHandlerGuard extends AbstractEventSubscriber implements DiagnosticLogging {
 
-    private ExceptionTolerance tolerance = ExceptionTolerance.RAISE;
+    private HandlerFailureTolerance tolerance = HandlerFailureTolerance.RAISE;
 
     @Override
     public ImmutableSet<EventClass> messageClasses() {
@@ -61,7 +61,7 @@ final class ExceptionGuard extends AbstractEventSubscriber implements ExceptionL
 
     /**
      * Throws an {@link org.opentest4j.AssertionFailedError AssertionFailedError}
-     * unless the guard is configured to {@linkplain #tolerate() tolerate} exceptions.
+     * unless the guard is configured to {@linkplain #tolerateFailures() tolerate} exceptions.
      *
      * <p>If the guard is tolerating exceptions, logs the handler failure.
      */
@@ -86,8 +86,8 @@ final class ExceptionGuard extends AbstractEventSubscriber implements ExceptionL
     /**
      * Asks the guard to tolerate exceptions.
      */
-    void tolerate() {
-        tolerance = ExceptionTolerance.LOG;
+    void tolerateFailures() {
+        tolerance = HandlerFailureTolerance.LOG;
     }
 
     /**
