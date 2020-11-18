@@ -74,7 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * the {@code RecordStorageDelegate} is able to utilize the API with the expected results.
  */
 @DisplayName("A `RecordStorageDelegate` descendant should")
-public class RecordStorageDelegateTest
+class RecordStorageDelegateTest
         extends AbstractStorageTest<StgProjectId, StgProject, StgProjectStorage> {
 
     @Override
