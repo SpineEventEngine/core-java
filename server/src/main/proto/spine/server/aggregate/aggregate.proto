@@ -71,6 +71,11 @@ message AggregateEventRecordId {
 //
 message AggregateEventRecord {
 
+    // An identifier of the record.
+    //
+    // This field is technically `(required)`, but left optional intentionally
+    // to comply with the legacy data.
+    //
     AggregateEventRecordId id = 4;
 
     // A timestamp of the event or snapshot in this record.
@@ -84,6 +89,11 @@ message AggregateEventRecord {
         server.aggregate.Snapshot snapshot = 3;
     }
 
+    // An identifier of the aggregate which history the `AggregateEventRecord` is a part of .
+    //
+    // This field is technically `(required)`, but left optional intentionally
+    // to comply with the legacy data.
+    //
     google.protobuf.Any aggregate_id = 5;
 }
 
