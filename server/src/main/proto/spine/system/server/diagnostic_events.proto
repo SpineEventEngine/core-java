@@ -139,5 +139,6 @@ message AggregateHistoryCorrupted {
     //
     // The events are not applied to the Aggregate when loading, i.e. applying for these events was
     // interrupted.
+    //
     uint32 interrupted_events = 6;
 }
