@@ -23,7 +23,7 @@ message MessageId {
     // If the message is a signal (an event of a command), `id` has the value of the signal ID (an
     // `EventId` or a `CommandId`).
     //
-    // If the message is an entity state, `id` had the value of the entity identifier.
+    // If the message is an entity state, `id` has the value of the entity identifier.
     //
     google.protobuf.Any id = 1 [(required) = true, (validate) = true];
 
