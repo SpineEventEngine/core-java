@@ -108,7 +108,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     }
 
     /**
-     * Returns the iterator over all non-archived and non-deleted entity records.
+     * Returns the iterator over all active entity records.
      *
      * @throws IllegalStateException
      *         if the storage is already closed
