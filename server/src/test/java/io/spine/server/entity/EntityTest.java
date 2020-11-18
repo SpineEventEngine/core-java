@@ -208,7 +208,8 @@ class EntityTest {
         BlackBoxContext bbc = BlackBoxContext
                 .from(context)
                 .receivesCommand(signUpUser)
-                .receivesCommand(chooseInitial);
+                .receivesCommand(chooseInitial)
+                .tolerateExceptions();
         bbc.receivesCommand(chooseAgain);
         bbc.assertEntity(id, UserAggregate.class)
            .hasStateThat()

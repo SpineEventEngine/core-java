@@ -194,8 +194,9 @@ public abstract class BlackBoxContext implements Logging {
     /**
      * Configures the context to only log runtime signal handler exceptions, but not fail the tests.
      */
-    public final void tolerateExceptions(){
+    public final BlackBoxContext tolerateExceptions(){
         exceptionGuard.tolerate();
+        return this;
     }
 
     /**
