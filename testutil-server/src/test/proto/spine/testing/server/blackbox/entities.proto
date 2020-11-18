@@ -94,7 +94,7 @@ message BbInit {
     bool initialized = 2;
 }
 
-// A synthetic process for testing `FailedHandlerGuard` integration in the BBC.
+// A synthetic process for testing `FailedHandlerGuard` integration with the BBC.
 message BbProjectFailer {
 
     option (entity) = {kind: PROCESS_MANAGER visibility: FULL};
