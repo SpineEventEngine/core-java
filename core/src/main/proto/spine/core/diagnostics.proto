@@ -14,18 +14,16 @@ import "google/protobuf/any.proto";
 import "spine/core/actor_context.proto";
 import "spine/core/version.proto";
 
-// An identifier of a domain message.
-//
-// May represent a signal or an entity state.
-//
+// An identifier of a domain message, such as a signal, or an entity state.
 message MessageId {
     option (is).java_type = "io.spine.core.MessageIdMixin";
 
     // The ID of the message.
     //
     // If the message is a signal (an event of a command), `id` has the value of the signal ID (an
-    // `EventId` or a `CommandId`). If the message is an entity state, `id` had the value of
-    // the entity identifier.
+    // `EventId` or a `CommandId`).
+    //
+    // If the message is an entity state, `id` had the value of the entity identifier.
     //
     google.protobuf.Any id = 1 [(required) = true, (validate) = true];
 
