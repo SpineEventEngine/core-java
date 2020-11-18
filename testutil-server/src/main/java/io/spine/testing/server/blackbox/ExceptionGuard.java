@@ -47,7 +47,7 @@ final class ExceptionGuard extends AbstractEventSubscriber implements ExceptionL
         );
         switch (tolerance){
             case LOG:
-                log(event, msg);
+                log(msg, event);
                 break;
             case RAISE:
             default:

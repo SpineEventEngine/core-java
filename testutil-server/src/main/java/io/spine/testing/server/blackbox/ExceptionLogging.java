@@ -49,7 +49,7 @@ interface ExceptionLogging extends Logging {
     @FormatMethod
     default void log(EventMessage event, @FormatString String errorMessage, Object... formatArgs) {
         String msg = format(errorMessage, formatArgs);
-        log(event, msg);
+        log(msg, event);
     }
 
     /**
@@ -58,8 +58,7 @@ interface ExceptionLogging extends Logging {
      * @param msg
      *         the formatted error message to log
      */
-    @FormatMethod
-    default void log(EventMessage event, String msg) {
+    default void log(String msg, EventMessage event) {
         FluentLogger.Api severeLogger = logger()
                 .atSevere()
                 .withStackTrace(StackSize.NONE);
