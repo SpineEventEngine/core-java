@@ -28,6 +28,7 @@ import io.spine.annotation.Internal;
 import io.spine.type.TypeUrl;
 import io.spine.validate.FieldAwareMessage;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
 
@@ -82,6 +83,19 @@ interface MessageIdMixin extends MessageIdOrBuilder, FieldAwareMessage {
     default CommandId asCommandId() {
         checkState(isCommand(), "%s is not a command ID.", getId().getTypeUrl());
         return unpack(getId(), CommandId.class);
+    }
+
+    /**
+     * Creates a new instance copying ID and type URL from this instance, and applying
+     * the passed version.
+     */
+    @SuppressWarnings("ClassReferencesSubclass") // we want to encapsulate copy construction.
+    default MessageId withVersion(Version version) {
+        checkNotNull(version);
+        return MessageId.newBuilder()
+                        .setId(getId())
+                        .setTypeUrl(getTypeUrl())
+                        .vBuild();
     }
 
     @Override
