@@ -116,7 +116,7 @@ public abstract class BlackBoxContext implements Logging {
     private final Set<Event> postedEvents;
 
     /**
-     * Handles runtime exceptions thrown from signals handlers.
+     * Handles runtime exceptions thrown from signal handlers.
      */
     private final FailedHandlerGuard failedHandlerGuard;
 
@@ -192,7 +192,7 @@ public abstract class BlackBoxContext implements Logging {
     }
 
     /**
-     * Configures the context to log runtime signal handler failures, but not fail the tests.
+     * Tells context to log signal handler failures over failing the test.
      */
     @CanIgnoreReturnValue
     public final BlackBoxContext tolerateFailures(){
