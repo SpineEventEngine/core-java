@@ -276,7 +276,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
     }
 
     @Nested
-    @DisplayName("tolerate signal handler failures and log")
+    @DisplayName("tolerate signal handler failures and log handler info")
     class TolerateHandlerFailures {
 
         @BeforeEach
@@ -299,6 +299,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         @DisplayName("directly from the caller")
         void fromCaller() {
             BbFailProject command = failProject(newProjectId());
+
             assertDoesNotThrow(() -> context.receivesCommand(command));
         }
 
