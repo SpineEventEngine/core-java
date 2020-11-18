@@ -82,7 +82,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @VisibleForTesting
 public abstract class BlackBoxContext implements Logging {
 
-    /** The context under the test. */
+    /**
+     * The context under the test.
+     */
     private final BoundedContext context;
 
     /**
@@ -156,7 +158,9 @@ public abstract class BlackBoxContext implements Logging {
         return result;
     }
 
-    /** Obtains the name of the context under the test. */
+    /**
+     * Obtains the name of the context under the test.
+     */
     public BoundedContextName name() {
         return context.name();
     }
@@ -174,7 +178,7 @@ public abstract class BlackBoxContext implements Logging {
      */
     public final BlackBoxContext withActor(UserId user) {
         checkNotNull(user);
-        this.actor = this.actor.withId(user);
+        actor = actor.withId(user);
         return this;
     }
 
@@ -183,7 +187,7 @@ public abstract class BlackBoxContext implements Logging {
      */
     public final BlackBoxContext in(ZoneId zoneId) {
         checkNotNull(zoneId);
-        this.actor = this.actor.in(zoneId);
+        actor = actor.in(zoneId);
         return this;
     }
 
