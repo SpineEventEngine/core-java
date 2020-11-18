@@ -137,8 +137,6 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * {@inheritDoc}
      *
      * <p>Returns the records for both active and non-active entities.
-     *
-     * <p>Overrides the parent method in order to expose it as a part of the public API.
      */
     @Override
     public Iterator<EntityRecord> readAll(Iterable<I> ids, FieldMask mask) {
@@ -150,8 +148,6 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      *
      * <p>If the passed query has no ID parameter set, only the records of the active entities
      * are returned. If the query includes the ID parameter, includes non-active entities as well.
-     *
-     * <p>Overrides the parent method in order to expose it as a part of the public API.
      */
     @Override
     public Iterator<EntityRecord> readAll(RecordQuery<I, EntityRecord> query) {
