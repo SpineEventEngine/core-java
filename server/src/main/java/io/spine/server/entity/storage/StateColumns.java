@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EntityState;
 import io.spine.query.EntityColumn;
 
@@ -34,6 +35,7 @@ import java.util.Set;
  * @param <S>
  *         the type of the entity state
  */
+@Immutable
 final class StateColumns<S extends EntityState<?>> implements Iterable<EntityColumn<S, ?>> {
 
     private final ImmutableSet<EntityColumn<S, ?>> columns;

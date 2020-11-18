@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.query.CustomColumn;
 import io.spine.server.entity.Entity;
 
@@ -33,6 +34,7 @@ import java.util.Set;
  * @param <E>
  *         the type of entity which columns are described
  */
+@Immutable
 final class SystemColumns<E extends Entity<?, ?>> implements Iterable<CustomColumn<E, ?>> {
 
     private final ImmutableSet<CustomColumn<E, ?>> columns;
