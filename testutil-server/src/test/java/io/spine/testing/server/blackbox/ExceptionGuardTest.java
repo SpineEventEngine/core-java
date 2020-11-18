@@ -22,7 +22,6 @@ package io.spine.testing.server.blackbox;
 
 import io.spine.base.Error;
 import io.spine.system.server.HandlerFailedUnexpectedly;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,8 +29,8 @@ import org.opentest4j.AssertionFailedError;
 
 import java.util.logging.Logger;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Errors.causeOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`ExceptionGuard` should")
 final class ExceptionGuardTest extends ExceptionLoggingTest {
@@ -60,24 +59,15 @@ final class ExceptionGuardTest extends ExceptionLoggingTest {
 
     @Test
     @DisplayName("fail test on `HandlerFailedUnexpectedly` event")
-    @SuppressWarnings({"ThrowCaughtLocally", "ErrorNotRethrown"})
-        // we're testing that guard is failing a test
     void failTest() {
         Error error = causeOf(new IllegalStateException("Test exception. Handler is fine."));
-        try {
-            guard.on(
-                    HandlerFailedUnexpectedly
-                            .newBuilder()
-                            .setEntity(entity())
-                            .setError(error)
-                            .vBuild()
-            );
-            throw new IllegalStateException("The guard must have failed the test.");
-        } catch (AssertionFailedError e) {
-            assertThat(e.getMessage()).contains(error.getMessage());
-        } catch (IllegalStateException e) {
-            Assertions.fail(e);
-        }
+        assertThrows(AssertionFailedError.class, () -> guard.on(
+                HandlerFailedUnexpectedly
+                        .newBuilder()
+                        .setEntity(entity())
+                        .setError(error)
+                        .vBuild()
+        ));
     }
 
     @Override
