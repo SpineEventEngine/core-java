@@ -70,6 +70,7 @@ class TenantRecords<I, R extends Message> implements TenantDataStorage<I, Record
      */
     public Iterator<I> index(RecordQuery<I, R> query) {
         List<RecordWithColumns<I, R>> subset = findRecords(query);
+        @SuppressWarnings("ConstantConditions")  // Elements of the returned list are non-`null`.
         Iterator<I> result = Iterators.transform(subset.iterator(), RecordWithColumns::id);
         return result;
     }
@@ -163,9 +164,8 @@ class TenantRecords<I, R extends Message> implements TenantDataStorage<I, Record
         @SuppressWarnings("unchecked")
         @Override
         public @Nullable R apply(@Nullable R input) {
-            checkNotNull(input);
-            if (fieldMask.getPathsList()
-                         .isEmpty()) {
+            if (null == input || fieldMask.getPathsList()
+                                          .isEmpty()) {
                 return input;
             }
             if (input instanceof EntityRecord) {
@@ -174,7 +174,7 @@ class TenantRecords<I, R extends Message> implements TenantDataStorage<I, Record
             return applyMask(fieldMask, input);
         }
 
-        private EntityRecord maskEntityRecord(@Nullable EntityRecord input) {
+        private EntityRecord maskEntityRecord(EntityRecord input) {
             checkNotNull(input);
             Any maskedState = maskAny(input.getState());
             EntityRecord result = EntityRecord
