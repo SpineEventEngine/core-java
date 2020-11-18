@@ -127,7 +127,7 @@ public class RecordWithColumns<I, R extends Message> {
      *
      * @return the storage field names
      */
-    public ImmutableSet<ColumnName> columnNames() {
+    public final ImmutableSet<ColumnName> columnNames() {
         return ImmutableSet.copyOf(storageFields.keySet());
     }
 
@@ -148,7 +148,7 @@ public class RecordWithColumns<I, R extends Message> {
      * @throws IllegalStateException
      *         if there is no column with the specified name
      */
-    public @Nullable Object columnValue(ColumnName columnName) {
+    public final @Nullable Object columnValue(ColumnName columnName) {
         return columnValue(columnName, DefaultColumnMapping.INSTANCE);
     }
 
@@ -157,7 +157,7 @@ public class RecordWithColumns<I, R extends Message> {
      *
      * <p>The specified column mapping will be used to do the column value conversion.
      */
-    public <V> V columnValue(ColumnName columnName, ColumnMapping<V> columnMapping) {
+    public final <V> V columnValue(ColumnName columnName, ColumnMapping<V> columnMapping) {
         checkNotNull(columnName);
         checkNotNull(columnMapping);
         if (!storageFields.containsKey(columnName)) {
@@ -179,14 +179,14 @@ public class RecordWithColumns<I, R extends Message> {
      * Tells if there are any {@linkplain io.spine.query.Column columns}
      * associated with this record.
      */
-    public boolean hasColumns() {
+    public final boolean hasColumns() {
         return !storageFields.isEmpty();
     }
 
     /**
      * Determines if there is a column with the specified name among the storage fields.
      */
-    public boolean hasColumn(ColumnName name) {
+    public final boolean hasColumn(ColumnName name) {
         boolean result = storageFields.containsKey(name);
         return result;
     }
