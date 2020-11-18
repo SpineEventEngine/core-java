@@ -5,6 +5,7 @@ package spine.system.server;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
+option (every_is).java_type = "DiagnosticEvent";
 option java_package = "io.spine.system.server";
 option java_outer_classname = "DiagnosticEventsProto";
 option java_multiple_files = true;
@@ -38,7 +39,7 @@ message ConstraintViolated {
 
 // An event emitted whenever a command is dispatched to an entity for the second time.
 message CannotDispatchDuplicateCommand {
-    option (is) = {java_type: "CannotDispatchDuplicate" generate: true};
+    option (is).java_type = "CannotDispatchDuplicate";
 
     core.MessageId entity = 1;
 
@@ -53,7 +54,7 @@ message CannotDispatchDuplicateCommand {
 
 // An event emitted whenever an event is dispatched to an entity for the second time.
 message CannotDispatchDuplicateEvent {
-    option (is) = {java_type: "CannotDispatchDuplicate" generate: true};
+    option (is).java_type = "CannotDispatchDuplicate";
 
     // The violated entity info.
     core.MessageId entity = 1;
