@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.base.EntityState;
 import io.spine.query.CustomColumn;
 import io.spine.query.EntityColumn;
@@ -29,6 +28,7 @@ import io.spine.server.entity.model.EntityClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Set;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -65,8 +65,8 @@ final class Scanner<I, S extends EntityState<I>, E extends Entity<I, S>>  {
     /**
      * Obtains the {@linkplain SystemColumn system} columns of the class.
      */
-    ImmutableSet<CustomColumn<E, ?>> systemColumns() {
-        ImmutableSet.Builder<CustomColumn<E, ?>> columns = ImmutableSet.builder();
+    SystemColumns<E> systemColumns() {
+        Set<CustomColumn<E, ?>> columns = new HashSet<>();
         Class<?> entityClazz = entityClass.value();
         Method[] methods = entityClazz.getMethods();
         for (Method method : methods) {
@@ -78,25 +78,26 @@ final class Scanner<I, S extends EntityState<I>, E extends Entity<I, S>>  {
                 columns.add(column);
             }
         }
-        return columns.build();
+        SystemColumns<E> result = new SystemColumns<>(columns);
+        return result;
     }
 
     /**
      * Obtains the {@linkplain EntityColumn entity-state-based} columns of the class.
      */
     @SuppressWarnings("OverlyBroadCatchBlock")  // Treating all exceptions equally.
-    ImmutableSet<EntityColumn<S, ?>> simpleColumns() {
+    StateColumns<S> stateColumns() {
         Class<? extends EntityState<?>> stateClass = entityClass.stateClass();
         Class<?> columnClass = findColumnsClass(stateClass);
         if(columnClass == null) {
-            return ImmutableSet.of();
+            return StateColumns.none();
         }
         try {
             Method getDefinitions = columnClass.getDeclaredMethod(COL_DEFS_METHOD_NAME);
             @SuppressWarnings("unchecked")  // ensured by the Spine code generation.
             Set<EntityColumn<S, ?>> columns =
                     (Set<EntityColumn<S, ?>>) getDefinitions.invoke(null);
-            return ImmutableSet.copyOf(columns);
+            return new StateColumns<>(columns);
         } catch (Exception e) {
             throw newIllegalStateException(
                     e,

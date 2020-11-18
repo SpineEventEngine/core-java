@@ -20,11 +20,9 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
-import io.spine.query.CustomColumn;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.test.entity.TaskView;
@@ -36,11 +34,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.entity.storage.AssertColumns.assertContains;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.server.entity.storage.EntityRecordColumn.version;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -145,11 +143,11 @@ class EntityRecordSpecTest {
     @DisplayName("return system columns of an entity")
     void returnLifecycleColumns() {
 
-        ImmutableSet<CustomColumn<TaskViewProjection, ?>> systemCols = spec().systemColumns();
-        assertThat(systemCols).hasSize(3);
-        assertContains(systemCols, rawNameOf(archived));
-        assertContains(systemCols, rawNameOf(deleted));
-        assertContains(systemCols, rawNameOf(version));
+        SystemColumns<TaskViewProjection> cols = spec().systemColumns();
+        assertThat(cols).hasSize(3);
+        assertContains(cols, rawNameOf(archived));
+        assertContains(cols, rawNameOf(deleted));
+        assertContains(cols, rawNameOf(version));
     }
 
     private static String rawNameOf(EntityRecordColumn archived) {

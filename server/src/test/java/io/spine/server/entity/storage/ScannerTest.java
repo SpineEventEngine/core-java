@@ -20,12 +20,10 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.query.CustomColumn;
-import io.spine.query.EntityColumn;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
+import io.spine.test.entity.TaskListView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +40,7 @@ class ScannerTest {
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
         Scanner scanner = new Scanner(entityClass);
-        ImmutableSet<CustomColumn<?, ?>> systemColumns = scanner.systemColumns();
+        SystemColumns<TaskViewProjection> systemColumns = scanner.systemColumns();
 
         assertThat(systemColumns)
                 .containsExactlyElementsIn(EntityRecordColumn.all());
@@ -56,7 +54,7 @@ class ScannerTest {
                 asEntityClass(TaskListViewProjection.class);
         Scanner scanner = new Scanner(entityClass);
 
-        ImmutableSet<EntityColumn<?, ?>> columns = scanner.simpleColumns();
+        StateColumns<TaskListView> columns = scanner.stateColumns();
 
         assertContains(columns, "description");
     }

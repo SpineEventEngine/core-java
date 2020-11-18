@@ -20,29 +20,50 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.query.Column;
-import io.spine.query.ColumnName;
+import com.google.common.collect.ImmutableSet;
+import io.spine.base.EntityState;
 import io.spine.query.EntityColumn;
 
-import static com.google.common.truth.Truth.assertThat;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
- * An assertion utility for {@link EntityColumn} tests.
+ * Descries the columns of a particular entity defined in its Protobuf {@code Message}
+ * via {@code (column)} annotation.
+ *
+ * @param <S>
+ *         the type of the entity state
  */
-final class AssertColumns {
+final class StateColumns<S extends EntityState<?>> implements Iterable<EntityColumn<S, ?>> {
+
+    private final ImmutableSet<EntityColumn<S, ?>> columns;
 
     /**
-     * Prevents this utility from instantiating.
+     * Creates a new instance from the passed columns.
      */
-    private AssertColumns() {
+    StateColumns(Set<EntityColumn<S, ?>> columns) {
+        this.columns = ImmutableSet.copyOf(columns);
     }
 
-    static void assertContains(Iterable<? extends Column<?, ?>> columns, String columnName) {
-        ColumnName expectedName = ColumnName.of(columnName);
-        boolean contains = false;
-        for (Column<?, ?> column : columns) {
-            contains = contains || column.name().equals(expectedName);
-        }
-        assertThat(contains).isTrue();
+    /**
+     * Returns an empty column set.
+     *
+     * @param <S>
+     *         the type of the entity state which columns are described
+     */
+    static <S extends EntityState<?>> StateColumns<S> none() {
+        return new StateColumns<>(ImmutableSet.of());
+    }
+
+    @Override
+    public Iterator<EntityColumn<S, ?>> iterator() {
+        return columns.iterator();
+    }
+
+    /**
+     * Returns the number of columns.
+     */
+    int size() {
+        return columns.size();
     }
 }

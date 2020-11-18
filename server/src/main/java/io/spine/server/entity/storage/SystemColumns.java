@@ -20,29 +20,39 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.query.Column;
-import io.spine.query.ColumnName;
-import io.spine.query.EntityColumn;
+import com.google.common.collect.ImmutableSet;
+import io.spine.query.CustomColumn;
+import io.spine.server.entity.Entity;
 
-import static com.google.common.truth.Truth.assertThat;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
- * An assertion utility for {@link EntityColumn} tests.
+ * Describes the system columns defined for this type of {@link Entity}.
+ *
+ * @param <E>
+ *         the type of entity which columns are described
  */
-final class AssertColumns {
+final class SystemColumns<E extends Entity<?, ?>> implements Iterable<CustomColumn<E, ?>> {
+
+    private final ImmutableSet<CustomColumn<E, ?>> columns;
 
     /**
-     * Prevents this utility from instantiating.
+     * Creates a new instance from the passed columns.
      */
-    private AssertColumns() {
+    SystemColumns(Set<CustomColumn<E, ?>> columns) {
+        this.columns = ImmutableSet.copyOf(columns);
     }
 
-    static void assertContains(Iterable<? extends Column<?, ?>> columns, String columnName) {
-        ColumnName expectedName = ColumnName.of(columnName);
-        boolean contains = false;
-        for (Column<?, ?> column : columns) {
-            contains = contains || column.name().equals(expectedName);
-        }
-        assertThat(contains).isTrue();
+    @Override
+    public Iterator<CustomColumn<E, ?>> iterator() {
+        return columns.iterator();
+    }
+
+    /**
+     * Returns the number of columns.
+     */
+    int size() {
+        return columns.size();
     }
 }

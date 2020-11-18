@@ -21,14 +21,11 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
-import io.spine.query.CustomColumn;
-import io.spine.query.EntityColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.model.EntityClass;
@@ -66,19 +63,19 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     /**
      * The {@linkplain SystemColumn system columns} of the entity.
      */
-    private final ImmutableSet<CustomColumn<E, ?>> systemColumns;
+    private final SystemColumns<E> systemColumns;
 
     /**
      * The entity-state-based columns of the entity.
      */
-    private final ImmutableSet<EntityColumn<S, ?>> simpleColumns;
+    private final StateColumns<S> stateColumns;
 
     private EntityRecordSpec(EntityClass<E> entityClass,
-                             ImmutableSet<EntityColumn<S, ?>> simpleColumns,
-                             ImmutableSet<CustomColumn<E, ?>> systemColumns) {
+                             StateColumns<S> stateColumns,
+                             SystemColumns<E> systemColumns) {
         super(idClass(entityClass), EntityRecord.class);
         this.entityClass = entityClass;
-        this.simpleColumns = simpleColumns;
+        this.stateColumns = stateColumns;
         this.systemColumns = systemColumns;
     }
 
@@ -89,7 +86,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     EntityRecordSpec<I, S, E> of(EntityClass<E> entityClass) {
         checkNotNull(entityClass);
         Scanner<I, S, E> scan = new Scanner<>(entityClass);
-        return new EntityRecordSpec<>(entityClass, scan.simpleColumns(), scan.systemColumns());
+        return new EntityRecordSpec<>(entityClass, scan.stateColumns(), scan.systemColumns());
     }
 
     /**
@@ -101,7 +98,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
         @SuppressWarnings("unchecked")  // Ensured by the entity type declaration.
             EntityClass<E> modelClass = (EntityClass<E>) entity.modelClass();
         Scanner<I, S, E> scan = new Scanner<>(modelClass);
-        return new EntityRecordSpec<>(modelClass, scan.simpleColumns(), scan.systemColumns());
+        return new EntityRecordSpec<>(modelClass, scan.stateColumns(), scan.systemColumns());
     }
 
     /**
@@ -130,7 +127,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
         systemColumns.forEach(
                 column -> result.put(column.name(), column.valueIn(entity))
         );
-        simpleColumns.forEach(
+        stateColumns.forEach(
                 column -> result.put(column.name(), column.valueIn(entity.state()))
         );
         return unmodifiableMap(result);
@@ -144,7 +141,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     @Override
     public Optional<Column<?, ?>> findColumn(ColumnName name) {
         checkNotNull(name);
-        Column<?, ?> resultInSimple = lookForColumn(name, simpleColumns);
+        Column<?, ?> resultInSimple = lookForColumn(name, stateColumns);
         if (resultInSimple != null) {
             return Optional.of(resultInSimple);
         }
@@ -177,14 +174,14 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
      */
     @VisibleForTesting
     int columnCount() {
-        return systemColumns.size() + simpleColumns.size();
+        return systemColumns.size() + stateColumns.size();
     }
 
     /**
      * Returns the discovered system columns.
      */
     @VisibleForTesting
-    ImmutableSet<CustomColumn<E, ?>> systemColumns() {
+    SystemColumns<E> systemColumns() {
         return systemColumns;
     }
 
