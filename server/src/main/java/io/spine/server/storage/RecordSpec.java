@@ -20,7 +20,7 @@
 
 package io.spine.server.storage;
 
-import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -42,7 +42,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @param <S>
  *         the type of the source object on top of which the values of the columns are extracted
  */
-@Internal
+@SPI
 public abstract class RecordSpec<I, R, S> {
 
     private final Class<R> recordType;
