@@ -80,6 +80,7 @@ final class FailedHandlerGuard extends AbstractEventSubscriber implements Diagno
             case RAISE:
             default:
                 fail(() -> msg + lineSeparator() + toJson(event));
+                break;
         }
     }
 
