@@ -135,10 +135,10 @@ message AggregateHistoryCorrupted {
     // The error which occurred while applying the `erroneous_event`.
     base.Error error = 5;
 
-    // Count of events which come after the `erroneous_event` in the Aggregate history.
+    // The number of events which come after the `erroneous_event` in the Aggregate history.
     //
-    // The events are not applied to the Aggregate when loading, i.e. applying for these events was
-    // interrupted.
+    // The events are not applied to the Aggregate when loading, i.e. applying of these events
+    // was interrupted.
     //
     uint32 interrupted_events = 6;
 }
