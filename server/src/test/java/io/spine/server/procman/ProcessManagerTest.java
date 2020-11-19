@@ -124,7 +124,7 @@ class ProcessManagerTest {
     private TestProcessManager processManager;
 
     @BeforeEach
-    void initProcessManager() {
+    void initContextAndProcessManager() {
         ModelTests.dropAllModels();
         context = BoundedContextBuilder
                 .assumingTests(true)
