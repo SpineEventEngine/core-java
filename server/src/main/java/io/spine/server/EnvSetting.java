@@ -198,7 +198,9 @@ final class EnvSetting<V> {
      *         the type of the environment
      * @param value
      *         the value to assign this type of the environment
+     * @deprecated please use {@link ServerEnvironment#when(Class)}
      */
+    @Deprecated
     void registerTypeAndUse(EnvironmentType type, V value) {
         checkNotNull(type);
         checkNotNull(value);
