@@ -58,7 +58,7 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
 
     @Override
     public ImmutableSet<EventClass> domesticEventClasses() {
-        return EventClass.emptySet();
+        return eventClasses();
     }
 
     @Override
