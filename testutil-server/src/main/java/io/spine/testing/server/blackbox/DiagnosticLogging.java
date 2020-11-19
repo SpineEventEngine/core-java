@@ -63,15 +63,16 @@ interface DiagnosticLogging extends Logging {
                 .atSevere()
                 .withStackTrace(StackSize.NONE);
         boolean loggingEnabled = severeLogger.isEnabled();
+        String eventJson = toJson(event);
         if (loggingEnabled) {
             severeLogger.log(msg);
-            severeLogger.log(toJson(event));
+            severeLogger.log(eventJson);
         } else {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             // Edge case for disabled/misconfigured logging .
             PrintStream stderr = System.err;
             stderr.println(msg);
-            stderr.println(toJson(event));
+            stderr.println(eventJson);
         }
     }
 }
