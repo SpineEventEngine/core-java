@@ -72,11 +72,14 @@ class SystemAwareStorageFactoryTest {
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
-        serverEnv.use(productionStorage, Production.class);
+        ServerEnvironment.when(Production.class)
+                         .use(productionStorage);
         StorageFactory storageFactory = serverEnv.storageFactory();
-        assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
+        assertThat(storageFactory)
+                .isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
-        assertThat(systemAware.delegate()).isEqualTo(productionStorage);
+        assertThat(systemAware.delegate())
+                .isEqualTo(productionStorage);
 
         Environment.instance()
                    .reset();
@@ -87,11 +90,13 @@ class SystemAwareStorageFactoryTest {
     void wrapTestStorage() {
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory testStorage = InMemoryStorageFactory.newInstance();
-        serverEnv.use(testStorage, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(testStorage);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
-        assertThat(systemAware.delegate()).isEqualTo(testStorage);
+        assertThat(systemAware.delegate())
+                .isEqualTo(testStorage);
     }
 
     @Test
@@ -103,7 +108,8 @@ class SystemAwareStorageFactoryTest {
         AggregateStorage<CompanyId> storage =
                 systemAware.createAggregateStorage(CONTEXT, aggregateClass);
         assertThat(storage).isNull();
-        assertThat(factory.requestedStorages()).containsExactly(aggregateClass);
+        assertThat(factory.requestedStorages())
+                .containsExactly(aggregateClass);
     }
 
     @Test
@@ -115,7 +121,8 @@ class SystemAwareStorageFactoryTest {
         ProjectionStorage<TaskId> storage =
                 systemAware.createProjectionStorage(CONTEXT, projectionClass);
         assertThat(storage).isNull();
-        assertThat(factory.requestedStorages()).containsExactly(projectionClass);
+        assertThat(factory.requestedStorages())
+                .containsExactly(projectionClass);
     }
 
     @Test
@@ -126,7 +133,8 @@ class SystemAwareStorageFactoryTest {
         Class<TestProjection> projectionClass = TestProjection.class;
         RecordStorage<TaskId> storage = systemAware.createRecordStorage(CONTEXT, projectionClass);
         assertThat(storage).isNull();
-        assertThat(factory.requestedStorages()).containsExactly(projectionClass);
+        assertThat(factory.requestedStorages())
+                .containsExactly(projectionClass);
     }
 
     @Test
