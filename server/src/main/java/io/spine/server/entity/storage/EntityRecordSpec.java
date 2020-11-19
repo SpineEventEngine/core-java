@@ -81,6 +81,15 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
 
     /**
      * Gathers columns declared by the entity class.
+     *
+     * @param entityClass
+     *         the class of the entity
+     * @param <I>
+     *         the type of the entity identifiers
+     * @param <E>
+     *         the type of the entity
+     * @param <S>
+     *         the type of the entity state
      */
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityRecordSpec<I, S, E> of(EntityClass<E> entityClass) {
@@ -91,6 +100,15 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
 
     /**
      * Gathers columns declared by the class of the passed entity.
+     *
+     * @param entity
+     *         the entity instance
+     * @param <I>
+     *         the type of the entity identifiers
+     * @param <E>
+     *         the type of the entity
+     * @param <S>
+     *         the type of the entity state
      */
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityRecordSpec<I, S, E> of(E entity) {
