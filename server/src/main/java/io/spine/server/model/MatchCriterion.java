@@ -30,10 +30,10 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Optional;
 
-import static io.spine.server.model.MessageFormatter.toStringEnumeration;
 import static io.spine.server.model.MethodExceptionCheck.check;
 import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
 import static io.spine.server.model.SignatureMismatch.Severity.WARN;
+import static io.spine.string.Diags.toEnumerationBackticked;
 import static java.lang.String.format;
 
 /**
@@ -229,8 +229,7 @@ public enum MatchCriterion {
          */
         private String enumerateThrown() {
             return declared.stream()
-                           .map(Diags::backtick)
-                           .collect(toStringEnumeration());
+                           .collect(toEnumerationBackticked());
         }
     }
 }

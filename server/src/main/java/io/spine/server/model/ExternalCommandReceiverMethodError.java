@@ -23,12 +23,10 @@ package io.spine.server.model;
 import io.spine.annotation.Internal;
 import io.spine.server.command.model.CommandAcceptingMethod;
 import io.spine.server.command.model.CommandHandlingClass;
-import io.spine.server.type.CommandClass;
-import io.spine.string.Diags;
 
 import java.util.Collection;
 
-import static io.spine.server.model.MessageFormatter.toStringEnumeration;
+import static io.spine.string.Diags.toEnumerationBackticked;
 
 /**
  * An error thrown when one or more of the command accepting methods are marked {@code external}
@@ -67,9 +65,7 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
         String result = handlers
                 .stream()
                 .map(CommandAcceptingMethod::messageClass)
-                .map(CommandClass::toString)
-                .map(Diags::backtick)
-                .collect(toStringEnumeration());
+                .collect(toEnumerationBackticked());
         return result;
     }
 }
