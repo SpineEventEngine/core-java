@@ -88,8 +88,8 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * The identifier of the server instance running in scope of this application.
      *
-     * <p>It is currently impossible to set the node identifier directly. This is a subject
-     * to change in the future framework versions.
+     * <p>It is currently impossible to set the node identifier directly.
+     * This is a subject to change in the future framework versions.
      */
     private final NodeId nodeId;
 
@@ -105,7 +105,7 @@ public final class ServerEnvironment implements AutoCloseable {
     private final EnvSetting<Delivery> delivery = new EnvSetting<>();
 
     /**
-     * Storage factory. Differs between {@linkplain EnvironmentType environment types}.
+     * Storage factory setting.
      *
      * <p>Defaults to an {@code InMemoryStorageFactory} for tests.
      */
@@ -113,13 +113,12 @@ public final class ServerEnvironment implements AutoCloseable {
             new EnvSetting<>(Tests.class, () -> wrap(InMemoryStorageFactory.newInstance()));
 
     /**
-     * Factory of {@code Tracer}s. Differs between {@linkplain EnvironmentType environment types}.
+     * The setting for the factory of {@code Tracer}s.
      */
     private final EnvSetting<TracerFactory> tracerFactory = new EnvSetting<>();
 
     /**
-     * Factory for channel-based transport. Differs between {@linkplain EnvironmentType environment
-     * types}.
+     * The setting for the factory for channel-based transport.
      *
      * <p>Defaults to an {@code InMemoryTransportFactory} for tests.
      */
@@ -155,9 +154,9 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Updates the delivery for the current environment.
      *
-     * <p>This method is most typically used upon an application start. It's very uncommon and
-     * even dangerous to update the delivery mechanism later when the message delivery
-     * process may have been already used by various {@code BoundedContext}s.
+     * <p>This method is most typically used upon an application start.
+     * It's very uncommon and even dangerous to update the delivery mechanism later when
+     * the message delivery process may have been already used by various {@code BoundedContext}s.
      *
      * @deprecated use {@link #use(Delivery, EnvironmentType)}
      */
