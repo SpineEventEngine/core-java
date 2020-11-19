@@ -34,5 +34,5 @@ public enum HandlerFailureTolerance {
     /**
      * Identifies that exceptions must be raised and tests must be failed.
      */
-    RAISE
+    RAISE_AND_FAIL
 }

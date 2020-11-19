@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 final class FailedHandlerGuard extends AbstractEventSubscriber implements DiagnosticLogging {
 
-    private HandlerFailureTolerance tolerance = HandlerFailureTolerance.RAISE;
+    private HandlerFailureTolerance tolerance = HandlerFailureTolerance.RAISE_AND_FAIL;
 
     @Override
     public ImmutableSet<EventClass> messageClasses() {
@@ -77,7 +77,7 @@ final class FailedHandlerGuard extends AbstractEventSubscriber implements Diagno
             case LOG:
                 log(msg, event);
                 break;
-            case RAISE:
+            case RAISE_AND_FAIL:
             default:
                 fail(() -> msg + lineSeparator() + toJson(event));
                 break;
