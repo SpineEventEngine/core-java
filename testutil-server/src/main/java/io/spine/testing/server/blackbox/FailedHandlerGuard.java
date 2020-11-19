@@ -108,6 +108,6 @@ final class FailedHandlerGuard extends AbstractEventSubscriber implements Diagno
      */
     @Override
     public ImmutableSet<EventClass> externalEventClasses() {
-        return ImmutableSet.of();
+        return EventClass.emptySet();
     }
 }

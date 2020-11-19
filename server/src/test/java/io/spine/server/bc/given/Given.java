@@ -92,7 +92,7 @@ public class Given {
 
         @Override
         public ImmutableSet<EventClass> domesticEventClasses() {
-            return ImmutableSet.of();
+            return EventClass.emptySet();
         }
 
         @Override

@@ -73,7 +73,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher, Logging 
      */
     @Override
     public ImmutableSet<EventClass> externalEventClasses() {
-        return ImmutableSet.of();
+        return EventClass.emptySet();
     }
 
     @CanIgnoreReturnValue

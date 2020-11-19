@@ -148,6 +148,6 @@ final class UnsupportedCommandGuard extends AbstractEventSubscriber {
      */
     @Override
     public ImmutableSet<EventClass> externalEventClasses() {
-        return ImmutableSet.of();
+        return EventClass.emptySet();
     }
 }
