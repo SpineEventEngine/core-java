@@ -18,31 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    apply(from = "$rootDir/version.gradle.kts")
-}
+package io.spine.testing.server.blackbox.given;
 
-group = "io.spine.tools"
+import io.spine.server.command.Assign;
+import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
+import io.spine.server.procman.ProcessManager;
+import io.spine.testing.server.blackbox.BbProjectFailer;
+import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.command.BbFailProject;
+import io.spine.testing.server.blackbox.event.BbProjectFailed;
 
-val spineBaseVersion: String by extra
+/**
+ * Test environment for testing
+ * {@link io.spine.testing.server.blackbox.FailedHandlerGuard FailedHandlerGuard} integration.
+ */
+public final class BbProjectFailerProcess
+        extends ProcessManager<BbProjectId, BbProjectFailer, BbProjectFailer.Builder> {
 
-dependencies {
-    implementation(gradleApi())
-    implementation("io.spine.tools:spine-plugin-base:$spineBaseVersion")
-    implementation("io.spine.tools:spine-model-compiler:$spineBaseVersion")
-    implementation(project(":server"))
-    implementation(project(":model-assembler"))
+    @Assign
+    BbProjectFailed on(BbFailProject c) {
+        throw new RuntimeException("Command handling failed unexpectedly.");
+    }
 
-    testImplementation(gradleTestKit())
-    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine.tools:spine-plugin-testlib:$spineBaseVersion")
-    testImplementation(project(":testutil-server"))
-}
-
-tasks.test {
-    dependsOn("publishToMavenLocal",
-              ":core:publishToMavenLocal",
-              ":client:publishToMavenLocal",
-              ":server:publishToMavenLocal",
-              ":model-assembler:publishToMavenLocal")
+    @React
+    Nothing on(BbProjectFailed e) {
+        throw new RuntimeException("Reaction on the event failed unexpectedly.");
+    }
 }

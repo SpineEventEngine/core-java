@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SlowTest
-@DisplayName("ModelVerifierPlugin should")
+@DisplayName("`ModelVerifierPlugin` should")
 class ModelVerifierPluginTest {
 
     private static final String PROJECT_NAME = "model-verifier-test";
@@ -108,12 +108,13 @@ class ModelVerifierPluginTest {
     }
 
     private GradleProject newProjectWithJava(String... fileNames) {
-        return GradleProject.newBuilder()
-                            .setProjectName(PROJECT_NAME)
-                            .setProjectFolder(tempDir)
-                            .addJavaFiles(fileNames)
-                            .addProtoFiles(PROTO_FILES)
-                            .build();
+        return GradleProject
+                .newBuilder()
+                .setProjectName(PROJECT_NAME)
+                .setProjectFolder(tempDir)
+                .addJavaFiles(fileNames)
+                .addProtoFiles(PROTO_FILES)
+                .build();
     }
 
     private static String toPath(TaskName name) {

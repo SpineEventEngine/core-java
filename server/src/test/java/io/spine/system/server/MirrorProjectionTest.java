@@ -37,7 +37,7 @@ import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entity
 import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityRestored;
 import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityStateChanged;
 
-@DisplayName("Mirror projection should")
+@DisplayName("`MirrorProjection` should")
 class MirrorProjectionTest {
 
     @Test
@@ -129,6 +129,6 @@ class MirrorProjectionTest {
         return BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(mirrorRepository)
-        );
+        ).tolerateFailures();
     }
 }

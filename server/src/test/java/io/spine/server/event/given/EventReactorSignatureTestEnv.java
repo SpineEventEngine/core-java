@@ -54,7 +54,9 @@ import java.util.Optional;
         {"MethodOnlyUsedFromInnerClass", "Unused", "MethodMayBeStatic"})  // reflective access.
 public class EventReactorSignatureTestEnv {
 
-    /** Prevents this test environment from direct initialization. */
+    /**
+     * Prevents this test environment from direct initialization.
+     */
     private EventReactorSignatureTestEnv() {
     }
 

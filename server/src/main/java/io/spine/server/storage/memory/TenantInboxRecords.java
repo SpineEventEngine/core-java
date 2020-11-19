@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.SortedSet;
 
 import static java.util.Collections.synchronizedMap;
 
@@ -64,7 +63,7 @@ final class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMes
      *
      * @return messages of the {@code Inbox}
      */
-    public SortedSet<InboxMessage> readAll() {
+    public ImmutableSortedSet<InboxMessage> readAll() {
         ImmutableSortedSet<InboxMessage> result =
                 ImmutableSortedSet.copyOf(new InboxStorageRecordComparator(), records.values());
         return result;

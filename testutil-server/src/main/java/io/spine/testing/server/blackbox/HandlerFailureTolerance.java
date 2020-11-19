@@ -18,31 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    apply(from = "$rootDir/version.gradle.kts")
-}
+package io.spine.testing.server.blackbox;
 
-group = "io.spine.tools"
+/**
+ * Configures the behavior of the {@link BlackBoxContext} on handling runtime exceptions
+ * thrown from the handler methods.
+ */
+enum HandlerFailureTolerance {
 
-val spineBaseVersion: String by extra
+    /**
+     * Identifies that exceptions must be only logged.
+     */
+    LOG,
 
-dependencies {
-    implementation(gradleApi())
-    implementation("io.spine.tools:spine-plugin-base:$spineBaseVersion")
-    implementation("io.spine.tools:spine-model-compiler:$spineBaseVersion")
-    implementation(project(":server"))
-    implementation(project(":model-assembler"))
-
-    testImplementation(gradleTestKit())
-    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine.tools:spine-plugin-testlib:$spineBaseVersion")
-    testImplementation(project(":testutil-server"))
-}
-
-tasks.test {
-    dependsOn("publishToMavenLocal",
-              ":core:publishToMavenLocal",
-              ":client:publishToMavenLocal",
-              ":server:publishToMavenLocal",
-              ":model-assembler:publishToMavenLocal")
+    /**
+     * Identifies that exceptions must be raised and tests must be failed.
+     */
+    RAISE_AND_FAIL
 }

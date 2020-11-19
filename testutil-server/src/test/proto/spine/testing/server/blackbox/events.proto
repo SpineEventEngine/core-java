@@ -89,6 +89,10 @@ message BbEventDispatcherRegistered {
     string dispatcher_name = 1;
 }
 
+message BbProjectFailed {
+    BbProjectId project_id = 1;
+}
+
 //
 // External `Users` bounded context events
 //

@@ -52,7 +52,9 @@ import static java.util.stream.Collectors.toList;
 @Internal
 public final class EntityQueries {
 
-    /** Prevents instantiation of this utility class. */
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private EntityQueries() {
     }
 
@@ -103,9 +105,10 @@ public final class EntityQueries {
     }
 
     private static QueryParameters newQueryParameters(List<CompositeQueryParameter> parameters) {
-        return QueryParameters.newBuilder()
-                              .addAll(parameters)
-                              .build();
+        return QueryParameters
+                .newBuilder()
+                .addAll(parameters)
+                .build();
     }
 
     private static CompositeQueryParameter

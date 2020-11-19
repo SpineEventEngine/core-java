@@ -26,8 +26,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
-import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
@@ -43,6 +41,7 @@ import java.util.Random;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.Messages.builderFor;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
@@ -143,8 +142,8 @@ public class Sample {
      */
     @SuppressWarnings({"OverlyComplexMethod", "BadImport" /* Use `Type` for brevity. */})
     private static Object valueFor(FieldDescriptor field) {
-        Type type = field.getType();
-        JavaType javaType = type.getJavaType();
+        FieldDescriptor.Type type = field.getType();
+        FieldDescriptor.JavaType javaType = type.getJavaType();
         Random random = new SecureRandom();
         switch (javaType) {
             case INT:
@@ -178,7 +177,9 @@ public class Sample {
         Descriptors.EnumDescriptor descriptor = field.getEnumType();
         List<Descriptors.EnumValueDescriptor> enumValues = descriptor.getValues();
         if (enumValues.isEmpty()) {
-            return null;
+            throw newIllegalStateException(
+                    "There must be at least one `Enum` value for field `%s`.", field
+            );
         }
 
         // Value under index 0 is usually used to store `undefined` option

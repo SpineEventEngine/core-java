@@ -72,7 +72,7 @@ public abstract class AbstractEventAccumulator implements EventDispatcher {
 
     @Override
     public ImmutableSet<EventClass> externalEventClasses() {
-        return ImmutableSet.of();
+        return EventClass.emptySet();
     }
 
     public void assertEventCount(int expectedCount) {

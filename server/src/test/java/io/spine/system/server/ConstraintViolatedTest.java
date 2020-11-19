@@ -38,11 +38,11 @@ import org.junit.jupiter.api.Test;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.system.server.given.diagnostics.ViolationsWatch.DEFAULT;
 
-@DisplayName("ConstraintViolated should be emitted when")
+@DisplayName("`ConstraintViolated` should be emitted when")
 class ConstraintViolatedTest {
 
-    @MuteLogging
     @Test
+    @MuteLogging
     @DisplayName("an entity state is set to an invalid value as a result of an event")
     void afterEvent() {
         String invalidText = "123-non numerical";
@@ -50,7 +50,7 @@ class ConstraintViolatedTest {
                 BoundedContextBuilder.assumingTests()
                     .add(ValidatedAggregate.class)
                     .add(new ViolationsWatch.Repository())
-        );
+        ).tolerateFailures();
         context.receivesCommand(
                 ValidateAndSet.newBuilder()
                               .setId(ValidatedId.generate())
@@ -66,15 +66,15 @@ class ConstraintViolatedTest {
                );
     }
 
-    @MuteLogging
     @Test
+    @MuteLogging
     @DisplayName("an entity state is set to an invalid value as a result of a command")
     void afterCommand() {
         BlackBoxContext context = BlackBoxContext.from(
                 BoundedContextBuilder.assumingTests()
                 .add(VerificationProcman.class)
                 .add(new ViolationsWatch.Repository())
-        );
+        ).tolerateFailures();
         context.receivesCommand(
                 StartVerification
                         .newBuilder()

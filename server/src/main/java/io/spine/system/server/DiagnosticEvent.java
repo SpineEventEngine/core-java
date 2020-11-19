@@ -18,31 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    apply(from = "$rootDir/version.gradle.kts")
-}
+package io.spine.system.server;
 
-group = "io.spine.tools"
+import com.google.errorprone.annotations.Immutable;
+import io.spine.base.EventMessage;
 
-val spineBaseVersion: String by extra
-
-dependencies {
-    implementation(gradleApi())
-    implementation("io.spine.tools:spine-plugin-base:$spineBaseVersion")
-    implementation("io.spine.tools:spine-model-compiler:$spineBaseVersion")
-    implementation(project(":server"))
-    implementation(project(":model-assembler"))
-
-    testImplementation(gradleTestKit())
-    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine.tools:spine-plugin-testlib:$spineBaseVersion")
-    testImplementation(project(":testutil-server"))
-}
-
-tasks.test {
-    dependsOn("publishToMavenLocal",
-              ":core:publishToMavenLocal",
-              ":client:publishToMavenLocal",
-              ":server:publishToMavenLocal",
-              ":model-assembler:publishToMavenLocal")
+/**
+ * A common marker interface for events that occur within the System context in response to
+ * misconfigurations or runtime errors.
+ */
+@Immutable
+public interface DiagnosticEvent extends EventMessage {
 }

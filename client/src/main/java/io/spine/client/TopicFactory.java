@@ -42,6 +42,10 @@ public final class TopicFactory {
 
     private final ActorContext actorContext;
 
+    /**
+     * Creates a new {@code TopicFactory} that uses supplied {@code actorRequestFactory}
+     * to generate the {@code ActorContext}.
+     */
     TopicFactory(ActorRequestFactory actorRequestFactory) {
         checkNotNull(actorRequestFactory);
         this.actorContext = actorRequestFactory.newActorContext();

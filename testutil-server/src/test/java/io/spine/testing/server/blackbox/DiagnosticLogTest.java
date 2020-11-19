@@ -20,7 +20,6 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.protobuf.Empty;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.CommandId;
@@ -30,65 +29,32 @@ import io.spine.system.server.AggregateHistoryCorrupted;
 import io.spine.system.server.CannotDispatchDuplicateCommand;
 import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.ConstraintViolated;
-import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.RoutingFailed;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.type.TypeUrl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Errors.causeOf;
 import static io.spine.base.Errors.fromThrowable;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 
-@DisplayName("`Dashboard` should")
-class DiagnosticLogTest {
-
-    private ByteArrayOutputStream output;
-    private PrintStream saveErrorStream;
-    private PrintStream substErrorStream;
-
-    @SuppressWarnings("UseOfSystemOutOrSystemErr")
-    @BeforeEach
-    void setUpStderr() {
-        saveErrorStream = System.err;
-        output = new ByteArrayOutputStream();
-        substErrorStream = new PrintStream(output, true);
-        System.setErr(substErrorStream);
-        logger().setLevel(Level.OFF);
-    }
-
-    private static Logger logger() {
-        return Logger.getLogger(DiagnosticLog.class.getName());
-    }
-
-    @SuppressWarnings("UseOfSystemOutOrSystemErr")
-    @AfterEach
-    void resetStderr() {
-        System.err.close();
-        System.setErr(saveErrorStream);
-        logger().setLevel(Level.ALL);
-    }
+@DisplayName("`DiagnosticLog` should")
+class DiagnosticLogTest extends DiagnosticLoggingTest {
 
     @Test
     @DisplayName("log `ConstraintViolated` event")
     void acceptConstraintViolated() {
-        MessageId entity = entityId();
+        MessageId entity = entity();
         DiagnosticLog.instance()
                      .on(ConstraintViolated
-                             .newBuilder()
-                             .setEntity(entity)
-                             .vBuild());
+                                 .newBuilder()
+                                 .setEntity(entity)
+                                 .vBuild());
         assertLogged(Identifier.toString(entity.getId()));
     }
 
@@ -102,10 +68,10 @@ class DiagnosticLogTest {
                 .vBuild();
         DiagnosticLog.instance()
                      .on(CannotDispatchDuplicateCommand
-                             .newBuilder()
-                             .setEntity(entityId())
-                             .setDuplicateCommand(command)
-                             .vBuild());
+                                 .newBuilder()
+                                 .setEntity(entity())
+                                 .setDuplicateCommand(command)
+                                 .vBuild());
         assertLogged(command.getTypeUrl());
         assertLogged(command.asCommandId().getUuid());
     }
@@ -122,26 +88,12 @@ class DiagnosticLogTest {
                 .vBuild();
         DiagnosticLog.instance()
                      .on(CannotDispatchDuplicateEvent
-                             .newBuilder()
-                             .setEntity(entityId())
-                             .setDuplicateEvent(event)
-                             .vBuild());
+                                 .newBuilder()
+                                 .setEntity(entity())
+                                 .setDuplicateEvent(event)
+                                 .vBuild());
         assertLogged(event.getTypeUrl());
         assertLogged(event.asEventId().getValue());
-    }
-
-    @Test
-    @DisplayName("log `HandlerFailedUnexpectedly` event")
-    void acceptHandlerFailedUnexpectedly() {
-        MessageId entity = entityId();
-        Error error = causeOf(new IllegalStateException("Test exception. Handler is fine."));
-        DiagnosticLog.instance()
-                     .on(HandlerFailedUnexpectedly
-                             .newBuilder()
-                             .setEntity(entity)
-                             .setError(error)
-                             .vBuild());
-        assertLogged(error.getMessage());
     }
 
     @Test
@@ -150,9 +102,9 @@ class DiagnosticLogTest {
         Error error = causeOf(new IllegalStateException("Test exception. Routing is fine."));
         DiagnosticLog.instance()
                      .on(RoutingFailed
-                             .newBuilder()
-                             .setError(error)
-                             .vBuild());
+                                 .newBuilder()
+                                 .setError(error)
+                                 .vBuild());
         assertLogged(error.getMessage());
     }
 
@@ -161,28 +113,19 @@ class DiagnosticLogTest {
     void acceptAggregateHistoryCorrupted() {
         Error error =
                 fromThrowable(new IllegalStateException("Test exception. Aggregates are fine."));
-        MessageId entityId = entityId();
+        MessageId entityId = entity();
         DiagnosticLog.instance()
                      .on(AggregateHistoryCorrupted
-                             .newBuilder()
-                             .setEntity(entityId)
-                             .setError(error)
-                             .vBuild());
+                                 .newBuilder()
+                                 .setEntity(entityId)
+                                 .setError(error)
+                                 .vBuild());
         assertLogged(Identifier.toString(entityId.getId()));
         assertLogged(error.getMessage());
     }
 
-    private void assertLogged(String messagePart) {
-        substErrorStream.flush();
-        assertThat(output.toString())
-                .contains(messagePart);
-    }
-
-    private static MessageId entityId() {
-        return MessageId
-                .newBuilder()
-                .setId(pack(newUuid()))
-                .setTypeUrl(TypeUrl.of(Empty.class).value())
-                .vBuild();
+    @Override
+    protected Logger logger() {
+        return Logger.getLogger(DiagnosticLog.class.getName());
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import io.spine.annotation.Internal;
 import io.spine.server.command.model.CommandAcceptingMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
@@ -49,11 +50,15 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
+    /**
+     * Creates a new exception for the command handler that violates the {@code @Command} semantic.
+     */
+    @Internal
     public ExternalCommandReceiverMethodError(
             CommandHandlingClass<?, ?> classWithViolation,
             Collection<? extends CommandAcceptingMethod<?, ?>> invalidMethods) {
-        super("The class `%s` declares `external` command receiver methods for command types: %s."
-                      + " Only event accepting methods should be marked as `external`.",
+        super("The class `%s` declares `external` command receiver methods for command types: %s. "
+                      + "Only event accepting methods should be marked as `external`.",
               classWithViolation, handledCommandTypes(invalidMethods));
     }
 

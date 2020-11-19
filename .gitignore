@@ -1,37 +1,99 @@
+#
+# Copyright 2020, TeamDev. All rights reserved.
+#
+# Redistribution and use in source and/or binary forms, with or without
+# modification, must retain the above copyright notice and the following
+# disclaimer.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+#
+# This file is used for two purposes:
+#  1. ignoring files in the `config` project.
+#  2. ignoring files in the projects that import `config` as a sub-module.
+#
+# Therefore, instructions below are superset of instructions required for all the projects.
+
 # IntelliJ IDEA modules and interim config files.
 *.iml
-.idea/libraries
-.idea/shelf
 .idea/*.xml
 .idea/.name
+.idea/artifacts
+.idea/libraries
+.idea/modules
+.idea/shelf
 
-# Do not ignore code style settings.
-!/.idea/codeStyleSettings.xml
+# Do not ignore the following IDEA settings
+!.idea/misc.xml
+!.idea/codeStyleSettings.xml
+!.idea/codeStyles/
+!.idea/copyright/
 
 # Gradle interim configs
-.gradle/
-
-# Maven deployment build directory
-/core-java/target
+**/.gradle/**
 
 # Generated source code
-generated/
+**/generated/**
 
 # Gradle build files
-build/
+**/build/**
 
-# IDEA build files
-out/
+# Build files produced by the IDE
+**/out/**
 
-# Spine temporary artifact storage
-.spine/
+# Ignore Gradle GUI config
+gradle-app.setting
 
-# Credentials to Maven repositories and Google Cloud Storage used for Travis build reports
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+
+# Spine internal directory for storing intermediate artifacts
+**/.spine/**
+
+# Spine model compiler auto-generated resources
+/tools/gradle-plugins/model-compiler/src/main/resources/spine-protoc.gradle
+
+# Login details to Maven repository.
+# Each workstation should have developer's login defined in this file.
 credentials.tar
 credentials.properties
 cloudrepo.properties
 deploy_key_rsa
 gcs-auth-key.json
+
+# Log files
+*.log
+
+# Package Files #
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+.packages
+pubspec.lock
+
 
 #
 # The gradle.properties file should contain settings specific to a developer's workstation.

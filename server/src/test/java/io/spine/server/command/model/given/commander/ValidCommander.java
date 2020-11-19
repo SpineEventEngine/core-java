@@ -57,10 +57,10 @@ public final class ValidCommander extends AbstractCommander {
     }
 
     @Command
-    SigSetProjectOwner declaredRejection(SigCreateProject command)
-            throws SigCannotCreateProject {
-        throw SigCannotCreateProject.newBuilder()
-                                    .build();
+    SigSetProjectOwner declaredRejection(SigCreateProject command) throws SigCannotCreateProject {
+        throw SigCannotCreateProject
+                .newBuilder()
+                .build();
     }
 
     @Command
@@ -108,13 +108,13 @@ public final class ValidCommander extends AbstractCommander {
     }
 
     @Command
-    Iterable<CommandMessage>
-    msgWithCtxIterableResult(SigAssignTask command, CommandContext ctx) {
+    Iterable<CommandMessage> msgWithCtxIterableResult(SigAssignTask command, CommandContext ctx) {
         return ImmutableList.of(startTask());
     }
 
-    @SuppressWarnings("MethodMayBeStatic") // testing the visibility level.
     @Command
+    @SuppressWarnings("MethodMayBeStatic")
+    // It is a use-case-under-test.
     private SigStartTask privateHandler(SigAssignTask command) {
         return startTask();
     }

@@ -82,7 +82,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @VisibleForTesting
 public abstract class BlackBoxContext implements Logging {
 
-    /** The context under the test. */
+    /**
+     * The context under the test.
+     */
     private final BoundedContext context;
 
     /**
@@ -114,6 +116,11 @@ public abstract class BlackBoxContext implements Logging {
     private final Set<Event> postedEvents;
 
     /**
+     * Handles runtime exceptions thrown from signal handlers.
+     */
+    private final FailedHandlerGuard failedHandlerGuard;
+
+    /**
      * Information about the current user and the time-zone.
      */
     private Actor actor;
@@ -135,6 +142,7 @@ public abstract class BlackBoxContext implements Logging {
         this.postedCommands = synchronizedSet(new HashSet<>());
         this.events = new EventCollector();
         this.postedEvents = synchronizedSet(new HashSet<>());
+        this.failedHandlerGuard = new FailedHandlerGuard();
         BoundedContextBuilder wiredCopy = wiredCopyOf(builder);
         this.context = wiredCopy.build();
         this.actor = defaultActor();
@@ -144,12 +152,15 @@ public abstract class BlackBoxContext implements Logging {
         BoundedContextBuilder result = builder.testingCopy();
         result.addCommandListener(commands)
               .addEventListener(events)
+              .addEventDispatcher(failedHandlerGuard)
               .addEventDispatcher(new UnsupportedCommandGuard(result.name().getValue()))
               .addEventDispatcher(DiagnosticLog.instance());
         return result;
     }
 
-    /** Obtains the name of the context under the test. */
+    /**
+     * Obtains the name of the context under the test.
+     */
     public BoundedContextName name() {
         return context.name();
     }
@@ -167,7 +178,7 @@ public abstract class BlackBoxContext implements Logging {
      */
     public final BlackBoxContext withActor(UserId user) {
         checkNotNull(user);
-        this.actor = this.actor.withId(user);
+        actor = actor.withId(user);
         return this;
     }
 
@@ -176,7 +187,16 @@ public abstract class BlackBoxContext implements Logging {
      */
     public final BlackBoxContext in(ZoneId zoneId) {
         checkNotNull(zoneId);
-        this.actor = this.actor.in(zoneId);
+        actor = actor.in(zoneId);
+        return this;
+    }
+
+    /**
+     * Tells context to log signal handler failures over failing the test.
+     */
+    @CanIgnoreReturnValue
+    public final BlackBoxContext tolerateFailures(){
+        failedHandlerGuard.tolerateFailures();
         return this;
     }
 
