@@ -517,7 +517,7 @@ class ServerEnvironmentTest {
         private void testClosesEnv(Class<? extends EnvironmentType> envType) throws Exception {
             ServerEnvironment.when(envType)
                              .use(storageFactory)
-                             .use(tracerFactory)
+                             .use(transportFactory)
                              .use(tracerFactory);
 
             ServerEnvironment.instance()
