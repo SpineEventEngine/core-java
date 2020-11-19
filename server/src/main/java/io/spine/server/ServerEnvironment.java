@@ -373,8 +373,8 @@ public final class ServerEnvironment implements AutoCloseable {
         Class<? extends EnvironmentType> type = environment().type();
         StorageFactory result = storageFactory.optionalValue(type)
                 .orElseThrow(() -> newIllegalStateException(
-                        "The storage factory for environment `%s` was not"
-                                + " configured. Please call `use(StorageFactory)`.",
+                        "The storage factory for environment `%s` was not configured."
+                                + " Please call `.when(environmentType).use(storageFactory)`.",
                         type.getSimpleName()));
         return result;
     }
@@ -405,7 +405,7 @@ public final class ServerEnvironment implements AutoCloseable {
         TransportFactory result = transportFactory.optionalValue(type)
                 .orElseThrow(() -> newIllegalStateException(
                         "Transport factory is not assigned for the current environment `%s`."
-                                + " Please call `use(TransportFactory)`.",
+                                + " Please call `.when(environmentType).use(transportFactory)`.",
                         type.getSimpleName()));
 
         return result;
