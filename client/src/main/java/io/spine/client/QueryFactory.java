@@ -22,7 +22,6 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
-import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.ActorContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -201,20 +200,17 @@ public final class QueryFactory {
         return builder;
     }
 
-    @Internal
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         return composeQuery(target, 0, null, fieldMask);
     }
 
-    @Internal
     Query composeQuery(Target target, OrderBy orderBy, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
         return composeQuery(target, 0, orderBy, fieldMask);
     }
 
-    @Internal
     Query composeQuery(Target target, OrderBy orderBy, int limit, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
