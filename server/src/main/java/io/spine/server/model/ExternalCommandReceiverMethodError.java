@@ -57,8 +57,8 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
     public ExternalCommandReceiverMethodError(
             CommandHandlingClass<?, ?> classWithViolation,
             Collection<? extends CommandAcceptingMethod<?, ?>> invalidMethods) {
-        super("The class `%s` declares `external` command receiver methods for command types: %s. " +
-                      "Only event accepting methods should be marked as `external`.",
+        super("The class `%s` declares `external` command receiver methods for command types: %s. "
+                      + "Only event accepting methods should be marked as `external`.",
               classWithViolation, handledCommandTypes(invalidMethods));
     }
 
