@@ -93,3 +93,18 @@ hs_err_pid*
 
 .packages
 pubspec.lock
+
+
+#
+# The gradle.properties file should contain settings specific to a developer's workstation.
+#
+# See sample file for a Mac OS X workstation below.
+# -------
+# # Set Java home to point to JDK8. This is need to generate classes working with Java8 API.
+# # Otherwise the following warning appears during the build:
+# #     warning: [options] bootstrap class path not set in conjunction with -source 1.8
+# #
+# # suppress inspection "UnusedProperty"
+# org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/
+# -------
+gradle.properties
