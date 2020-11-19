@@ -152,21 +152,6 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Updates the delivery for the current environment.
-     *
-     * <p>This method is most typically used upon an application start.
-     * It's very uncommon and even dangerous to update the delivery mechanism later when
-     * the message delivery process may have been already used by various {@code BoundedContext}s.
-     *
-     * @deprecated use {@link #use(Delivery, EnvironmentType)}
-     */
-    @Deprecated
-    public synchronized void configureDelivery(Delivery delivery) {
-        checkNotNull(delivery);
-        this.delivery.use(delivery, environment().type());
-    }
-
-    /**
      * Returns the delivery mechanism specific to this environment.
      *
      * <p>Unless {@linkplain #use(Delivery, EnvironmentType) updated manually}, returns
@@ -322,30 +307,6 @@ public final class ServerEnvironment implements AutoCloseable {
     public ServerEnvironment use(TransportFactory factory, Class<? extends EnvironmentType> type) {
         transportFactory.use(factory, type);
         return this;
-    }
-
-    /**
-     * Assigns the specified {@code StorageFactory} for tests.
-     *
-     * @deprecated use {@link #use(StorageFactory, Class)}, specifying {@code Tests.class)}
-     */
-    @Deprecated
-    public void configureStorageForTests(StorageFactory factory) {
-        checkNotNull(factory);
-        use(factory, Tests.class);
-    }
-
-    /**
-     * Assigns the specified {@code StorageFactory} for the {@link Production} application
-     * environment.
-     *
-     * @deprecated use {@link #use(StorageFactory, Class)}, specifying the
-     *         {@code Production.class} or any other environment type
-     */
-    @Deprecated
-    public void configureStorage(StorageFactory factory) {
-        checkNotNull(factory);
-        use(factory, Production.class);
     }
 
     /**

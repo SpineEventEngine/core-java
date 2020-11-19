@@ -188,20 +188,6 @@ class ServerEnvironmentTest {
             SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) factory;
             assertThat(systemAware.delegate()).isInstanceOf(InMemoryStorageFactory.class);
         }
-
-        @Test
-        @DisplayName("using a deprecated method")
-        @SuppressWarnings("deprecation")
-        void deprecatedMethod() {
-            environment.setTo(Production.class);
-
-            InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.configureStorage(storageFactory);
-            assertThat(serverEnvironment.storageFactory())
-                    .isInstanceOf(SystemAwareStorageFactory.class);
-            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
-                    .isSameInstanceAs(storageFactory);
-        }
     }
 
     @Nested
@@ -221,19 +207,6 @@ class ServerEnvironmentTest {
             serverEnvironment.use(factory, Tests.class);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
-        }
-
-        @Test
-        @DisplayName("using a deprecated method")
-        @SuppressWarnings("deprecation")
-        void deprecatedMethod() {
-            MemoizingStorageFactory factory = new MemoizingStorageFactory();
-
-            serverEnvironment.configureStorageForTests(factory);
-            StorageFactory configuredFactory = serverEnvironment.storageFactory();
-            assertThat(configuredFactory).isInstanceOf(SystemAwareStorageFactory.class);
-            assertThat(((SystemAwareStorageFactory) configuredFactory).delegate())
-                    .isSameInstanceAs(factory);
         }
     }
 
