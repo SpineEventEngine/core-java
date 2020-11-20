@@ -137,8 +137,7 @@ class ServerEnvironmentConfigTest {
             @DisplayName("returning a configured instance")
             void ok() {
                 InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-                when(Local.class)
-                                 .use(transportFactory);
+                when(Local.class).use(transportFactory);
                 assertThat(serverEnvironment.transportFactory())
                         .isSameInstanceAs(transportFactory);
             }
@@ -159,9 +158,10 @@ class ServerEnvironmentConfigTest {
         @Test
         @DisplayName("to a custom mechanism")
         void allowToCustomizeDeliveryStrategy() {
-            Delivery newDelivery = Delivery.newBuilder()
-                                           .setStrategy(UniformAcrossAllShards.forNumber(42))
-                                           .build();
+            Delivery newDelivery =
+                    Delivery.newBuilder()
+                            .setStrategy(UniformAcrossAllShards.forNumber(42))
+                            .build();
             Delivery defaultValue = serverEnvironment.delivery();
             Class<? extends EnvironmentType> currentType = environment.type();
 
@@ -171,8 +171,7 @@ class ServerEnvironmentConfigTest {
                     .isSameInstanceAs(newDelivery);
 
             // Restore the default value.
-            when(currentType)
-                             .use(defaultValue);
+            when(currentType).use(defaultValue);
         }
     }
 
@@ -197,8 +196,7 @@ class ServerEnvironmentConfigTest {
         @DisplayName("for the testing environment")
         void forTesting() {
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            when(Tests.class)
-                             .use(memoizingTracer);
+            when(Tests.class).use(memoizingTracer);
 
             Truth8.assertThat(serverEnvironment.tracing())
                   .hasValue(memoizingTracer);
@@ -252,10 +250,8 @@ class ServerEnvironmentConfigTest {
             @DisplayName("return configured `StorageFactory`")
             void productionFactory() {
                 StorageFactory factory = InMemoryStorageFactory.newInstance();
-                when(Production.class)
-                                 .use(factory);
-                StorageFactory delegate =
-                        ((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate();
+                when(Production.class).use(factory);
+                StorageFactory delegate = systemAwareFactory().delegate();
                 assertThat(delegate)
                         .isEqualTo(factory);
             }
@@ -268,8 +264,9 @@ class ServerEnvironmentConfigTest {
                 StorageFactory factory = serverEnvironment.storageFactory();
                 assertThat(factory)
                         .isInstanceOf(SystemAwareStorageFactory.class);
-                SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) factory;
-                assertThat(systemAware.delegate()).isInstanceOf(InMemoryStorageFactory.class);
+                StorageFactory delegate = systemAwareFactory().delegate();
+                assertThat(delegate)
+                        .isInstanceOf(InMemoryStorageFactory.class);
             }
         }
 
@@ -281,11 +278,9 @@ class ServerEnvironmentConfigTest {
             @DisplayName("wrapping `SystemAwareStorageFactory` over the passed instance")
             void getSet() {
                 StorageFactory factory = new MemoizingStorageFactory();
-                when(Tests.class)
-                                 .use(factory);
+                when(Tests.class).use(factory);
 
-                StorageFactory delegate =
-                        ((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate();
+                StorageFactory delegate = systemAwareFactory().delegate();
                 assertThat(delegate)
                         .isEqualTo(factory);
             }
@@ -311,15 +306,17 @@ class ServerEnvironmentConfigTest {
             @DisplayName("returning a configured wrapped instance")
             void returnConfiguredStorageFactory() {
                 InMemoryStorageFactory inMemory = InMemoryStorageFactory.newInstance();
-                when(Local.class)
-                                 .use(inMemory);
+                when(Local.class).use(inMemory);
 
-                StorageFactory delegate =
-                        ((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate();
+                StorageFactory delegate = systemAwareFactory().delegate();
                 assertThat(delegate)
                         .isEqualTo(inMemory);
             }
         }
+    }
+
+    private static SystemAwareStorageFactory systemAwareFactory() {
+        return (SystemAwareStorageFactory) serverEnvironment.storageFactory();
     }
 
     /**
