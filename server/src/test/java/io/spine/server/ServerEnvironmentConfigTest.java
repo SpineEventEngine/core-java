@@ -67,6 +67,7 @@ class ServerEnvironmentConfigTest {
         serverEnvironment.reset();
         environment.reset();
         environment.setTo(Tests.class);
+        Local.disable();
     }
 
     @Test
@@ -387,7 +388,7 @@ class ServerEnvironmentConfigTest {
         class ForCustom {
 
             @BeforeEach
-            void reset() {
+            void setToLocal() {
                 environment.setTo(Local.class);
                 Local.enable();
             }
