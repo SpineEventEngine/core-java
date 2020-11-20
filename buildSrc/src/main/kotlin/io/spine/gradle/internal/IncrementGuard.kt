@@ -39,8 +39,8 @@ class IncrementGuard : Plugin<Project> {
      *
      * Only adds the check if the project is built on Travis CI and the job is a pull request.
      *
-     * The task will never run outside of Travis CI or when building individual branches. This is
-     * done to prevent unexpected CI fails when re-building `master` multiple times, creating git
+     * The task only runs on non-master branches on GitHub Actions. This is done
+     * to prevent unexpected CI fails when re-building `master` multiple times, creating git
      * tags, and in other cases that go outside of the "usual" development cycle.
      */
     override fun apply(target: Project) {
@@ -50,25 +50,33 @@ class IncrementGuard : Plugin<Project> {
             tasks.getByName("check").dependsOn(this)
 
             shouldRunAfter("test")
-            if (!isTravisPullRequest()) {
-                logger.info("The build does not represent a Travis pull request job, the " +
-                        "`checkVersionIncrement` task is disabled.")
+            if (!shouldCheckVersion()) {
+                logger.info("The build does not represent a GitHub Actions feature branch job, " +
+                        "the `checkVersionIncrement` task is disabled.")
                 this.enabled = false
             }
         }
     }
 
     /**
-     * Returns `true` if the current build is a Travis job which represents a GitHub pull request.
+     * Returns `true` if the current build is a GitHub Actions build which represents a push
+     * to a feature branch.
      *
-     * Implementation note: the `TRAVIS_PULL_REQUEST` environment variable contains the pull
-     * request number rather than `"true"` in positive case, hence the check.
+     * Returns `false` if the associated reference is not a branch (e.g. a tag) or if it has
+     * the name which ends with `master`. So, on branches such as `master` and `2.x-jdk8-master`
+     * this method would return `false`.
      *
-     * @see <a href="https://docs.travis-ci.com/user/environment-variables/#default-environment-variables">
-     *     List of default environment variables provided for Travis builds</a>
+     * @see <a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables">
+     *     List of default environment variables provided for GitHub Actions builds</a>
      */
-    private fun isTravisPullRequest(): Boolean {
-        val isPullRequest = System.getenv("TRAVIS_PULL_REQUEST")
-        return isPullRequest != null && isPullRequest != "false"
+    private fun shouldCheckVersion(): Boolean {
+        val eventName = System.getenv("GITHUB_EVENT_NAME")
+        if ("push" != eventName) {
+            return false
+        }
+        val reference = System.getenv("GITHUB_REF") ?: return false
+        val matches = Regex("refs/heads/(.+)").matchEntire(reference) ?: return false
+        val branch = matches.groupValues[1]
+        return !branch.endsWith("master")
     }
 }
