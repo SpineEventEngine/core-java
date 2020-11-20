@@ -28,6 +28,7 @@ import io.spine.base.EnvironmentType;
 import io.spine.base.Identifier;
 import io.spine.base.Production;
 import io.spine.base.Tests;
+import io.spine.reflect.Invokables;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -48,25 +49,30 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * The server conditions and configuration under which the application operates.
  *
- * <h1>Configuration</h1>
+ * <h3>Configuration</h3>
+ * 
  * <p>Some parts of the {@code ServerEnvironment} can be customized based on the {@code
  * EnvironmentType}. To do so, one of the overloads of the {@code use} method can be called.
- * Two environment types exist out of the box: {@link Tests} and {@link Production}. For example:
+ * Two environment types exist out of the box: {@link Tests} and {@link Production}.
+ * For example:
  * <pre>
- *     ServerEnvironment.use(productionStorageFactory, Production.class)
- *                      .use(testingStorageFactory, Tests.class)
- *                      .use(memoizingTracerFactory, Production.class)
+ *
+ *     ServerEnvironment.when(Production.class)
+ *                      .use(productionStorageFactory)
+ *                      .use(memoizingTracerFactory);
+ *     ServerEnvironment.when(Tests.class)
+ *                      .use(testingStorageFactory);
  * </pre>
- * A custom environment type may also be used:
+ *
+ * <p>A custom environment type may also be used:
  * <pre>
+ *
  *     final class StagingEnvironment extends EnvironmentType {
  *         ...
  *     }
  *
- *     // Can also be
- *     // `ServerEnvironment.use(inMemoryStorageFactory, new Staging(stagingServiceDiscovery));`,
- *     // if `Staging` expects dependencies to its constructor.
- *     ServerEnvironment.use(inMemoryStorageFactory, Staging.class);
+ *     ServerEnvironment.when(Staging.class)
+ *                      .use(inMemoryStorageFactory);
  * </pre>
  * If {@code Staging} is {@link Environment#type() enabled}, the specified value is going to be
  * returned on {@link #storageFactory()}.
@@ -88,8 +94,8 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * The identifier of the server instance running in scope of this application.
      *
-     * <p>It is currently impossible to set the node identifier directly. This is a subject
-     * to change in the future framework versions.
+     * <p>It is currently impossible to set the node identifier directly.
+     * This is a subject to change in the future framework versions.
      */
     private final NodeId nodeId;
 
@@ -105,7 +111,7 @@ public final class ServerEnvironment implements AutoCloseable {
     private final EnvSetting<Delivery> delivery = new EnvSetting<>();
 
     /**
-     * Storage factory. Differs between {@linkplain EnvironmentType environment types}.
+     * Storage factory setting.
      *
      * <p>Defaults to an {@code InMemoryStorageFactory} for tests.
      */
@@ -113,13 +119,12 @@ public final class ServerEnvironment implements AutoCloseable {
             new EnvSetting<>(Tests.class, () -> wrap(InMemoryStorageFactory.newInstance()));
 
     /**
-     * Factory of {@code Tracer}s. Differs between {@linkplain EnvironmentType environment types}.
+     * The setting for the factory of {@code Tracer}s.
      */
     private final EnvSetting<TracerFactory> tracerFactory = new EnvSetting<>();
 
     /**
-     * Factory for channel-based transport. Differs between {@linkplain EnvironmentType environment
-     * types}.
+     * The setting for the factory for channel-based transport.
      *
      * <p>Defaults to an {@code InMemoryTransportFactory} for tests.
      */
@@ -150,21 +155,6 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public DeploymentType deploymentType() {
         return deploymentDetector.get();
-    }
-
-    /**
-     * Updates the delivery for the current environment.
-     *
-     * <p>This method is most typically used upon an application start. It's very uncommon and
-     * even dangerous to update the delivery mechanism later when the message delivery
-     * process may have been already used by various {@code BoundedContext}s.
-     *
-     * @deprecated use {@link #use(Delivery, EnvironmentType)}
-     */
-    @Deprecated
-    public synchronized void configureDelivery(Delivery delivery) {
-        checkNotNull(delivery);
-        use(delivery, this.delivery, environment().type());
     }
 
     /**
@@ -237,12 +227,15 @@ public final class ServerEnvironment implements AutoCloseable {
      * Assigns the specified {@code TransportFactory} for the specified application environment.
      *
      * @return this instance of {@code ServerEnvironment}
+     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
+     *         followed by {@link TypeConfigurator#use(StorageFactory) use(StorageFactory)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public ServerEnvironment use(StorageFactory factory, EnvironmentType envType) {
         checkNotNull(factory);
         SystemAwareStorageFactory wrapped = wrap(factory);
-        use(wrapped, storageFactory, envType);
+        storageFactory.registerTypeAndUse(envType, wrapped);
         return this;
     }
 
@@ -250,12 +243,15 @@ public final class ServerEnvironment implements AutoCloseable {
      * Assigns the specified {@code TransportFactory} for the specified application environment.
      *
      * @return this instance of {@code ServerEnvironment}
+     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
+     *         followed by {@link TypeConfigurator#use(StorageFactory) use(StorageFactory)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public ServerEnvironment use(StorageFactory factory, Class<? extends EnvironmentType> type) {
         checkNotNull(factory);
         SystemAwareStorageFactory wrapped = wrap(factory);
-        use(wrapped, storageFactory, type);
+        storageFactory.use(wrapped, type);
         return this;
     }
 
@@ -263,10 +259,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * Assigns the specified {@code Delivery} for the selected environment.
      *
      * @return this instance of {@code ServerEnvironment}
+     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
+     *         followed by {@link TypeConfigurator#use(Delivery) use(Delivery)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public ServerEnvironment use(Delivery delivery, EnvironmentType envType) {
-        use(delivery, this.delivery, envType);
+        this.delivery.registerTypeAndUse(envType, delivery);
         return this;
     }
 
@@ -274,10 +273,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * Assigns the specified {@code Delivery} for the selected environment.
      *
      * @return this instance of {@code ServerEnvironment}
+     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
+     *         followed by {@link TypeConfigurator#use(Delivery) use(Delivery)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public ServerEnvironment use(Delivery delivery, Class<? extends EnvironmentType> envType) {
-        use(delivery, this.delivery, envType);
+        this.delivery.use(delivery, envType);
         return this;
     }
 
@@ -285,10 +287,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * Assigns {@code TracerFactory} for the specified application environment.
      *
      * @return this instance of {@code ServerEnvironment}
+     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
+     *         followed by {@link TypeConfigurator#use(TracerFactory) use(TracerFactory)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public ServerEnvironment use(TracerFactory factory, EnvironmentType envType) {
-        use(factory, tracerFactory, envType);
+        tracerFactory.registerTypeAndUse(envType, factory);
         return this;
     }
 
@@ -296,10 +301,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * Assigns {@code TracerFactory} for the specified application environment.
      *
      * @return this instance of {@code ServerEnvironment}
+     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
+     *         followed by {@link TypeConfigurator#use(TracerFactory) use(TracerFactory)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public ServerEnvironment use(TracerFactory factory, Class<? extends EnvironmentType> envType) {
-        use(factory, tracerFactory, envType);
+        tracerFactory.use(factory, envType);
         return this;
     }
 
@@ -307,10 +315,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * Configures the specified transport factory for the selected type of environment.
      *
      * @return this instance of {@code ServerEnvironment}
+     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
+     *         followed by {@link TypeConfigurator#use(TransportFactory) use(TransportFactory)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public ServerEnvironment use(TransportFactory factory, EnvironmentType envType) {
-        use(factory, transportFactory, envType);
+        transportFactory.registerTypeAndUse(envType, factory);
         return this;
     }
 
@@ -318,35 +329,14 @@ public final class ServerEnvironment implements AutoCloseable {
      * Configures the specified transport factory for the selected type of environment.
      *
      * @return this instance of {@code ServerEnvironment}
+     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
+     *         followed by {@link TypeConfigurator#use(TransportFactory) use(TransportFactory)}
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public ServerEnvironment use(TransportFactory factory, Class<? extends EnvironmentType> type) {
-        use(factory, transportFactory, type);
+        transportFactory.use(factory, type);
         return this;
-    }
-
-    /**
-     * Assigns the specified {@code StorageFactory} for tests.
-     *
-     * @deprecated use {@link #use(StorageFactory, Class)}, specifying {@code Tests.class)}
-     */
-    @Deprecated
-    public void configureStorageForTests(StorageFactory factory) {
-        checkNotNull(factory);
-        use(factory, Tests.class);
-    }
-
-    /**
-     * Assigns the specified {@code StorageFactory} for the {@link Production} application
-     * environment.
-     *
-     * @deprecated use {@link #use(StorageFactory, Class)}, specifying the
-     *         {@code Production.class} or any other environment type
-     */
-    @Deprecated
-    public void configureStorage(StorageFactory factory) {
-        checkNotNull(factory);
-        use(factory, Production.class);
     }
 
     /**
@@ -366,20 +356,16 @@ public final class ServerEnvironment implements AutoCloseable {
      *
      * @return {@code StorageFactory} instance for the storage for the current environment
      * @throws IllegalStateException
-     *         if the value {@code StorageFactory} was not {@linkplain #use(StorageFactory, Class)}
-     *         configured} prior to the call
+     *         if the value {@code StorageFactory} was not
+     *         {@linkplain TypeConfigurator#use(StorageFactory) configured} prior to the call
      */
     public StorageFactory storageFactory() {
         Class<? extends EnvironmentType> type = environment().type();
-        StorageFactory result = storageFactory
-                .optionalValue(type)
-                .orElseThrow(() -> {
-                    String className = type.getSimpleName();
-                    return newIllegalStateException(
-                            "The storage factory for environment `%s` was not " +
-                                    "configured. Please call `use(storage, %s);`.",
-                            className, className);
-                });
+        StorageFactory result = storageFactory.optionalValue(type)
+                .orElseThrow(() -> newIllegalStateException(
+                        "The storage factory for environment `%s` was not configured."
+                                + " Please call `.when(environmentType).use(storageFactory)`.",
+                        type.getSimpleName()));
         return result;
     }
 
@@ -406,15 +392,11 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public TransportFactory transportFactory() {
         Class<? extends EnvironmentType> type = environment().type();
-        TransportFactory result = transportFactory
-                .optionalValue(type)
-                .orElseThrow(() -> {
-                    String environmentName = type.getSimpleName();
-                    return newIllegalStateException(
-                            "Transport factory is not assigned for the current environment `%s`. " +
-                                    "Please call `use(transportFactory, %s);`.",
-                            environmentName, environmentName);
-                });
+        TransportFactory result = transportFactory.optionalValue(type)
+                .orElseThrow(() -> newIllegalStateException(
+                        "Transport factory is not assigned for the current environment `%s`."
+                                + " Please call `.when(environmentType).use(transportFactory)`.",
+                        type.getSimpleName()));
 
         return result;
     }
@@ -428,12 +410,12 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @VisibleForTesting
     public void reset() {
-        this.transportFactory.reset();
-        this.tracerFactory.reset();
-        this.storageFactory.reset();
-        this.delivery.reset();
+        transportFactory.reset();
+        tracerFactory.reset();
+        storageFactory.reset();
+        delivery.reset();
         Class<? extends EnvironmentType> currentEnv = environment().type();
-        this.delivery.use(Delivery.local(), currentEnv);
+        delivery.use(Delivery.local(), currentEnv);
         resetDeploymentType();
     }
 
@@ -447,20 +429,65 @@ public final class ServerEnvironment implements AutoCloseable {
         storageFactory.apply(AutoCloseable::close);
     }
 
-    private static <V> void use(V value, EnvSetting<V> setting, EnvironmentType type) {
-        checkNotNull(value);
+    /**
+     * Starts flowing API chain for configuring {@code ServerEnvironment} for the passed type.
+     */
+    public static TypeConfigurator when(Class<? extends EnvironmentType> type) {
         checkNotNull(type);
-        checkNotNull(setting);
-        environment().register(type);
-        setting.use(value, type.getClass());
+        return new TypeConfigurator(type);
     }
 
-    private static <V> void use(V value,
-                                EnvSetting<V> setting,
-                                Class<? extends EnvironmentType> type) {
-        checkNotNull(value);
-        checkNotNull(type);
-        checkNotNull(setting);
-        setting.use(value, type);
+    /**
+     * Allows to configure values used by the {@code ServerEnvironment} for the given type.
+     */
+    public static class TypeConfigurator {
+
+        private final ServerEnvironment se;
+        private final Class<? extends EnvironmentType> type;
+
+        private TypeConfigurator(Class<? extends EnvironmentType> type) {
+            this.se = instance();
+            EnvironmentType et = Invokables.callParameterlessCtor(type);
+            Environment.instance()
+                       .register(et);
+            this.type = checkNotNull(type);
+        }
+
+        /**
+         * Assigns the specified {@code Delivery} for the selected environment.
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator use(Delivery delivery) {
+            se.use(delivery, type);
+            return this;
+        }
+
+        /**
+         * Assigns {@code TracerFactory} for the selected environment.
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator use(TracerFactory factory) {
+            se.tracerFactory.use(factory, type);
+            return this;
+        }
+
+        /**
+         * Configures the specified transport factory for the selected environment.
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator use(TransportFactory factory) {
+            se.transportFactory.use(factory, type);
+            return this;
+        }
+
+        /**
+         * Assigns the specified {@code TransportFactory} for the selected environment.
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator use(StorageFactory factory) {
+            SystemAwareStorageFactory wrapped = wrap(factory);
+            se.storageFactory.use(wrapped, type);
+            return this;
+        }
     }
 }

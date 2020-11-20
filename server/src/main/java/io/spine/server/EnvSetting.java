@@ -21,6 +21,7 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.base.Environment;
 import io.spine.base.EnvironmentType;
 
 import java.util.HashMap;
@@ -181,11 +182,31 @@ final class EnvSetting<V> {
      *
      * @param value
      *         value to assign to one of environments
+     * @param type
+     *         the type of the environment
      */
     void use(V value, Class<? extends EnvironmentType> type) {
         checkNotNull(value);
         checkNotNull(type);
         this.environmentValues.put(type, value);
+    }
+
+    /**
+     * Registers the passed type of the environment, and sets the specified value the type.
+     *
+     * @param type
+     *         the type of the environment
+     * @param value
+     *         the value to assign this type of the environment
+     * @deprecated please use {@link ServerEnvironment#when(Class)}
+     */
+    @Deprecated
+    void registerTypeAndUse(EnvironmentType type, V value) {
+        checkNotNull(type);
+        checkNotNull(value);
+        Environment.instance()
+                   .register(type);
+        use(value, type.getClass());
     }
 
     private Optional<V> valueFor(Class<? extends EnvironmentType> type) {

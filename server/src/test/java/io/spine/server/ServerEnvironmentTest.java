@@ -75,11 +75,13 @@ class ServerEnvironmentTest {
                                        .build();
         ServerEnvironment environment = serverEnvironment;
         Delivery defaultValue = environment.delivery();
-        environment.use(newDelivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(newDelivery);
         assertEquals(newDelivery, environment.delivery());
 
         // Restore the default value.
-        environment.use(defaultValue, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(defaultValue);
     }
 
     @Test
@@ -172,7 +174,8 @@ class ServerEnvironmentTest {
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
             StorageFactory factory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.use(factory, Production.class);
+            ServerEnvironment.when(Production.class)
+                             .use(factory);
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
@@ -188,20 +191,6 @@ class ServerEnvironmentTest {
             SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) factory;
             assertThat(systemAware.delegate()).isInstanceOf(InMemoryStorageFactory.class);
         }
-
-        @Test
-        @DisplayName("using a deprecated method")
-        @SuppressWarnings("deprecation")
-        void deprecatedMethod() {
-            environment.setTo(Production.class);
-
-            InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.configureStorage(storageFactory);
-            assertThat(serverEnvironment.storageFactory())
-                    .isInstanceOf(SystemAwareStorageFactory.class);
-            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
-                    .isSameInstanceAs(storageFactory);
-        }
     }
 
     @Nested
@@ -214,26 +203,16 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("returning it when explicitly set")
+        @DisplayName("wrapping `SystemAwareStorageFactory` over the passed instance")
         void getSet() {
             StorageFactory factory = new MemoizingStorageFactory();
+            ServerEnvironment.when(Tests.class)
+                             .use(factory);
 
-            serverEnvironment.use(factory, Tests.class);
-            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
+            StorageFactory delegate =
+                    ((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate();
+            assertThat(delegate)
                     .isEqualTo(factory);
-        }
-
-        @Test
-        @DisplayName("using a deprecated method")
-        @SuppressWarnings("deprecation")
-        void deprecatedMethod() {
-            MemoizingStorageFactory factory = new MemoizingStorageFactory();
-
-            serverEnvironment.configureStorageForTests(factory);
-            StorageFactory configuredFactory = serverEnvironment.storageFactory();
-            assertThat(configuredFactory).isInstanceOf(SystemAwareStorageFactory.class);
-            assertThat(((SystemAwareStorageFactory) configuredFactory).delegate())
-                    .isSameInstanceAs(factory);
         }
     }
 
@@ -266,7 +245,8 @@ class ServerEnvironmentTest {
         @DisplayName("returning a configured wrapped instance")
         void returnConfiguredStorageFactory() {
             InMemoryStorageFactory inMemory = InMemoryStorageFactory.newInstance();
-            serverEnvironment.use(inMemory, Local.class);
+            ServerEnvironment.when(Local.class)
+                             .use(inMemory);
 
             assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(inMemory);
@@ -302,7 +282,8 @@ class ServerEnvironmentTest {
         @DisplayName("return configured instance in Production")
         void productionValue() {
             TransportFactory factory = new StubTransportFactory();
-            serverEnvironment.use(factory, Production.class);
+            ServerEnvironment.when(Production.class)
+                             .use(factory);
             assertThat(serverEnvironment.transportFactory())
                     .isEqualTo(factory);
         }
@@ -321,9 +302,10 @@ class ServerEnvironmentTest {
         @DisplayName("returning one when explicitly set")
         void setExplicitly() {
             TransportFactory factory = new StubTransportFactory();
-
-            serverEnvironment.use(factory, Tests.class);
-            assertThat(serverEnvironment.transportFactory()).isEqualTo(factory);
+            ServerEnvironment.when(Tests.class)
+                             .use(factory);
+            assertThat(serverEnvironment.transportFactory())
+                    .isSameInstanceAs(factory);
         }
 
         @Test
@@ -365,8 +347,10 @@ class ServerEnvironmentTest {
         @DisplayName("returning a configured instance")
         void ok() {
             InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-            serverEnvironment.use(transportFactory, Local.class);
-            assertThat(serverEnvironment.transportFactory()).isSameInstanceAs(transportFactory);
+            ServerEnvironment.when(Local.class)
+                             .use(transportFactory);
+            assertThat(serverEnvironment.transportFactory())
+                    .isSameInstanceAs(transportFactory);
         }
     }
 
@@ -396,7 +380,8 @@ class ServerEnvironmentTest {
                        .setTo(Production.class);
 
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            serverEnvironment.use(memoizingTracer, Production.class);
+            ServerEnvironment.when(Production.class)
+                             .use(memoizingTracer);
 
             assertThat(serverEnvironment.tracing()
                                         .get()).isSameInstanceAs(memoizingTracer);
@@ -407,7 +392,8 @@ class ServerEnvironmentTest {
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         void forTesting() {
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            serverEnvironment.use(memoizingTracer, Tests.class);
+            ServerEnvironment.when(Tests.class)
+                             .use(memoizingTracer);
 
             assertThat(serverEnvironment.tracing()
                                         .get()).isSameInstanceAs(memoizingTracer);
@@ -421,7 +407,8 @@ class ServerEnvironmentTest {
                        .setTo(Local.class);
 
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            serverEnvironment.use(memoizingTracer, Local.class);
+            ServerEnvironment.when(Local.class)
+                             .use(memoizingTracer);
 
             assertThat(serverEnvironment.tracing()
                                         .get()).isSameInstanceAs(memoizingTracer);
@@ -433,7 +420,8 @@ class ServerEnvironmentTest {
             Local.disable();
 
             MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            serverEnvironment.use(memoizingTracer, Local.class);
+            ServerEnvironment.when(Local.class)
+                             .use(memoizingTracer);
 
             assertThat(serverEnvironment.tracing()).isEmpty();
         }
@@ -472,13 +460,18 @@ class ServerEnvironmentTest {
                                            .build();
             ServerEnvironment environment = serverEnvironment;
             Delivery defaultValue = environment.delivery();
-            environment.use(newDelivery, Environment.instance()
-                                                    .type());
+            Class<? extends EnvironmentType> currentType =
+                    Environment.instance()
+                               .type();
+
+            ServerEnvironment.when(currentType)
+                             .use(newDelivery);
+
             assertEquals(newDelivery, environment.delivery());
 
             // Restore the default value.
-            environment.use(defaultValue, Environment.instance()
-                                                     .type());
+            ServerEnvironment.when(currentType)
+                             .use(defaultValue);
         }
 
     }
@@ -522,16 +515,20 @@ class ServerEnvironmentTest {
         }
 
         private void testClosesEnv(Class<? extends EnvironmentType> envType) throws Exception {
-            ServerEnvironment serverEnv = ServerEnvironment.instance();
-            serverEnv.use(transportFactory, envType)
-                     .use(storageFactory, envType)
-                     .use(tracerFactory, envType);
+            ServerEnvironment.when(envType)
+                             .use(storageFactory)
+                             .use(transportFactory)
+                             .use(tracerFactory);
 
-            serverEnv.close();
+            ServerEnvironment.instance()
+                             .close();
 
-            assertThat(transportFactory.isOpen()).isFalse();
-            assertThat(storageFactory.isClosed()).isTrue();
-            assertThat(tracerFactory.closed()).isTrue();
+            assertThat(transportFactory.isOpen())
+                    .isFalse();
+            assertThat(storageFactory.isClosed())
+                    .isTrue();
+            assertThat(tracerFactory.closed())
+                    .isTrue();
         }
     }
 
