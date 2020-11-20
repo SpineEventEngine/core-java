@@ -143,18 +143,6 @@ final class Conveyor implements Iterable<InboxMessage> {
     }
 
     /**
-     * Updates the message residing on this conveyor by the identifier of the message.
-     *
-     * <p>If there is no such message on the conveyor, does nothing.
-     */
-    void update(InboxMessage message) {
-        InboxMessageId id = message.getId();
-        if (messages.containsKey(id)) {
-            messages.put(id, message);
-        }
-    }
-
-    /**
      * Runs the job for every message in this conveyor and updates those
      * {@linkplain ConveyorJob#modify(InboxMessage) modified by the job}.
      *
