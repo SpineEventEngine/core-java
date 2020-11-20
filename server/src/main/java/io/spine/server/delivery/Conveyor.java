@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -150,6 +151,23 @@ final class Conveyor implements Iterable<InboxMessage> {
         InboxMessageId id = message.getId();
         if (messages.containsKey(id)) {
             messages.put(id, message);
+        }
+    }
+
+    /**
+     * Runs the job for every message in this conveyor and updates those
+     * {@linkplain ConveyorJob#modify(InboxMessage) modified by the job}.
+     *
+     * @param job
+     *         the job to run
+     */
+    void updateWith(ConveyorJob job) {
+        for (InboxMessageId id : messages.keySet()) {
+            InboxMessage message = messages.get(id);
+            Optional<InboxMessage> modified = job.modify(message);
+            modified.ifPresent(
+                    inboxMessage -> messages.put(id, inboxMessage)
+            );
         }
     }
 

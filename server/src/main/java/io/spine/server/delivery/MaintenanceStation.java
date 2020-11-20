@@ -21,14 +21,10 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.base.EventMessage;
-import io.spine.core.Event;
-import io.spine.server.delivery.event.ShardProcessingRequested;
 
 import java.util.List;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * A station which supplies the {@link DeliveryRunInfo} to certain events being dispatched
@@ -36,8 +32,8 @@ import static io.spine.protobuf.AnyPacker.pack;
  */
 final class MaintenanceStation extends Station {
 
-    private final DeliveryRunInfo runInfo;
-    private final ImmutableList<CatchUp> finalizingJobs;
+    private final UpdateShardProcessingEvents job;
+    private final ImmutableList<CatchUp> finalizingCatchUps;
 
     /**
      * Creates a station in this delivery run-time information and initializes itself by searching
@@ -45,8 +41,8 @@ final class MaintenanceStation extends Station {
      */
     MaintenanceStation(DeliveryRunInfo runInfo) {
         super();
-        this.runInfo = runInfo;
-        this.finalizingJobs = findFinalizingJobs(runInfo);
+        this.job = new UpdateShardProcessingEvents(runInfo);
+        this.finalizingCatchUps = findFinalizingCatchUps(runInfo);
     }
 
     /**
@@ -63,48 +59,14 @@ final class MaintenanceStation extends Station {
      */
     @Override
     Result process(Conveyor conveyor) {
-        if (finalizingJobs.isEmpty()) {
+        if (finalizingCatchUps.isEmpty()) {
             return emptyResult();
         }
-        updateShardProcessingEvents(conveyor);
+        conveyor.updateWith(job);
         return emptyResult();
     }
 
-    //TODO:2020-11-05:alex.tymchenko: more clarity is required here.
-    private void updateShardProcessingEvents(Conveyor conveyor) {
-        for (InboxMessage message : conveyor) {
-            if (message.hasEvent()) {
-                Event event = message.getEvent();
-                EventMessage eventMessage = event.enclosedMessage();
-                if (eventMessage instanceof ShardProcessingRequested) {
-                    ShardProcessingRequested cast = (ShardProcessingRequested) eventMessage;
-                    ShardProcessingRequested updatedSignal = updateWithContext(cast);
-                    updateEventMessage(conveyor, message, updatedSignal);
-                }
-            }
-        }
-    }
-
-    private static void
-    updateEventMessage(Conveyor conveyor, InboxMessage message, EventMessage newValue) {
-        Event event = message.getEvent();
-        Event modifiedEvent = event.toBuilder()
-                                   .setMessage(pack(newValue))
-                                   .vBuild();
-        InboxMessage modifiedMessage = message.toBuilder()
-                                              .setEvent(modifiedEvent)
-                                              .vBuild();
-        conveyor.update(modifiedMessage);
-    }
-
-    private ShardProcessingRequested updateWithContext(ShardProcessingRequested signal) {
-        ShardProcessingRequested modifiedSignal = signal.toBuilder()
-                                                        .setRunInfo(runInfo)
-                                                        .vBuild();
-        return modifiedSignal;
-    }
-
-    private static ImmutableList<CatchUp> findFinalizingJobs(DeliveryRunInfo runInfo) {
+    private static ImmutableList<CatchUp> findFinalizingCatchUps(DeliveryRunInfo runInfo) {
         List<CatchUp> jobs = runInfo.getCatchUpJobList();
         ImmutableList<CatchUp> finalizingJobs =
                 jobs.stream()
