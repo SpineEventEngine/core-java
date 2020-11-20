@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.query.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -45,6 +46,7 @@ import static java.util.Collections.unmodifiableMap;
  * @param <R>
  *         the type of the stored records
  */
+@SPI
 public class RecordWithColumns<I, R extends Message> {
 
     private final I id;
@@ -94,7 +96,6 @@ public class RecordWithColumns<I, R extends Message> {
      *
      * <p>Such instance of {@code RecordWithColumns} will contain no storage fields.
      */
-    @Internal
     public static <I, R extends Message> RecordWithColumns<I, R> of(I id, R record) {
         return new RecordWithColumns<>(id, record, Collections.emptyMap());
     }

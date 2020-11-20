@@ -22,7 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.query.ColumnName;
@@ -45,7 +45,7 @@ import static java.util.Collections.emptyMap;
  * A value of {@link EntityRecord} associated with the values
  * of its {@linkplain io.spine.query.Column columns}.
  */
-@Internal
+@SPI
 public final class EntityRecordWithColumns<I>
         extends RecordWithColumns<I, EntityRecord> implements WithLifecycle {
 
