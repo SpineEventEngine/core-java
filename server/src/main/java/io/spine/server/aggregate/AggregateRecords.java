@@ -75,12 +75,15 @@ final class AggregateRecords {
         Any packedId = Identifier.pack(aggregateId);
 
         AggregateEventRecordId recordId = eventRecordId(eventIdStr);
-        return AggregateEventRecord.newBuilder()
-                                   .setId(recordId)
-                                   .setAggregateId(packedId)
-                                   .setTimestamp(timestamp)
-                                   .setEvent(event)
-                                   .build();
+        AggregateEventRecord result =
+                AggregateEventRecord
+                        .newBuilder()
+                        .setId(recordId)
+                        .setAggregateId(packedId)
+                        .setTimestamp(timestamp)
+                        .setEvent(event)
+                        .vBuild();
+        return result;
     }
 
     /**
@@ -105,13 +108,15 @@ final class AggregateRecords {
                                                                        .value();
         String snapshotId = format("%s_%s_%s", snapshotColumnName, stringId, snapshotTimestamp);
         AggregateEventRecordId recordId = eventRecordId(snapshotId);
-        return AggregateEventRecord
-                .newBuilder()
-                .setId(recordId)
-                .setAggregateId(Identifier.pack(aggregateId))
-                .setTimestamp(value)
-                .setSnapshot(snapshot)
-                .build();
+        AggregateEventRecord result =
+                AggregateEventRecord
+                        .newBuilder()
+                        .setId(recordId)
+                        .setAggregateId(Identifier.pack(aggregateId))
+                        .setTimestamp(value)
+                        .setSnapshot(snapshot)
+                        .vBuild();
+        return result;
     }
 
     /**
