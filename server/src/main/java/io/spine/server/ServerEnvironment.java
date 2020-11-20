@@ -363,11 +363,17 @@ public final class ServerEnvironment implements AutoCloseable {
     public StorageFactory storageFactory() {
         Class<? extends EnvironmentType> type = environment().type();
         StorageFactory result = storageFactory.optionalValue(type)
-                .orElseThrow(() -> newIllegalStateException(
-                        "The storage factory for environment `%s` was not configured."
-                                + " Please call `.when(environmentType).use(storageFactory)`.",
-                        type.getSimpleName()));
+                .orElseThrow(() -> suggestConfiguringStorageFactory(type));
         return result;
+    }
+
+    private static IllegalStateException
+    suggestConfiguringStorageFactory(Class<? extends EnvironmentType> type) {
+        String typeName = type.getSimpleName();
+        return newIllegalStateException(
+                "The storage factory for the environment `%s` was not configured."
+                        + " Please call `ServerEnvironment.when(%s.class).use(storageFactory);`.",
+                typeName, typeName);
     }
 
     /**
@@ -394,12 +400,18 @@ public final class ServerEnvironment implements AutoCloseable {
     public TransportFactory transportFactory() {
         Class<? extends EnvironmentType> type = environment().type();
         TransportFactory result = transportFactory.optionalValue(type)
-                .orElseThrow(() -> newIllegalStateException(
-                        "Transport factory is not assigned for the current environment `%s`."
-                                + " Please call `.when(environmentType).use(transportFactory)`.",
-                        type.getSimpleName()));
+                .orElseThrow(() -> suggestConfiguringTransportFactory(type));
 
         return result;
+    }
+
+    private static IllegalStateException
+    suggestConfiguringTransportFactory(Class<? extends EnvironmentType> type) {
+        String typeName = type.getSimpleName();
+        return newIllegalStateException(
+                "Transport factory is not assigned for the current environment `%s`."
+                        + " Please call `ServerEnvironment.when(%s.class).use(transportFactory);`.",
+                typeName, typeName);
     }
 
     private static Environment environment() {
