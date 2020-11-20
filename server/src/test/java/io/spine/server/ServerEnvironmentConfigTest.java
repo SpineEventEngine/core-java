@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Truth8;
 import io.spine.base.Environment;
 import io.spine.base.EnvironmentType;
@@ -32,12 +33,14 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
+import io.spine.server.trace.TracerFactory;
 import io.spine.server.trace.given.MemoizingTracerFactory;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,9 +69,21 @@ class ServerEnvironmentConfigTest {
         environment.setTo(Tests.class);
     }
 
+    @Test
+    @DisplayName("reject `null` arguments")
+    void nullCheck() {
+        ServerEnvironment.TypeConfigurator configurator = when(Tests.class);
+        new NullPointerTester().testAllPublicInstanceMethods(configurator);
+    }
+
     @Nested
     @DisplayName("`TransportFactory` for")
     class OfTransportFactory {
+
+        private void assertValue(TransportFactory factory) {
+            assertThat(serverEnvironment.transportFactory())
+                    .isSameInstanceAs(factory);
+        }
 
         @Nested
         @DisplayName("`Production`")
@@ -84,14 +99,12 @@ class ServerEnvironmentConfigTest {
             void throwsIfNotConfigured() {
                 assertThrows(IllegalStateException.class, serverEnvironment::transportFactory);
             }
-
             @Test
             @DisplayName("return configured instance in Production")
             void productionValue() {
                 TransportFactory factory = new StubTransportFactory();
                 when(Production.class).use(factory);
-                assertThat(serverEnvironment.transportFactory())
-                        .isEqualTo(factory);
+                assertValue(factory);
             }
         }
 
@@ -104,10 +117,8 @@ class ServerEnvironmentConfigTest {
             void setExplicitly() {
                 TransportFactory factory = new StubTransportFactory();
                 when(Tests.class).use(factory);
-                assertThat(serverEnvironment.transportFactory())
-                        .isSameInstanceAs(factory);
+                assertValue(factory);
             }
-
             @Test
             @DisplayName("returning an `InMemoryTransportFactory` when not set")
             void notSet() {
@@ -136,70 +147,134 @@ class ServerEnvironmentConfigTest {
             @Test
             @DisplayName("returning a configured instance")
             void ok() {
-                InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-                when(Local.class).use(transportFactory);
-                assertThat(serverEnvironment.transportFactory())
-                        .isSameInstanceAs(transportFactory);
+                InMemoryTransportFactory factory = InMemoryTransportFactory.newInstance();
+                when(Local.class).use(factory);
+                assertValue(factory);
             }
+        }
+
+        @Test
+        @DisplayName("via function")
+        void viaFn() {
+            TransportFactory factory = new StubTransportFactory();
+            ReturnValue<TransportFactory> fn = new ReturnValue<>(factory);
+
+            when(Tests.class).useTransportFactory(fn);
+
+            assertValue(factory);
+            assertThat(fn.typePassed())
+                    .isEqualTo(Tests.class);
         }
     }
 
     @Nested
     @DisplayName("`Delivery`")
-    class DeliveryTest {
+    class OfDelivery {
+
+        private Class<? extends EnvironmentType> currentType;
+        private Delivery currentDelivery;
+
+        private void assertValue(Delivery delivery) {
+            assertThat(serverEnvironment.delivery())
+                    .isSameInstanceAs(delivery);
+        }
+
+        @BeforeEach
+        void rememberCurrentDelivery() {
+            currentType = environment.type();
+            currentDelivery = serverEnvironment.delivery();
+        }
+
+        @AfterEach
+        void restoreDelivery() {
+            when(currentType).use(currentDelivery);
+        }
 
         @Test
         @DisplayName("to default back to `Local` if no delivery is set")
-        void backToLocal() {
+        void defaultsToLocal() {
             Delivery delivery = serverEnvironment.delivery();
             assertThat(delivery).isNotNull();
         }
 
         @Test
         @DisplayName("to a custom mechanism")
-        void allowToCustomizeDeliveryStrategy() {
-            Delivery newDelivery =
-                    Delivery.newBuilder()
-                            .setStrategy(UniformAcrossAllShards.forNumber(42))
-                            .build();
-            Delivery defaultValue = serverEnvironment.delivery();
-            Class<? extends EnvironmentType> currentType = environment.type();
+        void customValue() {
+            Delivery customDelivery = customDelivery();
+            when(currentType).use(customDelivery);
 
-            when(currentType).use(newDelivery);
+            assertValue(customDelivery);
+        }
 
-            assertThat(serverEnvironment.delivery())
-                    .isSameInstanceAs(newDelivery);
+        @Test
+        @DisplayName("via a function")
+        void viaFn() {
+            Delivery valueFromFunction = customDelivery();
+            ReturnValue<Delivery> fn = new ReturnValue<>(valueFromFunction);
+            when(currentType).useDelivery(fn);
 
-            // Restore the default value.
-            when(currentType).use(defaultValue);
+            assertValue(valueFromFunction);
+            assertThat(fn.typePassed())
+                    .isEqualTo(currentType);
+        }
+
+        private Delivery customDelivery() {
+            return Delivery.newBuilder()
+                           .setStrategy(UniformAcrossAllShards.forNumber(42))
+                           .build();
+        }
+    }
+
+    /**
+     * Test fixture implementing {@link ServerEnvironment.Fn} which remembers a type
+     * passed to {@link #apply(Class)} and returns the configured value.
+     *
+     * @param <R>
+     *         the type of the configuration parameter
+     */
+    static final class ReturnValue<R> implements ServerEnvironment.Fn<R> {
+
+        private @Nullable Class<? extends EnvironmentType> typePassed;
+
+        private final R value;
+
+        ReturnValue(R value) {
+            this.value = value;
+        }
+
+        @Override
+        public R apply(Class<? extends EnvironmentType> type) {
+            typePassed = type;
+            return value;
+        }
+
+        @Nullable Class<? extends EnvironmentType> typePassed() {
+            return typePassed;
         }
     }
 
     @Nested
     @DisplayName("`TracerFactory`")
-    class TracerFactory {
+    class OfTracerFactory {
 
         @Test
         @DisplayName("returning an instance for the production environment")
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
         void forProduction() {
             environment.setTo(Production.class);
 
-            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            when(Production.class).use(memoizingTracer);
+            TracerFactory factory = new MemoizingTracerFactory();
+            when(Production.class).use(factory);
 
-            assertThat(serverEnvironment.tracing()
-                                        .get()).isSameInstanceAs(memoizingTracer);
+            assertTracer(factory);
         }
 
         @Test
         @DisplayName("for the testing environment")
         void forTesting() {
-            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            when(Tests.class).use(memoizingTracer);
+            TracerFactory factory = new MemoizingTracerFactory();
+            when(Tests.class).use(factory);
 
-            Truth8.assertThat(serverEnvironment.tracing())
-                  .hasValue(memoizingTracer);
+            assertTracer(factory);
         }
 
         @Test
@@ -207,11 +282,15 @@ class ServerEnvironmentConfigTest {
         void forCustom() {
             environment.setTo(Local.class);
 
-            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            when(Local.class).use(memoizingTracer);
+            TracerFactory factory = new MemoizingTracerFactory();
+            when(Local.class).use(factory);
 
+            assertTracer(factory);
+        }
+
+        private void assertTracer(TracerFactory expected) {
             Truth8.assertThat(serverEnvironment.tracing())
-                  .hasValue(memoizingTracer);
+                  .hasValue(expected);
         }
 
         @Test
@@ -219,17 +298,39 @@ class ServerEnvironmentConfigTest {
         void forCustomEmpty() {
             Local.disable();
 
-            MemoizingTracerFactory memoizingTracer = new MemoizingTracerFactory();
-            when(Local.class).use(memoizingTracer);
+            TracerFactory factory = new MemoizingTracerFactory();
+            when(Local.class).use(factory);
 
             Truth8.assertThat(serverEnvironment.tracing())
                   .isEmpty();
+        }
+
+        @Test
+        @DisplayName("via a function")
+        void viaFn() {
+            TracerFactory factory = new MemoizingTracerFactory();
+            ReturnValue<TracerFactory> fn = new ReturnValue<>(factory);
+
+            when(Tests.class).useTracerFactory(fn);
+            assertTracer(factory);
+            assertThat(fn.typePassed())
+                    .isEqualTo(Tests.class);
         }
     }
 
     @Nested
     @DisplayName("`StorageFactory` for")
     class OfStorageFactory {
+
+        private SystemAwareStorageFactory systemAwareFactory() {
+            return (SystemAwareStorageFactory) serverEnvironment.storageFactory();
+        }
+
+        private void assertDelegateIs(StorageFactory factory) {
+            StorageFactory delegate = systemAwareFactory().delegate();
+            assertThat(delegate)
+                    .isEqualTo(factory);
+        }
 
         @Nested
         @DisplayName("`Production`")
@@ -251,9 +352,7 @@ class ServerEnvironmentConfigTest {
             void productionFactory() {
                 StorageFactory factory = InMemoryStorageFactory.newInstance();
                 when(Production.class).use(factory);
-                StorageFactory delegate = systemAwareFactory().delegate();
-                assertThat(delegate)
-                        .isEqualTo(factory);
+                assertDelegateIs(factory);
             }
 
             @Test
@@ -279,10 +378,7 @@ class ServerEnvironmentConfigTest {
             void getSet() {
                 StorageFactory factory = new MemoizingStorageFactory();
                 when(Tests.class).use(factory);
-
-                StorageFactory delegate = systemAwareFactory().delegate();
-                assertThat(delegate)
-                        .isEqualTo(factory);
+                assertDelegateIs(factory);
             }
         }
 
@@ -308,15 +404,22 @@ class ServerEnvironmentConfigTest {
                 InMemoryStorageFactory inMemory = InMemoryStorageFactory.newInstance();
                 when(Local.class).use(inMemory);
 
-                StorageFactory delegate = systemAwareFactory().delegate();
-                assertThat(delegate)
-                        .isEqualTo(inMemory);
+                assertDelegateIs(inMemory);
             }
         }
-    }
 
-    private static SystemAwareStorageFactory systemAwareFactory() {
-        return (SystemAwareStorageFactory) serverEnvironment.storageFactory();
+        @Test
+        @DisplayName("via a function")
+        void viaFn() {
+            StorageFactory factory = new MemoizingStorageFactory();
+            ReturnValue<StorageFactory> fn = new ReturnValue<>(factory);
+
+            when(Tests.class).useStorageFactory(fn);
+
+            assertDelegateIs(factory);
+            assertThat(fn.typePassed())
+                    .isEqualTo(Tests.class);
+        }
     }
 
     /**

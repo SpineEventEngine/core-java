@@ -464,8 +464,15 @@ public final class ServerEnvironment implements AutoCloseable {
             return this;
         }
 
+        /**
+         * Assigns a {@code Delivery} obtained from the passed function.
+         *
+         * @param fn
+         *      the function to provide the {@code Delivery} in response to
+         *      the currently configured server environment type
+         */
         @CanIgnoreReturnValue
-        public TypeConfigurator use(Function<Class<? extends EnvironmentType>, Delivery> fn) {
+        public TypeConfigurator useDelivery(Fn<Delivery> fn) {
             checkNotNull(fn);
             Delivery delivery = fn.apply(type);
             return use(delivery);
@@ -482,13 +489,41 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         /**
-         * Configures the specified transport factory for the selected environment.
+         * Assigns a {@code TracerFactory} obtained from the passed function.
+         *
+         * @param fn
+         *      the function to provide the {@code TracerFactory} in response to
+         *      the currently configured server environment type
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator useTracerFactory(Fn<TracerFactory> fn) {
+            checkNotNull(fn);
+            TracerFactory factory = fn.apply(type);
+            return use(factory);
+        }
+
+        /**
+         * Assigns the specified transport factory for the selected environment.
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(TransportFactory factory) {
             checkNotNull(factory);
             se.transportFactory.use(factory, type);
             return this;
+        }
+
+        /**
+         * Assigns a {@code TransportFactory} obtained from the passed function.
+         *
+         * @param fn
+         *      the function to provide the {@code TransportFactory} in response to
+         *      the currently configured server environment type
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator useTransportFactory(Fn<TransportFactory> fn) {
+            checkNotNull(fn);
+            TransportFactory factory = fn.apply(type);
+            return use(factory);
         }
 
         /**
@@ -500,5 +535,30 @@ public final class ServerEnvironment implements AutoCloseable {
             se.storageFactory.use(wrapped, type);
             return this;
         }
+
+        /**
+         * Assigns a {@code StorageFactory} obtained from the passed function.
+         *
+         * @param fn
+         *      the function to provide the {@code StorageFactory} in response to
+         *      the currently configured server environment type
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator useStorageFactory(Fn<StorageFactory> fn) {
+            checkNotNull(fn);
+            StorageFactory factory = fn.apply(type);
+            return use(factory);
+        }
+    }
+
+    /**
+     * A function which accepts a class of {@link EnvironmentType} and returns
+     * a value {@link ServerEnvironment#when(Class) configured} in a {@code ServerEnvironment}.
+     *
+     * @param <R> the type of the configured value
+     */
+    @FunctionalInterface
+    @SuppressWarnings("NewClassNamingConvention") // two letters for this name is fine.
+    public interface Fn<R> extends Function<Class<? extends EnvironmentType>, R> {
     }
 }
