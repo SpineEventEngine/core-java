@@ -40,6 +40,7 @@ import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -458,8 +459,16 @@ public final class ServerEnvironment implements AutoCloseable {
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(Delivery delivery) {
+            checkNotNull(delivery);
             se.use(delivery, type);
             return this;
+        }
+
+        @CanIgnoreReturnValue
+        public TypeConfigurator use(Function<Class<? extends EnvironmentType>, Delivery> fn) {
+            checkNotNull(fn);
+            Delivery delivery = fn.apply(type);
+            return use(delivery);
         }
 
         /**
@@ -467,6 +476,7 @@ public final class ServerEnvironment implements AutoCloseable {
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(TracerFactory factory) {
+            checkNotNull(factory);
             se.tracerFactory.use(factory, type);
             return this;
         }
@@ -476,6 +486,7 @@ public final class ServerEnvironment implements AutoCloseable {
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(TransportFactory factory) {
+            checkNotNull(factory);
             se.transportFactory.use(factory, type);
             return this;
         }
