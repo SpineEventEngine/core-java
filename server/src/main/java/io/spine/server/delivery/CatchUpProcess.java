@@ -137,7 +137,6 @@ import static java.util.stream.Collectors.toSet;
  *     <li>The status if the catch-up process is set to {@link CatchUpStatus#IN_PROGRESS
  *     IN_PROGRESS}.
  * </ol>
-
  *
  * <h3>{@link CatchUpStatus#IN_PROGRESS IN_PROGRESS}</h3>
  *
