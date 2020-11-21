@@ -40,6 +40,7 @@ import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -77,7 +78,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * If {@code Staging} is {@link Environment#type() enabled}, the specified value is going to be
  * returned on {@link #storageFactory()}.
  */
-@SuppressWarnings("ClassWithTooManyMethods" /* there are some deprecated methods to be eliminated later. */)
+@SuppressWarnings("ClassWithTooManyMethods" /* deprecated methods to be eliminated later. */)
 public final class ServerEnvironment implements AutoCloseable {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
@@ -362,10 +363,7 @@ public final class ServerEnvironment implements AutoCloseable {
     public StorageFactory storageFactory() {
         Class<? extends EnvironmentType> type = environment().type();
         StorageFactory result = storageFactory.optionalValue(type)
-                .orElseThrow(() -> newIllegalStateException(
-                        "The storage factory for environment `%s` was not configured."
-                                + " Please call `.when(environmentType).use(storageFactory)`.",
-                        type.getSimpleName()));
+                .orElseThrow(() -> SuggestConfiguring.storageFactory(type));
         return result;
     }
 
@@ -393,10 +391,7 @@ public final class ServerEnvironment implements AutoCloseable {
     public TransportFactory transportFactory() {
         Class<? extends EnvironmentType> type = environment().type();
         TransportFactory result = transportFactory.optionalValue(type)
-                .orElseThrow(() -> newIllegalStateException(
-                        "Transport factory is not assigned for the current environment `%s`."
-                                + " Please call `.when(environmentType).use(transportFactory)`.",
-                        type.getSimpleName()));
+                .orElseThrow(() -> SuggestConfiguring.transportFactory(type));
 
         return result;
     }
@@ -455,39 +450,167 @@ public final class ServerEnvironment implements AutoCloseable {
 
         /**
          * Assigns the specified {@code Delivery} for the selected environment.
+         *
+         * @see #useDelivery(Fn)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(Delivery delivery) {
+            checkNotNull(delivery);
             se.use(delivery, type);
             return this;
         }
 
         /**
+         * Assigns a {@code Delivery} obtained from the passed function.
+         *
+         * @param fn
+         *         the function to provide the {@code Delivery} in response to
+         *         the currently configured server environment type
+         * @see #use(Delivery)
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator useDelivery(Fn<Delivery> fn) {
+            checkNotNull(fn);
+            Delivery delivery = fn.apply(type);
+            return use(delivery);
+        }
+
+        /**
          * Assigns {@code TracerFactory} for the selected environment.
+         *
+         * @see #useTracerFactory(Fn)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(TracerFactory factory) {
+            checkNotNull(factory);
             se.tracerFactory.use(factory, type);
             return this;
         }
 
         /**
-         * Configures the specified transport factory for the selected environment.
+         * Assigns a {@code TracerFactory} obtained from the passed function.
+         *
+         * @param fn
+         *         the function to provide the {@code TracerFactory} in response to
+         *         the currently configured server environment type
+         * @see #use(TracerFactory)
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator useTracerFactory(Fn<TracerFactory> fn) {
+            checkNotNull(fn);
+            TracerFactory factory = fn.apply(type);
+            return use(factory);
+        }
+
+        /**
+         * Assigns the specified transport factory for the selected environment.
+         *
+         * @see #useTransportFactory(Fn)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(TransportFactory factory) {
+            checkNotNull(factory);
             se.transportFactory.use(factory, type);
             return this;
         }
 
         /**
+         * Assigns a {@code TransportFactory} obtained from the passed function.
+         *
+         * @param fn
+         *         the function to provide the {@code TransportFactory} in response to
+         *         the currently configured server environment type
+         * @see #use(TransportFactory)
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator useTransportFactory(Fn<TransportFactory> fn) {
+            checkNotNull(fn);
+            TransportFactory factory = fn.apply(type);
+            return use(factory);
+        }
+
+        /**
          * Assigns the specified {@code TransportFactory} for the selected environment.
+         *
+         * @see #useStorageFactory(Fn)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(StorageFactory factory) {
             SystemAwareStorageFactory wrapped = wrap(factory);
             se.storageFactory.use(wrapped, type);
             return this;
+        }
+
+        /**
+         * Assigns a {@code StorageFactory} obtained from the passed function.
+         *
+         * @param fn
+         *         the function to provide the {@code StorageFactory} in response to
+         *         the currently configured server environment type
+         * @see #use(StorageFactory)
+         */
+        @CanIgnoreReturnValue
+        public TypeConfigurator useStorageFactory(Fn<StorageFactory> fn) {
+            checkNotNull(fn);
+            StorageFactory factory = fn.apply(type);
+            return use(factory);
+        }
+    }
+
+    /**
+     * A function which accepts a class of {@link EnvironmentType} and returns
+     * a value {@link ServerEnvironment#when(Class) configured} in a {@code ServerEnvironment}.
+     *
+     * @param <R> the type of the configured value
+     */
+    @FunctionalInterface
+    @SuppressWarnings("NewClassNamingConvention") // two letters for this name is fine.
+    public interface Fn<R> extends Function<Class<? extends EnvironmentType>, R> {
+    }
+
+    /**
+     * Factory methods for creating exceptions raised when a feature of server
+     * environment is not properly configured.
+     */
+    private static class SuggestConfiguring {
+
+        /** Prevents instantiation of this utility class. */
+        private SuggestConfiguring() {
+        }
+
+        private static IllegalStateException
+        storageFactory(Class<? extends EnvironmentType> type) {
+            return raise(
+                    "The storage factory for the environment `%s` was not configured.",
+                    type, "storageFactory"
+            );
+        }
+
+        private static IllegalStateException
+        transportFactory(Class<? extends EnvironmentType> type) {
+            return raise(
+                    "Transport factory is not assigned for the current environment `%s`.",
+                    type, "transportFactory"
+            );
+        }
+
+        /**
+         * Creates {@code IllegalStateException} with the error message suggesting configuring
+         * a feature of {@code ServerEnvironment}.
+         *
+         * @param prefixFmt
+         *         the first part of the error message which explains the error, containing
+         *         format parameter for the type name of the current environment
+         * @param type
+         *         the type of the environment under which we depected the error
+         * @param featureParamName
+         *         the name of the parameter passed to the {@code use()} method
+         */
+        private static IllegalStateException
+        raise(String prefixFmt, Class<? extends EnvironmentType> type, String featureParamName) {
+            String typeName = type.getSimpleName();
+            String fmt = prefixFmt + " Please call `ServerEnvironment.when(%s.class).use(%s);`.";
+            return newIllegalStateException(fmt, typeName, typeName, featureParamName);
         }
     }
 }
