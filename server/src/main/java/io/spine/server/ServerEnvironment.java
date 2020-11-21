@@ -468,6 +468,8 @@ public final class ServerEnvironment implements AutoCloseable {
 
         /**
          * Assigns the specified {@code Delivery} for the selected environment.
+         *
+         * @see #useDelivery(Fn)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(Delivery delivery) {
@@ -480,8 +482,9 @@ public final class ServerEnvironment implements AutoCloseable {
          * Assigns a {@code Delivery} obtained from the passed function.
          *
          * @param fn
-         *      the function to provide the {@code Delivery} in response to
-         *      the currently configured server environment type
+         *         the function to provide the {@code Delivery} in response to
+         *         the currently configured server environment type
+         * @see #use(Delivery)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator useDelivery(Fn<Delivery> fn) {
@@ -492,6 +495,8 @@ public final class ServerEnvironment implements AutoCloseable {
 
         /**
          * Assigns {@code TracerFactory} for the selected environment.
+         *
+         * @see #useTracerFactory(Fn)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(TracerFactory factory) {
@@ -504,8 +509,9 @@ public final class ServerEnvironment implements AutoCloseable {
          * Assigns a {@code TracerFactory} obtained from the passed function.
          *
          * @param fn
-         *      the function to provide the {@code TracerFactory} in response to
-         *      the currently configured server environment type
+         *         the function to provide the {@code TracerFactory} in response to
+         *         the currently configured server environment type
+         * @see #use(TracerFactory)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator useTracerFactory(Fn<TracerFactory> fn) {
@@ -516,6 +522,8 @@ public final class ServerEnvironment implements AutoCloseable {
 
         /**
          * Assigns the specified transport factory for the selected environment.
+         *
+         * @see #useTransportFactory(Fn)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(TransportFactory factory) {
@@ -528,8 +536,9 @@ public final class ServerEnvironment implements AutoCloseable {
          * Assigns a {@code TransportFactory} obtained from the passed function.
          *
          * @param fn
-         *      the function to provide the {@code TransportFactory} in response to
-         *      the currently configured server environment type
+         *         the function to provide the {@code TransportFactory} in response to
+         *         the currently configured server environment type
+         * @see #use(TransportFactory)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator useTransportFactory(Fn<TransportFactory> fn) {
@@ -540,6 +549,8 @@ public final class ServerEnvironment implements AutoCloseable {
 
         /**
          * Assigns the specified {@code TransportFactory} for the selected environment.
+         *
+         * @see #useStorageFactory(Fn)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(StorageFactory factory) {
@@ -552,8 +563,9 @@ public final class ServerEnvironment implements AutoCloseable {
          * Assigns a {@code StorageFactory} obtained from the passed function.
          *
          * @param fn
-         *      the function to provide the {@code StorageFactory} in response to
-         *      the currently configured server environment type
+         *         the function to provide the {@code StorageFactory} in response to
+         *         the currently configured server environment type
+         * @see #use(StorageFactory)
          */
         @CanIgnoreReturnValue
         public TypeConfigurator useStorageFactory(Fn<StorageFactory> fn) {
