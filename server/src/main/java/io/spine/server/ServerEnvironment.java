@@ -78,7 +78,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * If {@code Staging} is {@link Environment#type() enabled}, the specified value is going to be
  * returned on {@link #storageFactory()}.
  */
-@SuppressWarnings("ClassWithTooManyMethods" /* there are some deprecated methods to be eliminated later. */)
+@SuppressWarnings("ClassWithTooManyMethods" /* deprecated methods to be eliminated later. */)
 public final class ServerEnvironment implements AutoCloseable {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
@@ -363,17 +363,8 @@ public final class ServerEnvironment implements AutoCloseable {
     public StorageFactory storageFactory() {
         Class<? extends EnvironmentType> type = environment().type();
         StorageFactory result = storageFactory.optionalValue(type)
-                .orElseThrow(() -> suggestConfiguringStorageFactory(type));
+                .orElseThrow(() -> SuggestConfiguring.storageFactory(type));
         return result;
-    }
-
-    private static IllegalStateException
-    suggestConfiguringStorageFactory(Class<? extends EnvironmentType> type) {
-        String typeName = type.getSimpleName();
-        return newIllegalStateException(
-                "The storage factory for the environment `%s` was not configured."
-                        + " Please call `ServerEnvironment.when(%s.class).use(storageFactory);`.",
-                typeName, typeName);
     }
 
     /**
@@ -400,18 +391,9 @@ public final class ServerEnvironment implements AutoCloseable {
     public TransportFactory transportFactory() {
         Class<? extends EnvironmentType> type = environment().type();
         TransportFactory result = transportFactory.optionalValue(type)
-                .orElseThrow(() -> suggestConfiguringTransportFactory(type));
+                .orElseThrow(() -> SuggestConfiguring.transportFactory(type));
 
         return result;
-    }
-
-    private static IllegalStateException
-    suggestConfiguringTransportFactory(Class<? extends EnvironmentType> type) {
-        String typeName = type.getSimpleName();
-        return newIllegalStateException(
-                "Transport factory is not assigned for the current environment `%s`."
-                        + " Please call `ServerEnvironment.when(%s.class).use(transportFactory);`.",
-                typeName, typeName);
     }
 
     private static Environment environment() {
@@ -584,5 +566,51 @@ public final class ServerEnvironment implements AutoCloseable {
     @FunctionalInterface
     @SuppressWarnings("NewClassNamingConvention") // two letters for this name is fine.
     public interface Fn<R> extends Function<Class<? extends EnvironmentType>, R> {
+    }
+
+    /**
+     * Factory methods for creating exceptions raised when a feature of server
+     * environment is not properly configured.
+     */
+    private static class SuggestConfiguring {
+
+        /** Prevents instantiation of this utility class. */
+        private SuggestConfiguring() {
+        }
+
+        private static IllegalStateException
+        storageFactory(Class<? extends EnvironmentType> type) {
+            return raise(
+                    "The storage factory for the environment `%s` was not configured.",
+                    type, "storageFactory"
+            );
+        }
+
+        private static IllegalStateException
+        transportFactory(Class<? extends EnvironmentType> type) {
+            return raise(
+                    "Transport factory is not assigned for the current environment `%s`.",
+                    type, "transportFactory"
+            );
+        }
+
+        /**
+         * Creates {@code IllegalStateException} with the error message suggesting configuring
+         * a feature of {@code ServerEnvironment}.
+         *
+         * @param prefixFmt
+         *         the first part of the error message which explains the error, containing
+         *         format parameter for the type name of the current environment
+         * @param type
+         *         the type of the environment under which we depected the error
+         * @param featureParamName
+         *         the name of the parameter passed to the {@code use()} method
+         */
+        private static IllegalStateException
+        raise(String prefixFmt, Class<? extends EnvironmentType> type, String featureParamName) {
+            String typeName = type.getSimpleName();
+            String fmt = prefixFmt + " Please call `ServerEnvironment.when(%s.class).use(%s);`.";
+            return newIllegalStateException(fmt, typeName, typeName, featureParamName);
+        }
     }
 }
