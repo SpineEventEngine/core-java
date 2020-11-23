@@ -20,47 +20,40 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.collect.Lists;
-import com.google.protobuf.FieldMask;
-import io.spine.client.ResponseFormat;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
+import com.google.protobuf.Message;
+import io.spine.query.RecordQuery;
+import io.spine.server.ContextSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import io.spine.server.storage.RecordWithColumns;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
 
 /**
- * Memory-based implementation of {@link RecordStorage}.
+ * An in-memory implementation of {@link RecordStorage}.
  *
  * @param <I>
- *         the type of entity IDs
+ *         the type of the record identifiers
+ * @param <R>
+ *         the type of the stored records
  */
-public final class InMemoryRecordStorage<I> extends RecordStorage<I> {
+public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
-    private final StorageSpec<I> spec;
-    private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
+    private final MultitenantStorage<TenantRecords<I, R>> multitenantStorage;
 
-    InMemoryRecordStorage(StorageSpec<I> spec,
-                          Class<? extends Entity<?, ?>> entityClass,
-                          boolean multitenant) {
-        super(entityClass, multitenant);
-        this.spec = spec;
-        this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
-            @Override
-            TenantRecords<I> createSlice() {
-                return new TenantRecords<>();
-            }
-        };
+    InMemoryRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
+        super(context, recordSpec);
+        this.multitenantStorage =
+                new MultitenantStorage<TenantRecords<I, R>>(context.isMultitenant()) {
+                    @Override
+                    TenantRecords<I, R> createSlice() {
+                        return new TenantRecords<>();
+                    }
+                };
     }
 
-    StorageSpec<I> spec() {
-        return spec;
+    private TenantRecords<I, R> records() {
+        return multitenantStorage.currentSlice();
     }
 
     @Override
@@ -69,83 +62,34 @@ public final class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    public boolean delete(I id) {
+    protected Iterator<I> index(RecordQuery<I, R> query) {
+        return records().index(query);
+    }
+
+    @Override
+    public void write(I id, R record) {
+        writeRecord(RecordWithColumns.of(id, record));
+    }
+
+    @Override
+    protected void writeRecord(RecordWithColumns<I, R> record) {
+        records().put(record.id(), record);
+    }
+
+    @Override
+    protected void writeAllRecords(Iterable<? extends RecordWithColumns<I, R>> records) {
+        for (RecordWithColumns<I, R> record : records) {
+            records().put(record.id(), record);
+        }
+    }
+
+    @Override
+    protected Iterator<R> readAllRecords(RecordQuery<I, R> query) {
+        return records().readAll(query);
+    }
+
+    @Override
+    protected boolean deleteRecord(I id) {
         return records().delete(id);
-    }
-
-    @Override
-    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> givenIds,
-                                                                   FieldMask fieldMask) {
-        TenantRecords<I> storage = records();
-
-        // It is impossible to return an immutable collection,
-        // since null may be present in it.
-        Collection<EntityRecord> result = Lists.newLinkedList();
-
-        for (I givenId : givenIds) {
-            EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
-            result.add(matchingResult);
-        }
-        return result.iterator();
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords(ResponseFormat format) {
-        return records().readAll(format);
-    }
-
-    @Override
-    protected Iterator<EntityRecord>
-    readAllRecords(EntityQuery<I> query, ResponseFormat format) {
-        EntityQuery<I> completeQuery = toCompleteQuery(query);
-        return records().readAll(completeQuery, format);
-    }
-
-    /**
-     * Creates an {@link EntityQuery} instance which has:
-     * <ul>
-     *     <li>all the parameters from the {@code src} query;
-     *     <li>at least one parameter limiting the 
-     *     {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns}.
-     * </ul>
-     *
-     * <p>If the {@code query} instance {@linkplain EntityQuery#isLifecycleAttributesSet() 
-     * contains the lifecycle attributes}, then it is returned without any changes. 
-     * Otherwise, a new instance containing active lifecycle attributes is returned.
-     *
-     * @param query
-     *         the source {@link EntityQuery} to take the parameters from
-     * @return an {@link EntityQuery} which includes
-     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns} 
-     *         unless they are not supported
-     */
-    private EntityQuery<I> toCompleteQuery(EntityQuery<I> query) {
-        if (!query.isLifecycleAttributesSet()) {
-            return query.withActiveLifecycle(this);
-        }
-        return query;
-    }
-
-    private TenantRecords<I> records() {
-        return multitenantStorage.currentSlice();
-    }
-
-    @Override
-    protected Optional<EntityRecord> readRecord(I id) {
-        return records().get(id)
-                        .map(EntityRecordUnpacker.INSTANCE);
-    }
-
-    @Override
-    protected void writeRecord(I id, EntityRecordWithColumns record) {
-        records().put(id, record);
-    }
-
-    @Override
-    protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
-        TenantRecords<I> storage = records();
-        for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
-            storage.put(record.getKey(), record.getValue());
-        }
     }
 }

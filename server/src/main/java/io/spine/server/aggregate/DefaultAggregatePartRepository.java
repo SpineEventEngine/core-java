@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.server.DefaultRepository;
 import io.spine.server.aggregate.model.AggregatePartClass;
 
@@ -29,13 +30,22 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
 /**
  * Default implementation of {@code AggregatePartRepository}.
  *
+ * @param <I>
+ *         the type of aggregate IDs
+ * @param <A>
+ *         the type of the stored aggregate part
+ * @param <S>
+ *         the type of aggregate state
+ * @param <R>
+ *         the type of an aggregate root
  * @see io.spine.server.DefaultRepository
  */
 @Internal
 public final class DefaultAggregatePartRepository<I,
-                                                  A extends AggregatePart<I, ?, ?, R>,
+                                                  A extends AggregatePart<I, S, ?, R>,
+                                                  S extends EntityState<I>,
                                                   R extends AggregateRoot<I>>
-        extends AggregatePartRepository<I, A, R>
+        extends AggregatePartRepository<I, A, S, R>
         implements DefaultRepository {
 
     private final AggregatePartClass<A> modelClass;

@@ -45,8 +45,8 @@ public final class EitherOf4<A extends Message,
 
     private static final long serialVersionUID = 0L;
 
-    private EitherOf4(Message value, int index) {
-        super(value, index);
+    private EitherOf4(Message value, IndexOf index) {
+        super(value, index.value());
     }
 
     /**
@@ -55,7 +55,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withA(A a) {
         checkNotNull(a);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(a, 0);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(a, IndexOf.A);
         return result;
     }
 
@@ -65,7 +65,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withB(B b) {
         checkNotNull(b);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(b, 1);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(b, IndexOf.B);
         return result;
     }
 
@@ -75,7 +75,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withC(C c) {
         checkNotNull(c);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(c, 2);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(c, IndexOf.C);
         return result;
     }
 
@@ -85,7 +85,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withD(D d) {
         checkNotNull(d);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(d, 3);
+        EitherOf4<A, B, C, D> result = new EitherOf4<>(d, IndexOf.D);
         return result;
     }
 
@@ -93,43 +93,87 @@ public final class EitherOf4<A extends Message,
      * Obtains the value of the first alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasA()
      */
     @Override
     public A getA() {
-        return get(this, 0);
+        return get(this, IndexOf.A);
+    }
+
+    /**
+     * Tells whether {@code <A>} value is stored.
+     *
+     * @return {@code true} if the first alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasA() {
+        return IndexOf.A.is(index());
     }
 
     /**
      * Obtains the value of the second alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasB()
      */
     @Override
     public B getB() {
-        return get(this, 1);
+        return get(this, IndexOf.B);
+    }
+
+    /**
+     * Tells whether {@code <B>} value is stored.
+     *
+     * @return {@code true} if the second alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasB() {
+        return IndexOf.B.is(index());
     }
 
     /**
      * Obtains the value of the third alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasC()
      */
     @Override
     public C getC() {
-        return get(this, 2);
+        return get(this, IndexOf.C);
+    }
+
+    /**
+     * Tells whether {@code <C>} value is stored.
+     *
+     * @return {@code true} if the third alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasC() {
+        return IndexOf.C.is(index());
     }
 
     /**
      * Obtains the value of the third alternative.
      *
      * @throws IllegalStateException if a value of another type is stored instead.
-     * @return the stored value.
+     * @return the stored value
+     * @see #hasD()
      */
     @Override
     public D getD() {
-        return get(this, 3);
+        return get(this, IndexOf.D);
+    }
+
+    /**
+     * Tells whether {@code <D>} value is stored.
+     *
+     * @return {@code true} if the fourth alternative value is set, {@code false} otherwise
+     */
+    @Override
+    public boolean hasD() {
+        return IndexOf.D.is(index());
     }
 }

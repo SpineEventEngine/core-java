@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,6 +86,13 @@ final class Conveyor implements Iterable<InboxMessage> {
         return new ArrayList<>(messages.values()).iterator();
     }
 
+    /**
+     * Creates a new stream from the contents.
+     */
+    public Stream<InboxMessage> stream() {
+        return messages.values().stream();
+    }
+
     private void markDelivered(InboxMessage message) {
         changeStatus(message, DELIVERED);
         deliveredMessages.recordDelivered(message);
@@ -132,6 +140,23 @@ final class Conveyor implements Iterable<InboxMessage> {
      */
     void markCatchUp(InboxMessage message) {
         changeStatus(message, TO_CATCH_UP);
+    }
+
+    /**
+     * Runs the job for every message in this conveyor and updates those
+     * {@linkplain ConveyorJob#modify(InboxMessage) modified by the job}.
+     *
+     * @param job
+     *         the job to run
+     */
+    void updateWith(ConveyorJob job) {
+        for (InboxMessageId id : messages.keySet()) {
+            InboxMessage message = messages.get(id);
+            Optional<InboxMessage> modified = job.modify(message);
+            modified.ifPresent(
+                    inboxMessage -> messages.put(id, inboxMessage)
+            );
+        }
     }
 
     private void changeStatus(InboxMessage message, InboxMessageStatus status) {
@@ -218,8 +243,8 @@ final class Conveyor implements Iterable<InboxMessage> {
                         .stream()
                         .filter(message -> this.dirtyMessages.contains(message.getId()))
                         .collect(toList());
-        storage.writeAll(dirtyMessages);
-        storage.removeAll(removals);
+        storage.writeBatch(dirtyMessages);
+        storage.removeBatch(removals);
         dirtyMessages.clear();
         removals.clear();
         duplicates.clear();

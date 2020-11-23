@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkState;
  * to modify the state from the descendants.
  */
 public abstract class TransactionalEntity<I,
-                                          S extends EntityState,
+                                          S extends EntityState<I>,
                                           B extends ValidatingBuilder<S>>
                       extends AbstractEntity<I, S> {
 
@@ -80,7 +80,7 @@ public abstract class TransactionalEntity<I,
     /**
      * Adds events to the {@linkplain #recentHistory() recent history}.
      */
-    protected void remember(Iterable<Event> events) {
+    protected void appendToRecentHistory(Iterable<Event> events) {
         recentHistory.addAll(events);
     }
 
@@ -89,6 +89,17 @@ public abstract class TransactionalEntity<I,
      */
     protected void clearRecentHistory() {
         recentHistory.clear();
+    }
+
+    /**
+     * A callback invoked before the transaction is committed.
+     *
+     * <p>The developers of descending types may wish to override this method to implement
+     * some common logic on modifying the entity state.
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass")  // The method does nothing by default.
+    protected void onBeforeCommit() {
+        // do nothing by default.
     }
 
     /**
@@ -157,8 +168,8 @@ public abstract class TransactionalEntity<I,
      *
      * @return {@code true} if it is active, {@code false} otherwise
      */
-    @VisibleForTesting
-    final boolean isTransactionInProgress() {
+    @Internal
+    protected final boolean isTransactionInProgress() {
         Transaction<?, ?, ?, ?> tx = this.transaction;
         boolean result = tx != null && tx.isActive();
         return result;

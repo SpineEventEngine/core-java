@@ -25,7 +25,7 @@ import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 
 /**
- * Processes a query and returns the result.
+ * Processes a {@linkplain Query query} and returns the result.
  */
 interface QueryProcessor {
 

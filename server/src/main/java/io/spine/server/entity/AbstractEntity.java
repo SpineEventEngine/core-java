@@ -71,7 +71,7 @@ import static io.spine.validate.Validate.violationsOf;
         "SynchronizeOnThis" /* This class uses double-check idiom for lazy init of some
             fields. See Effective Java 2nd Ed. Item #71. */,
         "ClassWithTooManyMethods"})
-public abstract class AbstractEntity<I, S extends EntityState>
+public abstract class AbstractEntity<I, S extends EntityState<I>>
         implements Entity<I, S>, HandlerLifecycle {
 
     /**
@@ -219,7 +219,8 @@ public abstract class AbstractEntity<I, S extends EntityState>
      * Obtains the model class.
      */
     @Internal
-    protected EntityClass<?> modelClass() {
+    @Override
+    public EntityClass<?> modelClass() {
         return EntityClass.asEntityClass(getClass());
     }
 

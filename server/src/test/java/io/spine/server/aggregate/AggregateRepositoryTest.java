@@ -30,11 +30,9 @@ import io.spine.core.Event;
 import io.spine.core.Events;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.aggregate.given.klasse.EngineAggregate;
 import io.spine.server.aggregate.given.repo.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.repo.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.repo.FailingAggregateRepository;
-import io.spine.server.aggregate.given.repo.GivenAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
 import io.spine.server.aggregate.given.repo.ReactingAggregate;
@@ -44,7 +42,6 @@ import io.spine.server.aggregate.given.repo.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.repo.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.RecentHistory;
-import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -52,9 +49,7 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.HandlerFailedUnexpectedly;
-import io.spine.system.server.Mirror;
-import io.spine.system.server.MirrorRepository;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -69,9 +64,8 @@ import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,6 +85,7 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.context;
+import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregate;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenStoredAggregate;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenStoredAggregateWithId;
@@ -99,7 +94,6 @@ import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.re
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.resetBoundedContext;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -109,8 +103,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
-@DisplayName("AggregateRepository should")
-public class AggregateRepositoryTest {
+@DisplayName("`AggregateRepository` should")
+class AggregateRepositoryTest {
 
     @BeforeEach
     void setUp() {
@@ -164,11 +158,8 @@ public class AggregateRepositoryTest {
         @DisplayName("using snapshot")
         void usingSnapshot() {
             ProjectId id = Sample.messageOfType(ProjectId.class);
-            ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
-
-            UncommittedEvents events = ((Aggregate<?, ?, ?>) expected).getUncommittedEvents();
-            repository().setSnapshotTrigger(events.list()
-                                                  .size());
+            repository().setSnapshotTrigger(3);
+            ProjectAggregate expected = givenAggregate().withUncommittedEvents(id);
             repository().store(expected);
 
             ProjectAggregate actual = assertFound(id);
@@ -181,7 +172,7 @@ public class AggregateRepositoryTest {
         @DisplayName("without using snapshot")
         void notUsingSnapshot() {
             ProjectId id = Sample.messageOfType(ProjectId.class);
-            ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
+            ProjectAggregate expected = givenAggregate().withUncommittedEvents(id);
 
             repository().store(expected);
             ProjectAggregate actual = assertFound(id);
@@ -205,11 +196,9 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("when it's required to store snapshot")
         void whenNeededToStore() {
-            ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
             // This should make the repository write the snapshot.
-            UncommittedEvents events = ((Aggregate<?, ?, ?>) aggregate).getUncommittedEvents();
-            repository().setSnapshotTrigger(events.list()
-                                                  .size());
+            repository().setSnapshotTrigger(3);
+            ProjectAggregate aggregate = givenAggregate().withUncommittedEvents();
 
             repository().store(aggregate);
             AggregateHistory record = readRecord(aggregate);
@@ -220,7 +209,7 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("when storing snapshot isn't needed")
         void whenStoreNotNeeded() {
-            ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
+            ProjectAggregate aggregate = givenAggregate().withUncommittedEvents();
 
             repository().store(aggregate);
             AggregateHistory record = readRecord(aggregate);
@@ -228,10 +217,9 @@ public class AggregateRepositoryTest {
         }
 
         private AggregateHistory readRecord(ProjectAggregate aggregate) {
-            AggregateReadRequest<ProjectId> request =
-                    new AggregateReadRequest<>(aggregate.id(), DEFAULT_SNAPSHOT_TRIGGER);
-            Optional<AggregateHistory> optional = repository().aggregateStorage()
-                                                              .read(request);
+            Optional<AggregateHistory> optional =
+                    repository().aggregateStorage()
+                                .read(aggregate.id(), DEFAULT_SNAPSHOT_TRIGGER);
             assertTrue(optional.isPresent());
             return optional.get();
         }
@@ -284,15 +272,11 @@ public class AggregateRepositoryTest {
             ProjectId id = Sample.messageOfType(ProjectId.class);
             loadOrCreate(repository, id);
 
-            AggregateReadRequest<ProjectId> passedRequest = storage.memoizedRequest();
-            assertThat(passedRequest)
-                    .isNotNull();
-
-            assertThat(passedRequest.recordId())
+            assertThat(storage.memoizedId())
                     .isEqualTo(id);
-            int snapshotTrigger = repository.snapshotTrigger();
-            assertThat(passedRequest.batchSize())
-                    .isEqualTo(snapshotTrigger + 1);
+
+            assertThat(storage.memoizedBatchSize())
+                    .isEqualTo(repository.snapshotTrigger() + 1);
         }
 
         @Test
@@ -307,19 +291,16 @@ public class AggregateRepositoryTest {
             ProjectId id = Sample.messageOfType(ProjectId.class);
             loadOrCreate(repository, id);
 
-            AggregateReadRequest<ProjectId> passedRequest = storage.memoizedRequest();
-            assertThat(passedRequest)
-                    .isNotNull();
-
-            assertThat(passedRequest.recordId())
+            assertThat(storage.memoizedId())
                     .isEqualTo(id);
-            assertThat(passedRequest.batchSize())
+
+            assertThat(storage.memoizedBatchSize())
                     .isEqualTo(nonDefaultSnapshotTrigger + 1);
         }
     }
 
-    private static void loadOrCreate(AggregateRepository<ProjectId, ProjectAggregate> repository,
-                                     ProjectId id) {
+    private static void loadOrCreate(
+            AggregateRepository<ProjectId, ProjectAggregate, AggProject> repository, ProjectId id) {
         repository.loadOrCreate(id);
     }
 
@@ -367,7 +348,7 @@ public class AggregateRepositoryTest {
 
     @SuppressWarnings("CheckReturnValue") // The returned value is not used in this test.
     @Test
-    @DisplayName("throw IllegalStateException if unable to load entity by id from storage index")
+    @DisplayName("throw `IllegalStateException` if unable to load entity by ID from storage index")
     void throwWhenUnableToLoadEntity() {
         // Store a valid aggregate.
         givenStoredAggregate();
@@ -376,7 +357,7 @@ public class AggregateRepositoryTest {
         TenantAwareOperation op = new TenantAwareOperation(generate()) {
             @Override
             public void run() {
-                givenStoredAggregateWithId(ProjectAggregateRepository.troublesome.getId());
+                givenStoredAggregateWithId(ProjectAggregateRepository.troublesome.getUuid());
             }
         };
         op.execute();
@@ -516,18 +497,18 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
-        private BlackBoxContext context;
+        private BlackBox context;
 
         /**
          * Create a fresh instance of the repository since this nested class uses
-         * {@code BlackBoxBoundedContext}. We cannot use the instance of the repository created by
+         * {@code BlackBox}. We cannot use the instance of the repository created by
          * {@link AggregateRepositoryTest#setUp()} because this method registers it with another
          * {@code BoundedContext}.
          */
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            context = BlackBoxContext.from(
+            context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(repository())
             );
@@ -588,7 +569,7 @@ public class AggregateRepositoryTest {
         }
 
         @Test
-        @DisplayName("through the repository EventFilter")
+        @DisplayName("through the repository `EventFilter`")
         void throughEventFilter() {
             ProjectId id = givenAggregateId(Identifier.newUuid());
             AggCreateProject create = AggCreateProject
@@ -606,7 +587,7 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxContext context = BlackBoxContext.from(
+            BlackBox context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new EventDiscardingAggregateRepository())
             );
@@ -727,52 +708,5 @@ public class AggregateRepositoryTest {
         assertThrows(IllegalStateException.class,
                      () -> context().internalAccess()
                                     .register(new AnemicAggregateRepository()));
-    }
-
-    @Test
-    @DisplayName("register self among mirrored types in `MirrorRepository`")
-    void registerAsMirroredType() {
-        MirrorRepository mirrorRepository = mirrorRepository(context());
-        TypeUrl type = TypeUrl.of(Project.class);
-        assertThat(mirrorRepository.isMirroring(type)).isTrue();
-    }
-
-    @Nested
-    @DisplayName("not register self among mirrored types")
-    class NotRegisterAsMirroredType {
-
-        @Test
-        @DisplayName("if the aggregate visibility is `NONE`")
-        void ifVisibilityIsNone() {
-            // `Engine` aggregate has default visibility, which is `NONE`.
-            BoundedContext context = BoundedContextBuilder.assumingTests()
-                                                          .add(EngineAggregate.class)
-                                                          .build();
-            MirrorRepository mirrorRepository = mirrorRepository(context);
-            TypeUrl type = TypeUrl.of(Project.class);
-            assertThat(mirrorRepository.isMirroring(type)).isFalse();
-        }
-
-        @Test
-        @DisplayName("if aggregate querying is disabled")
-        void ifAggregateQueryingDisabled() {
-            BoundedContextBuilder builder = BoundedContextBuilder.assumingTests();
-            builder.systemFeatures()
-                   .disableAggregateQuerying();
-            BoundedContext context = builder.add(ProjectAggregate.class)
-                                            .build();
-            BoundedContext systemContext = systemOf(context);
-            assertThat(systemContext.hasEntitiesWithState(Mirror.class)).isFalse();
-        }
-    }
-
-    private static MirrorRepository mirrorRepository(BoundedContext context) {
-        BoundedContext systemContext = systemOf(context);
-        Optional<Repository<?, ?>> repository =
-                systemContext.internalAccess()
-                             .findRepository(Mirror.class);
-        assertThat(repository).isPresent();
-        MirrorRepository result = (MirrorRepository) repository.get();
-        return result;
     }
 }

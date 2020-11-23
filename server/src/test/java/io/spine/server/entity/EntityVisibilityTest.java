@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.EntityState;
-import io.spine.core.Event;
 import io.spine.option.EntityOption;
 import io.spine.test.entity.AccountDetails;
 import io.spine.test.entity.LastSeen;
@@ -85,14 +84,6 @@ class EntityVisibilityTest {
     }
 
     @Test
-    @DisplayName("report NONE level for `Event.class`")
-    void eventDefault() {
-        EntityVisibility visibility = visibilityOf(Event.class);
-        assertTrue(visibility.is(NONE));
-        assertFalse(visibility.isNotNone());
-    }
-
-    @Test
     @DisplayName("report QUERY level")
     void findQuery() {
         EntityVisibility visibility = visibilityOf(AccountDetails.class);
@@ -130,13 +121,13 @@ class EntityVisibilityTest {
     }
 
     private static EntityVisibility
-    assertVisibility(Class<? extends EntityState> stateClass, EntityOption.Visibility expected) {
+    assertVisibility(Class<? extends EntityState<?>> stateClass, EntityOption.Visibility expected) {
         EntityVisibility actual = visibilityOf(stateClass);
         assertTrue(actual.is(expected));
         return actual;
     }
 
-    private static EntityVisibility visibilityOf(Class<? extends EntityState> stateClass) {
+    private static EntityVisibility visibilityOf(Class<? extends EntityState<?>> stateClass) {
         Optional<EntityVisibility> visibility = EntityVisibility.of(stateClass);
         assertThat(visibility).isPresent();
         return visibility.get();

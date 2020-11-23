@@ -45,7 +45,7 @@ import io.spine.server.type.EventEnvelope;
 public abstract
 class EventPlayingTransaction<I,
                               E extends TransactionalEntity<I, S, B>,
-                              S extends EntityState,
+                              S extends EntityState<I>,
                               B extends ValidatingBuilder<S>>
         extends Transaction<I, E, S, B> {
 

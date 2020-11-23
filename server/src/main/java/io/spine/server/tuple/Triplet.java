@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 
 import static io.spine.server.tuple.Element.value;
+import static io.spine.server.tuple.Values.isOptionalPresent;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -93,17 +94,39 @@ public final class Triplet<A extends Message, B, C>
 
     @Override
     public A getA() {
-        return value(this, 0);
+        return value(this, IndexOf.A);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always returns {@code true}.
+     */
+    @Override
+    public boolean hasA() {
+        return true;
     }
 
     @Override
     public B getB() {
-        return value(this, 1);
+        return value(this, IndexOf.B);
+    }
+
+    @Override
+    public boolean hasB() {
+        B value = getB();
+        return isOptionalPresent(value);
     }
 
     @Override
     public C getC() {
-        return value(this, 2);
+        return value(this, IndexOf.C);
+    }
+
+    @Override
+    public boolean hasC() {
+        C value = getC();
+        return isOptionalPresent(value);
     }
 
     @CanIgnoreReturnValue

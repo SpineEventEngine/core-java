@@ -89,8 +89,8 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setSignalId(signalIdFrom(envelope, entityId))
                 .setInboxId(inboxId)
                 .setLabel(label)
-                .setStatus(determineStatus(envelope, label))
                 .setWhenReceived(Time.currentTime())
+                .setStatus(determineStatus(envelope, label))
                 .setVersion(VersionCounter.next());
         setRecordPayload(envelope, builder);
         InboxMessage message = builder.vBuild();

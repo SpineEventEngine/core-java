@@ -26,16 +26,16 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.base.EntityColumn;
-import io.spine.base.EntityStateField;
 import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.client.CompositeFilter.CompositeOperator;
-import io.spine.code.proto.FieldName;
 import io.spine.core.Event;
 import io.spine.core.EventContextField;
 import io.spine.core.Version;
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
+import io.spine.query.EntityStateField;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -58,17 +58,13 @@ import static java.util.Arrays.stream;
 /**
  * A factory of {@link Filter} instances.
  *
- * <p>Public methods of this class represent the recommended way to create
- * a {@link Filter}.
+ * <p>Public methods of this class represent the recommended way to create a {@link Filter}.
  *
  * <a name="types"></a>
- * <h1>Comparison types</h1>
+ * <h3>Supported Types</h3>
  *
- * <p>The filters support two generic kinds of comparison:
- * <ol>
- *     <li>equality comparison;
- *     <li>ordering comparison.
- * </ol>
+ * <p>The filters allow to put criteria on fields with comparison operations. The criteria either
+ * define the particular values for the fields or specify some ordering.
  *
  * <p>The {@linkplain #eq equality comparison} supports any data type for the compared objects.
  *
@@ -112,12 +108,14 @@ public final class Filters {
      * Creates a new equality {@link Filter}.
      *
      * @param column
-     *         the entity column to filter by
+     *         the column to filter by
      * @param value
      *         the requested value
+     * @param <V>
+     *         the type of column values
      * @return a new instance of {@code Filter}
      */
-    public static Filter eq(EntityColumn column, Object value) {
+    public static <V> Filter eq(Column<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name(), value, EQUAL);
@@ -198,9 +196,11 @@ public final class Filters {
      *         the entity column to filter by
      * @param value
      *         the requested value
+     * @param <V>
+     *         the type of column values
      * @return a new instance of {@code Filter}
      */
-    public static Filter gt(EntityColumn column, Object value) {
+    public static <V> Filter gt(Column<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name(), value, GREATER_THAN);
@@ -287,9 +287,11 @@ public final class Filters {
      *         the entity column to filter by
      * @param value
      *         the requested value
+     * @param <V>
+     *         the type of column values
      * @return a new instance of {@code Filter}
      */
-    public static Filter lt(EntityColumn column, Object value) {
+    public static <V> Filter lt(Column<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name(), value, LESS_THAN);
@@ -376,9 +378,11 @@ public final class Filters {
      *         the entity column to filter by
      * @param value
      *         the requested value
+     * @param <V>
+     *         the type of column values
      * @return a new instance of {@code Filter}
      */
-    public static Filter ge(EntityColumn column, Object value) {
+    public static <V> Filter ge(Column<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name(), value, GREATER_OR_EQUAL);
@@ -465,9 +469,11 @@ public final class Filters {
      *         the entity column to filter by
      * @param value
      *         the requested value
+     * @param <V>
+     *         the type of column values
      * @return a new instance of {@code Filter}
      */
-    public static Filter le(EntityColumn column, Object value) {
+    public static <V> Filter le(Column<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         return createFilter(column.name(), value, LESS_OR_EQUAL);
@@ -566,6 +572,27 @@ public final class Filters {
     }
 
     /**
+     * Creates a new composite filter with a disjunction applied to the aggregated filters.
+     *
+     * <p>A record is considered matching this filter if it matches at least one of
+     * the aggregated filters.
+     *
+     * <p>This method is used to create the default {@code EITHER} filter if the user
+     * chooses to pass instances of {@link Filter} directly to the {@link QueryBuilder}.
+     *
+     * @param filters
+     *         the aggregated filters
+     * @return new instance of {@link CompositeFilter}
+     * @see #either(Filter, Filter...) for the public API equivalent
+     */
+    static CompositeFilter either(Collection<Filter> filters) {
+        checkNotNull(filters);
+        checkArgument(!filters.isEmpty(),
+                      "Composite filter must contain at least one plain filter in it.");
+        return composeFilters(filters, EITHER);
+    }
+
+    /**
      * Creates a new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of
@@ -576,7 +603,7 @@ public final class Filters {
      *
      * @param filters
      *         the aggregated filters
-     * @return new instance of {@link CompositeFilter}
+     * @return new instance of {@code CompositeFilter}
      * @see #all(Filter, Filter...) for the public API equivalent
      */
     static CompositeFilter all(Collection<Filter> filters) {
@@ -586,33 +613,57 @@ public final class Filters {
         return composeFilters(filters, ALL);
     }
 
-    static Filter createFilter(String fieldPath, Object value, Operator operator) {
-        Field field = Field.parse(fieldPath);
-        return createFilter(field, value, operator);
-    }
-
-    static Filter createFilter(FieldName fieldName, Object value, Operator operator) {
-        FieldPath fieldPath = fieldName.asPath();
+    /**
+     * Creates a new filter which targets a certain column by its name comparing the actual
+     * column values to the one passed value according to the passed operator.
+     *
+     * @param columnName
+     *         the name of the column
+     * @param value
+     *         the value to filter by
+     * @param operator
+     *         the operator to use in comparison of actual values to the passed one
+     * @return a new filter instance
+     */
+    static Filter createFilter(ColumnName columnName, Object value, Operator operator) {
+        String fieldPath = columnName.value();
         return createFilter(fieldPath, value, operator);
     }
 
+    /**
+     * Creates a new filter which targets a certain {@code Message} field by comparing the actual
+     * field values to the one passed value according to the passed operator.
+     *
+     * @param field
+     *         the declaration of a field in a {@code Message} instances of which are filtered
+     * @param value
+     *         the value to filter by
+     * @param operator
+     *         the operator to use in comparison of actual values to the passed one
+     * @return a new filter instance
+     */
     static Filter createFilter(Field field, Object value, Operator operator) {
+        checkNotNull(field);
         FieldPath fieldPath = field.path();
         return createFilter(fieldPath, value, operator);
     }
 
-    static Filter createFilter(FieldPath path, Object value, Operator operator) {
-        Any wrappedValue = toAny(value);
-        Filter filter = Filter
-                .newBuilder()
-                .setFieldPath(path)
-                .setValue(wrappedValue)
-                .setOperator(operator)
-                .build();
-        return filter;
-    }
-
+    /**
+     * Creates a filter for {@link Event} instances which is applied to one of the fields in
+     * the {@link io.spine.core.EventContext EventContext} corresponding to the {@code Event}.
+     *
+     * @param field
+     *         the declaration of the field in the {@code EventContext}
+     * @param value
+     *         the value to filter by
+     * @param operator
+     *         the operator to use in filtering
+     * @return a new instance of {@code Filter}
+     */
     static Filter createContextFilter(Field field, Object value, Operator operator) {
+        checkNotNull(field);
+        checkNotNull(value);
+        checkNotNull(operator);
         FieldPath fieldPath = Event.Field.context()
                                          .getField()
                                          .nested(field)
@@ -620,7 +671,20 @@ public final class Filters {
         return createFilter(fieldPath, value, operator);
     }
 
+    /**
+     * Creates a new composite filter out of the passed {@code Filter} instances joining them
+     * with the passed composite operator.
+     *
+     * @param filters
+     *         the filters to include into the composite filter
+     * @param operator
+     *         the operator to use in evaluation of the intermediate evaluation results
+     *         of each of the aggregated filters
+     * @return a new instance of {@code CompositeFilter}
+     */
     static CompositeFilter composeFilters(Iterable<Filter> filters, CompositeOperator operator) {
+        checkNotNull(filters);
+        checkNotNull(operator);
         CompositeFilter result = CompositeFilter
                 .newBuilder()
                 .addAllFilter(filters)
@@ -629,26 +693,64 @@ public final class Filters {
         return result;
     }
 
+    /**
+     * Obtains the {@link Filter}s from the passed array of {@code Filter} wrappers and returns
+     * them as new array.
+     *
+     * @param filters
+     *         the filter wrappers
+     * @return a new array of the {@code Filter} instances
+     */
     static Filter[] extractFilters(TypedFilter<?>[] filters) {
+        checkNotNull(filters);
         return stream(filters)
                 .map(TypedFilter::filter)
                 .toArray(Filter[]::new);
     }
 
+    /**
+     * Obtains the {@link Filter}s from the passed collection of {@code Filter} wrappers and returns
+     * them as a new immutable list.
+     *
+     * @param filters
+     *         the filter wrappers
+     * @param <M>
+     *         the type of the filtered messages specific to the passed filter wrappers
+     * @return an immutable list of the {@code Filter}s
+     */
     static <M extends Message> ImmutableList<Filter>
     extractFilters(Collection<? extends TypedFilter<M>> filters) {
+        checkNotNull(filters);
         return filters.stream()
                       .map(TypedFilter::filter)
                       .collect(toImmutableList());
     }
 
+    /**
+     * Obtains the {@link CompositeFilter}s from the passed array of {@code CompositeFilter}
+     * wrappers and returns them as new array.
+     *
+     * @param filters
+     *         the composite filter wrappers
+     * @return a new array of the {@code CompositeFilter} instances
+     */
     static CompositeFilter[] extractFilters(TypedCompositeFilter<?>[] filters) {
+        checkNotNull(filters);
         return stream(filters)
                 .map(TypedCompositeFilter::filter)
                 .toArray(CompositeFilter[]::new);
     }
 
+    /**
+     * Ensures that the instances of the passed type are supported for ordering comparison.
+     *
+     * <p>Throws an {@link IllegalArgumentException} if the passed type does not qualify for that.
+     *
+     * @param cls
+     *         the type to check
+     */
     static void checkSupportedOrderingComparisonType(Class<?> cls) {
+        checkNotNull(cls);
         Class<?> dataType = Primitives.wrap(cls);
         boolean supported = isSupportedNumber(dataType)
                 || Timestamp.class.isAssignableFrom(dataType)
@@ -676,5 +778,24 @@ public final class Filters {
     public static Predicate<Event> toEventFilter(CompositeFilter filterData) {
         checkNotNull(filterData);
         return new CompositeEventFilter(filterData);
+    }
+
+    private static Filter createFilter(FieldPath path, Object value, Operator operator) {
+        checkNotNull(path);
+        checkNotNull(value);
+        checkNotNull(operator);
+        Any wrappedValue = toAny(value);
+        Filter filter = Filter
+                .newBuilder()
+                .setFieldPath(path)
+                .setValue(wrappedValue)
+                .setOperator(operator)
+                .build();
+        return filter;
+    }
+
+    private static Filter createFilter(String fieldPath, Object value, Operator operator) {
+        Field field = Field.parse(fieldPath);
+        return createFilter(field, value, operator);
     }
 }

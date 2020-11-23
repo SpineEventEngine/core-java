@@ -47,7 +47,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I>
  *         the type of the identifiers
  */
-final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState> {
+final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState<?>> {
 
     private static final long serialVersionUID = 0L;
 
@@ -74,7 +74,7 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState> {
         return new DefaultStateRoute<>(idClass);
     }
 
-    boolean supports(Class<? extends EntityState> stateType) {
+    boolean supports(Class<? extends EntityState<?>> stateType) {
         Descriptor type = Messages.defaultInstance(stateType)
                                   .getDescriptorForType();
         Optional<FieldDescriptor> idField = findField(idClass, type);
@@ -100,7 +100,7 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState> {
      *          if the passed state instance does not have a field of the required ID type
      */
     @Override
-    public Set<I> apply(EntityState state, EventContext ignored) {
+    public Set<I> apply(EntityState<?> state, EventContext ignored) {
         checkNotNull(state);
         checkNotNull(ignored);
         Class<? extends EntityState> messageClass = state.getClass();
@@ -119,7 +119,7 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState> {
         return result;
     }
 
-    private Set<I> fieldToSet(FieldDescriptor field, EntityState state) {
+    private Set<I> fieldToSet(FieldDescriptor field, EntityState<?> state) {
         Object fieldValue = state.getField(field);
         I id = idClass.cast(fieldValue);
         return withId(id);

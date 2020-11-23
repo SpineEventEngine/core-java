@@ -28,7 +28,6 @@ import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
-import io.spine.server.entity.storage.Columns;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.system.server.EntityTypeName;
@@ -49,7 +48,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <E> the type of entities
  */
 @SuppressWarnings("SynchronizeOnThis") // Double-check idiom for lazy init.
-public class EntityClass<E extends Entity> extends ModelClass<E> {
+public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
 
     private static final long serialVersionUID = 0L;
 
@@ -57,7 +56,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     private final Class<?> idClass;
 
     /** The class of the entity state. */
-    private final Class<? extends EntityState> stateClass;
+    private final Class<? extends EntityState<?>> stateClass;
 
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
@@ -67,13 +66,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     /** The default state of entities of this class. */
     @LazyInit
-    private transient volatile @MonotonicNonNull EntityState defaultState;
-
-    /**
-     * The entity columns of this class.
-     */
-    @LazyInit
-    private transient volatile @MonotonicNonNull Columns columns;
+    private transient volatile @MonotonicNonNull EntityState<?> defaultState;
 
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
@@ -98,7 +91,20 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains an entity class for the passed raw class.
      */
-    public static <E extends Entity> EntityClass<E> asEntityClass(Class<E> cls) {
+    public static <E extends Entity<?, ?>> EntityClass<E> asEntityClass(Class<E> cls) {
+        checkNotNull(cls);
+        EntityClass<E> result = (EntityClass<E>)
+                get(cls, EntityClass.class, () -> new EntityClass<>(cls));
+        return result;
+    }
+
+    /**
+     * Obtains an entity class for the passed parameterized class.
+     *
+     * <p>Use this method when a more precise type bounds are required.
+     */
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    EntityClass<E> asParameterizedEntityClass(Class<E> cls) {
         checkNotNull(cls);
         EntityClass<E> result = (EntityClass<E>)
                 get(cls, EntityClass.class, () -> new EntityClass<>(cls));
@@ -134,32 +140,15 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the default state for this class of entities.
      */
-    public final EntityState defaultState() {
-        EntityState result = defaultState;
+    public final EntityState<?> defaultState() {
+        EntityState<?> result = defaultState;
         if (result == null) {
             synchronized (this) {
                 result = defaultState;
                 if (result == null) {
-                    Class<? extends EntityState> stateClass = stateClass();
+                    Class<? extends EntityState<?>> stateClass = stateClass();
                     defaultState = defaultInstance(stateClass);
                     result = defaultState;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Obtains the entity columns of this class.
-     */
-    public final Columns columns() {
-        Columns result = columns;
-        if (result == null) {
-            synchronized (this) {
-                result = columns;
-                if (result == null) {
-                    columns = Columns.of(this);
-                    result = columns;
                 }
             }
         }
@@ -183,7 +172,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the class of the state of entities of this class.
      */
-    public final Class<? extends EntityState> stateClass() {
+    public final Class<? extends EntityState<?>> stateClass() {
         return stateClass;
     }
 
@@ -267,7 +256,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      *
      * @throws ModelError if unsupported ID class passed
      */
-    public static <I> Class<I> idClass(Class<? extends Entity> cls) {
+    public static <I> Class<I> idClass(Class<? extends Entity<?, ?>> cls) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
                 Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.argumentIn(cls);
         try {
@@ -285,8 +274,8 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * public API. It is used internally by other framework routines and not designed for efficient
      * execution by Spine users.
      */
-    public static <S extends EntityState> Class<S>
-    stateClassOf(Class<? extends Entity> entityClass) {
+    public static <S extends EntityState<?>> Class<S>
+    stateClassOf(Class<? extends Entity<?, ?>> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
         return result;

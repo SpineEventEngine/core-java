@@ -104,9 +104,10 @@ message Filter {
 
     // The path to the field to be matched.
     //
-    // If the filter is a query filter, this path should contain a top-level message field that
-    // is marked with the `(column)` option. For subscriptions, any message fields can be specified
-    // including nested ones.
+    // If the filter is an entity query filter, this path must contain a top-level message field
+    // marked with the `(column)` option.
+    //
+    // For subscriptions, any message fields can be specified including the nested fields.
     //
     base.FieldPath field_path = 1 [(required) = true];
 

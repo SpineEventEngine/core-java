@@ -67,7 +67,7 @@ import static io.spine.testing.server.query.ResponseStatusSubject.responseStatus
  */
 @VisibleForTesting
 public final class QueryResultSubject
-        extends IterableOfProtosSubject<EntityState> {
+        extends IterableOfProtosSubject<EntityState<?>> {
 
     /**
      * A helper {@code Subject} which allows to check the {@link QueryResponse} status.
@@ -86,10 +86,10 @@ public final class QueryResultSubject
      */
     private IterableEntityVersionSubject versionsSubject;
 
-    private final ImmutableList<EntityState> actual;
+    private final ImmutableList<EntityState<?>> actual;
 
     private QueryResultSubject(FailureMetadata failureMetadata,
-                               Iterable<EntityState> entityStates) {
+                               Iterable<EntityState<?>> entityStates) {
         super(failureMetadata, entityStates);
         this.actual = ImmutableList.copyOf(entityStates);
     }
@@ -103,7 +103,7 @@ public final class QueryResultSubject
     public static QueryResultSubject assertQueryResult(QueryResponse queryResponse) {
         checkNotNull(queryResponse, "`QueryResponse` must never be `null`.");
 
-        Iterable<EntityState> entityStates = extractEntityStates(queryResponse);
+        Iterable<EntityState<?>> entityStates = extractEntityStates(queryResponse);
         QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
         subject.initChildSubjects(queryResponse);
         return subject;
@@ -122,7 +122,7 @@ public final class QueryResultSubject
     /**
      * Obtains the actually queried entity states.
      */
-    public ImmutableList<EntityState> actual() {
+    public ImmutableList<EntityState<?>> actual() {
         return actual;
     }
 
@@ -147,7 +147,7 @@ public final class QueryResultSubject
      */
     public ProtoSubject containsSingleEntityStateThat() {
         assertContainsSingleItem();
-        EntityState state = actual.iterator()
+        EntityState<?> state = actual.iterator()
                                   .next();
         ProtoSubject subject = check("singleEntityState()").about(protos())
                                                            .that(state);
@@ -174,8 +174,8 @@ public final class QueryResultSubject
         hasSize(1);
     }
 
-    private static ImmutableList<EntityState> extractEntityStates(QueryResponse queryResponse) {
-        ImmutableList<EntityState> result = ImmutableList.copyOf(queryResponse.states());
+    private static ImmutableList<EntityState<?>> extractEntityStates(QueryResponse queryResponse) {
+        ImmutableList<EntityState<?>> result = ImmutableList.copyOf(queryResponse.states());
         return result;
     }
 
@@ -189,7 +189,7 @@ public final class QueryResultSubject
                 .getStatus();
     }
 
-    static Subject.Factory<QueryResultSubject, Iterable<EntityState>> queryResult() {
+    static Subject.Factory<QueryResultSubject, Iterable<EntityState<?>>> queryResult() {
         return QueryResultSubject::new;
     }
 }

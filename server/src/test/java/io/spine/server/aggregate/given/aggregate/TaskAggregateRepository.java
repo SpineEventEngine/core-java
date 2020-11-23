@@ -21,10 +21,12 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
 
 /**
  * A repository that manages {@link TaskAggregate} instances.
  */
-public class TaskAggregateRepository extends AggregateRepository<AggTaskId, TaskAggregate> {
+public class TaskAggregateRepository
+        extends AggregateRepository<AggTaskId, TaskAggregate, AggTask> {
 }

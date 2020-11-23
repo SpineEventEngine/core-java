@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -117,6 +118,23 @@ class TripletTest {
         assertEquals(a, triplet.getA());
         assertEquals(b, triplet.getB());
         assertEquals(c, triplet.getC());
+    }
+
+    @Test
+    @DisplayName("tell if elements are present if they are indeed set")
+    void tellElementsPresent() {
+        assertThat(triplet.hasA()).isTrue();
+        assertThat(triplet.hasB()).isTrue();
+        assertThat(triplet.hasC()).isTrue();
+    }
+
+    @Test
+    @DisplayName("tell if elements are absent if set as `null`")
+    void tellElementsAbsent() {
+        assertThat(Triplet.withNullable(a, b, null)
+                          .hasC()).isFalse();
+        assertThat(Triplet.withNullable2(a, null, null)
+                          .hasB()).isFalse();
     }
 
     @Nested

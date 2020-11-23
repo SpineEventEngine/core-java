@@ -38,7 +38,8 @@ import static io.spine.server.aggregate.AggregatePart.GenericParameter.AGGREGATE
  *
  * @param <A> the type of aggregate parts.
  */
-public final class AggregatePartClass<A extends AggregatePart> extends AggregateClass<A> {
+public final class AggregatePartClass<A extends AggregatePart<?, ?, ?, ?>>
+        extends AggregateClass<A> {
 
     private static final long serialVersionUID = 0L;
 
@@ -54,7 +55,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     /**
      * Obtains an aggregate part class for the passed raw class.
      */
-    public static <A extends AggregatePart>
+    public static <A extends AggregatePart<?, ?, ?, ?>>
     AggregatePartClass<A> asAggregatePartClass(Class<A> cls) {
         checkNotNull(cls);
         AggregatePartClass<A> result = (AggregatePartClass<A>)

@@ -42,7 +42,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface SystemColumn {
 
     /**
-     * The column name for storage.
+     * The implementation of the column.
      */
-    String name();
+    EntityRecordColumn impl();
 }

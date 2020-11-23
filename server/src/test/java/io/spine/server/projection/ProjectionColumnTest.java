@@ -20,11 +20,12 @@
 
 package io.spine.server.projection;
 
-import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.Columns;
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
+import io.spine.server.entity.storage.EntityRecordColumn;
+import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.server.projection.given.SavedString;
 import io.spine.server.projection.given.SavingProjection;
-import io.spine.server.storage.StorageField;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,32 +33,29 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 
 @Nested
 @DisplayName("Projection should have columns")
 class ProjectionColumnTest {
 
+    private static final EntityRecordSpec<String, SavedString, SavingProjection> recordSpec =
+            EntityRecordSpec.of(SavingProjection.class);
+
     @Test
     @DisplayName("`version`")
     void version() {
-        assertHasColumn(SavingProjection.class, version);
+        assertHasColumn(EntityRecordColumn.version.columnName());
     }
 
     @Test
     @DisplayName("`archived` and `deleted`")
     void lifecycleColumns() {
-        assertHasColumn(SavingProjection.class, archived);
-        assertHasColumn(SavingProjection.class, deleted);
+        assertHasColumn(EntityRecordColumn.archived.columnName());
+        assertHasColumn(EntityRecordColumn.deleted.columnName());
     }
 
-    private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
-                                        StorageField storageField) {
-        Columns columns = Columns.of(projectionType);
-        ColumnName columnName = ColumnName.of(storageField);
-        Optional<Column> result = columns.find(columnName);
+    private static void assertHasColumn(ColumnName columnName) {
+        Optional<Column<?, ?>> result = recordSpec.findColumn(columnName);
         assertThat(result).isPresent();
     }
 }

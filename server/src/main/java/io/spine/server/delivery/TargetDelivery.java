@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.IdInTenant;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -91,11 +92,14 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         List<Batch<I>> batches = Batch.byInboxId(incoming, this::asEnvelope);
 
         for (Batch<I> batch : batches) {
-            batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents);
+            TenantId tenant = batch.inboxId.tenant();
+            TenantAwareRunner.with(tenant).run(
+                    () -> batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents)
+            );
         }
     }
 
-    private SignalEnvelope asEnvelope(InboxMessage message) {
+    private SignalEnvelope<?, ?, ?> asEnvelope(InboxMessage message) {
         if (message.hasCommand()) {
             return inboxOfCmds.asEnvelope(message);
         } else {
@@ -120,14 +124,14 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
          *
          * <p>The resulting order of messages through all batches is preserved.
          */
-        private static <I> List<Batch<I>> byInboxId(List<InboxMessage> messages,
-                                                    Function<InboxMessage, SignalEnvelope> fn) {
+        private static <I> List<Batch<I>>
+        byInboxId(List<InboxMessage> messages, Function<InboxMessage, SignalEnvelope<?, ?, ?>> fn) {
             List<Batch<I>> batches = new ArrayList<>();
             Batch<I> currentBatch = null;
             for (InboxMessage message : messages) {
 
                 InboxId msgInboxId = message.getInboxId();
-                SignalEnvelope envelope = fn.apply(message);
+                SignalEnvelope<?, ?, ?> envelope = fn.apply(message);
                 TenantId tenantId = envelope.tenantId();
                 if (currentBatch == null) {
                     currentBatch = new Batch<>(msgInboxId, tenantId);

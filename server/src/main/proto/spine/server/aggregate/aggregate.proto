@@ -34,6 +34,8 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/core/event.proto";
 import "spine/core/version.proto";
+import "spine/server/entity/entity.proto";
+
 
 // The message for storing an aggregate snapshot.
 message Snapshot {
@@ -53,6 +55,14 @@ message Snapshot {
     // This field is used when storing a snapshot in `AggregateEventRecord`.
     //
     google.protobuf.Timestamp timestamp = 3;
+
+    // The lifecycle flags of the aggregate at the moment of the creation of this snapshot.
+    spine.server.entity.LifecycleFlags lifecycle = 4;
+}
+
+message AggregateEventRecordId {
+
+    string value = 1 [(required) = true];
 }
 
 // A record with information about an event or a snapshot of an aggregate.
@@ -60,6 +70,13 @@ message Snapshot {
 // This message is used by storage implementations.
 //
 message AggregateEventRecord {
+
+    // An identifier of the record.
+    //
+    // This field is technically `(required)`, but left optional intentionally
+    // to comply with the legacy data.
+    //
+    AggregateEventRecordId id = 4;
 
     // A timestamp of the event or snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
@@ -71,6 +88,13 @@ message AggregateEventRecord {
         // A snapshot of the aggregate.
         server.aggregate.Snapshot snapshot = 3;
     }
+
+    // An identifier of the aggregate which history the `AggregateEventRecord` is a part of .
+    //
+    // This field is technically `(required)`, but left optional intentionally
+    // to comply with the legacy data.
+    //
+    google.protobuf.Any aggregate_id = 5;
 }
 
 // A history of an aggregate is a sequence of its events which is used by the aggregate
@@ -93,5 +117,38 @@ message AggregateHistory {
     // Otherwise, it is the full history of the aggregate.
     //
     repeated core.Event event = 2;
+}
+
+
+// The state of an aggregate at some point in time stored as a distinct record.
+//
+// Being persisted separately from aggregate's history (i.e. event and snapshot records),
+// state records unlock the possibility to query the storage for aggregate instances.
+//
+// The records of this type are not used to replay the aggregate history, but rather serve as
+// an eventually-consistent "read-side" of the stored aggregate instance.
+//
+message AggregateStateRecord {
+
+    // The ID of the corresponding aggregate packed as Any.
+    google.protobuf.Any value = 1 [(required) = true, (validate) = true];
+
+    // The type URL of the aggregate ID.
+    string id_type = 2 [(required) = true];
+
+    // The state of the aggregate.
+    //
+    // This field is populated if the aggregate is visible for querying.
+    //
+    google.protobuf.Any state = 3;
+
+    // The version of the aggregate.
+    core.Version version = 4;
+
+    // The aggregate type URL.
+    string aggregate_type = 5 [(column) = true];
+
+    // The lifecycle flags of the aggregate.
+    spine.server.entity.LifecycleFlags lifecycle = 6;
 }
 

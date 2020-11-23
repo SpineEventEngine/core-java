@@ -37,7 +37,7 @@ public interface ReactingClass extends EventReceiverClass {
      * @param originClass
      *         the class of messages that are origins of these events
      */
-    EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass);
+    EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass);
 
     /**
      * Obtains the classes of events produced from the event reaction.

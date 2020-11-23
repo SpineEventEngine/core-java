@@ -21,8 +21,9 @@
 package io.spine.server.bc.given;
 
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
 
 public class ProjectAggregateRepository
-        extends AggregateRepository<ProjectId, ProjectAggregate> {
+        extends AggregateRepository<ProjectId, ProjectAggregate, Project> {
 }

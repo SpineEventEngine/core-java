@@ -21,7 +21,7 @@
 package io.spine.server.entity.given;
 
 import com.google.protobuf.FieldMask;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.Task;
@@ -39,15 +39,15 @@ public class FieldMasksTestEnv {
 
     public static class Given {
 
-        public static final TypeUrl TYPE = TypeUrl.of(Project.class);
+        public static final TypeUrl TYPE = TypeUrl.of(AggProject.class);
 
         /** Prevents instantiation of this utility class. */
         private Given() {
         }
 
-        public static Project newProject(String id) {
+        public static AggProject newProject(String id) {
             ProjectId projectId = ProjectId.newBuilder()
-                                           .setId(id)
+                                           .setUuid(id)
                                            .build();
             Task first = Task.newBuilder()
                              .setTaskId(TaskId.newBuilder()
@@ -63,18 +63,18 @@ public class FieldMasksTestEnv {
                               .setTitle("Second Task")
                               .build();
 
-            Project project = Project.newBuilder()
-                                     .setId(projectId)
-                                     .setName(format("Test project : %s", id))
-                                     .addTask(first)
-                                     .addTask(second)
-                                     .setStatus(Status.CREATED)
-                                     .build();
+            AggProject project = AggProject.newBuilder()
+                                           .setId(projectId)
+                                           .setName(format("Test project : %s", id))
+                                           .addTask(first)
+                                           .addTask(second)
+                                           .setStatus(Status.CREATED)
+                                           .build();
             return project;
         }
 
         public static FieldMask fieldMask(int... fieldIndices) {
-            return fromFieldNumbers(Project.class, fieldIndices);
+            return fromFieldNumbers(AggProject.class, fieldIndices);
         }
     }
 }

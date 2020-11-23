@@ -21,13 +21,11 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import io.spine.base.EntityState;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.RecordBasedRepository;
+import io.spine.server.entity.QueryableRepository;
 
 import java.util.Iterator;
 
@@ -39,10 +37,9 @@ import static com.google.common.collect.Streams.stream;
  */
 class EntityQueryProcessor implements QueryProcessor {
 
-    private final RecordBasedRepository<?, ? extends Entity, ? extends EntityState> repository;
+    private final QueryableRepository repository;
 
-    EntityQueryProcessor(
-            RecordBasedRepository<?, ? extends Entity, ? extends EntityState> repository) {
+    EntityQueryProcessor(QueryableRepository repository) {
         this.repository = repository;
     }
 
@@ -59,12 +56,12 @@ class EntityQueryProcessor implements QueryProcessor {
 
     private Iterator<EntityRecord> loadByQuery(Query query) {
         Iterator<EntityRecord> entities =
-            repository.findRecords(query.filters(), query.responseFormat());
+                repository.findRecords(query.filters(), query.responseFormat());
         return entities;
     }
 
     private Iterator<EntityRecord> loadAll(ResponseFormat format) {
-        Iterator<EntityRecord> entities = repository.loadAllRecords(format);
+        Iterator<EntityRecord> entities = repository.findRecords(format);
         return entities;
     }
 

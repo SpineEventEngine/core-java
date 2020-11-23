@@ -51,7 +51,7 @@ import static io.spine.base.Errors.fromThrowable;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 
-@DisplayName("`Dashboard` should")
+@DisplayName("`DiagnosticLog` should")
 class DiagnosticLogTest {
 
     private ByteArrayOutputStream output;

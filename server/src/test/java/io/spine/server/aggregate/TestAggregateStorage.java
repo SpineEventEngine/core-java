@@ -21,69 +21,129 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.LifecycleFlags;
+import io.spine.annotation.Internal;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
+import io.spine.core.Event;
+import io.spine.core.Version;
+import io.spine.server.entity.EntityRecord;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
 
 /**
- * An {@link AggregateStorage} whose purpose is to intercept the incoming
- * {@linkplain AggregateReadRequest read request}.
+ * An {@link AggregateStorage} which purpose is to intercept and remember
+ * the parameter values of executed read operations.
  */
-final class TestAggregateStorage extends AggregateStorage<ProjectId> {
+final class TestAggregateStorage extends AggregateStorage<ProjectId, AggProject> {
 
-    private final AggregateStorage<ProjectId> delegate;
-    private AggregateReadRequest<ProjectId> memoizedRequest;
+    private final AggregateStorage<ProjectId, ?> delegate;
+    private ProjectId memoizedId;
+    private int memoizedBatchSize;
 
-    TestAggregateStorage(AggregateStorage<ProjectId> delegate) {
-        super(delegate.isMultitenant());
+    TestAggregateStorage(AggregateStorage<ProjectId, AggProject> delegate) {
+        super(delegate);
         this.delegate = delegate;
     }
 
     @Override
-    public Optional<AggregateHistory> read(AggregateReadRequest<ProjectId> request) {
-        memoizedRequest = request;
+    public Optional<AggregateHistory> read(ProjectId id, int batchSize) {
+        memoizedId = id;
+        memoizedBatchSize = batchSize;
         return Optional.empty();
     }
 
     @Override
-    protected void writeRecord(ProjectId id, AggregateEventRecord record) {
-        delegate.writeRecord(id, record);
+    public void enableStateQuerying() {
+        delegate.enableStateQuerying();
     }
 
     @Override
-    protected Iterator<AggregateEventRecord>
-    historyBackward(AggregateReadRequest<ProjectId> request) {
-        return delegate.historyBackward(request);
+    public Iterator<ProjectId> index() {
+        return delegate.index();
     }
 
     @Override
-    protected void truncate(int snapshotIndex) {
-        delegate.truncate(snapshotIndex);
+    public Optional<AggregateHistory> read(ProjectId id) {
+        return delegate.read(id);
     }
 
     @Override
-    protected void truncate(int snapshotIndex, Timestamp date) {
-        delegate.truncate(snapshotIndex, date);
+    public void write(ProjectId id, AggregateHistory events) {
+        delegate.write(id, events);
     }
 
     @Override
-    protected Iterator<ProjectId> distinctAggregateIds() {
-        return delegate.distinctAggregateIds();
+    public void writeEvent(ProjectId id, Event event) {
+        delegate.writeEvent(id, event);
     }
 
     @Override
-    public Optional<LifecycleFlags> readLifecycleFlags(ProjectId id) {
-        return delegate.readLifecycleFlags(id);
+    public void writeSnapshot(ProjectId aggregateId, Snapshot snapshot) {
+        delegate.writeSnapshot(aggregateId, snapshot);
     }
 
     @Override
-    public void writeLifecycleFlags(ProjectId id, LifecycleFlags flags) {
-        delegate.writeLifecycleFlags(id, flags);
+    public void writeEventRecord(ProjectId id, AggregateEventRecord record) {
+        delegate.writeEventRecord(id, record);
     }
 
-    AggregateReadRequest<ProjectId> memoizedRequest() {
-        return memoizedRequest;
+    @Override
+    public Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
+        return delegate.readStates(filters, format);
+    }
+
+    @Override
+    public Iterator<EntityRecord> readStates(ResponseFormat format) {
+        return delegate.readStates(format);
+    }
+
+    @Override
+    public void writeState(Aggregate<ProjectId, ?, ?> aggregate) {
+        delegate.writeState(aggregate);
+    }
+
+    @Override
+    public Iterator<AggregateEventRecord> historyBackward(ProjectId id, int batchSize) {
+        return delegate.historyBackward(id, batchSize);
+    }
+
+    @Override
+    public Iterator<AggregateEventRecord> historyBackward(ProjectId id, int batchSize,
+                                                          @Nullable Version startingFrom) {
+        return delegate.historyBackward(id, batchSize, startingFrom);
+    }
+
+    @Override
+    @Internal
+    public void truncateOlderThan(int snapshotIndex) {
+        delegate.truncateOlderThan(snapshotIndex);
+    }
+
+    @Override
+    @Internal
+    public void truncateOlderThan(int snapshotIndex, Timestamp date) {
+        delegate.truncateOlderThan(snapshotIndex, date);
+    }
+
+    @Override
+    public void doTruncate(int snapshotIndex) {
+        delegate.doTruncate(snapshotIndex);
+    }
+
+    @Override
+    public void doTruncate(int snapshotIndex, Timestamp date) {
+        delegate.doTruncate(snapshotIndex, date);
+    }
+
+    ProjectId memoizedId() {
+        return memoizedId;
+    }
+
+    int memoizedBatchSize() {
+        return memoizedBatchSize;
     }
 }

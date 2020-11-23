@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregatePartClass;
 
@@ -35,14 +36,17 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  *         the type of part identifiers
  * @param <A>
  *         the type of aggregate parts
+ * @param <S>
+ *         the type of the state of aggregate parts
  * @param <R>
  *         the type of the aggregate root associated with the type of parts
  */
 @Experimental
 public abstract class AggregatePartRepository<I,
-                                              A extends AggregatePart<I, ?, ?, R>,
+                                              A extends AggregatePart<I, S, ?, R>,
+                                              S extends EntityState<I>,
                                               R extends AggregateRoot<I>>
-                      extends AggregateRepository<I, A> {
+                      extends AggregateRepository<I, A, S> {
 
     /**
      * Creates a new instance.

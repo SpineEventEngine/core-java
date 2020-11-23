@@ -52,7 +52,7 @@ import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -84,7 +84,7 @@ class ProjectionEndToEndTest {
         PrjTaskAdded firstTaskAdded = GivenEventMessage.taskAdded();
         PrjTaskAdded secondTaskAdded = GivenEventMessage.taskAdded();
         ProjectId producerId = created.getProjectId();
-        BlackBoxContext context = BlackBoxContext.from(
+        BlackBox context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(new EntitySubscriberProjection.Repository())
                                      .add(new TestProjection.Repository())
@@ -114,11 +114,11 @@ class ProjectionEndToEndTest {
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
 
-        BlackBoxContext sender = BlackBoxContext.from(
+        BlackBox sender = BlackBox.from(
                 BoundedContext.singleTenant("Organizations")
                               .add(new OrganizationProjection.Repository())
         );
-        BlackBoxContext receiver = BlackBoxContext.from(
+        BlackBox receiver = BlackBox.from(
                 BoundedContext.singleTenant("Groups")
                 .add(new GroupNameProjection.Repository())
         );

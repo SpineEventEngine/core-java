@@ -22,9 +22,9 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Int32Value;
-import io.spine.base.EntityColumn;
 import io.spine.base.FieldPath;
 import io.spine.protobuf.AnyPacker;
+import io.spine.query.EntityColumn;
 import io.spine.test.client.TestEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,6 +41,7 @@ import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
 @DisplayName("`QueryFilter` should")
+@SuppressWarnings("deprecation")    // Testing the deprecated type.
 class QueryFilterTest {
 
     @Test
@@ -85,9 +86,10 @@ class QueryFilterTest {
             checkCreates(QueryFilter::le, LESS_OR_EQUAL);
         }
 
-        private void checkCreates(BiFunction<EntityColumn, Object, QueryFilter> factoryMethod,
-                                  Filter.Operator expectedOperator) {
-            EntityColumn column = TestEntity.Column.thirdField();
+        private void
+        checkCreates(BiFunction<EntityColumn<?, Integer>, Integer, QueryFilter> factoryMethod,
+                     Filter.Operator expectedOperator) {
+            EntityColumn<?, Integer> column = TestEntity.Column.thirdField();
             int value = 42;
             QueryFilter queryFilter = factoryMethod.apply(column, value);
             Filter filter = queryFilter.filter();

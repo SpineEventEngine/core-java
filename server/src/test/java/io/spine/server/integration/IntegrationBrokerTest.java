@@ -30,9 +30,9 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.given.AnotherMemoizingProjectDetailsRepo;
 import io.spine.server.integration.given.BillingAggregate;
-import io.spine.server.integration.given.MemoizingProjectDetails1Repository;
-import io.spine.server.integration.given.MemoizingProjectDetails2Repository;
+import io.spine.server.integration.given.MemoizingProjectDetailsRepo;
 import io.spine.server.integration.given.MemoizingProjection;
 import io.spine.server.integration.given.PhotosProcMan;
 import io.spine.server.integration.given.ProjectCommander;
@@ -42,7 +42,7 @@ import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -142,11 +142,11 @@ class IntegrationBrokerTest {
 
             BoundedContext destination1 = newContext();
             destination1.internalAccess()
-                        .register(new MemoizingProjectDetails1Repository());
+                        .register(new MemoizingProjectDetailsRepo());
 
             BoundedContext destination2 = newContext();
             destination2.internalAccess()
-                        .register(new MemoizingProjectDetails2Repository());
+                        .register(new AnotherMemoizingProjectDetailsRepo());
 
             assertTrue(MemoizingProjection.events()
                                           .isEmpty());
@@ -260,11 +260,11 @@ class IntegrationBrokerTest {
     @DisplayName("send messages between two contexts regardless of registration order")
     void mutual() {
         String suffix = IntegrationBrokerTest.class.getSimpleName();
-        BlackBoxContext photos = BlackBoxContext.from(
+        BlackBox photos = BlackBox.from(
                 BoundedContext.singleTenant("Photos-" + suffix)
                               .add(PhotosProcMan.class)
         );
-        BlackBoxContext billing = BlackBoxContext.from(
+        BlackBox billing = BlackBox.from(
                 BoundedContext.singleTenant("Billing-" + suffix)
                               .add(BillingAggregate.class)
         );
@@ -277,7 +277,7 @@ class IntegrationBrokerTest {
         billing.close();
     }
 
-    private static void assertReceived(BlackBoxContext context,
+    private static void assertReceived(BlackBox context,
                                        Class<? extends EventMessage> eventClass) {
         context.assertEvents()
                .withType(eventClass)

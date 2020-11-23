@@ -32,16 +32,17 @@ import io.spine.type.TypeName;
  * <p>Handles the special {@link CatchUpStarted} event by deleting the state of the target
  * projection instance.
  */
-final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntityState>
+final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntityState<I>>
         extends ProjectionEndpoint<I, P, S> {
 
-    private static final TypeName CATCH_UP_STARTED = TypeName.from(CatchUpStarted.getDescriptor());
+    private static final TypeName CATCH_UP_STARTED =
+            TypeName.from(CatchUpStarted.getDescriptor());
 
     private CatchUpEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
     }
 
-    static <I, P extends Projection<I, S, ?>, S extends EntityState>
+    static <I, P extends Projection<I, S, ?>, S extends EntityState<I>>
     CatchUpEndpoint<I, P, S> of(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
         return new CatchUpEndpoint<>(repository, event);
     }
@@ -57,12 +58,19 @@ final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntitySt
     @Override
     public void dispatchTo(I entityId) {
         TypeName actualTypeName = envelope().messageTypeName();
-        if (CATCH_UP_STARTED.equals(actualTypeName)) {
-            ProjectionRepository<I, P, ?> repository = repository();
-            repository.recordStorage()
-                      .delete(entityId);
+        if (actualTypeName.equals(CATCH_UP_STARTED)) {
+            onCatchUpStarted(entityId);
         } else {
             super.dispatchTo(entityId);
         }
+    }
+
+    private void onCatchUpStarted(I entityId) {
+        ProjectionRepository<I, P, ?> repository = repository();
+        CatchUpStarted event = (CatchUpStarted) envelope().message();
+        repository.recordStorage()
+                  .delete(entityId);
+        repository.lifecycleOf(entityId)
+                  .onProjectionStateCleared(event.getId());
     }
 }

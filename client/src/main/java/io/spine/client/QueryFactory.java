@@ -32,13 +32,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.client.ResponseFormats.responseFormat;
 import static io.spine.client.Targets.composeTarget;
 import static java.lang.String.format;
 
 /**
  * A factory of {@link Query} instances.
  *
- * <p>Uses the given {@link ActorRequestFactory} as a source of the query meta information,
+ * <p>Uses the supplied {@link ActorRequestFactory} as a source of the query meta information,
  * such as the actor.
  *
  * @see ActorRequestFactory#query()
@@ -74,7 +75,7 @@ public final class QueryFactory {
      *         the {@linkplain Query query} target type
      * @return new instance of {@link QueryBuilder}
      */
-    public QueryBuilder select(Class<? extends EntityState> targetType) {
+    public QueryBuilder select(Class<? extends EntityState<?>> targetType) {
         checkNotNull(targetType);
         QueryBuilder queryBuilder = new QueryBuilder(targetType, this);
         return queryBuilder;
@@ -106,7 +107,7 @@ public final class QueryFactory {
      *         to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public Query byIdsWithMask(Class<? extends EntityState> entityClass,
+    public Query byIdsWithMask(Class<? extends EntityState<?>> entityClass,
                                Set<?> ids,
                                String... maskPaths) {
         checkSpecified(entityClass);
@@ -136,7 +137,7 @@ public final class QueryFactory {
      * @throws IllegalArgumentException
      *         if any of IDs have invalid type or are {@code null}
      */
-    public Query byIds(Class<? extends EntityState> entityClass, Set<?> ids) {
+    public Query byIds(Class<? extends EntityState<?>> entityClass, Set<?> ids) {
         checkSpecified(entityClass);
         checkNotNull(ids);
         return composeQuery(entityClass, ids, null, null);
@@ -160,7 +161,7 @@ public final class QueryFactory {
      *         the property paths for the {@code FieldMask} applied to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public Query allWithMask(Class<? extends EntityState> entityClass, String... maskPaths) {
+    public Query allWithMask(Class<? extends EntityState<?>> entityClass, String... maskPaths) {
         checkSpecified(entityClass);
         checkNotNull(maskPaths);
         FieldMask fieldMask = fromStringList(null, ImmutableList.copyOf(maskPaths));
@@ -178,27 +179,27 @@ public final class QueryFactory {
      *         the class of a target entity
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public Query all(Class<? extends EntityState> entityClass) {
+    public Query all(Class<? extends EntityState<?>> entityClass) {
         checkSpecified(entityClass);
         return composeQuery(entityClass, null, null, null);
     }
 
-    private Query composeQuery(Class<? extends EntityState> entityClass,
+    private Query composeQuery(Class<? extends EntityState<?>> entityClass,
                                @Nullable Set<?> ids,
                                @Nullable Set<CompositeFilter> filters,
                                @Nullable FieldMask fieldMask) {
-        ResponseFormat format = responseFormat(fieldMask, null, 0);
+        ResponseFormat format = responseFormat(fieldMask, null, null);
         Query.Builder builder = queryBuilderFor(entityClass, ids, filters)
                 .setFormat(format);
         Query query = newQuery(builder);
         return query;
     }
 
-    private static void checkSpecified(Class<? extends EntityState> entityClass) {
+    private static void checkSpecified(Class<? extends EntityState<?>> entityClass) {
         checkNotNull(entityClass, "The class of `Entity` must be specified for a `Query`.");
     }
 
-    private static Query.Builder queryBuilderFor(Class<? extends EntityState> entityClass,
+    private static Query.Builder queryBuilderFor(Class<? extends EntityState<?>> entityClass,
                                                  @Nullable Set<?> ids,
                                                  @Nullable Set<CompositeFilter> filters) {
         Target target = composeTarget(entityClass, ids, filters);
@@ -208,7 +209,7 @@ public final class QueryFactory {
 
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        ResponseFormat format = responseFormat(fieldMask, null, 0);
+        ResponseFormat format = responseFormat(fieldMask, null, null);
         Query.Builder builder = queryBuilderFor(target)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -227,7 +228,7 @@ public final class QueryFactory {
                        @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
-        ResponseFormat format = responseFormat(fieldMask, orderBy, 0);
+        ResponseFormat format = responseFormat(fieldMask, orderBy, null);
         Query.Builder builder = queryBuilderFor(target)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -258,20 +259,4 @@ public final class QueryFactory {
                       .vBuild();
     }
 
-    private static ResponseFormat responseFormat(@Nullable FieldMask mask,
-                                                 @Nullable OrderBy ordering,
-                                                 int limit) {
-        ResponseFormat.Builder result = ResponseFormat
-                .newBuilder();
-        if (mask != null) {
-            result.setFieldMask(mask);
-        }
-        if (ordering != null) {
-            result.setOrderBy(ordering);
-        }
-        if (limit > 0) {
-            result.setLimit(limit);
-        }
-        return result.vBuild();
-    }
 }

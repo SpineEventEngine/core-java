@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Internal
 public class ProjectionTransaction<I,
-                                   S extends EntityState,
+                                   S extends EntityState<I>,
                                    B extends ValidatingBuilder<S>>
         extends EventPlayingTransaction<I, Projection<I, S, B>, S, B> {
 
@@ -64,7 +64,7 @@ public class ProjectionTransaction<I,
      * @return the new transaction instance
      */
     protected static <I,
-                      S extends EntityState,
+                      S extends EntityState<I>,
                       B extends ValidatingBuilder<S>>
     ProjectionTransaction<I, S, B> start(Projection<I, S, B> projection) {
         checkNotNull(projection);

@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class EventDispatchingRepository<I,
                                                  E extends AbstractEntity<I, S>,
-                                                 S extends EntityState>
+                                                 S extends EntityState<I>>
         extends DefaultRecordBasedRepository<I, E, S>
         implements EventDispatcher {
 

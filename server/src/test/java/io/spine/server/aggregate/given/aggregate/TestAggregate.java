@@ -31,7 +31,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -55,7 +55,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
  */
 @SuppressWarnings("PublicField") /* For inspection in tests. */
 public class TestAggregate
-        extends Aggregate<ProjectId, Project, Project.Builder> {
+        extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 
     @VisibleForTesting
     public boolean createProjectCommandHandled = false;

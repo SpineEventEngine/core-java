@@ -187,7 +187,7 @@ public class Model {
      * <p>If the model does not have the model class yet, it would be obtained
      * from the passed supplier and remembered.
      */
-    <T, M extends ModelClass>
+    <T, M extends ModelClass<?>>
     ModelClass<T> getClass(Class<? extends T> cls,
                            Class<M> classOfModelClass,
                            Supplier<ModelClass<T>> supplier) {

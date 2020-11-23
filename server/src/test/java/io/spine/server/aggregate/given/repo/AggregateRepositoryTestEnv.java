@@ -23,7 +23,6 @@ package io.spine.server.aggregate.given.repo;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -64,15 +63,19 @@ public class AggregateRepositoryTestEnv {
         repository = newRepository();
     }
 
+    public static GivenAggregate givenAggregate() {
+        return new GivenAggregate(repository);
+    }
+
     public static ProjectId givenAggregateId(String id) {
         return ProjectId.newBuilder()
-                        .setId(id)
+                        .setUuid(id)
                         .build();
     }
 
     public static ProjectAggregate givenStoredAggregate() {
         ProjectId id = Sample.messageOfType(ProjectId.class);
-        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(id);
+        ProjectAggregate aggregate = givenAggregate().withUncommittedEvents(id);
 
         repository.storeAggregate(aggregate);
         return aggregate;
@@ -80,14 +83,14 @@ public class AggregateRepositoryTestEnv {
 
     public static void givenStoredAggregateWithId(String id) {
         ProjectId projectId = givenAggregateId(id);
-        ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(projectId);
+        ProjectAggregate aggregate = givenAggregate().withUncommittedEvents(projectId);
 
         repository.storeAggregate(aggregate);
     }
 
     private static TestActorRequestFactory newRequestFactory() {
         TestActorRequestFactory requestFactory =
-                new TestActorRequestFactory(AggregateRepositoryTest.class);
+                new TestActorRequestFactory(AggregateRepositoryTestEnv.class);
         return requestFactory;
     }
 

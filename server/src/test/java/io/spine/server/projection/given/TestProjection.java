@@ -30,7 +30,6 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectWithColumns;
 import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
@@ -41,8 +40,7 @@ import java.util.Set;
 
 /** The projection stub used in tests. */
 public class TestProjection
-        extends Projection<ProjectId, Project, Project.Builder>
-        implements ProjectWithColumns {
+        extends Projection<ProjectId, Project, Project.Builder> {
 
     /** The event message history we store for inspecting in delivery tests. */
     private static final Multimap<ProjectId, Message> eventMessagesDelivered =
@@ -131,13 +129,15 @@ public class TestProjection
     }
 
     @Override
-    public String getName() {
-        return state().getName();
+    protected void onBeforeCommit() {
+        builder().setIdString(id().toString());
     }
 
-    @Override
+    /**
+     * Returns the identifier of this projection, as {@code String}.
+     */
     public String getIdString() {
-        return id().toString();
+       return id().toString();
     }
 
     public static class Repository

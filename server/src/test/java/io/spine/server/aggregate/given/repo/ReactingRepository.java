@@ -25,6 +25,7 @@ import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
+import io.spine.test.aggregate.ParentState;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 
@@ -34,7 +35,7 @@ import java.util.Set;
  * The repository of {@link io.spine.server.aggregate.given.repo.ReactingAggregate}.
  */
 public class ReactingRepository
-        extends AggregateRepository<ProjectId, ReactingAggregate> {
+        extends AggregateRepository<ProjectId, ReactingAggregate, ParentState> {
 
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override

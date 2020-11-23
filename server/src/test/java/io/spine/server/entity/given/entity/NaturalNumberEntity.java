@@ -23,8 +23,8 @@ package io.spine.server.entity.given.entity;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.test.server.number.NaturalNumber;
 
-public class NaturalNumberEntity extends AbstractEntity<Long, NaturalNumber> {
-    public NaturalNumberEntity(Long id) {
+public class NaturalNumberEntity extends AbstractEntity<Integer, NaturalNumber> {
+    public NaturalNumberEntity(Integer id) {
         super(id);
     }
 }

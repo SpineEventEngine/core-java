@@ -25,7 +25,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
-import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.test.reflect.Project;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -33,7 +33,7 @@ import io.spine.test.reflect.event.RefProjectCreated;
 /**
  * An aggregate which always rejects the passed command.
  */
-public class RejectingAggregate extends Aggregate<ProjectId, EmptyAggregate, EmptyAggregate.Builder> {
+public class RejectingAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
     public RejectingAggregate(ProjectId id) {
         super(id);
     }

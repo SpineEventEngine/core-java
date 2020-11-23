@@ -21,6 +21,7 @@
 package io.spine.server.integration.given;
 
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.integration.Document;
 import io.spine.server.integration.DocumentId;
 import io.spine.server.integration.OpenOfficeDocumentUploaded;
 import io.spine.server.integration.PaperDocumentScanned;
@@ -28,7 +29,8 @@ import io.spine.server.route.EventRouting;
 
 import static io.spine.server.route.EventRoute.withId;
 
-public class DocumentRepository extends AggregateRepository<DocumentId, DocumentAggregate> {
+public class DocumentRepository
+        extends AggregateRepository<DocumentId, DocumentAggregate, Document> {
 
     @Override
     protected void setupImportRouting(EventRouting<DocumentId> routing) {

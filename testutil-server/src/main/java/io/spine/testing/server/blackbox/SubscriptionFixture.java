@@ -89,12 +89,12 @@ public final class SubscriptionFixture {
      *
      * <p>If messages of other kind were received instead, the returned iterable would be empty.
      */
-    public IterableOfProtosSubject<EntityState> assertEntityStates() {
-        ImmutableList<EntityState> states =
+    public IterableOfProtosSubject<EntityState<?>> assertEntityStates() {
+        ImmutableList<EntityState<?>> states =
                 updates.stream()
                        .flatMap(SubscriptionFixture::toEntityState)
                        .collect(toImmutableList());
-        IterableOfProtosSubject<EntityState> subject = ProtoTruth.assertThat(states);
+        IterableOfProtosSubject<EntityState<?>> subject = ProtoTruth.assertThat(states);
         return subject;
     }
 
@@ -105,7 +105,7 @@ public final class SubscriptionFixture {
         return Stream.empty();
     }
 
-    private static Stream<EntityState> toEntityState(SubscriptionUpdate update) {
+    private static Stream<EntityState<?>> toEntityState(SubscriptionUpdate update) {
         if (update.getUpdateCase() == ENTITY_UPDATES) {
             return update.states().stream();
         }

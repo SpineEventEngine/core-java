@@ -28,7 +28,6 @@ import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
-import io.spine.server.stand.given.StandTestEnv;
 import io.spine.server.stand.given.StandTestEnv.MemoizeSubscriptionCallback;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
@@ -39,11 +38,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.entity.given.Given.aggregateOfClass;
+import static io.spine.server.stand.given.StandTestEnv.createRequestFactory;
+import static io.spine.server.stand.given.StandTestEnv.einCustomer;
 import static io.spine.server.stand.given.StandTestEnv.newStand;
+import static io.spine.server.stand.given.StandTestEnv.subscribeAndActivate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@DisplayName("Multitenant Stand should")
+@DisplayName("Multitenant `Stand` should")
 class MultitenantStandTest extends StandTest {
 
     @Override
@@ -70,7 +72,7 @@ class MultitenantStandTest extends StandTest {
 
         // --- Default Tenant
         ActorRequestFactory requestFactory = getRequestFactory();
-        StandTestEnv.MemoizeSubscriptionCallback defaultTenantCallback =
+        MemoizeSubscriptionCallback defaultTenantCallback =
                 subscribeToAllOf(stand, requestFactory, Customer.class);
 
         // --- Another Tenant
@@ -80,8 +82,7 @@ class MultitenantStandTest extends StandTest {
                 subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
-        Customer customer = fillSampleCustomers(1).iterator()
-                                                  .next();
+        Customer customer = einCustomer();
         CustomerId customerId = customer.getId();
         int version = 1;
         CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
@@ -102,7 +103,7 @@ class MultitenantStandTest extends StandTest {
     MemoizeSubscriptionCallback
     subscribeToAllOf(Stand stand,
                      ActorRequestFactory requestFactory,
-                     Class<? extends EntityState> stateClass) {
+                     Class<? extends EntityState<?>> stateClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(stateClass);
         MemoizeSubscriptionCallback action = new MemoizeSubscriptionCallback();

@@ -37,7 +37,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  */
 public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
                                   I,
-                                  S extends EntityState,
+                                  S extends EntityState<I>,
                                   R extends AggregateRoot<I>>
         extends AggregateBuilder<A, I, S> {
 

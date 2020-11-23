@@ -26,7 +26,8 @@ import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Snapshot;
-import io.spine.test.storage.Project;
+import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.event.StgProjectCreated;
 
 import java.util.List;
@@ -83,8 +84,9 @@ public final class ReadOperationTestEnv {
                 .build();
     }
 
-    public static final class TestAggregate extends Aggregate<String, Project, Project.Builder> {
-        private TestAggregate(String id) {
+    public static final class TestAggregate
+            extends Aggregate<StgProjectId, StgProject, StgProject.Builder> {
+        private TestAggregate(StgProjectId id) {
             super(id);
         }
     }

@@ -23,7 +23,7 @@ package io.spine.server.tenant;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryId;
-import io.spine.core.Event;
+import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,11 +32,11 @@ import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("QueryOperation should")
+@DisplayName("`QueryOperation` should")
 class QueryOperationTest {
 
     @Test
-    @DisplayName("reject null input")
+    @DisplayName("reject `null` input")
     void rejectNullInput() {
         Query nullQuery = nullRef();
         assertThrows(NullPointerException.class,
@@ -68,7 +68,7 @@ class QueryOperationTest {
     @DisplayName("return query ID")
     void returnQueryId() {
         QueryFactory factory = new TestActorRequestFactory(getClass()).query();
-        Query query = factory.all(Event.class);
+        Query query = factory.all(EmptyAggregate.class);
         QueryId id = query.getId();
         QueryOperation op = new QueryOperation(query) {
             @Override
