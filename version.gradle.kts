@@ -40,7 +40,7 @@ val coreJava = "1.6.15"
  * Versions of the Spine libraries that `core-java` depends on.
  */
 val base = "1.6.13"
-val time = "1.6.11"
+val time = "1.6.13"
 
 project.extra.apply {
     this["versionToPublish"] = coreJava
