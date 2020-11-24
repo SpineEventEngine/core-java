@@ -64,7 +64,6 @@ import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.archive;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.assertIteratorsEqual;
@@ -74,6 +73,7 @@ import static io.spine.server.storage.given.EntityRecordStorageTestEnv.buildStor
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.delete;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newEntity;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newRecord;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.recordWithCols;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.test.storage.StgProject.Status.CANCELLED;
 import static io.spine.test.storage.StgProject.Status.CANCELLED_VALUE;
@@ -251,8 +251,8 @@ public class EntityRecordStorageTest
 
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
 
-            storage.write(create(activeEntity, activeRecord));
-            storage.write(create(archivedEntity, archivedRecord));
+            storage.write(recordWithCols(activeEntity, activeRecord));
+            storage.write(recordWithCols(archivedEntity, archivedRecord));
 
             StgProject.Query query =
                     StgProject.query()
@@ -308,7 +308,7 @@ public class EntityRecordStorageTest
                                          StgProjectId id,
                                          TestCounterEntity entity) {
             EntityRecord record = buildStorageRecord(id, newState(id));
-            EntityRecordWithColumns<StgProjectId> withCols = create(entity, record);
+            EntityRecordWithColumns<StgProjectId> withCols = recordWithCols(entity, record);
             storage.write(withCols);
             return record;
         }
@@ -385,7 +385,7 @@ public class EntityRecordStorageTest
                                          EntityRecordStorage<StgProjectId, StgProject> storage) {
             Entity<StgProjectId, ?> entity = newEntity(id);
             EntityRecord record = buildStorageRecord(id, newState(id));
-            EntityRecordWithColumns<StgProjectId> withCols = create(entity, record);
+            EntityRecordWithColumns<StgProjectId> withCols = recordWithCols(entity, record);
             storage.write(withCols);
             return record;
         }
@@ -410,7 +410,7 @@ public class EntityRecordStorageTest
             TestCounterEntity deletedEntity = newEntity(deletedId);
             delete(deletedEntity);
             EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
-            storage.write(create(deletedEntity, deletedRecord));
+            storage.write(recordWithCols(deletedEntity, deletedRecord));
             return deletedRecord;
         }
 
@@ -420,7 +420,7 @@ public class EntityRecordStorageTest
             TestCounterEntity archivedEntity = newEntity(archivedId);
             archive(archivedEntity);
             EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
-            storage.write(create(archivedEntity, archivedRecord));
+            storage.write(recordWithCols(archivedEntity, archivedRecord));
             return archivedRecord;
         }
 
@@ -473,7 +473,7 @@ public class EntityRecordStorageTest
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
             EntityRecord record = buildStorageRecord(entity.id(), entity.state(),
                                                      entity.lifecycleFlags());
-            storage.write(create(entity, record));
+            storage.write(recordWithCols(entity, record));
         }
     }
 
@@ -504,8 +504,8 @@ public class EntityRecordStorageTest
             EntityRecord record = newStorageRecord(id);
             Entity<StgProjectId, ?> testEntity = newEntity(id);
             EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordWithColumns<StgProjectId> recordWithColumns = create(testEntity, record);
-            storage.write(recordWithColumns);
+            EntityRecordWithColumns<StgProjectId> withCols = recordWithCols(testEntity, record);
+            storage.write(withCols);
 
             Optional<EntityRecord> readRecord = storage.read(id);
             assertTrue(readRecord.isPresent());
@@ -524,7 +524,7 @@ public class EntityRecordStorageTest
             for (int i = 0; i < bulkSize; i++) {
                 StgProjectId id = newId();
                 EntityRecord record = newStorageRecord(id);
-                initial.put(id, create(id, record));
+                initial.put(id, newRecord(id, record));
             }
             storage.writeAll(initial.values());
 
@@ -607,8 +607,8 @@ public class EntityRecordStorageTest
                         EntityRecord record,
                         EntityRecordStorage<StgProjectId, StgProject> storage) {
             entity.assignStatus(status);
-            EntityRecordWithColumns<StgProjectId> recordWithColumns = create(entity, record);
-            storage.write(recordWithColumns);
+            EntityRecordWithColumns<StgProjectId> withCols = recordWithCols(entity, record);
+            storage.write(withCols);
             return record;
         }
     }

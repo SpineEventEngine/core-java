@@ -87,3 +87,7 @@ message BbFinalizeProject {
 message BbRegisterCommandDispatcher {
     string dispatcher_name = 1;
 }
+
+message BbFailProject {
+    BbProjectId project_id = 1;
+}

@@ -26,8 +26,6 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggTaskStarted;
 
-import static io.spine.server.route.EventRoute.withId;
-
 /**
  * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
  * IdempotencyGuard tests}.
@@ -38,9 +36,7 @@ public final class IgTestAggregateRepository
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {
         super.setupEventRouting(routing);
-        routing.route(AggTaskStarted.class,
-                      (message, ctx) -> withId(message.getProjectId()))
-               .route(AggProjectPaused.class,
-                      (message, ctx) -> withId(message.getProjectId()));
+        routing.unicast(AggTaskStarted.class, AggTaskStarted::getProjectId)
+               .unicast(AggProjectPaused.class, AggProjectPaused::getProjectId);
     }
 }

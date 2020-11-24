@@ -74,7 +74,7 @@ final class ClassMap {
      * @throws DuplicateCommandHandlerError
      *         if the passed class handles commands that are already handled
      */
-    <T, M extends ModelClass>
+    <T, M extends ModelClass<T>>
     ModelClass<T> get(Class<? extends T> rawClass,
                       Class<M> requestedClass,
                       Supplier<ModelClass<T>> supplier) {
@@ -88,7 +88,9 @@ final class ClassMap {
             return setEntry(key, supplier);
         }
 
-        Class<? extends ModelClass> currentClass = modelClass.getClass();
+        @SuppressWarnings("unchecked")
+        Class<? extends ModelClass<?>> currentClass =
+                (Class<? extends ModelClass<?>>) modelClass.getClass();
         if (currentClass.equals(requestedClass)) {
             return modelClass;
         }
@@ -120,7 +122,7 @@ final class ClassMap {
     private void checkDuplicates(CommandHandlingClass<?, ?> candidate)
             throws DuplicateCommandHandlerError {
         Set<CommandClass> candidateCommands = candidate.commands();
-        ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> duplicates =
+        ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass<?, ?>> duplicates =
                 ImmutableMap.builder();
 
         for (ModelClass<?> modelClass : classes.values()) {
@@ -135,7 +137,8 @@ final class ClassMap {
             }
         }
 
-        ImmutableMap<Set<CommandClass>, CommandHandlingClass> currentHandlers = duplicates.build();
+        ImmutableMap<Set<CommandClass>, CommandHandlingClass<?, ?>> currentHandlers =
+                duplicates.build();
         if (!currentHandlers.isEmpty()) {
             throw new DuplicateCommandHandlerError(candidate, currentHandlers);
         }

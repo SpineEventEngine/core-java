@@ -53,6 +53,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     public static <S extends EventSubscriber>
     EventSubscriberClass<S> asEventSubscriberClass(Class<S> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         EventSubscriberClass<S> result = (EventSubscriberClass<S>)
                 get(cls, EventSubscriberClass.class, () -> new EventSubscriberClass<>(cls));
         return result;

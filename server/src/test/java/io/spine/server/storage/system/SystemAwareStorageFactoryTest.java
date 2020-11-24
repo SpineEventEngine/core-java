@@ -34,12 +34,16 @@ import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
+import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import io.spine.server.storage.system.given.TestAggregate;
 import io.spine.system.server.Company;
 import io.spine.system.server.CompanyId;
+import io.spine.test.projection.Project;
+import io.spine.test.projection.ProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -69,11 +73,14 @@ class SystemAwareStorageFactoryTest {
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
-        serverEnv.use(productionStorage, Production.class);
+        ServerEnvironment.when(Production.class)
+                         .use(productionStorage);
         StorageFactory storageFactory = serverEnv.storageFactory();
-        assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
+        assertThat(storageFactory)
+                .isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
-        assertThat(systemAware.delegate()).isEqualTo(productionStorage);
+        assertThat(systemAware.delegate())
+                .isEqualTo(productionStorage);
 
         Environment.instance()
                    .reset();
@@ -84,11 +91,13 @@ class SystemAwareStorageFactoryTest {
     void wrapTestStorage() {
         ServerEnvironment serverEnv = ServerEnvironment.instance();
         StorageFactory testStorage = InMemoryStorageFactory.newInstance();
-        serverEnv.use(testStorage, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(testStorage);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
-        assertThat(systemAware.delegate()).isEqualTo(testStorage);
+        assertThat(systemAware.delegate())
+                .isEqualTo(testStorage);
     }
 
     @Test
@@ -100,7 +109,23 @@ class SystemAwareStorageFactoryTest {
         AggregateStorage<CompanyId, Company> storage =
                 systemAware.createAggregateStorage(CONTEXT, aggregateClass);
         assertThat(storage).isNull();
-        assertThat(factory.requestedStorages()).containsExactly(aggregateClass);
+        assertThat(factory.requestedStorages())
+                .containsExactly(aggregateClass);
+    }
+
+    @Test
+    @DisplayName("delegate record storage creation to given factory")
+    void delegateRecordStorage() {
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
+        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
+        Class<Project> recordType = Project.class;
+        MessageRecordSpec<ProjectId, Project> spec =
+                new MessageRecordSpec<>(ProjectId.class, Project.class,
+                                        i -> ProjectId.getDefaultInstance());
+        RecordStorage<ProjectId, Project> storage = systemAware.createRecordStorage(CONTEXT, spec);
+        assertThat(storage).isNull();
+        assertThat(factory.requestedStorages())
+                .containsExactly(recordType);
     }
 
     @Test
@@ -134,7 +159,7 @@ class SystemAwareStorageFactoryTest {
     }
 
     @Test
-    @DisplayName("create EmptyEventStore if event persistence is disabled")
+    @DisplayName("create `EmptyEventStore` if event persistence is disabled")
     void createEmptyEventStore() {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);

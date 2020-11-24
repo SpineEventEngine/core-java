@@ -37,6 +37,7 @@ import static io.spine.query.RecordColumn.create;
  * <p>Provides various types of {@linkplain RecordColumn record columns}
  * that can be used to emulate a client-side query.
  */
+@SuppressWarnings("BadImport")       // `create` looks fine in this context.
 public final class RecordQueryMatcherTestEnv {
 
     /** Prevents instantiation of this test env class. */

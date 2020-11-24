@@ -31,8 +31,10 @@ import static io.spine.query.RecordColumn.create;
 /**
  * Columns of the {@link StgProject} stored as a plain {@link Message}.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection") // column names repeat across different types.
 @RecordColumns(ofType = StgProject.class)
+@SuppressWarnings(
+        {"DuplicateStringLiteralInspection",  // Column names may repeat across records.
+                "BadImport"})                 // `create` looks fine in this context.
 public final class StgColumn {
 
     public static final RecordColumn<StgProject, Integer>

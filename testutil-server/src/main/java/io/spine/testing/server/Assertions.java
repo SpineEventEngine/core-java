@@ -63,7 +63,7 @@ public final class Assertions {
     }
 
     @SafeVarargs
-    private static <C extends MessageClass, M extends Message>
+    private static <C extends MessageClass<?>, M extends Message>
     void assertContains(Collection<C> collection,
                         Function<Class<M>, C> func,
                         Class<? extends M>...classes) {

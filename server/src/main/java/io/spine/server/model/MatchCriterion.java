@@ -20,25 +20,20 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.Invokable;
-import com.google.common.reflect.TypeToken;
+import com.google.common.collect.ImmutableList;
 import io.spine.annotation.Internal;
 import io.spine.string.Diags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
 import static io.spine.server.model.MethodExceptionCheck.check;
-import static io.spine.server.model.MethodParams.findMatching;
-import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
 import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
 import static io.spine.server.model.SignatureMismatch.Severity.WARN;
-import static io.spine.server.model.SignatureMismatch.create;
+import static io.spine.string.Diags.toEnumerationBackticked;
 import static java.lang.String.format;
 
 /**
@@ -59,59 +54,63 @@ public enum MatchCriterion {
      * {@linkplain MethodSignature#returnTypes() expected}.
      */
     RETURN_TYPE(ERROR,
-                "The return type of `%s` method does not match the constraints " +
-                        "set for `%s`-annotated method.") {
-        @SuppressWarnings("UnstableApiUsage")   // Using Guava's `TypeToken`.
+                "The return type of `%s` method does not match the constraints"
+                        + " set for `%s`-annotated method.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            TypeToken<?> returnType = Invokable.from(method)
-                                               .getReturnType();
-            boolean conforms = signature
-                    .returnTypes()
-                    .stream()
-                    .anyMatch(type -> TypeMatcher.matches(type, returnType) &&
-                            (signature.mayReturnIgnored() ||
-                                    TypeMatcher.messagesFitting(returnType)
-                                               .stream()
-                                               .noneMatch(MethodResult::isIgnored))
-                    );
-            if (!conforms) {
-                SignatureMismatch mismatch =
-                        create(this,
-                               methodAsString(method),
-                               signature.annotation()
-                                        .getSimpleName());
-                return Optional.of(mismatch);
+            if (signature.returnTypeMatches(method)) {
+                return Optional.empty();
             }
-            return Optional.empty();
+            return createMismatch(method, signature.annotation());
+        }
+    },
+
+    /**
+     * The criterion for the method parameters to conform the
+     * {@linkplain MethodSignature#params() requirements}.
+     *
+     * @see AllowedParams#findMatching(Method)
+     */
+    PARAMETERS(ERROR,
+               "The method `%s` has invalid parameters. Please refer to the documentation"
+                       + " of `@%s` for allowed parameter types.") {
+        @Override
+        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
+            Optional<? extends ParameterSpec<?>> matching =
+                    signature.params().findMatching(method);
+            if (matching.isPresent()) {
+                return Optional.empty();
+            }
+            return createMismatch(method, signature.annotation());
         }
     },
 
     /**
      * The criterion, which ensures that the method access modifier is among the
-     * {@linkplain MethodSignature#modifiers() expected}.
+     * {@linkplain MethodSignature#modifier() expected}.
      */
     ACCESS_MODIFIER(WARN,
-                    "The access modifier of `%s` method is `%s`. We recommend it to be `%s`. " +
-                            "Refer to the `%s` annotation docs for details.") {
+                    "The access modifier of `%s` method is `%s`. We recommend it to be `%s`."
+                            + " Refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            ImmutableSet<AccessModifier> allowedModifiers = signature.modifiers();
-            boolean hasMatch = allowedModifiers
-                    .stream()
-                    .anyMatch(m -> m.test(method));
-            if (!hasMatch) {
-                SignatureMismatch mismatch =
-                        create(this,
-                               methodAsString(method),
-                               AccessModifier.fromMethod(method),
-                               AccessModifier.asString(allowedModifiers),
-                               signature.annotation()
-                                        .getSimpleName());
-                return Optional.of(mismatch);
-
+            AccessModifier recommended = signature.modifier();
+            boolean hasMatch = recommended.test(method);
+            if (hasMatch) {
+                return Optional.empty();
             }
-            return Optional.empty();
+            return createMismatch(method, signature, recommended);
+        }
+
+        private Optional<SignatureMismatch>
+        createMismatch(Method method,
+                       MethodSignature<?, ?> signature,
+                       AccessModifier recommended) {
+            String methodReference = methodAsString(method);
+            String annotationName = signature.annotation().getSimpleName();
+            AccessModifier currentModifier = AccessModifier.fromMethod(method);
+            return SignatureMismatch.create(
+                    this, methodReference, currentModifier, recommended, annotationName);
         }
     },
 
@@ -123,73 +122,16 @@ public enum MatchCriterion {
 
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            @Nullable
-            Class<? extends Throwable> allowedThrowable =
+            @Nullable Class<? extends Throwable> allowed =
                     signature.allowedThrowable().orElse(null);
-            MethodExceptionCheck checker = check(method, allowedThrowable);
-            List<Class<? extends Throwable>> prohibited = checker.findProhibited();
+            MethodExceptionCheck checker = check(method, allowed);
+            ImmutableList<Class<? extends Throwable>> prohibited = checker.findProhibited();
             if (prohibited.isEmpty()) {
                 return Optional.empty();
             }
-            String errorMessage = toMessage(method, prohibited, allowedThrowable);
-            SignatureMismatch mismatch = create(this, errorMessage);
-            return Optional.of(mismatch);
-        }
-
-        private String toMessage(Method method,
-                                 List<Class<? extends Throwable>> exceptionsThrown,
-                                 @Nullable Class<? extends Throwable> allowedThrowable) {
-            if (allowedThrowable == null) {
-                return format(
-                        "The method `%s.%s` throws %s. But throwing is not allowed" +
-                                " for this kind of methods.",
-                        method.getDeclaringClass().getCanonicalName(),
-                        method.getName(),
-                        enumerate(exceptionsThrown)
-                );
-            }
-            return format(
-                    "The method `%s.%s` throws %s. But only `%s` is allowed for" +
-                            " this kind of methods.",
-                    method.getDeclaringClass().getCanonicalName(),
-                    method.getName(),
-                    enumerate(exceptionsThrown),
-                    allowedThrowable.getName()
-            );
-        }
-
-        /**
-         * Prints {@link Iterable} to {@link String}, separating elements with comma.
-         */
-        private String enumerate(List<Class<? extends Throwable>> throwables) {
-            return throwables.stream()
-                             .map(Diags::backtick)
-                             .collect(toStringEnumeration());
-        }
-    },
-
-    /**
-     * The criterion for the method parameters to conform the
-     * {@linkplain MethodSignature#paramSpecs() requirements}.
-     *
-     * @see MethodParams#findMatching(Method, Collection)
-     */
-    PARAMETERS(ERROR,
-               "The method `%s` has invalid parameters. " +
-               "Please refer to `%s` annotation documentation for allowed parameter types.") {
-        @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            Optional<? extends ParameterSpec<?>> matching =
-                    findMatching(method, signature.paramSpecs());
-            if (!matching.isPresent()) {
-                SignatureMismatch mismatch =
-                        create(this,
-                               methodAsString(method),
-                               signature.annotation()
-                                        .getSimpleName());
-                return Optional.of(mismatch);
-            }
-            return Optional.empty();
+            ProhibitedExceptionMessage errorMessage
+                    = new ProhibitedExceptionMessage(method, prohibited, allowed);
+            return SignatureMismatch.create(this, errorMessage);
         }
     };
 
@@ -205,15 +147,6 @@ public enum MatchCriterion {
         this.format = format;
     }
 
-    SignatureMismatch.Severity severity() {
-        return severity;
-    }
-
-    String formatMsg(Object... args) {
-        String message = format(Locale.ROOT, format, args);
-        return message;
-    }
-
     /**
      * Tests the method against the rules defined by the signature.
      *
@@ -226,11 +159,77 @@ public enum MatchCriterion {
      */
     abstract Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature);
 
+    protected final SignatureMismatch.Severity severity() {
+        return severity;
+    }
+
+    protected final String formatMsg(Object... args) {
+        String message = format(Locale.ROOT, format, args);
+        return message;
+    }
+
+    /**
+     * Creates a mismatch with the passed method and the name as parameters.
+     */
+    protected final Optional<SignatureMismatch>
+    createMismatch(Method method, Class<? extends Annotation> annotation) {
+        String methodReference = methodAsString(method);
+        String annotationName = annotation.getSimpleName();
+        return SignatureMismatch.create(this, methodReference, annotationName);
+    }
+
     private static String methodAsString(Method method) {
         String declaringClassName = method.getDeclaringClass()
                                           .getCanonicalName();
         String parameterTypes = Diags.join(method.getParameterTypes());
         String result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
         return result;
+    }
+
+    /**
+     * Helper class for {@link #PROHIBITED_EXCEPTION} for composing an error message.
+     */
+    static final class ProhibitedExceptionMessage {
+
+        private final Method method;
+        private final ImmutableList<Class<? extends Throwable>> declared;
+        private final @Nullable Class<? extends Throwable> allowed;
+
+        ProhibitedExceptionMessage(Method method,
+                                   ImmutableList<Class<? extends Throwable>> declared,
+                                   @Nullable Class<? extends Throwable> allowed) {
+            this.method = method;
+            this.declared = declared;
+            this.allowed = allowed;
+        }
+
+        @Override
+        public String toString() {
+            if (allowed == null) {
+                return format(
+                        "The method `%s.%s` throws `%s`. But throwing is not allowed"
+                                + " for this kind of methods.",
+                        method.getDeclaringClass().getCanonicalName(),
+                        method.getName(),
+                        enumerateThrown()
+                );
+            }
+            return format(
+                    "The method `%s.%s` throws `%s`. But only `%s` is allowed for"
+                            + " this kind of methods.",
+                    method.getDeclaringClass().getCanonicalName(),
+                    method.getName(),
+                    enumerateThrown(),
+                    allowed.getName()
+            );
+        }
+
+        /**
+         * Prints {@code Iterable} to {@code String}, separating elements with comma.
+         */
+        private String enumerateThrown() {
+            return declared.stream()
+                           .collect(toEnumerationBackticked());
+        }
     }
 }

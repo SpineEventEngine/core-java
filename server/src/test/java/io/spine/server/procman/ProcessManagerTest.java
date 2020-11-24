@@ -110,7 +110,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ProcessManager should")
+@DisplayName("`ProcessManager` should")
 class ProcessManagerTest {
 
     private static final int VERSION = 2;
@@ -124,7 +124,7 @@ class ProcessManagerTest {
     private TestProcessManager processManager;
 
     @BeforeEach
-    void setUp() {
+    void initContextAndProcessManager() {
         ModelTests.dropAllModels();
         context = BoundedContextBuilder
                 .assumingTests(true)
@@ -137,7 +137,7 @@ class ProcessManagerTest {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void closeContext() throws Exception {
         context.close();
     }
 
@@ -307,23 +307,23 @@ class ProcessManagerTest {
         }
     }
 
-    @MuteLogging
     @Nested
+    @MuteLogging
     @DisplayName("rollback state on")
     class RollbackOn {
 
         private BlackBox context;
 
         @BeforeEach
-        void setUp() {
+        void setupContext() {
             context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TestProcessManagerRepo())
-            );
+            ).tolerateFailures();
         }
 
         @AfterEach
-        void tearDown() {
+        void closeContext() {
             context.close();
         }
 
@@ -357,7 +357,7 @@ class ProcessManagerTest {
         private BlackBox context;
 
         @BeforeEach
-        void setUp() {
+        void setupContext() {
             context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TestProcessManagerRepo())
@@ -365,7 +365,7 @@ class ProcessManagerTest {
         }
 
         @AfterEach
-        void tearDown() {
+        void closeContext() {
             context.close();
         }
 

@@ -67,41 +67,41 @@ object Repos {
 }
 
 object Versions {
-    val checkerFramework = "3.3.0"
-    val errorProne       = "2.3.4"
+    val checkerFramework = "3.7.1"
+    val errorProne       = "2.4.0"
     val errorProneJavac  = "9+181-r4173-1" // taken from here: https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
-    val errorPronePlugin = "1.2.1"
+    val errorPronePlugin = "1.3.0"
     val pmd              = "6.24.0"
     val checkstyle       = "8.29"
-    val protobufPlugin   = "0.8.12"
-    val appengineApi     = "1.9.79"
+    val protobufPlugin   = "0.8.13"
+    val appengineApi     = "1.9.82"
     val appenginePlugin  = "2.2.0"
     val findBugs         = "3.0.2"
-    val guava            = "29.0-jre"
-    val protobuf         = "3.11.4"
+    val guava            = "30.0-jre"
+    val protobuf         = "3.13.0"
     val grpc             = "1.28.1"
     val flogger          = "0.5.1"
-    val junit4           = "4.12"
-    val junit5           = "5.6.2"
-    val junitPlatform    = "1.6.2"
-    val junitPioneer     = "0.4.2"
-    val truth            = "1.0.1"
+    val junit4           = "4.13.1"
+    val junit5           = "5.7.0"
+    val junitPlatform    = "1.7.0"
+    val junitPioneer     = "1.0.0"
+    val truth            = "1.1"
     val httpClient       = "1.34.2"
     val apacheHttpClient = "2.1.2"
     val firebaseAdmin    = "6.12.2"
     val roaster          = "2.21.2.Final"
     val licensePlugin    = "1.13"
-    val javaPoet         = "1.12.1"
-    val autoService      = "1.0-rc6"
+    val javaPoet         = "1.13.0"
+    val autoService      = "1.0-rc7"
     val autoCommon       = "0.10"
     val jackson          = "2.9.10.5"
-    val animalSniffer    = "1.18"
+    val animalSniffer    = "1.19"
     val apiguardian      = "1.1.0"
     val javaxAnnotation  = "1.3.2"
     val klaxon           = "5.4"
-    val ouathJwt         = "3.10.3"
+    val ouathJwt         = "3.11.0"
     val bouncyCastlePkcs = "1.66"
-    val assertK          = "0.22"
+    val assertK          = "0.23"
 
     /**
      * Version of the SLF4J library.
@@ -113,7 +113,7 @@ object Versions {
      * this version and force it via [forceConfiguration(..)][DependencyResolution.forceConfiguration].
      */
     @Deprecated("Use Flogger over SLF4J.", replaceWith = ReplaceWith("flogger"))
-    val slf4j            = "1.7.29"
+    val slf4j            = "1.7.30"
 }
 
 object GradlePlugins {
@@ -312,6 +312,9 @@ object DependencyResolution {
                         Deps.test.junit4,
 
                         // Transitive dependencies of 3rd party components that we don't use directly.
+                        "org.junit.platform:junit-platform-commons:${Versions.junitPlatform}",
+                        "com.google.auto.value:auto-value-annotations:1.7.4",
+                        "com.google.auto.service:auto-service-annotations:1.0-rc7",
                         "com.google.code.gson:gson:2.8.6",
                         "com.google.j2objc:j2objc-annotations:1.3",
                         "org.codehaus.plexus:plexus-utils:3.3.0",

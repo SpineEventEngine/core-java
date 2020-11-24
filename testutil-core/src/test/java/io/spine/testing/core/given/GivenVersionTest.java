@@ -25,9 +25,7 @@ import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.TestValues.random;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("GivenVersion should")
@@ -35,12 +33,6 @@ class GivenVersionTest extends UtilityClassTest<GivenVersion> {
 
     GivenVersionTest() {
         super(GivenVersion.class);
-    }
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(GivenVersion.class);
     }
 
     @Test

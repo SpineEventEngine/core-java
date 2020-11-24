@@ -25,11 +25,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.server.event.model.SubscriberMethod;
-import io.spine.server.type.MessageEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -159,31 +157,6 @@ public final class MethodParams {
             }
         }
         return true;
-    }
-
-    /**
-     * Finds matching parameter specification based on the parameters of the given method and
-     * the class, describing the parameter specification.
-     *
-     * @param method
-     *         the method, which parameter list is used to match the parameter specification
-     * @param paramSpecs
-     *         the class of parameter specification
-     * @param <E>
-     *         the type of message envelope, which the parameter specification class handles
-     * @param <S>
-     *         the type of the parameter specification
-     * @return the matching parameter spec,
-     *         or {@link Optional#empty() Optional.empty()} if no matching specification is found
-     */
-    static <E extends MessageEnvelope<?, ?, ?>, S extends ParameterSpec<E>>
-    Optional<S> findMatching(Method method, Collection<S> paramSpecs) {
-        MethodParams params = of(method);
-        Optional<S> result =
-                paramSpecs.stream()
-                          .filter(spec -> spec.matches(params))
-                          .findFirst();
-        return result;
     }
 
     /**

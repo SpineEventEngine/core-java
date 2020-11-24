@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.spine.testing.Assertions.assertNpe;
 
 @DisplayName("`EnvSetting` should")
 @SuppressWarnings("DuplicateStringLiteralInspection")
@@ -67,14 +67,12 @@ class EnvSettingTest {
         @DisplayName("using the `null` as the env value")
         void forEnv() {
             EnvSetting<StorageFactory> setting = new EnvSetting<>();
-            assertThrows(NullPointerException.class,
-                         () -> setting.use(InMemoryStorageFactory.newInstance(), null));
+            assertNpe(() -> setting.use(InMemoryStorageFactory.newInstance(), null));
         }
 
         private void testNoNullsForEnv(Class<? extends EnvironmentType> envType) {
-            EnvSetting<?> config = new EnvSetting();
-            assertThrows(NullPointerException.class,
-                         () -> config.use(null, envType));
+            EnvSetting<?> config = new EnvSetting<Void>();
+            assertNpe(() -> config.use(null, envType));
         }
     }
 

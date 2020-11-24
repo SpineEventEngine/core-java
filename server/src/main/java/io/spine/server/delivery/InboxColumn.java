@@ -30,8 +30,10 @@ import static io.spine.query.RecordColumn.create;
 /**
  * Columns stored along with each {@link InboxMessage}.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")  // column names may repeat across records.
 @RecordColumns(ofType = InboxMessage.class)
+@SuppressWarnings(
+        {"DuplicateStringLiteralInspection",  // Column names may repeat across records.
+                "BadImport"})                 // `create` looks fine in this context.
 final class InboxColumn {
 
     /**

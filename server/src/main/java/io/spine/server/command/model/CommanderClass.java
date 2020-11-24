@@ -66,6 +66,7 @@ public final class CommanderClass<C extends Commander>
     public static <C extends AbstractCommander>
     CommanderClass<C> asCommanderClass(Class<C> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         CommanderClass<C> result = (CommanderClass<C>)
                 get(cls, CommanderClass.class, () -> new CommanderClass<>(cls));
         return result;

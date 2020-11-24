@@ -26,6 +26,7 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
@@ -153,6 +154,16 @@ public final class EntityRecordStorageTestEnv {
         return record;
     }
 
+    public static EntityRecordWithColumns<StgProjectId>
+    recordWithCols(Entity<StgProjectId, ?> entity, EntityRecord record) {
+        return EntityRecordWithColumns.create(entity, record);
+    }
+
+    public static EntityRecordWithColumns<StgProjectId>
+    newRecord(StgProjectId id, EntityRecord record) {
+        return EntityRecordWithColumns.create(id, record);
+    }
+
     public static void assertQueryHasSingleResult(
             StgProject.Query query,
             EntityRecord expected,
@@ -166,10 +177,11 @@ public final class EntityRecordStorageTestEnv {
             extends TransactionalEntity<StgProjectId, StgProject, StgProject.Builder>
             implements HasLifecycleColumns<StgProjectId, StgProject> {
 
-        public static final Timestamp PROJECT_VERSION_TIMESTAMP = Timestamp.newBuilder()
-                                                                           .setSeconds(124565)
-                                                                           .setNanos(2434535)
-                                                                           .build();
+        public static final Timestamp PROJECT_VERSION_TIMESTAMP =
+                Timestamp.newBuilder()
+                         .setSeconds(124565)
+                         .setNanos(2434535)
+                         .build();
 
         private int counter = 0;
 

@@ -93,6 +93,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      */
     public static <E extends Entity<?, ?>> EntityClass<E> asEntityClass(Class<E> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         EntityClass<E> result = (EntityClass<E>)
                 get(cls, EntityClass.class, () -> new EntityClass<>(cls));
         return result;
@@ -106,6 +107,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityClass<E> asParameterizedEntityClass(Class<E> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         EntityClass<E> result = (EntityClass<E>)
                 get(cls, EntityClass.class, () -> new EntityClass<>(cls));
         return result;

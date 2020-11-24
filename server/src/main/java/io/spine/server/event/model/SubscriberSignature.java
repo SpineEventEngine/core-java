@@ -20,43 +20,46 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
+import com.google.common.collect.ObjectArrays;
 import io.spine.base.EntityState;
 import io.spine.core.Subscribe;
+import io.spine.server.model.AllowedParams;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.ReturnTypes;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
+
+import static io.spine.server.model.ReturnTypes.onlyVoid;
 
 /**
  * A signature of {@link SubscriberMethod}.
  */
 public class SubscriberSignature extends EventAcceptingSignature<SubscriberMethod> {
 
-    private static final ImmutableSet<ParameterSpec<EventEnvelope>>
-            PARAM_SPEC = ImmutableSet
-            .<ParameterSpec<EventEnvelope>>builder()
-            .addAll(EventAcceptingSignature.PARAM_SPEC)
-            .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
-            .build();
+    private static final AllowedParams<EventEnvelope> PARAMS = new AllowedParams<>(combinedSpecs());
 
-    private static final ImmutableSet<TypeToken<?>>
-            RETURN_TYPE = ImmutableSet.of(TypeToken.of(void.class));
+    private static ParameterSpec<EventEnvelope>[] combinedSpecs() {
+        ParameterSpec<EventEnvelope>[] eventParams = EventAcceptingMethodParams.values();
+        ParameterSpec<EventEnvelope>[] stateParams = StateSubscriberSpec.values();
+        @SuppressWarnings("unchecked") // ensured by the content of the merged arrays.
+        ParameterSpec<EventEnvelope>[] result =
+                ObjectArrays.concat(eventParams, stateParams, ParameterSpec.class);
+        return result;
+    }
 
     public SubscriberSignature() {
         super(Subscribe.class);
     }
 
     @Override
-    protected ImmutableSet<TypeToken<?>> returnTypes() {
-        return RETURN_TYPE;
+    protected ReturnTypes returnTypes() {
+        return onlyVoid();
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return PARAM_SPEC;
+    public AllowedParams<EventEnvelope> params() {
+        return PARAMS;
     }
 
     @Override

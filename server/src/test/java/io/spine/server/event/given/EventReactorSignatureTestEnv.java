@@ -54,7 +54,9 @@ import java.util.Optional;
         {"MethodOnlyUsedFromInnerClass", "Unused", "MethodMayBeStatic"})  // reflective access.
 public class EventReactorSignatureTestEnv {
 
-    /** Prevents this test environment from direct initialization. */
+    /**
+     * Prevents this test environment from direct initialization.
+     */
     private EventReactorSignatureTestEnv() {
     }
 
@@ -134,8 +136,9 @@ public class EventReactorSignatureTestEnv {
             return taskStarted();
         }
 
-        @SuppressWarnings("ProtectedMemberInFinalClass")    // It is a use-case-under-test.
         @React
+        @SuppressWarnings({"ProtectedMemberInFinalClass", "ProtectedMembersInFinalClass"})
+        // It is a use-case-under-test. IDEA's warning is singular, ErrorProne's is plural.
         protected SigTaskStarted protectedHandler(SigTaskAddedToProject event) {
             return taskStarted();
         }

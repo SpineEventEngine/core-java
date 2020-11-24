@@ -41,13 +41,13 @@ abstract class AbstractDeliveryTest {
 
     @AfterEach
     public void tearDown() {
-        ServerEnvironment.instance()
-                         .use(originalDelivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(originalDelivery);
     }
 
     static void changeShardCountTo(int shards) {
         Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
-        ServerEnvironment.instance()
-                         .use(newDelivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(newDelivery);
     }
 }

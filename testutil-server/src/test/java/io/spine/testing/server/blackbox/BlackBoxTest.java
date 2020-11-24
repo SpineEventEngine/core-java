@@ -53,12 +53,14 @@ import io.spine.testing.server.BlackBoxId;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.command.BbAssignSelf;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.command.BbFailProject;
 import io.spine.testing.server.blackbox.command.BbFinalizeProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbProjectDone;
+import io.spine.testing.server.blackbox.event.BbProjectFailed;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
@@ -66,6 +68,7 @@ import io.spine.testing.server.blackbox.event.BbUserDeleted;
 import io.spine.testing.server.blackbox.given.BbCommandDispatcher;
 import io.spine.testing.server.blackbox.given.BbEventDispatcher;
 import io.spine.testing.server.blackbox.given.BbInitProcess;
+import io.spine.testing.server.blackbox.given.BbProjectFailerProcess;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
@@ -96,10 +99,12 @@ import static io.spine.testing.server.blackbox.given.Given.assignSelf;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
+import static io.spine.testing.server.blackbox.given.Given.failProject;
 import static io.spine.testing.server.blackbox.given.Given.finalizeProject;
 import static io.spine.testing.server.blackbox.given.Given.initProject;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
 import static io.spine.testing.server.blackbox.given.Given.projectDone;
+import static io.spine.testing.server.blackbox.given.Given.projectFailed;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.given.Given.userDeleted;
@@ -124,7 +129,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
         builder.add(new BbProjectRepository())
                .add(new BbReportRepository())
                .add(BbProjectViewProjection.class)
-               .add(BbInitProcess.class);
+               .add(BbInitProcess.class)
+               .add(BbProjectFailerProcess.class);
         @SuppressWarnings("unchecked") // see Javadoc for newBuilder().
         T ctx = (T) BlackBox.from(builder);
         context = ctx;
@@ -238,6 +244,77 @@ abstract class BlackBoxTest<T extends BlackBox> {
     }
 
     @Nested
+    @DisplayName("throw `AssertionError` if any signal handler fails")
+    class FailOnHandlerFailures {
+
+        /**
+         * Cleans the inbox so the erroneous commands sent in tests are not persisted and do not
+         * fail the other tests.
+         */
+        @AfterEach
+        void cleanInbox() {
+            ServerEnvironment.when(Tests.class)
+                             .use(Delivery.local());
+        }
+
+        @Test
+        @MuteLogging
+        @DisplayName("directly from the caller")
+        void fromCaller() {
+            BbFailProject command = failProject(newProjectId());
+
+            assertThrows(AssertionError.class, () -> context.receivesCommand(command));
+        }
+
+        @Test
+        @MuteLogging
+        @DisplayName("generated as a response to some other signal")
+        void generatedWithinModel() {
+            BbProjectFailed event = projectFailed(newProjectId());
+
+            assertThrows(AssertionError.class, () -> context.receivesEvent(event));
+        }
+    }
+
+    @Nested
+    @DisplayName("tolerate signal handler failures and log handler info")
+    class TolerateHandlerFailures {
+
+        @BeforeEach
+        void tolerateFailures(){
+            context().tolerateFailures();
+        }
+
+        /**
+         * Cleans the inbox so the erroneous commands sent in tests are not persisted and do not
+         * fail the other tests.
+         */
+        @AfterEach
+        void cleanInbox() {
+            ServerEnvironment.when(Tests.class)
+                             .use(Delivery.local());
+        }
+
+        @Test
+        @MuteLogging
+        @DisplayName("directly from the caller")
+        void fromCaller() {
+            BbFailProject command = failProject(newProjectId());
+
+            assertDoesNotThrow(() -> context.receivesCommand(command));
+        }
+
+        @Test
+        @MuteLogging
+        @DisplayName("generated as a response to some other signal")
+        void generatedWithinModel() {
+            BbProjectFailed event = projectFailed(newProjectId());
+
+            assertDoesNotThrow(() -> context.receivesEvent(event));
+        }
+    }
+
+    @Nested
     @DisplayName("throw `AssertionError` on receiving an unsupported command")
     class FailOnUnsupportedCommand {
 
@@ -247,8 +324,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
          */
         @AfterEach
         void cleanInbox() {
-            ServerEnvironment.instance()
-                             .use(Delivery.local(), Tests.class);
+            ServerEnvironment.when(Tests.class)
+                             .use(Delivery.local());
         }
 
         @Test

@@ -129,7 +129,9 @@ public final class EventClass extends MessageClass<EventMessage> {
         return new EventClass(eventMessage.getClass(), typeUrl);
     }
 
-    /** Creates immutable set of {@code EventClass} from the passed set. */
+    /**
+     * Creates a set of {@code EventClass} from the passed set.
+     */
     public static ImmutableSet<EventClass> setOf(Iterable<Class<? extends EventMessage>> classes) {
         ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends EventMessage> cls : classes) {
@@ -138,14 +140,25 @@ public final class EventClass extends MessageClass<EventMessage> {
         return builder.build();
     }
 
-    /** Creates a set of {@code EventClass} from the passed classes. */
+    /**
+     * Creates a set of {@code EventClass} from the passed classes.
+     */
     @SafeVarargs
     public static ImmutableSet<EventClass> setOf(Class<? extends EventMessage>... classes) {
         return setOf(Arrays.asList(classes));
     }
 
-    /** Creates a set with only one passed event class. */
+    /**
+     * Creates a set with only one passed {@code EventClass}.
+     */
     public static ImmutableSet<EventClass> setOf(Class<? extends EventMessage> cls) {
         return ImmutableSet.of(from(cls));
+    }
+
+    /**
+     * Returns an empty {@code EventClass} set.
+     */
+    public static ImmutableSet<EventClass> emptySet(){
+        return ImmutableSet.of();
     }
 }

@@ -30,8 +30,6 @@ import io.spine.test.delivery.DCounter;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.type.TypeUrl;
 
-import static io.spine.server.route.EventRoute.withId;
-
 /**
  * Counts the incoming events.
  *
@@ -66,8 +64,7 @@ public final class CounterView extends Projection<String, DCounter, DCounter.Bui
         @Override
         protected void setupEventRouting(EventRouting<String> routing) {
             super.setupEventRouting(routing);
-            routing.route(NumberAdded.class,
-                          (message, context) -> withId(message.getCalculatorId()));
+            routing.unicast(NumberAdded.class, NumberAdded::getCalculatorId);
         }
     }
 }

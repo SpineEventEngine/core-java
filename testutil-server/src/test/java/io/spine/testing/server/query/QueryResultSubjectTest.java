@@ -179,12 +179,13 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
         return assertQueryResult(queryResponse);
     }
 
-    @SuppressWarnings("ErrorNotRethrown") // Ignore the error.
+    @SuppressWarnings({"ErrorNotRethrown", "MaskedAssertion"}) // Ignore the error.
     private static void expectSomeFailure(Runnable call) {
         try {
             call.run();
             fail(EXPECTED_ASSERTION_ERROR_TO_BE_THROWN);
         } catch (AssertionError ignored) {
+            // Do nothing.
         }
     }
 

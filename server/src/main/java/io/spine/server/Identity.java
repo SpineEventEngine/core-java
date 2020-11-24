@@ -76,4 +76,17 @@ public final class Identity {
                 .setTypeUrl(EMPTY_URL.value())
                 .vBuild();
     }
+
+    /**
+     * Creates the identity of the entity state by its ID and type URL.
+     */
+    public static MessageId ofEntity(Object entityId, TypeUrl entityType) {
+        checkNotNull(entityId);
+        checkNotNull(entityType);
+        return MessageId
+                .newBuilder()
+                .setId(Identifier.pack(entityId))
+                .setTypeUrl(entityType.value())
+                .vBuild();
+    }
 }

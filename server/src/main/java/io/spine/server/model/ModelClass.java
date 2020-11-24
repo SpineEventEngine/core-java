@@ -44,7 +44,7 @@ public abstract class ModelClass<T> extends ClassTypeValue<T> {
      * <p>If the model does not have the model class yet, it would be obtained
      * from the passed supplier and remembered.
      */
-    protected static <T, M extends ModelClass<?>>
+    protected static <T, M extends ModelClass<T>>
     ModelClass<T> get(Class<T> rawClass,
                       Class<M> requestedModelClass,
                       Supplier<ModelClass<T>> supplier) {

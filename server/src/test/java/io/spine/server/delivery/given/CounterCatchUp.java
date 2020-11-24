@@ -175,7 +175,7 @@ public class CounterCatchUp {
                                     .setCatchUpStorage(storage)
                                     .build();
         delivery.subscribe(new LocalDispatchingObserver());
-        ServerEnvironment.instance()
-                         .use(delivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(delivery);
     }
 }

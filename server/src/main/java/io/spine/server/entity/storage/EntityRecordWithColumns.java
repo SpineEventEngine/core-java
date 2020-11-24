@@ -88,7 +88,7 @@ public final class EntityRecordWithColumns<I>
      * @param record
      *         the record to store; it is also used as a source for the lifecycle column values
      * @param <I>
-     *         the type of the identiiers
+     *         the type of the identifiers
      * @return a new instance of {@code EntityRecordWithColumns}
      */
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {

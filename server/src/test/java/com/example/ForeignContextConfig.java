@@ -88,7 +88,7 @@ public final class ForeignContextConfig {
 
         @Override
         public ImmutableSet<EventClass> externalEventClasses() {
-            return ImmutableSet.of();
+            return EventClass.emptySet();
         }
 
         @Override
@@ -98,7 +98,7 @@ public final class ForeignContextConfig {
 
         @Override
         public ImmutableSet<EventClass> messageClasses() {
-            return ImmutableSet.of();
+            return EventClass.emptySet();
         }
 
         @CanIgnoreReturnValue
