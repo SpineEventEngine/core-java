@@ -77,9 +77,9 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
     }
 
     /**
-     * Obtains the storage for the {@linkplain #getTestEntityClass() entity class}.
+     * Obtains an instance of the storage-under-test.
      *
-     * @return the storage, which will be closed automatically after a test
+     * @return the storage which will be closed automatically after a test
      */
     protected final S storage() {
         return storage;

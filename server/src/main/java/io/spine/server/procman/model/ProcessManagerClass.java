@@ -65,6 +65,7 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
     public static <P extends ProcessManager<?, ?, ?>>
     ProcessManagerClass<P> asProcessManagerClass(Class<P> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         ProcessManagerClass<P> result = (ProcessManagerClass<P>)
                 get(cls, ProcessManagerClass.class, () -> new ProcessManagerClass<>(cls));
         return result;

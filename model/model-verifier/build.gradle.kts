@@ -18,8 +18,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.Deps
-
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 }
@@ -38,7 +36,6 @@ dependencies {
     testImplementation(gradleTestKit())
     testImplementation("io.spine:spine-testlib:$spineBaseVersion")
     testImplementation("io.spine.tools:spine-plugin-testlib:$spineBaseVersion")
-    testImplementation(Deps.test.junitPioneer)
     testImplementation(project(":testutil-server"))
 }
 

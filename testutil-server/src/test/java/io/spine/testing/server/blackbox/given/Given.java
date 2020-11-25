@@ -33,12 +33,14 @@ import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbAssignSelf;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
+import io.spine.testing.server.blackbox.command.BbFailProject;
 import io.spine.testing.server.blackbox.command.BbFinalizeProject;
 import io.spine.testing.server.blackbox.command.BbInitProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbEventDispatcherRegistered;
 import io.spine.testing.server.blackbox.event.BbProjectDone;
+import io.spine.testing.server.blackbox.event.BbProjectFailed;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
 
@@ -190,6 +192,20 @@ public class Given {
 
     public static BbFinalizeProject finalizeProject(BbProjectId projectId) {
         return BbFinalizeProject
+                .newBuilder()
+                .setProjectId(projectId)
+                .build();
+    }
+
+    public static BbFailProject failProject(BbProjectId projectId) {
+        return BbFailProject
+                .newBuilder()
+                .setProjectId(projectId)
+                .build();
+    }
+
+    public static BbProjectFailed projectFailed(BbProjectId projectId) {
+        return BbProjectFailed
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();

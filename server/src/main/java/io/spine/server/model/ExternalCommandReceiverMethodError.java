@@ -20,13 +20,13 @@
 
 package io.spine.server.model;
 
+import io.spine.annotation.Internal;
 import io.spine.server.command.model.CommandAcceptingMethod;
 import io.spine.server.command.model.CommandHandlingClass;
-import io.spine.server.type.CommandClass;
 
 import java.util.Collection;
 
-import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
+import static io.spine.string.Diags.toEnumerationBackticked;
 
 /**
  * An error thrown when one or more of the command accepting methods are marked {@code external}
@@ -48,14 +48,16 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String MESSAGE =
-            "The class `%s` declares `external` command receiver methods for command types: %s. " +
-                    "Only event accepting methods should be marked as `external`.";
-
+    /**
+     * Creates a new exception for the command handler that violates the {@code @Command} semantic.
+     */
+    @Internal
     public ExternalCommandReceiverMethodError(
-            CommandHandlingClass classWithViolation,
+            CommandHandlingClass<?, ?> classWithViolation,
             Collection<? extends CommandAcceptingMethod<?, ?>> invalidMethods) {
-        super(MESSAGE, classWithViolation, handledCommandTypes(invalidMethods));
+        super("The class `%s` declares `external` command receiver methods for command types: %s. "
+                      + "Only event accepting methods should be marked as `external`.",
+              classWithViolation, handledCommandTypes(invalidMethods));
     }
 
     private static String
@@ -63,9 +65,7 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
         String result = handlers
                 .stream()
                 .map(CommandAcceptingMethod::messageClass)
-                .map(CommandClass::toString)
-                .map(MessageFormatter::backtick)
-                .collect(toStringEnumeration());
+                .collect(toEnumerationBackticked());
         return result;
     }
 }

@@ -8,20 +8,21 @@ sudo: required
 
 env:
   global:
-    # https://docs.travis-ci.com/user/environment-variables/#Encrypting-environment-variables
+    # https://docs.travis-ci.com/user/environment-variables/#defining-encrypted-variables-in-travisyml
     # Encrypted `GCS_SECRET` variable.
     - secure: "i/Kdj+APEvQPULnFU05hYJp1AG+NYS10XapkrGP4S/uXcfFyGAdjyH/BzPoSsg1wvhtySLD0OS1hDoHiJ1wYsqHskkQZDodu29HcTxpMi1qbKqWly6E73eKDr5tMBfFTOMQDAzKbp5T1/NxMtV7T4Dhoam0EdbdHj6ui5B53SVPF12H7fnmVZurpFWvGwS75O6N2GJMOsyK8tLa2SqMNvYTWHQL5CgnOX5yszAm1/WVCmxvIygHvvQ0J4DYg2KGjePSYKTPyN+MCK4rxKZnzy4x+bUOhks+lDFuyAKQbY57cA6hkUkB+pXePPtZr0rAHamaAdKZiBaJ0S1FtZKdUuC6FP1fAxsOgoNsuyYdcFqekDIw595F7p1TVDsjOtWVTeAHxAIWqC1pweUnRuAMzy/5JVGb3Vmdgiq1okL6owiy+d93DVAW/47+HUaQL09gnd4TlnJvC54gfexchQJwLmX+yEFTKgDvwqhQcCpkZoIZhAeNz3E5okGtTNhvlVJ0+jKuHYpx17yrvC0Y45LGKBdgttfGL/9GOjpfk4TeCo6o1VqlCzv0j2y0K3gkTM7su6PGFkkQ20UPfjTNvlcvEHHYWtgGVaRgAmPyjKRQrHyTMPmbHFMDGMWUT+eWX+q4u3qz+OCGqSLW6opfhHd4pYQ8/5MGqliblLMlqHVAKVG4="
     # Encrypted `GITHUB_TOKEN` variable. The token belongs to armiol.
     - secure: "TNiHyUEWpTkEbmx5WIf24V4nn8JF9SotJY5Ydef5eHulubci466sQmUGaljYcAgKcwaYKnFU+MQlfU0OoDsl64JZ7KXqxEZD5Ye8MHLw5zKe3MI8Ol7NYB5E7HYzP1lwQnwXNQ72YqICI4Yx9hsmT9y277C0exoq5yuh9Ej25gKVjsLrxkX/B3Vezxwq+jPfr8tf9CpaUT/YYz96MtpJNETEIQzmkTMBOIEkc+sS0MTNQDI7wBYT7HZZYSPFXUaWP3thkFNKlEYW8mo59zd3yTOk1Oq17g5GTsxj1NYPuJrcWSRApZB0zSUrMuz7IWEw4zWBaBKtHGPzta251KDTjfweDB1KzP+gD15WnyaBWzjpulPB2i/WNefDOmLsE912X7fb4gOMJi/OoXfaV8LMmu3lRBr+pDgZM2hC3QLKgIlQpe1KNqOUm3nVEElTBGDHGLQWwcs1SjoRaVkcwFJ3RlOfHqBvIUwDERtt4HZrWONWAwlCiZljGNCCwBLKfi8hjeM+/yBL6u9wCUKs7C8cBg104pFkMGGledjRHIm/xnfP2GUdkG1RAHJTPStx4EEUZWF94uiUhEri3Mxnrx0hDHuqBDZD4aTU6R436BVeoRYi6xK9Rx+wbZmKMh+t2bGTyBdoO0Nv3c9bzGiyI9XlbXQDhPt1NBTU7oV1Ou3D7Pk="
     # This email is used as a commit author email when updating the Javadoc hosted on GitHub Pages.
     # See `scripts/update-gh-pages.gradle`
-    - FORMAL_GIT_HUB_PAGES_AUTHOR: "spine-developers@teamdev.com"
+    - FORMAL_GIT_HUB_PAGES_AUTHOR: "developers@spine.io"
 
 before_install:
   - chmod +x gradlew
   - chmod +x config/scripts/register-ssh-key.sh
   - chmod +x ./config/scripts/publish-artifacts.sh
   # Decrypt and un-archive Maven and Google Cloud credentials and an RSA private key (deploy_key_rsa).
+  # See also: https://github.com/SpineEventEngine/SpineEventEngine.github.io/wiki/Encrypting-credential-files-for-Travis
   - openssl aes-256-cbc -K $encrypted_e308efbe7a9a_key -iv $encrypted_e308efbe7a9a_iv -in credentials.tar.enc -out credentials.tar -d
   - tar xvf credentials.tar
   - chmod 600 deploy_key_rsa

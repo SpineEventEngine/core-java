@@ -22,6 +22,7 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
+import com.google.common.truth.StringSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
@@ -71,10 +72,6 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -427,7 +424,7 @@ class QueryBuilderTest {
 
             assertThat(idValues)
                  .hasSize(2);
-            assertThat(intIdValues, containsInAnyOrder(id1, id2));
+            assertThat(intIdValues).containsAtLeast(id1, id2);
 
             // Check query params
             List<CompositeFilter> aggregatingFilters =
@@ -502,7 +499,8 @@ class QueryBuilderTest {
                     .stream()
                     .map(id -> toObject(id, TestEntityId.class))
                     .collect(toList());
-            assertThat(actualValues, containsInAnyOrder(messageIds));
+            assertThat(actualValues)
+                    .containsAtLeastElementsIn(messageIds);
         }
 
         @Test
@@ -521,7 +519,8 @@ class QueryBuilderTest {
             Collection<String> maskFields = mask.getPathsList();
             assertThat(maskFields)
                  .hasSize(arrayFields.length);
-            assertThat(maskFields, contains(arrayFields));
+            assertThat(maskFields)
+                    .containsAtLeastElementsIn(arrayFields);
         }
 
         @Test
@@ -562,17 +561,20 @@ class QueryBuilderTest {
         String columnName2 = "column2";
         Message columnValue2 = randomId();
         String fieldName = "TestEntity.secondField";
-        QueryBuilder builder = factory.select(TEST_ENTITY_TYPE)
-                                      .withMask(fieldName)
-                                      .byId(id1, id2)
-                                      .where(eq(columnName1, columnValue1),
-                                             eq(columnName2, columnValue2));
+        QueryBuilder builder =
+                factory.select(TEST_ENTITY_TYPE)
+                       .withMask(fieldName)
+                       .byId(id1, id2)
+                       .where(eq(columnName1, columnValue1),
+                              eq(columnName2, columnValue2));
         String stringRepr = builder.toString();
 
-        assertThat(stringRepr, containsString(TEST_ENTITY_TYPE.getSimpleName()));
-        assertThat(stringRepr, containsString(String.valueOf(id1)));
-        assertThat(stringRepr, containsString(String.valueOf(id2)));
-        assertThat(stringRepr, containsString(columnName1));
-        assertThat(stringRepr, containsString(columnName2));
+        StringSubject assertOutput = assertThat(stringRepr);
+
+        assertOutput.contains(TEST_ENTITY_TYPE.getSimpleName());
+        assertOutput.contains(String.valueOf(id1));
+        assertOutput.contains(String.valueOf(id2));
+        assertOutput.contains(columnName1);
+        assertOutput.contains(columnName2);
     }
 }

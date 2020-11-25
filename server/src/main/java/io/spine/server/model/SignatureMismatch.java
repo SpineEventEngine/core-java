@@ -24,6 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -84,13 +86,14 @@ public final class SignatureMismatch {
      *         the criterion
      * @param values
      *         the values, which did not met the criterion requirements
-     * @return a new {@code SignatureMismatch} instance
+     * @return a new {@code SignatureMismatch} instance wrapped in {@code Optional}
+     *         which is guaranteed to be non-empty
      */
-    static SignatureMismatch create(MatchCriterion criterion, Object... values) {
+    static Optional<SignatureMismatch> create(MatchCriterion criterion, Object... values) {
         checkNotNull(criterion);
         checkNotNull(values);
         SignatureMismatch result = new SignatureMismatch(criterion, values);
-        return result;
+        return Optional.of(result);
     }
 
     /**

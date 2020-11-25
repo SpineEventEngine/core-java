@@ -29,11 +29,13 @@ import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.UUID;
 
 import static com.google.protobuf.ByteString.copyFromUtf8;
 import static io.spine.base.Time.currentTime;
+import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -41,15 +43,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
                                         of preconditions */,
                    "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
                    "OverlyCoupledClass" /* we test many data types and utility methods */})
-@DisplayName("Changes utility should")
+@DisplayName("`Changes` utility should")
 class ChangesTest extends UtilityClassTest<Changes> {
-
-    private static final String ERR_PREVIOUS_VALUE_CANNOT_BE_NULL =
-            "do_not_accept_null_previousValue";
-    private static final String ERR_NEW_VALUE_CANNOT_BE_NULL =
-            "do_not_accept_null_newValue";
-    private static final String ERR_VALUES_CANNOT_BE_EQUAL =
-            "do_not_accept_equal_values";
 
     ChangesTest() {
         super(Changes.class);
@@ -67,7 +62,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
     class Create {
 
         @Test
-        @DisplayName("String")
+        @DisplayName("`String`")
         void forStrings() {
             String previousValue = randomUuid();
             String newValue = randomUuid();
@@ -79,7 +74,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("ByteString")
+        @DisplayName("`ByteString`")
         void forByteStrings() {
             ByteString previousValue = copyFromUtf8(randomUuid());
             ByteString newValue = copyFromUtf8(randomUuid());
@@ -91,7 +86,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("Timestamp")
+        @DisplayName("`Timestamp`")
         void forTimestamps() {
             Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
             Timestamp now = currentTime();
@@ -103,7 +98,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("boolean")
+        @DisplayName("`boolean`")
         void forBooleans() {
             boolean s1 = true;
             boolean s2 = false;
@@ -115,7 +110,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("double")
+        @DisplayName("`double`")
         void forDoubles() {
             double s1 = 1957.1004;
             double s2 = 1957.1103;
@@ -127,7 +122,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("int32")
+        @DisplayName("`int32`")
         void forInt32s() {
             int s1 = 1550;
             int s2 = 1616;
@@ -139,7 +134,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("int64")
+        @DisplayName("`int64`")
         void forInt64s() {
             long s1 = 16420225L;
             long s2 = 17270320L;
@@ -151,7 +146,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("float")
+        @DisplayName("`float`")
         void forFloats() {
             float s1 = 1473.0219f;
             float s2 = 1543.0524f;
@@ -163,7 +158,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("uint32")
+        @DisplayName("`uint32`")
         void forUint32s() {
             int s1 = 16440925;
             int s2 = 17100919;
@@ -175,7 +170,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("uint64")
+        @DisplayName("`uint64`")
         void forUint64s() {
             long s1 = 16290414L;
             long s2 = 16950708L;
@@ -187,7 +182,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("sint32")
+        @DisplayName("`sint32`")
         void forSint32s() {
             int s1 = 16550106;
             int s2 = 17050816;
@@ -199,7 +194,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("sint64")
+        @DisplayName("`sint64`")
         void forSint64s() {
             long s1 = 1666L;
             long s2 = 1736L;
@@ -211,7 +206,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("fixed32")
+        @DisplayName("`fixed32`")
         void forFixed32s() {
             int s1 = 17070415;
             int s2 = 17830918;
@@ -223,7 +218,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("fixed64")
+        @DisplayName("`fixed64`")
         void forFixed64s() {
             long s1 = 17240422L;
             long s2 = 18040212L;
@@ -235,7 +230,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("sfixed32")
+        @DisplayName("`sfixed32`")
         void forSfixed32s() {
             int s1 = 1550;
             int s2 = 1616;
@@ -247,7 +242,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("sfixed64")
+        @DisplayName("`sfixed64`")
         void forSfixed64s() {
             long s1 = 16420225L;
             long s2 = 17270320L;
@@ -269,112 +264,112 @@ class ChangesTest extends UtilityClassTest<Changes> {
     class NotAcceptEqual {
 
         @Test
-        @DisplayName("String")
+        @DisplayName("`String`")
         void strings() {
-            String value = ERR_VALUES_CANNOT_BE_EQUAL;
+            String value = randomString();
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
-        @DisplayName("ByteString")
+        @DisplayName("`ByteString`")
         void byteStrings() {
-            ByteString value = copyFromUtf8(ERR_VALUES_CANNOT_BE_EQUAL);
+            ByteString value = copyFromUtf8(randomString());
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
-        @DisplayName("TimeStamp")
+        @DisplayName("`Timestamp`")
         void timestamps() {
             Timestamp now = currentTime();
             assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
         }
 
         @Test
-        @DisplayName("boolean")
+        @DisplayName("`boolean`")
         void booleans() {
             boolean value = true;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
-        @DisplayName("double")
+        @DisplayName("`double`")
         void doubles() {
             double value = 1961.0412;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
-        @DisplayName("float")
+        @DisplayName("`float`")
         void floats() {
             float value = 1543.0f;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
-        @DisplayName("int32")
+        @DisplayName("`int32`")
         void int32s() {
             int value = 1614;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
-        @DisplayName("int64")
+        @DisplayName("`int64`")
         void int64s() {
             long value = 1666L;
             assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
         }
 
         @Test
-        @DisplayName("uint32")
+        @DisplayName("`uint32`")
         void uint32s() {
             int value = 1776;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofUInt32(value, value));
         }
 
         @Test
-        @DisplayName("uint64")
+        @DisplayName("`uint64`")
         void uint64s() {
             long value = 1690L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofUInt64(value, value));
         }
 
         @Test
-        @DisplayName("sint32")
+        @DisplayName("`sint32`")
         void sint32s() {
             int value = 1694;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSInt32(value, value));
         }
 
         @Test
-        @DisplayName("sint64")
+        @DisplayName("`sint64`")
         void sint64s() {
             long value = 1729L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSInt64(value, value));
         }
 
         @Test
-        @DisplayName("fixed32")
+        @DisplayName("`fixed32`")
         void fixed32s() {
             int value = 1736;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofFixed32(value, value));
         }
 
         @Test
-        @DisplayName("fixed64")
+        @DisplayName("`fixed64`")
         void fixed64s() {
             long value = 1755L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofFixed64(value, value));
         }
 
         @Test
-        @DisplayName("sfixed32")
+        @DisplayName("`sfixed32`")
         void sfixed32s() {
             int value = 1614;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSfixed32(value, value));
         }
 
         @Test
-        @DisplayName("sfixed64")
+        @DisplayName("`sfixed64`")
         void sfixed64s() {
             long value = 1666L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSfixed64(value, value));
@@ -382,48 +377,47 @@ class ChangesTest extends UtilityClassTest<Changes> {
     }
 
     @Nested
-    @DisplayName("fail to create value change from null")
+    @DisplayName("fail to create value change from `null`")
     class NotAcceptNull {
 
         @Test
-        @DisplayName("String previousValue")
+        @DisplayName("`String` `previousValue`")
         void stringPrevious() {
-            assertThrows(NullPointerException.class,
-                         () -> Changes.of(null, ERR_PREVIOUS_VALUE_CANNOT_BE_NULL));
+            assertThrowsNpe(() -> Changes.of(null, randomString()));
         }
 
         @Test
-        @DisplayName("String newValue")
+        @DisplayName("`String` `newValue`")
         void stringNew() {
-            assertThrows(NullPointerException.class,
-                         () -> Changes.of(ERR_NEW_VALUE_CANNOT_BE_NULL, null));
+            assertThrowsNpe(() -> Changes.of(randomString(), null));
         }
 
         @Test
-        @DisplayName("ByteString previousValue")
+        @DisplayName("`ByteString` `previousValue`")
         void byteStringPrevious() {
-            assertThrows(NullPointerException.class,
-                         () -> Changes.of(null,
-                                          copyFromUtf8(ERR_PREVIOUS_VALUE_CANNOT_BE_NULL)));
+            assertThrowsNpe(() -> Changes.of(null, copyFromUtf8(randomString())));
         }
 
         @Test
-        @DisplayName("ByteString newValue")
+        @DisplayName("`ByteString` `newValue`")
         void byteStringNew() {
-            assertThrows(NullPointerException.class,
-                         () -> Changes.of(copyFromUtf8(ERR_NEW_VALUE_CANNOT_BE_NULL), null));
+            assertThrowsNpe(() -> Changes.of(copyFromUtf8(randomString()), null));
         }
 
         @Test
-        @DisplayName("Timestamp previousValue")
+        @DisplayName("`Timestamp` `previousValue`")
         void timestampPrevious() {
-            assertThrows(NullPointerException.class, () -> Changes.of(null, currentTime()));
+            assertThrowsNpe(() -> Changes.of(null, currentTime()));
         }
 
         @Test
-        @DisplayName("Timestamp newValue")
+        @DisplayName("`Timestamp` `newValue`")
         void timestampNew() {
-            assertThrows(NullPointerException.class, () -> Changes.of(currentTime(), null));
+            assertThrowsNpe(() -> Changes.of(currentTime(), null));
+        }
+
+        void assertThrowsNpe(Executable executable) {
+            assertThrows(NullPointerException.class, executable);
         }
     }
 }

@@ -20,7 +20,6 @@
 
 package io.spine.model.verify;
 
-import com.google.common.io.Files;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
 import io.spine.model.verify.given.DuplicateCommandHandler;
@@ -35,6 +34,7 @@ import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
 import io.spine.server.model.SignatureMismatchException;
+import io.spine.testing.TempDir;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
@@ -208,7 +208,7 @@ class ModelVerifierTest {
         JavaCompile compileTask = actualProject().getTasks()
                                                  .withType(JavaCompile.class)
                                                  .getByName(compileJava.name());
-        File dest = Files.createTempDir();
+        File dest = TempDir.forClass(getClass());
         compileTask.setDestinationDir(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         URL destUrl = dest.toURI().toURL();

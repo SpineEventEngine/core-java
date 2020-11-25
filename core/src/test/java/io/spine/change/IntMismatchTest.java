@@ -20,7 +20,6 @@
 
 package io.spine.change;
 
-import com.google.common.testing.NullPointerTester;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,9 +32,6 @@ import static io.spine.change.IntMismatch.unexpectedValue;
 import static io.spine.change.IntMismatch.unpackActual;
 import static io.spine.change.IntMismatch.unpackExpected;
 import static io.spine.change.IntMismatch.unpackNewValue;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -49,19 +45,6 @@ class IntMismatchTest extends UtilityClassTest<IntMismatch> {
 
     IntMismatchTest() {
         super(IntMismatch.class);
-    }
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(IntMismatch.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(IntMismatch.class);
     }
 
     @Nested

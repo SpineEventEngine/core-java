@@ -21,7 +21,6 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
@@ -30,9 +29,11 @@ import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.command.Command;
+import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.ReturnTypes;
 import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
 
@@ -48,28 +49,24 @@ import static io.spine.server.model.TypeMatcher.exactly;
 public class CommandReactionSignature
         extends MethodSignature<CommandReactionMethod, EventEnvelope> {
 
-    private static final ImmutableSet<CommandReactionParams>
-            PARAM_SPECS = ImmutableSet.copyOf(CommandReactionParams.values());
-
-    private static final ImmutableSet<TypeToken<?>>
-            RETURN_TYPES = ImmutableSet.of(
-                    TypeToken.of(CommandMessage.class),
-                    new TypeToken<Iterable<CommandMessage>>() {},
-                    new TypeToken<Optional<CommandMessage>>() {}
-                    );
+    private static final ReturnTypes TYPES = new ReturnTypes(
+            TypeToken.of(CommandMessage.class),
+            new TypeToken<Iterable<CommandMessage>>() {},
+            new TypeToken<Optional<CommandMessage>>() {}
+    );
 
     CommandReactionSignature() {
         super(Command.class);
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return PARAM_SPECS;
+    public AllowedParams<EventEnvelope> params() {
+        return CommandReactionParams.ALLOWED;
     }
 
     @Override
-    protected ImmutableSet<TypeToken<?>> returnTypes() {
-        return RETURN_TYPES;
+    protected ReturnTypes returnTypes() {
+        return TYPES;
     }
 
     @Override
@@ -140,6 +137,8 @@ public class CommandReactionSignature
                 return new Object[]{event.message(), originContext};
             }
         };
+
+        private static final AllowedParams<EventEnvelope> ALLOWED = new AllowedParams<>(values());
 
         private final ImmutableList<TypeMatcher> criteria;
 

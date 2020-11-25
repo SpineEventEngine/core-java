@@ -22,10 +22,6 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.FormatMethod;
 import com.google.errorprone.annotations.FormatString;
-import io.spine.string.Diags;
-
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -47,22 +43,5 @@ public class ModelError extends Error {
 
     public ModelError(Throwable cause) {
         super(cause);
-    }
-
-    /**
-     * An error message formatting helper.
-     */
-    static class MessageFormatter {
-
-        private MessageFormatter() {
-        }
-
-        static String backtick(Object object) {
-            return Diags.backtick(object);
-        }
-
-        static Collector<CharSequence, ?, String> toStringEnumeration() {
-            return Collectors.joining(", ");
-        }
     }
 }

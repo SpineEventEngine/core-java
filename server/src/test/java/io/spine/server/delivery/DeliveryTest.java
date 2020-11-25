@@ -150,8 +150,8 @@ public class DeliveryTest extends AbstractDeliveryTest {
         Delivery newDelivery = Delivery.localWithStrategyAndWindow(strategy, Durations.ZERO);
         ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
         newDelivery.subscribe(memoizer);
-        ServerEnvironment.instance()
-                         .use(newDelivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(newDelivery);
 
         ImmutableSet<String> targets = manyTargets(7);
         new NastyClient(5, false).runWith(targets);
@@ -170,8 +170,8 @@ public class DeliveryTest extends AbstractDeliveryTest {
         Delivery delivery = Delivery.newBuilder()
                                     .setStrategy(UniformAcrossAllShards.forNumber(7))
                                     .build();
-        ServerEnvironment.instance()
-                         .use(delivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(delivery);
         List<DeliveryStats> deliveryStats = synchronizedList(new ArrayList<>());
         delivery.subscribe(msg -> {
             Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(msg.shardIndex());
@@ -201,15 +201,16 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                     .setStrategy(strategy)
                                     .setWorkRegistry(registry)
                                     .build();
-        ServerEnvironment env = ServerEnvironment.instance();
-        env.use(delivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(delivery);
 
         ShardIndex index = strategy.nonEmptyShard();
         TenantId tenantId = GivenTenantId.generate();
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsMatch(delivery, index));
 
-        Optional<ShardProcessingSession> session = registry.pickUp(index, env.nodeId());
+        Optional<ShardProcessingSession> session =
+                registry.pickUp(index, ServerEnvironment.instance().nodeId());
         assertThat(session).isPresent();
 
         TenantAwareRunner.with(tenantId)
@@ -230,8 +231,8 @@ public class DeliveryTest extends AbstractDeliveryTest {
         RawMessageMemoizer rawMessageMemoizer = new RawMessageMemoizer();
         delivery.subscribe(rawMessageMemoizer);
         delivery.subscribe(new LocalDispatchingObserver());
-        ServerEnvironment.instance()
-                         .use(delivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(delivery);
 
         ImmutableSet<String> aTarget = singleTarget();
         assertThat(monitor.stats()).isEmpty();
@@ -269,8 +270,8 @@ public class DeliveryTest extends AbstractDeliveryTest {
         Delivery newDelivery = Delivery.localWithStrategyAndWindow(strategy, Durations.fromDays(1));
         RawMessageMemoizer memoizer = new RawMessageMemoizer();
         newDelivery.subscribe(memoizer);
-        ServerEnvironment.instance()
-                         .use(newDelivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(newDelivery);
 
         ImmutableSet<String> targets = manyTargets(6);
         new NastyClient(3, false).runWith(targets);
@@ -303,8 +304,8 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                     .build();
         deliverAfterPause(delivery);
 
-        ServerEnvironment.instance()
-                         .use(delivery, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(delivery);
         ImmutableSet<String> targets = singleTarget();
         NastyClient simulator = new NastyClient(7, false);
         simulator.runWith(targets);
@@ -364,7 +365,6 @@ public class DeliveryTest extends AbstractDeliveryTest {
      ******************************************************************************/
 
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent"/* unchecked exception fails the test. */)
     private static void assertStatsMatch(Delivery delivery, ShardIndex index) {
         Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
         assertThat(stats).isPresent();

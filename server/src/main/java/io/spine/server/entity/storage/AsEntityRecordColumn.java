@@ -61,6 +61,7 @@ final class AsEntityRecordColumn {
      *         the type of the column values
      * @return a view on the column
      */
+    @SuppressWarnings("BadImport")       // `create` looks fine in this context.
     static <V> RecordColumn<EntityRecord, V> apply(Column<?, ?> original, Class<V> typeOfValues) {
         checkNotNull(original);
         checkNotNull(typeOfValues);

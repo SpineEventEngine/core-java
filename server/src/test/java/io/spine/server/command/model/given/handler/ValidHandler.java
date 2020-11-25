@@ -58,8 +58,9 @@ public final class ValidHandler extends AbstractCommandHandler {
 
     @Command
     SigProjectCreated declaredRejection(SigCreateProject cmd) throws SigCannotCreateProject {
-        throw SigCannotCreateProject.newBuilder()
-                                    .build();
+        throw SigCannotCreateProject
+                .newBuilder()
+                .build();
     }
 
     @Assign
@@ -117,20 +118,22 @@ public final class ValidHandler extends AbstractCommandHandler {
         return ImmutableList.of(EventMessages.taskStarted());
     }
 
-    @SuppressWarnings("MethodMayBeStatic")              // testing the visibility level.
     @Assign
+    @SuppressWarnings("MethodMayBeStatic")
+    // It is a use-case-under-test.
     private SigTaskPaused privateHandler(SigPauseTask command) {
         return EventMessages.taskPaused();
     }
 
-    @SuppressWarnings("ProtectedMemberInFinalClass")    // testing the visibility level.
     @Assign
+    @SuppressWarnings({"ProtectedMemberInFinalClass", "ProtectedMembersInFinalClass"})
+    // testing the visibility level. IDEA's warning is singular, ErrorProne's is plural.
     protected SigTaskPaused protectedHandler(SigPauseTask command) {
         return EventMessages.taskPaused();
     }
 
     @Assign
-    public SigTaskPaused publicHandler(SigPauseTask command) {
+    public SigTaskPaused publicHandler(@SuppressWarnings("unused") SigPauseTask command) {
         return EventMessages.taskPaused();
     }
 }

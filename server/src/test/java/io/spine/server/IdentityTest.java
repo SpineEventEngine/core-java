@@ -20,7 +20,10 @@
 
 package io.spine.server;
 
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Empty;
 import io.spine.testing.UtilityClassTest;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +34,12 @@ class IdentityTest extends UtilityClassTest<Identity> {
 
     IdentityTest() {
         super(Identity.class);
+    }
+
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(TypeUrl.class, TypeUrl.of(Empty.getDefaultInstance()));
     }
 
     @Test

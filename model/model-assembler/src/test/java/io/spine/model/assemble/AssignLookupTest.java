@@ -25,8 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("AssignLookup should")
@@ -42,6 +41,7 @@ class AssignLookupTest extends SpineAnnotationProcessorTest {
     void supportSpineDirRoot() {
         Set<String> opts = processor().getSupportedOptions();
         assertEquals(1, opts.size());
-        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
+
+        assertThat(opts).contains(AssignLookup.OUTPUT_OPTION_NAME);
     }
 }

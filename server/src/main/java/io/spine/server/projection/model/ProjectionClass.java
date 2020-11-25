@@ -60,6 +60,7 @@ public final class ProjectionClass<P extends Projection<?, ?, ?>>
     public static <P extends Projection<?, ?, ?>> ProjectionClass<P>
     asProjectionClass(Class<P> cls) {
         checkNotNull(cls);
+        @SuppressWarnings("unchecked")
         ProjectionClass<P> result = (ProjectionClass<P>)
                 get(cls, ProjectionClass.class, () -> new ProjectionClass<>(cls));
         return result;

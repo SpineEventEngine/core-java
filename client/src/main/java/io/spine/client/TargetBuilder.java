@@ -20,7 +20,6 @@
 
 package io.spine.client;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
@@ -108,7 +107,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
         if (fieldMask == null || fieldMask.isEmpty()) {
             return null;
         }
-        FieldMask mask = fromStringList(null, ImmutableList.copyOf(fieldMask));
+        FieldMask mask = fromStringList(fieldMask);
         return mask;
     }
 

@@ -20,6 +20,8 @@
 
 package io.spine.core;
 
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.test.commands.CmdCreateProject;
@@ -28,6 +30,7 @@ import io.spine.test.commands.CmdStopProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.command.TestCommandMessage;
 import io.spine.testing.core.given.GivenCommandContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -48,33 +51,38 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * <p>The test suite is located under the "client" module since actor request generation
  * is required. So we want to avoid circular dependencies between "core" and "client" modules.
  */
-@DisplayName("Command  should")
+@SuppressWarnings("MethodOnlyUsedFromInnerClass" /* to simplify the structure, allow for re-use */)
+@DisplayName("Command should")
 class CommandTest {
-
-    private static final CmdCreateProject createProject = CmdCreateProject
-            .newBuilder()
-            .setId(Identifier.newUuid())
-            .build();
-    private static final CmdStartProject startProject = CmdStartProject
-            .newBuilder()
-            .setId(Identifier.newUuid())
-            .build();
-    private static final CmdStopProject stopProject = CmdStopProject
-            .newBuilder()
-            .setId(Identifier.newUuid())
-            .build();
 
     private final TestActorRequestFactory requestFactory =
             new TestActorRequestFactory(CommandTest.class);
 
+    private CmdCreateProject createProject;
+    private CmdStartProject startProject;
+    private CmdStopProject stopProject;
+
+    @BeforeEach
+    void createCommands() {
+        String projectId = Identifier.newUuid();
+        createProject = CmdCreateProject.newBuilder()
+                .setId(projectId)
+                .build();
+        startProject = CmdStartProject.newBuilder()
+                .setId(projectId)
+                .build();
+        stopProject = CmdStopProject.newBuilder()
+                .setId(projectId)
+                .build();
+    }
+
     @Test
     @DisplayName("extract message from given command")
     void extractMessage() {
-        CommandMessage message = TestCommandMessage
-                .newBuilder()
+        CommandMessage message = TestCommandMessage.newBuilder()
                 .setId(Identifier.newUuid())
                 .build();
-        Command command = requestFactory.createCommand(message);
+        Command command = command(message);
         assertThat(command.enclosedMessage())
                 .isEqualTo(message);
     }
@@ -86,8 +94,7 @@ class CommandTest {
         @Test
         @DisplayName("after given time")
         void after() {
-            Command command = requestFactory.command()
-                                            .create(stopProject);
+            Command command = command(stopProject);
             assertThat(command.isAfter(secondsAgo(5)))
                  .isTrue();
         }
@@ -95,8 +102,7 @@ class CommandTest {
         @Test
         @DisplayName("before given time")
         void before() {
-            Command command = requestFactory.command()
-                                            .create(startProject);
+            Command command = command(startProject);
             assertThat(command.isBefore(secondsFromNow(10)))
                     .isTrue();
         }
@@ -104,11 +110,11 @@ class CommandTest {
         @Test
         @DisplayName("withing time range")
         void between() {
-            Command fiveMinsAgo = requestFactory.createCommand(createProject, minutesAgo(5));
-            Command twoMinsAgo = requestFactory.createCommand(startProject, minutesAgo(2));
-            Command thirtySecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(30));
-            Command twentySecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(20));
-            Command fiveSecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(5));
+            Command fiveMinsAgo = command(createProject, minutesAgo(5));
+            Command twoMinsAgo = command(startProject, minutesAgo(2));
+            Command thirtySecondsAgo = command(stopProject, secondsAgo(30));
+            Command twentySecondsAgo = command(stopProject, secondsAgo(20));
+            Command fiveSecondsAgo = command(stopProject, secondsAgo(5));
 
             long filteredCommands =
                     Stream.of(fiveMinsAgo,
@@ -121,13 +127,10 @@ class CommandTest {
             assertEquals(3, filteredCommands);
         }
     }
-
     @Test
     @DisplayName("consider command scheduled when command delay is set")
     void recognizeScheduled() {
-        CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
-        Command cmd = requestFactory.command()
-                                    .createBasedOnContext(createProject, context);
+        Command cmd = commandWithDelay(createProject, seconds(10));
         assertThat(cmd.isScheduled())
                 .isTrue();
     }
@@ -135,7 +138,7 @@ class CommandTest {
     @Test
     @DisplayName("consider command not scheduled when no scheduling options are present")
     void recognizeNotScheduled() {
-        Command cmd = requestFactory.createCommand(createProject);
+        Command cmd = command(createProject);
         assertThat(cmd.isScheduled())
                 .isFalse();
     }
@@ -143,10 +146,22 @@ class CommandTest {
     @Test
     @DisplayName("throw exception when command delay set to negative")
     void throwOnNegativeDelay() {
-        CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
-        Command cmd =
-                requestFactory.command()
-                              .createBasedOnContext(createProject, context);
+        Command cmd = commandWithDelay(createProject, seconds(-10));
         assertThrows(IllegalStateException.class, cmd::isScheduled);
+    }
+
+    private Command command(CommandMessage msg, Timestamp timestamp) {
+        return requestFactory.createCommand(msg, timestamp);
+    }
+
+    private Command command(CommandMessage msg) {
+        return requestFactory.command().create(msg);
+    }
+
+    private Command commandWithDelay(CommandMessage msg, Duration delay) {
+        CommandContext context = GivenCommandContext.withScheduledDelayOf(delay);
+        Command result = requestFactory.command()
+                                       .createBasedOnContext(msg, context);
+        return result;
     }
 }
