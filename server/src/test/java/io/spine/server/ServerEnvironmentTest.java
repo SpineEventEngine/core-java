@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import io.spine.base.Environment;
 import io.spine.base.EnvironmentType;
 import io.spine.base.Production;
 import io.spine.base.Tests;
@@ -195,11 +196,18 @@ class ServerEnvironmentTest {
         }
     }
 
+    @Test
+    @DisplayName("obtain the current environment type")
+    void gettingType() {
+        assertThat(serverEnvironment.type())
+                .isSameInstanceAs(Environment.instance()
+                                             .type());
+    }
+
     @SuppressWarnings({
             "AccessOfSystemProperties" /* Testing the configuration loaded from System properties. */,
             "AbstractClassWithoutAbstractMethods" /* A test base with setUp and tearDown. */
     })
-
     abstract class WithAppEngineEnvironment {
 
         private final String targetEnvironment;

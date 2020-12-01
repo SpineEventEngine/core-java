@@ -151,6 +151,16 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
+     * Obtains the type of the current server environment.
+     *
+     * @apiNote This is a convenience method for server-side configuration code, which
+     *         simply delegates to {@link Environment#type()}.
+     */
+    public Class<? extends EnvironmentType> type() {
+        return Environment.instance().type();
+    }
+
+    /**
      * The type of the environment application is deployed to.
      */
     public DeploymentType deploymentType() {
