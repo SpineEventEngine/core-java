@@ -336,13 +336,17 @@ public final class ServerEnvironment implements AutoCloseable {
         private TypeConfigurator(Class<? extends EnvironmentType> type) {
             this.se = instance();
             if (CustomEnvironmentType.class.isAssignableFrom(type)) {
-                @SuppressWarnings("unchecked") // checked above
-                Class<? extends CustomEnvironmentType> customType =
-                        (Class<? extends CustomEnvironmentType>) type;
-                Environment.instance()
-                           .register(customType);
+                registerCustomType(type);
             }
             this.type = checkNotNull(type);
+        }
+
+        private static void registerCustomType(Class<? extends EnvironmentType> type) {
+            @SuppressWarnings("unchecked") // checked by calling site.
+            Class<? extends CustomEnvironmentType> customType =
+                    (Class<? extends CustomEnvironmentType>) type;
+            Environment.instance()
+                       .register(customType);
         }
 
         /**
