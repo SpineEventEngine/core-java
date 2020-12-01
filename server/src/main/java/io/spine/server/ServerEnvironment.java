@@ -431,7 +431,7 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         /**
-         * Assigns the specified {@code TransportFactory} for the selected environment.
+         * Assigns the specified {@code StorageFactory} for the selected environment.
          *
          * @see #useStorageFactory(ServerEnvironment.Fn)
          */
