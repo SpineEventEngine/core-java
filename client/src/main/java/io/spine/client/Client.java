@@ -422,8 +422,22 @@ public class Client implements AutoCloseable {
          * Sets the timeout for the {@linkplain Client#close() shutdown operation} of the client.
          *
          * <p>If not specified directly, {@link Client#DEFAULT_SHUTDOWN_TIMEOUT} will be used.
+         *
+         * @deprecated Use {@link #shutdownTimeout(long, TimeUnit)} instead.
          */
+        @Deprecated
         public Builder shutdownTimout(long timeout, TimeUnit timeUnit) {
+            checkNotNull(timeUnit);
+            this.shutdownTimeout = Timeout.of(timeout, timeUnit);
+            return this;
+        }
+
+        /**
+         * Sets the timeout for the {@linkplain Client#close() shutdown operation} of the client.
+         *
+         * <p>If not specified directly, {@link Client#DEFAULT_SHUTDOWN_TIMEOUT} will be used.
+         */
+        public Builder shutdownTimeout(long timeout, TimeUnit timeUnit) {
             checkNotNull(timeUnit);
             this.shutdownTimeout = Timeout.of(timeout, timeUnit);
             return this;

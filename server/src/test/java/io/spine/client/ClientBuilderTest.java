@@ -150,7 +150,7 @@ class ClientBuilderTest {
         void valueAndUnit() {
             int value = 100;
             TimeUnit unit = TimeUnit.MILLISECONDS;
-            builder.shutdownTimout(value, unit);
+            builder.shutdownTimeout(value, unit);
 
             client = builder.build();
             assertThat(client.shutdownTimeout())
