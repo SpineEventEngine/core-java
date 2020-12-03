@@ -73,7 +73,7 @@ abstract class AbstractClientTest {
         return Client.inProcess(serverName)
                      // When shutting down, terminate the client immediately since all
                      // the requests made in tests are going to be complete by that time.
-                     .shutdownTimout(0, TimeUnit.SECONDS);
+                     .shutdownTimeout(0, TimeUnit.SECONDS);
     }
 
     @AfterEach
