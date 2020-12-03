@@ -51,8 +51,10 @@ class IncrementGuard : Plugin<Project> {
 
             shouldRunAfter("test")
             if (!shouldCheckVersion()) {
-                logger.info("The build does not represent a GitHub Actions feature branch job, " +
-                        "the `checkVersionIncrement` task is disabled.")
+                logger.info(
+                    "The build does not represent a GitHub Actions feature branch job, " +
+                            "the `checkVersionIncrement` task is disabled."
+                )
                 this.enabled = false
             }
         }
