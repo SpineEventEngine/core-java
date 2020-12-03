@@ -43,8 +43,8 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             force(
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion"
+                "io.spine:spine-base:$spineBaseVersion",
+                "io.spine:spine-time:$spineTimeVersion"
             )
         }
     }
@@ -64,14 +64,14 @@ val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 
 extra["projectsToPublish"] = listOf(
-        "core",
-        "client",
-        "server",
-        "testutil-core",
-        "testutil-client",
-        "testutil-server",
-        "model-assembler",
-        "model-verifier"
+    "core",
+    "client",
+    "server",
+    "testutil-core",
+    "testutil-client",
+    "testutil-server",
+    "model-assembler",
+    "model-verifier"
 )
 extra["credentialsPropertyFile"] = PublishingRepos.cloudRepo.credentials
 
@@ -89,7 +89,7 @@ allprojects {
 }
 
 subprojects {
-    
+
     apply {
         plugin("java-library")
         plugin("com.google.protobuf")
@@ -143,8 +143,8 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
-                        "io.spine:spine-base:$spineBaseVersion",
-                        "io.spine:spine-time:$spineTimeVersion"
+                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine:spine-time:$spineTimeVersion"
                 )
             }
         }
@@ -204,14 +204,16 @@ subprojects {
 
     idea {
         module {
-            generatedSourceDirs.addAll(files(
+            generatedSourceDirs.addAll(
+                files(
                     generatedJavaDir,
                     generatedGrpcDir,
                     generatedSpineDir,
                     generatedTestJavaDir,
                     generatedTestGrpcDir,
                     generatedTestSpineDir
-            ))
+                )
+            )
 
             testSourceDirs.add(file(generatedTestJavaDir))
 
@@ -230,8 +232,8 @@ subprojects {
      * @return `true` is the project Javadoc should be published, `false` otherwise
      */
     fun shouldPublishJavadoc() =
-            !project.name.startsWith("testutil") &&
-            !project.name.startsWith("model")
+        !project.name.startsWith("testutil") &&
+                !project.name.startsWith("model")
 
     // Apply the Javadoc publishing plugin.
     // This plugin *must* be applied here, not in the module `build.gradle` files.
