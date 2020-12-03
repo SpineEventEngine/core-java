@@ -34,13 +34,13 @@
 /**
  * Version of this library.
  */
-val coreJava = "1.6.17"
+val coreJava = "1.6.18"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "1.6.15"
-val time = "1.6.13"
+val base = "1.6.16"
+val time = "1.6.16"
 
 project.extra.apply {
     this["versionToPublish"] = coreJava
