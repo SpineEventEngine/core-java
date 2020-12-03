@@ -26,5 +26,5 @@ dependencies {
     api(project(":client"))
     api("io.spine:spine-testlib:$spineBaseVersion")
     Deps.test.junit5Api.forEach { api(it) }
-    runtimeClasspath(Deps.test.junit5Runner)
+    Deps.test.truth.forEach { api(it) }
 }
