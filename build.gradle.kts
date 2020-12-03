@@ -234,7 +234,7 @@ subprojects {
      */
     fun shouldPublishJavadoc() =
         !project.name.startsWith("testutil") &&
-                !project.name.startsWith("model")
+        !project.name.startsWith("model")
 
     // Apply the Javadoc publishing plugin.
     // This plugin *must* be applied here, not in the module `build.gradle` files.
