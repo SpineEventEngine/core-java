@@ -21,11 +21,9 @@
 package io.spine.server.type;
 
 import io.spine.base.CommandMessage;
-import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.type.TypeName;
 
@@ -91,19 +89,6 @@ public final class CommandEnvelope
     @Override
     public CommandClass messageClass() {
         return commandClass;
-    }
-
-    /**
-     * Obtains the actor context of the enclosed command.
-     */
-    @Override
-    public ActorContext actorContext() {
-        return context().getActorContext();
-    }
-
-    @Override
-    public Origin asMessageOrigin() {
-        return command().asMessageOrigin();
     }
 
     /**
