@@ -158,13 +158,12 @@ public interface Signal<I extends SignalId,
      */
     default Origin asMessageOrigin() {
         MessageId commandQualifier = identityBuilder().buildPartial();
-        Origin origin = Origin
+        Origin.Builder originBuilder = Origin
                 .newBuilder()
                 .setActorContext(actorContext())
-                .setMessage(commandQualifier)
-                .setGrandOrigin(origin().orElse(Origin.getDefaultInstance()))
-                .vBuild();
-        return origin;
+                .setMessage(commandQualifier);
+        origin().ifPresent(originBuilder::setGrandOrigin);
+        return originBuilder.vBuild();
     }
 
     /**
