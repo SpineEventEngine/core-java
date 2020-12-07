@@ -20,10 +20,12 @@
 
 package io.spine.core;
 
+import io.spine.base.CommandMessage;
 import io.spine.server.event.EventFactory;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.core.given.GivenUserId;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +52,12 @@ class SignalTest {
         Origin origin = derivativeEvent.getContext().getPastMessage();
         assertThat(origin.getMessage())
                 .isEqualTo(originalEvent.messageId());
-        assertThat(origin.hasGrandOrigin())
+        Origin grandOrigin = origin.getGrandOrigin();
+        TypeUrl grandOriginType = TypeUrl.parse(grandOrigin.getMessage()
+                                                           .getTypeUrl());
+        assertThat(grandOriginType.toJavaClass())
+                .isAssignableTo(CommandMessage.class);
+        assertThat(grandOrigin.hasGrandOrigin())
                 .isFalse();
     }
 }
