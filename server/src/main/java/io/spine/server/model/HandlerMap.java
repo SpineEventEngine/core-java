@@ -162,14 +162,13 @@ public final class HandlerMap<M extends MessageClass<?>,
      * <p>If there is no handler matching both the message and origin class, a handler will be
      * searched by the message class only.
      *
-     * <p>If there is no such method or several such methods, an {@link IllegalStateException} is
-     * thrown.
-     *
      * @param messageClass
      *         the message class of the handled message
      * @return a handler method
      * @throws IllegalStateException
-     *         if there is no such method or several such methods found in the map
+     *         if there is no such handler methods found
+     * @throws DuplicateHandlerMethodError
+     *         if there are several handler methods found
      */
     public H handlerOf(M messageClass, MessageClass originClass) {
         ImmutableSet<H> methods = handlersOf(messageClass, originClass);
