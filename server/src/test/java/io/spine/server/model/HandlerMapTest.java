@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`HandlerMap` should")
@@ -126,7 +127,7 @@ class HandlerMapTest {
                     .newBuilder()
                     .setId(project)
                     .vBuild();
-            context().receivesCommand(createProject);
+            assertDoesNotThrow(() -> context().receivesCommand(createProject));
         }
     }
 }
