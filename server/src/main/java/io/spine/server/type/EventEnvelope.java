@@ -22,12 +22,10 @@ package io.spine.server.type;
 
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.ActorContext;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
 import io.spine.server.enrich.EnrichmentService;
@@ -103,16 +101,6 @@ public final class EventEnvelope
     @Override
     public EventClass messageClass() {
         return this.eventClass;
-    }
-
-    @Override
-    public ActorContext actorContext() {
-        return outerObject().actorContext();
-    }
-
-    @Override
-    public Origin asMessageOrigin() {
-        return outerObject().asMessageOrigin();
     }
 
     /**

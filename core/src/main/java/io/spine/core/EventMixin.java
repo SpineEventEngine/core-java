@@ -180,10 +180,9 @@ interface EventMixin
 
     @Override
     default MessageId messageId() {
-        return Signal.super.messageId()
-                           .toBuilder()
-                           .setVersion(context().getVersion())
-                           .build();
+        return identityBuilder()
+                .setVersion(context().getVersion())
+                .vBuild();
     }
 
     @Override

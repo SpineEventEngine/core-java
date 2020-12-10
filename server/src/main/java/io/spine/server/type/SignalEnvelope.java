@@ -23,6 +23,7 @@ package io.spine.server.type;
 import io.spine.base.MessageContext;
 import io.spine.core.ActorContext;
 import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.core.TenantId;
@@ -47,12 +48,19 @@ public interface SignalEnvelope<I extends SignalId,
     /**
      * Obtains an actor context for the wrapped message.
      */
-    ActorContext actorContext();
+    default ActorContext actorContext() {
+        return outerObject().actorContext();
+    }
 
     /**
      * Obtains the message ID of the signal.
      */
     default MessageId messageId() {
         return outerObject().messageId();
+    }
+
+    @Override
+    default Origin asMessageOrigin() {
+        return outerObject().asMessageOrigin();
     }
 }

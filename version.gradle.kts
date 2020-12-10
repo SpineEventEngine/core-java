@@ -34,7 +34,7 @@
 /**
  * Version of this library.
  */
-val coreJava = "1.6.18"
+val coreJava = "1.6.19"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.

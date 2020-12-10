@@ -154,17 +154,15 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains this signal as an origin of other signals.
      *
-     * <p>This origin is assigned to any signal message produced as a reaction to this one..
+     * <p>This origin is assigned to any signal message produced as a reaction to this one.
      */
     default Origin asMessageOrigin() {
-        MessageId commandQualifier = identityBuilder().buildPartial();
-        Origin origin = Origin
+        Origin.Builder originBuilder = Origin
                 .newBuilder()
                 .setActorContext(actorContext())
-                .setMessage(commandQualifier)
-                .setGrandOrigin(origin().orElse(Origin.getDefaultInstance()))
-                .vBuild();
-        return origin;
+                .setMessage(messageId());
+        origin().ifPresent(originBuilder::setGrandOrigin);
+        return originBuilder.vBuild();
     }
 
     /**
