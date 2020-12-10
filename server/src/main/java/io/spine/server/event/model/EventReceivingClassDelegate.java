@@ -121,7 +121,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains the method which handles the passed event class.
      */
-    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass originClass) {
+    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass<?> originClass) {
         return handlers.handlersOf(eventClass, originClass);
     }
 
@@ -131,7 +131,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * @throws IllegalStateException
      *         if there is no such method in the class
      */
-    public M handlerOf(EventClass eventClass, MessageClass originClass) {
+    public M handlerOf(EventClass eventClass, MessageClass<?> originClass) {
         return handlers.handlerOf(eventClass, originClass);
     }
 

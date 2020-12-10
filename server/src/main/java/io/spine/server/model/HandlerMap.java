@@ -170,7 +170,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @throws DuplicateHandlerMethodError
      *         if multiple handler methods were found
      */
-    public H handlerOf(M messageClass, MessageClass originClass) {
+    public H handlerOf(M messageClass, MessageClass<?> originClass) {
         ImmutableSet<H> methods = handlersOf(messageClass, originClass);
         return singleMethod(methods, messageClass);
     }
