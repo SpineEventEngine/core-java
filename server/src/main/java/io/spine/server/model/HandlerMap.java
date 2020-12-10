@@ -135,7 +135,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      * <p>If there is no handler matching both the message and origin class, handlers will be
      * searched by the message class only.
      *
-     * <p>May return an empty set if no handlers found for a specified criteria.
+     * <p>If no handlers for a specified criteria is found, returns an empty set.
      *
      * @param messageClass
      *         the message class of the handled message
