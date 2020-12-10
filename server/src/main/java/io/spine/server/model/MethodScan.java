@@ -28,7 +28,6 @@ import io.spine.type.MessageClass;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * A class method scan operation.
@@ -86,11 +85,8 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     private void scanMethod(Method method) {
-        Optional<H> handlerMethod = signature.classify(method);
-        if (handlerMethod.isPresent()) {
-            H handler = handlerMethod.get();
-            remember(handler);
-        }
+        signature.classify(method)
+                 .ifPresent(this::remember);
     }
 
     private void remember(H handler) {
