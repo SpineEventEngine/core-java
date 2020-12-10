@@ -144,14 +144,14 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
             return ImmutableSet.of();
         }
         ImmutableSet<M> stateHandlers = handlers.handlersOf(updateEvent);
-        ImmutableSet<StateClass> result = stateHandlers
-                .stream()
-                .filter(StateSubscriberMethod.class::isInstance)
-                .map(StateSubscriberMethod.class::cast)
-                .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
-                .map(StateSubscriberMethod::stateType)
-                .map(StateClass::from)
-                .collect(toImmutableSet());
+        ImmutableSet<StateClass> result =
+                stateHandlers.stream()
+                             .filter(StateSubscriberMethod.class::isInstance)
+                             .map(StateSubscriberMethod.class::cast)
+                             .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
+                             .map(StateSubscriberMethod::stateType)
+                             .map(StateClass::from)
+                             .collect(toImmutableSet());
         return result;
     }
 }
