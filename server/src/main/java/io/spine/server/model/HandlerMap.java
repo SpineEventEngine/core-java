@@ -166,9 +166,9 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         the message class of the handled message
      * @return a handler method
      * @throws IllegalStateException
-     *         if there is no such handler methods found
+     *         if no handler methods were found
      * @throws DuplicateHandlerMethodError
-     *         if there are several handler methods found
+     *         if multiple handler methods were found
      */
     public H handlerOf(M messageClass, MessageClass originClass) {
         ImmutableSet<H> methods = handlersOf(messageClass, originClass);
@@ -196,9 +196,9 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         the message class of the handled message
      * @return a handler method
      * @throws IllegalStateException
-     *         if there is no such handler methods found
+     *         if no handler methods were found
      * @throws DuplicateHandlerMethodError
-     *         if there are several handler methods found
+     *         if multiple handler methods were found
      */
     public H handlerOf(M messageClass) {
         ImmutableSet<H> methods = handlersOf(messageClass);
