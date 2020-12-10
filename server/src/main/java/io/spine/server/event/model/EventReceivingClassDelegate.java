@@ -120,8 +120,6 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
 
     /**
      * Obtains the method which handles the passed event class.
-     *
-     * @throws IllegalStateException if there is such method in the class
      */
     public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass originClass) {
         return handlers.handlersOf(eventClass, originClass);
@@ -130,7 +128,8 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains the method which handles the passed event class.
      *
-     * @throws IllegalStateException if there is such method in the class
+     * @throws IllegalStateException
+     *         if there is no such method in the class
      */
     public M handlerOf(EventClass eventClass, MessageClass originClass) {
         return handlers.handlerOf(eventClass, originClass);
@@ -145,14 +144,14 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
             return ImmutableSet.of();
         }
         ImmutableSet<M> stateHandlers = handlers.handlersOf(updateEvent);
-        ImmutableSet<StateClass> result =
-                stateHandlers.stream()
-                        .filter(h -> h instanceof StateSubscriberMethod)
-                        .map(h -> (StateSubscriberMethod) h)
-                        .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
-                        .map(StateSubscriberMethod::stateType)
-                        .map(StateClass::from)
-                        .collect(toImmutableSet());
+        ImmutableSet<StateClass> result = stateHandlers
+                .stream()
+                .filter(h -> h instanceof StateSubscriberMethod)
+                .map(h -> (StateSubscriberMethod) h)
+                .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
+                .map(StateSubscriberMethod::stateType)
+                .map(StateClass::from)
+                .collect(toImmutableSet());
         return result;
     }
 }
