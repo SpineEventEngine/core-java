@@ -21,10 +21,12 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.truth.extensions.proto.ProtoTruth;
+import com.google.common.truth.StringSubject;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.EventValidationError;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -57,8 +59,10 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
+import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.given.NoDefaultOptionProjection.ACCEPTED_VALUE;
 import static io.spine.server.projection.given.dispatch.ProjectionEventDispatcher.dispatch;
@@ -71,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests {@link io.spine.server.projection.Projection}.
  */
-@DisplayName("Projection should")
+@DisplayName("`Projection` should")
 class ProjectionTest {
 
     private static final TestEventFactory eventFactory =
@@ -101,10 +105,9 @@ class ProjectionTest {
                 .build();
         Event strEvt = eventFactory.createEvent(stringEvent);
         dispatch(projection, stringEvent, strEvt.context());
-        assertTrue(projection.state()
-                             .getValue()
-                             .contains(stringEvent.getValue()));
         assertTrue(projection.changed());
+        assertThat(projection.state().getValue())
+                .contains(stringEvent.getValue());
 
         Int32Imported integerEvent = Int32Imported
                 .newBuilder()
@@ -112,10 +115,9 @@ class ProjectionTest {
                 .build();
         Event intEvt = eventFactory.createEvent(integerEvent);
         dispatch(projection, integerEvent, intEvt.context());
-        assertTrue(projection.state()
-                             .getValue()
-                             .contains(String.valueOf(integerEvent.getValue())));
         assertTrue(projection.changed());
+        assertThat(projection.state().getValue())
+                .contains(String.valueOf(integerEvent.getValue()));
     }
 
     @Test
@@ -172,8 +174,8 @@ class ProjectionTest {
     }
 
     @Test
-    @DisplayName("throw ISE if no handler is present for event")
-    void throwIfNoHandlerPresent() {
+    @DisplayName("dispatch unexpected handler failure system rejection with `UNSUPPORTED_EVENT` cause")
+    void dispatchUnsupportedEventFailure() {
         @SuppressWarnings({"unchecked", "RedundantSuppression"})
         ProjectionRepository<String, SavingProjection, SavedString> repository =
                 (ProjectionRepository<String, SavingProjection, SavedString>)
@@ -193,16 +195,18 @@ class ProjectionTest {
         endpoint.dispatchTo(projection.id());
 
         List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
-        assertThat(systemEvents).hasSize(1);
+        assertThat(systemEvents)
+                .hasSize(1);
         HandlerFailedUnexpectedly systemEvent = systemEvents.get(0);
-        assertThat(systemEvent.getHandledSignal()
-                              .asEventId())
-                .isEqualTo(event.id());
-        assertThat(systemEvent.getEntity()
-                              .getId())
-                .isEqualTo(Identifier.pack(projection.id()));
-        assertThat(systemEvent.getError().getType())
-                .isEqualTo(IllegalStateException.class.getCanonicalName());
+        assertThat(systemEvent.getHandledSignal().asEventId())
+             .isEqualTo(event.id());
+        assertThat(systemEvent.getEntity().getId())
+             .isEqualTo(Identifier.pack(projection.id()));
+        Error error = systemEvent.getError();
+        assertThat(error.getType())
+                .isEqualTo(EventValidationError.getDescriptor().getFullName());
+        assertThat(error.getCode())
+                .isEqualTo(UNSUPPORTED_EVENT_VALUE);
     }
 
     @Test
@@ -221,11 +225,12 @@ class ProjectionTest {
         Event e2 = eventFactory.createEvent(integerImported, Versions.increment(nextVersion));
 
         boolean projectionChanged = Projection.playOn(projection, ImmutableList.of(e1, e2));
+        assertTrue(projectionChanged);
 
         String projectionState = projection.state().getValue();
-        assertTrue(projectionChanged);
-        assertTrue(projectionState.contains(stringImported.getValue()));
-        assertTrue(projectionState.contains(String.valueOf(integerImported.getValue())));
+        StringSubject state = assertThat(projectionState);
+        state.contains(stringImported.getValue());
+        state.contains(String.valueOf(integerImported.getValue()));
     }
 
     @Test
@@ -240,18 +245,19 @@ class ProjectionTest {
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
-        ProtoTruth.assertThat(projection.state())
-                  // Ignore the difference in the ID field of the state which
-                  // was set automatically by the tx.
-                  .comparingExpectedFieldsOnly()
-                  .isEqualTo(SavedString.getDefaultInstance());
+        assertThat(projection.state())
+                // Ignore the difference in the ID field of the state which
+                // was set automatically by the tx.
+                .comparingExpectedFieldsOnly()
+                .isEqualTo(SavedString.getDefaultInstance());
 
         StringImported dispatched = StringImported
                 .newBuilder()
                 .setValue(ACCEPTED_VALUE)
                 .build();
         dispatch(projection, eventFactory.createEvent(dispatched));
-        assertThat(projection.state().getValue()).isEqualTo(ACCEPTED_VALUE);
+        assertThat(projection.state().getValue())
+                .isEqualTo(ACCEPTED_VALUE);
     }
 
     private static ProjectId newId() {
