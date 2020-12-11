@@ -24,6 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.core.Event;
+import io.spine.core.EventValidationError;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -130,10 +131,12 @@ public abstract class Projection<I,
     private DispatchOutcome unhandledEvent(EventEnvelope event) {
         Error error = Error
                 .newBuilder()
+                .setType(EventValidationError.getDescriptor().getFullName())
                 .setCode(UNSUPPORTED_EVENT_VALUE)
-                .setMessage(format("Projection %s cannot handle event %s.",
-                                   thisClass(),
-                                   event.messageTypeName()))
+                .setMessage(format(
+                        "Projection `%s` cannot handle event `%s`.",
+                        thisClass(), event.messageTypeName()
+                ))
                 .buildPartial();
         return DispatchOutcome
                 .newBuilder()

@@ -46,8 +46,8 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
-                                         P extends MessageClass<?>,
-                                         M extends HandlerMethod<?, EventClass, ?, P>>
+        P extends MessageClass<?>,
+        M extends HandlerMethod<?, EventClass, ?, P>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
@@ -120,19 +120,18 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
 
     /**
      * Obtains the method which handles the passed event class.
-     *
-     * @throws IllegalStateException if there is such method in the class
      */
-    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass originClass) {
+    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass<?> originClass) {
         return handlers.handlersOf(eventClass, originClass);
     }
 
     /**
      * Obtains the method which handles the passed event class.
      *
-     * @throws IllegalStateException if there is such method in the class
+     * @throws IllegalStateException
+     *         if there is no such method in the class
      */
-    public M handlerOf(EventClass eventClass, MessageClass originClass) {
+    public M handlerOf(EventClass eventClass, MessageClass<?> originClass) {
         return handlers.handlerOf(eventClass, originClass);
     }
 
@@ -146,9 +145,10 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         }
         ImmutableSet<M> stateHandlers = handlers.handlersOf(updateEvent);
         ImmutableSet<StateClass> result =
-                stateHandlers.stream()
-                        .filter(h -> h instanceof StateSubscriberMethod)
-                        .map(h -> (StateSubscriberMethod) h)
+                stateHandlers
+                        .stream()
+                        .filter(StateSubscriberMethod.class::isInstance)
+                        .map(StateSubscriberMethod.class::cast)
                         .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
                         .map(StateSubscriberMethod::stateType)
                         .map(StateClass::from)
