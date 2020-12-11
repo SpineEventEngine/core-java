@@ -46,8 +46,8 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
-                                         P extends MessageClass<?>,
-                                         M extends HandlerMethod<?, EventClass, ?, P>>
+        P extends MessageClass<?>,
+        M extends HandlerMethod<?, EventClass, ?, P>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
@@ -145,13 +145,14 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         }
         ImmutableSet<M> stateHandlers = handlers.handlersOf(updateEvent);
         ImmutableSet<StateClass> result =
-                stateHandlers.stream()
-                             .filter(StateSubscriberMethod.class::isInstance)
-                             .map(StateSubscriberMethod.class::cast)
-                             .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
-                             .map(StateSubscriberMethod::stateType)
-                             .map(StateClass::from)
-                             .collect(toImmutableSet());
+                stateHandlers
+                        .stream()
+                        .filter(StateSubscriberMethod.class::isInstance)
+                        .map(StateSubscriberMethod.class::cast)
+                        .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
+                        .map(StateSubscriberMethod::stateType)
+                        .map(StateClass::from)
+                        .collect(toImmutableSet());
         return result;
     }
 }
