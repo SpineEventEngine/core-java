@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -21,11 +27,11 @@
 package io.spine.server.type;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.type.given.rejection.PhoneNotFound;
-import io.spine.server.type.given.rejection.TestRejections;
 import com.google.protobuf.Any;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.given.rejection.PhoneNotFound;
+import io.spine.server.type.given.rejection.TestRejections;
 import io.spine.test.core.ProjectCreated;
 import io.spine.test.core.ProjectId;
 import io.spine.type.TypeUrl;
