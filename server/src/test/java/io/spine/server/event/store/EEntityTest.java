@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -23,24 +29,12 @@ package io.spine.server.event.store;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
-import io.spine.server.event.EventStore;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.core.given.GivenEnrichment;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Stream;
-
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.concurrent.CompletableFuture.runAsync;
 
 @DisplayName("EEntity should")
 final class EEntityTest {
