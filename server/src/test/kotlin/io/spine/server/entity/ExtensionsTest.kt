@@ -51,7 +51,7 @@ private fun createEntity() : Fixture {
 }
 
 /**
- * An entity which uses the `update` extension in its [apply] method.
+ * An entity which uses the [TransactionalEntity.update] extension function in its [apply] method.
  */
 private class Fixture : TransactionalEntity<String, StringEntity, StringEntity.Builder>() {
 

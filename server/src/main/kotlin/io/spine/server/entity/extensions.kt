@@ -23,6 +23,29 @@ package io.spine.server.entity
 import io.spine.base.EntityState
 import io.spine.protobuf.ValidatingBuilder
 
+/**
+ * Extends [TransactionalEntity] with the `update` block for accessing
+ * properties of the entity state [builder][TransactionalEntity.builder].
+ *
+ * For example, a method that applies an event may look like this:
+ *
+ * ```kotlin
+ * @Apply
+ * fun event(e: TaskCreated) {
+ *     update {
+ *         title = e.title
+ *         description = e.description
+ *     }
+ * }
+ * ```
+ *
+ * @param I the type of the entity identifiers
+ * @param S the type of the entity state
+ * @param B the type of the entity state builder
+ *
+ * @apiNote This function is not `inline` because [TransactionalEntity.builder] is `protected`
+ * while inline functions can use only `public` API.
+ */
 fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
         E.update(block: B.() -> Unit): B {
     val builder = builderOf(this)
@@ -30,6 +53,12 @@ fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuil
     return builder
 }
 
+/**
+ * Obtains the builder from the passed entity.
+ *
+ * @apiNote We employ the fact that we are in the same package with [TransactionalEntity] and
+ * because of this can access its `protected` API.
+ */
 private fun <I, S : EntityState<I>, B : ValidatingBuilder<S>>
         builderOf(e: TransactionalEntity<I, S, B>): B = e.builder()
 
