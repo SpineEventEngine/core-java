@@ -1,6 +1,9 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
     <option name="RIGHT_MARGIN" value="100" />
+    <DartCodeStyleSettings>
+      <option name="DELEGATE_TO_DARTFMT" value="false" />
+    </DartCodeStyleSettings>
     <JavaCodeStyleSettings>
       <option name="PREFER_LONGER_NAMES" value="false" />
       <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1000" />
