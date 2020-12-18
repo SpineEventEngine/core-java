@@ -40,6 +40,7 @@ import io.spine.protobuf.ValidatingBuilder
  * ```
  *
  * @param I the type of the entity identifiers
+ * @param E the type of the transactional entity
  * @param S the type of the entity state
  * @param B the type of the entity state builder
  *
