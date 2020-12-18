@@ -18,10 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import io.spine.gradle.internal.DependencyResolution
 import io.spine.gradle.internal.Deps
 import io.spine.gradle.internal.PublishingRepos
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
 
@@ -31,6 +31,7 @@ buildscript {
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     val dependencyResolution = io.spine.gradle.internal.DependencyResolution
 
+    val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
 
@@ -44,6 +45,8 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             force(
+                    "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+                    "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion"
             )
@@ -62,6 +65,7 @@ plugins {
 }
 
 apply(from = "version.gradle.kts")
+val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 
@@ -159,6 +163,9 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
+                        "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+                        "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
+
                         "io.spine:spine-base:$spineBaseVersion",
                         "io.spine:spine-time:$spineTimeVersion"
                 )
