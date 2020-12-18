@@ -18,6 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import io.spine.gradle.internal.DependencyResolution
 import io.spine.gradle.internal.Deps
 import io.spine.gradle.internal.PublishingRepos
@@ -52,6 +53,7 @@ buildscript {
 
 plugins {
     java
+    kotlin("jvm") version "1.4.21"
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
@@ -92,6 +94,7 @@ subprojects {
     
     apply {
         plugin("java-library")
+        plugin("kotlin")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
         plugin("pmd")
@@ -121,12 +124,25 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    val jvmVersion = "1.8"
+
+    val compileKotlin: KotlinCompile by tasks
+    compileKotlin.kotlinOptions {
+        jvmTarget = jvmVersion
+    }
+
+    val compileTestKotlin: KotlinCompile by tasks
+    compileTestKotlin.kotlinOptions {
+        jvmTarget = jvmVersion
+    }
+
     DependencyResolution.defaultRepositories(repositories)
 
     dependencies {
         errorprone(Deps.build.errorProneCore)
         errorproneJavac(Deps.build.errorProneJavac)
 
+        implementation(kotlin("stdlib-jdk8"))
         implementation(Deps.build.guava)
         implementation(Deps.build.jsr305Annotations)
         implementation(Deps.build.checkerAnnotations)
