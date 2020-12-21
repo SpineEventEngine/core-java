@@ -128,9 +128,7 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    val jvmVersion = "1.8"
-
-   tasks.withType<KotlinCompile>.configureEach {
+   tasks.withType<KotlinCompile>().configureEach {
       kotlinOptions {
           jvmTarget = JavaVersion.VERSION_1_8.toString()
       }
