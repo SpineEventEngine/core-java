@@ -130,15 +130,11 @@ subprojects {
 
     val jvmVersion = "1.8"
 
-    val compileKotlin: KotlinCompile by tasks
-    compileKotlin.kotlinOptions {
-        jvmTarget = jvmVersion
-    }
-
-    val compileTestKotlin: KotlinCompile by tasks
-    compileTestKotlin.kotlinOptions {
-        jvmTarget = jvmVersion
-    }
+   tasks.withType<KotlinCompile>.configureEach {
+      kotlinOptions {
+          jvmTarget = JavaVersion.VERSION_1_8.toString()
+      }
+   }
 
     DependencyResolution.defaultRepositories(repositories)
 
