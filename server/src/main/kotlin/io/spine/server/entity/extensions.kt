@@ -20,6 +20,7 @@
 
 package io.spine.server.entity
 
+import io.spine.annotation.Experimental
 import io.spine.base.EntityState
 import io.spine.protobuf.ValidatingBuilder
 
@@ -47,6 +48,7 @@ import io.spine.protobuf.ValidatingBuilder
  * @apiNote This function is not `inline` because [TransactionalEntity.builder] is `protected`
  * while inline functions can use only `public` API.
  */
+@Experimental
 fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
         E.update(block: B.() -> Unit): B {
     val builder = builderOf(this)
