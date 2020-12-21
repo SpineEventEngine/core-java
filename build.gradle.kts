@@ -59,9 +59,9 @@ plugins {
     kotlin("jvm") version "1.4.21"
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    id("net.ltgt.errorprone").version(io.spine.gradle.internal.Deps.versions.errorPronePlugin)
+    id("com.google.protobuf") version io.spine.gradle.internal.Deps.versions.protobufPlugin
+    @Suppress("RemoveRedundantQualifierName")
+    id("net.ltgt.errorprone") version io.spine.gradle.internal.Deps.versions.errorPronePlugin
 }
 
 apply(from = "version.gradle.kts")
