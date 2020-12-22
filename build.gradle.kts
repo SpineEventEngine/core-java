@@ -138,7 +138,7 @@ subprojects {
     DependencyResolution.defaultRepositories(repositories)
 
     dependencies {
-        Deps.build.apply{
+        Deps.build.apply {
             errorprone(errorProneCore)
             errorproneJavac(errorProneJavac)
             implementation(guava)
