@@ -22,7 +22,9 @@ package io.spine.server.entity
 
 import io.spine.annotation.Experimental
 import io.spine.base.EntityState
+import io.spine.base.EnvironmentType
 import io.spine.protobuf.ValidatingBuilder
+import io.spine.server.ServerEnvironment
 
 /**
  * Extends [TransactionalEntity] with the `update` block for accessing
@@ -65,3 +67,25 @@ fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuil
 private fun <I, S : EntityState<I>, B : ValidatingBuilder<S>>
         builderOf(e: TransactionalEntity<I, S, B>): B = e.builder()
 
+/**
+ * Allows to configure [ServerEnvironment] features under various environments.
+ *
+ * Example of usage:
+ * ```kotlin
+ *     under<Production> {
+ *         use(productionStorageFactory)
+ *         use(memoizingTracerFactory)
+ *     }
+ *     under<Tests> {
+ *         use(testingStorageFactory)
+ *     }
+ * ```
+ *
+ * @apiNote This function allows to avoid calling [ServerEnvironment.when] from Kotlin, which
+ * requires backticking `when` because it is a reserved word.
+ */
+inline fun <reified E : EnvironmentType>
+        under(block: ServerEnvironment.TypeConfigurator.() -> Unit) {
+    val configurator = ServerEnvironment.`when`(E::class.java)
+    block.invoke(configurator)
+}

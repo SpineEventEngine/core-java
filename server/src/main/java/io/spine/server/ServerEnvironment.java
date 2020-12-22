@@ -461,6 +461,14 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         /**
+         * Obtains the type of the environment being currently configured.
+         */
+        @VisibleForTesting
+        public Class<? extends EnvironmentType> type() {
+            return type;
+        }
+
+        /**
          * Assigns the specified {@code Delivery} for the selected environment.
          *
          * @see #useDelivery(ServerEnvironment.Fn)
