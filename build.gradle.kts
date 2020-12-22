@@ -21,6 +21,7 @@
 import io.spine.gradle.internal.DependencyResolution
 import io.spine.gradle.internal.Deps
 import io.spine.gradle.internal.PublishingRepos
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
 
@@ -30,6 +31,7 @@ buildscript {
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     val dependencyResolution = io.spine.gradle.internal.DependencyResolution
 
+    val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
 
@@ -43,6 +45,8 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             force(
+                    "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+                    "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion"
             )
@@ -53,12 +57,14 @@ buildscript {
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     java
+    kotlin("jvm") version "1.4.21"
     idea
     id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
     id("net.ltgt.errorprone").version(io.spine.gradle.internal.Deps.versions.errorPronePlugin)
 }
 
 apply(from = "version.gradle.kts")
+val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 
@@ -91,6 +97,7 @@ subprojects {
     
     apply {
         plugin("java-library")
+        plugin("kotlin")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
         plugin("pmd")
@@ -122,6 +129,12 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+   tasks.withType<KotlinCompile>().configureEach {
+      kotlinOptions {
+          jvmTarget = JavaVersion.VERSION_1_8.toString()
+      }
+   }
+
     DependencyResolution.defaultRepositories(repositories)
 
     dependencies {
@@ -132,13 +145,13 @@ subprojects {
             implementation(jsr305Annotations)
             implementation(checkerAnnotations)
             errorProneAnnotations.forEach { implementation(it) }
-
         }
+        implementation(kotlin("stdlib-jdk8"))
+
         Deps.test.apply {
             testImplementation(guavaTestlib)
             junit5Api.forEach { testImplementation(it) }
             testImplementation(junit5Runner)
-
         }
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }
@@ -148,6 +161,9 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
+                        "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+                        "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
+
                         "io.spine:spine-base:$spineBaseVersion",
                         "io.spine:spine-time:$spineTimeVersion"
                 )

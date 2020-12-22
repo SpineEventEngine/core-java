@@ -18,33 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
+package io.spine.server.entity;
+
+import io.spine.base.EntityState;
+import io.spine.protobuf.ValidatingBuilder;
 
 /**
- * Version of this library.
+ * Stub implementation of {@code Transaction} which behaves as told in the passed parameters.
  */
-val coreJava = "2.0.0-jdk8.SNAPSHOT.9"
+final class StubTransaction<I,
+                            E extends TransactionalEntity<I, S, B>,
+                            S extends EntityState<I>,
+                            B extends ValidatingBuilder<S>>
+        extends Transaction<I, E, S, B> {
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "2.0.0-jdk8.SNAPSHOT.8"
-val time = "2.0.0-jdk8.SNAPSHOT.8"
-
-project.extra.apply {
-    this["kotlinVersion"] = "1.4.21"
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineTimeVersion"] = time
+    StubTransaction(E entity, boolean active, boolean stateChanged) {
+        super(entity);
+        if (!active) {
+            deactivate();
+        }
+        if (stateChanged) {
+            markStateChanged();
+        }
+    }
 }
