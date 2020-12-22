@@ -50,12 +50,11 @@ buildscript {
     }
 }
 
+@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     java
     idea
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     id("net.ltgt.errorprone").version(io.spine.gradle.internal.Deps.versions.errorPronePlugin)
 }
 
@@ -97,9 +96,11 @@ subprojects {
         plugin("pmd")
         plugin("io.spine.tools.spine-model-compiler")
 
-        from(Deps.scripts.javacArgs(project))
-        from(Deps.scripts.modelCompiler(project))
-        from(Deps.scripts.projectLicenseReport(project))
+        with(Deps.scripts) {
+            from(javacArgs(project))
+            from(modelCompiler(project))
+            from(projectLicenseReport(project))
+        }
     }
 
     extensions["modelCompiler"].withGroovyBuilder {
@@ -124,17 +125,21 @@ subprojects {
     DependencyResolution.defaultRepositories(repositories)
 
     dependencies {
-        errorprone(Deps.build.errorProneCore)
-        errorproneJavac(Deps.build.errorProneJavac)
+        Deps.build.apply{
+            errorprone(errorProneCore)
+            errorproneJavac(errorProneJavac)
+            implementation(guava)
+            implementation(jsr305Annotations)
+            implementation(checkerAnnotations)
+            errorProneAnnotations.forEach { implementation(it) }
 
-        implementation(Deps.build.guava)
-        implementation(Deps.build.jsr305Annotations)
-        implementation(Deps.build.checkerAnnotations)
-        Deps.build.errorProneAnnotations.forEach { implementation(it) }
+        }
+        Deps.test.apply {
+            testImplementation(guavaTestlib)
+            junit5Api.forEach { testImplementation(it) }
+            testImplementation(junit5Runner)
 
-        testImplementation(Deps.test.guavaTestlib)
-        Deps.test.junit5Api.forEach { testImplementation(it) }
-        testImplementation(Deps.test.junit5Runner)
+        }
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }
 
@@ -151,25 +156,25 @@ subprojects {
     }
     DependencyResolution.excludeProtobufLite(configurations)
 
-    val sourcesRootDir = "$projectDir/src"
-    val generatedRootDir = "$projectDir/generated"
-    val generatedJavaDir = "$generatedRootDir/main/java"
-    val generatedTestJavaDir = "$generatedRootDir/test/java"
-    val generatedGrpcDir = "$generatedRootDir/main/grpc"
-    val generatedTestGrpcDir = "$generatedRootDir/test/grpc"
-    val generatedSpineDir = "$generatedRootDir/main/spine"
-    val generatedTestSpineDir = "$generatedRootDir/test/spine"
+    val srcDir = "$projectDir/src"
+    val generatedDir = "$projectDir/generated"
+    val generatedJavaDir = "$generatedDir/main/java"
+    val generatedTestJavaDir = "$generatedDir/test/java"
+    val generatedGrpcDir = "$generatedDir/main/grpc"
+    val generatedTestGrpcDir = "$generatedDir/test/grpc"
+    val generatedSpineDir = "$generatedDir/main/spine"
+    val generatedTestSpineDir = "$generatedDir/test/spine"
 
     sourceSets {
         main {
-            java.srcDirs(generatedJavaDir, "$sourcesRootDir/main/java", generatedSpineDir)
-            resources.srcDirs("$sourcesRootDir/main/resources", "$generatedRootDir/main/resources")
-            proto.srcDirs("$sourcesRootDir/main/proto")
+            java.srcDirs(generatedJavaDir, "$srcDir/main/java", generatedSpineDir)
+            resources.srcDirs("$srcDir/main/resources", "$generatedDir/main/resources")
+            proto.srcDirs("$srcDir/main/proto")
         }
         test {
-            java.srcDirs(generatedTestJavaDir, "$sourcesRootDir/test/java", generatedTestSpineDir)
-            resources.srcDirs("$sourcesRootDir/test/resources", "$generatedRootDir/test/resources")
-            proto.srcDirs("$sourcesRootDir/test/proto")
+            java.srcDirs(generatedTestJavaDir, "$srcDir/test/java", generatedTestSpineDir)
+            resources.srcDirs("$srcDir/test/resources", "$generatedDir/test/resources")
+            proto.srcDirs("$srcDir/test/proto")
         }
     }
 
@@ -180,9 +185,11 @@ subprojects {
     }
 
     apply {
-        from(Deps.scripts.slowTests(project))
-        from(Deps.scripts.testOutput(project))
-        from(Deps.scripts.javadocOptions(project))
+        with(Deps.scripts) {
+            from(slowTests(project))
+            from(testOutput(project))
+            from(javadocOptions(project))
+        }
     }
 
     tasks.register("sourceJar", Jar::class) {
@@ -247,12 +254,13 @@ subprojects {
 }
 
 apply {
-    from(Deps.scripts.publish(project))
-
-    // Aggregated coverage report across all subprojects.
-    from(Deps.scripts.jacoco(project))
-    // Generate a repository-wide report of 3rd-party dependencies and their licenses.
-    from(Deps.scripts.repoLicenseReport(project))
-    // Generate a `pom.xml` file containing first-level dependency of all projects in the repository.
-    from(Deps.scripts.generatePom(project))
+    with (Deps.scripts) {
+        from(publish(project))
+        // Aggregated coverage report across all subprojects.
+        from(jacoco(project))
+        // Generate a repository-wide report of 3rd-party dependencies and their licenses.
+        from(repoLicenseReport(project))
+        // Generate a `pom.xml` file containing first-level dependency of all projects in the repository.
+        from(generatePom(project))
+    }
 }
