@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -24,23 +30,22 @@ import io.spine.gradle.internal.PublishingRepos
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-
     apply(from = "version.gradle.kts")
     apply(from = "$rootDir/config/gradle/dependencies.gradle")
 
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    val dependencyResolution = io.spine.gradle.internal.DependencyResolution
+    with(io.spine.gradle.internal.DependencyResolution) {
+        defaultRepositories(repositories)
+        forceConfiguration(configurations)
+    }
 
     val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
 
-    dependencyResolution.defaultRepositories(repositories)
     dependencies {
         classpath("io.spine.tools:spine-model-compiler:$spineBaseVersion")
     }
-
-    dependencyResolution.forceConfiguration(configurations)
 
     configurations.all {
         resolutionStrategy {
@@ -52,15 +57,17 @@ buildscript {
             )
         }
     }
-}
+} // buildscript
 
-@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     java
     kotlin("jvm") version "1.4.21"
     idea
-    id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
-    id("net.ltgt.errorprone").version(io.spine.gradle.internal.Deps.versions.errorPronePlugin)
+    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
+    with(io.spine.gradle.internal.Deps.versions) {
+        id("com.google.protobuf") version protobufPlugin
+        id("net.ltgt.errorprone") version errorPronePlugin
+    }
 }
 
 apply(from = "version.gradle.kts")
@@ -94,7 +101,6 @@ allprojects {
 }
 
 subprojects {
-    
     apply {
         plugin("java-library")
         plugin("kotlin")
@@ -270,7 +276,7 @@ subprojects {
 }
 
 apply {
-    with (Deps.scripts) {
+    with(Deps.scripts) {
         from(publish(project))
         // Aggregated coverage report across all subprojects.
         from(jacoco(project))
