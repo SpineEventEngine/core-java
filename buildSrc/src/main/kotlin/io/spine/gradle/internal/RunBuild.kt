@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -20,12 +26,12 @@
 
 package io.spine.gradle.internal
 
+import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
-import java.io.File
 
 /**
  * A Gradle task which runs another Gradle build.
@@ -83,10 +89,10 @@ open class RunBuild : DefaultTask() {
     }
 
     private fun buildProcess(command: List<String>, errorOut: File, debugOut: File) =
-            ProcessBuilder()
-                    .command(command)
-                    .directory(project.file(directory))
-                    .redirectError(errorOut)
-                    .redirectOutput(debugOut)
-                    .start()
+        ProcessBuilder()
+            .command(command)
+            .directory(project.file(directory))
+            .redirectError(errorOut)
+            .redirectOutput(debugOut)
+            .start()
 }
