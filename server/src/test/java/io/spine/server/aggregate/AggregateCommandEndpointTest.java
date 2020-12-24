@@ -27,7 +27,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.truth.Truth;
-import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
@@ -36,6 +35,7 @@ import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAg
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
@@ -57,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AggregateCommandEndpointTest {
 
     private BoundedContext context;
-    private AggregateRepository<ProjectId, ProjectAggregate> repository;
+    private AggregateRepository<ProjectId, ProjectAggregate, AggProject> repository;
 
     private ProjectId projectId;
     private Subscriber subscriber;
@@ -67,10 +67,7 @@ class AggregateCommandEndpointTest {
         ModelTests.dropAllModels();
         context = BoundedContextBuilder.assumingTests()
                                        .build();
-        projectId = ProjectId
-                .newBuilder()
-                .setId(Identifier.newUuid())
-                .build();
+        projectId = ProjectId.generate();
 
         // Create a subscriber of ProjectCreated event.
         subscriber = new Subscriber();

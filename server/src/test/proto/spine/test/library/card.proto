@@ -35,7 +35,6 @@ option java_outer_classname = "LibraryProto";
 option java_multiple_files = true;
 
 import "spine/people/person_name.proto";
-import "spine/time/time.proto";
 import "spine/core/user_id.proto";
 
 message Isbn {

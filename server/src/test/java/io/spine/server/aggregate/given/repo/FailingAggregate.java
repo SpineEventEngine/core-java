@@ -27,7 +27,6 @@
 package io.spine.server.aggregate.given.repo;
 
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
@@ -36,14 +35,16 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.React;
-import io.spine.server.test.shared.StringAggregate;
+import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.test.aggregate.number.DoNothing;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.NumberPassed;
 import io.spine.test.aggregate.number.RejectNegativeInt;
 import io.spine.test.aggregate.number.RejectNegativeLong;
+import io.spine.time.TimestampTemporal;
 
+import java.time.temporal.ChronoField;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
@@ -58,7 +59,7 @@ import static java.util.Collections.emptyList;
  *
  * @see FailingAggregateRepository
  */
-class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregate.Builder> {
+class FailingAggregate extends Aggregate<Long, LongIdAggregate, LongIdAggregate.Builder> {
 
     @SuppressWarnings("NumericCastThatLosesPrecision") // Int. part as ID.
     static long toId(FloatEncountered message) {
@@ -109,9 +110,11 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregate.
 
     @Apply
     private void apply(NumberPassed event) {
-        builder().setValue(state().getValue()
-                                   + System.lineSeparator()
-                                   + Timestamps.toString(event.getWhen()));
+        int whichSecond = TimestampTemporal
+                .from(event.getWhen())
+                .toInstant()
+                .get(ChronoField.MILLI_OF_SECOND);
+        builder().setValue(state().getValue() + whichSecond);
     }
 
     private static NumberPassed now() {

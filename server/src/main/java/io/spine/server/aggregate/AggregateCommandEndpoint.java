@@ -46,7 +46,7 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, CommandEnvelope>
         implements CommandEndpoint<I> {
 
-    AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
+    AggregateCommandEndpoint(AggregateRepository<I, A, ?> repo, CommandEnvelope command) {
         super(repo, command);
     }
 

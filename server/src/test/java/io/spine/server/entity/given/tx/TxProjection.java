@@ -34,19 +34,18 @@ import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
 import io.spine.server.projection.Projection;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.entity.given.tx.ProjectionState.ProjectionType.USEFUL;
 import static io.spine.server.entity.given.tx.ProjectionState.ProjectionType.VERY_USEFUL;
 
 /**
  * Test environment projection for {@link io.spine.server.projection.ProjectionTransactionTest}.
  */
 public final class TxProjection
-        extends Projection<Id, ProjectionState, ProjectionState.Builder>
-        implements ProjectionStateWithColumns {
+        extends Projection<Id, ProjectionState, ProjectionState.Builder> {
 
     private final List<Message> receivedEvents = newLinkedList();
 
@@ -91,16 +90,29 @@ public final class TxProjection
     }
 
     @Override
-    public int getNameLength() {
-        return state().getName()
-                      .length();
+    protected void onBeforeCommit() {
+        updateNameLength();
+        updateTypeValue();
     }
 
-    @Override
-    public @Nullable ProjectionType getType() {
-        if (isNullType) {
-            return null;
-        }
-        return VERY_USEFUL;
+    private void updateTypeValue() {
+        ProjectionType newTypeValue = typeValueOf(isNullType);
+        builder().setType(newTypeValue);
+    }
+
+    private void updateNameLength() {
+        int newLengthValue = calculateLength(builder().getName());
+        builder().setNameLength(newLengthValue);
+    }
+
+    public static ProjectionType typeValueOf(boolean isNullType) {
+        return isNullType
+               ? USEFUL
+               : VERY_USEFUL;
+    }
+
+    public static int calculateLength(String name) {
+        int lengthValue = name.length();
+        return lengthValue;
     }
 }

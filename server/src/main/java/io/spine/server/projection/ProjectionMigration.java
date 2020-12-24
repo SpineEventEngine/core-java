@@ -39,7 +39,7 @@ import io.spine.server.procman.ProcessManager;
 @Experimental
 public abstract class ProjectionMigration<I,
                                           P extends Projection<I, S, B>,
-                                          S extends EntityState,
+                                          S extends EntityState<I>,
                                           B extends ValidatingBuilder<S>>
         extends Migration<I, P, S> {
 

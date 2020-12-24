@@ -27,8 +27,10 @@
 package io.spine.server.aggregate.given.repo;
 
 import io.spine.base.CommandMessage;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
@@ -39,21 +41,26 @@ import static io.spine.server.aggregate.given.dispatch.AggregateMessageDispatche
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.requestFactory;
 import static io.spine.testdata.Sample.builderForType;
 
-/** Utility factory for test aggregates. */
+/**
+ * Utility factory for test aggregates.
+ **/
 public class GivenAggregate {
 
-    /** Prevents instantiation of this utility class. */
-    private GivenAggregate() {
+    private final AggregateRepository<ProjectId, ProjectAggregate, AggProject> repository;
+
+    public GivenAggregate(AggregateRepository<ProjectId, ProjectAggregate, AggProject> repository) {
+        this.repository = repository;
     }
 
-    public static ProjectAggregate withUncommittedEvents() {
+    public ProjectAggregate withUncommittedEvents() {
         return withUncommittedEvents(Sample.messageOfType(ProjectId.class));
     }
 
-    public static ProjectAggregate withUncommittedEvents(ProjectId id) {
-        ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
-                                          .withId(id)
-                                          .build();
+    public ProjectAggregate withUncommittedEvents(ProjectId id) {
+        ProjectAggregate givenProject =
+                Given.aggregateOfClass(ProjectAggregate.class)
+                     .withId(id)
+                     .build();
 
         AggCreateProject.Builder createProject = builderForType(AggCreateProject.class);
         createProject.setProjectId(id);
@@ -62,16 +69,33 @@ public class GivenAggregate {
         AggStartProject.Builder startProject = builderForType(AggStartProject.class);
         startProject.setProjectId(id);
 
-        dispatchCommand(aggregate, env(createProject.build()));
-        dispatchCommand(aggregate, env(addTask.build()));
-        dispatchCommand(aggregate, env(startProject.build()));
-
-        return aggregate;
+        new ToProject(givenProject)
+                .dispatch(createProject.build())
+                .dispatch(addTask.build())
+                .dispatch(startProject.build());
+        return givenProject;
     }
 
-    /** Generates a command for the passed message and wraps it into the envelope. */
-    private static CommandEnvelope env(CommandMessage commandMessage) {
-        return CommandEnvelope.of(requestFactory().command()
-                                                  .create(commandMessage));
+    /**
+     * Method object which simplifies dispatching of commands to {@link ProjectAggregate} instances.
+     */
+    private final class ToProject {
+
+        private final ProjectAggregate aggregate;
+
+        private ToProject(ProjectAggregate aggregate) {
+            this.aggregate = aggregate;
+        }
+
+        private ToProject dispatch(CommandMessage commandMessage) {
+            dispatchCommand(aggregate, repository, env(commandMessage));
+            return this;
+        }
+
+        /** Generates a command for the passed message and wraps it into the envelope. */
+        private CommandEnvelope env(CommandMessage commandMessage) {
+            return CommandEnvelope.of(requestFactory().command()
+                                                      .create(commandMessage));
+        }
     }
 }

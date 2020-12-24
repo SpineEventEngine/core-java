@@ -43,7 +43,7 @@ import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that the commands posted to the {@link BlackBoxContext} are not the
+ * Verifies that the commands posted to the {@link BlackBox} are not the
  * {@linkplain io.spine.server.bus.DeadMessageHandler "dead"} messages.
  *
  * <p>The guard subscribes to {@link CommandErrored} event.
@@ -140,7 +140,7 @@ final class UnsupportedCommandGuard extends AbstractEventSubscriber {
     /**
      * {@inheritDoc}
      *
-     * <p>The {@code BlackBoxBoundedContext} only consumes domestic events.
+     * <p>The {@code BlackBox} bounded context only consumes domestic events.
      */
     @Override
     public ImmutableSet<EventClass> domesticEventClasses() {
@@ -150,7 +150,7 @@ final class UnsupportedCommandGuard extends AbstractEventSubscriber {
     /**
      * {@inheritDoc}
      *
-     * <p>The {@code BlackBoxBoundedContext} does not consume external events.
+     * <p>The {@code BlackBox} bounded context does not consume external events.
      */
     @Override
     public ImmutableSet<EventClass> externalEventClasses() {

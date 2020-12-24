@@ -27,7 +27,8 @@
 package io.spine.server.bc.given;
 
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.test.bc.SecretProject;
 
 public class SecretProjectRepository
-        extends AggregateRepository<String, SecretProjectAggregate> {
+        extends AggregateRepository<String, SecretProjectAggregate, SecretProject> {
 }

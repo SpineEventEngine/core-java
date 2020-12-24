@@ -36,7 +36,7 @@ import io.spine.test.commandbus.CmdBusCaffetteriaStats;
 import io.spine.test.commandbus.CmdBusOrderId;
 import io.spine.test.commandbus.command.CmdBusAllocateTable;
 import io.spine.test.commandbus.command.Visitors;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +46,7 @@ class RejectionInFilterTest {
     @Test
     @DisplayName("post this rejection to `EventBus`")
     void postRejection() {
-        BlackBoxContext context = BlackBoxContext.from(
+        BlackBox context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(OrderAggregate.class)
                                      .add(new CaffetteriaStatsRepository())

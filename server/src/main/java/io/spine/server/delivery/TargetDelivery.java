@@ -100,12 +100,12 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         for (Batch<I> batch : batches) {
             TenantId tenant = batch.inboxId.tenant();
             TenantAwareRunner.with(tenant).run(
-                () -> batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents)
+                    () -> batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents)
             );
         }
     }
 
-    private SignalEnvelope asEnvelope(InboxMessage message) {
+    private SignalEnvelope<?, ?, ?> asEnvelope(InboxMessage message) {
         if (message.hasCommand()) {
             return inboxOfCmds.asEnvelope(message);
         } else {
@@ -130,14 +130,14 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
          *
          * <p>The resulting order of messages through all batches is preserved.
          */
-        private static <I> List<Batch<I>> byInboxId(List<InboxMessage> messages,
-                                                    Function<InboxMessage, SignalEnvelope> fn) {
+        private static <I> List<Batch<I>>
+        byInboxId(List<InboxMessage> messages, Function<InboxMessage, SignalEnvelope<?, ?, ?>> fn) {
             List<Batch<I>> batches = new ArrayList<>();
             Batch<I> currentBatch = null;
             for (InboxMessage message : messages) {
 
                 InboxId msgInboxId = message.getInboxId();
-                SignalEnvelope envelope = fn.apply(message);
+                SignalEnvelope<?, ?, ?> envelope = fn.apply(message);
                 TenantId tenantId = envelope.tenantId();
                 if (currentBatch == null) {
                     currentBatch = new Batch<>(msgInboxId, tenantId);

@@ -42,7 +42,7 @@ import io.spine.server.route.given.sur.Works;
 import io.spine.server.route.given.sur.WorksProjection;
 import io.spine.server.route.given.sur.command.PublishArticle;
 import io.spine.server.route.given.sur.event.PieceOfArtCreated;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,11 +53,11 @@ import static io.spine.server.route.given.sur.Surrealism.GOLL;
 @DisplayName("ProjectionRepository state routing should")
 class StateRoutingTest {
 
-    private BlackBoxContext context;
+    private BlackBox context;
 
     @BeforeEach
     void setupContext() {
-        context = BlackBoxContext.from(
+        context = BlackBox.from(
                 BoundedContextBuilder
                         .assumingTests()
                         .add(MagazineAggregate.class)

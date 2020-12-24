@@ -33,10 +33,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * Test-only routines to use when testing the catch-up and delivery API.
@@ -54,7 +54,7 @@ public final class TestRoutines {
     }
 
     public static void post(List<Callable<Object>> jobs, int threads) throws InterruptedException {
-        ExecutorService service = Executors.newFixedThreadPool(threads);
+        ExecutorService service = newFixedThreadPool(threads);
         service.invokeAll(jobs);
         List<Runnable> leftovers = service.shutdownNow();
         assertThat(leftovers).isEmpty();

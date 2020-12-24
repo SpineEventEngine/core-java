@@ -33,19 +33,18 @@ import io.spine.test.stand.DishAdded;
 import io.spine.test.stand.DishRemoved;
 import io.spine.test.stand.Menu;
 import io.spine.test.stand.MenuId;
-import io.spine.test.stand.MenuWithColumns;
 
 import java.util.List;
 
 public final class MenuProjection
-        extends Projection<MenuId, Menu, Menu.Builder>
-        implements MenuWithColumns {
+        extends Projection<MenuId, Menu, Menu.Builder> {
 
     public static final String UUID_COLUMN = "uuid";
 
     @Subscribe
     void on(DishAdded event) {
-        builder().addDish(event.getDish());
+        builder().addDish(event.getDish())
+                 .setUuid(id().getUuid());
     }
 
     @Subscribe
@@ -58,10 +57,11 @@ public final class MenuProjection
                 return;
             }
         }
+        builder().setUuid(id().getUuid());
     }
 
     @Override
-    public String getUuid() {
-        return id().getUuid();
+    protected void onBeforeCommit() {
+        builder().setUuid(id().getUuid());
     }
 }

@@ -26,364 +26,314 @@
 
 package io.spine.server.storage;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
+import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
-import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.FieldMasks;
-import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.Columns;
-import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import io.spine.query.RecordQuery;
+import io.spine.query.RecordQueryBuilder;
+import io.spine.server.ContextSpec;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.util.Exceptions.newIllegalStateException;
-
 /**
- * A storage keeping messages with identity.
+ * An abstract base for storage implementations, which store the Protobuf messages as records.
+ *
+ * <p>Each stored record must be identified.
+ *
+ * <p>Additionally, some attributes may be stored along with the record itself
+ * to allow further querying.
  *
  * @param <I>
- *         the type of entity IDs
+ *         the type of the record identifiers
+ * @param <R>
+ *         the type of the stored message records
  */
-public abstract class RecordStorage<I>
-        extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
-        implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
-                   BulkStorageOperationsMixin<I, EntityRecord> {
+@SPI
+@SuppressWarnings("ClassWithTooManyMethods")    // This is a centerpiece.
+public abstract class RecordStorage<I, R extends Message> extends AbstractStorage<I, R> {
+
+    private final RecordSpec<I, R, ?> recordSpec;
 
     /**
-     * The class of entities stored in this {@code RecordStorage}.
+     * Creates the new storage instance.
+     *
+     * @param context
+     *         specification of the Bounded Context in scope of which the storage will be used
+     * @param recordSpec
+     *         definitions of the columns to store along with each record
      */
-    private final EntityClass<?> entityClass;
-
-    /**
-     * Creates an instance of {@code RecordStorage}.
-     */
-    protected RecordStorage(Class<? extends Entity<?, ?>> entityClass, boolean multitenant) {
-        super(multitenant);
-        this.entityClass = asEntityClass(entityClass);
+    protected RecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
+        super(context.isMultitenant());
+        this.recordSpec = recordSpec;
     }
 
     /**
-     * Reads a record which matches the specified {@linkplain RecordReadRequest request}.
+     * Reads the identifiers of the records selected by the passed query.
      *
-     * @param request
-     *         the request to read the record
-     * @return a record instance or {@code Optional.empty()} if there is no record with this ID
+     * @param query
+     *         the query to execute
+     * @return an iterator over the matching record identifiers
      */
-    @Override
-    public Optional<EntityRecord> read(RecordReadRequest<I> request) {
-        checkNotClosed();
-        checkNotNull(request);
-
-        Optional<EntityRecord> record = readRecord(request.recordId());
-        return record;
-    }
+    protected abstract Iterator<I> index(RecordQuery<I, R> query);
 
     /**
-     * Reads a record which matches the specified {@linkplain RecordReadRequest request}
-     * and applies a {@link FieldMask} to it.
+     * Writes the record along with its filled-in column values to the storage.
      *
-     * @param request
-     *         the request to read the record
-     * @param fieldMask
-     *         fields to read.
-     * @return the item with the given ID and with the {@code FieldMask} applied
-     *         or {@code Optional.empty()} if there is no record matching this request
-     * @see #read(RecordReadRequest)
-     */
-    @SuppressWarnings("CheckReturnValue") // calling builder method
-    public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
-        Optional<EntityRecord> rawResult = read(request);
-
-        if (!rawResult.isPresent()) {
-            return Optional.empty();
-        }
-
-        EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
-        Any state = builder.getState();
-        Message stateAsMessage = AnyPacker.unpack(state);
-
-        Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage);
-
-        Any packedState = AnyPacker.pack(maskedState);
-        builder.setState(packedState);
-        return Optional.of(builder.build());
-    }
-
-    /**
-     * Writes a record and its {@linkplain io.spine.server.entity.storage.Column columns} into the
-     * storage.
-     *
-     * <p>Rewrites it if a record with this ID already exists in the storage.
-     *
-     * @param id
-     *         the ID for the record
      * @param record
-     *         the record to store
+     *         the record and additional columns with their values
      * @throws IllegalStateException
-     *         if the storage is closed
-     * @see #write(Object, EntityRecord)
+     *         if the storage was closed before
      */
-    public void write(I id, EntityRecordWithColumns record) {
-        checkNotNull(id);
-        checkArgument(record.record()
-                            .hasState(), "Record does not have state field.");
+    protected void write(RecordWithColumns<I, R> record) {
         checkNotClosed();
-
-        writeRecord(id, record);
-    }
-
-    @Override
-    public void write(I id, EntityRecord record) {
-        EntityRecordWithColumns recordWithStorageFields =
-                EntityRecordWithColumns.of(record);
-        write(id, recordWithStorageFields);
+        writeRecord(record);
     }
 
     /**
-     * Writes a bulk of records into the storage.
-     *
-     * <p>Rewrites it if a record with this ID already exists in the storage.
+     * Writes the batch of the records along with their filled-in columns to the storage.
      *
      * @param records
-     *         the ID to record map with the entries to store
+     *         records and their column values
      * @throws IllegalStateException
-     *         if the storage is closed
+     *         if the storage was closed before
      */
-    public void write(Map<I, EntityRecordWithColumns> records) {
-        checkNotNull(records);
+    protected void writeAll(Iterable<? extends RecordWithColumns<I, R>> records) {
         checkNotClosed();
-
-        writeRecords(records);
+        writeAllRecords(records);
     }
 
     @Override
-    public Optional<LifecycleFlags> readLifecycleFlags(I id) {
-        RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        Optional<EntityRecord> optional = read(request);
-        return optional.map(EntityRecord::getLifecycleFlags);
-    }
-
-    @Override
-    public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        Optional<EntityRecord> optional = read(request);
-        if (optional.isPresent()) {
-            EntityRecord record = optional.get();
-            EntityRecord updated = record.toBuilder()
-                                         .setLifecycleFlags(flags)
-                                         .build();
-            write(id, updated);
-        } else {
-            String idStr = Identifier.toString(id);
-            throw newIllegalStateException("Unable to load record for entity with ID: %s", idStr);
-        }
+    public Optional<R> read(I id) {
+        checkNotClosed();
+        RecordQuery<I, R> query = toQuery(id);
+        return readSingleRecord(query);
     }
 
     /**
-     * Deletes the record with the passed ID.
+     * Reads the message record by the passed identifier and applies the given field mask to it.
      *
      * @param id
-     *         the record to delete
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     *         the identifier of the message record to read
+     * @param mask
+     *         the field mask to apply
+     * @return the record with the given identifier, after the field mask has been applied to it,
+     *         or {@code Optional.empty()} if no record is found by the ID
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
-    public abstract boolean delete(I id);
+    protected Optional<R> read(I id, FieldMask mask) {
+        checkNotClosed();
+        RecordQuery<I, R> query = toQuery(id, mask);
+        return readSingleRecord(query);
+    }
 
     /**
-     * Reads multiple active items from the storage and applies {@link FieldMask} to the results.
+     * Reads all message records in the storage.
      *
-     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
-     * with nulls in place of missing or inactive entities.
+     * <p>This method should be used with the performance and memory considerations in mind.
+     *
+     * @return iterator over the records
+     * @throws IllegalStateException
+     *         if the storage was closed before
+     */
+    protected Iterator<R> readAll() {
+        checkNotClosed();
+        RecordQuery<I, R> query = queryForAll();
+        return readAll(query);
+    }
+
+    /**
+     * Reads all the message records according to the passed identifiers.
+     *
+     * <p>The response contains only the records which were found.
      *
      * @param ids
-     *         the IDs of the items to read
-     * @param fieldMask
-     *         the mask to apply
-     * @return the items with the given IDs and with the given {@code FieldMask} applied
+     *         the identifiers of the records to read
+     * @return iterator over the records with the passed IDs
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
-    @Override
-    public Iterator<@Nullable EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
+    protected Iterator<R> readAll(Iterable<I> ids) {
         checkNotClosed();
-        checkNotNull(ids);
-
-        return readMultipleRecords(ids, fieldMask);
+        RecordQuery<I, R> query = toQuery(ids);
+        return readAll(query);
     }
 
     /**
-     * Reads all active items from the storage and apply {@link FieldMask} to each of the results.
+     * Reads all the message records according to the passed record identifiers and returns
+     * each record applying the passed field mask.
      *
-     * @param format
-     *         the expected format of the response
-     * @return all items from this repository with the given {@code FieldMask} applied
+     * <p>The response contains only the records which were found.
+     *
+     * @param ids
+     *         the identifiers of the records to read
+     * @param mask
+     *         the mask to apply to each record
+     * @return the iterator over the records
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
-    @Override
-    public Iterator<EntityRecord> readAll(ResponseFormat format) {
+    protected Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
         checkNotClosed();
-
-        return readAllRecords(format);
+        RecordQuery<I, R> query = toQuery(ids, mask);
+        return readAll(query);
     }
 
     /**
-     * Reads all the records matching the given {@link EntityQuery} and applies the given
-     * {@link FieldMask} to the resulting record states.
+     * Reads all message records according to the passed query.
      *
-     * <p>By default, the entities supporting lifecycle will be returned only if they are active.
-     * To get inactive entities, the lifecycle attribute must be set to the
-     * {@linkplain EntityQuery provided query}.
+     * <p>The default {@link ResponseFormat} is used.
      *
      * @param query
      *         the query to execute
-     * @param format
-     *         the format of the query response
-     * @return the matching records mapped upon their IDs
+     * @return iterator over the matching records
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
-    public Iterator<EntityRecord> readAll(EntityQuery<I> query, ResponseFormat format) {
+    protected Iterator<R> readAll(RecordQuery<I, R> query) {
         checkNotClosed();
-        checkNotNull(query);
-        checkNotNull(format);
-
-        return readAllRecords(query, format);
+        return readAllRecords(query);
     }
 
     /**
-     * Reads all the records matching the given {@link EntityQuery} and applies the given
-     * {@link FieldMask} to the resulting record states.
+     * Physically deletes the message record from the storage by the record identifier.
      *
-     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags} but the entity
-     * supports them, all the resulting records are active. Otherwise the records obey
-     * the constraints provided by the query.
-     *
-     * @param query
-     *         the query to execute
-     * @return the matching records mapped upon their IDs
-     */
-    public Iterator<EntityRecord> readAll(EntityQuery<I> query) {
-        return readAll(query, ResponseFormat.getDefaultInstance());
-    }
-
-    /**
-     * Obtains a list of columns of the managed {@link Entity}.
-     *
-     * @see io.spine.server.entity.storage.Column
-     * @see io.spine.code.proto.ColumnOption
-     */
-    protected final ImmutableList<Column> columnList() {
-        return columns().columnList();
-    }
-
-    /**
-     * Returns the columns of the managed {@link Entity}.
-     *
-     * @see io.spine.server.entity.storage.Column
-     * @see io.spine.code.proto.ColumnOption
-     */
-    @Internal
-    public Columns columns() {
-        return entityClass.columns();
-    }
-
-    /**
-     * Returns a {@code Map} of {@linkplain io.spine.server.entity.storage.Column columns}
-     * corresponded to the {@link LifecycleFlagField lifecycle storage fields} of the
-     * {@link Entity} class managed by this storage.
-     *
-     * @return a {@code Map} of managed {@link Entity} lifecycle columns
-     * @throws IllegalArgumentException
-     *         if a lifecycle field is not present
-     *         in the managed {@link Entity} class
-     * @see LifecycleFlagField
-     */
-    @Internal
-    public final ImmutableMap<ColumnName, Column> lifecycleColumns() {
-        return columns().lifecycleColumns();
-    }
-
-    /*
-     * Internal storage methods
-     *****************************/
-
-    /**
-     * Reads a record from the storage by the passed ID.
+     * <p>In case the record with the specified identifier is not found in the storage,
+     * this method does nothing and returns {@code false}.
      *
      * @param id
-     *         the ID of the record to load
-     * @return a record instance or {@code null} if there is no record with this ID
+     *         identifier of the record to delete
+     * @return {@code true} if the record was deleted,
+     *         or {@code false} if the record with the specified identifier was not found
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
-    protected abstract Optional<EntityRecord> readRecord(I id);
+    @CanIgnoreReturnValue
+    protected boolean delete(I id) {
+        checkNotClosed();
+        return deleteRecord(id);
+    }
 
     /**
-     * Obtains an iterator for reading multiple records by IDs, and
-     * applying the passed field mask to the results.
+     * Deletes the batch of message records by their identifiers.
      *
-     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
-     * with nulls in place of missing or inactive entities.
+     * <p>If for some provided identifiers there is no records in the storage, such identifiers
+     * are silently skipped.
      *
-     * @see BulkStorageOperationsMixin#readMultiple
+     * @param ids
+     *         identifiers of the records to delete
+     * @throws IllegalStateException
+     *         if the storage was closed before
      */
-    protected abstract Iterator<@Nullable EntityRecord>
-    readMultipleRecords(Iterable<I> ids, FieldMask fieldMask);
+    protected void deleteAll(Iterable<I> ids) {
+        for (I id : ids) {
+            delete(id);
+        }
+    }
 
     /**
-     * Obtains an iterator for reading all records.
-     *
-     * <p>Only active entities are returned.
-     *
-     * @param format
-     *         the expected format of the query response
-     * @see BulkStorageOperationsMixin#readAll
+     * Creates a new query which targets the single record with the specified ID.
      */
-    protected abstract Iterator<EntityRecord> readAllRecords(ResponseFormat format);
+    protected RecordQuery<I, R> toQuery(I id) {
+        return queryBuilder().id().is(id).build();
+    }
 
     /**
-     * Obtains an iterator for reading records matching the query,
-     * and applying the passed field mask to the results.
-     *
-     * <p>Returns only active entities if the query does not specify the {@linkplain LifecycleFlags
-     * lifecycle flags}. In order to read inactive entities, the corresponding filters must be set
-     * to the provided {@link EntityQuery query}.
-     *
-     * @see #readAll(EntityQuery, ResponseFormat)
+     * Creates a new query for the target with the specified ID, which, if exists, should be
+     * returned according to the specified field mask.
      */
-    protected abstract Iterator<EntityRecord>
-    readAllRecords(EntityQuery<I> query, ResponseFormat format);
+    protected RecordQuery<I, R> toQuery(I id, FieldMask mask) {
+        return queryBuilder().id().is(id).withMask(mask).build();
+    }
 
     /**
-     * Writes a record and the associated {@linkplain io.spine.server.entity.storage.Column column}
-     * values into the storage.
+     * Creates a new query for the targets which have one of the passed identifiers.
+     */
+    protected RecordQuery<I, R> toQuery(Iterable<I> ids) {
+        return queryBuilder().id().in(ids).build();
+    }
+
+    /**
+     * Creates a new query for the targets which have one of the passed identifiers.
      *
-     * <p>Rewrites it if a record with this ID already exists in the storage.
+     * <p>The results will contain only the fields specified by the given field mask.
+     */
+    protected RecordQuery<I, R> toQuery(Iterable<I> ids, FieldMask mask) {
+        return queryBuilder().id().in(ids).withMask(mask).build();
+    }
+
+    /**
+     * Creates a new query targeting all records in the storage.
+     */
+    protected RecordQuery<I, R> queryForAll() {
+        return queryBuilder().build();
+    }
+
+    /**
+     * Creates a new query builder for the records stored in this storage.
+     */
+    public RecordQueryBuilder<I, R> queryBuilder() {
+        return RecordQuery.newBuilder(recordSpec.idType(), recordSpec().recordType());
+    }
+
+    /**
+     * Performs writing the record and its column values to the storage.
      *
-     * @param id
-     *         an ID of the record
      * @param record
-     *         a record to store
+     *         the record and additional columns with their values
      */
-    protected abstract void writeRecord(I id, EntityRecordWithColumns record);
+    protected abstract void writeRecord(RecordWithColumns<I, R> record);
 
     /**
-     * Writes a bulk of records into the storage.
-     *
-     * <p>Rewrites it if a record with this ID already exists in the storage.
+     * Performs writing of the record batch along with records' filled-in columns to the storage.
      *
      * @param records
-     *         an ID to record map with the entries to store
+     *         records and the values of their columns
      */
-    protected abstract void writeRecords(Map<I, EntityRecordWithColumns> records);
+    @Internal
+    protected abstract void writeAllRecords(Iterable<? extends RecordWithColumns<I, R>> records);
+
+    /**
+     * Performs reading of the message records by executing the passed query.
+     *
+     * @param query
+     *         the query to execute
+     * @return iterator over the matching message records
+     */
+    protected abstract Iterator<R> readAllRecords(RecordQuery<I, R> query);
+
+    /**
+     * Performs the physical removal of the message record from the storage
+     * by the identifier of the record.
+     *
+     * <p>In case the record with the specified identifier is not found in the storage,
+     * this method does nothing and returns {@code false}.
+     *
+     * @param id
+     *         identifier of the record to delete
+     * @return {@code true} if the record was deleted,
+     *         or {@code false} if the record with the specified identifier was not found
+     */
+    @CanIgnoreReturnValue
+    protected abstract boolean deleteRecord(I id);
+
+    /**
+     * Returns the specification of the record format, in which the message record should be stored.
+     */
+    @Internal
+    protected RecordSpec<I, R, ?> recordSpec() {
+        return recordSpec;
+    }
+
+    private Optional<R> readSingleRecord(RecordQuery<I, R> query) {
+        Iterator<R> iterator = readAll(query);
+        return iterator.hasNext()
+               ? Optional.of(iterator.next())
+               : Optional.empty();
+    }
 }
+

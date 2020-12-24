@@ -44,11 +44,12 @@ import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 @Internal
 public final class InMemoryRootDirectory implements AggregateRootDirectory {
 
-    private final SetMultimap<Class<? extends AggregateRoot<?>>, AggregatePartRepository<?, ?, ?>>
+    private final SetMultimap<Class<? extends AggregateRoot<?>>,
+                              AggregatePartRepository<?, ?, ?, ?>>
     repositories = synchronizedSetMultimap(HashMultimap.create());
 
     @Override
-    public void register(AggregatePartRepository<?, ?, ?> repository) {
+    public void register(AggregatePartRepository<?, ?, ?, ?> repository) {
         checkNotNull(repository);
 
         Class<? extends AggregateRoot<?>> rootClass = repository.aggregatePartClass().rootClass();
@@ -56,15 +57,15 @@ public final class InMemoryRootDirectory implements AggregateRootDirectory {
     }
 
     @Override
-    public Optional<? extends AggregatePartRepository<?, ?, ?>>
+    public Optional<? extends AggregatePartRepository<?, ?, ?, ?>>
     findPart(Class<? extends AggregateRoot<?>> rootClass,
-             Class<? extends EntityState> partStateClass) {
-        Set<AggregatePartRepository<?, ?, ?>> parts = repositories.get(rootClass);
+             Class<? extends EntityState<?>> partStateClass) {
+        Set<AggregatePartRepository<?, ?, ?, ?>> parts = repositories.get(rootClass);
         if (parts.isEmpty()) {
             return Optional.empty();
         } else {
             TypeUrl targetType = TypeUrl.of(partStateClass);
-            Optional<AggregatePartRepository<?, ?, ?>> repository = parts
+            Optional<AggregatePartRepository<?, ?, ?, ?>> repository = parts
                     .stream()
                     .filter(repo -> repo.entityStateType().equals(targetType))
                     .findAny();

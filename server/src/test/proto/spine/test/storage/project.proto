@@ -37,16 +37,16 @@ import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "spine/core/version.proto";
 
-message ProjectId {
+message StgProjectId {
     string id = 1;
 }
 
-message Project {
+message StgProject {
     option (entity).kind = PROJECTION;
 
-    ProjectId id = 1;
+    StgProjectId id = 1;
     string name = 2;
-    repeated Task task = 3;
+    repeated StgTask task = 3;
 
     enum Status {
         UNDEFINED = 0;
@@ -70,13 +70,13 @@ message Project {
     google.protobuf.Timestamp due_date = 10 [(column) = true];
 }
 
-message TaskId {
+message StgTaskId {
     int32 id = 1;
 }
 
-message Task {
+message StgTask {
     option (entity).kind = PROJECTION;
-    TaskId task_id = 1;
+    StgTaskId task_id = 1;
     string title = 2;
     string description = 3;
 }

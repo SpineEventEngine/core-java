@@ -39,9 +39,6 @@ import io.spine.test.event.RSessionId;
 import java.util.Iterator;
 import java.util.Set;
 
-import static com.google.common.collect.Streams.stream;
-import static java.util.stream.Collectors.toSet;
-
 public class SessionRepository
         extends ProjectionRepository<RSessionId, SessionProjection, RSession> {
 
@@ -56,13 +53,12 @@ public class SessionRepository
     }
 
     private Set<RSessionId> findByUserId(UserId id) {
-        Iterator<SessionProjection> iterator =
-                iterator(projection -> projection.state()
-                                                 .getUserId()
-                                                 .equals(id));
-        Set<RSessionId> ids = stream(iterator)
-                .map(SessionProjection::id)
-                .collect(toSet());
-        return ids;
+        RSession.Query query =
+                RSession.query()
+                        .userId().is(id)
+                        .build();
+        Iterator<RSessionId> identifiers = recordStorage().index(query);
+        ImmutableSet<RSessionId> result = ImmutableSet.copyOf(identifiers);
+        return result;
     }
 }

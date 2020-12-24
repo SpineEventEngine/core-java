@@ -27,10 +27,11 @@
 package io.spine.testing.server.blackbox.given;
 
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
 
 public abstract class RepositoryThrowingExceptionOnClose
-        extends AggregateRepository<BbProjectId, BbProjectAggregate> {
+        extends AggregateRepository<BbProjectId, BbProjectAggregate, BbProject> {
 
     @Override
     public void close() {

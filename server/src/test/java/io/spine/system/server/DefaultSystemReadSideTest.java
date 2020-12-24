@@ -26,25 +26,15 @@
 
 package io.spine.system.server;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.DefaultRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
-import io.spine.system.server.given.client.ShoppingListAggregate;
-import io.spine.test.system.server.ListId;
-import io.spine.test.system.server.ShoppingList;
-import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,15 +42,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.system.server.given.client.SystemClientTestEnv.findAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -141,57 +127,6 @@ class DefaultSystemReadSideTest {
             Event event = events.createEvent(systemEvent);
             systemContext.eventBus().post(event);
             return systemEvent;
-        }
-    }
-
-    @Nested
-    @DisplayName("read domain aggregate states")
-    class ReadDomainAggregates {
-
-        private final TestActorRequestFactory actorRequestFactory =
-                new TestActorRequestFactory(DefaultSystemWriteSideTest.class);
-
-        private ListId aggregateId;
-
-        @BeforeEach
-        void setUp() {
-            domainContext.internalAccess()
-                         .register(DefaultRepository.of(ShoppingListAggregate.class));
-            aggregateId = ListId
-                    .newBuilder()
-                    .setId(newUuid())
-                    .build();
-            createAggregate();
-        }
-
-        @Test
-        @DisplayName("by the given query")
-        void query() {
-            Query query =
-                    actorRequestFactory.query()
-                                       .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
-            Iterator<EntityStateWithVersion> iterator = systemReadSide.readDomainAggregate(query);
-            EntityStateWithVersion next = iterator.next();
-            Message foundMessage = unpack(next.getState());
-
-            ShoppingListAggregate aggregate = aggregate();
-            assertEquals(aggregate.state(), foundMessage);
-            assertEquals(aggregate.version(), next.getVersion());
-        }
-
-        private ShoppingListAggregate aggregate() {
-            return findAggregate(aggregateId, domainContext);
-        }
-
-        private void createAggregate() {
-            CreateShoppingList command = CreateShoppingList
-                    .newBuilder()
-                    .setId(aggregateId)
-                    .build();
-            Command cmd = actorRequestFactory.command()
-                                             .create(command);
-            domainContext.commandBus()
-                         .post(cmd, noOpObserver());
         }
     }
 

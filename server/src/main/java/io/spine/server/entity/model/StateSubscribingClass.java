@@ -39,12 +39,12 @@ public interface StateSubscribingClass {
     /**
      * Obtains domestic entity states to which the class is subscribed.
      */
-    ImmutableSet<StateClass> domesticStates();
+    ImmutableSet<StateClass<?>> domesticStates();
 
     /**
      * Obtains external entity states to which the class is subscribed.
      */
-    ImmutableSet<StateClass> externalStates();
+    ImmutableSet<StateClass<?>> externalStates();
 
     /**
      * Verifies if this class is {@linkplain io.spine.core.Subscribe subscribed} to updates of

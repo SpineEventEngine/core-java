@@ -28,8 +28,10 @@ package io.spine.server.entity.given;
 
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.server.given.groups.GroupId;
 import io.spine.server.given.groups.GroupName;
 import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
 
 public class DefaultEntityFactoryTestEnv {
 
@@ -38,26 +40,26 @@ public class DefaultEntityFactoryTestEnv {
     }
 
     /** A test entity class which is not versionable. */
-    public static class TestEntity1 extends AbstractEntity<String, Project> {
-        private TestEntity1(String id) {
+    public static class TestEntity1 extends AbstractEntity<ProjectId, Project> {
+        private TestEntity1(ProjectId id) {
             super(id);
         }
     }
 
     /** A test repository. */
     public static class TestRepository1
-            extends DefaultRecordBasedRepository<String, TestEntity1, Project> {
+            extends DefaultRecordBasedRepository<ProjectId, TestEntity1, Project> {
     }
 
     /** Another entity with the same ID and different state. */
-    public static class TestEntity2 extends AbstractEntity<String, GroupName> {
-        protected TestEntity2(String id) {
+    public static class TestEntity2 extends AbstractEntity<GroupId, GroupName> {
+        protected TestEntity2(GroupId id) {
             super(id);
         }
     }
 
     /** A repository for {@link TestEntity2}. */
     public static class TestRepository2
-            extends DefaultRecordBasedRepository<String, TestEntity2, GroupName> {
+            extends DefaultRecordBasedRepository<GroupId, TestEntity2, GroupName> {
     }
 }

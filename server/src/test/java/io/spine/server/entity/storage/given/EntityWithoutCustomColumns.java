@@ -27,13 +27,13 @@
 package io.spine.server.entity.storage.given;
 
 import io.spine.server.projection.Projection;
-import io.spine.test.storage.Task;
-import io.spine.test.storage.TaskId;
+import io.spine.test.storage.StgTask;
+import io.spine.test.storage.StgTaskId;
 
 public final class EntityWithoutCustomColumns
-        extends Projection<TaskId, Task, Task.Builder> {
+        extends Projection<StgTaskId, StgTask, StgTask.Builder> {
 
-    public EntityWithoutCustomColumns(TaskId id) {
+    public EntityWithoutCustomColumns(StgTaskId id) {
         super(id);
     }
 }

@@ -38,11 +38,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 import static io.spine.option.EntityOption.Visibility.QUERY;
-import static io.spine.protobuf.Messages.isDefault;
 import static java.lang.String.format;
 
 /**
- * Validates the {@linkplain Query} instances submitted to {@linkplain Stand}.
+ * Validates the {@link Query} instances submitted to {@link Stand}.
  */
 final class QueryValidator extends AbstractTargetValidator<Query> {
 
@@ -55,7 +54,7 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
         ResponseFormat format = request.getFormat();
         int limit = format.getLimit();
         if (limit > 0) {
-            boolean orderByMissing = isDefault(format.getOrderBy());
+            boolean orderByMissing = format.getOrderByCount() == 0;
             if (orderByMissing) {
                 Value limitValue = Value
                         .newBuilder()
@@ -86,9 +85,8 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
     }
 
     @Override
-    protected InvalidQueryException invalidMessageException(String exceptionMsg,
-                                                            Query request,
-                                                            Error error) {
+    protected InvalidQueryException
+    invalidMessageException(String exceptionMsg, Query request, Error error) {
         return new InvalidQueryException(exceptionMsg, request, error);
     }
 

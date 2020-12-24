@@ -37,7 +37,7 @@ import io.spine.type.TypeUrl;
  * @param <E> the type of entities
  * @param <S> the type of entity states
  */
-final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends EntityState>
+final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends EntityState<I>>
         extends StorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
@@ -46,7 +46,7 @@ final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Entity
         super(stateType, factory, fieldMask);
     }
 
-    static <I, E extends AbstractEntity<I, S>, S extends EntityState>
+    static <I, E extends AbstractEntity<I, S>, S extends EntityState<I>>
     StorageConverter<I, E, S> forAllFields(TypeUrl stateType, EntityFactory<E> factory) {
         FieldMask allFields = FieldMask.getDefaultInstance();
         return new DefaultConverter<>(stateType, factory, allFields);

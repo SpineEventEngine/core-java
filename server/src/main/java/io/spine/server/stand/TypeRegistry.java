@@ -27,6 +27,7 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.QueryableRepository;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.type.TypeUrl;
@@ -64,7 +65,7 @@ interface TypeRegistry extends AutoCloseable {
      * @return {@code RecordBasedRepository} managing the objects of the given {@code type},
      *         or {@code Optional.empty()} if no such repository has been registered
      */
-    Optional<? extends RecordBasedRepository<?, ?, ?>> recordRepositoryOf(TypeUrl type);
+    Optional<QueryableRepository> recordRepositoryOf(TypeUrl type);
 
     /**
      * Reads all {@link io.spine.server.aggregate.Aggregate Aggregate} entity state types

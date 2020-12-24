@@ -64,12 +64,12 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
     /**
      * Obtains immutable list of entity states returned in this query response.
      */
-    default ImmutableList<? extends EntityState> states() {
-        ImmutableList<EntityState> result = getMessageList()
+    default ImmutableList<? extends EntityState<?>> states() {
+        ImmutableList<EntityState<?>> result = getMessageList()
                 .stream()
                 .map(EntityStateWithVersion::getState)
                 .map(AnyPacker::unpack)
-                .map(EntityState.class::cast)
+                .map((m) -> (EntityState<?>) m)
                 .collect(toImmutableList());
         return result;
     }
@@ -79,7 +79,7 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
      *
      * @throws UnexpectedTypeException if the {@code type} does not match the actual result type
      */
-    default <S extends EntityState> ImmutableList<S> states(Class<S> type)
+    default <S extends EntityState<?>> ImmutableList<S> states(Class<S> type)
             throws UnexpectedTypeException {
         ImmutableList<S> result = getMessageList()
                 .stream()
@@ -95,9 +95,9 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
      * @throws IndexOutOfBoundsException
      *         if the index is out of the range of entities returned by this query response
      */
-    default EntityState state(int index) {
+    default EntityState<?> state(int index) {
         EntityStateWithVersion stateWithVersion = getMessageList().get(index);
-        EntityState result = (EntityState) unpack(stateWithVersion.getState());
+        EntityState<?> result = (EntityState<?>) unpack(stateWithVersion.getState());
         return result;
     }
 

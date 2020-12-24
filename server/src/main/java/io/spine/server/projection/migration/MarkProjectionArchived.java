@@ -45,7 +45,7 @@ import io.spine.server.projection.ProjectionMigration;
 @Experimental
 public final class MarkProjectionArchived<I,
                                           P extends Projection<I, S, B>,
-                                          S extends EntityState,
+                                          S extends EntityState<I>,
                                           B extends ValidatingBuilder<S>>
         extends ProjectionMigration<I, P, S, B> {
 

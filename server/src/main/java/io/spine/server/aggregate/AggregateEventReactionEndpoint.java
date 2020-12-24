@@ -38,7 +38,7 @@ import io.spine.server.type.EventEnvelope;
 final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEventEndpoint<I, A> {
 
-    AggregateEventReactionEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
+    AggregateEventReactionEndpoint(AggregateRepository<I, A, ?> repo, EventEnvelope event) {
         super(repo, event);
     }
 

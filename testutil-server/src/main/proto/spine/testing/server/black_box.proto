@@ -37,9 +37,9 @@ option java_multiple_files = true;
 
 import "spine/core/bounded_context.proto";
 
-// ID of a `BlackBoxBoundedContext`.
+// ID of a `BlackBox` bounded context.
 //
-// Identifies the producer of the events posted directly into a `BlackBoxBoundedContext`.
+// Identifies the producer of the events posted directly into a `BlackBox`.
 //
 message BlackBoxId {
 

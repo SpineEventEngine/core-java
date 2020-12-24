@@ -27,6 +27,7 @@ package io.spine.server.aggregate.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.base.EntityState;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
@@ -63,6 +64,20 @@ public class AggregateMessageDispatcher {
         checkNotNull(command);
         return AggregateTestSupport
                 .dispatchCommand(new TestAggregateRepository<>(), aggregate, command);
+    }
+
+    /**
+     * Dispatches the {@linkplain CommandEnvelope command envelope} and applies the resulting events
+     * to the given {@code Aggregate}.
+     *
+     * @return the list of event messages.
+     */
+    @CanIgnoreReturnValue
+    public static <I, A extends Aggregate<I, S, ?>, S extends EntityState<I>> DispatchOutcome
+    dispatchCommand(A aggregate, AggregateRepository<I, A, S> repository, CommandEnvelope command) {
+        checkNotNull(aggregate);
+        checkNotNull(command);
+        return AggregateTestSupport.dispatchCommand(repository, aggregate, command);
     }
 
     /**
@@ -114,8 +129,10 @@ public class AggregateMessageDispatcher {
     /**
      * Test-only aggregate repository that uses {@linkplain NoOpLifecycle NO-OP entity lifecycle}.
      */
-    private static class TestAggregateRepository<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateRepository<I, A> {
+    private static class TestAggregateRepository<I,
+                                                 A extends Aggregate<I, S, ?>,
+                                                 S extends EntityState<I>>
+            extends AggregateRepository<I, A, S> {
 
         @Override
         public EntityLifecycle lifecycleOf(I id) {

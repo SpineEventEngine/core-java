@@ -26,7 +26,8 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.test.storage.ProjectId;
+import io.spine.server.entity.EntityRecord;
+import io.spine.test.storage.StgProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,21 +45,22 @@ import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("MultitenantStorage should")
+@DisplayName("`MultitenantStorage` should")
 class MultitenantStorageTest {
 
     private static final boolean IS_MULTITENANT = false;
 
-    private MultitenantStorage<TenantRecords<ProjectId>> multitenantStorage;
+    private MultitenantStorage<TenantRecords<StgProjectId, EntityRecord>> multitenantStorage;
 
     @BeforeEach
     void setUp() {
-        multitenantStorage = new MultitenantStorage<TenantRecords<ProjectId>>(IS_MULTITENANT) {
-            @Override
-            TenantRecords<ProjectId> createSlice() {
-                return new TenantRecords<>();
-            }
-        };
+        multitenantStorage =
+                new MultitenantStorage<TenantRecords<StgProjectId, EntityRecord>>(IS_MULTITENANT) {
+                    @Override
+                    TenantRecords<StgProjectId, EntityRecord> createSlice() {
+                        return new TenantRecords<>();
+                    }
+                };
     }
 
     @Test
@@ -66,17 +68,21 @@ class MultitenantStorageTest {
     void returnSameSlice()
             throws InterruptedException, ExecutionException {
         int numberOfTasks = 1000;
-        Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);
+        Collection<Callable<TenantRecords<StgProjectId, EntityRecord>>> tasks =
+                newArrayListWithExpectedSize(numberOfTasks);
 
         for (int i = 0; i < numberOfTasks; i++) {
             tasks.add(() -> {
-                TenantRecords<ProjectId> storage = multitenantStorage.currentSlice();
+                TenantRecords<StgProjectId, EntityRecord> storage =
+                        multitenantStorage.currentSlice();
                 return storage;
             });
         }
 
-        List<Future<TenantRecords>> futures = executeInMultithreadedEnvironment(tasks);
-        Set<TenantRecords> tenantRecords = convertFuturesToSetOfCompletedResults(futures);
+        List<Future<TenantRecords<StgProjectId, EntityRecord>>> futures =
+                executeInMultithreadedEnvironment(tasks);
+        Set<TenantRecords<StgProjectId, EntityRecord>> tenantRecords =
+                convertFuturesToSetOfCompletedResults(futures);
 
         int expected = 1;
         assertEquals(expected, tenantRecords.size());

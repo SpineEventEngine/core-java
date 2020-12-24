@@ -30,25 +30,26 @@ import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newConcurrentMap;
+import static java.util.Collections.synchronizedMap;
 
 /**
  * The multitenant storage.
  *
  * @param <S> the type of the storage "slice" for each tenant
  */
-abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
+abstract class MultitenantStorage<S extends TenantDataStorage<?, ?>> {
 
     /** The lock for {@code MultitenantStorage} accessor methods. */
     private final Lock lock = new ReentrantLock();
 
     /** The map from {@code TenantId} to its slice of data. */
-    private final Map<TenantId, S> tenantSlices = newConcurrentMap();
+    private final Map<TenantId, S> tenantSlices = synchronizedMap(new HashMap<>());
 
     /** If {@code true} the storage will contain a data slice for each tenant. */
     private final boolean multitenant;

@@ -32,7 +32,7 @@ import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCancelProject;
 import io.spine.test.aggregate.command.AggPauseProject;
@@ -50,7 +50,7 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectPaused;
  *
  * <p>One might say, this aggregate sticks to its roots and denies changes. Hence the name.
  */
-public class AmishAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+public class AmishAggregate extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 
     public AmishAggregate(ProjectId id) {
         super(id);

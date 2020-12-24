@@ -85,8 +85,8 @@ public class Given {
 
         @Internal
         @Override
-        public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
-            return records == null ? super.loadAllRecords(format) : records;
+        public Iterator<EntityRecord> findRecords(ResponseFormat format) {
+            return records == null ? super.findRecords(format) : records;
         }
 
         @Internal

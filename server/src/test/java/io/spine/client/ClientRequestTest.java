@@ -32,6 +32,7 @@ import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
+import io.spine.test.client.users.ActiveUsers;
 import io.spine.test.client.users.UserAccount;
 import io.spine.test.client.users.command.LogInUser;
 import io.spine.test.client.users.event.UserLoggedIn;
@@ -80,8 +81,8 @@ class ClientRequestTest extends AbstractClientTest {
         @Test
         @DisplayName("`SubscriptionRequest`")
         void subscription() {
-            Class<? extends EntityState> messageType = UserAccount.class;
-            SubscriptionRequest<? extends EntityState> subscriptionRequest =
+            Class<? extends EntityState<?>> messageType = UserAccount.class;
+            SubscriptionRequest<? extends EntityState<?>> subscriptionRequest =
                     request.subscribeTo(messageType);
 
             assertThat(subscriptionRequest.messageType())
@@ -98,16 +99,14 @@ class ClientRequestTest extends AbstractClientTest {
             assertThat(eventSubscriptionRequest.messageType())
                     .isEqualTo(eventType);
         }
+    }
 
-        @Test
-        @DisplayName("`QueryRequest`")
-        void query() {
-            Class<? extends EntityState> messageType = UserAccount.class;
-            QueryRequest<? extends EntityState> queryRequest =
-                    request.select(messageType);
-
-            assertThat(queryRequest.messageType())
-                    .isEqualTo(messageType);
-        }
+    @Test
+    @DisplayName("run `EntityQuery`")
+    void runEntityQuery() {
+        ActiveUsers.Query query = ActiveUsers.query()
+                                             .build();
+        ImmutableList<ActiveUsers> results = request.run(query);
+        assertThat(results).isNotNull();
     }
 }

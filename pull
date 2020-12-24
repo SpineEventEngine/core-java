@@ -27,8 +27,8 @@
 #
 
 cd ./config || exit
-echo "Switching the pointer of the 'config' submodule to its 'master'."
-git checkout master
+echo "Switching the pointer of the 'config' submodule to its '2.x-jdk8-master'."
+git checkout 2.x-jdk8-master
 git pull
 
 cd ..

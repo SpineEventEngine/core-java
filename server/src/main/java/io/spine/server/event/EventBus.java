@@ -279,12 +279,11 @@ public final class EventBus
                 ServerEnvironment.instance()
                                  .storageFactory()
                                  .createEventStore(context.spec());
-        eventStore.registerWith(context);
     }
 
     @Override
     public boolean isRegistered() {
-        return eventStore.isRegistered();
+        return eventStore != null;
     }
 
     /** The {@code Builder} for {@code EventBus}. */

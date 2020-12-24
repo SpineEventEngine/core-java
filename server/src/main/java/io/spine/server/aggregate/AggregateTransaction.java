@@ -32,6 +32,7 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayingTransaction;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
 
@@ -44,7 +45,7 @@ import io.spine.server.type.EventEnvelope;
  */
 @Internal
 public class AggregateTransaction<I,
-                                  S extends EntityState,
+                                  S extends EntityState<I>,
                                   B extends ValidatingBuilder<S>>
         extends EventPlayingTransaction<I, Aggregate<I, S, B>, S, B> {
 
@@ -74,8 +75,37 @@ public class AggregateTransaction<I,
         return aggregate.invokeApplier(event);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Additionally, notifies the {@code Aggregate} instance that the event has been played.
+     */
+    @Override
+    public DispatchOutcome play(EventEnvelope event) {
+        DispatchOutcome outcome = super.play(event);
+        entity().onAfterEventPlayed(event);
+        return outcome;
+    }
+
     @Override
     protected VersionIncrement createVersionIncrement(EventEnvelope event) {
         return VersionIncrement.fromEvent(event);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose to the package.
+     */
+    @Override
+    protected final LifecycleFlags lifecycleFlags() {
+        return super.lifecycleFlags();
+    }
+
+    /**
+     * Returns the current version of the "dirty" entity being modified in scope of the transaction.
+     */
+    final Version currentVersion() {
+        return version();
     }
 }

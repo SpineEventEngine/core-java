@@ -30,12 +30,11 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.Closeable;
-import io.spine.server.ContextAware;
 
 /**
  * A store of all events in a Bounded Context.
  */
-public interface EventStore extends ContextAware, Closeable {
+public interface EventStore extends Closeable {
 
     /**
      * Appends the passed event to the history of events.

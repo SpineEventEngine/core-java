@@ -30,6 +30,7 @@ import com.google.common.truth.Subject;
 import io.spine.server.entity.Entity;
 import io.spine.testing.SubjectTest;
 import io.spine.testing.server.entity.given.TestEntity;
+import io.spine.testing.server.given.entity.TuProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -66,8 +67,14 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
     @Test
     @DisplayName("check that the entity exists")
     void exists() {
-        Entity<?, ?> entity = new TestEntity(42L);
+        Entity<?, ?> entity = new TestEntity(id("42"));
         assertWithSubjectThat(entity).exists();
         expectSomeFailure(whenTesting -> whenTesting.that(entity).doesNotExist());
+    }
+
+    private static TuProjectId id(String value) {
+        return TuProjectId.newBuilder()
+                          .setValue(value)
+                          .vBuild();
     }
 }

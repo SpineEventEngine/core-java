@@ -37,6 +37,7 @@ import io.spine.client.Query;
  * exposed state objects.
  */
 class NoOpQueryProcessor implements QueryProcessor {
+
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         return ImmutableList.of();

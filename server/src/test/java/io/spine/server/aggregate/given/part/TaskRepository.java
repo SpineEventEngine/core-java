@@ -27,13 +27,14 @@
 package io.spine.server.aggregate.given.part;
 
 import io.spine.server.aggregate.AggregatePartRepository;
+import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
 
 /**
  * The repository of {@link TaskPart}s.
  */
 public class TaskRepository
-        extends AggregatePartRepository<AggTaskId, TaskPart, TaskRoot> {
+        extends AggregatePartRepository<AggTaskId, TaskPart, AggTask, TaskRoot> {
 
     public TaskRepository() {
         super();

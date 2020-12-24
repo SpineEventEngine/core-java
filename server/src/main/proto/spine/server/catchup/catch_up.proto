@@ -83,6 +83,14 @@ message CatchUp {
 
     // The indexes of the shards through which the historical messages were dispatched.
     repeated int32 affected_shard = 6;
+
+    // The number of target projection instances which state has to be cleared before
+    // the historical events are started to be recalled.
+    //
+    int32 instances_to_clear = 7;
+
+    // The indexes of shards in which the dispatching of the catch-up events is finalized.
+    repeated int32 finalized_shard = 8;
 }
 
 // An ID of a catch-up process.
@@ -100,12 +108,15 @@ enum CatchUpStatus {
     // Not started.
     CUS_UNDEFINED = 0;
 
+    // The process has been started.
+    STARTED = 1;
+
     // The process has been started and is in progress.
-    IN_PROGRESS = 1;
+    IN_PROGRESS = 2;
 
     // The process is now processing the events that are close to the current time.
-    FINALIZING = 2;
+    FINALIZING = 3;
 
     // The process is completed.
-    COMPLETED = 3;
+    COMPLETED = 4;
 }

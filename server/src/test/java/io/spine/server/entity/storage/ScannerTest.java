@@ -26,26 +26,18 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableMap;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.given.IntrospectorTestEnv.InvalidEntityWithColumns;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
-import io.spine.server.projection.Projection;
 import io.spine.test.entity.TaskListView;
-import io.spine.test.entity.TaskListViewId;
-import io.spine.test.entity.TaskListViewWithColumns;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.spine.server.entity.storage.AssertColumns.assertContains;
 
+@SuppressWarnings({"rawtypes", "unchecked"}) // using `Scanner` with no generic args for simplicity
 @DisplayName("`Scanner` should")
 class ScannerTest {
 
@@ -54,26 +46,12 @@ class ScannerTest {
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
         Scanner scanner = new Scanner(entityClass);
-        ImmutableMap<ColumnName, SysColumn> systemColumns = scanner.systemColumns();
+        SystemColumns<TaskViewProjection> systemColumns = scanner.systemColumns();
 
-        assertThat(systemColumns).containsKey(ColumnName.of(archived));
-        assertThat(systemColumns).containsKey(ColumnName.of(deleted));
-        assertThat(systemColumns).containsKey(ColumnName.of(version));
+        assertThat(systemColumns)
+                .containsExactlyElementsIn(EntityRecordColumn.all());
     }
 
-    @Test
-    @DisplayName("extract columns implemented via `EntityWithColumns` descendant")
-    void extractImplementedColumns() {
-        EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-        Scanner scanner = new Scanner(entityClass);
-        ImmutableMap<ColumnName, InterfaceBasedColumn> columns =
-                scanner.interfaceBasedColumns();
-
-        assertThat(columns).containsKey(ColumnName.of("name"));
-        assertThat(columns).containsKey(ColumnName.of("estimate_in_days"));
-        assertThat(columns).containsKey(ColumnName.of("status"));
-        assertThat(columns).containsKey(ColumnName.of("due_date"));
-    }
 
     @Test
     @DisplayName("extract simple Protobuf field based columns")
@@ -82,54 +60,8 @@ class ScannerTest {
                 asEntityClass(TaskListViewProjection.class);
         Scanner scanner = new Scanner(entityClass);
 
-        ImmutableMap<ColumnName, SimpleColumn> columns = scanner.simpleColumns();
+        StateColumns<TaskListView> columns = scanner.stateColumns();
 
-        assertThat(columns).containsKey(ColumnName.of("description"));
-    }
-
-    @Test
-    @DisplayName("extract columns from the non-`public` entity class")
-    void extractFromNonPublic() {
-        EntityClass<PrivateProjection> entityClass = asEntityClass(PrivateProjection.class);
-        Scanner scanner = new Scanner(entityClass);
-
-        ImmutableMap<ColumnName, InterfaceBasedColumn> columns =
-                scanner.interfaceBasedColumns();
-
-        ColumnName description = ColumnName.of("description");
-        InterfaceBasedColumn column = columns.get(description);
-
-        Entity<TaskListViewId, TaskListView> projection = new PrivateProjection();
-
-        assertThat(column.valueIn(projection)).isEqualTo(PrivateProjection.DESCRIPTION);
-    }
-
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Called to throw exception.
-    @Test
-    @DisplayName("throw `ISE` if getter with the expected name is not found in the entity class")
-    void throwOnGetterNotFound() {
-        EntityClass<InvalidEntityWithColumns> entityClass =
-                asEntityClass(InvalidEntityWithColumns.class);
-        Scanner scanner = new Scanner(entityClass);
-
-        assertThrows(IllegalStateException.class, scanner::interfaceBasedColumns);
-    }
-
-    /**
-     * A projection with a non-{@code public} access.
-     *
-     * <p>Due to the access restrictions, can't be moved to the test env.
-     */
-    private static class PrivateProjection
-            extends Projection<TaskListViewId, TaskListView, TaskListView.Builder>
-            implements TaskListViewWithColumns {
-
-        private static final String DESCRIPTION = "some-description";
-
-        @Override
-        public String getDescription() {
-            return DESCRIPTION;
-        }
+        assertContains(columns, "description");
     }
 }

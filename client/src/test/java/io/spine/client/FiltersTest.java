@@ -31,8 +31,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EntityColumn;
-import io.spine.base.EntityStateField;
 import io.spine.base.EventMessageField;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
@@ -41,6 +39,9 @@ import io.spine.core.EventContext;
 import io.spine.core.EventContextField;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.query.ColumnName;
+import io.spine.query.EntityColumn;
+import io.spine.query.EntityStateField;
 import io.spine.test.client.ClProjectCreated;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityOwner;
@@ -101,7 +102,9 @@ class FiltersTest {
                 .setDefault(EntityStateField.class, TestEntity.Field.owner())
                 .setDefault(EventMessageField.class, ClProjectCreated.Field.name())
                 .setDefault(EventContextField.class, EventContext.Field.pastMessage())
-                .testAllPublicStaticMethods(Filters.class);
+                .setDefault(ColumnName.class, ColumnName.of("filters_test"))
+                .setDefault(Field.class, Field.named("filters_test"))
+                .testStaticMethods(Filters.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Nested
@@ -167,7 +170,7 @@ class FiltersTest {
         @Test
         @DisplayName("column")
         void column() {
-            EntityColumn column = TestEntity.Column.firstField();
+            EntityColumn<TestEntity, String> column = TestEntity.Column.firstField();
             String value = "expected-filter-value";
             String expectedPath = column.name()
                                         .value();

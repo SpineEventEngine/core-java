@@ -57,12 +57,6 @@ public class IdempotencyGuardTestEnv {
     private IdempotencyGuardTestEnv() {
     }
 
-    public static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
-    }
-
     public static TenantId newTenantId() {
         return TenantId.newBuilder()
                        .setValue(newUuid())

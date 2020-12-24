@@ -57,4 +57,6 @@ message Customer {
 
     // The list of customer's nicknames.
     repeated people.PersonName nickname = 3;
+
+    string first_name = 4 [(column) = true];
 }

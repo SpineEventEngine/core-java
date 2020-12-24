@@ -79,9 +79,9 @@ public class AggregateRoot<I> {
      *         if a repository was not found, or the ID type of the part state does not match
      *         the ID type of this {@code AggregateRoot}
      */
-    protected <S extends EntityState, A extends AggregatePart<I, S, ?, ?>>
+    protected <S extends EntityState<I>, A extends AggregatePart<I, S, ?, ?>>
     S partState(Class<S> partStateClass) {
-        AggregatePartRepository<I, A, ?> repo = repositoryOf(partStateClass);
+        AggregatePartRepository<I, A, S, ?> repo = repositoryOf(partStateClass);
         AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(id());
         S partState = aggregatePart.state();
         return partState;
@@ -95,18 +95,19 @@ public class AggregateRoot<I> {
      *         of this {@code AggregateRoot}
      */
     @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
-    private <S extends EntityState, A extends AggregatePart<I, S, ?, ?>>
-    AggregatePartRepository<I, A, ?> repositoryOf(Class<S> stateClass) {
+    private <S extends EntityState<I>, A extends AggregatePart<I, S, ?, ?>>
+    AggregatePartRepository<I, A, S, ?> repositoryOf(Class<S> stateClass) {
         Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
-        Optional<? extends AggregatePartRepository<?, ?, ?>> partRepository =
+        Optional<? extends AggregatePartRepository<?, ?, ?, ?>> partRepository =
                 context.internalAccess()
                        .aggregateRootDirectory()
                        .findPart(thisType, stateClass);
-        AggregatePartRepository<?, ?, ?> repository = partRepository.orElseThrow(
-                () -> newIllegalStateException("Could not find a repository for aggregate part %s",
+        AggregatePartRepository<?, ?, ?, ?> repository = partRepository.orElseThrow(
+                () -> newIllegalStateException("Could not find repository for aggregate part `%s`.",
                                                stateClass.getName())
         );
-        AggregatePartRepository<I, A, ?> result = (AggregatePartRepository<I, A, ?>) repository;
+        AggregatePartRepository<I, A, S, ?> result =
+                (AggregatePartRepository<I, A, S, ?>) repository;
         return result;
     }
 }

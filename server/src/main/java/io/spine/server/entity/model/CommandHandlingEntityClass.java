@@ -40,7 +40,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 /**
  * Abstract base for entity classes that handle commands.
  */
-public abstract class CommandHandlingEntityClass<E extends Entity>
+public abstract class CommandHandlingEntityClass<E extends Entity<?, ?>>
         extends EntityClass<E>
         implements CommandHandlingClass {
 

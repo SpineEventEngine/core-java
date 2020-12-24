@@ -48,7 +48,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.AggProjectCreatedReactor;
 import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.stand.InvalidSubscriptionException;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggOwnerNotified;
@@ -68,7 +68,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.Given.CommandMessage.createProject;
@@ -76,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("SubscriptionService should")
+@DisplayName("`SubscriptionService` should")
 class SubscriptionServiceTest {
 
     private final TestActorRequestFactory requestFactory =
@@ -206,7 +205,7 @@ class SubscriptionServiceTest {
     }
 
     private Topic newTopic() {
-        return topic().forTarget(Targets.allOf(Project.class));
+        return topic().forTarget(Targets.allOf(AggProject.class));
     }
 
     /**
@@ -236,7 +235,7 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("entity updates")
         void entityTopic() {
-            checkSubscribesTo(Project.class);
+            checkSubscribesTo(AggProject.class);
         }
 
         @Test
@@ -252,10 +251,7 @@ class SubscriptionServiceTest {
             Subscription subscription = checkSubscribesTo(AggOwnerNotified.class);
             MemoizingObserver<SubscriptionUpdate> observer = StreamObservers.memoizingObserver();
             subscriptionService.activate(subscription, observer);
-            ProjectId projectId = ProjectId
-                    .newBuilder()
-                    .setId(newUuid())
-                    .build();
+            ProjectId projectId = ProjectId.generate();
             Command command = new TestActorRequestFactory(SubscriptionServiceTest.class)
                     .createCommand(createProject(projectId));
             context.commandBus()
@@ -309,8 +305,8 @@ class SubscriptionServiceTest {
         // `activationObserver::onCompleted` to be called.
         verifyState(activationObserver, false);
 
-        EntityState actual = memoizedEntity(activationObserver, Project.class);
-        EntityState expected = toExpected(entityId);
+        EntityState<?> actual = memoizedEntity(activationObserver, AggProject.class);
+        EntityState<?> expected = toExpected(entityId);
         ProtoTruth.assertThat(actual)
                   .comparingExpectedFieldsOnly()
                   .isEqualTo(expected);
@@ -320,7 +316,7 @@ class SubscriptionServiceTest {
     private ProjectId updateEntity() {
         ProjectId projectId = ProjectId
                 .newBuilder()
-                .setId("some-id")
+                .setUuid("some-id")
                 .build();
         AggCreateProject cmd = createProject(projectId);
         Command command = requestFactory.createCommand(cmd);
@@ -329,13 +325,13 @@ class SubscriptionServiceTest {
         return projectId;
     }
 
-    private static EntityState toExpected(ProjectId entityId) {
-        return Project.newBuilder()
-               .setId(entityId)
-               .build();
+    private static EntityState<?> toExpected(ProjectId entityId) {
+        return AggProject.newBuilder()
+                         .setId(entityId)
+                         .build();
     }
 
-    private static <T extends EntityState>
+    private static <T extends EntityState<?>>
     T memoizedEntity(MemoizingObserver<SubscriptionUpdate> observer, Class<T> stateType) {
         SubscriptionUpdate update = observer.firstResponse();
         EntityUpdates entityUpdates = update.getEntityUpdates();
@@ -472,7 +468,8 @@ class SubscriptionServiceTest {
             assertThat(faultyObserver.firstResponse()).isNotNull();
             assertThat(faultyObserver.isCompleted()).isFalse();
             assertThat(faultyObserver.getError()).isInstanceOf(RuntimeException.class);
-            assertThat(faultyObserver.getError().getMessage()).isEqualTo(rejectionMessage);
+            assertThat(faultyObserver.getError()
+                                     .getMessage()).isEqualTo(rejectionMessage);
         }
     }
 }

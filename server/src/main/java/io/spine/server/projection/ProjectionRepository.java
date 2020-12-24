@@ -49,14 +49,13 @@ import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.time.TimestampTemporal;
@@ -113,7 +112,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S>
  *         the type of projection state messages
  */
-public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState>
+public abstract class ProjectionRepository<I,
+                                           P extends Projection<I, S, ?>,
+                                           S extends EntityState<I>>
         extends EventDispatchingRepository<I, P, S> {
 
     private @MonotonicNonNull Inbox<I> inbox;
@@ -242,10 +243,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     private void validate(StateUpdateRouting<I> routing) throws IllegalStateException {
         ProjectionClass<P> cls = projectionClass();
-        Set<StateClass> stateClasses = union(cls.domesticStates(), cls.externalStates());
-        ImmutableList<StateClass> unsupported =
+        Set<StateClass<?>> stateClasses = union(cls.domesticStates(), cls.externalStates());
+        ImmutableList<StateClass<?>> unsupported =
                 stateClasses.stream()
-                            .filter(c -> !routing.supports(c.value()))
+                            .filter(c -> !routing.supports(c.typedValue()))
                             .collect(toImmutableList());
         if (!unsupported.isEmpty()) {
             boolean moreThanOne = unsupported.size() > 1;
@@ -313,26 +314,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     /**
-     * Ensures that the repository has the storage.
+     * {@inheritDoc}
      *
-     * @return storage instance
-     * @throws IllegalStateException
-     *         if the storage is null
+     * <p>Overrides the parent method to expose it to this package.
      */
     @Override
-    protected final RecordStorage<I> recordStorage() {
-        @SuppressWarnings("unchecked") // ensured by the type returned by `createdStorage()`.
-        RecordStorage<I> recordStorage = ((ProjectionStorage<I>) storage()).recordStorage();
-        return checkStorage(recordStorage);
-    }
-
-    @Override
-    protected final ProjectionStorage<I> createStorage() {
-        StorageFactory sf = defaultStorageFactory();
-        Class<P> projectionClass = entityClass();
-        ProjectionStorage<I> projectionStorage =
-                sf.createProjectionStorage(context().spec(), projectionClass);
-        return projectionStorage;
+    protected final EntityRecordStorage<I, S> recordStorage() {
+        return super.recordStorage();
     }
 
     /**

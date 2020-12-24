@@ -42,7 +42,8 @@ public class VisibilityGuardTestEnv {
             extends Aggregate<Long, FullAccessAggregate, FullAccessAggregate.Builder> {
     }
 
-    public static class ExposedRepository extends AggregateRepository<Long, Exposed> {
+    public static class ExposedRepository
+            extends AggregateRepository<Long, Exposed, FullAccessAggregate> {
         public ExposedRepository() {
             super();
         }
@@ -52,7 +53,8 @@ public class VisibilityGuardTestEnv {
             extends Aggregate<Long, SubscribableAggregate, SubscribableAggregate.Builder> {
     }
 
-    public static class SubscribableRepository extends AggregateRepository<Long, Subscribable> {
+    public static class SubscribableRepository
+            extends AggregateRepository<Long, Subscribable, SubscribableAggregate> {
         public SubscribableRepository() {
             super();
         }
@@ -61,7 +63,8 @@ public class VisibilityGuardTestEnv {
     static class Hidden extends Aggregate<String, HiddenAggregate, HiddenAggregate.Builder> {
     }
 
-    public static class HiddenRepository extends AggregateRepository<String, Hidden> {
+    public static class HiddenRepository
+            extends AggregateRepository<String, Hidden, HiddenAggregate> {
         public HiddenRepository() {
             super();
         }

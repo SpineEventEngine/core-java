@@ -65,7 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public abstract class TransactionTest<I,
         E extends TransactionalEntity<I, S, B>,
-        S extends EntityState,
+        S extends EntityState<I>,
         B extends ValidatingBuilder<S>> {
 
     /**
@@ -126,7 +126,7 @@ public abstract class TransactionTest<I,
                 .build();
     }
 
-    protected abstract DispatchOutcome applyEvent(Transaction tx, Event event);
+    protected abstract DispatchOutcome applyEvent(Transaction<I, E, S, B> tx, Event event);
 
     @BeforeEach
     void setUp() {

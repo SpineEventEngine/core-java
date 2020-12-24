@@ -26,12 +26,12 @@
 
 package io.spine.server.entity.given.entity;
 
-import com.google.protobuf.Message;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
 
-public class TestEntityWithIdMessage extends AbstractEntity<Message, Project> {
-    public TestEntityWithIdMessage(Message id) {
+public class TestEntityWithIdMessage extends AbstractEntity<ProjectId, Project> {
+    public TestEntityWithIdMessage(ProjectId id) {
         super(id);
     }
 }

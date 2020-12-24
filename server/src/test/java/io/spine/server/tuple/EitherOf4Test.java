@@ -47,6 +47,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
         /* Short vars are OK for tuple tests. */
@@ -98,6 +99,30 @@ class EitherOf4Test {
         assertEquals(b, eitherWithB.getB());
         assertEquals(c, eitherWithC.getC());
         assertEquals(d, eitherWithD.getD());
+    }
+
+    @Test
+    @DisplayName("tell if the values are set")
+    void reportHasValues() {
+        assertTrue(eitherWithA.hasA());
+        assertFalse(eitherWithA.hasB());
+        assertFalse(eitherWithA.hasC());
+        assertFalse(eitherWithA.hasD());
+
+        assertTrue(eitherWithB.hasB());
+        assertFalse(eitherWithB.hasA());
+        assertFalse(eitherWithB.hasC());
+        assertFalse(eitherWithB.hasD());
+
+        assertTrue(eitherWithC.hasC());
+        assertFalse(eitherWithC.hasA());
+        assertFalse(eitherWithC.hasB());
+        assertFalse(eitherWithC.hasD());
+
+        assertTrue(eitherWithD.hasD());
+        assertFalse(eitherWithD.hasA());
+        assertFalse(eitherWithD.hasB());
+        assertFalse(eitherWithD.hasC());
     }
 
     @Test

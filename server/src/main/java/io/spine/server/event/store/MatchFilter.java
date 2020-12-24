@@ -149,8 +149,8 @@ final class MatchFilter implements Predicate<Event> {
         Field field = fieldFrom(filter);
         Optional<Object> value = field.findValue(object);
         if (!value.isPresent()) {
-            /* If there is no value in the field return `true`
-               if the list of required values is also empty. */
+            /* If there is no value in the field, return `true`
+               when the list of required values is also empty. */
             boolean nothingIsExpected = filter.getValueList().isEmpty();
             return nothingIsExpected;
         }

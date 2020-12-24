@@ -30,16 +30,19 @@ import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
-import io.spine.client.OrderBy;
-import io.spine.client.ResponseFormat;
-import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.Signal;
 import io.spine.core.TenantId;
-import io.spine.server.BoundedContext;
-import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.logging.Logging;
+import io.spine.query.RecordQuery;
+import io.spine.server.ContextSpec;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordWithColumns;
+import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 
@@ -58,9 +61,8 @@ import static java.util.stream.Collectors.toSet;
 /**
  * Default implementation of {@link EventStore}.
  */
-public final class DefaultEventStore
-        extends DefaultRecordBasedRepository<EventId, EEntity, Event>
-        implements EventStore {
+public final class DefaultEventStore extends MessageStorage<EventId, Event>
+        implements EventStore, Logging {
 
     private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
@@ -72,27 +74,26 @@ public final class DefaultEventStore
     /**
      * Constructs new instance.
      */
-    public DefaultEventStore() {
-        super();
+    public DefaultEventStore(ContextSpec context, StorageFactory factory) {
+        super(context, factory.createRecordStorage(context, spec()));
         this.log = new Log();
     }
 
-    /**
-     * Initializes the instance by registering itself with the passed {@code BoundedContext}.
-     *
-     * @implNote Normally repositories are explicitly registered with a context during its creation.
-     * This method performs the registration with the context, so that normal repository flow
-     * is ensured. It avoids calling the {@code super.init()} since it assumes that the context
-     * is already assigned.
-     */
-    @Override
-    @SuppressWarnings({"OverridingMethodsMustInvokeSuper", "MissingSuperCall"}) // see impl. note
-    public void registerWith(BoundedContext context) {
-        if (!isRegistered()) { // Quit recursion.
-            super.registerWith(context);
-            context.internalAccess()
-                   .register(this);
-        }
+    private static MessageRecordSpec<EventId, Event> spec() {
+        MessageRecordSpec<EventId, Event> spec =
+                new MessageRecordSpec<>(EventId.class,
+                                        Event.class,
+                                        Signal::id,
+                                        EventColumn.definitions());
+        return spec;
+    }
+
+    private static void ensureSameTenant(ImmutableList<Event> events) {
+        checkNotNull(events);
+        Set<TenantId> tenants = events.stream()
+                                      .map(Event::tenant)
+                                      .collect(toSet());
+        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }
 
     @Override
@@ -133,14 +134,6 @@ public final class DefaultEventStore
         log.stored(events);
     }
 
-    private static void ensureSameTenant(ImmutableList<Event> events) {
-        checkNotNull(events);
-        Set<TenantId> tenants = events.stream()
-                                      .map(Event::tenant)
-                                      .collect(toSet());
-        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
-    }
-
     @Override
     public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
         checkNotNull(request);
@@ -164,62 +157,37 @@ public final class DefaultEventStore
      */
     private Iterator<Event> iterator(EventStreamQuery query) {
         checkNotNull(query);
-        Iterator<EEntity> iterator = find(query);
-        ImmutableList<EEntity> entities = ImmutableList.copyOf(iterator);
+        Iterator<Event> iterator = find(query);
+        ImmutableList<Event> entities = ImmutableList.copyOf(iterator);
         Predicate<Event> predicate = new MatchesStreamQuery(query);
         Iterator<Event> result = entities
                 .stream()
-                .map(EEntity::state)
                 .filter(predicate)
                 .sorted(chronological())
                 .iterator();
         return result;
     }
 
-    @Override
-    protected boolean isTypeSupplier() {
-        return false;
-    }
-
     /**
      * Obtains iteration over entities matching the passed query.
      */
-    private Iterator<EEntity> find(EventStreamQuery query) {
-        ResponseFormat format = formatFrom(query);
-        if (query.includeAll()) {
-            return loadAll(format);
-        } else {
-            TargetFilters filters = QueryToFilters.convert(query);
-            return find(filters, format);
-        }
-    }
-
-    private static ResponseFormat formatFrom(EventStreamQuery query) {
-        ResponseFormat.Builder formatBuilder = ResponseFormat.newBuilder();
-        OrderBy ascendingByCreated = OrderBy
-                .newBuilder()
-                .setColumn(EEntity.CREATED_COLUMN)
-                .setDirection(OrderBy.Direction.ASCENDING)
-                .vBuild();
-        if (query.hasLimit()) {
-            formatBuilder.setOrderBy(ascendingByCreated)
-                         .setLimit(query.getLimit()
-                                        .getValue());
-        }
-        return formatBuilder.build();
+    private Iterator<Event> find(EventStreamQuery query) {
+        RecordQuery<EventId, Event> converted = Queries.convert(query);
+        return readAll(converted);
     }
 
     private void store(Event event) {
-        EEntity entity = EEntity.create(event);
-        store(entity);
+        Event toStore = event.clearEnrichments();
+        write(toStore.getId(), toStore);
     }
 
     private void store(Iterable<Event> events) {
-        ImmutableList<EEntity> entities =
+        ImmutableList<RecordWithColumns<EventId, Event>> records =
                 Streams.stream(events)
-                       .map(EEntity::create)
+                       .map(Event::clearEnrichments)
+                       .map((e) -> RecordWithColumns.create(e.getId(), e, recordSpec()))
                        .collect(toImmutableList());
-        store(entities);
+        writeAll(records);
     }
 
     /**

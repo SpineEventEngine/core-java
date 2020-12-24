@@ -39,13 +39,6 @@ interface SystemFeatures {
     boolean includeCommandLog();
 
     /**
-     * Obtains the {@code Aggregate} mirrors setting.
-     *
-     * @return {@code true} if the Aggregate mirrors should be stored, {@code false} otherwise
-     */
-    boolean includeAggregateMirroring();
-
-    /**
      * Obtains the system events persistence setting.
      *
      * @return {@code true} if system events should be stored, {@code false} otherwise

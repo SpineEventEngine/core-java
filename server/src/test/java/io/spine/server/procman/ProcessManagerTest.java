@@ -44,12 +44,12 @@ import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.test.shared.AnyProcess;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.test.procman.ElephantProcess;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
@@ -78,7 +78,7 @@ import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,7 +138,7 @@ class ProcessManagerTest {
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
                               .withVersion(VERSION)
-                              .withState(AnyProcess.getDefaultInstance())
+                              .withState(ElephantProcess.getDefaultInstance())
                               .build();
     }
 
@@ -318,11 +318,11 @@ class ProcessManagerTest {
     @DisplayName("rollback state on")
     class RollbackOn {
 
-        private BlackBoxContext context;
+        private BlackBox context;
 
         @BeforeEach
         void setupContext() {
-            context = BlackBoxContext.from(
+            context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TestProcessManagerRepo())
             ).tolerateFailures();
@@ -360,11 +360,11 @@ class ProcessManagerTest {
     @DisplayName("create command(s)")
     class CommandCreation {
 
-        private BlackBoxContext context;
+        private BlackBox context;
 
         @BeforeEach
         void setupContext() {
-            context = BlackBoxContext.from(
+            context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new TestProcessManagerRepo())
             );
@@ -518,7 +518,7 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            BlackBoxContext context = BlackBoxContext.from(
+            BlackBox context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new QuizProcmanRepository())
             );

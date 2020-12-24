@@ -33,6 +33,7 @@ import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -49,9 +50,10 @@ import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.React;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
+import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -64,14 +66,15 @@ import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
-import io.spine.test.storage.Task;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
 import io.spine.time.Now;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.spine.base.Identifier.newUuid;
@@ -190,10 +193,7 @@ public class Given {
         }
 
         private static ProjectId newProjectId() {
-            String uuid = newUuid();
-            return ProjectId.newBuilder()
-                            .setId(uuid)
-                            .build();
+            return ProjectId.generate();
         }
     }
 
@@ -220,7 +220,7 @@ public class Given {
     }
 
     static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
+            extends AggregateRepository<ProjectId, ProjectAggregate, AggProject> {
 
         ProjectAggregateRepository() {
             super();
@@ -228,7 +228,7 @@ public class Given {
     }
 
     private static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, Project.Builder> {
+            extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 
         // an aggregate constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
@@ -281,10 +281,35 @@ public class Given {
     }
 
     public static class CustomerAggregateRepository
-            extends AggregateRepository<CustomerId, CustomerAggregate> {
+            extends AggregateRepository<CustomerId, CustomerAggregate, Customer> {
+
+        private @Nullable TargetFilters memoizedFilters;
+        private @Nullable ResponseFormat memoizedFormat;
 
         public CustomerAggregateRepository() {
             super();
+        }
+
+        @Override
+        public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
+            this.memoizedFilters = filters;
+            this.memoizedFormat = format;
+            return super.findRecords(filters, format);
+        }
+
+        @Internal
+        @Override
+        public Iterator<EntityRecord> findRecords(ResponseFormat format) {
+            this.memoizedFormat = format;
+            return super.findRecords(format);
+        }
+
+        public Optional<TargetFilters> memoizedFilters() {
+            return Optional.ofNullable(memoizedFilters);
+        }
+
+        public Optional<ResponseFormat> memoizedFormat() {
+            return Optional.ofNullable(memoizedFormat);
         }
     }
 
@@ -314,31 +339,31 @@ public class Given {
     static final String PROJECTS_CONTEXT_NAME = "Projects";
 
     static class ProjectDetailsRepository
-            extends ProjectionRepository<io.spine.test.commandservice.ProjectId,
+            extends ProjectionRepository<io.spine.test.projection.ProjectId,
                                          ProjectDetails,
                                          io.spine.test.projection.Project> {
     }
 
     /**
      * A {@link ProjectDetailsRepository} which throws on attempt to
-     * {@link #loadAllRecords(ResponseFormat) load all records}.
+     * {@link #findRecords(ResponseFormat) load all records}.
      */
     static final class ThrowingProjectDetailsRepository
             extends ProjectDetailsRepository {
 
         @Internal
         @Override
-        public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
+        public Iterator<EntityRecord> findRecords(ResponseFormat format) {
             throw new IllegalStateException("Ignore this error.");
         }
     }
 
     static class ProjectDetails
-            extends Projection<io.spine.test.commandservice.ProjectId,
+            extends Projection<io.spine.test.projection.ProjectId,
                                io.spine.test.projection.Project,
                                io.spine.test.projection.Project.Builder> {
 
-        private ProjectDetails(io.spine.test.commandservice.ProjectId id) {
+        private ProjectDetails(io.spine.test.projection.ProjectId id) {
             super(id);
         }
 

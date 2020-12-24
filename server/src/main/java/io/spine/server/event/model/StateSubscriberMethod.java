@@ -36,6 +36,7 @@ import io.spine.base.Tests;
 import io.spine.core.BoundedContext;
 import io.spine.core.BoundedContextName;
 import io.spine.logging.Logging;
+import io.spine.server.entity.model.StateClass;
 import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.DispatchKey;
 import io.spine.server.model.Model;
@@ -58,7 +59,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     private static final FieldPath ENTITY_TYPE_URL = Field.parse("entity.type_url").path();
 
     private final BoundedContextName contextOfSubscriber;
-    private final Class<? extends EntityState> stateType;
+    private final Class<? extends EntityState<?>> stateType;
 
     StateSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(checkNotFiltered(method), parameterSpec);
@@ -90,8 +91,15 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     /**
      * Obtains the type of the entity state to which the method is subscribed.
      */
-    public Class<? extends EntityState> stateType() {
+    public Class<? extends EntityState<?>> stateType() {
         return stateType;
+    }
+
+    /**
+     * Returns the value of {@link #stateType() stateType()} as a {@link StateClass}.
+     */
+    public StateClass<?> stateClass() {
+        return StateClass.of(stateType());
     }
 
     @Override

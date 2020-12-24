@@ -46,7 +46,7 @@ import static com.google.common.collect.Sets.union;
  *
  * @param <A> the type of aggregates
  */
-public class AggregateClass<A extends Aggregate>
+public class AggregateClass<A extends Aggregate<?, ?, ?>>
         extends CommandHandlingEntityClass<A>
         implements ReactingClass {
 
@@ -67,7 +67,7 @@ public class AggregateClass<A extends Aggregate>
     /**
      * Obtains an aggregate class for the passed raw class.
      */
-    public static <A extends Aggregate> AggregateClass<A> asAggregateClass(Class<A> cls) {
+    public static <A extends Aggregate<?, ?, ?>> AggregateClass<A> asAggregateClass(Class<A> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
         AggregateClass<A> result = (AggregateClass<A>)

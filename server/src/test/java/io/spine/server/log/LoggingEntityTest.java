@@ -36,7 +36,7 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -122,8 +122,8 @@ class LoggingEntityTest extends LoggingTest {
                     .isInstanceOf(UnknownBook.class);
     }
 
-    private static BlackBoxContext context() {
-        return BlackBoxContext.from(
+    private static BlackBox context() {
+        return BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(CardAggregate.class)
         );

@@ -49,13 +49,12 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
-import io.spine.server.entity.RecordBasedRepository;
+import io.spine.server.entity.QueryableRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -64,7 +63,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.grpc.StreamObservers.ack;
 
 /**
@@ -119,21 +117,17 @@ public class Stand implements AutoCloseable {
     private final QueryValidator queryValidator;
     private final SubscriptionValidator subscriptionValidator;
 
-    private final AggregateQueryProcessor aggregateQueryProcessor;
     private final EventTap eventTap;
 
     private Stand(Builder builder) {
         super();
-        this.multitenant = builder.multitenant != null
-                           ? builder.multitenant
-                           : false;
+        this.multitenant = builder.isMultitenant();
         this.subscriptionRegistry = builder.subscriptionRegistry();
         this.typeRegistry = builder.typeRegistry();
         this.eventRegistry = builder.eventRegistry();
         this.topicValidator = builder.topicValidator();
         this.queryValidator = builder.queryValidator();
         this.subscriptionValidator = builder.subscriptionValidator();
-        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.systemReadSide());
         this.eventTap = new EventTap(subscriptionRegistry);
     }
 
@@ -399,20 +393,12 @@ public class Stand implements AutoCloseable {
      * @return suitable implementation of {@code QueryProcessor}
      */
     private QueryProcessor processorFor(TypeUrl type) {
-        Optional<? extends RecordBasedRepository<?, ?, ?>> foundRepository =
-                typeRegistry.recordRepositoryOf(type);
-        if (foundRepository.isPresent()) {
-            RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
-            return new EntityQueryProcessor(repository);
-        } else if (exposedAggregateTypes().contains(type)) {
-            return aggregateProcessor();
-        } else {
-            return NO_OP_PROCESSOR;
+        Optional<QueryableRepository> maybeRepo = typeRegistry.recordRepositoryOf(type);
+        if (maybeRepo.isPresent()) {
+            QueryableRepository recordRepo = maybeRepo.get();
+            return new EntityQueryProcessor(recordRepo);
         }
-    }
-
-    private QueryProcessor aggregateProcessor() {
-        return aggregateQueryProcessor;
+        return NO_OP_PROCESSOR;
     }
 
     public static class Builder {
@@ -422,7 +408,7 @@ public class Stand implements AutoCloseable {
          *
          * <p>The value of this field should be equal to that of corresponding
          * {@linkplain io.spine.server.BoundedContextBuilder BoundedContextBuilder} and is not
-         * supposed to be {@linkplain #setMultitenant(Boolean) set directly}.
+         * supposed to be {@linkplain #setMultitenant(boolean) set directly}.
          *
          * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating
          * {@code BoundedContext}.
@@ -436,19 +422,11 @@ public class Stand implements AutoCloseable {
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
-        private SystemReadSide systemReadSide;
 
         @CanIgnoreReturnValue
         @Internal
-        public Builder setMultitenant(@Nullable Boolean multitenant) {
+        public Builder setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
-            return this;
-        }
-
-        @CanIgnoreReturnValue
-        @Internal
-        public Builder setSystemReadSide(SystemReadSide readSide) {
-            this.systemReadSide = checkNotNull(readSide);
             return this;
         }
 
@@ -460,9 +438,8 @@ public class Stand implements AutoCloseable {
             return this;
         }
 
-        @Internal
-        public @Nullable Boolean isMultitenant() {
-            return multitenant;
+        private boolean isMultitenant() {
+            return this.multitenant != null && this.multitenant;
         }
 
         private SubscriptionRegistry subscriptionRegistry() {
@@ -489,10 +466,6 @@ public class Stand implements AutoCloseable {
             return eventRegistry;
         }
 
-        private SystemReadSide systemReadSide() {
-            return systemReadSide;
-        }
-
         /**
          * Builds an instance of {@code Stand}.
          *
@@ -503,12 +476,8 @@ public class Stand implements AutoCloseable {
          */
         @Internal
         public Stand build() {
-            checkState(systemReadSide != null, "SystemWriteSide is not set.");
-            boolean multitenant = this.multitenant == null
-                                  ? false
-                                  : this.multitenant;
             if (subscriptionRegistry == null) {
-                subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
+                subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(isMultitenant());
             }
             topicValidator = new TopicValidator(typeRegistry);
             queryValidator = new QueryValidator(typeRegistry);

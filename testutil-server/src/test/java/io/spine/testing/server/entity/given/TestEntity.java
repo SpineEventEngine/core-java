@@ -28,9 +28,10 @@ package io.spine.testing.server.entity.given;
 
 import io.spine.server.entity.AbstractEntity;
 import io.spine.testing.server.given.entity.TuProject;
+import io.spine.testing.server.given.entity.TuProjectId;
 
-public final class TestEntity extends AbstractEntity<Long, TuProject> {
-    public TestEntity(Long id) {
+public final class TestEntity extends AbstractEntity<TuProjectId, TuProject> {
+    public TestEntity(TuProjectId id) {
         super(id);
     }
 }

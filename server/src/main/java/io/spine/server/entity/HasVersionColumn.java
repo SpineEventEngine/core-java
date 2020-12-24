@@ -29,19 +29,19 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.Version;
+import io.spine.server.entity.storage.EntityRecordColumn;
 import io.spine.server.entity.storage.SystemColumn;
 
 /**
  * Marks an {@link Entity} that declares a {@link Version} column.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Can only use string literals in annotation.
 @Internal
-public interface HasVersionColumn<I, S extends EntityState> extends Entity<I, S> {
+public interface HasVersionColumn<I, S extends EntityState<I>> extends Entity<I, S> {
 
     /**
      * Obtains the version of the entity.
      */
-    @SystemColumn(name = "version")
+    @SystemColumn(impl = EntityRecordColumn.version)
     default Version getVersion() {
         return version();
     }

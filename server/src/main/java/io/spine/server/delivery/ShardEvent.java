@@ -43,5 +43,6 @@ public interface ShardEvent extends EventMessage {
      *
      * <p>Determines the shard through which this message is delivered.
      */
-    ShardIndex getId();
+    @SuppressWarnings("override")   // Overrides are located in the Proto-generated code.
+    ShardIndex getIndex();
 }

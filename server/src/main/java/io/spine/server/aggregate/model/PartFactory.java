@@ -41,13 +41,13 @@ import static java.lang.String.format;
 /**
  * Creates aggregate parts passing the root class to the constructor.
  */
-final class PartFactory<A extends AggregatePart> extends AbstractEntityFactory<A> {
+final class PartFactory<A extends AggregatePart<?, ?, ?, ?>> extends AbstractEntityFactory<A> {
 
     private static final long serialVersionUID = 0L;
 
-    private final Class<? extends AggregateRoot> rootClass;
+    private final Class<? extends AggregateRoot<?>> rootClass;
 
-    PartFactory(Class<A> aggregatePartClass, Class<? extends AggregateRoot> rootClass) {
+    PartFactory(Class<A> aggregatePartClass, Class<? extends AggregateRoot<?>> rootClass) {
         super(aggregatePartClass);
         this.rootClass = checkNotNull(rootClass);
     }

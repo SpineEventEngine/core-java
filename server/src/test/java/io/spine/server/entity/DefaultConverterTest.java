@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.entity.DefaultConverter.forAllFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("DefaultConverter should")
+@DisplayName("`DefaultConverter` should")
 class DefaultConverterTest {
 
     private StorageConverter<OrganizationId, TestEntity, Organization> converter;

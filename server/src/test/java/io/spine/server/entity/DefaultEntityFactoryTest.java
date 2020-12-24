@@ -32,8 +32,10 @@ import io.spine.server.entity.given.DefaultEntityFactoryTestEnv.TestEntity1;
 import io.spine.server.entity.given.DefaultEntityFactoryTestEnv.TestEntity2;
 import io.spine.server.entity.given.DefaultEntityFactoryTestEnv.TestRepository1;
 import io.spine.server.entity.given.DefaultEntityFactoryTestEnv.TestRepository2;
+import io.spine.server.given.groups.GroupId;
 import io.spine.server.given.groups.GroupName;
 import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,8 +48,8 @@ class DefaultEntityFactoryTest {
 
     @BeforeEach
     void setUp() {
-        RecordBasedRepository<String, TestEntity1, Project> r1 = new TestRepository1();
-        RecordBasedRepository<String, TestEntity2, GroupName> r2 = new TestRepository2();
+        RecordBasedRepository<ProjectId, TestEntity1, Project> r1 = new TestRepository1();
+        RecordBasedRepository<GroupId, TestEntity2, GroupName> r2 = new TestRepository2();
 
         entityFactory1 = r1.entityFactory();
         entityFactory2 = r2.entityFactory();

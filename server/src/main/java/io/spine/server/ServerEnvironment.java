@@ -57,7 +57,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * The server conditions and configuration under which the application operates.
  *
  * <h3>Configuration</h3>
- * 
+ *
  * <p>Some parts of the {@code ServerEnvironment} can be customized based on the {@code
  * EnvironmentType}. To do so, one of the overloads of the {@code use} method can be called.
  * Two environment types exist out of the box: {@link Tests} and {@link Production}.
@@ -70,8 +70,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *     ServerEnvironment.when(Tests.class)
  *                      .use(testingStorageFactory);
  * </pre>
- *
- * <p>A custom environment type may also be used:
+ * A custom environment type may also be used:
  * <pre>
  *
  *     final class StagingEnvironment extends EnvironmentType {
@@ -81,8 +80,21 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *     ServerEnvironment.when(Staging.class)
  *                      .use(inMemoryStorageFactory);
  * </pre>
- * If {@code Staging} is {@link Environment#type() enabled}, the specified value is going to be
+ *
+ * <p>If {@code Staging} is {@link Environment#type() enabled}, the specified value is going to be
  * returned on {@link #storageFactory()}.
+ *
+ * <h3>Relation to Bounded Contexts</h3>
+ *
+ * <p>A {@code ServerEnvironment} instance is a singleton. It means that all Bounded Contexts
+ * which are deployed within the same JVM share the configuration of the server environment.
+ * Namely, under the same environment type, all Bounded Contexts will share the same storage
+ * factory, transport factory, delivery and tracing tools.
+ *
+ * <p>If one decides that some of the Bounded Contexts of an application requires custom
+ * settings, they should arrange a separate deployable artifact and distinct configuration
+ * of the respective {@code ServerEnvironment} for those Bounded Contexts. In this way,
+ * the Contexts would reside in their own JVMs and not overlap on interacting with this singleton.
  */
 public final class ServerEnvironment implements AutoCloseable {
 

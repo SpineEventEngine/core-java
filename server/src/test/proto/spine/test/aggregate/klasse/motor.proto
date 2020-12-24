@@ -49,5 +49,7 @@ message Engine {
         STARTED = 2;
     }
 
-    Status status = 1 [(required) = true];
+    EngineId id = 1;
+
+    Status status = 2 [(required) = true];
 }

@@ -36,7 +36,7 @@ import io.spine.server.procman.ProcessManager;
  * A test-only implementation of a {@link PmTransaction} that can set the given
  * {@code state} and {@code version} as a starting point for the transaction.
  */
-final class TestPmTransaction<I, S extends EntityState, B extends ValidatingBuilder<S>>
+final class TestPmTransaction<I, S extends EntityState<I>, B extends ValidatingBuilder<S>>
         extends PmTransaction<I, S, B> {
 
     TestPmTransaction(ProcessManager<I, S, B> processManager) {

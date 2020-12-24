@@ -47,7 +47,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 public abstract
 class CommandHandlingEntity<I,
-                            S extends EntityState,
+                            S extends EntityState<I>,
                             B extends ValidatingBuilder<S>>
         extends TransactionalEntity<I, S, B>
         implements CommandHandler {

@@ -28,7 +28,6 @@ package io.spine.server.storage;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.server.entity.Entity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,32 +51,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * An abstract base for test suites testing storages.
+ * An abstract base for test suites testing storage implementations.
  *
- * <p>Manages creation and closing of the {@linkplain #storage() storage}
- * for the {@linkplain #getTestEntityClass() test entity class}.
+ * <p>Carries the tests of the API defined in {@link AbstractStorage}. Any custom functionality
+ * of the storage-under-test should be implemented by the descendants.
  *
- * <p>In case if the storage for different entity class should be tested,
- * it can be {@linkplain #newStorage(Class) created} manually, but closing of this storage
- * is a responsibility of a caller.
+ * <p>This abstract base handles the {@linkplain #newStorage() initialization} and
+ * {@linkplain #close(AbstractStorage) closing} of the tested storage instance.
+ * So the descendants should omit closing the tested storage instance manually, unless it is
+ * required for the particular test scenario.
  *
- * <p>All storages should be {@linkplain #close(AbstractStorage) closed} after a test
- * to avoid the issues, which may occur due to unreleased resources.
- *
- * @param <I> the type of IDs of storage records
- * @param <M> the type of records kept in the storage
- * @param <R> the type of read requests for the storage
+ * @param <I>
+ *         the type of IDs of storage records
+ * @param <M>
+ *         the type of records kept in the storage
+ * @param <S>
+ *         the type of the storage under test
  */
-public abstract class AbstractStorageTest<I,
-                                          M extends Message,
-                                          R extends ReadRequest<I>,
-                                          S extends AbstractStorage<I, M, R>> {
+public abstract class AbstractStorageTest<I, M extends Message, S extends AbstractStorage<I, M>> {
 
     private S storage;
 
     @BeforeEach
     protected void setUpAbstractStorageTest() {
-        storage = newStorage(getTestEntityClass());
+        storage = newStorage();
     }
 
     @AfterEach
@@ -86,44 +83,37 @@ public abstract class AbstractStorageTest<I,
     }
 
     /**
-     * Obtains the storage for the {@linkplain #getTestEntityClass() entity class}.
+     * Obtains an instance of the storage-under-test.
      *
-     * @return the storage, which will be closed automatically after a test
+     * @return the storage which will be closed automatically after a test
      */
     protected final S storage() {
         return storage;
     }
 
     /**
-     * Creates the storage for the specified entity class.
+     * Creates a new storage instance.
      *
      * <p>The resulting storage should be {@linkplain #close(AbstractStorage) closed} manually to
      * release resources, which may be used by the storage.
      *
-     * <p>Use {@linkplain #storage() existing storage} if the storage may be tested for
-     * the {@linkplain #getTestEntityClass() entity class}.
+     * <p>Use {@link #storage() storage()} method to access the created instance in tests.
      *
-     * @return an empty storage instance
+     * @return a newly created and empty storage
      * @see AbstractStorage#close()
      */
-    protected abstract S newStorage(Class<? extends Entity<?, ?>> cls);
+    protected abstract S newStorage();
 
     /** Creates a new storage record. */
-    protected abstract M newStorageRecord();
+    protected abstract M newStorageRecord(I id);
 
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
 
-    /** Creates a new read request with the specified ID. */
-    protected abstract R newReadRequest(I id);
-
-    /** Returns the class of the test entity. */
-    protected abstract Class<? extends Entity<?, ?>> getTestEntityClass();
-
     /**
      * Closes the storage and propagates an exception if any occurs.
      */
-    protected void close(AbstractStorage storage) {
+    protected void close(AbstractStorage<?, ?> storage) {
         if (storage.isOpen()) {
             try {
                 storage.close();
@@ -135,7 +125,7 @@ public abstract class AbstractStorageTest<I,
 
     /** Closes the storage and fails the test if any exception occurs. */
     @SuppressWarnings("CallToPrintStackTrace")
-    private void closeAndFailIfException(AbstractStorage<I, M, R> storage) {
+    private void closeAndFailIfException(AbstractStorage<I, M> storage) {
         try {
             storage.close();
         } catch (Exception e) {
@@ -148,8 +138,7 @@ public abstract class AbstractStorageTest<I,
     private void writeAndReadRecordTest(I id) {
         M expected = writeRecord(id);
 
-        R readRequest = newReadRequest(id);
-        Optional<M> actual = storage.read(readRequest);
+        Optional<M> actual = storage.read(id);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -157,7 +146,7 @@ public abstract class AbstractStorageTest<I,
 
     @CanIgnoreReturnValue
     private M writeRecord(I id) {
-        M expected = newStorageRecord();
+        M expected = newStorageRecord(id);
         storage.write(id, expected);
         return expected;
     }
@@ -165,15 +154,93 @@ public abstract class AbstractStorageTest<I,
     @Test
     @DisplayName("handle absence of record with passed ID")
     void handleAbsenceOfRecord() {
-        R readRequest = newReadRequest(newId());
-        Optional<M> record = storage.read(readRequest);
-
+        Optional<M> record = storage.read(newId());
         assertResultForMissingId(record);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // This is the purpose of the method.
     private void assertResultForMissingId(Optional<M> record) {
         assertFalse(record.isPresent());
+    }
+
+    /**
+     * Tests that the storage overwrites the existing record when storing a new record with the
+     * same ID.
+     *
+     * <p>This test should be overridden by the descendants working with storages which are able
+     * to store multiple records by the same ID.
+     */
+    @Test
+    @DisplayName("re-write record if writing by the same ID")
+    protected void rewriteRecord() {
+        I id = newId();
+        writeAndReadRecordTest(id);
+        writeAndReadRecordTest(id);
+    }
+
+    /**
+     * Index-based tests here and below aren't grouped into a {@code Nested} test class to allow
+     * overriding them in descendants.
+     */
+    @Test
+    @DisplayName("return non-null `index()`")
+    protected void nonNullIndex() {
+        Iterator<I> index = storage.index();
+        assertNotNull(index);
+    }
+
+    @Test
+    @DisplayName("return immutable `index()`")
+    protected void immutableIndex() {
+        writeRecord(newId());
+        assertIndexImmutability();
+    }
+
+    protected void assertIndexImmutability() {
+        Iterator<I> index = storage.index();
+        assertTrue(index.hasNext());
+        try {
+            index.remove();
+            fail("Storage#index is mutable");
+
+            // One of collections used in in-memory implementation throws IllegalStateException
+            // but default behavior is UnsupportedOperationException
+        } catch (UnsupportedOperationException | IllegalStateException ignored) {
+            // One of valid exceptions was thrown
+        }
+    }
+
+    @Test
+    @DisplayName("have all IDs counted by `index()`")
+    protected void indexCountingAllIds() {
+        int recordCount = 10;
+        Set<I> ids = new HashSet<>(recordCount);
+        for (int i = 0; i < recordCount; i++) {
+            I id = newId();
+            writeRecord(id);
+            ids.add(id);
+        }
+
+        Iterator<I> index = storage.index();
+        Collection<I> indexValues = newHashSet(index);
+
+        assertEquals(ids.size(), indexValues.size());
+        assertThat(indexValues).containsExactlyElementsIn(ids);
+    }
+
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
+                                                               checking via #contains(Object). */)
+    @Test
+    @DisplayName("return unique ID")
+    void returnUniqueID() {
+        int checkCount = 10;
+        Set<I> ids = newHashSet();
+        for (int i = 0; i < checkCount; i++) {
+            I newId = newId();
+            if (ids.contains(newId)) {
+                fail("AbstractStorageTest.newId() should return unique IDs.");
+            }
+        }
     }
 
     @Nested
@@ -190,7 +257,7 @@ public abstract class AbstractStorageTest<I,
         @DisplayName("writing by null ID")
         void writeByNullId() {
             assertThrows(NullPointerException.class,
-                         () -> storage.write(nullRef(), newStorageRecord()));
+                         () -> storage.write(nullRef(), newStorageRecord(newId())));
         }
 
         @Test
@@ -216,68 +283,6 @@ public abstract class AbstractStorageTest<I,
             writeAndReadRecordTest(newId());
             writeAndReadRecordTest(newId());
             writeAndReadRecordTest(newId());
-        }
-    }
-
-    /**
-     * Tests that the storage overwrites the existing record when storing a new record with the
-     * same ID.
-     *
-     * This test should be overridden by the descendants working with storages which can store
-     * multiple records by the same ID.
-     */
-    @Test
-    @DisplayName("re-write record if writing by the same ID")
-    protected void rewriteRecord() {
-        I id = newId();
-        writeAndReadRecordTest(id);
-        writeAndReadRecordTest(id);
-    }
-
-    @Nested
-    @DisplayName("have index which")
-    class HaveIndex {
-
-        @Test
-        @DisplayName("is non-null")
-        void nonNull() {
-            Iterator<I> index = storage.index();
-            assertNotNull(index);
-        }
-
-        @Test
-        @DisplayName("counts all IDs")
-        void countingAllIds() {
-            int recordCount = 10;
-            Set<I> ids = new HashSet<>(recordCount);
-            for (int i = 0; i < recordCount; i++) {
-                I id = newId();
-                writeRecord(id);
-                ids.add(id);
-            }
-
-            Iterator<I> index = storage.index();
-            Collection<I> indexValues = newHashSet(index);
-
-            assertEquals(ids.size(), indexValues.size());
-            assertThat(indexValues).containsExactlyElementsIn(ids);
-        }
-
-        @Test
-        @DisplayName("is immutable")
-        void immutable() {
-            writeRecord(newId());
-            Iterator<I> index = storage.index();
-            assertTrue(index.hasNext());
-            try {
-                index.remove();
-                fail("Storage#index is mutable");
-
-                // One of collections used in in-memory implementation throws IllegalStateException
-                // but default behavior is UnsupportedOperationException
-            } catch (UnsupportedOperationException | IllegalStateException ignored) {
-                // One of valid exceptions was thrown
-            }
         }
     }
 
@@ -341,9 +346,7 @@ public abstract class AbstractStorageTest<I,
         @DisplayName("read operation")
         void read() {
             closeAndFailIfException(storage);
-
-            R readRequest = newReadRequest(newId());
-            assertThrows(IllegalStateException.class, () -> storage.read(readRequest));
+            assertThrows(IllegalStateException.class, () -> storage.read(newId()));
         }
 
         @Test
@@ -351,8 +354,9 @@ public abstract class AbstractStorageTest<I,
         void write() {
             closeAndFailIfException(storage);
 
+            I id = newId();
             assertThrows(IllegalStateException.class,
-                         () -> storage.write(newId(), newStorageRecord()));
+                         () -> storage.write(id, newStorageRecord(id)));
         }
 
         @Test
@@ -360,21 +364,6 @@ public abstract class AbstractStorageTest<I,
         void close() {
             storage.close();
             assertThrows(IllegalStateException.class, () -> storage.close());
-        }
-    }
-
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
-                                                               checking via #contains(Object). */)
-    @Test
-    @DisplayName("return unique ID")
-    void returnUniqueID() {
-        int checkCount = 10;
-        Set<I> ids = newHashSet();
-        for (int i = 0; i < checkCount; i++) {
-            I newId = newId();
-            if (ids.contains(newId)) {
-                fail("AbstractStorageTest.newId() should return unique IDs.");
-            }
         }
     }
 }

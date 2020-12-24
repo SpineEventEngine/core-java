@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -58,10 +57,7 @@ class AggregateRootTest {
     void setUp() {
         ModelTests.dropAllModels();
         context = BoundedContextBuilder.assumingTests().build();
-        ProjectId projectId = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
+        ProjectId projectId = ProjectId.generate();
         aggregateRoot = new AggregateRootTestEnv.ProjectRoot(context, projectId);
         BoundedContext.InternalAccess contextAccess = context.internalAccess();
         contextAccess.register(new ProjectDefinitionRepository());

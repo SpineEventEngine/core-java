@@ -97,7 +97,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>This field is null if the storage was not initialized, or
      * the repository was {@linkplain #close() closed}.
      */
-    private @Nullable Storage<I, ?, ?> storage;
+    private @Nullable Storage<I, ?> storage;
 
     /**
      * Creates the repository.
@@ -284,7 +284,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Initializes the storage of the repository.
      */
     protected final void open() {
-        Storage<I, ?, ?> storage = storage();
+        Storage<I, ?> storage = storage();
         checkNotNull(storage, "Unable to initialize the storage.");
     }
 
@@ -309,7 +309,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @throws IllegalStateException if the storage is not assigned
      */
-    protected final Storage<I, ?, ?> storage() {
+    protected final Storage<I, ?> storage() {
         if (storage == null) {
             this.storage = createStorage();
         }
@@ -345,7 +345,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @return the created storage instance
      */
-    protected abstract Storage<I, ?, ?> createStorage();
+    protected abstract Storage<I, ?> createStorage();
 
     /**
      * Closes the repository by closing the underlying storage.

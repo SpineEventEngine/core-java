@@ -176,6 +176,6 @@ public class Given {
     }
 
     static String projectName(ProjectId id) {
-        return "Project_" + id.getId();
+        return "Project_" + id.getUuid();
     }
 }

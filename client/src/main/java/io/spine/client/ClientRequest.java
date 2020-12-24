@@ -26,12 +26,14 @@
 
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.core.UserId;
+import io.spine.query.EntityQuery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,9 +45,12 @@ import static io.spine.util.Preconditions2.checkNotDefaultArg;
  * <p>An instance of this class is obtained via
  * {@link Client#onBehalfOf(UserId)} or {@link Client#asGuest()} methods and then used for creating
  * a specific client request e.g. for {@linkplain ClientRequest#command(CommandMessage) posting
- * a command} or {@linkplain ClientRequest#select(Class) running a query}.
+ * a command}.
  *
- * <p>A client request is customizing using fluent API, which is provided by the derived classes.
+ * <p>A client request may be customized using fluent API provided by the deriving classes.
+ *
+ * <p>Some features such as running an {@link EntityQuery} are available
+ * {@linkplain #run(EntityQuery) directly from this class}.
  *
  * @see Client
  */
@@ -82,7 +87,7 @@ public class ClientRequest {
     /**
      * Creates a builder for customizing subscription for the passed entity state type.
      */
-    public <S extends EntityState> SubscriptionRequest<S> subscribeTo(Class<S> type) {
+    public <S extends EntityState<?>> SubscriptionRequest<S> subscribeTo(Class<S> type) {
         checkNotNull(type);
         return new SubscriptionRequest<>(this, type);
     }
@@ -96,10 +101,30 @@ public class ClientRequest {
     }
 
     /**
-     * Creates a builder for constructing a query for messages of the specified type.
+     * Runs the {@link EntityQuery} and returns the matched entity states.
+     *
+     * <p>Usage example:
+     * <pre>
+     *
+     * Customer.Query query = Customer.query()
+     *              .id().in(westCoastCustomerIds())
+     *              .type().is(CustomerType.PERMANENT)
+     *              .discountPercent().is(10)
+     *              .companySize().is(Company.Size.SMALL)
+     *              .withMask(nameAddressAndEmail)
+     *              .sortAscendingBy(name())
+     *              .limit(20)
+     *              .build();
+     *{@literal ImmutableList<Customer> customers = client.onBehalfOf(currentUser).run(query);}
+     * </pre>
+     *
+     * @param <S>
+     *         the type of the entity state for which the query is run
      */
-    public <S extends EntityState> QueryRequest<S> select(Class<S> type) {
-        return new QueryRequest<>(this, type);
+    public <S extends EntityState<?>> ImmutableList<S> run(EntityQuery<?, S, ?> query) {
+        QueryRequest<S> request = new QueryRequest<>(this, query);
+        ImmutableList<S> results = request.run();
+        return results;
     }
 
     /**
