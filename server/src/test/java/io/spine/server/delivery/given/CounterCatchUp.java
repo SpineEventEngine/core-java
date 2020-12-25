@@ -50,7 +50,7 @@ import java.util.concurrent.Callable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.delivery.TestRoutines.findView;
 import static io.spine.server.delivery.TestRoutines.post;
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 import static java.util.stream.Collectors.toList;
 
 /**

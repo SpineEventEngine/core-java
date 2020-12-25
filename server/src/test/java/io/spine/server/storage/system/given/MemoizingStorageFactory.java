@@ -36,7 +36,7 @@ import io.spine.server.storage.StorageFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 
 /**
  * A test-only {@link StorageFactory} which always returns {@code null}s instead of storages and

@@ -54,7 +54,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 import static io.spine.time.Month.FEBRUARY;
 import static io.spine.time.Month.JANUARY;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -24,7 +24,7 @@ import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.CommandEnvelope;
 
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 
 public class NoOpEndpoint implements MessageEndpoint<String, CommandEnvelope> {
 
