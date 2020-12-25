@@ -24,7 +24,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.given.organizations.Organization;
 
-import static io.spine.testing.Tests.halt;
+import static io.spine.testing.Testing.halt;
 
 /**
  * This class declares invalid subscriber because filtering of states is not allowed.

@@ -39,7 +39,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
-import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
+import static io.spine.client.Client.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.core.Responses.statusOk;
 import static io.spine.testing.TestValues.random;
 import static io.spine.testing.client.grpc.TableSide.LEFT;

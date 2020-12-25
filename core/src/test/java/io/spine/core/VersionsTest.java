@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -21,48 +27,44 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.core.given.GivenVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.Versions.checkIsIncrement;
+import static io.spine.core.Versions.increment;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Versions utility should")
-class VersionsTest {
+@DisplayName("`Versions` utility should")
+class VersionsTest extends UtilityClassTest<Versions> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Versions.class);
+    private VersionsTest() {
+        super(Versions.class);
+    }
+
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(Version.class, Version.getDefaultInstance());
     }
 
     @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(Version.class, Version.getDefaultInstance())
-                .testAllPublicStaticMethods(Versions.class);
-    }
-
-    @Test
-    @DisplayName("check Version increment")
+    @DisplayName("check `Version` increment")
     void checkVersionIncrement() {
         assertThrows(IllegalArgumentException.class,
-                     () -> Versions.checkIsIncrement(
+                     () -> checkIsIncrement(
                              GivenVersion.withNumber(2),
                              GivenVersion.withNumber(1)
                      ));
     }
 
     @Test
-    @DisplayName("increment Version")
-    void increment() {
+    @DisplayName("increment `Version`")
+    void incr() {
         Version v1 = GivenVersion.withNumber(1);
-        assertEquals(v1.getNumber() + 1, Versions.increment(v1)
-                                                 .getNumber());
+        assertThat(increment(v1).getNumber())
+                .isEqualTo(v1.getNumber() + 1);
     }
 }

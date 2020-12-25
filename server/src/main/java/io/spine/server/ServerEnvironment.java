@@ -23,6 +23,7 @@ package io.spine.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
+import io.spine.base.CustomEnvironmentType;
 import io.spine.base.Environment;
 import io.spine.base.EnvironmentType;
 import io.spine.base.Identifier;
@@ -90,7 +91,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * of the respective {@code ServerEnvironment} for those Bounded Contexts. In this way,
  * the Contexts would reside in their own JVMs and not overlap on interacting with this singleton.
  */
-@SuppressWarnings("ClassWithTooManyMethods" /* deprecated methods to be eliminated later. */)
 public final class ServerEnvironment implements AutoCloseable {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
@@ -116,7 +116,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * The strategy of delivering the messages received by entity repositories
      * to the entity instances.
      *
-     * <p>If not {@linkplain #use(Delivery, EnvironmentType)}) configured by the end-user},
+     * <p>If not {@linkplain TypeConfigurator#use(Delivery)}) configured by the end-user},
      * initialized with the {@linkplain Delivery#local() local} delivery by default.
      *
      * <p>Differs between {@linkplain EnvironmentType environment types}.
@@ -173,7 +173,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Returns the delivery mechanism specific to this environment.
      *
-     * <p>Unless {@linkplain #use(Delivery, EnvironmentType) updated manually}, returns
+     * <p>Unless {@linkplain TypeConfigurator#use(Delivery) updated manually}, returns
      * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
     public synchronized Delivery delivery() {
@@ -234,122 +234,6 @@ public final class ServerEnvironment implements AutoCloseable {
     public void configureDeployment(Supplier<DeploymentType> supplier) {
         checkNotNull(supplier);
         deploymentDetector = supplier;
-    }
-
-    /**
-     * Assigns the specified {@code TransportFactory} for the specified application environment.
-     *
-     * @return this instance of {@code ServerEnvironment}
-     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
-     *         followed by {@link TypeConfigurator#use(StorageFactory) use(StorageFactory)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public ServerEnvironment use(StorageFactory factory, EnvironmentType envType) {
-        checkNotNull(factory);
-        SystemAwareStorageFactory wrapped = wrap(factory);
-        storageFactory.registerTypeAndUse(envType, wrapped);
-        return this;
-    }
-
-    /**
-     * Assigns the specified {@code TransportFactory} for the specified application environment.
-     *
-     * @return this instance of {@code ServerEnvironment}
-     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
-     *         followed by {@link TypeConfigurator#use(StorageFactory) use(StorageFactory)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public ServerEnvironment use(StorageFactory factory, Class<? extends EnvironmentType> type) {
-        checkNotNull(factory);
-        SystemAwareStorageFactory wrapped = wrap(factory);
-        storageFactory.use(wrapped, type);
-        return this;
-    }
-
-    /**
-     * Assigns the specified {@code Delivery} for the selected environment.
-     *
-     * @return this instance of {@code ServerEnvironment}
-     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
-     *         followed by {@link TypeConfigurator#use(Delivery) use(Delivery)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public ServerEnvironment use(Delivery delivery, EnvironmentType envType) {
-        this.delivery.registerTypeAndUse(envType, delivery);
-        return this;
-    }
-
-    /**
-     * Assigns the specified {@code Delivery} for the selected environment.
-     *
-     * @return this instance of {@code ServerEnvironment}
-     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
-     *         followed by {@link TypeConfigurator#use(Delivery) use(Delivery)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public ServerEnvironment use(Delivery delivery, Class<? extends EnvironmentType> envType) {
-        this.delivery.use(delivery, envType);
-        return this;
-    }
-
-    /**
-     * Assigns {@code TracerFactory} for the specified application environment.
-     *
-     * @return this instance of {@code ServerEnvironment}
-     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
-     *         followed by {@link TypeConfigurator#use(TracerFactory) use(TracerFactory)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public ServerEnvironment use(TracerFactory factory, EnvironmentType envType) {
-        tracerFactory.registerTypeAndUse(envType, factory);
-        return this;
-    }
-
-    /**
-     * Assigns {@code TracerFactory} for the specified application environment.
-     *
-     * @return this instance of {@code ServerEnvironment}
-     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
-     *         followed by {@link TypeConfigurator#use(TracerFactory) use(TracerFactory)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public ServerEnvironment use(TracerFactory factory, Class<? extends EnvironmentType> envType) {
-        tracerFactory.use(factory, envType);
-        return this;
-    }
-
-    /**
-     * Configures the specified transport factory for the selected type of environment.
-     *
-     * @return this instance of {@code ServerEnvironment}
-     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
-     *         followed by {@link TypeConfigurator#use(TransportFactory) use(TransportFactory)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public ServerEnvironment use(TransportFactory factory, EnvironmentType envType) {
-        transportFactory.registerTypeAndUse(envType, factory);
-        return this;
-    }
-
-    /**
-     * Configures the specified transport factory for the selected type of environment.
-     *
-     * @return this instance of {@code ServerEnvironment}
-     * @deprecated please use {@link #when(Class) when(Class<? extends EnvironmentType>)}
-     *         followed by {@link TypeConfigurator#use(TransportFactory) use(TransportFactory)}
-     */
-    @Deprecated
-    @CanIgnoreReturnValue
-    public ServerEnvironment use(TransportFactory factory, Class<? extends EnvironmentType> type) {
-        transportFactory.use(factory, type);
-        return this;
     }
 
     /**
@@ -455,9 +339,21 @@ public final class ServerEnvironment implements AutoCloseable {
         private TypeConfigurator(Class<? extends EnvironmentType> type) {
             this.se = instance();
             EnvironmentType et = Invokables.callParameterlessCtor(type);
-            Environment.instance()
-                       .register(et);
+            if (et instanceof CustomEnvironmentType) {
+                Class<? extends CustomEnvironmentType> newType =
+                        ((CustomEnvironmentType) et).getClass();
+                Environment.instance()
+                           .register(newType);
+            }
             this.type = checkNotNull(type);
+        }
+
+        /**
+         * Obtains the type of the environment being currently configured.
+         */
+        @VisibleForTesting
+        public Class<? extends EnvironmentType> type() {
+            return type;
         }
 
         /**
@@ -468,7 +364,7 @@ public final class ServerEnvironment implements AutoCloseable {
         @CanIgnoreReturnValue
         public TypeConfigurator use(Delivery delivery) {
             checkNotNull(delivery);
-            se.use(delivery, type);
+            se.delivery.use(delivery, type);
             return this;
         }
 

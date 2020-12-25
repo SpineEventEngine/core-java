@@ -29,31 +29,25 @@ import io.spine.server.event.UnsupportedEventException;
 import io.spine.server.transport.Statuses;
 import io.spine.test.event.ProjectCreated;
 import io.spine.testdata.Sample;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Statuses utility should")
-class StatusesTest {
+@DisplayName("`Statuses` utility should")
+class StatusesTest extends UtilityClassTest<Statuses> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Statuses.class);
+    StatusesTest() {
+        super(Statuses.class);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(Exception.class, new RuntimeException("Statuses test"))
-                .setDefault(Error.class, Error.getDefaultInstance())
-                .testAllPublicStaticMethods(Statuses.class);
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(Exception.class, new RuntimeException("Statuses test"))
+              .setDefault(Error.class, Error.getDefaultInstance());
     }
 
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")

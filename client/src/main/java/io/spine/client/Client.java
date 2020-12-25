@@ -77,6 +77,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class Client implements AutoCloseable {
 
+    /** The default port number for a gRCP connection. */
+    public static final int DEFAULT_CLIENT_SERVICE_PORT = 50051;
+
     /** The default amount of time to wait when {@linkplain #close() closing} the client. */
     public static final Timeout DEFAULT_SHUTDOWN_TIMEOUT = Timeout.of(5, SECONDS);
 
@@ -104,14 +107,10 @@ public class Client implements AutoCloseable {
     /** Active subscriptions maintained by the client. */
     private final Subscriptions subscriptions;
 
-    /**
-     * The handler for errors that may occur during asynchronous requests initiated by this client.
-     */
+    /** The handler for errors that may occur during async. requests initiated by this client. */
     private final @Nullable ErrorHandler streamingErrorHandler;
 
-    /**
-     * The handler for errors returned from server side in response to posted messages.
-     */
+    /** The handler for errors returned from server side in response to posted messages. */
     private final @Nullable ServerErrorHandler serverErrorHandler;
 
     /**

@@ -23,6 +23,7 @@ package io.spine.client;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,17 +38,22 @@ import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filter.Operator.LESS_THAN;
+import static io.spine.client.OperatorAssertions.assertFalse;
+import static io.spine.client.OperatorAssertions.assertGreater;
+import static io.spine.client.OperatorAssertions.assertGreaterOrEqual;
+import static io.spine.client.OperatorAssertions.assertLess;
+import static io.spine.client.OperatorAssertions.assertLessOrEqual;
+import static io.spine.client.OperatorAssertions.assertTrue;
 import static io.spine.client.OperatorEvaluator.eval;
 import static io.spine.protobuf.Durations2.seconds;
+import static io.spine.testing.Assertions.assertIllegalArgument;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.nullRef;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static io.spine.testing.TestValues.nullRef;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({
-        "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names */
+        "DuplicateStringLiteralInspection" /* Common test display names */,
+        "ThrowableNotThrown" /* from custom assertions */
 })
 @DisplayName("OperatorEvaluator should")
 class OperatorEvaluatorTest {
@@ -59,7 +65,8 @@ class OperatorEvaluatorTest {
                 .testStaticMethods(OperatorEvaluator.class, PACKAGE);
     }
 
-    @SuppressWarnings("RedundantStringConstructorCall") // We need an equal but not the same object
+    @SuppressWarnings({"RedundantStringConstructorCall", "RedundantSuppression"})
+        // We need an equal but not the same object
     @Test
     @DisplayName("compare equal instances")
     void compareEqual() {
@@ -68,12 +75,12 @@ class OperatorEvaluatorTest {
         Object third = new String(left);
 
         // The checks taken from the java.lang.Object.equals Javadoc
-        assertTrue(eval(left, EQUAL, right), "basic");
-        assertTrue(eval(right, EQUAL, left), "symmetric");
-        assertTrue(eval(left, EQUAL, left), "reflective");
-        assertTrue(eval(left, EQUAL, third) || eval(third, EQUAL, right), "transitive");
-        assertTrue(eval(null, EQUAL, null), "nullable");
-        assertTrue(eval(left, EQUAL, right), "consistent");
+        assertTrue(left, EQUAL, right, "basic");
+        assertTrue(right, EQUAL, left, "symmetric");
+        assertTrue(left, EQUAL, left, "reflective");
+        Assertions.assertTrue(eval(left, EQUAL, third) || eval(third, EQUAL, right), "transitive");
+        assertTrue(null, EQUAL, null, "nullable");
+        assertTrue(left, EQUAL, right, "consistent");
     }
 
     @Test
@@ -82,8 +89,8 @@ class OperatorEvaluatorTest {
         Object left = "one!";
         Object right = "another!";
 
-        assertFalse(eval(left, EQUAL, right), "direct order check");
-        assertFalse(eval(right, EQUAL, left), "reverse order check");
+        assertFalse(left, EQUAL, right, "direct order check");
+        assertFalse(right, EQUAL, left, "reverse order check");
     }
 
     @Nested
@@ -98,13 +105,13 @@ class OperatorEvaluatorTest {
             Timestamp medium = add(small, delta);
             Timestamp big = add(medium, delta);
 
-            assertTrue(eval(medium, GREATER_THAN, small));
-            assertTrue(eval(big, GREATER_THAN, medium));
-            assertTrue(eval(big, GREATER_THAN, small));
+            assertTrue(medium, GREATER_THAN, small);
+            assertTrue(big, GREATER_THAN, medium);
+            assertTrue(big, GREATER_THAN, small);
 
-            assertFalse(eval(small, GREATER_THAN, small));
-            assertFalse(eval(small, GREATER_THAN, big));
-            assertFalse(eval(nullRef(), GREATER_THAN, small));
+            assertFalse(small, GREATER_THAN, small);
+            assertFalse(small, GREATER_THAN, big);
+            assertFalse(nullRef(), GREATER_THAN, small);
         }
 
         @Test
@@ -115,13 +122,13 @@ class OperatorEvaluatorTest {
             Timestamp medium = add(small, delta);
             Timestamp big = add(medium, delta);
 
-            assertTrue(eval(medium, GREATER_OR_EQUAL, small));
-            assertTrue(eval(big, GREATER_OR_EQUAL, medium));
-            assertTrue(eval(big, GREATER_OR_EQUAL, small));
-            assertTrue(eval(small, GREATER_OR_EQUAL, small));
+            assertTrue(medium, GREATER_OR_EQUAL, small);
+            assertTrue(big, GREATER_OR_EQUAL, medium);
+            assertTrue(big, GREATER_OR_EQUAL, small);
+            assertTrue(small, GREATER_OR_EQUAL, small);
 
-            assertFalse(eval(small, GREATER_OR_EQUAL, big));
-            assertFalse(eval(nullRef(), GREATER_OR_EQUAL, small));
+            assertFalse(small, GREATER_OR_EQUAL, big);
+            assertFalse(nullRef(), GREATER_OR_EQUAL, small);
         }
 
         @Test
@@ -132,13 +139,13 @@ class OperatorEvaluatorTest {
             Timestamp medium = add(small, delta);
             Timestamp big = add(medium, delta);
 
-            assertTrue(eval(medium, LESS_THAN, big));
-            assertTrue(eval(small, LESS_THAN, medium));
-            assertTrue(eval(small, LESS_THAN, big));
+            assertTrue(medium, LESS_THAN, big);
+            assertTrue(small, LESS_THAN, medium);
+            assertTrue(small, LESS_THAN, big);
 
-            assertFalse(eval(big, LESS_THAN, big));
-            assertFalse(eval(big, LESS_THAN, small));
-            assertFalse(eval(nullRef(), LESS_THAN, nullRef()));
+            assertFalse(big, LESS_THAN, big);
+            assertFalse(big, LESS_THAN, small);
+            assertFalse(nullRef(), LESS_THAN, nullRef());
         }
 
         @Test
@@ -149,13 +156,13 @@ class OperatorEvaluatorTest {
             Timestamp medium = add(small, delta);
             Timestamp big = add(medium, delta);
 
-            assertTrue(eval(medium, LESS_OR_EQUAL, big));
-            assertTrue(eval(small, LESS_OR_EQUAL, medium));
-            assertTrue(eval(small, LESS_OR_EQUAL, big));
+            assertTrue(medium, LESS_OR_EQUAL, big);
+            assertTrue(small, LESS_OR_EQUAL, medium);
+            assertTrue(small, LESS_OR_EQUAL, big);
 
-            assertTrue(eval(medium, LESS_OR_EQUAL, medium));
-            assertFalse(eval(big, LESS_OR_EQUAL, small));
-            assertFalse(eval(medium, LESS_OR_EQUAL, nullRef()));
+            assertTrue(medium, LESS_OR_EQUAL, medium);
+            assertFalse(big, LESS_OR_EQUAL, small);
+            assertFalse(medium, LESS_OR_EQUAL, nullRef());
         }
     }
 
@@ -285,45 +292,13 @@ class OperatorEvaluatorTest {
     @Test
     @DisplayName("fail to compare different types")
     void notCompareDifferentTypes() {
-        assertThrows(IllegalArgumentException.class, () -> eval("7", GREATER_THAN, 6));
+        assertIllegalArgument(() -> eval("7", GREATER_THAN, 6));
     }
 
     @Test
     @DisplayName("fail to compare by invalid operator")
     void notCompareByInvalidOperator() {
-        assertThrows(IllegalArgumentException.class, () -> eval("a", CFO_UNDEFINED, "b"));
-    }
-
-    private static void assertGreater(Object left, Object right) {
-        assertStrict(left, right, GREATER_THAN);
-    }
-
-    private static void assertLess(Object left, Object right) {
-        assertStrict(left, right, LESS_THAN);
-    }
-
-    private static void assertGreaterOrEqual(Object obj, Object less) {
-        assertNotStrict(obj, less, GREATER_OR_EQUAL, GREATER_THAN);
-    }
-
-    private static void assertLessOrEqual(Object obj, Object less) {
-        assertNotStrict(obj, less, LESS_OR_EQUAL, LESS_THAN);
-    }
-
-    private static void assertStrict(Object left, Object right, Operator operator) {
-        assertTrue(eval(left, operator, right));
-        assertFalse(eval(right, operator, left));
-        assertFalse(eval(left, EQUAL, right));
-    }
-
-    private static void assertNotStrict(Object obj,
-                                        Object other,
-                                        Operator operator,
-                                        Operator strictOperator) {
-        assertStrict(obj, other, strictOperator);
-
-        assertTrue(eval(obj, operator, obj));
-        assertTrue(eval(obj, EQUAL, obj));
+        assertIllegalArgument(() -> eval("a", CFO_UNDEFINED, "b"));
     }
 
     private static class FaultyComparisonType {

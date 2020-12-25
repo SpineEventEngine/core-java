@@ -20,6 +20,7 @@
 package io.spine.server.entity
 
 import com.google.common.truth.Truth.assertThat
+import io.spine.base.Tests
 import io.spine.server.test.shared.StringEntity
 import io.spine.testing.TestValues.randomString
 import org.junit.jupiter.api.DisplayName
@@ -33,8 +34,14 @@ internal class ExtensionsTest {
         val entity = createEntity()
         val str = randomString()
         entity.apply(str)
-        assertThat(entity.value())
-            .isEqualTo(str)
+        assertThat(entity.value()).isEqualTo(str)
+    }
+
+    @Test
+    fun `add 'under' function for 'ServerEnvironment' configuration`() {
+        under<Tests> {
+            assertThat(type()).isEqualTo(Tests::class.java)
+        }
     }
 }
 

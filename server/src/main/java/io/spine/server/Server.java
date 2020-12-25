@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
@@ -48,16 +47,6 @@ public final class Server implements Logging {
 
     /** The container for Command- and Query- services. */
     private final GrpcContainer grpcContainer;
-
-    /**
-     * Creates a new builder for the server.
-     *
-     * @deprecated please use {@link #atPort(int)} or {@link #inProcess(String)}
-     */
-    @Deprecated
-    public static Builder newBuilder() {
-        return new Builder(DEFAULT_CLIENT_SERVICE_PORT, null);
-    }
 
     /**
      * Initiates creating a server exposed at the passed port.
