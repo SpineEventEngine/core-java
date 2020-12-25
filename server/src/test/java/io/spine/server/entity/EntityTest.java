@@ -41,7 +41,6 @@ import io.spine.test.user.ChooseDayOfBirth;
 import io.spine.test.user.SignUpUser;
 import io.spine.test.user.User;
 import io.spine.testdata.Sample;
-import io.spine.testing.Tests;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.time.LocalDates;
@@ -83,7 +82,7 @@ class EntityTest {
     @Test
     @DisplayName("not accept null ID")
     void notAcceptNullId() {
-        assertThrows(NullPointerException.class, () -> new EntityWithMessageId(Tests.nullRef()));
+        assertThrows(NullPointerException.class, () -> new EntityWithMessageId(nullRef()));
     }
 
     @Nested
@@ -172,7 +171,7 @@ class EntityTest {
     @DisplayName("throw exception if try to set null state")
     void throwOnSettingNullState() {
         assertThrows(NullPointerException.class,
-                     () -> entityNew.updateState(Tests.nullRef(), Versions.zero()));
+                     () -> entityNew.updateState(nullRef(), Versions.zero()));
     }
 
     @Test

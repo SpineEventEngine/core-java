@@ -27,7 +27,6 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,6 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static io.spine.testing.TestValues.nullRef;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -81,7 +81,7 @@ class CommandBusBuilderTest
     @DisplayName("not accept null CommandStore")
     void notAcceptNullCommandStore() {
         assertThrows(NullPointerException.class,
-                     () -> builder().injectTenantIndex(Tests.nullRef()));
+                     () -> builder().injectTenantIndex(nullRef()));
     }
 
     @Test

@@ -338,10 +338,13 @@ public final class ServerEnvironment implements AutoCloseable {
 
         private TypeConfigurator(Class<? extends EnvironmentType> type) {
             this.se = instance();
-            CustomEnvironmentType et = (CustomEnvironmentType)
-                    Invokables.callParameterlessCtor(type);
-            Environment.instance()
-                       .register(et.getClass());
+            EnvironmentType et = Invokables.callParameterlessCtor(type);
+            if (et instanceof CustomEnvironmentType) {
+                Class<? extends CustomEnvironmentType> newType =
+                        ((CustomEnvironmentType) et).getClass();
+                Environment.instance()
+                           .register(newType);
+            }
             this.type = checkNotNull(type);
         }
 

@@ -21,7 +21,6 @@
 package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -31,6 +30,7 @@ import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,24 +39,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.query.LogicalOperator.AND;
 import static io.spine.query.LogicalOperator.OR;
 import static io.spine.server.event.store.Queries.convert;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
 @DisplayName("`Queries` should")
-class QueriesTest {
+class QueriesTest extends UtilityClassTest<Queries> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Queries.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testStaticMethods(Queries.class, PACKAGE);
+    QueriesTest() {
+        super(Queries.class, PACKAGE);
     }
 
     @Test

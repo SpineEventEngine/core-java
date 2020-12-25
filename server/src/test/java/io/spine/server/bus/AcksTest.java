@@ -35,6 +35,7 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.test.bus.ShareId;
 import io.spine.test.bus.command.ShareCannotBeTraded;
 import io.spine.test.commandbus.command.CmdBusStartProject;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,25 +47,20 @@ import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.core.Status.StatusCase.REJECTION;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.newUuidValue;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
 @DisplayName("`Acks` utility should")
-class AcksTest {
+class AcksTest extends UtilityClassTest<Acks> {
 
     public static final CommandId ID = CommandId.generate();
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Acks.class);
+    AcksTest() {
+        super(Acks.class);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
         Command command = Command
                 .newBuilder()
                 .setMessage(pack(CmdBusStartProject.getDefaultInstance()))
@@ -78,8 +74,7 @@ class AcksTest {
                 CommandEnvelope.of(command),
                 throwable
         );
-        new NullPointerTester()
-                .setDefault(Message.class, Any.getDefaultInstance())
+        tester.setDefault(Message.class, Any.getDefaultInstance())
                 .setDefault(Error.class, Error.newBuilder()
                                               .setCode(1)
                                               .build())
@@ -87,8 +82,7 @@ class AcksTest {
                 .setDefault(Message.class, newUuidValue())
                 .setDefault(MessageId.class, MessageId.newBuilder()
                                                       .setTypeUrl("test.example.org")
-                                                      .build())
-                .testAllPublicStaticMethods(Acks.class);
+                                                      .build());
     }
 
     @Test

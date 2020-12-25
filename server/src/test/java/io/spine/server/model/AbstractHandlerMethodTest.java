@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.AbstractHandlerMethod.firstParamType;
 import static io.spine.server.model.given.method.StubHandler.getMethodWithCheckedException;
 import static io.spine.server.model.given.method.StubHandler.getMethodWithRuntimeException;

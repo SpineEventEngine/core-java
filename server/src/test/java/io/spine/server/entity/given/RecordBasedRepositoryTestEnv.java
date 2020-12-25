@@ -26,7 +26,7 @@ import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.AbstractEntity;
 
-import static io.spine.testing.Tests.assertMatchesMask;
+import static io.spine.testing.Assertions.assertMatchesMask;
 
 public final class RecordBasedRepositoryTestEnv {
 

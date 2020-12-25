@@ -42,8 +42,8 @@ import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PRODUCTI
 import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
 import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
+import static io.spine.testing.Assertions.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
