@@ -32,8 +32,9 @@ import io.spine.testing.core.given.GivenVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.Versions.checkIsIncrement;
+import static io.spine.core.Versions.increment;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`Versions` utility should")
@@ -43,29 +44,27 @@ class VersionsTest extends UtilityClassTest<Versions> {
         super(Versions.class);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(Version.class, Version.getDefaultInstance())
-                .testAllPublicStaticMethods(Versions.class);
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(Version.class, Version.getDefaultInstance());
     }
 
     @Test
-    @DisplayName("check Version increment")
+    @DisplayName("check `Version` increment")
     void checkVersionIncrement() {
         assertThrows(IllegalArgumentException.class,
-                     () -> Versions.checkIsIncrement(
+                     () -> checkIsIncrement(
                              GivenVersion.withNumber(2),
                              GivenVersion.withNumber(1)
                      ));
     }
 
     @Test
-    @DisplayName("increment Version")
-    void increment() {
+    @DisplayName("increment `Version`")
+    void incr() {
         Version v1 = GivenVersion.withNumber(1);
-        assertEquals(v1.getNumber() + 1, Versions.increment(v1)
-                                                 .getNumber());
+        assertThat(increment(v1).getNumber())
+                .isEqualTo(v1.getNumber() + 1);
     }
 }
