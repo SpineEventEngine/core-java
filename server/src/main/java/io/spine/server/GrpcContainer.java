@@ -30,7 +30,6 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.inprocess.InProcessServerBuilder;
-import io.spine.client.Client;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
@@ -66,16 +65,6 @@ public final class GrpcContainer {
 
     @VisibleForTesting
     private @Nullable Server injectedServer;
-
-    /**
-     * Creates a new builder for the container.
-     *
-     * @deprecated please use {@link #atPort(int)} or {@link #inProcess(String)}
-     */
-    @Deprecated
-    public static Builder newBuilder() {
-        return new Builder(Client.DEFAULT_CLIENT_SERVICE_PORT, null);
-    }
 
     /**
      * Initiates creating a container exposed at the given port.
