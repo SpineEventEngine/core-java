@@ -57,7 +57,7 @@ buildscript {
             )
         }
     }
-} // buildscript
+}
 
 plugins {
     java
