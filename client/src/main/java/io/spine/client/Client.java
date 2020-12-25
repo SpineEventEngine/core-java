@@ -77,6 +77,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public class Client implements AutoCloseable {
 
+    /** The default port number on which a client server runs. */
+    public static final int DEFAULT_CLIENT_SERVICE_PORT = 50051;
+
     /** The default amount of time to wait when {@linkplain #close() closing} the client. */
     public static final Timeout DEFAULT_SHUTDOWN_TIMEOUT = Timeout.of(5, SECONDS);
 
