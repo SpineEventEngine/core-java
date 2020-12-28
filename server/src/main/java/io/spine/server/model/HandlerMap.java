@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -37,7 +43,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static io.spine.server.model.MethodScan.findMethodsBy;
@@ -86,8 +91,7 @@ public final class HandlerMap<M extends MessageClass<?>,
         return new HandlerMap<>(map, messageClasses);
     }
 
-    private HandlerMap(ImmutableSetMultimap<DispatchKey, H> map,
-                       ImmutableSet<M> messageClasses) {
+    private HandlerMap(ImmutableSetMultimap<DispatchKey, H> map, ImmutableSet<M> messageClasses) {
         this.map = map;
         this.messageClasses = messageClasses;
     }
@@ -132,34 +136,17 @@ public final class HandlerMap<M extends MessageClass<?>,
     }
 
     /**
-     * Obtains the method for handling by the passed key.
-     *
-     * @param key
-     *         the key of the handler to get
-     * @return a handler method
-     * @throws IllegalStateException
-     *         if there is no method found in the map
-     */
-    private ImmutableSet<H> handlersOf(DispatchKey key) {
-        ImmutableSet<H> handlers = map.get(key);
-        checkState(!handlers.isEmpty(),
-                   "Unable to find handler with the key: %s.", key);
-        return handlers;
-    }
-
-    /**
      * Obtains methods for handling messages of the given class and with the given origin.
      *
      * <p>If there is no handler matching both the message and origin class, handlers will be
      * searched by the message class only.
      *
+     * <p>If no handlers for a specified criteria is found, returns an empty set.
+     *
      * @param messageClass
      *         the message class of the handled message
      * @param originClass
      *         the class of the message, from which the handled message is originate
-     * @return a handler method
-     * @throws IllegalStateException
-     *         if there is no method found in the map
      */
     public ImmutableSet<H> handlersOf(M messageClass, MessageClass<?> originClass) {
         DispatchKey key =
@@ -171,7 +158,8 @@ public final class HandlerMap<M extends MessageClass<?>,
         DispatchKey presentKey = map.containsKey(key)
                                  ? key
                                  : new DispatchKey(messageClass.value(), null, null);
-        return handlersOf(presentKey);
+        ImmutableSet<H> handlers = map.get(presentKey);
+        return handlers;
     }
 
     /**
@@ -180,16 +168,15 @@ public final class HandlerMap<M extends MessageClass<?>,
      * <p>If there is no handler matching both the message and origin class, a handler will be
      * searched by the message class only.
      *
-     * <p>If there is no such method or several such methods, an {@link IllegalStateException} is
-     * thrown.
-     *
      * @param messageClass
      *         the message class of the handled message
      * @return a handler method
      * @throws IllegalStateException
-     *         if there is no such method or several such methods found in the map
+     *         if no handler methods were found
+     * @throws DuplicateHandlerMethodError
+     *         if multiple handler methods were found
      */
-    public H handlerOf(M messageClass, MessageClass originClass) {
+    public H handlerOf(M messageClass, MessageClass<?> originClass) {
         ImmutableSet<H> methods = handlersOf(messageClass, originClass);
         return singleMethod(methods, messageClass);
     }
@@ -200,8 +187,6 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @param messageClass
      *         the message class of the handled message
      * @return handlers method
-     * @throws IllegalStateException
-     *         if there is no method found in the map
      */
     public ImmutableSet<H> handlersOf(M messageClass) {
         return handlersOf(messageClass, EmptyClass.instance());
@@ -217,7 +202,9 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         the message class of the handled message
      * @return a handler method
      * @throws IllegalStateException
-     *         if there is no such method or several such methods found in the map
+     *         if no handler methods were found
+     * @throws DuplicateHandlerMethodError
+     *         if multiple handler methods were found
      */
     public H handlerOf(M messageClass) {
         ImmutableSet<H> methods = handlersOf(messageClass);
@@ -233,11 +220,9 @@ public final class HandlerMap<M extends MessageClass<?>,
     private void checkSingle(Collection<H> handlers, M targetType) {
         int count = handlers.size();
         if (count == 0) {
-            _error().log("No handler method found for the type `%s`.", targetType);
-            throw newIllegalStateException(
-                    "Unexpected number of handlers for messages of class %s: %d.%n%s",
-                    targetType, count, handlers
-            );
+            String error = String.format("No handler method found for the type `%s`.", targetType);
+            _error().log(error);
+            throw newIllegalStateException(error);
         } else if (count > 1) {
             /*
               The map should have found all the duplicates during construction.

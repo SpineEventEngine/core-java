@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -20,6 +26,7 @@
 
 package io.spine.server;
 
+import io.spine.base.Environment;
 import io.spine.base.EnvironmentType;
 import io.spine.base.Production;
 import io.spine.base.Tests;
@@ -195,11 +202,18 @@ class ServerEnvironmentTest {
         }
     }
 
+    @Test
+    @DisplayName("obtain the current environment type")
+    void gettingType() {
+        assertThat(serverEnvironment.type())
+                .isSameInstanceAs(Environment.instance()
+                                             .type());
+    }
+
     @SuppressWarnings({
             "AccessOfSystemProperties" /* Testing the configuration loaded from System properties. */,
             "AbstractClassWithoutAbstractMethods" /* A test base with setUp and tearDown. */
     })
-
     abstract class WithAppEngineEnvironment {
 
         private final String targetEnvironment;

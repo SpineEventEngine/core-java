@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -23,6 +29,7 @@ package io.spine.server.type;
 import io.spine.base.MessageContext;
 import io.spine.core.ActorContext;
 import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.core.TenantId;
@@ -47,12 +54,19 @@ public interface SignalEnvelope<I extends SignalId,
     /**
      * Obtains an actor context for the wrapped message.
      */
-    ActorContext actorContext();
+    default ActorContext actorContext() {
+        return outerObject().actorContext();
+    }
 
     /**
      * Obtains the message ID of the signal.
      */
     default MessageId messageId() {
         return outerObject().messageId();
+    }
+
+    @Override
+    default Origin asMessageOrigin() {
+        return outerObject().asMessageOrigin();
     }
 }

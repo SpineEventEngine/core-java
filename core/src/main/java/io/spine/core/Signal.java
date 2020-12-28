@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -154,17 +160,15 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains this signal as an origin of other signals.
      *
-     * <p>This origin is assigned to any signal message produced as a reaction to this one..
+     * <p>This origin is assigned to any signal message produced as a reaction to this one.
      */
     default Origin asMessageOrigin() {
-        MessageId commandQualifier = identityBuilder().buildPartial();
-        Origin origin = Origin
+        Origin.Builder originBuilder = Origin
                 .newBuilder()
                 .setActorContext(actorContext())
-                .setMessage(commandQualifier)
-                .setGrandOrigin(origin().orElse(Origin.getDefaultInstance()))
-                .vBuild();
-        return origin;
+                .setMessage(messageId());
+        origin().ifPresent(originBuilder::setGrandOrigin);
+        return originBuilder.vBuild();
     }
 
     /**

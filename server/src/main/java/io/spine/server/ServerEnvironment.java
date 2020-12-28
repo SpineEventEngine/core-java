@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -29,7 +35,6 @@ import io.spine.base.EnvironmentType;
 import io.spine.base.Identifier;
 import io.spine.base.Production;
 import io.spine.base.Tests;
-import io.spine.reflect.Invokables;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -116,7 +121,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * The strategy of delivering the messages received by entity repositories
      * to the entity instances.
      *
-     * <p>If not {@linkplain TypeConfigurator#use(Delivery)}) configured by the end-user},
+     * <p>If not {@linkplain TypeConfigurator#use(Delivery) configured by the end-user},
      * initialized with the {@linkplain Delivery#local() local} delivery by default.
      *
      * <p>Differs between {@linkplain EnvironmentType environment types}.
@@ -161,6 +166,16 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public static ServerEnvironment instance() {
         return INSTANCE;
+    }
+
+    /**
+     * Obtains the type of the current server environment.
+     *
+     * @apiNote This is a convenience method for server-side configuration code, which
+     *         simply delegates to {@link Environment#type()}.
+     */
+    public Class<? extends EnvironmentType> type() {
+        return Environment.instance().type();
     }
 
     /**
@@ -338,14 +353,18 @@ public final class ServerEnvironment implements AutoCloseable {
 
         private TypeConfigurator(Class<? extends EnvironmentType> type) {
             this.se = instance();
-            EnvironmentType et = Invokables.callParameterlessCtor(type);
-            if (et instanceof CustomEnvironmentType) {
-                Class<? extends CustomEnvironmentType> newType =
-                        ((CustomEnvironmentType) et).getClass();
-                Environment.instance()
-                           .register(newType);
+            if (CustomEnvironmentType.class.isAssignableFrom(type)) {
+                registerCustomType(type);
             }
             this.type = checkNotNull(type);
+        }
+
+        private static void registerCustomType(Class<? extends EnvironmentType> type) {
+            @SuppressWarnings("unchecked") // checked by calling site.
+            Class<? extends CustomEnvironmentType> customType =
+                    (Class<? extends CustomEnvironmentType>) type;
+            Environment.instance()
+                       .register(customType);
         }
 
         /**
@@ -438,7 +457,7 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         /**
-         * Assigns the specified {@code TransportFactory} for the selected environment.
+         * Assigns the specified {@code StorageFactory} for the selected environment.
          *
          * @see #useStorageFactory(ServerEnvironment.Fn)
          */

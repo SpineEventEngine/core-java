@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -421,8 +427,22 @@ public class Client implements AutoCloseable {
          * Sets the timeout for the {@linkplain Client#close() shutdown operation} of the client.
          *
          * <p>If not specified directly, {@link Client#DEFAULT_SHUTDOWN_TIMEOUT} will be used.
+         *
+         * @deprecated Use {@link #shutdownTimeout(long, TimeUnit)} instead.
          */
+        @Deprecated
         public Builder shutdownTimout(long timeout, TimeUnit timeUnit) {
+            checkNotNull(timeUnit);
+            this.shutdownTimeout = Timeout.of(timeout, timeUnit);
+            return this;
+        }
+
+        /**
+         * Sets the timeout for the {@linkplain Client#close() shutdown operation} of the client.
+         *
+         * <p>If not specified directly, {@link Client#DEFAULT_SHUTDOWN_TIMEOUT} will be used.
+         */
+        public Builder shutdownTimeout(long timeout, TimeUnit timeUnit) {
             checkNotNull(timeUnit);
             this.shutdownTimeout = Timeout.of(timeout, timeUnit);
             return this;

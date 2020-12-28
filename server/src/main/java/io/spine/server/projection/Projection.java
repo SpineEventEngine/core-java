@@ -1,6 +1,12 @@
 /*
  * Copyright 2020, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -24,6 +30,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.core.Event;
+import io.spine.core.EventValidationError;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -130,10 +137,12 @@ public abstract class Projection<I,
     private DispatchOutcome unhandledEvent(EventEnvelope event) {
         Error error = Error
                 .newBuilder()
+                .setType(EventValidationError.getDescriptor().getFullName())
                 .setCode(UNSUPPORTED_EVENT_VALUE)
-                .setMessage(format("Projection %s cannot handle event %s.",
-                                   thisClass(),
-                                   event.messageTypeName()))
+                .setMessage(format(
+                        "Projection `%s` cannot handle event `%s`.",
+                        thisClass(), event.messageTypeName()
+                ))
                 .buildPartial();
         return DispatchOutcome
                 .newBuilder()
