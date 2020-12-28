@@ -25,7 +25,6 @@ import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EnvironmentType;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.BoundedContextBuilder;
@@ -38,7 +37,6 @@ import io.spine.server.aggregate.given.fibonacci.SequenceId;
 import io.spine.server.aggregate.given.fibonacci.command.MoveSequence;
 import io.spine.server.aggregate.given.fibonacci.command.SetStartingNumbers;
 import io.spine.server.aggregate.given.fibonacci.event.StartingNumbersSet;
-import io.spine.server.storage.StorageFactory;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testdata.Sample;
@@ -70,9 +68,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * Tests the truncation of an Aggregate history.
  *
- * <p>Wishing to customize the storage for these tests, descendants may configure it via
- * {@link ServerEnvironment#use(StorageFactory, EnvironmentType)
- * ServerEnvironment.use(customStorageFactory, Tests.class)}.
+ * <p>Wishing to customize the storage for these tests, descendants may configure it via:
+ * <pre>
+ *     ServerEnvironment.when(Tests.class)
+ *                      .use(customStorageFactory);
+ * </pre>
  *
  * <p>Please note that for the test name to make sense the descendants should have some
  * meaningful display names, e.g. {@code "InMemoryAggregateStorage"}.

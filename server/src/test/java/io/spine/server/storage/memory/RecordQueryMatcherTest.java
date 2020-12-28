@@ -42,7 +42,7 @@ import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.any
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.anyValue;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.booleanColumn;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.recordSubject;
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

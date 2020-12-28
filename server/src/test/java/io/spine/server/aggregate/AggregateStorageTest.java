@@ -57,7 +57,6 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.StringProject;
 import io.spine.testdata.Sample;
 import io.spine.testing.TestValues;
-import io.spine.testing.Tests;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.model.ModelTests;
@@ -87,6 +86,7 @@ import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.aggregate.given.StorageRecords.sequenceFor;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
+import static io.spine.testing.TestValues.nullRef;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 import static java.lang.Integer.MAX_VALUE;
@@ -207,36 +207,35 @@ public class AggregateStorageTest
         @DisplayName("request ID when reading history")
         void idForReadHistory() {
             assertThrows(NullPointerException.class,
-                         () -> storage.historyBackward(Tests.nullRef(), 10));
+                         () -> storage.historyBackward(nullRef(), 10));
         }
 
         @Test
         @DisplayName("event for writing")
         void event() {
             assertThrows(NullPointerException.class,
-                         () -> storage.writeEvent(id, Tests.nullRef()));
+                         () -> storage.writeEvent(id, nullRef()));
         }
 
         @Test
         @DisplayName("event ID for writing")
         void eventId() {
             assertThrows(NullPointerException.class,
-                         () -> storage.writeEvent(Tests.nullRef(), Event.getDefaultInstance()));
+                         () -> storage.writeEvent(nullRef(), Event.getDefaultInstance()));
         }
 
         @Test
         @DisplayName("snapshot for writing")
         void snapshot() {
             assertThrows(NullPointerException.class,
-                         () -> storage.writeSnapshot(id, Tests.nullRef()));
+                         () -> storage.writeSnapshot(id, nullRef()));
         }
 
         @Test
         @DisplayName("snapshot ID for writing")
         void snapshotId() {
             assertThrows(NullPointerException.class,
-                         () -> storage.writeSnapshot(Tests.nullRef(),
-                                                     Snapshot.getDefaultInstance()));
+                         () -> storage.writeSnapshot(nullRef(), Snapshot.getDefaultInstance()));
         }
     }
 

@@ -47,7 +47,6 @@ import io.spine.test.user.ChooseDayOfBirth;
 import io.spine.test.user.SignUpUser;
 import io.spine.test.user.User;
 import io.spine.testdata.Sample;
-import io.spine.testing.Tests;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.time.LocalDates;
@@ -60,7 +59,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 import static io.spine.time.Month.FEBRUARY;
 import static io.spine.time.Month.JANUARY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -89,7 +88,7 @@ class EntityTest {
     @Test
     @DisplayName("not accept null ID")
     void notAcceptNullId() {
-        assertThrows(NullPointerException.class, () -> new EntityWithMessageId(Tests.nullRef()));
+        assertThrows(NullPointerException.class, () -> new EntityWithMessageId(nullRef()));
     }
 
     @Nested
@@ -178,7 +177,7 @@ class EntityTest {
     @DisplayName("throw exception if try to set null state")
     void throwOnSettingNullState() {
         assertThrows(NullPointerException.class,
-                     () -> entityNew.updateState(Tests.nullRef(), Versions.zero()));
+                     () -> entityNew.updateState(nullRef(), Versions.zero()));
     }
 
     @Test

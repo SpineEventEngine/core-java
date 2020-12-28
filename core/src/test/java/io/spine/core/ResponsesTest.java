@@ -27,22 +27,19 @@
 package io.spine.core;
 
 import io.spine.base.Error;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("Responses utility should")
-class ResponsesTest {
+@DisplayName("`Responses` utility should")
+class ResponsesTest extends UtilityClassTest<Responses> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Responses.class);
+    private ResponsesTest() {
+        super(Responses.class);
     }
 
     @Test

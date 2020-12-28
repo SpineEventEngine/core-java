@@ -69,7 +69,7 @@ import static io.spine.server.delivery.TestRoutines.findView;
 import static io.spine.server.delivery.TestRoutines.post;
 import static io.spine.server.delivery.given.WhatToCatchUp.catchUpAll;
 import static io.spine.server.delivery.given.WhatToCatchUp.catchUpOf;
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.fail;

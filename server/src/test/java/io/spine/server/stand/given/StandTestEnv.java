@@ -89,7 +89,7 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.given.Given.projectionOfClass;
 import static io.spine.test.projection.Project.Status.STARTED;
-import static io.spine.testing.Tests.assertMatchesMask;
+import static io.spine.testing.Assertions.assertMatchesMask;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;

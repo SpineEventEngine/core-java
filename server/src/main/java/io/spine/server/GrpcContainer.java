@@ -36,16 +36,15 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.inprocess.InProcessServerBuilder;
-import io.spine.client.ConnectionConstants;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Wrapping container for gRPC server.
@@ -72,16 +71,6 @@ public final class GrpcContainer {
 
     @VisibleForTesting
     private @Nullable Server injectedServer;
-
-    /**
-     * Creates a new builder for the container.
-     *
-     * @deprecated please use {@link #atPort(int)} or {@link #inProcess(String)}
-     */
-    @Deprecated
-    public static Builder newBuilder() {
-        return new Builder(ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT, null);
-    }
 
     /**
      * Initiates creating a container exposed at the given port.
@@ -242,19 +231,21 @@ public final class GrpcContainer {
         if (injectedServer != null) {
             return injectedServer;
         }
-        ServerBuilder builder = createServerBuilder();
+        ServerBuilder<?> builder = createServerBuilder();
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
         }
         return builder.build();
     }
 
-    private ServerBuilder createServerBuilder() {
-        ServerBuilder result =
-                serverName == null
-                ? ServerBuilder.forPort(checkNotNull(port))
-                : InProcessServerBuilder.forName(serverName)
-                                        .directExecutor();
+    private ServerBuilder<?> createServerBuilder() {
+        boolean serverNameGiven = serverName != null;
+        @Nullable Integer port = serverNameGiven ? null : requireNonNull(this.port);
+        ServerBuilder<?> result =
+                serverNameGiven
+                ? InProcessServerBuilder.forName(serverName)
+                                        .directExecutor()
+                : ServerBuilder.forPort(port);
         return result;
     }
 

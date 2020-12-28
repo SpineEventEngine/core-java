@@ -51,7 +51,9 @@ modelCompiler {
 }
 
 apply {
-    from(Deps.scripts.testArtifacts(project))
-    from(Deps.scripts.publishProto(project))
+    with(Deps.scripts) {
+        from(testArtifacts(project))
+        from(publishProto(project))
+    }
     plugin(IncrementGuard::class)
 }

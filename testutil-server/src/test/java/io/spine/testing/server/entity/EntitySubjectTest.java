@@ -34,7 +34,7 @@ import io.spine.testing.server.given.entity.TuProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 
 @DisplayName("EntitySubject should")
 class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {

@@ -26,42 +26,32 @@
 
 package io.spine.grpc;
 
-import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.Truth8;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.spine.base.Error;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.grpc.MetadataConverter.toError;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("Metadata converter should")
-class MetadataConverterTest {
+@DisplayName("`Metadata` converter should")
+class MetadataConverterTest extends UtilityClassTest<MetadataConverter> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(MetadataConverter.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(MetadataConverter.class);
+    MetadataConverterTest() {
+        super(MetadataConverter.class);
     }
 
     @SuppressWarnings("ConstantConditions") // A part of the test.
     @Test
-    @DisplayName("convert Error to Metadata")
+    @DisplayName("convert `Error` to `Metadata`")
     void convertError() throws InvalidProtocolBufferException {
         Error error = Error.getDefaultInstance();
         Metadata metadata = MetadataConverter.toMetadata(error);
@@ -70,36 +60,38 @@ class MetadataConverterTest {
     }
 
     @Test
-    @DisplayName("convert Metadata to Error")
+    @DisplayName("convert `Metadata` to `Error`")
     void convertMetadata() {
         Error expectedError = Error.getDefaultInstance();
         Metadata metadata = MetadataConverter.toMetadata(expectedError);
 
-        Optional<Error> optional = MetadataConverter.toError(metadata);
+        Optional<Error> optional = toError(metadata);
         assertTrue(optional.isPresent());
         assertEquals(expectedError, optional.get());
     }
 
     @Test
-    @DisplayName("return absent when converting empty Metadata")
+    @DisplayName("return absent when converting empty `Metadata`")
     void processEmptyMetadata() {
         Metadata metadata = new Metadata();
 
-        assertFalse(MetadataConverter.toError(metadata)
-                                     .isPresent());
+        Truth8.assertThat(toError(metadata))
+              .isEmpty();
     }
 
     @Test
-    @DisplayName("throw wrapped InvalidProtocolBufferException when Metadata bytes are invalid")
+    @DisplayName("throw wrapped `InvalidProtocolBufferException` when Metadata bytes are invalid")
     void throwOnInvalidBytes() {
         Metadata metadata = new Metadata();
         metadata.put(MetadataConverter.KEY, new byte[]{(byte) 1});
 
-        IllegalStateException e =
-                assertThrows(IllegalStateException.class,
-                             () -> MetadataConverter.toError(metadata),
-                             "InvalidProtocolBufferException was not thrown.");
+        IllegalStateException e = assertThrows(
+                IllegalStateException.class,
+                () -> toError(metadata), "`InvalidProtocolBufferException` was not thrown."
+        );
 
-        assertTrue(e.getCause() instanceof InvalidProtocolBufferException);
+        assertThat(e)
+                .hasCauseThat()
+                .isInstanceOf(InvalidProtocolBufferException.class);
     }
 }
