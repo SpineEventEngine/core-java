@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,13 +34,13 @@
 /**
  * Version of this library.
  */
-val coreJava = "1.7.0"
+val coreJava = "1.7.1"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "1.7.0"
-val time = "1.7.0"
+val base = "1.7.4"
+val time = "1.7.1"
 
 project.extra.apply {
     this["versionToPublish"] = coreJava
