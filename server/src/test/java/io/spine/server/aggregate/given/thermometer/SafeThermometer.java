@@ -26,49 +26,49 @@
 
 package io.spine.server.aggregate.given.thermometer;
 
-import com.google.common.math.DoubleMath;
+import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.given.thermometer.event.TemperatureChanged;
 import io.spine.server.aggregate.given.thermometer.event.TermTemperatureChanged;
 import io.spine.server.event.React;
 
+import java.util.Optional;
+
 /**
  * Sets the temperature to self {@link #MIN}/{@link #MAX} value without going crazy.
  */
-final class SafeThermometer extends Aggregate<ThermometerId, Thermometer, Thermometer.Builder> {
+public final class SafeThermometer extends Aggregate<ThermometerId, Thermometer, Thermometer.Builder> {
 
-    private static final double MIN = 0.1;
+    private static final double MIN = 0;
     private static final double MAX = 120;
 
     @React
-    TermTemperatureChanged on(TemperatureChanged e) {
-        double temperature = withinBounds(e.getFahrenheit());
-        return TermTemperatureChanged
-                .newBuilder()
-                .setThermometer(id())
-                .setChange(
-                        TemperatureChange
-                                .newBuilder()
-                                .setNewValue(temperature)
-                                .setPreviousValue(state().getFahrenheit())
-                )
-                .vBuild();
+    Optional<TermTemperatureChanged> on(@External TemperatureChanged e) {
+        double temperature = e.getFahrenheit();
+        if (!withinBounds(temperature)) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                TermTemperatureChanged
+                        .newBuilder()
+                        .setThermometer(id())
+                        .setChange(
+                                TemperatureChange
+                                        .newBuilder()
+                                        .setNewValue(temperature)
+                                        .setPreviousValue(state().getFahrenheit())
+                        )
+                        .vBuild()
+        );
     }
 
-    private static double withinBounds(double temperature) {
-        if (DoubleMath.fuzzyCompare(temperature, MIN, 0.01) <= 0) {
-            return MIN;
-        }
-        if (DoubleMath.fuzzyCompare(temperature, MAX, 0.01) > 0) {
-            return MAX;
-        }
-        return temperature;
+    private static boolean withinBounds(double temperature) {
+        return temperature > MIN && temperature < MAX;
     }
 
     @Apply
     private void on(TermTemperatureChanged e) {
-        // do nothing cause it's broken.
         builder().setFahrenheit(e.getChange()
                                  .getNewValue());
     }

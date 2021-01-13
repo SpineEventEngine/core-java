@@ -37,6 +37,7 @@ import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -50,6 +51,11 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregate;
 import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
+import io.spine.server.aggregate.given.thermometer.SafeThermometer;
+import io.spine.server.aggregate.given.thermometer.SafeThermometerRepo;
+import io.spine.server.aggregate.given.thermometer.Thermometer;
+import io.spine.server.aggregate.given.thermometer.ThermometerId;
+import io.spine.server.aggregate.given.thermometer.event.TemperatureChanged;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.dispatch.BatchDispatchOutcome;
@@ -81,7 +87,7 @@ import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.ContextAwareTest;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.AfterEach;
@@ -318,7 +324,8 @@ public class AggregateTest {
 
         // Get the first event since the command handler produces only one event message.
         Aggregate<?, ?, ?> agg = aggregate;
-        List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
+        List<Event> uncommittedEvents = agg.getUncommittedEvents()
+                                           .list();
         Event event = uncommittedEvents.get(0);
         EventContext context = event.context();
         assertThat(aggregate.version())
@@ -719,7 +726,8 @@ public class AggregateTest {
 
         private ProtoSubject assertNextCommandId() {
             Event event = history.next();
-            return assertThat(event.rootMessage().asCommandId());
+            return assertThat(event.rootMessage()
+                                   .asCommandId());
         }
 
         @Test
@@ -818,7 +826,8 @@ public class AggregateTest {
     private static void dispatch(TenantId tenant,
                                  Supplier<MessageEndpoint<ProjectId, ?>> endpoint) {
         with(tenant).run(
-                () -> endpoint.get().dispatchTo(ID)
+                () -> endpoint.get()
+                              .dispatchTo(ID)
         );
     }
 
@@ -890,6 +899,48 @@ public class AggregateTest {
                         .hasSize(1);
             assertEvents.withType(AggUserNotified.class)
                         .hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("allow having validation on the aggregate state and")
+    class AllowValidatedAggregates extends ContextAwareTest {
+
+        private final ThermometerId thermometer = ThermometerId.generate();
+
+        @Override
+        protected BoundedContextBuilder contextBuilder() {
+            return BoundedContextBuilder
+                    .assumingTests()
+                    .add(new SafeThermometerRepo(thermometer));
+        }
+
+        @Test
+        @DisplayName("not change the Aggregate state when there is no reaction on the event")
+        void notChangeStateIfNoReaction() {
+            TemperatureChanged booksOnFire =
+                    TemperatureChanged.newBuilder()
+                                      .setFahrenheit(451)
+                                      .vBuild();
+            context().receivesExternalEvent(booksOnFire)
+                     .assertEntity(thermometer, SafeThermometer.class)
+                     .doesNotExist();
+        }
+
+        @Test
+        @DisplayName("save valid aggregate state on change")
+        void safelySaveValidState() {
+            TemperatureChanged gettingWarmer =
+                    TemperatureChanged.newBuilder()
+                                      .setFahrenheit(72)
+                                      .vBuild();
+            context().receivesExternalEvent(gettingWarmer);
+            Thermometer expected = Thermometer
+                    .newBuilder()
+                    .setId(thermometer)
+                    .setFahrenheit(72)
+                    .vBuild();
+            context().assertState(thermometer, expected);
         }
     }
 }

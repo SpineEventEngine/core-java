@@ -26,15 +26,22 @@
 
 package io.spine.server.aggregate.given.thermometer;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.given.thermometer.event.TemperatureChanged;
 import io.spine.server.route.EventRouting;
 
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
+
 public final class SafeThermometerRepo extends AggregateRepository<ThermometerId, SafeThermometer> {
+
+    private final ThermometerId thermometer;
+
+    public SafeThermometerRepo(ThermometerId thermometer) {
+        this.thermometer = checkNotDefaultArg(thermometer);
+    }
 
     @Override
     protected void setupEventRouting(EventRouting<ThermometerId> routing) {
-        routing.route(TemperatureChanged.class, (message, context) -> ImmutableSet.copyOf(index()));
+        routing.unicast(TemperatureChanged.class, (e) -> thermometer);
     }
 }
