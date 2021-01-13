@@ -317,12 +317,12 @@ public class AggregateTest {
         dispatchCommand(aggregate, command(createProject));
 
         // Get the first event since the command handler produces only one event message.
-        Aggregate<?, ?, ?> agg = this.aggregate;
+        Aggregate<?, ?, ?> agg = aggregate;
         List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
-
-        assertEquals(this.aggregate.version(), event.context()
-                                                    .getVersion());
+        EventContext context = event.context();
+        assertThat(aggregate.version())
+                .isEqualTo(context.getVersion());
     }
 
     @Test
