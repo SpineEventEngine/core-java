@@ -32,10 +32,16 @@ import io.spine.server.route.EventRouting;
 
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
+/**
+ * A {@link SafeThermometer thermometer} repository.
+ */
 public final class SafeThermometerRepo extends AggregateRepository<ThermometerId, SafeThermometer> {
 
     private final ThermometerId thermometer;
 
+    /**
+     * Creates a new repository for the {@code thermometer}.
+     */
     public SafeThermometerRepo(ThermometerId thermometer) {
         this.thermometer = checkNotDefaultArg(thermometer);
     }

@@ -35,7 +35,7 @@ option java_multiple_files = true;
 
 import "spine/test/aggregate/thermometer/thermometer.proto";
 
-// The outside temperature has changed.
+// A notion of the temperature change.
 message TemperatureChanged {
 
     // The temperature in ℉.

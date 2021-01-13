@@ -14,7 +14,7 @@ message ThermometerId {
   string uuid = 1 [(required) = true];
 }
 
-// The US daily thermometer.
+// A US thermometer for mild-weather regions.
 //
 // This particular thermometer type is created for the mild-weather conditions and is not gonna
 // work in cold parts of the country while not being able to determine the cold temperature
