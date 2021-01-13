@@ -90,7 +90,7 @@ abstract class AggregateEndpoint<I,
 
     private void storeAndPost(A aggregate, DispatchOutcome outcome) {
         Success success = outcome.getSuccess();
-        if (success.hasProducedEvents()) {
+        if (success.hasEvents()) {
             store(aggregate);
             List<Event> events = success.getProducedEvents()
                                         .getEventList();
@@ -126,7 +126,7 @@ abstract class AggregateEndpoint<I,
     final DispatchOutcome handleAndApplyEvents(A aggregate) {
         DispatchOutcome outcome = invokeDispatcher(aggregate);
         Success successfulOutcome = outcome.getSuccess();
-        return successfulOutcome.hasProducedEvents()
+        return successfulOutcome.hasEvents()
                ? applyProducedEvents(aggregate, outcome)
                : outcome;
     }
