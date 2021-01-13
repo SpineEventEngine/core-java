@@ -36,7 +36,7 @@ import io.spine.server.event.React;
 import java.util.Optional;
 
 /**
- * Sets the temperature to self {@link #MIN}/{@link #MAX} value without going crazy.
+ * Ignores temperature changes outside its own range.
  */
 public final class SafeThermometer extends Aggregate<ThermometerId, Thermometer, Thermometer.Builder> {
 
