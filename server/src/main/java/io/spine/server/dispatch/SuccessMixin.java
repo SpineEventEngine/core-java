@@ -49,4 +49,24 @@ interface SuccessMixin extends SuccessOrBuilder, FieldAwareMessage {
                 return getField(field);
         }
     }
+
+    /**
+     * Determines if the outcome has any produced events.
+     *
+     * @implNote Prefer using this method over the generated {@code hasProducedEvents}
+     *         while the latter only checks if the message is set.
+     */
+    default boolean hasEvents() {
+        return hasProducedEvents() && getProducedEvents().getEventCount() > 0;
+    }
+
+    /**
+     * Determines if the outcome has any produced commands.
+     *
+     * @implNote Prefer using this method over the generated {@code hasProducedCommands}
+     *         while the latter only checks if the message is set.
+     */
+    default boolean hasCommands() {
+        return hasProducedCommands() && getProducedCommands().getCommandCount() > 0;
+    }
 }
