@@ -23,24 +23,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.aggregate;
+package io.spine.server.aggregate.given.thermometer;
 
-import "spine/options.proto";
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.given.thermometer.event.TemperatureChanged;
+import io.spine.server.route.EventRouting;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.aggregate.given.fibonacci.command";
-option java_multiple_files = true;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
-import "spine/test/aggregate/fibonacci/fibonacci.proto";
+/**
+ * A {@link SafeThermometer thermometer} repository.
+ */
+public final class SafeThermometerRepo extends AggregateRepository<ThermometerId, SafeThermometer> {
 
-message SetStartingNumbers {
-    SequenceId id = 1;
-    int32 number_one = 2;
-    int32 number_two = 3;
-}
+    private final ThermometerId thermometer;
 
-message MoveSequence {
-    SequenceId id = 1;
+    /**
+     * Creates a new repository for the {@code thermometer}.
+     */
+    public SafeThermometerRepo(ThermometerId thermometer) {
+        this.thermometer = checkNotDefaultArg(thermometer);
+    }
+
+    @Override
+    protected void setupEventRouting(EventRouting<ThermometerId> routing) {
+        routing.unicast(TemperatureChanged.class, (e) -> thermometer);
+    }
 }
