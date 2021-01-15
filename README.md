@@ -7,34 +7,12 @@
 [Spine Event Engine][spine-site] is a Java framework for building Event Sourcing and CQRS
 applications that are accessed by clients built with JavaScript, Java Nano (Android), Dart, and Java.
 
-# This is 2.x `master` branch!
-
-This branch contains the configuration for the development-only 2.x branches of the Spine libraries.
-
-It must **NOT** be merged to the `master`, at least until the release of Spine 2.0.0.
-
-The configuration in this branch is **not production-ready**. 
-
-This branch must be treated as `master` for the configuration required during 
-the Spine 2.0.0 development. Any the changes to it must go through the PR review process.
- 
-## `config` submodule in 2.x branch
-
-The common configuration files are located in the [SpineEventEngine/config](https://github.com/SpineEventEngine/config)
-repository. In scope of 2.x development a special `2.x-jdk8-master` branch has been created 
-in the `config` repository as well. It has been connected to the current repository as a submodule.
-
-In order to get the actual code for the `config` submodule, run the following command:
-```bash
-git submodule update --init --recursive
-```
-
 ## Releases
 
 The project is under active ongoing development. 
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.6.0][latest-release].
+The latest stable version is [1.7.0][latest-release].
 
 ## Contents
 
@@ -84,7 +62,7 @@ latest version of the configuration files.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:developers@spine.io
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.6.0
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.7.0
 [spine-site]: https://spine.io/
 [quick-start]: https://spine.io/docs/quick-start
 [spine-examples]: https://github.com/spine-examples
