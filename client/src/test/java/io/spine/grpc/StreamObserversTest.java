@@ -34,7 +34,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Response;
-import io.spine.testing.Tests;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,22 +50,20 @@ import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.grpc.StreamObservers.fromStreamError;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.Assertions.assertIllegalState;
+import static io.spine.testing.TestValues.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("ThrowableNotThrown") // in custom assertions
 @DisplayName("StreamObservers utility should")
-class StreamObserversTest {
+class StreamObserversTest extends UtilityClassTest<StreamObservers> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(StreamObservers.class);
+    StreamObserversTest() {
+        super(StreamObservers.class);
     }
 
     @Test
@@ -74,15 +72,15 @@ class StreamObserversTest {
         StreamObserver<Response> emptyObserver = noOpObserver();
         assertNotNull(emptyObserver);
         // Call methods just to add to coverage.
-        emptyObserver.onNext(Tests.nullRef());
-        emptyObserver.onError(Tests.nullRef());
+        emptyObserver.onNext(nullRef());
+        emptyObserver.onError(nullRef());
         emptyObserver.onCompleted();
     }
 
     @Test
     @DisplayName("create proper error-forwarding observer")
     void createErrorForwardingObserver() {
-        MemoizingObserver delegate = new MemoizingObserver<>();
+        MemoizingObserver<?> delegate = new MemoizingObserver<>();
 
         StreamObserver<Object> forwardingInstance = forwardErrorsOnly(delegate);
 
@@ -108,7 +106,7 @@ class StreamObserversTest {
     }
 
     private static void checkFirstResponse(MemoizingObserver<Object> observer) {
-        assertThrows(IllegalStateException.class, observer::firstResponse);
+        assertIllegalState(observer::firstResponse);
     }
 
     private static void checkOnNext(MemoizingObserver<Object> observer) {

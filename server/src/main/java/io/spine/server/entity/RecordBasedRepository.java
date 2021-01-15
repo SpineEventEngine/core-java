@@ -43,11 +43,13 @@ import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.core.Event;
 import io.spine.core.Signal;
-import io.spine.server.entity.storage.EntityQueries;
-import io.spine.server.entity.storage.EntityQuery;
+import io.spine.query.EntityQuery;
+import io.spine.query.RecordQuery;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.RecordReadRequest;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.entity.storage.ToEntityRecordQuery;
+import io.spine.server.storage.QueryConverter;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,8 +57,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -64,9 +64,9 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -75,7 +75,7 @@ import static io.spine.validate.Validate.checkValid;
 /**
  * The base class for repositories that store entities as records.
  *
- * <p>Such a repository is backed by {@link RecordStorage}.
+ * <p>Such a repository is backed by {@link EntityRecordStorage}.
  * Entity states are stored as {@link EntityRecord}s.
  *
  * @param <I>
@@ -85,9 +85,8 @@ import static io.spine.validate.Validate.checkValid;
  * @param <S>
  *         the type of entity state messages
  */
-@SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
-public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends EntityState>
-        extends Repository<I, E> {
+public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends EntityState<I>>
+        extends Repository<I, E> implements QueryableRepository {
 
     /** Creates a new instance. */
     protected RecordBasedRepository() {
@@ -111,9 +110,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @throws IllegalStateException
      *         if the storage is null
      */
-    protected RecordStorage<I> recordStorage() {
+    protected EntityRecordStorage<I, S> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-        RecordStorage<I> storage = (RecordStorage<I>) storage();
+        EntityRecordStorage<I, S> storage = (EntityRecordStorage<I, S>) storage();
         return storage;
     }
 
@@ -126,9 +125,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     public void store(E entity) {
-        EntityRecordWithColumns record = toRecord(entity);
-        RecordStorage<I> storage = recordStorage();
-        storage.write(entity.id(), record);
+        RecordWithColumns<I, EntityRecord> record = toRecord(entity);
+        EntityRecordStorage<I, S> storage = recordStorage();
+        storage.write(record);
     }
 
     @Override
@@ -223,9 +222,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     @Override
-    protected RecordStorage<I> createStorage() {
+    protected EntityRecordStorage<I, S> createStorage() {
         StorageFactory sf = defaultStorageFactory();
-        RecordStorage<I> result = sf.createRecordStorage(context().spec(), entityClass());
+        EntityRecordStorage<I, S> result =
+                sf.createEntityRecordStorage(context().spec(), entityClass());
         return result;
     }
 
@@ -238,12 +238,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         the {@linkplain Entity Entities} to store
      */
     public void store(Collection<E> entities) {
-        Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
-        for (E entity : entities) {
-            EntityRecordWithColumns recordWithColumns = toRecord(entity);
-            records.put(entity.id(), recordWithColumns);
-        }
-        recordStorage().write(records);
+        ImmutableList<RecordWithColumns<I, EntityRecord>> records =
+                entities.stream()
+                        .map(this::toRecord)
+                        .collect(toImmutableList());
+        recordStorage().writeAll(records);
     }
 
     /**
@@ -280,9 +279,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * {@linkplain WithLifecycle#isActive() active}.
      */
     private Optional<EntityRecord> findRecord(I id) {
-        RecordStorage<I> storage = recordStorage();
-        RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        Optional<EntityRecord> found = storage.read(request);
+        EntityRecordStorage<I, S> storage = recordStorage();
+        Optional<EntityRecord> found = storage.read(id);
         if (!found.isPresent()) {
             return Optional.empty();
         }
@@ -310,7 +308,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @VisibleForTesting
     public Iterator<E> loadAll(ResponseFormat format) {
-        Iterator<EntityRecord> records = loadAllRecords(format);
+        Iterator<EntityRecord> records = findRecords(format);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
@@ -347,11 +345,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
-        RecordStorage<I> storage = recordStorage();
-        Iterator<@Nullable EntityRecord> records = storage.readMultiple(ids, fieldMask);
-        Iterator<EntityRecord> presentRecords = Iterators.filter(records, Objects::nonNull);
+        EntityRecordStorage<I, S> storage = recordStorage();
+        Iterator<EntityRecord> records = storage.readAll(ids, fieldMask);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
-        Iterator<E> result = transform(presentRecords, toEntity::apply);
+        Iterator<E> result = transform(records, toEntity::apply);
         return result;
     }
 
@@ -372,10 +369,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return an iterator over all records
      */
     @Internal
-    public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
+    @Override
+    public Iterator<EntityRecord> findRecords(ResponseFormat format) {
         checkNotNull(format);
-        RecordStorage<I> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll(format);
+        EntityRecordStorage<I, S> storage = recordStorage();
+        RecordQuery<I, EntityRecord> query = QueryConverter.newQuery(storage.recordSpec(), format);
+        Iterator<EntityRecord> records = storage.readAll(query);
         return records;
     }
 
@@ -391,7 +390,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>The field paths in the entity column field filters are specified
      * to contain a single path member - the name of the entity column.
      *
-     * <p>The filtering process is delegated to the underlying {@link RecordStorage}.
+     * <p>The filtering process is delegated to the underlying {@link EntityRecordStorage}.
      *
      * <p>Note: The storage must be assigned before calling this method.
      *
@@ -400,10 +399,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @param format
      *         the expected format of the query response
      * @return all the entities in this repository passed through the filters
-     * @see EntityQuery
      */
     public Iterator<E> find(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
+        checkValid(filters);
         checkNotNull(format);
 
         Iterator<EntityRecord> records = findRecords(filters, format);
@@ -413,22 +412,35 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Obtains iterator over {@linkplain EntityRecord entity records} matching the passed filters.
+     * Finds the entities according to the given {@code EntityQuery}.
      *
-     * @param filters
-     *         entity filters
-     *         the mask to apply to the entities
-     * @return the iterator over the matching records
+     * <p>Note: The storage must be assigned before calling this method.
+     *
+     * @param query
+     *         the entity query
+     * @return all the entities in this repository which satisfy the query
      */
+    public Iterator<E> find(EntityQuery<I, S, ?> query) {
+        checkNotNull(query);
+
+        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
+        Iterator<EntityRecord> records = recordStorage().readAll(recordQuery);
+        Function<EntityRecord, E> toEntity = storageConverter().reverse();
+        Iterator<E> result = transform(records, toEntity::apply);
+        return result;
+    }
+
+    @Override
     @Internal
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
         checkValid(filters);
         checkNotNull(format);
 
-        RecordStorage<I> storage = recordStorage();
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, storage);
-        Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
+        EntityRecordStorage<I, S> storage = recordStorage();
+        RecordQuery<I, EntityRecord> query =
+                QueryConverter.convert(filters, format, storage.recordSpec());
+        Iterator<EntityRecord> records = storage.readAll(query);
         return records;
     }
 
@@ -480,11 +492,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Converts the passed entity into the record.
      */
     @VisibleForTesting
-    EntityRecordWithColumns toRecord(E entity) {
-        EntityRecord entityRecord = storageConverter().convert(entity);
-        checkNotNull(entityRecord);
-        EntityRecordWithColumns result =
-                EntityRecordWithColumns.create(entityRecord, entity, recordStorage());
+    RecordWithColumns<I, EntityRecord> toRecord(E entity) {
+        EntityRecord record = storageConverter().convert(entity);
+        checkNotNull(record);
+        RecordWithColumns<I, EntityRecord> result =
+                EntityRecordWithColumns.create(entity, record);
         return result;
     }
 

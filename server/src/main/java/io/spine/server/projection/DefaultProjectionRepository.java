@@ -39,7 +39,7 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  * @see io.spine.server.DefaultRepository
  */
 @Internal
-public class DefaultProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState>
+public class DefaultProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState<I>>
         extends ProjectionRepository<I, P, S>
         implements DefaultRepository {
 

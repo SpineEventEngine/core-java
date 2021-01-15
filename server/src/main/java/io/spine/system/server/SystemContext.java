@@ -60,7 +60,7 @@ public final class SystemContext extends BoundedContext {
 
     private SystemContext(BoundedContextBuilder builder) {
         super(builder);
-        this.config = builder.systemFeatures()
+        this.config = builder.systemSettings()
                              .freeze();
     }
 
@@ -86,9 +86,6 @@ public final class SystemContext extends BoundedContext {
         if (config.includeCommandLog()) {
             register(commandLog);
             register(new ScheduledCommandRepository());
-        }
-        if (config.includeAggregateMirroring()) {
-            register(new MirrorRepository());
         }
     }
 

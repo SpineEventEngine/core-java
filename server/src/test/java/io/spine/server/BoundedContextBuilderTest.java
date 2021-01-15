@@ -154,16 +154,6 @@ class BoundedContextBuilderTest {
     private static class StubTenantIndex implements TenantIndex {
 
         @Override
-        public void registerWith(BoundedContext context) {
-            // Do nothing.
-        }
-
-        @Override
-        public boolean isRegistered() {
-            return true;
-        }
-
-        @Override
         public void keep(TenantId id) {
             // Do nothing.
         }
@@ -237,13 +227,14 @@ class BoundedContextBuilderTest {
 
         private BoundedContextBuilder builder;
         private CommandDispatcher dispatcher;
-        private AggregateRepository<?, ?> repository;
+        private AggregateRepository<?, ?, ?> repository;
 
         @BeforeEach
         void setUp() {
             builder = BoundedContextBuilder.assumingTests();
             dispatcher = new NoOpCommandDispatcher();
-            repository = (AggregateRepository<?, ?>) DefaultRepository.of(ProjectAggregate.class);
+            repository =
+                    (AggregateRepository<?, ?, ?>) DefaultRepository.of(ProjectAggregate.class);
         }
 
         @Test
@@ -344,6 +335,7 @@ class BoundedContextBuilderTest {
             builder.removeEventDispatcher(repository);
             assertFalse(builder.hasRepository(repository));
         }
+
         @Test
         @DisplayName("check repository presence in Builder if it's queried as event dispatcher")
         void checkHasRepo() {

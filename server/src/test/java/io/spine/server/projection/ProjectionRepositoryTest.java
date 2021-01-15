@@ -32,13 +32,8 @@ import com.google.common.collect.Lists;
 import com.google.common.truth.Correspondence;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import io.spine.base.EntityColumn;
 import io.spine.base.EventMessage;
-import io.spine.client.CompositeFilter;
-import io.spine.client.CompositeQueryFilter;
-import io.spine.client.QueryFilter;
 import io.spine.client.ResponseFormat;
-import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
@@ -49,6 +44,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
@@ -60,8 +56,7 @@ import io.spine.server.projection.given.TestProjection;
 import io.spine.server.projection.migration.MarkProjectionArchived;
 import io.spine.server.projection.migration.MarkProjectionDeleted;
 import io.spine.server.projection.migration.RemoveProjectionFromStorage;
-import io.spine.server.projection.migration.UpdateProjectionColumns;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.projection.migration.UpdateProjectionState;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
@@ -100,6 +95,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedEventId;
+import static io.spine.server.projection.given.SetTestProjectionName.NEW_NAME;
 import static io.spine.server.projection.given.dispatch.ProjectionEventDispatcher.dispatch;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertEventClasses;
@@ -113,7 +109,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ProjectionRepository should")
+@DisplayName("`ProjectionRepository` should")
 class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
 
@@ -192,7 +188,7 @@ class ProjectionRepositoryTest
     }
 
     @Override
-    protected List<TestProjection> createNamed(int count, Supplier<String> nameSupplier) {
+    protected List<TestProjection> createWithNames(int count, Supplier<String> nameSupplier) {
         List<TestProjection> projections = Lists.newArrayList();
 
         for (int i = 0; i < count; i++) {
@@ -345,7 +341,7 @@ class ProjectionRepositoryTest
         }
 
         @SuppressWarnings("OverlyCoupledMethod")
-        // A complex test case with many test domain messages.
+            // A complex test case with many test domain messages.
         @Test
         @DisplayName("entity state update")
         void entityState() throws Exception {
@@ -504,7 +500,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("entity storage")
         void entityStorage() {
-            RecordStorage<ProjectId> recordStorage = repository().recordStorage();
+            EntityRecordStorage<ProjectId, ?> recordStorage = repository().recordStorage();
             assertNotNull(recordStorage);
         }
     }
@@ -573,19 +569,20 @@ class ProjectionRepositoryTest
         repository.store(projection);
 
         // Init filters by the `id_string` column.
-        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+        Project.Query query =
+                Project.query()
+                       .idString().is(id.toString())
+                       .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProjection> found =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProjection> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the migration.
         repository.applyMigration(id, new SetTestProjectionId());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProjection> afterMigration =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProjection> afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the new entity state has all fields updated as expected.
@@ -614,32 +611,32 @@ class ProjectionRepositoryTest
         repository.store(projection3);
 
         // Init filters by the `name` column.
-        TargetFilters filters =
-                targetFilters(Project.Column.name(), SetTestProjectionName.NEW_NAME);
+        Project.Query query =
+                Project.query()
+                       .name().is(NEW_NAME)
+                       .build();
 
         // Check nothing is found as the entity states were not yet updated.
-        Iterator<TestProjection> found =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProjection> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the column update to two of the three entities.
         repository.applyMigration(ImmutableSet.of(id1, id2), new SetTestProjectionName());
 
         // Check the entities are now found by the provided filters.
-        Iterator<TestProjection> foundAfterMigration =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProjection> foundAfterMigration = repository.find(query);
 
         ImmutableList<TestProjection> results = ImmutableList.copyOf(foundAfterMigration);
         Project expectedState1 = projection1
                 .state()
                 .toBuilder()
-                .setName(SetTestProjectionName.NEW_NAME)
+                .setName(NEW_NAME)
                 .setIdString(projection1.getIdString())
                 .build();
         Project expectedState2 = projection2
                 .state()
                 .toBuilder()
-                .setName(SetTestProjectionName.NEW_NAME)
+                .setName(NEW_NAME)
                 .setIdString(projection2.getIdString())
                 .build();
         assertThat(results).hasSize(2);
@@ -649,8 +646,8 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns through migration operation")
-    void updateColumns() {
+    @DisplayName("update state through migration operation")
+    void updateState() {
         // Store a new projection instance in the repository.
         ProjectId id = createId(42);
         TestProjectionRepository repository = repository();
@@ -658,19 +655,20 @@ class ProjectionRepositoryTest
         repository.store(projection);
 
         // Init filters by the `id_string` column.
-        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+        Project.Query query =
+                Project.query()
+                       .idString().is(id.toString())
+                       .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProjection> found =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProjection> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
-        // Apply the columns update.
-        repository.applyMigration(id, new UpdateProjectionColumns<>());
+        // Apply the state update.
+        repository.applyMigration(id, new UpdateProjectionState<>());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProjection> afterMigration =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProjection> afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the column value is propagated to the entity state.
@@ -684,8 +682,8 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns for multiple entities")
-    void updateColumnsForMultiple() {
+    @DisplayName("update state of multiple entities")
+    void updateStateForMultiple() {
         // Store three projections to the repository.
         ProjectId id1 = createId(1);
         ProjectId id2 = createId(2);
@@ -698,18 +696,17 @@ class ProjectionRepositoryTest
         repository.store(projection2);
         repository.store(projection3);
 
-        // Apply the column update to two of the three entities.
-        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateProjectionColumns<>());
+        // Apply the state update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateProjectionState<>());
 
         // Check that entities to which migration has been applied now have column values updated.
-        QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
-        QueryFilter filter2 = QueryFilter.eq(Project.Column.idString(), id2.toString());
-        QueryFilter filter3 = QueryFilter.eq(Project.Column.idString(), id3.toString());
-
-        TargetFilters filters = targetFilters(filter1, filter2, filter3);
-
-        Iterator<TestProjection> found =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Project.Query query =
+                Project.query()
+                       .either(p -> p.idString().is(id1.toString()),
+                               p -> p.idString().is(id2.toString()),
+                               p -> p.idString().is(id3.toString()))
+                       .build();
+        Iterator<TestProjection> found = repository.find(query);
 
         ImmutableList<TestProjection> results = ImmutableList.copyOf(found);
         Project expectedState1 = projection1
@@ -769,20 +766,6 @@ class ProjectionRepositoryTest
 
         Optional<TestProjection> found = repository().find(id);
         assertThat(found).isEmpty();
-    }
-
-    private static TargetFilters targetFilters(EntityColumn column, String value) {
-        QueryFilter filter = QueryFilter.eq(column, value);
-        return targetFilters(filter);
-    }
-
-    private static TargetFilters targetFilters(QueryFilter first, QueryFilter... rest) {
-        CompositeQueryFilter composite = CompositeQueryFilter.either(first, rest);
-        CompositeFilter filterValue = composite.value();
-        return TargetFilters
-                .newBuilder()
-                .addFilter(filterValue)
-                .build();
     }
 
     private static Correspondence<TestProjection, Project> entityState() {

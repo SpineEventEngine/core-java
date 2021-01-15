@@ -40,9 +40,9 @@ dependencies {
 
 modelCompiler {
     fields {
-        // Enable the strongly-typed fields generation for `spine.core.Event` as currently it's
-        // a subscribable entity state.
-        generateFor("spine.core.Event", markAs("io.spine.base.EntityStateField"))
+
+        // Describe the `Event` fields to allow non-reflective and strongly-typed access.
+        generateFor("spine.core.Event", markAs("io.spine.core.EventField"))
 
         // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
         // creation of typed event filters based on event context.
@@ -51,7 +51,9 @@ modelCompiler {
 }
 
 apply {
-    from(Deps.scripts.testArtifacts(project))
-    from(Deps.scripts.publishProto(project))
+    with(Deps.scripts) {
+        from(testArtifacts(project))
+        from(publishProto(project))
+    }
     plugin(IncrementGuard::class)
 }

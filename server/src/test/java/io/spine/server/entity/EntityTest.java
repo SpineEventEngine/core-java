@@ -28,7 +28,6 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Range;
 import com.google.common.truth.LongSubject;
-import com.google.protobuf.StringValue;
 import io.spine.core.UserId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -43,13 +42,13 @@ import io.spine.server.entity.given.entity.UserAggregate;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
 import io.spine.test.user.ChooseDayOfBirth;
 import io.spine.test.user.SignUpUser;
 import io.spine.test.user.User;
 import io.spine.testdata.Sample;
-import io.spine.testing.Tests;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.time.LocalDates;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +59,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 import static io.spine.time.Month.FEBRUARY;
 import static io.spine.time.Month.JANUARY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -89,7 +88,7 @@ class EntityTest {
     @Test
     @DisplayName("not accept null ID")
     void notAcceptNullId() {
-        assertThrows(NullPointerException.class, () -> new EntityWithMessageId(Tests.nullRef()));
+        assertThrows(NullPointerException.class, () -> new EntityWithMessageId(nullRef()));
     }
 
     @Nested
@@ -148,7 +147,9 @@ class EntityTest {
         @Test
         @DisplayName("Message")
         void ofMessageType() {
-            StringValue messageId = StringValue.of("messageId");
+            ProjectId messageId = ProjectId.newBuilder()
+                                           .setId("messageId")
+                                           .vBuild();
             TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
             assertEquals(messageId, entityWithMessageID.id());
@@ -176,7 +177,7 @@ class EntityTest {
     @DisplayName("throw exception if try to set null state")
     void throwOnSettingNullState() {
         assertThrows(NullPointerException.class,
-                     () -> entityNew.updateState(Tests.nullRef(), Versions.zero()));
+                     () -> entityNew.updateState(nullRef(), Versions.zero()));
     }
 
     @Test
@@ -211,7 +212,7 @@ class EntityTest {
                 .setId(id)
                 .setDayOfBirth(LocalDates.of(1988, FEBRUARY, 29))
                 .vBuild();
-        BlackBoxContext bbc = BlackBoxContext
+        BlackBox bbc = BlackBox
                 .from(context)
                 .receivesCommand(signUpUser)
                 .receivesCommand(chooseInitial)
@@ -353,6 +354,7 @@ class EntityTest {
         @DisplayName("for entity with non-empty ID and state, non-zero hash code is generated")
         void nonZeroForNonEmptyEntity() {
             assertFalse(entityWithState.id()
+                                       .getId()
                                        .trim()
                                        .isEmpty());
 
@@ -434,12 +436,14 @@ class EntityTest {
         @Test
         @DisplayName("entities with different status are not equal")
         void consideredForEquality() {
-            // Create an entity with the same ID and the same (default) state.
-            AbstractEntity another = new TestEntityWithIdString(entityNew.id());
+            // Create entities with the same ID and the same (default) state.
+            String id = "This very same identifier";
+            AbstractEntity<?, ?> oneEntity = new TestEntityWithIdString(id);
+            AbstractEntity<?, ?> another = new TestEntityWithIdString(id);
 
             another.setArchived(true);
 
-            assertNotEquals(entityNew, another);
+            assertNotEquals(oneEntity, another);
         }
 
         @Test

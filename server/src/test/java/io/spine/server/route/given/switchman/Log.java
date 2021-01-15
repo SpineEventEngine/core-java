@@ -83,7 +83,7 @@ public final class Log extends Aggregate<Long, LogState, LogState.Builder> {
     /**
      * The repository with default routing functions that route to the singleton aggregate.
      */
-    public static final class Repository extends AggregateRepository<Long, Log> {
+    public static final class Repository extends AggregateRepository<Long, Log, LogState> {
 
         private static final ImmutableSet<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
 

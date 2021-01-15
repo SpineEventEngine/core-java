@@ -27,10 +27,11 @@
 package io.spine.server.aggregate.given.repo;
 
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.test.shared.EmptyAggregate;
 
 /**
  * The repository of {@link io.spine.server.aggregate.given.repo.AnemicAggregate}.
  */
 public class AnemicAggregateRepository
-        extends AggregateRepository<Integer, AnemicAggregate> {
+        extends AggregateRepository<String, AnemicAggregate, EmptyAggregate> {
 }

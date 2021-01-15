@@ -37,7 +37,7 @@ import io.spine.server.route.given.switchman.rejection.SwitchmanUnavailable;
  * A repository which fires a rejection in response to a command with a particular value of the
  * target aggregate ID.
  */
-public final class SwitchmanBureau extends AggregateRepository<String, Switchman> {
+public final class SwitchmanBureau extends AggregateRepository<String, Switchman, SwitchmanLog> {
 
     /** The ID of the aggregate for which a {@link SetSwitch command} would be rejected. */
     public static final String MISSING_SWITCHMAN_NAME = "Petrovich";

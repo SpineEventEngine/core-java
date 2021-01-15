@@ -52,7 +52,7 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
  * @param <S> the type of the entity state
  */
 @VisibleForTesting
-public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends EntityState>
+public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends EntityState<I>>
         extends ReflectiveBuilder<E> {
 
     /**

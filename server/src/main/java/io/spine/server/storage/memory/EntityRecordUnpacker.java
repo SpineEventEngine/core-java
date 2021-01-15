@@ -37,12 +37,12 @@ import java.util.function.Function;
  *
  * <p>The {@code null} input is always converted to {@code null}.
  */
-enum EntityRecordUnpacker implements Function<EntityRecordWithColumns, EntityRecord> {
+enum EntityRecordUnpacker implements Function<EntityRecordWithColumns<?>, EntityRecord> {
 
     INSTANCE;
 
     @Override
-    public @Nullable EntityRecord apply(@Nullable EntityRecordWithColumns input) {
+    public @Nullable EntityRecord apply(@Nullable EntityRecordWithColumns<?> input) {
         if (input == null) {
             return null;
         }

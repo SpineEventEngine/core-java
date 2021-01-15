@@ -36,16 +36,13 @@ import com.google.errorprone.annotations.Immutable;
 final class SystemConfig implements SystemFeatures {
 
     private final boolean commandLog;
-    private final boolean aggregateMirrors;
     private final boolean storeEvents;
     private final boolean parallelPosting;
 
     SystemConfig(boolean commandLog,
-                 boolean aggregateMirrors,
                  boolean storeEvents,
                  boolean parallelPosting) {
         this.commandLog = commandLog;
-        this.aggregateMirrors = aggregateMirrors;
         this.storeEvents = storeEvents;
         this.parallelPosting = parallelPosting;
     }
@@ -53,11 +50,6 @@ final class SystemConfig implements SystemFeatures {
     @Override
     public boolean includeCommandLog() {
         return commandLog;
-    }
-
-    @Override
-    public boolean includeAggregateMirroring() {
-        return aggregateMirrors;
     }
 
     @Override
@@ -70,7 +62,6 @@ final class SystemConfig implements SystemFeatures {
         return parallelPosting;
     }
 
-    @SuppressWarnings("OverlyComplexBooleanExpression")
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -81,13 +72,12 @@ final class SystemConfig implements SystemFeatures {
         }
         SystemConfig config = (SystemConfig) o;
         return commandLog == config.commandLog &&
-                aggregateMirrors == config.aggregateMirrors &&
                 storeEvents == config.storeEvents &&
                 parallelPosting == config.parallelPosting;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(commandLog, aggregateMirrors, storeEvents, parallelPosting);
+        return Objects.hashCode(commandLog, storeEvents, parallelPosting);
     }
 }

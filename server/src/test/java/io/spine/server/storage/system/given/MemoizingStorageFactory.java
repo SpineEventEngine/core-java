@@ -27,22 +27,22 @@
 package io.spine.server.storage.system.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
+import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
-import io.spine.server.entity.Entity;
 import io.spine.server.event.EventStore;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 
 /**
  * A test-only {@link StorageFactory} which always returns {@code null}s instead of storages and
@@ -57,25 +57,9 @@ public final class MemoizingStorageFactory implements StorageFactory {
     private boolean closed = false;
 
     @Override
-    public <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context,
-                           Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
-        requestedStorages.add(aggregateClass);
-        return nullRef();
-    }
-
-    @Override
-    public <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
-        requestedStorages.add(entityClass);
-        return nullRef();
-    }
-
-    @Override
-    public <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context,
-                            Class<? extends Projection<I, ?, ?>> projectionClass) {
-        requestedStorages.add(projectionClass);
+    public <I, S extends EntityState<I>> AggregateStorage<I, S>
+    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, S, ?>> aggregateCls) {
+        requestedStorages.add(aggregateCls);
         return nullRef();
     }
 
@@ -94,6 +78,13 @@ public final class MemoizingStorageFactory implements StorageFactory {
     @Override
     public EventStore createEventStore(ContextSpec context) {
         requestedEventStore = true;
+        return nullRef();
+    }
+
+    @Override
+    public <I, M extends Message> RecordStorage<I, M>
+    createRecordStorage(ContextSpec context, RecordSpec<I, M, ?> recordSpec) {
+        requestedStorages.add(recordSpec.recordType());
         return nullRef();
     }
 

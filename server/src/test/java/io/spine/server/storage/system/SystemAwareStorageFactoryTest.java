@@ -40,15 +40,16 @@ import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
-import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import io.spine.server.storage.system.given.TestAggregate;
-import io.spine.server.storage.system.given.TestProjection;
+import io.spine.system.server.Company;
 import io.spine.system.server.CompanyId;
-import io.spine.test.storage.TaskId;
+import io.spine.test.projection.Project;
+import io.spine.test.projection.ProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -111,7 +112,7 @@ class SystemAwareStorageFactoryTest {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         Class<TestAggregate> aggregateClass = TestAggregate.class;
-        AggregateStorage<CompanyId> storage =
+        AggregateStorage<CompanyId, Company> storage =
                 systemAware.createAggregateStorage(CONTEXT, aggregateClass);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages())
@@ -119,28 +120,18 @@ class SystemAwareStorageFactoryTest {
     }
 
     @Test
-    @DisplayName("delegate projection storage creation to given factory")
-    void delegateProjectionStorage() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        Class<TestProjection> projectionClass = TestProjection.class;
-        ProjectionStorage<TaskId> storage =
-                systemAware.createProjectionStorage(CONTEXT, projectionClass);
-        assertThat(storage).isNull();
-        assertThat(factory.requestedStorages())
-                .containsExactly(projectionClass);
-    }
-
-    @Test
     @DisplayName("delegate record storage creation to given factory")
     void delegateRecordStorage() {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        Class<TestProjection> projectionClass = TestProjection.class;
-        RecordStorage<TaskId> storage = systemAware.createRecordStorage(CONTEXT, projectionClass);
+        Class<Project> recordType = Project.class;
+        MessageRecordSpec<ProjectId, Project> spec =
+                new MessageRecordSpec<>(ProjectId.class, Project.class,
+                                        i -> ProjectId.getDefaultInstance());
+        RecordStorage<ProjectId, Project> storage = systemAware.createRecordStorage(CONTEXT, spec);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages())
-                .containsExactly(projectionClass);
+                .containsExactly(recordType);
     }
 
     @Test
@@ -174,7 +165,7 @@ class SystemAwareStorageFactoryTest {
     }
 
     @Test
-    @DisplayName("create EmptyEventStore if event persistence is disabled")
+    @DisplayName("create `EmptyEventStore` if event persistence is disabled")
     void createEmptyEventStore() {
         MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);

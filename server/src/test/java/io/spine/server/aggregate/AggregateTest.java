@@ -67,7 +67,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CannotDispatchDuplicateCommand;
 import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -136,7 +136,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AggregateTest {
 
     private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("prj-01")
+                                                 .setUuid("prj-01")
                                                  .build();
 
     private static final AggCreateProject createProject = Given.CommandMessage.createProject(ID);
@@ -193,14 +193,6 @@ public class AggregateTest {
     @AfterEach
     void tearDown() throws Exception {
         context.close();
-    }
-
-    @Test
-    @DisplayName("not allow a negative event count after last snapshot")
-    void negativeEventCount() {
-        Aggregate<?, ?, ?> aggregate = this.aggregate;
-        assertThrows(IllegalArgumentException.class,
-                     () -> aggregate.setEventCountAfterLastSnapshot(-1));
     }
 
     @Nested
@@ -403,7 +395,7 @@ public class AggregateTest {
         void updatedUponCommandHandled() {
             dispatchCommand(aggregate, command(createProject));
 
-            Project state = aggregate.state();
+            AggProject state = aggregate.state();
 
             assertEquals(ID, state.getId());
             assertEquals(Status.CREATED, state.getStatus());
@@ -426,7 +418,7 @@ public class AggregateTest {
     }
 
     @Test
-    @DisplayName("play events")
+    @DisplayName("replay historical events")
     void playEvents() {
         List<Event> events = generateProjectEvents();
         AggregateHistory aggregateHistory =
@@ -435,7 +427,7 @@ public class AggregateTest {
                                 .build();
 
         AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
-        aggregate().play(aggregateHistory);
+        aggregate().replay(aggregateHistory);
         tx.commit();
 
         assertTrue(aggregate.projectCreatedEventApplied);
@@ -453,9 +445,9 @@ public class AggregateTest {
         Aggregate<?, ?, ?> anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(anotherAggregate);
-        anotherAggregate.play(AggregateHistory.newBuilder()
-                                              .setSnapshot(snapshot)
-                                              .build());
+        anotherAggregate.replay(AggregateHistory.newBuilder()
+                                                .setSnapshot(snapshot)
+                                                .build());
         tx.commit();
 
         assertEquals(aggregate, anotherAggregate);
@@ -546,7 +538,7 @@ public class AggregateTest {
         dispatchCommand(aggregate, command(createProject));
 
         Snapshot snapshot = aggregate().toSnapshot();
-        Project state = unpack(snapshot.getState(), Project.class);
+        AggProject state = unpack(snapshot.getState(), AggProject.class);
 
         assertEquals(ID, state.getId());
         assertEquals(Status.CREATED, state.getStatus());
@@ -663,7 +655,7 @@ public class AggregateTest {
                     .addEvent(event)
                     .build();
             BatchDispatchOutcome batchDispatchOutcome =
-                    ((Aggregate<?, ?, ?>) faultyAggregate).play(history);
+                    ((Aggregate<?, ?, ?>) faultyAggregate).replay(history);
             assertThat(batchDispatchOutcome.getSuccessful()).isFalse();
             MessageId expectedTarget = MessageId
                     .newBuilder()
@@ -837,9 +829,8 @@ public class AggregateTest {
 
         @Override
         protected BoundedContextBuilder contextBuilder() {
-            return BoundedContextBuilder
-                    .assumingTests()
-                    .add(new TaskAggregateRepository());
+            return BoundedContextBuilder.assumingTests()
+                                        .add(new TaskAggregateRepository());
         }
 
         /**

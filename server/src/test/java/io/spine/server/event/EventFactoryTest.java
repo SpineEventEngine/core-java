@@ -29,7 +29,7 @@ package io.spine.server.event;
 import com.google.protobuf.Any;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.command.event.MandatoryFieldEvent;
-import io.spine.testing.Tests;
+import io.spine.testing.TestValues;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.pack;
 import static io.spine.testing.TestValues.newUuidValue;
+import static io.spine.testing.TestValues.nullRef;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("EventFactory should")
@@ -57,14 +58,14 @@ class EventFactoryTest {
     @Test
     @DisplayName("require producer ID")
     void requireProducerId() {
-        assertThrows(NullPointerException.class, () -> EventFactory.on(origin, Tests.nullRef()));
+        assertThrows(NullPointerException.class, () -> EventFactory.on(origin, nullRef()));
     }
 
     @Test
     @DisplayName("require origin")
     void requireOrigin() {
         assertThrows(NullPointerException.class,
-                     () -> EventFactory.on(Tests.<CommandEnvelope>nullRef(), producerId));
+                     () -> EventFactory.on(TestValues.<CommandEnvelope>nullRef(), producerId));
     }
 
     @Test

@@ -35,7 +35,7 @@ import static io.spine.testing.server.blackbox.given.GivenCommandError.duplicati
 import static io.spine.testing.server.blackbox.given.GivenCommandError.nonValidationError;
 import static io.spine.testing.server.blackbox.given.GivenCommandError.unsupportedError;
 
-@DisplayName("UnsupportedCommandGuard should")
+@DisplayName("`UnsupportedCommandGuard` should")
 class UnsupportedCommandGuardTest {
 
     private UnsupportedCommandGuard guard;

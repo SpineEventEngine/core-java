@@ -41,7 +41,7 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
 @Internal
 public final class DefaultProcessManagerRepository<I,
                                                    P extends ProcessManager<I, S, ?>,
-                                                   S extends EntityState>
+                                                   S extends EntityState<I>>
         extends ProcessManagerRepository<I, P, S>
         implements DefaultRepository {
 

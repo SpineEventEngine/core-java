@@ -30,7 +30,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -44,7 +47,9 @@ import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventProducingRepository;
+import io.spine.server.entity.QueryableRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
@@ -58,11 +63,9 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
-import io.spine.system.server.Mirror;
-import io.spine.system.server.MirrorRepository;
-import io.spine.system.server.SystemSettings;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -83,12 +86,15 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the aggregate IDs
  * @param <A>
  *         the type of the aggregates managed by this repository
+ * @param <S>
+ *         the type of the state of aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings("ClassWithTooManyMethods")
-public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState<I>>
         extends Repository<I, A>
-        implements CommandDispatcher, EventProducingRepository, EventDispatcherDelegate {
+        implements CommandDispatcher, EventProducingRepository,
+                   EventDispatcherDelegate, QueryableRepository {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -159,7 +165,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         }
         initCache(context.isMultitenant());
         initInbox();
-        initMirror();
+        configureQuerying();
     }
 
     @Override
@@ -300,8 +306,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @VisibleForTesting
     protected void doStore(A aggregate) {
-        Write<I> operation = Write.operationFor(this, aggregate);
-        operation.perform();
+        UncommittedHistory history = aggregate.uncommittedHistory();
+        aggregateStorage().writeAll(aggregate, history.get());
+        aggregate.commitEvents();
     }
 
     /**
@@ -310,9 +317,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return new storage
      */
     @Override
-    protected AggregateStorage<I> createStorage() {
+    protected AggregateStorage<I, S> createStorage() {
         StorageFactory sf = defaultStorageFactory();
-        AggregateStorage<I> result = sf.createAggregateStorage(context().spec(), entityClass());
+        AggregateStorage<I, S> result = sf.createAggregateStorage(context().spec(), entityClass());
         return result;
     }
 
@@ -487,43 +494,26 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Sets up entity state {@linkplain MirrorRepository mirroring} for the aggregates of this
-     * repository.
+     * Checks if the aggregate should be mirrored, and configures
+     * the underlying storage accordingly.
      */
-    private void initMirror() {
-        if (shouldBeMirrored()) {
-            mirrorRepository().ifPresent(repo -> {
-                repo.registerMirroredType(this);
-                aggregateStorage().configureMirror(repo, entityStateType());
-            });
+    private void configureQuerying() {
+        if(exposedToQuerying()) {
+            aggregateStorage().enableStateQuerying();
         }
     }
 
     /**
-     * Returns {@code true} if the aggregates of this repository should be mirrored.
+     * Returns {@code true} if the aggregates of this repository should be available for querying.
      *
-     * <p>When the entity is mirrored, its latest state is stored in a dedicated system
-     * {@linkplain io.spine.system.server.MirrorProjection projection}, allowing for efficient
-     * querying from outside.
+     * <p>When enabled, the underlying storage persists the latest state of the corresponding
+     * Aggregate instance.
      *
-     * <p>All aggregates visible for querying or subscribing should be mirrored.
+     * <p>This feature is enabled for all aggregates visible for querying or subscribing.
      */
-    private boolean shouldBeMirrored() {
-        boolean shouldBeMirrored = aggregateClass().visibility()
-                                                   .isNotNone();
-        return shouldBeMirrored;
-    }
-
-    /**
-     * Returns a {@link MirrorRepository} of a corresponding {@link BoundedContext}.
-     *
-     * <p>Returns {@code Optional.empty()} if aggregate mirroring is
-     * {@linkplain SystemSettings disabled} in the system context.
-     */
-    private Optional<MirrorRepository> mirrorRepository() {
-        Optional<MirrorRepository> result = context().systemClient()
-                                                     .systemRepositoryFor(Mirror.class)
-                                                     .map(MirrorRepository.class::cast);
+    private boolean exposedToQuerying() {
+        boolean result = aggregateClass().visibility()
+                                         .isNotNone();
         return result;
     }
 
@@ -534,9 +524,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @throws IllegalStateException
      *         if the storage is null
      */
-    protected AggregateStorage<I> aggregateStorage() {
+    protected AggregateStorage<I, S> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-                AggregateStorage<I> result = (AggregateStorage<I>) storage();
+        AggregateStorage<I, S> result = (AggregateStorage<I, S>) storage();
         return result;
     }
 
@@ -570,7 +560,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>This method defines the basic flow of an {@code Aggregate} loading. First,
      * the {@linkplain AggregateHistory Aggregate history} is
      * {@linkplain #loadHistory fetched} from the storage. Then the {@code Aggregate} is
-     * {@linkplain #play restored} from its state history.
+     * {@linkplain #restore restored} from its state history.
      *
      * @param id
      *         the ID of the aggregate
@@ -579,7 +569,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private Optional<A> load(I id) {
         Optional<AggregateHistory> found = loadHistory(id);
-        Optional<A> result = found.map(history -> play(id, history));
+        Optional<A> result = found.map(history -> restore(id, history));
         return result;
     }
 
@@ -588,9 +578,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>The method loads only the recent history of the aggregate.
      *
-     * <p>The current {@link #snapshotTrigger} is used as a read operation
-     * {@linkplain AggregateReadRequest#batchSize()} batch size}, so the method can perform
-     * sub-optimally for some time after a {@link #snapshotTrigger} change.
+     * <p>The current {@link #snapshotTrigger} is used as a batch size of the read operation,
+     * so the method can perform sub-optimally for some time
+     * after the {@link #snapshotTrigger} change.
      *
      * @param id
      *         the ID of the {@code Aggregate} to fetch
@@ -598,10 +588,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         {@code Optional.empty()} if there is no record with the ID
      */
     private Optional<AggregateHistory> loadHistory(I id) {
-        AggregateStorage<I> storage = aggregateStorage();
+        AggregateStorage<I, S> storage = aggregateStorage();
         int batchSize = snapshotTrigger + 1;
-        AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
-        Optional<AggregateHistory> result = storage.read(request);
+        Optional<AggregateHistory> result = storage.read(id, batchSize);
         return result;
     }
 
@@ -615,10 +604,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         the state record of the {@code Aggregate} to load
      * @return an instance of {@link Aggregate}
      */
-    protected A play(I id, AggregateHistory history) {
+    protected A restore(I id, AggregateHistory history) {
         A result = create(id);
         AggregateTransaction<I, ?, ?> tx = AggregateTransaction.start(result);
-        BatchDispatchOutcome outcome = result.play(history);
+        BatchDispatchOutcome outcome = result.replay(history);
         boolean success = outcome.getSuccessful();
         tx.commitIfActive();
         if (!success) {
@@ -662,5 +651,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (inbox != null) {
             inbox.unregister();
         }
+    }
+
+    @Override
+    @Internal
+    public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
+        return aggregateStorage().readStates(filters, format);
+    }
+
+    @Override
+    @Internal
+    public Iterator<EntityRecord> findRecords(ResponseFormat format) {
+        return aggregateStorage().readStates(format);
     }
 }

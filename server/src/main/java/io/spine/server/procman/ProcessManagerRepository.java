@@ -87,7 +87,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
-                                               S extends EntityState>
+                                               S extends EntityState<I>>
         extends EventDispatchingRepository<I, P, S>
         implements CommandDispatcherDelegate, EventProducingRepository {
 

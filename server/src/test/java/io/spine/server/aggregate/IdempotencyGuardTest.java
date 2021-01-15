@@ -58,7 +58,6 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.command;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProject;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.event;
-import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newProjectId;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.projectPaused;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProject;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.taskStarted;
@@ -78,13 +77,14 @@ class IdempotencyGuardTest {
         repository = new IgTestAggregateRepository();
         context.internalAccess()
                .register(repository);
-        projectId = newProjectId();
+        projectId = ProjectId.generate();
     }
 
     @AfterEach
     void tearDown() throws Exception {
         repository.close();
         context.close();
+        ModelTests.dropAllModels();
     }
 
     @Nested

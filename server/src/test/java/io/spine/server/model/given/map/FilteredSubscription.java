@@ -32,7 +32,7 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.given.SavedString;
 import io.spine.test.projection.event.Int32Imported;
 
-import static io.spine.testing.Tests.halt;
+import static io.spine.testing.Testing.halt;
 
 /**
  * Valid projection class which filters events by values.

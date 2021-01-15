@@ -56,7 +56,7 @@ final class VersionSequence {
      * @param originalEvents
      *         the events to be applied
      * @return events ready to be applied to this aggregate
-     * @see Aggregate#apply(List)
+     * @see Aggregate#apply(List, int)
      */
     ImmutableList<Event> update(Collection<Event> originalEvents) {
         Stream<Version> versions =

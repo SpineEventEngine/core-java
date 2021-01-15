@@ -35,7 +35,8 @@ import static io.spine.util.Preconditions2.checkNotDefaultArg;
 /**
  * A {@link SafeThermometer thermometer} repository.
  */
-public final class SafeThermometerRepo extends AggregateRepository<ThermometerId, SafeThermometer> {
+public final class SafeThermometerRepo
+        extends AggregateRepository<ThermometerId, SafeThermometer, Thermometer> {
 
     private final ThermometerId thermometer;
 

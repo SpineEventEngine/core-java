@@ -29,7 +29,6 @@ package io.spine.server.event.store;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.server.BoundedContext;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 
@@ -40,7 +39,6 @@ import io.spine.server.event.EventStreamQuery;
 public final class EmptyEventStore implements EventStore {
 
     private boolean open = true;
-    private boolean registered = false;
 
     @Override
     public void append(Event event) {
@@ -60,16 +58,6 @@ public final class EmptyEventStore implements EventStore {
     @Override
     public boolean isOpen() {
         return open;
-    }
-
-    @Override
-    public void registerWith(BoundedContext context) {
-        this.registered = true;
-    }
-
-    @Override
-    public boolean isRegistered() {
-        return registered;
     }
 
     @Override

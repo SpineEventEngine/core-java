@@ -48,14 +48,15 @@ public final class CounterView extends Projection<String, DCounter, DCounter.Bui
 
     private static int weight = 1;
 
+    public static void changeWeightTo(int value) {
+        weight = value;
+    }
+
     @Subscribe
+    @SuppressWarnings("unused")
     void on(NumberAdded event, EventContext context) {
         DCounter.Builder builder = builder();
         builder.setTotal(builder.getTotal() + weight);
-    }
-
-    public static void changeWeightTo(int value) {
-        weight = value;
     }
 
     public static TypeUrl projectionType() {

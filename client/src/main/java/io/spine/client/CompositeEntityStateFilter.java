@@ -39,7 +39,7 @@ import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 /**
  * A subscription filter which aggregates one or more {@link EntityState} filters.
  */
-public final class CompositeEntityStateFilter extends TypedCompositeFilter<EntityState> {
+public final class CompositeEntityStateFilter extends TypedCompositeFilter<EntityState<?>> {
 
     private static final long serialVersionUID = 0L;
 

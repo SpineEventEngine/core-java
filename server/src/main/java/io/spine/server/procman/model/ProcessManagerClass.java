@@ -50,7 +50,7 @@ import static com.google.common.collect.Sets.union;
  * @param <P>
  *         the type of process managers
  */
-public final class ProcessManagerClass<P extends ProcessManager>
+public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
         extends CommandHandlingEntityClass<P>
         implements ReactingClass, CommandingClass {
 
@@ -68,8 +68,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
     /**
      * Obtains the process manager class for the passed raw class.
      */
-    @SuppressWarnings("rawtypes")
-    public static <P extends ProcessManager>
+    public static <P extends ProcessManager<?, ?, ?>>
     ProcessManagerClass<P> asProcessManagerClass(Class<P> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")

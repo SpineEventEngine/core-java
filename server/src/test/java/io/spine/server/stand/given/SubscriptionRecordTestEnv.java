@@ -39,7 +39,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.event.ProjectCreated;
@@ -49,7 +49,7 @@ import java.util.Collections;
 
 public final class SubscriptionRecordTestEnv {
 
-    public static final TypeUrl TYPE = TypeUrl.of(Project.class);
+    public static final TypeUrl TYPE = TypeUrl.of(AggProject.class);
     public static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
 
     /** Prevents instantiation of this utility class. */
@@ -57,12 +57,12 @@ public final class SubscriptionRecordTestEnv {
     }
 
     public static EventEnvelope
-    stateChangedEnvelope(ProjectId id, Project oldState, Project newState) {
+    stateChangedEnvelope(ProjectId id, AggProject oldState, AggProject newState) {
         return stateChangedEnvelope(id, oldState, newState, TYPE);
     }
 
     public static EventEnvelope
-    stateChangedEnvelope(ProjectId id, Project oldState, Project newState, TypeUrl type) {
+    stateChangedEnvelope(ProjectId id, AggProject oldState, AggProject newState, TypeUrl type) {
         EntityStateChanged eventMessage = entityStateChanged(id, oldState, newState, type);
         Any packedMessage = TypeConverter.toAny(eventMessage);
         Event event = Event
@@ -74,7 +74,7 @@ public final class SubscriptionRecordTestEnv {
     }
 
     private static EntityStateChanged
-    entityStateChanged(ProjectId id, Project oldState, Project newState, TypeUrl type) {
+    entityStateChanged(ProjectId id, AggProject oldState, AggProject newState, TypeUrl type) {
         Any packedId = Identifier.pack(id);
         MessageId entityId = MessageId
                 .newBuilder()
@@ -133,17 +133,17 @@ public final class SubscriptionRecordTestEnv {
     }
 
     private static Target target() {
-        Target target = Targets.allOf(Project.class);
+        Target target = Targets.allOf(AggProject.class);
         return target;
     }
 
     private static Target target(ProjectId targetId) {
-        Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
+        Target target = Targets.someOf(AggProject.class, Collections.singleton(targetId));
         return target;
     }
 
-    public static Project projectWithName(String name) {
-        return Project
+    public static AggProject projectWithName(String name) {
+        return AggProject
                 .newBuilder()
                 .setName(name)
                 .build();
@@ -152,7 +152,7 @@ public final class SubscriptionRecordTestEnv {
     public static ProjectId projectId(String id) {
         return ProjectId
                 .newBuilder()
-                .setId(id)
+                .setUuid(id)
                 .build();
     }
 }

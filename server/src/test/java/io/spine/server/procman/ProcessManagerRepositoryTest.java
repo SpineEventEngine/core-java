@@ -32,13 +32,7 @@ import com.google.common.truth.Correspondence;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
-import io.spine.base.EntityColumn;
 import io.spine.base.EventMessage;
-import io.spine.client.CompositeFilter;
-import io.spine.client.CompositeQueryFilter;
-import io.spine.client.QueryFilter;
-import io.spine.client.ResponseFormat;
-import io.spine.client.TargetFilters;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
@@ -67,7 +61,7 @@ import io.spine.server.procman.given.repo.TestProcessManagerRepository;
 import io.spine.server.procman.migration.MarkPmArchived;
 import io.spine.server.procman.migration.MarkPmDeleted;
 import io.spine.server.procman.migration.RemovePmFromStorage;
-import io.spine.server.procman.migration.UpdatePmColumns;
+import io.spine.server.procman.migration.UpdatePmState;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -92,7 +86,7 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,6 +119,7 @@ import static io.spine.server.procman.given.repo.GivenCommandMessage.projectCrea
 import static io.spine.server.procman.given.repo.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.taskAdded;
+import static io.spine.server.procman.given.repo.SetTestProcessName.NEW_NAME;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
@@ -136,7 +131,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ProcessManagerRepository should")
+@DisplayName("`ProcessManagerRepository` should")
 class ProcessManagerRepositoryTest
         extends RecordBasedRepositoryTest<TestProcessManager, ProjectId, Project> {
 
@@ -167,32 +162,28 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected List<TestProcessManager> createEntities(int count) {
-        return createEntitiesWithState(count, id -> Project.getDefaultInstance());
+        return createNamedEntities(count, id -> randomString());
     }
 
     @Override
-    protected List<TestProcessManager> createNamed(int count, Supplier<String> nameSupplier) {
-        return createEntitiesWithState(count, id -> Project.newBuilder()
-                                                           .setId(id)
-                                                           .setName(nameSupplier.get())
-                                                           .build());
+    protected List<TestProcessManager> createWithNames(int count, Supplier<String> nameSupplier) {
+        return createNamedEntities(count, id -> nameSupplier.get());
     }
 
     private List<TestProcessManager>
-    createEntitiesWithState(int count, Function<ProjectId, Project> initialStateSupplier) {
+    createNamedEntities(int count, Function<ProjectId, String> nameSupplier) {
         List<TestProcessManager> procmans = newArrayList();
 
         for (int i = 0; i < count; i++) {
             ProjectId id = createId(i);
-            TestProcessManager procman = new TestProcessManager(id);
-            setEntityState(procman, initialStateSupplier.apply(id));
+            String name = nameSupplier.apply(id);
 
             TestProcessManager pm =
                     Given.processManagerOfClass(TestProcessManager.class)
                          .withId(id)
                          .withState(Project.newBuilder()
                                            .setId(id)
-                                           .setName("Test pm name" + randomString())
+                                           .setName(name)
                                            .build())
                          .build();
             procmans.add(pm);
@@ -625,7 +616,7 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        BlackBoxContext context = BlackBoxContext.from(
+        BlackBox context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(new EventDiscardingProcManRepository())
         );
@@ -671,19 +662,20 @@ class ProcessManagerRepositoryTest
         repository.store(pm);
 
         // Init filters by the `id_string` column.
-        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+        Project.Query query =
+                Project.query()
+                       .idString().is(id.toString())
+                       .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProcessManager> found =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the migration.
         repository.applyMigration(id, new SetTestProcessId());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProcessManager> afterMigration =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the new entity state has all fields updated as expected.
@@ -712,31 +704,32 @@ class ProcessManagerRepositoryTest
         repository.store(pm3);
 
         // Init filters by the `name` column.
-        TargetFilters filters = targetFilters(Project.Column.name(), SetTestProcessName.NEW_NAME);
+        Project.Query query =
+                Project.query()
+                       .name().is(NEW_NAME)
+                       .build();
 
         // Check nothing is found as the entity states were not yet updated.
-        Iterator<TestProcessManager> found =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the column update to two of the three entities.
         repository.applyMigration(ImmutableSet.of(id1, id2), new SetTestProcessName());
 
         // Check the entities are now found by the provided filters.
-        Iterator<TestProcessManager> foundAfterMigration =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> foundAfterMigration = repository.find(query);
 
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(foundAfterMigration);
         Project expectedState1 = pm1
                 .state()
                 .toBuilder()
-                .setName(SetTestProcessName.NEW_NAME)
+                .setName(NEW_NAME)
                 .setIdString(pm1.getIdString())
                 .build();
         Project expectedState2 = pm2
                 .state()
                 .toBuilder()
-                .setName(SetTestProcessName.NEW_NAME)
+                .setName(NEW_NAME)
                 .setIdString(pm2.getIdString())
                 .build();
         assertThat(results).hasSize(2);
@@ -746,8 +739,8 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns via migration operation")
-    void updateColumns() {
+    @DisplayName("update state via migration operation")
+    void updateState() {
         // Store a new process manager instance in the repository.
         ProjectId id = createId(42);
         TestProcessManagerRepository repository = repository();
@@ -755,19 +748,20 @@ class ProcessManagerRepositoryTest
         repository.store(pm);
 
         // Init filters by the `id_string` column.
-        TargetFilters targetFilters = targetFilters(Project.Column.idString(), id.toString());
+        Project.Query query =
+                Project.query()
+                       .idString().is(id.toString())
+                       .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProcessManager> found =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
-        // Apply the columns update.
-        repository.applyMigration(id, new UpdatePmColumns<>());
+        // Apply the state update.
+        repository.applyMigration(id, new UpdatePmState<>());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProcessManager> afterMigration =
-                repository.find(targetFilters, ResponseFormat.getDefaultInstance());
+        Iterator<TestProcessManager> afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the column value is propagated to the entity state.
@@ -781,8 +775,8 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("update columns for multiple entities")
-    void updateColumnsForMultiple() {
+    @DisplayName("update state of multiple entities")
+    void updateStateForMultiple() {
         // Store three entities to the repository.
         ProjectId id1 = createId(1);
         ProjectId id2 = createId(2);
@@ -795,18 +789,17 @@ class ProcessManagerRepositoryTest
         repository.store(pm2);
         repository.store(pm3);
 
-        // Apply the column update to two of the three entities.
-        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdatePmColumns<>());
+        // Apply the state update to two of the three entities.
+        repository.applyMigration(ImmutableSet.of(id1, id2), new UpdatePmState<>());
 
         // Check that entities to which the migration has been applied now have columns updated.
-        QueryFilter filter1 = QueryFilter.eq(Project.Column.idString(), id1.toString());
-        QueryFilter filter2 = QueryFilter.eq(Project.Column.idString(), id2.toString());
-        QueryFilter filter3 = QueryFilter.eq(Project.Column.idString(), id3.toString());
-
-        TargetFilters filters = targetFilters(filter1, filter2, filter3);
-
-        Iterator<TestProcessManager> found =
-                repository.find(filters, ResponseFormat.getDefaultInstance());
+        Project.Query query =
+                Project.query()
+                       .either(p -> p.idString().is(id1.toString()),
+                               p -> p.idString().is(id2.toString()),
+                               p -> p.idString().is(id3.toString()))
+                       .build();
+        Iterator<TestProcessManager> found = repository.find(query);
 
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(found);
         Project expectedState1 = pm1
@@ -866,20 +859,6 @@ class ProcessManagerRepositoryTest
 
         Optional<TestProcessManager> found = repository().find(id);
         assertThat(found).isEmpty();
-    }
-
-    private static TargetFilters targetFilters(EntityColumn column, String value) {
-        QueryFilter filter = QueryFilter.eq(column, value);
-        return targetFilters(filter);
-    }
-
-    private static TargetFilters targetFilters(QueryFilter first, QueryFilter... rest) {
-        CompositeQueryFilter composite = CompositeQueryFilter.either(first, rest);
-        CompositeFilter filterValue = composite.value();
-        return TargetFilters
-                .newBuilder()
-                .addFilter(filterValue)
-                .build();
     }
 
     private static Correspondence<TestProcessManager, Project> entityState() {

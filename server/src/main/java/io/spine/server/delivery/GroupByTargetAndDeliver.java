@@ -28,11 +28,7 @@ package io.spine.server.delivery;
 
 import io.spine.server.model.ModelError;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.groupingBy;
 
 /**
  * A method object performing the delivery of the messages grouping them by the type of their
@@ -64,27 +60,19 @@ final class GroupByTargetAndDeliver implements DeliveryAction {
      */
     @Override
     public DeliveryErrors executeFor(List<InboxMessage> messages) {
-        Map<String, List<InboxMessage>> messagesByType = groupByTargetType(messages);
-
+        List<Segment> segments = Segment.groupByTargetType(messages);
         DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
-        for (String typeUrl : messagesByType.keySet()) {
-            ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
-            List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
+        for (Segment segment : segments) {
+            ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(segment.typeUrl());
+            List<InboxMessage> deliveryPackage = segment.messages();
             try {
                 delivery.deliver(deliveryPackage);
             } catch (RuntimeException exception) {
                 errors.addException(exception);
-            } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {
+            } catch (@SuppressWarnings("ErrorNotRethrown") /* False-positive */ ModelError error) {
                 errors.addError(error);
             }
         }
         return errors.build();
-    }
-
-    private static Map<String, List<InboxMessage>>
-    groupByTargetType(Collection<InboxMessage> source) {
-        return source.stream()
-                     .collect(groupingBy(m -> m.getInboxId()
-                                               .getTypeUrl()));
     }
 }

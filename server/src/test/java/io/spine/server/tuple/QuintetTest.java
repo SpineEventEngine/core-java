@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViola;
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViolin;
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViolinCello;
@@ -58,8 +59,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("Quintet should")
 class QuintetTest {
 
-    private final Quintet celloQuintet = newCelloQuintet();
-    private final Quintet violaQuintet = newViolaQuintet();
+    private final Quintet<?, ?, ?, ?, ?> celloQuintet = newCelloQuintet();
+    private final Quintet<?, ?, ?, ?, ?> violaQuintet = newViolaQuintet();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -99,5 +100,28 @@ class QuintetTest {
         assertEquals(newViola(), celloQuintet.getC());
         assertEquals(newViolinCello(NUM_1), celloQuintet.getD());
         assertEquals(newViolinCello(NUM_2), celloQuintet.getE());
+    }
+
+    @Test
+    @DisplayName("tell if elements are present if they are indeed set")
+    void tellElementsPresent() {
+        assertThat(celloQuintet.hasA()).isTrue();
+        assertThat(celloQuintet.hasB()).isTrue();
+        assertThat(celloQuintet.hasC()).isTrue();
+        assertThat(celloQuintet.hasD()).isTrue();
+        assertThat(celloQuintet.hasE()).isTrue();
+    }
+
+    @Test
+    @DisplayName("tell if elements are absent if set as `null`")
+    void tellElementsAbsent() {
+        assertThat(Quintet.withNullable(newViola(), newViola(), newViola(), newViola(), null)
+                          .hasE()).isFalse();
+        assertThat(Quintet.withNullable2(newViola(), newViola(), newViola(), null, null)
+                          .hasD()).isFalse();
+        assertThat(Quintet.withNullable3(newViola(), newViola(), null, null, null)
+                          .hasC()).isFalse();
+        assertThat(Quintet.withNullable4(newViola(), null, null, null, null)
+                          .hasB()).isFalse();
     }
 }

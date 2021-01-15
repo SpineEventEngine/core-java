@@ -33,6 +33,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.repo.AggregateWithLifecycle;
 import io.spine.server.aggregate.given.repo.RepoOfAggregateWithLifecycle;
+import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +54,7 @@ class AggregateRepositoryViewsTest {
     /**
      * The default behaviour of an {@code AggregateRepository}.
      */
-    private AggregateRepository<Long, AggregateWithLifecycle> repository;
+    private AggregateRepository<Long, AggregateWithLifecycle, LongIdAggregate> repository;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // It's on purpose for tests.
     private Optional<AggregateWithLifecycle> aggregate;
 

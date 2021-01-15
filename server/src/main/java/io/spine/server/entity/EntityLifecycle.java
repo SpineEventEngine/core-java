@@ -33,6 +33,7 @@ import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
+import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
@@ -45,6 +46,8 @@ import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.server.Identity;
+import io.spine.server.delivery.CatchUpId;
+import io.spine.server.delivery.event.ProjectionStateCleared;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.model.EntityClass;
@@ -409,6 +412,23 @@ public class EntityLifecycle {
                 .setDuplicateEvent(event.messageId())
                 .vBuild();
         postEvent(systemEvent);
+    }
+
+    /**
+     * Invoked when this entity is a projection, which state has just been cleared
+     * as a part of a catch-up process with the given ID.
+     *
+     * @param catchUpId the ID of the catch-up process, in scope of which the state
+     *                  has been cleared
+     */
+    public void onProjectionStateCleared(CatchUpId catchUpId) {
+        Any packedId = Identifier.pack(entityId);
+        ProjectionStateCleared event =
+                ProjectionStateCleared.newBuilder()
+                                      .setId(catchUpId)
+                                      .setInstanceId(packedId)
+                                      .vBuild();
+        postEvent(event);
     }
 
     public void onDuplicateCommand(CommandEnvelope command) {

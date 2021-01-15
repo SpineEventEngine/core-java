@@ -42,7 +42,7 @@ import io.spine.client.IdFilter;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.given.repository.GivenLifecycleFlags;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.tenant.TenantAwareTest;
@@ -74,7 +74,7 @@ import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.assertMatches;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFormat;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.orderByName;
-import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -86,7 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  *         the type of the {@link Entity} of this repository
  */
 public abstract
-class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends EntityState>
+class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends EntityState<I>>
         extends TenantAwareTest {
 
     private RecordBasedRepository<I, E, S> repository;
@@ -107,7 +107,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
      * {@link io.spine.server.entity.given.RecordBasedRepositoryTestEnv#ENTITY_NAME_COLUMN "name"}
      * state property.
      */
-    protected abstract List<E> createNamed(int count, Supplier<String> nameSupplier);
+    protected abstract List<E> createWithNames(int count, Supplier<String> nameSupplier);
 
     /**
      * Orders the entities by the
@@ -205,7 +205,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("by ID if archived")
         void byIdArchived() {
-            archive((TransactionalEntity) entity);
+            archive(asTxEntity(entity));
             storeEntity(entity);
             assertFound();
         }
@@ -213,7 +213,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("by ID if deleted")
         void byIdDeleted() {
-            delete((TransactionalEntity) entity);
+            delete(asTxEntity(entity));
             storeEntity(entity);
             assertFound();
         }
@@ -238,7 +238,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
     class FindMultiple {
 
         private Iterator<EntityRecord> loadAllRecords() {
-            return repository.loadAllRecords(ResponseFormat.getDefaultInstance());
+            return repository.findRecords(ResponseFormat.getDefaultInstance());
         }
 
         @Test
@@ -318,12 +318,12 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @DisplayName("in ascending order")
         void entitiesInAscendingOrder() {
             int count = 10;
-            // UUIDs are guaranteed to produced a collection with unordered names. 
-            List<E> entities = createAndStoreNamed(repository(), count, Identifier::newUuid);
+            // UUIDs are used to produce a collection with the names in a random order.
+            List<E> entities = entitiesWithNames(repository(), count, Identifier::newUuid);
 
             ResponseFormat format = ResponseFormat
                     .newBuilder()
-                    .setOrderBy(orderByName(ASCENDING))
+                    .addOrderBy(orderByName(ASCENDING))
                     .vBuild();
             Iterator<E> readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
@@ -336,12 +336,12 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @DisplayName("in descending order")
         void entitiesInDescendingOrder() {
             int count = 10;
-            // UUIDs are guaranteed to produced a collection with unordered names. 
-            List<E> entities = createAndStoreNamed(repository(), count, Identifier::newUuid);
+            // UUIDs are used to produce a collection with the names in a random order.
+            List<E> entities = entitiesWithNames(repository(), count, Identifier::newUuid);
 
             ResponseFormat format = ResponseFormat
                     .newBuilder()
-                    .setOrderBy(orderByName(DESCENDING))
+                    .addOrderBy(orderByName(DESCENDING))
                     .vBuild();
             Iterator<E> readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
@@ -355,12 +355,12 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         void limitedNumberOfEntities() {
             int totalCount = 10;
             int limit = 5;
-            // UUIDs are guaranteed to produced a collection with unordered names. 
-            List<E> entities = createAndStoreNamed(repository(), totalCount, Identifier::newUuid);
+            // UUIDs are used to produce a collection with the names in a random order.
+            List<E> entities = entitiesWithNames(repository(), totalCount, Identifier::newUuid);
 
             ResponseFormat format = ResponseFormat
                     .newBuilder()
-                    .setOrderBy(orderByName(ASCENDING))
+                    .addOrderBy(orderByName(ASCENDING))
                     .setLimit(limit)
                     .vBuild();
             Iterator<E> readEntities = repository().loadAll(format);
@@ -391,7 +391,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
             assertThat(found).hasSize(entities.size());
 
             for (E entity : entities) {
-                EntityRecordWithColumns record = repository.toRecord(entity);
+                RecordWithColumns<I, EntityRecord> record = repository.toRecord(entity);
                 assertThat(found).contains(record.record());
             }
         }
@@ -411,9 +411,9 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
             return repository().find(filters, format);
         }
 
-        private List<E> createAndStoreNamed(RecordBasedRepository<I, E, S> repo, int count,
-                                            Supplier<String> nameSupplier) {
-            List<E> entities = createNamed(count, nameSupplier);
+        private List<E> entitiesWithNames(RecordBasedRepository<I, E, S> repo, int count,
+                                          Supplier<String> nameSupplier) {
+            List<E> entities = createWithNames(count, nameSupplier);
             storeEntities(repo, entities);
             return entities;
         }
@@ -533,8 +533,8 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         E activeEntity = createEntity(271);
         E archivedEntity = createEntity(42);
         E deletedEntity = createEntity(314);
-        delete((TransactionalEntity) deletedEntity);
-        archive((TransactionalEntity) archivedEntity);
+        delete(asTxEntity(deletedEntity));
+        archive(asTxEntity(archivedEntity));
 
         // Fill the storage
         storeEntity(activeEntity);
@@ -555,8 +555,8 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         E activeEntity = createEntity(42);
         E archivedEntity = createEntity(314);
         E deletedEntity = createEntity(271);
-        delete((TransactionalEntity) deletedEntity);
-        archive((TransactionalEntity) archivedEntity);
+        delete(asTxEntity(deletedEntity));
+        archive(asTxEntity(archivedEntity));
 
         // Fill the storage
         storeEntity(activeEntity);
@@ -575,5 +575,9 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         IterableSubject assertFoundList = assertThat(foundList);
         assertFoundList.hasSize(2);
         assertFoundList.containsExactly(activeEntity, deletedEntity);
+    }
+
+    private TransactionalEntity<?, ?, ?> asTxEntity(E entity) {
+        return (TransactionalEntity<?, ?, ?>) entity;
     }
 }

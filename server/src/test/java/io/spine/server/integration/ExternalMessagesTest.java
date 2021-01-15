@@ -29,32 +29,25 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
-@DisplayName("ExternalMessages utility should")
-class ExternalMessagesTest {
+@DisplayName("`ExternalMessages` utility should")
+class ExternalMessagesTest extends UtilityClassTest<ExternalMessages> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(ExternalMessages.class);
+    ExternalMessagesTest() {
+        super(ExternalMessages.class, PACKAGE);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
-                .setDefault(Event.class, Event.getDefaultInstance())
-                .setDefault(Command.class, Command.getDefaultInstance())
-                .setDefault(RequestForExternalMessages.class,
-                            RequestForExternalMessages.getDefaultInstance())
-                .testStaticMethods(ExternalMessages.class, PACKAGE);
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
+              .setDefault(Event.class, Event.getDefaultInstance())
+              .setDefault(Command.class, Command.getDefaultInstance())
+              .setDefault(RequestForExternalMessages.class,
+                          RequestForExternalMessages.getDefaultInstance());
     }
 }

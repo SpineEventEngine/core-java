@@ -53,13 +53,6 @@ class SystemSettingsTest {
         }
 
         @Test
-        @DisplayName("enable aggregate mirroring")
-        void mirrors() {
-            SystemSettings features = SystemSettings.defaults();
-            assertTrue(features.includeAggregateMirroring());
-        }
-
-        @Test
         @DisplayName("disable command log")
         void commands() {
             SystemSettings features = SystemSettings.defaults();
@@ -109,15 +102,6 @@ class SystemSettingsTest {
     @Nested
     @DisplayName("configure")
     class Configure {
-
-        @Test
-        @DisplayName("aggregate mirroring")
-        void mirrors() {
-            SystemSettings features = SystemSettings
-                    .defaults()
-                    .disableAggregateQuerying();
-            assertFalse(features.includeAggregateMirroring());
-        }
 
         @Test
         @DisplayName("command log")

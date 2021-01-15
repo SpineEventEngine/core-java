@@ -26,22 +26,10 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.base.EntityState;
+import com.google.protobuf.Message;
 import io.spine.server.ContextSpec;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.delivery.CatchUpStorage;
-import io.spine.server.delivery.InboxStorage;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.model.EntityClass;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.StorageFactory;
-import io.spine.type.TypeUrl;
-
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
 /**
  * A factory for in-memory storages.
@@ -60,53 +48,10 @@ public final class InMemoryStorageFactory implements StorageFactory {
     private InMemoryStorageFactory() {
     }
 
-    /** <b>NOTE</b>: the parameter is unused. */
     @Override
-    public <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> unused) {
-        return new InMemoryAggregateStorage<>(context.isMultitenant());
-    }
-
-    @Override
-    public <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
-        EntityClass<?> modelClass = asEntityClass(entityClass);
-        StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
-        return new InMemoryRecordStorage<>(storageSpec, entityClass, context.isMultitenant());
-    }
-
-    @Override
-    public <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context,
-                            Class<? extends Projection<I, ?, ?>> projectionClass) {
-        EntityClass<?> modelClass = asProjectionClass(projectionClass);
-        StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
-        InMemoryRecordStorage<I> recordStorage =
-                new InMemoryRecordStorage<>(storageSpec, projectionClass, context.isMultitenant());
-        return new InMemoryProjectionStorage<>(projectionClass, recordStorage);
-    }
-
-    @Override
-    public InboxStorage createInboxStorage(boolean multitenant) {
-        return new InMemoryInboxStorage(multitenant);
-    }
-
-    @Override
-    public CatchUpStorage createCatchUpStorage(boolean multitenant) {
-        return new InMemoryCatchUpStorage(multitenant);
-    }
-
-    /**
-     * Obtains storage specification for the passed entity class.
-     */
-    private static <I>
-    StorageSpec<I> toStorageSpec(ContextSpec context, EntityClass<?> modelClass) {
-        Class<? extends EntityState> stateClass = modelClass.stateClass();
-        @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
-        Class<I> idClass = (Class<I>) modelClass.idClass();
-        TypeUrl stateUrl = TypeUrl.of(stateClass);
-        StorageSpec<I> result = StorageSpec.of(context.name(), stateUrl, idClass);
-        return result;
+    public <I, M extends Message> InMemoryRecordStorage<I, M>
+    createRecordStorage(ContextSpec context, RecordSpec<I, M, ?> spec) {
+        return new InMemoryRecordStorage<>(context, spec);
     }
 
     @Override

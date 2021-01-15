@@ -39,7 +39,7 @@ import io.spine.server.dispatch.Success;
 import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.MatchCriterion;
 import io.spine.server.model.SignatureMismatch;
-import io.spine.server.test.shared.EmptyAggregate;
+import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
@@ -300,7 +300,7 @@ class ApplierTest {
     }
 
     private abstract static class TestEventApplier
-            extends Aggregate<Long, EmptyAggregate, EmptyAggregate.Builder> {
+            extends Aggregate<Long, LongIdAggregate, LongIdAggregate.Builder> {
 
         private static final String APPLIER_METHOD_NAME = "apply";
 

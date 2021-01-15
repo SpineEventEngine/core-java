@@ -72,19 +72,24 @@ public abstract class Either implements Iterable<Message>, Serializable {
         return index;
     }
 
+    /**
+     * Obtains the value of the element by its index and casts it to the type {@code <T>}.
+     */
     @SuppressWarnings("TypeParameterUnusedInFormals") // We want to save of casts at the callers.
-    protected static <T> T get(Either either, int index) {
-        if (index != either.index()) {
+    protected static <T> T get(Either either, IndexOf index) {
+        int requestedIdx = index.value();
+        if (requestedIdx != either.index()) {
             String errMsg =
                     format("`Either` instance has value of a different type than requested. " +
                                    "Value index in `Either` is %d. Requested index: %d",
-                           either.index(), index);
+                           either.index(), requestedIdx);
             throw new IllegalStateException(errMsg);
         }
 
         @SuppressWarnings("unchecked") // It's the caller responsibility to ensure correct type.
         T result = (T) either.value();
         return result;
+
     }
 
     @Override

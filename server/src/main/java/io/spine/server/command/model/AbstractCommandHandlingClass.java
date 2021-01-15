@@ -51,7 +51,7 @@ public abstract class AbstractCommandHandlingClass<C,
                                                    R extends MessageClass<?>,
                                                    H extends CommandAcceptingMethod<?, R>>
         extends ModelClass<C>
-        implements CommandHandlingClass {
+        implements CommandHandlingClass<R, H> {
 
     private static final long serialVersionUID = 0L;
 

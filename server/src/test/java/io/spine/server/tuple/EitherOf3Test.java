@@ -46,6 +46,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
         /* Short vars are OK for tuple tests. */
@@ -92,6 +93,22 @@ class EitherOf3Test {
         assertEquals(a, eitherWithA.getA());
         assertEquals(b, eitherWithB.getB());
         assertEquals(c, eitherWithC.getC());
+    }
+
+    @Test
+    @DisplayName("tell if the values are set")
+    void reportHasValues() {
+        assertTrue(eitherWithA.hasA());
+        assertFalse(eitherWithA.hasB());
+        assertFalse(eitherWithA.hasC());
+
+        assertTrue(eitherWithB.hasB());
+        assertFalse(eitherWithB.hasA());
+        assertFalse(eitherWithB.hasC());
+
+        assertTrue(eitherWithC.hasC());
+        assertFalse(eitherWithC.hasA());
+        assertFalse(eitherWithC.hasB());
     }
 
     @Test

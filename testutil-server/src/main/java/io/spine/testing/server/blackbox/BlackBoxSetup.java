@@ -54,7 +54,7 @@ import static com.google.common.collect.Lists.asList;
 import static java.util.stream.Collectors.toList;
 
 /**
- * A class which sets up a {@link BlackBoxContext}.
+ * A class which sets up a {@link BlackBox}.
  *
  * <p>The setup may involve:
  * <ul>
