@@ -328,16 +328,16 @@
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
 1. **Group:** org.jetbrains **Name:** annotations **Version:** 13.0
@@ -430,14 +430,14 @@
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -451,21 +451,21 @@
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -486,7 +486,7 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 15 15:07:33 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -779,16 +779,16 @@ This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-Lice
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
 1. **Group:** org.jetbrains **Name:** annotations **Version:** 13.0
@@ -881,14 +881,14 @@ This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-Lice
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -902,21 +902,21 @@ This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-Lice
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -937,7 +937,7 @@ This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 15 15:07:33 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1265,16 +1265,16 @@ This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-Lice
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
 1. **Group:** org.jetbrains **Name:** annotations **Version:** 13.0
@@ -1367,14 +1367,14 @@ This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-Lice
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -1388,21 +1388,21 @@ This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-Lice
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -1423,7 +1423,7 @@ This report was generated on **Fri Jan 15 14:34:25 EET 2021** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 15 15:07:34 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1809,16 +1809,16 @@ This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-Lice
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
 1. **Group:** org.jboss.forge.roaster **Name:** roaster-api **Version:** 2.21.2.Final
@@ -1919,14 +1919,14 @@ This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-Lice
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -1940,21 +1940,21 @@ This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-Lice
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -1975,7 +1975,7 @@ This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 15 15:07:35 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2316,16 +2316,16 @@ This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-Lice
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
 1. **Group:** org.jetbrains **Name:** annotations **Version:** 13.0
@@ -2418,14 +2418,14 @@ This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-Lice
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -2439,21 +2439,21 @@ This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-Lice
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -2474,7 +2474,7 @@ This report was generated on **Fri Jan 15 14:34:26 EET 2021** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Fri Jan 15 14:34:27 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 15 15:07:36 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2857,16 +2857,16 @@ This report was generated on **Fri Jan 15 14:34:27 EET 2021** using [Gradle-Lice
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
 1. **Group:** org.jetbrains **Name:** annotations **Version:** 13.0
@@ -2959,14 +2959,14 @@ This report was generated on **Fri Jan 15 14:34:27 EET 2021** using [Gradle-Lice
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -2980,21 +2980,21 @@ This report was generated on **Fri Jan 15 14:34:27 EET 2021** using [Gradle-Lice
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -3015,7 +3015,7 @@ This report was generated on **Fri Jan 15 14:34:27 EET 2021** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Fri Jan 15 14:34:29 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 15 15:07:37 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3398,16 +3398,16 @@ This report was generated on **Fri Jan 15 14:34:29 EET 2021** using [Gradle-Lice
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
 1. **Group:** org.jetbrains **Name:** annotations **Version:** 13.0
@@ -3500,14 +3500,14 @@ This report was generated on **Fri Jan 15 14:34:29 EET 2021** using [Gradle-Lice
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -3521,21 +3521,21 @@ This report was generated on **Fri Jan 15 14:34:29 EET 2021** using [Gradle-Lice
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -3556,7 +3556,7 @@ This report was generated on **Fri Jan 15 14:34:29 EET 2021** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Fri Jan 15 14:34:30 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 15 15:07:38 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3983,16 +3983,16 @@ This report was generated on **Fri Jan 15 14:34:30 EET 2021** using [Gradle-Lice
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.agent **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.ant **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.core **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
-1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.5
+1. **Group:** org.jacoco **Name:** org.jacoco.report **Version:** 0.8.6
      * **POM License: Eclipse Public License 2.0** - [https://www.eclipse.org/legal/epl-2.0/](https://www.eclipse.org/legal/epl-2.0/)
 
 1. **Group:** org.jetbrains **Name:** annotations **Version:** 13.0
@@ -4085,14 +4085,14 @@ This report was generated on **Fri Jan 15 14:34:30 EET 2021** using [Gradle-Lice
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm **Version:** 7.3.1
+1. **Group:** org.ow2.asm **Name:** asm **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -4106,21 +4106,21 @@ This report was generated on **Fri Jan 15 14:34:30 EET 2021** using [Gradle-Lice
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-analysis **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-commons **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **POM License: BSD-3-Clause** - [https://asm.ow2.io/license.html](https://asm.ow2.io/license.html)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 7.2
+1. **Group:** org.ow2.asm **Name:** asm-tree **Version:** 8.0.1
      * **Manifest Project URL:** [http://asm.ow2.org](http://asm.ow2.org)
      * **Manifest License:** BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt (Not packaged)
      * **POM Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
@@ -4141,4 +4141,4 @@ This report was generated on **Fri Jan 15 14:34:30 EET 2021** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Fri Jan 15 14:34:32 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 15 15:07:42 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
