@@ -41,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -130,5 +131,25 @@ class QuartetTest {
         assertEquals(donkey, quartet.getB());
         assertEquals(goat, quartet.getC());
         assertEquals(bear, quartet.getD());
+    }
+
+    @Test
+    @DisplayName("tell if elements are present if they are indeed set")
+    void tellElementsPresent() {
+        assertThat(quartet.hasA()).isTrue();
+        assertThat(quartet.hasB()).isTrue();
+        assertThat(quartet.hasC()).isTrue();
+        assertThat(quartet.hasD()).isTrue();
+    }
+
+    @Test
+    @DisplayName("tell if elements are absent if set as `null`")
+    void tellElementsAbsent() {
+        assertThat(Quartet.withNullable(monkey, donkey, goat, null)
+                          .hasD()).isFalse();
+        assertThat(Quartet.withNullable2(monkey, donkey, null, null)
+                          .hasC()).isFalse();
+        assertThat(Quartet.withNullable3(monkey, null, null, null)
+                          .hasB()).isFalse();
     }
 }

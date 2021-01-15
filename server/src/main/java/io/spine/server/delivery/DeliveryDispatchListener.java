@@ -78,7 +78,7 @@ final class DeliveryDispatchListener implements MulticastDispatchListener {
     }
 
     /**
-     * Notifies the subscribed parties of a new message if it not currently dispatching.
+     * Notifies the subscribed parties of a new message if it is not currently being dispatched.
      *
      * @param message
      *         the message to notify of

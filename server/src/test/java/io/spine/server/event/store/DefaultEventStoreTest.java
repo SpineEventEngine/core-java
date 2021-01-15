@@ -83,7 +83,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EventStore should")
+@DisplayName("`EventStore` should")
 public class DefaultEventStoreTest {
 
     private BoundedContext context;
@@ -411,7 +411,7 @@ public class DefaultEventStoreTest {
     class NotStoreEnrichmentFor {
 
         @Test
-        @DisplayName("EventContext")
+        @DisplayName("`EventContext`")
         void eventContext() {
             Event event = projectCreated(Time.currentTime());
             Event enriched = event.toBuilder()
@@ -431,7 +431,7 @@ public class DefaultEventStoreTest {
         @SuppressWarnings("deprecation")
             // Enrichment cleanup still checks for the deprecated fields, so keep the test.
         @Test
-        @DisplayName("origin of EventContext type")
+        @DisplayName("origin of `EventContext` type")
         void eventContextOrigin() {
             Event event = projectCreated(Time.currentTime());
             Origin pastMessage = event.context()

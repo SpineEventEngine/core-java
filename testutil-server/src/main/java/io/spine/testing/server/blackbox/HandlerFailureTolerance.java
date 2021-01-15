@@ -27,7 +27,7 @@
 package io.spine.testing.server.blackbox;
 
 /**
- * Configures the behavior of the {@link BlackBoxContext} on handling runtime exceptions
+ * Configures the behavior of the {@link BlackBox} on handling runtime exceptions
  * thrown from the handler methods.
  */
 enum HandlerFailureTolerance {

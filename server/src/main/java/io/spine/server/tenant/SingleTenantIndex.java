@@ -28,7 +28,6 @@ package io.spine.server.tenant;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.TenantId;
-import io.spine.server.BoundedContext;
 
 import java.util.Set;
 
@@ -70,15 +69,5 @@ enum SingleTenantIndex implements TenantIndex {
     @Override
     public void close() {
         // Do nothing.
-    }
-
-    @Override
-    public void registerWith(BoundedContext context) {
-        // Do nothing.
-    }
-
-    @Override
-    public boolean isRegistered() {
-        return true;
     }
 }

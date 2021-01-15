@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import org.junit.jupiter.api.DisplayName;
@@ -67,15 +66,6 @@ class EmptyEventStoreTest {
         assertTrue(eventStore.isOpen());
         eventStore.close();
         assertFalse(eventStore.isOpen());
-    }
-
-    @Test
-    @DisplayName("register with a context")
-    void register() {
-        EventStore eventStore = new EmptyEventStore();
-        assertFalse(eventStore.isRegistered());
-        eventStore.registerWith(BoundedContextBuilder.assumingTests().build());
-        assertTrue(eventStore.isRegistered());
     }
 
     private static void assertEmpty(EventStore store) {

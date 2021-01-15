@@ -74,3 +74,17 @@ message SecretProject {
     string id = 1;
     string name = 2;
 }
+
+message BcEmptyProcess {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    ProjectId id = 1;
+}
+
+message BcProjectReport {
+
+    option (entity).kind = PROJECTION;
+
+    ProjectId id = 1;
+}

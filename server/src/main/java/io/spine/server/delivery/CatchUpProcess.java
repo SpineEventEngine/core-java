@@ -28,6 +28,7 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -46,6 +47,8 @@ import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.delivery.event.HistoryEventsRecalled;
 import io.spine.server.delivery.event.HistoryFullyRecalled;
 import io.spine.server.delivery.event.LiveEventsPickedUp;
+import io.spine.server.delivery.event.ProjectionStateCleared;
+import io.spine.server.delivery.event.ShardProcessed;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.event.AbstractStatefulReactor;
 import io.spine.server.event.EventFactory;
@@ -54,8 +57,10 @@ import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.EventStreamQuery.Limit;
 import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tuple.EitherOf2;
+import io.spine.server.tuple.EitherOf3;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -80,7 +85,11 @@ import static io.spine.server.delivery.CatchUpMessages.recalled;
 import static io.spine.server.delivery.CatchUpMessages.shardProcessingRequested;
 import static io.spine.server.delivery.CatchUpMessages.started;
 import static io.spine.server.delivery.CatchUpMessages.toFilters;
+import static io.spine.server.delivery.CatchUpStatus.COMPLETED;
+import static io.spine.server.delivery.CatchUpStatus.FINALIZING;
+import static io.spine.server.delivery.CatchUpStatus.IN_PROGRESS;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
+import static io.spine.server.route.EventRoute.noTargets;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -109,20 +118,33 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>In its lifecycle, the process moves through the several statuses.
  *
- * <p><b>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</b>
+ * <h3>{@linkplain CatchUpStatus#CUS_UNDEFINED Not started}</h3>
  *
- * <p>The process is created in to this status upon receiving {@code CatchUpRequested} event.
+ * <p>The process is created in this status upon receiving the {@code CatchUpRequested} event.
  * The further actions include:
  *
- * <ul>
+ * <ol>
  *     <li>A {@link CatchUpStarted} event is emitted. The target projection repository listens to
  *     this event and kills the state of the matching entities.
  *
  *     <li>The status if the catch-up process is set to {@link CatchUpStatus#IN_PROGRESS
  *     IN_PROGRESS}.
- * </ul>
+ * </ol>
  *
- * <p><b>{@link CatchUpStatus#IN_PROGRESS IN_PROGRESS}</b>
+ * <h3>{@linkplain CatchUpStatus#STARTED STARTED}</h3>
+ *
+ * <p>The process is created in this status upon receiving the {@code CatchUpRequested} event.
+ * The further actions include:
+ *
+ * <ol>
+ *     <li>A {@link CatchUpStarted} event is emitted. The target projection repository listens to
+ *     this event and kills the state of the matching entities.
+ *
+ *     <li>The status if the catch-up process is set to {@link CatchUpStatus#IN_PROGRESS
+ *     IN_PROGRESS}.
+ * </ol>
+ *
+ * <h3>{@link CatchUpStatus#IN_PROGRESS IN_PROGRESS}</h3>
  *
  * <p>When the process is in this status, the event history is read and the matching events are sent
  * to the {@code Inbox}es of the corresponding projections
@@ -135,7 +157,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>At this stage the actions are as follows.
  *
- * <ul>
+ * <ol>
  *      <li>The historical event messages are read from the {@link EventStore} respecting
  *      the time range requested and the time of the last read operation performed by this process.
  *      The maximum number of the events read is determined by
@@ -150,50 +172,104 @@ import static java.util.stream.Collectors.toSet;
  *
  *      <p>If the timestamps of the events read on this step are as close to the current time as
  *      the turbulence period, the {@link HistoryFullyRecalled} is emitted.
- * </ul>
+ * </ol>
  *
- * <p><b>{@link CatchUpStatus#FINALIZING FINALIZING}</b>
+ * <h3>{@link CatchUpStatus#FINALIZING FINALIZING}</h3>
  *
  * <p>The process moves to this status when the event history has been fully recalled and the
- * corresponding {@code HistoryFullyRecalled} is received. At this stage the {@code Delivery} stops
+ * corresponding {@code HistoryFullyRecalled} is received. At this stage, the {@code Delivery} stops
  * the propagation of the events to the catch-up messages, waiting for this process to populate
  * the inboxes with the messages arriving to be dispatched during the turbulence period.
  * Potentially, the inboxes will contain the duplicates produced by both the live users
  * and this process. To deal with it, a deduplication is performed by the {@code Delivery}.
  * See {@link CatchUpStation} for more details.
  *
- * <p>The actions are as follows.
+ * <p>The historical data pushed by the catch-up is dispatched through a number of shards,
+ * each processed by the {@code Delivery} independently from each other. Starting to dispatch
+ * the events from a shard, {@code Delivery} reads the details of the ongoing catch-up processes.
+ * By interpreting the status of each catch-up, {@code Delivery} decides on the actions to apply
+ * to the historical events. For instance, the historical events dispatched from a catch-up which
+ * is already {@code COMPLETED} are considered junk and are immediately deleted.
  *
- * <ul>
+ * <p>Before moving to the catch-up completion, it is required to make sure every historical event
+ * has been seen and dispatched by the {@code Delivery}. So if the catch-up process is moved
+ * to the {@code COMPLETED} state too early, some historical events will get stuck in limbo, and
+ * will eventually be deleted.
+ *
+ * <p>It's important to understand that different shards may be processed at different speeds and
+ * potentially by different application nodes. Therefore, in order to switch to the
+ * {@code COMPLETED} status, a catch-up process must ensure that <b>each</b> shard was processed
+ * by the {@code Delivery} which witnessed the catch-up process in its {@code FINALIZING} state.
+ * Such an evidence would mean that this {@code Delivery} run is at the point in time by which
+ * three things already happened:
+ *
+ * <ol type="a">
+ *     <li>the catch-up process has emitted all the events from the history,
+ *
+ *     <li>the catch-up process has sent {@link HistoryFullyRecalled} after the historical events,
+ *
+ *     <li>all these events were dispatched already — otherwise, the process wasn't going
+ *     to be in its {@code FINALIZING} state.
+ * </ol>
+ *
+ * <p>In order to guarantee that prior to moving to the {@code COMPLETED} status, the catch-up
+ * process emits special {@link ShardProcessingRequested} events for each shard. The events are
+ * dispatched to a {@link ShardMaintenanceProcess}, which responds back by emitting
+ * {@link ShardProcessed} events. The {@code Delivery} knows about this special-case signals
+ * and appends the data in these events with its own picture of ongoing catch-up
+ * processes and their statuses. By receiving {@code ShardProcessed} events populated with this
+ * information the catch-up process knows which status was seen by the {@code Delivery}
+ * at the moment when it had been dispatching the events from a certain shard.
+ *
+ * <p>The actions at this stage are as follows.
+ *
+ * <ol>
  *      <li>All the remaining messages of the matching event types are read {@link EventStore}.
  *      In this operation the read limits set by the {@code Delivery} are NOT used, since
  *      the goal is to read the remainder of the events.
  *
- *      <li>If there were no events read, the {@link CatchUpCompleted} is emitted and the process
- *      is moved to the {@link CatchUpStatus#COMPLETED COMPLETED} status.
+ *      <li>The {@link LiveEventsPickedUp} event is emitted. This allows some time for the posted
+ *      events to become visible to the {@code Delivery}.
  *
- *      <li>If there were some events read, the {@link LiveEventsPickedUp} event is emitted.
- *      This allows some time for the posted events to become visible to the {@code Delivery}.
- *      The reacting handler of the {@code LiveEventsPickedUp} completes the process.
- * </ul>
+ *      <li>In the next round of delivery, the emitted {@link LiveEventsPickedUp} event is
+ *      dispatched back to this process. By this time, the last batch of the historical events
+ *      has already been sent to their destinations. However, not all of them may have been yet
+ *      delivered due to their large number or to the I/O performance. To ensure that every
+ *      historical event was seen by the {@code Delivery}, a special
+ *      {@link ShardProcessingRequested} event is emitted for every shard involved into
+ *      dispatching the historical events up until now.
  *
- * <p><b>{@link CatchUpStatus#COMPLETED COMPLETED}</b>
+ *      <li>Each {@link ShardProcessingRequested} event triggers the {@code Delivery} to read
+ *      and dispatch the signals from a specific shard. Being sent, these events are dispatched
+ *      to a special system {@link ShardMaintenanceProcess} serving as a handler. By reacting
+ *      to a {@code ShardProcessingRequested}, the latter maintenance process emits
+ *      a {@link ShardProcessed} event, telling that the {@code Delivery} has worked its way
+ *      through the messages present in this shard.
  *
- * <p>Once the process moves to the {@code COMPLETED} status, the corresponding {@code Delivery}
- * routines deduplicate, reorder and dispatch the "paused" events. Then the normal live delivery
- * flow is resumed.
+ *      <li>The catch-up process handles each {@code ShardProcessed} event. By gathering the data
+ *      from these events, the catch-up is able to tell when all the affected shards were
+ *      fully processed by the {@code Delivery}. Once all shards are processed,
+ *      a {@link CatchUpCompleted} event is emitted.
+ * </ol>
  *
- * <p>To ensure that all the shards in which the "paused" historical events reside are processed,
- * this process additionally emits the "maintenance" {@link ShardProcessingRequested} events for
- * each shard involved. By dispatching them, the system guarantees that the {@code Delivery}
- * observes the {@code COMPLETED} status of this process and delivers the remainer of the messages.
+ * <h3>{@link CatchUpStatus#COMPLETED COMPLETED}</h3>
+ *
+ * <p>Once the {@code CatchUpCompleted} event is received, the process moves
+ * to the {@code COMPLETED} status. At this point, some live events and some historical events which
+ * were located in the "turbulence" window are still paused for dispatching. To ensure they are
+ * processed in each shard, the catch-up emits a number of {@code ShardProcessingRequested} events
+ * again. By dispatching them, it makes sure that the {@code Delivery} observes the change of
+ * catch-up status to {@code COMPLETED} and moves onto de-duplicating and delivering the previously
+ * "paused" events.
+ *
+ * <p>After that, a normal delivery flow is resumed. The catch-up process stops its execution.
  *
  * @implNote Technically, the instances of this class are not
  *         {@linkplain io.spine.server.procman.ProcessManager process managers}, since it is
  *         impossible to register the process managers with the same state in
  *         a multi-{@code BoundedContext} application.
  */
-@SuppressWarnings("OverlyCoupledClass")    // It does a lot.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})    // It does a lot.
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
@@ -254,9 +330,9 @@ public final class CatchUpProcess<I>
      * @param ids
      *         identifiers of the projections to catch up, or {@code null} if all of the
      *         instances should be caught up
+     * @return identifier of the catch-up operation
      * @throws CatchUpAlreadyStartedException
      *         if at least one of the selected instances is already catching up at the moment
-     * @return identifier of the catch-up operation
      */
     @Internal
     public CatchUpId startCatchUp(Timestamp since, @Nullable Set<I> ids)
@@ -265,33 +341,34 @@ public final class CatchUpProcess<I>
     }
 
     /**
-     * Moves the process from {@code Not Started} to {@code IN_PROGRESS} state.
+     * Moves the process from {@code Not Started} to {@code STARTED} state.
      *
-     * <p>There are several key actions performed at this stage.
-     *
-     * <ul>
+     * Several important things happen at this stage:
+     * <ol>
      *      <li>The reading timestamp of the process is set to the one specified in the request.
      *      However, people are used to say "I want to catch-up since 1 PM" meaning "counting
      *      the events happened at 1 PM sharp". Therefore process always subtracts a single
      *      nanosecond from the specified catch-up start time and then treats this interval as
      *      exclusive.
      *
-     *      <li>The identifiers of the catch-up targets are defined. They are either specified
-     *      in the original request, or, if all projections are to be caught-up, they are the
-     *      {@linkplain io.spine.server.entity.Repository#index() ID index} of the selected
-     *      repository.
-     *      It is important to know the target IDs, since their state has to be reset to default
-     *      before the dispatching of the first historical event.
+     *      <li>{@link CatchUpStarted} event is dispatched directly to the inboxes of the
+     *      catching-up targets based on the original catch-up request.
      *
-     *      <li>{@link CatchUpStarted} event is dispatched directly to the inboxes of the catching-up
-     *      targets.
+     *      <li>The identifiers of the catch-up targets are defined. They are set according to
+     *      the actual IDs of the projections to which the {@code CatchUpStarted} has been
+     *      dispatched. It is important to know the target IDs, since their state has to be reset
+     *      to default before the dispatching of the first historical event.
      *
-     *      <li>The same {@code CatchUpStarted} event is returned to be dispatched to this very
-     *      process via its inbox and move it to the next phase.
-     * </ul>
+     *      <li>The number of the projection instances to catch-up is remembered. The process
+     *      then waits for {@link ProjectionStateCleared} events to arrive for each of
+     *      the instances before reading the events from the history.
+     * </ol>
+     *
+     * <p>The event handler returns {@code Nothing}, as the results of its work are dispatched
+     * directly to the inboxes of the catching-up projections.
      */
     @React
-    CatchUpStarted handle(CatchUpRequested e, EventContext ctx) {
+    Nothing handle(CatchUpRequested e, EventContext ctx) {
         CatchUpId id = e.getId();
 
         CatchUp.Request request = e.getRequest();
@@ -301,27 +378,47 @@ public final class CatchUpProcess<I>
         builder().setWhenLastRead(withWindow)
                  .setRequest(request);
         CatchUpStarted started = started(id);
-        builder().setStatus(CatchUpStatus.IN_PROGRESS);
+        builder().setStatus(CatchUpStatus.STARTED);
         flushState();
 
-        Event event = wrapAsEvent(started, ctx);
-        Set<I> ids = targetsForCatchUpSignals(request);
-        dispatchAll(ImmutableList.of(event), ids);
+        dispatchCatchUpStarted(started, ctx);
+        return nothing();
+    }
 
-        return started;
+    private void dispatchCatchUpStarted(CatchUpStarted started, EventContext ctx) {
+        Event event = wrapAsEvent(started, ctx);
+        Set<I> ids = targetsForCatchUpSignals(builder().getRequest());
+        Set<I> targetIds = dispatchAll(ImmutableList.of(event), ids);
+        builder().setInstancesToClear(targetIds.size());
     }
 
     /**
-     * Performs the first read from the event history and dispatches the results to the inboxes
-     * of respective projections.
+     * Waits until all the projection instances report their state has been cleared and they
+     * are ready for the historical events to be dispatched.
+     *
+     * <p>Once all the instances are ready, performs the first reading from the event history
+     * and dispatches the results to the inboxes of respective projections.
      *
      * <p>If the history has been read fully (i.e. until the start of the {@linkplain Turbulence
      * turbulence period}), emits {@code HistoryFullyRecalled} event. Otherwise, emits
      * {@code HistoryEventsRecalled} by which it triggers the next round of history reading.
      */
     @React
-    EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> handle(CatchUpStarted event) {
-        return recallMoreEvents();
+    EitherOf3<HistoryEventsRecalled, HistoryFullyRecalled, Nothing>
+    handle(ProjectionStateCleared event) {
+        int leftToClear = builder().getInstancesToClear() - 1;
+        builder().setInstancesToClear(leftToClear);
+        if (leftToClear > 0) {
+            return EitherOf3.withC(nothing());
+        }
+        builder().setStatus(IN_PROGRESS);
+
+        EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> result = recallMoreEvents();
+        if (result.hasA()) {
+            return EitherOf3.withA(result.getA());
+        } else {
+            return EitherOf3.withB(result.getB());
+        }
     }
 
     /**
@@ -380,33 +477,103 @@ public final class CatchUpProcess<I>
      * Sets the process status to {@link CatchUpStatus#FINALIZING FINALIZING} and reads all
      * the remaining events, then dispatching those to the projection inboxes.
      *
-     * <p>If there were no events read, sets the process status to {@link CatchUpStatus#COMPLETED
-     * COMPLETED}. Otherwise, emits {@code LiveEventsPickedUp} event, which is dispatched to this
-     * process in the next round.
+     * <p>Emits {@code LiveEventsPickedUp} event, which is dispatched to this process
+     * in the next round.
      */
     @React
-    EitherOf2<LiveEventsPickedUp, CatchUpCompleted> handle(HistoryFullyRecalled event) {
+    LiveEventsPickedUp handle(HistoryFullyRecalled event, EventContext context) {
         CatchUpId id = event.getId();
-        builder().setStatus(CatchUpStatus.FINALIZING);
-        flushState();
+        if (builder().getStatus() != FINALIZING) {
+            builder().setStatus(FINALIZING);
+            flushState();
+        }
+        return runFinalization(id);
+    }
 
+    private LiveEventsPickedUp runFinalization(CatchUpId id) {
         CatchUp.Request request = builder().getRequest();
         List<Event> events = readMore(request, null, null);
-
-        if (events.isEmpty()) {
-            return EitherOf2.withB(completeProcess(id));
+        if (events.size() > 0) {
+            Timestamp lastEventTimestamp = events.get(events.size() - 1)
+                                                 .timestamp();
+            builder().setWhenLastRead(lastEventTimestamp);
+            dispatchAll(events);
         }
-        dispatchAll(events);
-        return EitherOf2.withA(liveEventsPickedUp(id));
+        return liveEventsPickedUp(id);
     }
 
     /**
-     * Completes the process once all the events, including live events emitted during
-     * the {@linkplain Turbulence turbulence} are dispatched to the target inboxes.
+     * Emits an additional {@link ShardProcessingRequested} event and thus triggers the processing
+     * of the potentially omitted live events in each of the shards affected in this
+     * catch-up process.
+     *
+     * <p>The {@code Delivery} is equipped with a {@link MaintenanceStation}, which
+     *
+     * <p>The main goal of such a trick is to ensure that all shards do not contain any
+     * of the historical events, and each of the shards is in {@code FINALIZING} status. Otherwise,
+     * moving to the {@code COMPLETED} status right away would kill these historical events
+     * as irrelevant.
+     *
+     * <p>See the {@link ShardMaintenanceProcess} which handles each of the emitted requests
+     * for the shard processing.
      */
     @React
-    CatchUpCompleted on(LiveEventsPickedUp event, EventContext context) {
-        return completeProcess(event.getId());
+    List<ShardProcessingRequested> handle(LiveEventsPickedUp event, EventContext context) {
+        List<Integer> affectedShards = builder().getAffectedShardList();
+        int totalShards = builder().getTotalShards();
+        List<ShardProcessingRequested> messages = toShardEvents(totalShards, affectedShards);
+        return messages;
+    }
+
+    /**
+     * Waits until all of the shards are guaranteed to have all of their historical events
+     * seen and dispatched by the {@code Delivery}.
+     *
+     * <p>By gathering the data from {@code ShardProcessed} events, the catch-up
+     * process tracks the shards which are already ready for the catch-up completion. Once all
+     * of the shards affected by this process become ready, a {@code CatchUpCompleted} is emitted.
+     *
+     * <p>If, for some reason, a {@code ShardProcessed} event is dispatched to this process when
+     * its status is already {@code COMPLETED}, this reactor method does nothing.
+     *
+     * <p>See the class-level documentation for more details and the big picture.
+     */
+    @React
+    EitherOf3<CatchUpCompleted, ShardProcessingRequested, Nothing> handle(ShardProcessed event) {
+        CatchUp.Builder builder = builder();
+        if (builder.getStatus() == COMPLETED) {
+            return EitherOf3.withC(nothing());
+        }
+
+        CatchUpId id = builder.getId();
+        Optional<CatchUp> stateVisibleToDelivery = findJob(id, event.getRunInfo());
+        if (stateVisibleToDelivery.isPresent()) {
+            CatchUp observedJob = stateVisibleToDelivery.get();
+            if (observedJob.getStatus() == FINALIZING) {
+                int indexOfFinalized = event.getIndex()
+                                            .getIndex();
+                if (!builder.getFinalizedShardList().contains(indexOfFinalized)) {
+                    builder.addFinalizedShard(indexOfFinalized);
+                }
+                List<Integer> affectedShards = builder.getAffectedShardList();
+                if (builder.getFinalizedShardList().containsAll(affectedShards)) {
+                    CatchUpCompleted completed = completeProcess(builder.getId());
+                    return EitherOf3.withA(completed);
+                }
+                return EitherOf3.withC(nothing());
+            }
+        }
+        ShardProcessingRequested stillRequested = shardProcessingRequested(id, event.getIndex());
+        return EitherOf3.withB(stillRequested);
+    }
+
+    private static Optional<CatchUp> findJob(CatchUpId id, DeliveryRunInfo deliveryInfo) {
+        Optional<CatchUp> stateVisibileToDelivery =
+                deliveryInfo.getCatchUpJobList()
+                               .stream()
+                               .filter((job) -> id.equals(job.getId()))
+                               .findFirst();
+        return stateVisibileToDelivery;
     }
 
     /**
@@ -422,12 +589,13 @@ public final class CatchUpProcess<I>
     List<ShardProcessingRequested> on(CatchUpCompleted ignored) {
         int shardCount = builder().getTotalShards();
         List<Integer> affectedShards = builder().getAffectedShardList();
+
         List<ShardProcessingRequested> events = toShardEvents(shardCount, affectedShards);
         return events;
     }
 
     private CatchUpCompleted completeProcess(CatchUpId id) {
-        builder().setStatus(CatchUpStatus.COMPLETED);
+        builder().setStatus(COMPLETED);
         flushState();
         CatchUpCompleted completed = catchUpCompleted(id);
         return completed;
@@ -442,7 +610,7 @@ public final class CatchUpProcess<I>
         return ids;
     }
 
-    private Event wrapAsEvent(CatchUpSignal event, EventContext context) {
+    private Event wrapAsEvent(EventMessage event, EventContext context) {
         Event firstEvent;
         EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
         firstEvent = factory.createEvent(event, null);
@@ -466,13 +634,13 @@ public final class CatchUpProcess<I>
         return events;
     }
 
-    private static List<ShardProcessingRequested> toShardEvents(int totalShards,
-                                                                List<Integer> indexes) {
+    private List<ShardProcessingRequested> toShardEvents(int totalShards, List<Integer> indexes) {
+        CatchUpId id = builder().getId();
         return indexes
                 .stream()
                 .map(indexValue -> {
                     ShardIndex shardIndex = newIndex(indexValue, totalShards);
-                    ShardProcessingRequested event = shardProcessingRequested(shardIndex);
+                    ShardProcessingRequested event = shardProcessingRequested(id, shardIndex);
                     return event;
                 })
                 .collect(toList());
@@ -500,23 +668,37 @@ public final class CatchUpProcess<I>
                  .setTotalShards(totalShards);
     }
 
-    private void dispatchAll(List<Event> events) {
+    @CanIgnoreReturnValue
+    private Set<I> dispatchAll(List<Event> events) {
         if (events.isEmpty()) {
-            return;
+            return ImmutableSet.of();
         }
         CatchUp.Request request = builder().getRequest();
         List<Any> packedIds = request.getTargetList();
         if (packedIds.isEmpty()) {
-            dispatchAll(events, new HashSet<>());
+            return dispatchAll(events, new HashSet<>());
         } else {
             Set<I> ids = unpack(packedIds);
-            dispatchAll(events, ids);
+            return dispatchAll(events, ids);
         }
     }
 
-    private void dispatchAll(List<Event> events, Set<I> targets) {
+    /**
+     * Dispatches the given list of events to the passed targets and returns the actual set of
+     * entity identifiers to which the dispatching has been performed.
+     *
+     * @param events
+     *         the events to dispatch
+     * @param targets
+     *         the set of identifiers of the targets to dispatch the events to;
+     *         if empty, no particular targets are selected, so the target repository will
+     *         decide on its own
+     * @return the list of the identifiers to which the dispatching has been made in fact
+     */
+    @CanIgnoreReturnValue
+    private Set<I> dispatchAll(List<Event> events, Set<I> targets) {
         if (events.isEmpty()) {
-            return;
+            return noTargets();
         }
         Set<I> actualTargets = new HashSet<>();
         @Nullable Set<I> targetsForDispatch = targets.isEmpty()
@@ -529,6 +711,7 @@ public final class CatchUpProcess<I>
         if (!actualTargets.isEmpty()) {
             recordAffectedShards(actualTargets);
         }
+        return actualTargets;
     }
 
     private List<Event> readMore(CatchUp.Request request,
@@ -577,33 +760,50 @@ public final class CatchUpProcess<I>
     /**
      * {@inheritDoc}
      *
-     * <p>Tells if the passed envelope can be dispatched to this instance of the process
-     * by verifying that the projection type URL passed with the event matches the one of the
-     * projection repository configured for this instance.
+     * <p>If the passed envelope is a {@link CatchUpSignal}, it is verified that the projection type
+     * URL passed with the event matches the one of the projection repository configured
+     * for this instance.
      */
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
         EventMessage raw = envelope.message();
-        if (!(raw instanceof CatchUpSignal)) {
-            return false;
+        if (raw instanceof CatchUpSignal) {
+            CatchUpSignal asSignal = (CatchUpSignal) raw;
+            String actualType = asSignal.getId()
+                                        .getProjectionType();
+            String expectedType = repository.entityStateType()
+                                            .value();
+            return expectedType.equals(actualType);
         }
-        CatchUpSignal asSignal = (CatchUpSignal) raw;
-        String actualType = asSignal.getId()
-                                    .getProjectionType();
-        String expectedType = repository.entityStateType()
-                                        .value();
-        return expectedType.equals(actualType);
+        return true;
     }
 
+    @SuppressWarnings("ChainOfInstanceofChecks")    // Handling two distinct cases.
     @Override
     protected ImmutableSet<CatchUpId> route(EventEnvelope event) {
-        CatchUpSignal message = (CatchUpSignal) event.message();
-        return ImmutableSet.of(message.getId());
+        EventMessage message = event.message();
+        if (message instanceof CatchUpSignal) {
+            return routeCatchUpSignal(message);
+        }
+        if (message instanceof ShardProcessed) {
+            return routeShardProcessed((ShardProcessed) message);
+        }
+        return ImmutableSet.of();
+    }
+
+    private static ImmutableSet<CatchUpId> routeShardProcessed(ShardProcessed message) {
+        CatchUpId id = message.getProcess();
+        return ImmutableSet.of(id);
+    }
+
+    private static ImmutableSet<CatchUpId> routeCatchUpSignal(EventMessage message) {
+        CatchUpSignal signal = (CatchUpSignal) message;
+        return ImmutableSet.of(signal.getId());
     }
 
     @Override
     protected Optional<CatchUp> load(CatchUpId id) {
-        return storage.read(new CatchUpReadRequest(id));
+        return storage.read(id);
     }
 
     @Override

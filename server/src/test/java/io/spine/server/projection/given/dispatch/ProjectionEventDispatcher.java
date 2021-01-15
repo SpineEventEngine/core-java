@@ -82,14 +82,14 @@ public class ProjectionEventDispatcher {
 
     private static class TestProjectionEndpoint<I,
                                                 P extends Projection<I, S, ?>,
-                                                S extends EntityState>
+                                                S extends EntityState<I>>
             extends ProjectionEndpoint<I, P, S> {
 
         private TestProjectionEndpoint(EventEnvelope event) {
             super(new TestProjectionRepository<>(), event);
         }
 
-        private static <I, P extends Projection<I, S, ?>, S extends EntityState> void
+        private static <I, P extends Projection<I, S, ?>, S extends EntityState<I>> void
         dispatch(P projection, EventEnvelope event) {
             TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(event);
             endpoint.runTransactionFor(projection);
@@ -101,7 +101,7 @@ public class ProjectionEventDispatcher {
      */
     private static class TestProjectionRepository<I,
                                                   P extends Projection<I, S, ?>,
-                                                  S extends EntityState>
+                                                  S extends EntityState<I>>
             extends ProjectionRepository<I, P, S> {
 
         @Override

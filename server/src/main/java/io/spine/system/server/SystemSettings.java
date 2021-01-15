@@ -35,13 +35,12 @@ import io.spine.base.Tests;
 /**
  * A configuration of features of a system context.
  *
- * <p>Users may choose to turn certain system features on or off depending on the required
- * performance.
+ * <p>Users may choose to turn certain system features on or off depending
+ * on the required performance.
  */
 public final class SystemSettings implements SystemFeatures {
 
     private boolean commandLog;
-    private boolean aggregateMirrors;
     private boolean storeEvents;
     private boolean parallelPosting;
 
@@ -56,7 +55,6 @@ public final class SystemSettings implements SystemFeatures {
      *
      * <p>By default, the system context:
      * <ol>
-     *     <li>Enables querying of the latest {@code Aggregate} states.
      *     <li>Does not store {@link io.spine.system.server.CommandLog CommandLog}.
      *     <li>Does not store system events.
      *     <li>Allows parallel posting of system events in production and disallows in tests.
@@ -65,7 +63,6 @@ public final class SystemSettings implements SystemFeatures {
     public static SystemSettings defaults() {
         SystemSettings settings = new SystemSettings()
                 .disableCommandLog()
-                .enableAggregateQuerying()
                 .forgetEvents();
         if (Environment.instance().is(Tests.class)) {
             settings.disableParallelPosting();
@@ -99,35 +96,6 @@ public final class SystemSettings implements SystemFeatures {
     @CanIgnoreReturnValue
     public SystemSettings disableCommandLog() {
         this.commandLog = false;
-        return this;
-    }
-
-    /**
-     * Enables querying of the latest domain {@code Aggregate} states.
-     *
-     * <p>The system context stores domain {@code Aggregate} states in the form of
-     * {@link io.spine.system.server.Mirror} projections.
-     *
-     * <p>This is the default setting.
-     *
-     * @return self for method chaining
-     * @see #disableAggregateQuerying()
-     */
-    @CanIgnoreReturnValue
-    public SystemSettings enableAggregateQuerying() {
-        this.aggregateMirrors = true;
-        return this;
-    }
-
-    /**
-     * Disables querying of the latest domain {@code Aggregate} states.
-     *
-     * @return self for method chaining
-     * @see #enableAggregateQuerying()
-     */
-    @CanIgnoreReturnValue
-    public SystemSettings disableAggregateQuerying() {
-        this.aggregateMirrors = false;
         return this;
     }
 
@@ -191,12 +159,6 @@ public final class SystemSettings implements SystemFeatures {
 
     @Internal
     @Override
-    public boolean includeAggregateMirroring() {
-        return aggregateMirrors;
-    }
-
-    @Internal
-    @Override
     public boolean includePersistentEvents() {
         return storeEvents;
     }
@@ -211,10 +173,10 @@ public final class SystemSettings implements SystemFeatures {
      * Copies these settings into an immutable feature set.
      */
     SystemConfig freeze() {
-        return new SystemConfig(commandLog, aggregateMirrors, storeEvents, parallelPosting);
+        return new SystemConfig(commandLog, storeEvents, parallelPosting);
     }
 
-    @SuppressWarnings({"OverlyComplexBooleanExpression", "NonFinalFieldReferenceInEquals"})
+    @SuppressWarnings("NonFinalFieldReferenceInEquals")
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -225,7 +187,6 @@ public final class SystemSettings implements SystemFeatures {
         }
         SystemSettings settings = (SystemSettings) o;
         return commandLog == settings.commandLog &&
-                aggregateMirrors == settings.aggregateMirrors &&
                 storeEvents == settings.storeEvents &&
                 parallelPosting == settings.parallelPosting;
     }
@@ -233,6 +194,6 @@ public final class SystemSettings implements SystemFeatures {
     @SuppressWarnings("NonFinalFieldReferencedInHashCode")
     @Override
     public int hashCode() {
-        return Objects.hashCode(commandLog, aggregateMirrors, storeEvents, parallelPosting);
+        return Objects.hashCode(commandLog, storeEvents, parallelPosting);
     }
 }

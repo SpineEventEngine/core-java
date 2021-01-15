@@ -26,13 +26,9 @@
 
 package io.spine.system.server;
 
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
 import io.spine.core.TenantId;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.tenant.TenantAwareRunner;
-
-import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -66,10 +62,5 @@ final class TenantAwareSystemReadSide implements SystemReadSide {
     @Override
     public void unregister(EventDispatcher dispatcher) {
         runner.run(() -> delegate.unregister(dispatcher));
-    }
-
-    @Override
-    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
-        return runner.evaluate(() -> delegate.readDomainAggregate(query));
     }
 }

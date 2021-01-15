@@ -76,8 +76,8 @@ open class RunBuild : DefaultTask() {
         val command = mutableListOf<String>()
         command.add("${project.rootDir}/$script")
         val shouldClean = project.gradle
-            .taskGraph
-            .hasTask(":clean")
+                                 .taskGraph
+                                 .hasTask(":clean")
         if (shouldClean) {
             command.add("clean")
         }

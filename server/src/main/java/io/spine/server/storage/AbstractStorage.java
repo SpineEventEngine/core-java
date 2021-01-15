@@ -35,10 +35,8 @@ import com.google.protobuf.Message;
  *
  * @param <I> the type of IDs of storage records
  * @param <M> the type of records kept in the storage
- * @param <R> the type of {@linkplain ReadRequest read requests} for the storage
  */
-public abstract class AbstractStorage<I, M extends Message, R extends ReadRequest<I>>
-                implements Storage<I, M, R> {
+public abstract class AbstractStorage<I, M extends Message> implements Storage<I, M> {
 
     private final boolean multitenant;
     private boolean open = true;
@@ -60,7 +58,7 @@ public abstract class AbstractStorage<I, M extends Message, R extends ReadReques
      * @param message exception message
      * @throws IllegalStateException if the storage is closed
      */
-    protected void checkNotClosed(String message) throws IllegalStateException {
+    protected final void checkNotClosed(String message) throws IllegalStateException {
         if (isClosed()) {
             throw new IllegalStateException(message);
         }
@@ -73,7 +71,7 @@ public abstract class AbstractStorage<I, M extends Message, R extends ReadReques
      *
      * @throws IllegalStateException if the storage is closed
      */
-    protected void checkNotClosed() throws IllegalStateException {
+    protected final void checkNotClosed() throws IllegalStateException {
         checkNotClosed("The storage is closed.");
     }
 
@@ -95,8 +93,8 @@ public abstract class AbstractStorage<I, M extends Message, R extends ReadReques
      * @return {@code true} if the storage is closed, {@code false} otherwise
      * @see #close()
      */
-    public boolean isClosed() {
-        return !open;
+    public final boolean isClosed() {
+        return !isOpen();
     }
 
     /**

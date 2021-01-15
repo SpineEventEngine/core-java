@@ -45,7 +45,7 @@ public interface AggregateRootDirectory {
     /**
      * Associates the given aggregate part repository and the respective root type.
      */
-    void register(AggregatePartRepository<?, ?, ?> repository);
+    void register(AggregatePartRepository<?, ?, ?, ?> repository);
 
     /**
      * Looks up an aggregate part repository by the type of the root and the type of the part state.
@@ -60,7 +60,7 @@ public interface AggregateRootDirectory {
      * @return the {@link AggregatePartRepository} or {@code Optional.empty()} if such a repository
      *         is not registered
      */
-    Optional<? extends AggregatePartRepository<?, ?, ?>>
+    Optional<? extends AggregatePartRepository<?, ?, ?, ?>>
     findPart(Class<? extends AggregateRoot<?>> rootClass,
-             Class<? extends EntityState> partStateClass);
+             Class<? extends EntityState<?>> partStateClass);
 }

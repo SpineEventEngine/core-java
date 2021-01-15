@@ -32,7 +32,7 @@ import io.spine.server.event.given.AbstractReactorTestEnv.AutoCharityDonor;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.ServicePerformanceTracker;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -47,8 +47,8 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServed
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
 
-    private BlackBoxContext restaurantContext;
-    private BlackBoxContext charityContext;
+    private BlackBox restaurantContext;
+    private BlackBox charityContext;
 
     private AutoCharityDonor charityDonor;
     private ServicePerformanceTracker performanceTracker;
@@ -57,14 +57,14 @@ class AbstractEventReactorTest {
     void setUp() {
         performanceTracker = new ServicePerformanceTracker();
         RestaurantNotifier notifier = new RestaurantNotifier();
-        restaurantContext = BlackBoxContext.from(
+        restaurantContext = BlackBox.from(
                 BoundedContext.singleTenant("Restaurant")
                               .addEventDispatcher(performanceTracker)
                               .addEventDispatcher(notifier)
         );
 
         charityDonor = new AutoCharityDonor();
-        charityContext = BlackBoxContext.from(
+        charityContext = BlackBox.from(
                 BoundedContext.singleTenant("Charity")
                               .addEventDispatcher(charityDonor)
         );

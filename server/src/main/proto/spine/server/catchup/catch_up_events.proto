@@ -28,7 +28,6 @@ syntax = "proto3";
 package spine.server.catchup;
 
 import "spine/options.proto";
-import "spine/time_options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
@@ -37,6 +36,8 @@ option (every_is).java_type = "io.spine.server.delivery.CatchUpSignal";
 option java_package = "io.spine.server.delivery.event";
 option java_outer_classname = "CatchUpEventsProto";
 option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
 
 import "spine/server/catchup/catch_up.proto";
 
@@ -53,6 +54,15 @@ message CatchUpRequested {
 message CatchUpStarted {
 
     CatchUpId id = 1;
+}
+
+// The state of the projection instance has been cleared at the start of the catch-up.
+message ProjectionStateCleared {
+
+    CatchUpId id = 1;
+
+    // The identifier of the projection instance.
+    google.protobuf.Any instance_id = 2;
 }
 
 // The next portion of the historical events was read and dispatched to the respective entities.

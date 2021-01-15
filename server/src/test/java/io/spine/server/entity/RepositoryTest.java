@@ -31,10 +31,8 @@ import io.spine.core.Versions;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.given.repository.ProjectEntity;
-import io.spine.server.entity.given.repository.RepoForEntityWithUnsupportedId;
 import io.spine.server.entity.given.repository.TestRepo;
-import io.spine.server.model.ModelError;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.entity.Project;
@@ -85,12 +83,6 @@ class RepositoryTest {
         if (context.isOpen()) {
             context.close();
         }
-    }
-
-    @Test
-    @DisplayName("check for entity ID class")
-    void checkEntityIdType() {
-        assertThrows(ModelError.class, () -> new RepoForEntityWithUnsupportedId().idClass());
     }
 
     @Test
@@ -159,7 +151,7 @@ class RepositoryTest {
     @Test
     @DisplayName("close storage on close")
     void closeStorageOnClose() {
-        RecordStorage<?> storage = (RecordStorage<?>) repository.storage();
+        EntityRecordStorage<?, ?> storage = (EntityRecordStorage<?, ?>) repository.storage();
         repository.close();
 
         assertTrue(storage.isClosed());

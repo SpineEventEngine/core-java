@@ -28,8 +28,9 @@ package io.spine.server.aggregate.given.repo;
 
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.SubProjectList;
 
 public class RejectingRepository
-        extends AggregateRepository<ProjectId, RejectingAggregate> {
+        extends AggregateRepository<ProjectId, RejectingAggregate, SubProjectList> {
 
 }

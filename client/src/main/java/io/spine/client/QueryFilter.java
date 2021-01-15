@@ -26,9 +26,9 @@
 
 package io.spine.client;
 
-import io.spine.base.EntityColumn;
 import io.spine.base.EntityState;
 import io.spine.client.Filter.Operator;
+import io.spine.query.EntityColumn;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator.EQUAL;
@@ -41,12 +41,16 @@ import static io.spine.client.Filters.createFilter;
 
 /**
  * A query filter which targets a {@linkplain EntityColumn column} of an entity.
+ *
+ * <p>This type is deprecated. Use {@linkplain io.spine.query.EntityQuery entity queries} instead.
+ * See {@code io.spine.query} package documentation for more details on usage.
  */
-public final class QueryFilter extends TypedFilter<EntityState> {
+@Deprecated
+public final class QueryFilter extends TypedFilter<EntityState<?>> {
 
     private static final long serialVersionUID = 0L;
 
-    private QueryFilter(EntityColumn column, Object expected, Operator operator) {
+    private QueryFilter(EntityColumn<?, ?> column, Object expected, Operator operator) {
         super(createFilter(column.name(), expected, operator));
     }
 
@@ -57,8 +61,10 @@ public final class QueryFilter extends TypedFilter<EntityState> {
      *         the entity column from which the actual value is taken
      * @param value
      *         the expected value
+     * @param <V>
+     *         the type of the column values
      */
-    public static QueryFilter eq(EntityColumn column, Object value) {
+    public static <V> QueryFilter eq(EntityColumn<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         return new QueryFilter(column, value, EQUAL);
@@ -74,8 +80,10 @@ public final class QueryFilter extends TypedFilter<EntityState> {
      *         the entity column from which the actual value is taken
      * @param value
      *         the expected value
+     * @param <V>
+     *         the type of the column values
      */
-    public static QueryFilter gt(EntityColumn column, Object value) {
+    public static <V> QueryFilter gt(EntityColumn<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
@@ -92,8 +100,10 @@ public final class QueryFilter extends TypedFilter<EntityState> {
      *         the entity column from which the actual value is taken
      * @param value
      *         the expected value
+     * @param <V>
+     *         the type of the column values
      */
-    public static QueryFilter lt(EntityColumn column, Object value) {
+    public static <V> QueryFilter lt(EntityColumn<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
@@ -110,8 +120,10 @@ public final class QueryFilter extends TypedFilter<EntityState> {
      *         the entity column from which the actual value is taken
      * @param value
      *         the expected value
+     * @param <V>
+     *         the type of the column values
      */
-    public static QueryFilter ge(EntityColumn column, Object value) {
+    public static <V> QueryFilter ge(EntityColumn<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());
@@ -128,8 +140,10 @@ public final class QueryFilter extends TypedFilter<EntityState> {
      *         the entity column from which the actual value is taken
      * @param value
      *         the expected value
+     * @param <V>
+     *         the type of the column values
      */
-    public static QueryFilter le(EntityColumn column, Object value) {
+    public static <V> QueryFilter le(EntityColumn<?, V> column, V value) {
         checkNotNull(column);
         checkNotNull(value);
         checkSupportedOrderingComparisonType(value.getClass());

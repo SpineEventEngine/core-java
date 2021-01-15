@@ -33,6 +33,7 @@ import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.ConsecutiveNumberProcess;
 import io.spine.server.delivery.given.ConsecutiveProjection;
 import io.spine.server.delivery.given.CounterCatchUp;
@@ -43,7 +44,7 @@ import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.EmitNextNumber;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.SlowTest;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -68,7 +69,7 @@ import static io.spine.server.delivery.TestRoutines.findView;
 import static io.spine.server.delivery.TestRoutines.post;
 import static io.spine.server.delivery.given.WhatToCatchUp.catchUpAll;
 import static io.spine.server.delivery.given.WhatToCatchUp.catchUpOf;
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -97,6 +98,14 @@ public class CatchUpTest extends AbstractDeliveryTest {
     public void tearDown() {
         super.tearDown();
         Time.resetProvider();
+        clearCatchUps();
+    }
+
+    private static void clearCatchUps() {
+        ServerEnvironment.instance()
+                         .delivery()
+                         .catchUpStorage()
+                         .clear();
     }
 
     @Test
@@ -108,7 +117,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
     @Test
     @DisplayName("given the time is provided with nanosecond resolution, " +
-            "catch up all of projection instances" +
+            "catch up all of projection instances " +
             "and respect the order of the delivered events")
     public void withNanosAllInOrder() throws InterruptedException {
         testCatchUpAll();
@@ -128,6 +137,12 @@ public class CatchUpTest extends AbstractDeliveryTest {
     public void withMillisAllInOrder() throws InterruptedException {
         setupMillis();
         testCatchUpAll();
+    }
+
+    @Test
+    @DisplayName("do nothing if the event store is empty")
+    public void onAnEmptyStorage() {
+        testCatchUpEmpty();
     }
 
     @Nested
@@ -204,6 +219,18 @@ public class CatchUpTest extends AbstractDeliveryTest {
         return new CounterCatchUp("first", "second", "third", "fourth");
     }
 
+    private static void testCatchUpEmpty() {
+        changeShardCountTo(17);
+
+        CounterCatchUp counterCatchUp = catchUpForCounter();
+        Timestamp aWhileAgo = subtract(currentTime(), Durations.fromHours(1));
+        String someTarget = "some-target";
+        counterCatchUp.catchUp(WhatToCatchUp.catchUpOf(someTarget, aWhileAgo));
+
+        Optional<CounterView> actual = counterCatchUp.find(someTarget);
+        assertThat(actual).isEmpty();
+    }
+
     private static void testCatchUpByIds() throws InterruptedException {
         changeShardCountTo(2);
 
@@ -261,7 +288,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         ConsecutiveProjection.Repo projectionRepo = new ConsecutiveProjection.Repo();
         Repository<String, ConsecutiveNumberProcess> pmRepo =
                 DefaultRepository.of(ConsecutiveNumberProcess.class);
-        BlackBoxContext ctx = BlackBoxContext.from(
+        BlackBox ctx = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(projectionRepo)
                                      .add(pmRepo)
@@ -331,7 +358,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
     }
 
     private static List<Callable<Object>>
-    asPostCommandJobs(BlackBoxContext ctx, List<EmitNextNumber> commands) {
+    asPostCommandJobs(BlackBox ctx, List<EmitNextNumber> commands) {
         return commands.stream()
                        .map(cmd -> (Callable<Object>) () -> ctx.receivesCommand(cmd))
                        .collect(toList());

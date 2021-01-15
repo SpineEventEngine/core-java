@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("rawtypes")   // for simplicity
 @DisplayName("TransactionalEntity should")
 class TransactionalEntityTest {
 
@@ -231,7 +232,7 @@ class TransactionalEntityTest {
     }
 
     private static TransactionalEntity<?, ?, ?> newEntity() {
-        return new TeEntity(1L);
+        return new TeEntity("TransactionalId");
     }
 
     private static TransactionalEntity entityWithActiveTx(boolean txChanged) {
@@ -247,20 +248,4 @@ class TransactionalEntityTest {
         return entity;
     }
 
-    /**
-     * Stub implementation of {@code Transaction} which behaves as told in the passed parameters.
-     */
-    private static class StubTransaction extends Transaction {
-
-        @SuppressWarnings("unchecked") // Generic parameters are not used by this stub impl.
-        private StubTransaction(TransactionalEntity entity, boolean active, boolean stateChanged) {
-            super(entity);
-            if (!active) {
-                deactivate();
-            }
-            if (stateChanged) {
-                markStateChanged();
-            }
-        }
-    }
 }

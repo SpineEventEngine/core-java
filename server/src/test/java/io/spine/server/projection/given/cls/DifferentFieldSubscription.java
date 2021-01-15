@@ -32,7 +32,7 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.given.SavedString;
 import io.spine.test.projection.event.PairImported;
 
-import static io.spine.testing.Tests.halt;
+import static io.spine.testing.Testing.halt;
 
 /**
  * This is invalid projection class because it uses different fields for

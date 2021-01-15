@@ -122,13 +122,15 @@ final class CatchUpMessages {
     }
 
     /**
-     * Creates a {@code ShardProcessingRequested} event messages with the specified index.
+     * Creates a {@code ShardProcessingRequested} event message with the specified index, requested
+     * by the {@link CatchUpProcess} with the given ID.
      */
-    static ShardProcessingRequested shardProcessingRequested(ShardIndex shardIndex) {
+    static ShardProcessingRequested shardProcessingRequested(CatchUpId id, ShardIndex shardIndex) {
         checkNotNull(shardIndex);
         return ShardProcessingRequested
                 .newBuilder()
-                .setId(shardIndex)
+                .setIndex(shardIndex)
+                .setProcess(id)
                 .vBuild();
     }
 }

@@ -31,8 +31,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.Internal;
+import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.MulticastDispatchListener;
@@ -95,9 +98,11 @@ import static java.util.Collections.synchronizedList;
  *
  * <p>{@code Delivery} is responsible for providing the {@link InboxStorage} for every inbox
  * registered. Framework users may {@linkplain DeliveryBuilder#setInboxStorage(InboxStorage)
- * configure} the storage, taking into account that it is typically multi-tenant. By default,
- * the {@code InboxStorage} for the delivery is provided by the environment-specific
- * {@linkplain ServerEnvironment#storageFactory() storage factory} and is multi-tenant.
+ * configure} the storage. By default, the {@code InboxStorage} for the delivery is provided
+ * by the environment-specific {@linkplain ServerEnvironment#storageFactory() storage factory}
+ * and is single-tenant. In case there is at least one multi-tenant {@code BoundedContext}
+ * served by the {@code Delivery}, the {@code InboxStorage} should be configured
+ * to support the multi-tenancy.
  *
  * <h2>Catch-up</h2>
  *
@@ -114,7 +119,10 @@ import static java.util.Collections.synchronizedList;
  * <p>The statuses of the ongoing catch-up processes are stored in a dedicated
  * {@link CatchUpStorage}. The {@code DeliveryBuilder} {@linkplain
  * DeliveryBuilder#setCatchUpStorage(CatchUpStorage) exposes an API} for the customization of this
- * storage.
+ * storage. By default, the {@code CatchUpStorage} is single-tenant. However,
+ * as with the {@code InboxStorage} used by the {@code Delivery}, it should be configured
+ * as multi-tenant if at least one {@code BoundedContext} served by the {@code Delivery}
+ * is multi-tenant.
  *
  * <h2>Observers</h2>
  *
@@ -223,6 +231,14 @@ public final class Delivery implements Logging {
      * <p>Selected to be pretty big to avoid dispatching duplicates to any entities.
      */
     private static final Duration LOCAL_DEDUPLICATION_WINDOW = Durations.fromSeconds(30);
+
+    /**
+     * The name of the system bounded context which performs the delivery of signals.
+     *
+     * <p>This name is used to initialize the storage implementations.
+     */
+    private static final BoundedContextName SYSTEM_DELIVERY =
+            BoundedContextNames.newName("__System_Delivery__");
 
     /**
      * The strategy of assigning a shard index for a message that is delivered to a particular
@@ -453,21 +469,21 @@ public final class Delivery implements Logging {
         Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
-        boolean continueAllowed = true;
+        boolean shouldContinue = true;
         List<DeliveryStage> stages = new ArrayList<>();
-        while (continueAllowed && maybePage.isPresent()) {
+        Iterable<CatchUp> catchUpJobs = refreshCatchUpJobs();
+        while (shouldContinue && maybePage.isPresent()) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
-                DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
-                Conveyor conveyor = new Conveyor(messages, deliveredMessages);
-                Iterable<CatchUp> catchUpJobs = catchUpStorage.readAll();
-                List<Station> stations = conveyorStationsFor(catchUpJobs, action);
-                DeliveryStage stage = launch(conveyor, stations, index);
-                continueAllowed = monitorTellsToContinue(stage);
+                DeliveryStage stage = deliverMessages(messages, index, catchUpJobs);
                 stages.add(stage);
+                shouldContinue = monitorTellsToContinueAfter(stage);
             }
-            if (continueAllowed) {
+            if (shouldContinue) {
+                if(messages.size() < pageSize) {
+                    catchUpJobs = refreshCatchUpJobs();
+                }
                 maybePage = currentPage.next();
             }
         }
@@ -475,7 +491,21 @@ public final class Delivery implements Logging {
         int totalMessagesDelivered = stages.stream()
                                            .map(DeliveryStage::getMessagesDelivered)
                                            .reduce(0, Integer::sum);
-        return new RunResult(totalMessagesDelivered, !continueAllowed);
+        return new RunResult(totalMessagesDelivered, !shouldContinue);
+    }
+
+    private ImmutableList<CatchUp> refreshCatchUpJobs() {
+        return ImmutableList.copyOf(catchUpStorage.readAll());
+    }
+
+    private DeliveryStage deliverMessages(ImmutableList<InboxMessage> messages,
+                                          ShardIndex index,
+                                          Iterable<CatchUp> catchUpJobs) {
+        DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
+        Conveyor conveyor = new Conveyor(messages, deliveredMessages);
+        List<Station> stations = conveyorStationsFor(catchUpJobs, action);
+        DeliveryStage stage = launch(conveyor, stations, index);
+        return stage;
     }
 
     /**
@@ -505,10 +535,17 @@ public final class Delivery implements Logging {
     private ImmutableList<Station> conveyorStationsFor(Iterable<CatchUp> catchUpJobs,
                                                        DeliveryAction action) {
         return ImmutableList.of(
+                new MaintenanceStation(deliveryInfoWith(catchUpJobs)),
                 new CatchUpStation(action, catchUpJobs),
                 new LiveDeliveryStation(action, deduplicationWindow),
                 new CleanupStation()
         );
+    }
+
+    private static DeliveryRunInfo deliveryInfoWith(Iterable<CatchUp> catchUpJobs) {
+        return DeliveryRunInfo.newBuilder()
+                              .addAllCatchUpJob(catchUpJobs)
+                              .vBuild();
     }
 
     private void notifyOfDuplicatesIn(Conveyor conveyor) {
@@ -527,7 +564,7 @@ public final class Delivery implements Logging {
                 .vBuild();
     }
 
-    private boolean monitorTellsToContinue(DeliveryStage stage) {
+    private boolean monitorTellsToContinueAfter(DeliveryStage stage) {
         return monitor.shouldContinueAfter(stage);
     }
 
@@ -646,9 +683,20 @@ public final class Delivery implements Logging {
         deliveries.unregister(inbox);
     }
 
+    /**
+     * Returns the instance of {@link InboxStorage} used by this {@code Delivery}.
+     */
     @VisibleForTesting
     InboxStorage inboxStorage() {
         return inboxStorage;
+    }
+
+    /**
+     * Returns the instance of {@link CatchUpStorage} used by this {@code Delivery}.
+     */
+    @VisibleForTesting
+    CatchUpStorage catchUpStorage() {
+        return catchUpStorage;
     }
 
     int shardCount() {
@@ -668,5 +716,17 @@ public final class Delivery implements Logging {
                 Delivery.this.dispatchListener.notifyOf(message);
             }
         };
+    }
+
+    /**
+     * Returns the specification of a Bounded Context describing the {@code Delivery} flow.
+     * @param multitenant whether the Bounded Context supports multi-tenancy
+     */
+    @SuppressWarnings("TestOnlyProblems")   // The called code is not test-only.
+    static ContextSpec contextSpec(boolean multitenant) {
+        String name = SYSTEM_DELIVERY.value();
+        return multitenant ?
+               ContextSpec.multitenant(name) :
+               ContextSpec.singleTenant(name);
     }
 }

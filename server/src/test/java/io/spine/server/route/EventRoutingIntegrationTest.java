@@ -30,12 +30,12 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.route.given.user.SessionProjection;
 import io.spine.server.route.given.user.SessionRepository;
-import io.spine.server.route.given.user.UserAggregate;
+import io.spine.server.route.given.user.UserRepository;
 import io.spine.server.route.given.user.event.RUserSignedIn;
 import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,9 +69,9 @@ class EventRoutingIntegrationTest {
                 .setUserConsentRequested(true)
                 .build();
 
-        BlackBoxContext context = BlackBoxContext.from(
+        BlackBox context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
-                                     .add(UserAggregate.class)
+                                     .add(new UserRepository())
                                      .add(new SessionRepository())
         );
         context.receivesEvent(event);

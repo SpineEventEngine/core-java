@@ -37,7 +37,7 @@ import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.entity.EntitySubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -56,11 +56,11 @@ import static com.google.common.truth.Truth.assertThat;
 class EventImportTest {
 
     private EngineRepository repository;
-    private BlackBoxContext context;
+    private BlackBox context;
 
     void createRepository(boolean routeByFirstMessageField) {
         repository = new EngineRepository(routeByFirstMessageField);
-        context = BlackBoxContext.from(
+        context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(repository)
         );
@@ -82,7 +82,7 @@ class EventImportTest {
         return this.repository;
     }
 
-    protected final BlackBoxContext context() {
+    protected final BlackBox context() {
         return this.context;
     }
 
@@ -153,8 +153,8 @@ class EventImportTest {
         /**
          * Checks that the given event is successfully imported.
          *
-         * <p>An imported event can be verified by the {@code BlackBoxBoundedContext} since it is
-         * posted into the event bus after being applied to an Aggregate. Also, the event posted
+         * <p>An imported event can be verified by the {@code BlackBox} since it is posted
+         * into the event bus after being applied to an Aggregate. Also, the event posted
          * into the event bus differs from the one posted into the import bus in the {@code version}
          * field.
          */

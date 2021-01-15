@@ -27,6 +27,7 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import io.spine.server.route.EventRouting;
+import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggTaskStarted;
@@ -36,7 +37,7 @@ import io.spine.test.aggregate.event.AggTaskStarted;
  * IdempotencyGuard tests}.
  */
 public final class IgTestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
+        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate, AggProject> {
 
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {

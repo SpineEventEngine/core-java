@@ -46,7 +46,7 @@ final class Actor {
 
     private static final Actor defaultActor = from(
             UserId.newBuilder()
-                  .setValue(BlackBoxContext.class.getName())
+                  .setValue(BlackBox.class.getName())
                   .build()
     );
 

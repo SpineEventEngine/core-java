@@ -28,11 +28,8 @@ package io.spine.system.server.given.client;
 
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.MealOrder;
 import io.spine.test.system.server.OrderId;
-import io.spine.test.system.server.ShoppingList;
 
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -51,19 +48,6 @@ public class SystemClientTestEnv {
         systemContext.internalAccess()
                      .register(new MealOrderRepository());
         return context;
-    }
-
-    public static ShoppingListAggregate findAggregate(ListId aggregateId, BoundedContext context) {
-        @SuppressWarnings("unchecked")
-        AggregateRepository<ListId, ShoppingListAggregate> repository =
-                (AggregateRepository<ListId, ShoppingListAggregate>)
-                        context.internalAccess()
-                               .findRepository(ShoppingList.class)
-                               .orElseGet(() -> fail("Aggregate repository should be visible."));
-        ShoppingListAggregate aggregate =
-                repository.find(aggregateId)
-                          .orElseGet(() -> fail("Aggregate should be present."));
-        return aggregate;
     }
 
     public static MealOrderProjection findProjection(OrderId projectionId, BoundedContext context) {

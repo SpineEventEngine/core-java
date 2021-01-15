@@ -26,8 +26,11 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
+import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.server.delivery.event.CatchUpStarted;
 
 import java.util.ArrayList;
@@ -63,7 +66,7 @@ final class CatchUpStation extends Station {
     CatchUpStation(DeliveryAction action, Iterable<CatchUp> jobs) {
         super();
         this.action = action;
-        this.jobs = jobs;
+        this.jobs = ImmutableList.copyOf(jobs);
     }
 
     /**
@@ -156,6 +159,44 @@ final class CatchUpStation extends Station {
                 accept(message);
             }
             return dispatchToCatchUp.values();
+        }
+
+        /**
+         * Processes the message if the matching job is in {@link CatchUpStatus#STARTED
+         * STARTED} status.
+         *
+         * <p>All the matched live messages (i.e. in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER}
+         * status) are ignored and removed from the conveyor.
+         *
+         * <p>The matched messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status
+         * are not yet dispatched to their targets.
+         *
+         * @param message
+         *         the message to process
+         */
+        private void started(InboxMessage message) {
+            boolean dispatched = dispatchAsCatchUpSignal(message, CatchUpStarted.class);
+            if(dispatched) {
+                return;
+            }
+            if (message.getStatus() == TO_DELIVER) {
+                conveyor.remove(message);
+            }
+        }
+
+        private boolean dispatchAsCatchUpSignal(InboxMessage message,
+                                                Class<? extends CatchUpSignal> signalType) {
+            if(message.hasEvent()) {
+                Event event = message.getEvent();
+                Class<? extends EventMessage> eventType = event.enclosedMessage()
+                                                               .getClass();
+                if (eventType.equals(signalType)) {
+                    DispatchingId dispatchingId = new DispatchingId(message);
+                    dispatchToCatchUp.put(dispatchingId, message);
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
@@ -256,6 +297,9 @@ final class CatchUpStation extends Station {
                 CatchUpStatus jobStatus = job.getStatus();
 
                 switch (jobStatus) {
+                    case STARTED:
+                        started(message); break;
+
                     case IN_PROGRESS:
                         inProgress(message); break;
 

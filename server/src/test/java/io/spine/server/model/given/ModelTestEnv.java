@@ -35,6 +35,7 @@ import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.test.shared.EmptyProcess;
 import io.spine.test.reflect.Project;
+import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.command.RefStartProject;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -49,9 +50,9 @@ public class ModelTestEnv {
     private ModelTestEnv() {
     }
 
-    public static class MAggregate extends Aggregate<Long, Project, Project.Builder> {
+    public static class MAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        private MAggregate(Long id) {
+        private MAggregate(ProjectId id) {
             super(id);
         }
 
@@ -85,9 +86,9 @@ public class ModelTestEnv {
     }
 
     public static class MProcessManager
-            extends ProcessManager<Long, EmptyProcess, EmptyProcess.Builder> {
+            extends ProcessManager<String, EmptyProcess, EmptyProcess.Builder> {
 
-        private MProcessManager(Long id) {
+        private MProcessManager(String id) {
             super(id);
         }
 
@@ -107,9 +108,9 @@ public class ModelTestEnv {
      * forbidden by the {@linkplain io.spine.server.command.model.CommanderClass model}.
      */
     public static class FaultyCommander
-            extends ProcessManager<Long, EmptyProcess, EmptyProcess.Builder> {
+            extends ProcessManager<String, EmptyProcess, EmptyProcess.Builder> {
 
-        private FaultyCommander(Long id) {
+        private FaultyCommander(String id) {
             super(id);
         }
 

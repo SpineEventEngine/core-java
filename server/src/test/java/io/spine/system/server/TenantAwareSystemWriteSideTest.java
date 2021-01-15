@@ -86,7 +86,7 @@ class TenantAwareSystemWriteSideTest {
     }
 
     private void postEventAndCheck(TenantId tenantId) {
-        EventMessage event = Sample.messageOfType(ShoppingListCreated.class);
+        EventMessage event = Sample.messageOfType(PersonNameCreated.class);
         SystemWriteSide writeSide = delegatingTo(delegate).get(tenantId);
         writeSide.postEvent(event);
 

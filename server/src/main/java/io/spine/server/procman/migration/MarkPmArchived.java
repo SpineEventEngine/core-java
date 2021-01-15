@@ -46,7 +46,7 @@ import io.spine.server.procman.ProcessManagerMigration;
 @Experimental
 public final class MarkPmArchived<I,
                                   P extends ProcessManager<I, S, B>,
-                                  S extends EntityState,
+                                  S extends EntityState<I>,
                                   B extends ValidatingBuilder<S>>
         extends ProcessManagerMigration<I, P, S, B> {
 

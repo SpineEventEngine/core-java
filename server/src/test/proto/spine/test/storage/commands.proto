@@ -37,14 +37,14 @@ option java_multiple_files = true;
 import "spine/test/storage/project.proto";
 
 message StgCreateProject {
-    ProjectId project_id = 1;
+    StgProjectId project_id = 1;
 }
 
 message StgAddTask {
-    ProjectId project_id = 1;
-    Task task = 2;
+    StgProjectId project_id = 1;
+    StgTask task = 2;
 }
 
 message StgStartProject {
-    ProjectId project_id = 1;
+    StgProjectId project_id = 1;
 }

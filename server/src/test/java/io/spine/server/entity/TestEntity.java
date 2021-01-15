@@ -28,18 +28,19 @@ package io.spine.server.entity;
 
 import io.spine.core.Version;
 import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 
 import static io.spine.base.Identifier.newUuid;
 
 public class TestEntity
-        extends AbstractEntity<String, Project>
-        implements HasLifecycleColumns<String, Project> {
+        extends AbstractEntity<ProjectId, Project>
+        implements HasLifecycleColumns<ProjectId, Project> {
 
     static TestEntity newInstance(String id) {
         TestEntity result = new TestEntityBuilder()
                 .setResultClass(TestEntity.class)
-                .withId(id)
+                .withId(newIdWith(id))
                 .build();
         return result;
     }
@@ -47,7 +48,7 @@ public class TestEntity
     static TestEntity withState() {
         TestEntity result = new TestEntityBuilder()
                 .setResultClass(TestEntity.class)
-                .withId(newUuid())
+                .withId(newIdWith(newUuid()))
                 .withState(Sample.messageOfType(Project.class))
                 .withVersion(3)
                 .build();
@@ -65,11 +66,17 @@ public class TestEntity
         return result;
     }
 
-    private TestEntity(String id) {
+    private static ProjectId newIdWith(String value) {
+        return ProjectId.newBuilder()
+                        .setId(value)
+                        .vBuild();
+    }
+
+    private TestEntity(ProjectId id) {
         super(id);
     }
 
-    public static class TestEntityBuilder extends EntityBuilder<TestEntity, String, Project> {
+    public static class TestEntityBuilder extends EntityBuilder<TestEntity, ProjectId, Project> {
 
         @Override
         protected void setState(TestEntity result, Project state, Version version) {

@@ -26,7 +26,7 @@
 
 package io.spine.server.storage.given;
 
-import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.command.StgAddTask;
 import io.spine.test.storage.command.StgCreateProject;
 import io.spine.test.storage.command.StgStartProject;
@@ -40,11 +40,11 @@ public class Given {
     private Given() {
     }
 
-    static ProjectId newProjectId() {
+    static StgProjectId newProjectId() {
         String uuid = newUuid();
-        return ProjectId.newBuilder()
-                        .setId(uuid)
-                        .build();
+        return StgProjectId.newBuilder()
+                           .setId(uuid)
+                           .build();
     }
 
     public static class EventMessage {
@@ -52,7 +52,7 @@ public class Given {
         private EventMessage() {
         }
 
-        public static StgProjectCreated projectCreated(ProjectId id) {
+        public static StgProjectCreated projectCreated(StgProjectId id) {
             return StgProjectCreated.newBuilder()
                                     .setProjectId(id)
                                     .build();
@@ -70,19 +70,19 @@ public class Given {
                                    .build();
         }
 
-        public static StgCreateProject createProject(ProjectId id) {
+        public static StgCreateProject createProject(StgProjectId id) {
             return StgCreateProject.newBuilder()
                                    .setProjectId(id)
                                    .build();
         }
 
-        public static StgAddTask addTask(ProjectId id) {
+        public static StgAddTask addTask(StgProjectId id) {
             return StgAddTask.newBuilder()
                              .setProjectId(id)
                              .build();
         }
 
-        public static StgStartProject startProject(ProjectId id) {
+        public static StgStartProject startProject(StgProjectId id) {
             return StgStartProject.newBuilder()
                                   .setProjectId(id)
                                   .build();

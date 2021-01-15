@@ -40,7 +40,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 public abstract class DefaultRecordBasedRepository<I,
                                                    E extends AbstractEntity<I, S>,
-                                                   S extends EntityState>
+                                                   S extends EntityState<I>>
                 extends RecordBasedRepository<I, E, S> {
 
     @LazyInit

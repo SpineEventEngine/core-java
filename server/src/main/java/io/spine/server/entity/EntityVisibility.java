@@ -106,7 +106,7 @@ public final class EntityVisibility implements Serializable {
      *         therefore this method handles {@code Event.class} as a special case and returns
      *         {@code NONE} visibility level for it.
      */
-    public static Optional<EntityVisibility> of(Class<? extends EntityState> stateClass) {
+    public static Optional<EntityVisibility> of(Class<? extends EntityState<?>> stateClass) {
         checkNotNull(stateClass);
 
         if (Event.class.equals(stateClass)) {

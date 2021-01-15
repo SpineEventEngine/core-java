@@ -31,7 +31,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.given.FieldMasksTestEnv.Given;
-import io.spine.test.aggregate.Project;
+import io.spine.test.aggregate.AggProject;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,7 +44,7 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
-import static io.spine.testing.Tests.assertMatchesMask;
+import static io.spine.testing.Assertions.assertMatchesMask;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -73,12 +73,12 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
         @DisplayName("to single message")
         void toSingleMessage() {
             FieldMask fieldMask =
-                    fromFieldNumbers(Project.class,
-                                     Project.ID_FIELD_NUMBER,
-                                     Project.NAME_FIELD_NUMBER);
-            Project original = Given.newProject("some-string-id");
+                    fromFieldNumbers(AggProject.class,
+                                     AggProject.ID_FIELD_NUMBER,
+                                     AggProject.NAME_FIELD_NUMBER);
+            AggProject original = Given.newProject("some-string-id");
 
-            Project masked = FieldMasks.applyMask(fieldMask, original);
+            AggProject masked = FieldMasks.applyMask(fieldMask, original);
 
             assertEquals(original.getId(), masked.getId());
             assertEquals(original.getName(), masked.getName());
@@ -89,26 +89,26 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
         @Test
         @DisplayName("to message collection")
         void toMessageCollections() {
-            FieldMask fieldMask = fromFieldNumbers(Project.class,
-                                                   Project.STATUS_FIELD_NUMBER,
-                                                   Project.TASK_FIELD_NUMBER);
+            FieldMask fieldMask = fromFieldNumbers(AggProject.class,
+                                                   AggProject.STATUS_FIELD_NUMBER,
+                                                   AggProject.TASK_FIELD_NUMBER);
             int count = 5;
 
-            Collection<Project> original = newArrayListWithCapacity(count);
+            Collection<AggProject> original = newArrayListWithCapacity(count);
 
             for (int i = 0; i < count; i++) {
-                Project project = Given.newProject(format("project-%s", i));
+                AggProject project = Given.newProject(format("project-%s", i));
                 original.add(project);
             }
 
-            Collection<Project> masked = FieldMasks.applyMask(fieldMask, original);
+            Collection<AggProject> masked = FieldMasks.applyMask(fieldMask, original);
 
             assertThat(masked).hasSize(original.size());
 
             // Collection references are not the same
             assertNotSame(original, masked);
 
-            for (Project project : masked) {
+            for (AggProject project : masked) {
                 assertMatchesMask(project, fieldMask);
 
                 // Can't check repeated fields with assertMatchesMask
@@ -127,11 +127,11 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
         void toSingleMessage() {
             FieldMask emptyMask = Given.fieldMask();
 
-            Project origin = Given.newProject("read_whole_message");
-            Project clone = Project.newBuilder(origin)
-                                   .build();
+            AggProject origin = Given.newProject("read_whole_message");
+            AggProject clone = AggProject.newBuilder(origin)
+                                         .build();
 
-            Project processed = FieldMasks.applyMask(emptyMask, origin);
+            AggProject processed = FieldMasks.applyMask(emptyMask, origin);
 
             // Check object itself was returned
             assertSame(processed, origin);
@@ -146,15 +146,15 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
         void toMessageCollection() {
             FieldMask emptyMask = Given.fieldMask();
 
-            Collection<Project> original = newLinkedList();
+            Collection<AggProject> original = newLinkedList();
             int count = 5;
 
             for (int i = 0; i < count; i++) {
-                Project project = Given.newProject(format("test-data--%s", i));
+                AggProject project = Given.newProject(format("test-data--%s", i));
                 original.add(project);
             }
 
-            Collection<Project> processed = FieldMasks.applyMask(emptyMask, original);
+            Collection<AggProject> processed = FieldMasks.applyMask(emptyMask, original);
 
             assertThat(processed).hasSize(original.size());
 
@@ -162,9 +162,9 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
             assertNotSame(original, processed);
 
             // A copy of the argument is returned (Collection type may differ)
-            Iterator<Project> processedProjects = processed.iterator();
+            Iterator<AggProject> processedProjects = processed.iterator();
 
-            for (Project anOriginal : original) {
+            for (AggProject anOriginal : original) {
                 assertEquals(processedProjects.next(), anOriginal);
             }
         }

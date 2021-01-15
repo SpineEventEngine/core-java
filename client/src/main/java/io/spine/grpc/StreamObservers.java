@@ -44,7 +44,7 @@ import static io.spine.core.Responses.ok;
  * A utility class for the routines related to
  * {@linkplain StreamObserver gRPC StreamObserver instances}.
  */
-public class StreamObservers {
+public final class StreamObservers {
 
     /** Prevents instantiation of this utility class. */
     private StreamObservers() {

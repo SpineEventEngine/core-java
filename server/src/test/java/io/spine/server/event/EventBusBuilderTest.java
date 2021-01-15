@@ -31,16 +31,17 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.type.EventEnvelope;
-import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.spine.testing.Assertions.assertNpe;
+import static io.spine.testing.TestValues.nullRef;
 
-@DisplayName("EventBus Builder should")
+@SuppressWarnings("ThrowableNotThrown") // in custom assertions
+@DisplayName("`EventBus.Builder` should")
 class EventBusBuilderTest
         extends BusBuilderTest<EventBus.Builder, EventEnvelope, Event> {
 
@@ -52,8 +53,7 @@ class EventBusBuilderTest
     @Test
     @DisplayName("reject null `EventEnricher`")
     void rejectNullEnricher() {
-        assertThrows(NullPointerException.class, () ->
-                builder().injectEnricher(Tests.nullRef()));
+        assertNpe(() -> builder().injectEnricher(nullRef()));
     }
 
     @Nested
@@ -63,9 +63,9 @@ class EventBusBuilderTest
         @Test
         @DisplayName("assigning `noOpObserver()` if not assigned")
         void assigningDefault() {
-            assertThat(builder().build()
-                              .observer())
-                    .isInstanceOf(noOpObserver().getClass());
+            EventBus bus = builder().build();
+            StreamObserver<Ack> observer = bus.observer();
+            assertThat(observer).isInstanceOf(noOpObserver().getClass());
         }
 
         @Test
@@ -85,10 +85,8 @@ class EventBusBuilderTest
                 }
             };
 
-            assertThat(builder().setObserver(observer)
-                                .build()
-                                .observer())
-                    .isEqualTo(observer);
+            EventBus bus = builder().setObserver(observer).build();
+            assertThat(bus.observer()).isEqualTo(observer);
         }
     }
 }

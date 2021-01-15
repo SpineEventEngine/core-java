@@ -27,6 +27,8 @@ syntax = "proto3";
 
 package spine.test.procman;
 
+import "google/protobuf/any.proto";
+
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
@@ -70,4 +72,15 @@ message Task {
     TaskId task_id = 1;
     string title = 2;
     string description = 3;
+}
+
+// Remembers the commands and events.
+message ElephantProcess {
+
+    option (entity).kind = PROCESS_MANAGER;
+
+    ProjectId id = 1;
+
+    // The last handled signal.
+    google.protobuf.Any any = 2;
 }

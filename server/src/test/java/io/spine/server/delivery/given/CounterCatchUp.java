@@ -37,40 +37,42 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.CatchUp;
 import io.spine.server.delivery.CatchUpStatus;
+import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.LocalDispatchingObserver;
-import io.spine.server.storage.memory.InMemoryCatchUpStorage;
+import io.spine.server.storage.StorageFactory;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BlackBoxContext;
+import io.spine.testing.server.blackbox.BlackBox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.delivery.TestRoutines.findView;
 import static io.spine.server.delivery.TestRoutines.post;
-import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.TestValues.nullRef;
 import static java.util.stream.Collectors.toList;
 
 /**
- * A convenience wrapper over the {@link CounterView} repository and the BlackBox Bounded Context
- * to be used in the catch-up tests.
+ * A convenience wrapper over the {@link CounterView} repository and the {@link BlackBox}
+ * Bounded Context to be used in the catch-up tests.
  */
 public class CounterCatchUp {
 
     private final CounterView.Repository repo;
-    private final BlackBoxContext ctx;
+    private final BlackBox ctx;
     private final String[] ids;
 
     public CounterCatchUp(String... ids) {
         this.ids = ids.clone();
         this.repo = new CounterView.Repository();
-        this.ctx = BlackBoxContext.from(
+        this.ctx = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(repo)
         );
@@ -91,8 +93,7 @@ public class CounterCatchUp {
         }
     }
 
-    public void dispatch(List<NumberAdded> events, int threads)
-            throws InterruptedException {
+    public void dispatch(List<NumberAdded> events, int threads) throws InterruptedException {
         post(asPostEventJobs(ctx, events), threads);
     }
 
@@ -101,6 +102,10 @@ public class CounterCatchUp {
                      .map((id) -> findView(repo, id).state()
                                                     .getTotal())
                      .collect(toList());
+    }
+
+    public Optional<CounterView> find(String id) {
+        return repo.find(id);
     }
 
     public String[] targets() {
@@ -150,7 +155,7 @@ public class CounterCatchUp {
     }
 
     private static List<Callable<Object>>
-    asPostEventJobs(BlackBoxContext ctx, List<NumberAdded> events) {
+    asPostEventJobs(BlackBox ctx, List<NumberAdded> events) {
         return events.stream()
                      .map(e -> (Callable<Object>) () -> ctx.receivesEvent(e))
                      .collect(toList());
@@ -161,7 +166,9 @@ public class CounterCatchUp {
     }
 
     public static void addOngoingCatchUpRecord(WhatToCatchUp target, CatchUpStatus status) {
-        InMemoryCatchUpStorage storage = new InMemoryCatchUpStorage(false);
+        StorageFactory factory = ServerEnvironment.instance()
+                                                  .storageFactory();
+        CatchUpStorage storage = new CatchUpStorage(factory,false);
         Collection<Object> ids = null;
         if (!target.shouldCatchUpAll()) {
             String identifier = checkNotNull(target.id());

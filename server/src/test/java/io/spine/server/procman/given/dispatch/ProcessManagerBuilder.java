@@ -44,13 +44,13 @@ import io.spine.server.procman.ProcessManager;
 @VisibleForTesting
 public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
                                    I,
-                                   S extends EntityState,
+                                   S extends EntityState<I>,
                                    B extends ValidatingBuilder<S>>
         extends EntityBuilder<P, I, S> {
 
     public static <P extends ProcessManager<I, S, B>,
                    I,
-                   S extends EntityState,
+                   S extends EntityState<I>,
                    B extends ValidatingBuilder<S>>
     ProcessManagerBuilder<P, I, S, B> newInstance() {
         return new ProcessManagerBuilder<>();
@@ -65,7 +65,7 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        TestPmTransaction transaction = new TestPmTransaction<>(result, state, version);
+        TestPmTransaction<I, S, B> transaction = new TestPmTransaction<>(result, state, version);
         transaction.commit();
     }
 }
