@@ -88,7 +88,6 @@ import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedT
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.ContextAwareTest;
-import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.AfterEach;
@@ -826,21 +825,12 @@ public class AggregateTest {
 
     @Nested
     @DisplayName("create a single event when emitting a pair without second value")
-    class CreateSingleEventForPair {
+    class CreateSingleEventForPair extends ContextAwareTest {
 
-        private BlackBox context;
-
-        @BeforeEach
-        void prepareContext() {
-            context = BlackBox.from(
-                    BoundedContextBuilder.assumingTests()
-                                         .add(new TaskAggregateRepository())
-            );
-        }
-
-        @AfterEach
-        void closeContext() {
-            context.close();
+        @Override
+        protected BoundedContextBuilder contextBuilder() {
+            return BoundedContextBuilder.assumingTests()
+                                        .add(new TaskAggregateRepository());
         }
 
         /**
@@ -854,10 +844,10 @@ public class AggregateTest {
         @Test
         @DisplayName("when dispatching a command")
         void fromCommandDispatch() {
-            context.receivesCommand(createTask())
-                   .assertEvents()
-                   .withType(AggTaskCreated.class)
-                   .isNotEmpty();
+            context().receivesCommand(createTask())
+                     .assertEvents()
+                     .withType(AggTaskCreated.class)
+                     .isNotEmpty();
         }
 
         /**
@@ -872,8 +862,8 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on an event")
         void fromEventReact() {
-            EventSubject assertEvents = context.receivesCommand(assignTask())
-                                               .assertEvents();
+            EventSubject assertEvents = context().receivesCommand(assignTask())
+                                                 .assertEvents();
             assertEvents.hasSize(2);
             assertEvents.withType(AggTaskAssigned.class)
                         .hasSize(1);
@@ -893,8 +883,8 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
-            EventSubject assertEvents = context.receivesCommand(reassignTask())
-                                               .assertEvents();
+            EventSubject assertEvents = context().receivesCommand(reassignTask())
+                                                 .assertEvents();
             assertEvents.hasSize(2);
             assertEvents.withType(AggCannotReassignUnassignedTask.class)
                         .hasSize(1);
