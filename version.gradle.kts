@@ -46,4 +46,5 @@ project.extra.apply {
     this["versionToPublish"] = coreJava
     this["spineBaseVersion"] = base
     this["spineTimeVersion"] = time
+    this["kotlinVersion"] = "1.4.21"
 }
