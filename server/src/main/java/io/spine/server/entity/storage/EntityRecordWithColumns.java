@@ -31,6 +31,9 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.SPI;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.client.ArchivedColumn;
+import io.spine.client.DeletedColumn;
+import io.spine.client.VersionColumn;
 import io.spine.query.ColumnName;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -43,8 +46,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.EntityRecordColumn.archived;
-import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static java.util.Collections.emptyMap;
 
 /**
@@ -73,8 +74,8 @@ public final class EntityRecordWithColumns<I>
      *         the type of the entity
      * @return a new instance of {@code EntityRecordWithColumns}
      */
-    public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
-    create(E entity, EntityRecord record) {
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    EntityRecordWithColumns<I> create(E entity, EntityRecord record) {
         checkNotNull(entity);
         checkNotNull(record);
         EntityRecordSpec<I, S, E> recordSpec = EntityRecordSpec.of(entity);
@@ -102,10 +103,12 @@ public final class EntityRecordWithColumns<I>
         checkNotNull(record);
         LifecycleFlags flags = record.getLifecycleFlags();
         ImmutableMap<ColumnName, Object> lifecycleValues =
-                ImmutableMap.of(archived.get()
-                                        .name(), flags.getArchived(),
-                                deleted.get()
-                                       .name(), flags.getArchived());
+                ImmutableMap.of(ArchivedColumn.instance()
+                                              .name(), flags.getArchived(),
+                                DeletedColumn.instance()
+                                             .name(), flags.getDeleted(),
+                                VersionColumn.instance()
+                                             .name(), record.getVersion());
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 

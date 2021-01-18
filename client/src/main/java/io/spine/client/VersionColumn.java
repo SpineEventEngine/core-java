@@ -24,36 +24,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.client;
 
-import io.spine.query.ColumnName;
-import io.spine.query.CustomColumn;
-import io.spine.server.entity.Entity;
+import io.spine.core.Version;
 
+//TODO:2021-01-18:alex.tymchenko: document
 /**
- * A column of an entity, which tells if the entity is deleted.
+ * A column of storing the version of an entity.
  */
-final class DeletedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
+public class VersionColumn extends EntityLifecycleColumn<Version> {
+
+    private static final VersionColumn instance = new VersionColumn();
 
     @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
-    private static final ColumnName DELETED = ColumnName.of("deleted");
-
-    DeletedColumn() {
-        super();
+    private VersionColumn() {
+        super("version");
     }
 
-    @Override
-    public ColumnName name() {
-        return DELETED;
+    public static VersionColumn instance() {
+        return instance;
     }
 
-    @Override
-    public Class<Boolean> type() {
-        return Boolean.class;
-    }
-
-    @Override
-    public Boolean valueIn(Entity<?, ?> entity) {
-        return entity.lifecycleFlags().getDeleted();
+    public static VersionColumn is() {
+        return instance;
     }
 }

@@ -27,33 +27,30 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.Immutable;
-import io.spine.query.CustomColumn;
+import io.spine.query.Column;
 import io.spine.server.entity.Entity;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
- * Describes the system columns defined for this type of {@link Entity}.
- *
- * @param <E>
- *         the type of entity which columns are described
+ * @author Alex Tymchenko
  */
-@Immutable
-final class SystemColumns<E extends Entity<?, ?>> implements Iterable<CustomColumn<E, ?>> {
+@SuppressWarnings({"MissingSummary", "Immutable"})  //TODO:2021-01-18:alex.tymchenko: address!
+public final class Columns<E extends Entity<?, ?>> implements Iterable<Column<E, ?>> {
 
-    private final ImmutableSet<CustomColumn<E, ?>> columns;
+    private final ImmutableSet<Column<E, ?>> columns;
 
     /**
      * Creates a new instance from the passed columns.
      */
-    SystemColumns(Set<CustomColumn<E, ?>> columns) {
+    Columns(Set<Column<E, ?>> columns) {
         this.columns = ImmutableSet.copyOf(columns);
     }
 
     @Override
-    public Iterator<CustomColumn<E, ?>> iterator() {
+    public Iterator<Column<E, ?>> iterator() {
         return columns.iterator();
     }
 
@@ -62,5 +59,12 @@ final class SystemColumns<E extends Entity<?, ?>> implements Iterable<CustomColu
      */
     int size() {
         return columns.size();
+    }
+
+    /**
+     * Returns a new stream on top of the stored columns.
+     */
+    Stream<Column<E, ?>> stream() {
+        return columns.stream();
     }
 }

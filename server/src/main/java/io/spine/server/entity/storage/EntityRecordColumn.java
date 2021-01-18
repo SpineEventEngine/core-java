@@ -29,18 +29,18 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.client.ArchivedColumn;
+import io.spine.client.DeletedColumn;
+import io.spine.client.VersionColumn;
+import io.spine.core.Version;
 import io.spine.query.ColumnName;
 import io.spine.query.CustomColumn;
 import io.spine.query.RecordColumn;
-import io.spine.server.entity.Entity;
+import io.spine.query.RecordColumns;
 import io.spine.server.entity.EntityRecord;
 
-import java.util.function.Supplier;
-
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static java.util.Arrays.stream;
-
 /**
+ * //TODO:2020-12-15:alex.tymchenko: update the description.
  * Columns storing the internal framework-specific attributes of an {@code Entity}.
  *
  * <p>As they are not declared in the Proto messages of entity states, they are implemented as
@@ -48,66 +48,22 @@ import static java.util.Arrays.stream;
  * the entity attributes at the very moment of persisting a corresponding {@code Entity} instance.
  */
 @Internal
-public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>> {
+@RecordColumns(ofType = EntityRecord.class)
+final class EntityRecordColumn {
+
+    static final RecordColumn<EntityRecord, Boolean> archived =
+            AsEntityRecordColumn.apply(ArchivedColumn.instance(), Boolean.class);
+
+    static final RecordColumn<EntityRecord, Boolean> deleted =
+            AsEntityRecordColumn.apply(DeletedColumn.instance(), Boolean.class);
+
+    static final RecordColumn<EntityRecord, Version> version =
+            AsEntityRecordColumn.apply(VersionColumn.instance(), Version.class);
 
     /**
-     * The column storing the {@code boolean} attribute telling if an entity is archived.
+     * Prevents instantiation of this column holder type.
      */
-    archived(new ArchivedColumn()),
-
-    /**
-     * The column storing the {@code boolean} attribute telling if an entity is deleted.
-     */
-    deleted(new DeletedColumn()),
-
-    /**
-     * The column storing the entity version.
-     */
-    version(new VersionColumn());
-
-    private final CustomColumn<Entity<?, ?>, ?> column;
-
-    EntityRecordColumn(CustomColumn<Entity<?, ?>, ?> column) {
-        this.column = column;
-    }
-
-    /**
-     * Returns the definition of the column.
-     */
-    @Override
-    public CustomColumn<Entity<?, ?>, ?> get() {
-        return column;
-    }
-
-    /**
-     * Returns the name of the column.
-     */
-    public ColumnName columnName() {
-        return get().name();
-    }
-
-    /**
-     * Obtains the column treating it as a lifecycle column with {@code Boolean} values.
-     *
-     * <p>If the column has the type of values different from {@code Boolean},
-     * the {@link ClassCastException} is thrown.
-     */
-    @SuppressWarnings("unchecked")
-    public CustomColumn<Entity<?, ?>, Boolean> lifecycle() {
-        CustomColumn<Entity<?, ?>, Boolean> boolColumn =
-                (CustomColumn<Entity<?, ?>, Boolean>) this.column;
-        return boolColumn;
-    }
-
-    /**
-     * Returns the column as a {@link RecordColumn}.
-     *
-     * <p>This is required in order to reuse a querying mechanism defined for all stored messages.
-     *
-     * @param <V> the type of the column values
-     */
-    <V> RecordColumn<EntityRecord, V> asRecordColumn(Class<V> valueType) {
-        return AsEntityRecordColumn.apply(column, valueType);
+    private EntityRecordColumn() {
     }
 
     /**
@@ -115,17 +71,6 @@ public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>
      */
     @VisibleForTesting
     static ImmutableSet<ColumnName> names() {
-        return ImmutableSet.of(archived.columnName(), deleted.columnName(), version.columnName());
-    }
-
-    /**
-     * Returns all the columns which store system attributes of an {@code Entity}.
-     */
-    @VisibleForTesting
-    static ImmutableSet<CustomColumn<Entity<?, ?>, ?>> all() {
-        ImmutableSet<CustomColumn<Entity<?, ?>, ?>> result =
-                stream(values()).map(EntityRecordColumn::get)
-                                .collect(toImmutableSet());
-        return result;
+        return ImmutableSet.of(archived.name(), deleted.name(), version.name());
     }
 }

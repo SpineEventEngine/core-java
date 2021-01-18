@@ -24,36 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.client;
 
-import io.spine.query.ColumnName;
-import io.spine.query.CustomColumn;
-import io.spine.server.entity.Entity;
-
+//TODO:2021-01-18:alex.tymchenko: document
 /**
- * A column of an entity, which tells if the entity is archived.
+ * A column of an entity, which tells if the entity is deleted.
  */
-final class ArchivedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
+public class DeletedColumn extends EntityLifecycleColumn<Boolean> {
+
+    private static final DeletedColumn instance = new DeletedColumn();
 
     @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
-    private static final ColumnName ARCHIVED = ColumnName.of("archived");
-
-    ArchivedColumn() {
-        super();
+    private DeletedColumn() {
+        super("deleted");
     }
 
-    @Override
-    public ColumnName name() {
-        return ARCHIVED;
+    public static DeletedColumn instance() {
+        return instance;
     }
 
-    @Override
-    public Class<Boolean> type() {
-        return Boolean.class;
+    public static DeletedColumn is() {
+        return instance();
     }
 
-    @Override
-    public Boolean valueIn(Entity<?, ?> entity) {
-        return entity.lifecycleFlags().getArchived();
+    public static String nameAsString() {
+        return instance().name().value();
     }
 }

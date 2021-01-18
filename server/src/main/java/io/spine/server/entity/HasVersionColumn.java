@@ -29,8 +29,6 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.EntityRecordColumn;
-import io.spine.server.entity.storage.SystemColumn;
 
 /**
  * Marks an {@link Entity} that declares a {@link Version} column.
@@ -41,7 +39,6 @@ public interface HasVersionColumn<I, S extends EntityState<I>> extends Entity<I,
     /**
      * Obtains the version of the entity.
      */
-    @SystemColumn(impl = EntityRecordColumn.version)
     default Version getVersion() {
         return version();
     }

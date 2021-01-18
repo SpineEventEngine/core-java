@@ -24,31 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.client;
 
-import io.spine.annotation.Internal;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
+//TODO:2021-01-18:alex.tymchenko: document
 /**
- * Marks an entity column declared by the Spine Framework.
- *
- * <p>Such columns may be shared across entities and are used internally by the Spine routines.
- *
- * <p>This annotation should not be used in the client code. The users should rely on the
- * {@code (column)} option to declare entity columns instead.
+ * A column of an entity, which tells if the entity is archived.
  */
-@Target(METHOD)
-@Retention(RUNTIME)
-@Internal
-public @interface SystemColumn {
+public final class ArchivedColumn extends EntityLifecycleColumn<Boolean> {
 
-    /**
-     * The implementation of the column.
-     */
-    EntityRecordColumn impl();
+    private static final ArchivedColumn instance = new ArchivedColumn();
+
+    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
+    private ArchivedColumn() {
+        super("archived");
+    }
+
+    public static ArchivedColumn instance() {
+        return instance;
+    }
+
+    public static ArchivedColumn is() {
+        return instance();
+    }
+
+    public static String nameAsString() {
+        return instance().name().value();
+    }
 }

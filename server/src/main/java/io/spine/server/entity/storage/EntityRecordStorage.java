@@ -78,16 +78,6 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     private final RecordQuery<I, EntityRecord> findActiveRecordsQuery;
 
     /**
-     * Tells if the entity has {@link EntityRecordColumn#archived archived} column declared.
-     */
-    private final boolean hasArchivedColumn;
-
-    /**
-     * Tells if the entity has {@link EntityRecordColumn#deleted deleted} column declared.
-     */
-    private final boolean hasDeletedColumn;
-
-    /**
      * Creates a new instance.
      *
      * <p>This constructor takes the specification of the Bounded Context in which the storage
@@ -102,10 +92,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
                                StorageFactory factory,
                                Class<? extends Entity<I, S>> entityClass) {
         super(context, factory.createRecordStorage(context, spec(entityClass)));
-        this.hasArchivedColumn = hasColumn(archived);
-        this.hasDeletedColumn = hasColumn(deleted);
-        FindActiveEntites<I, S> entityQuery = findActiveEntities().build();
-        this.findActiveRecordsQuery = transform(entityQuery);
+        this.findActiveRecordsQuery = findActiveEntities();
     }
 
     private static <I, S extends EntityState<I>> EntityRecordSpec<I, S, ?>
@@ -275,13 +262,6 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
         return ids.iterator();
     }
 
-    @SuppressWarnings("unchecked")  // ensured by the `EntityClass` definition.
-    private Class<S> stateType() {
-        return (Class<S>) recordSpec().entityClass()
-                                      .stateClass();
-    }
-
-
     @SuppressWarnings("unchecked")  // ensured by the `Entity` declaration.
     private Class<I> idType() {
         return (Class<I>) recordSpec().entityClass().idClass();
@@ -294,13 +274,25 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
                     .isEmpty();
     }
 
-    private static <I> boolean hasNoLifecycleCols(Query<I, ?> query) {
+    private RecordQuery<I, EntityRecord> onlyActive(RecordQuery<I, EntityRecord> query) {
+        RecordQuery<I, EntityRecord> result = query;
+        if (hasNoIds(query) && hasNoLifecycleCols(query)) {
+            RecordQueryBuilder<I, EntityRecord> builder = query.toBuilder();
+            builder.where(archived).is(false)
+                   .where(deleted).is(false);
+            result = builder.build();
+        }
+        return result;
+    }
+
+    private static <I> boolean hasNoLifecycleCols(Query<I, EntityRecord> query) {
         Subject<I, ?> subject = query.subject();
         ImmutableList<? extends QueryPredicate<?>> predicates = subject.predicates();
         for (QueryPredicate<?> predicate : predicates) {
-            boolean hasColumn = predicate.parameters()
-                                         .stream()
-                                         .anyMatch((param) -> isLifecycleColumn(param.column()));
+            boolean hasColumn =
+                    predicate.parameters()
+                             .stream()
+                             .anyMatch((param) -> isLifecycleColumn(param.column()));
             if (hasColumn) {
                 return false;
             }
@@ -308,34 +300,17 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
         return true;
     }
 
-    private RecordQuery<I, EntityRecord> onlyActive(RecordQuery<I, EntityRecord> query) {
-        RecordQuery<I, EntityRecord> result = query;
-        if (hasNoIds(query) && hasNoLifecycleCols(query)) {
-            RecordQueryBuilder<I, EntityRecord> builder = query.toBuilder();
-            if(hasArchivedColumn) {
-                builder.where(archived.asRecordColumn(Boolean.class)).is(false);
-            }
-            if(hasDeletedColumn) {
-                builder.where(deleted.asRecordColumn(Boolean.class)).is(false);
-            }
-            result = builder.build();
-        }
-        return result;
-    }
-
     private static boolean isLifecycleColumn(Column<?, ?> column) {
         ColumnName name = column.name();
-        return name.equals(archived.columnName()) || name.equals(deleted.columnName());
+        return name.equals(archived.name()) || name.equals(deleted.name());
     }
 
-    private FindActiveEntites.Builder<I, S> findActiveEntities() {
-        return FindActiveEntites.newBuilder(idType(), stateType(),
-                                            hasArchivedColumn, hasDeletedColumn);
-    }
-
-    private boolean hasColumn(EntityRecordColumn column) {
-        EntityRecordSpec<I, S, ?> spec = recordSpec();
-        return spec.findColumn(column.columnName())
-                              .isPresent();
+    private RecordQuery<I, EntityRecord> findActiveEntities() {
+        RecordQuery<I, EntityRecord> result =
+                RecordQuery.newBuilder(idType(), EntityRecord.class)
+                           .where(archived).is(false)
+                           .where(deleted).is(false)
+                           .build();
+        return result;
     }
 }
