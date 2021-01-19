@@ -26,16 +26,17 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.EntityState;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.client.VersionColumn;
 import io.spine.query.Column;
-import io.spine.query.ColumnName;
 import io.spine.query.EntityColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -73,36 +74,39 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
         this.entityClass = entityClass;
     }
 
+    /**
+     * Returns all columns for the scanned {@code Entity}.
+     *
+     * <p>The result includes both lifecycle columns and the columns declared
+     * in the {@code Entity} state.
+     */
     Columns<E> columns() {
         Set<Column<E, ?>> accumulator = new HashSet<>();
 
         StateColumns<S> stateColumns = stateColumns();
         for (EntityColumn<S, ?> stateCol : stateColumns) {
-            ColumnWrapper<E> wrapped =
-                    new ColumnWrapper<>(stateCol, (e) -> stateCol.valueIn(e.state()));
+            Column<E, ?> wrapped = wrap(stateCol, (entity) -> stateCol.valueIn(entity.state()));
             accumulator.add(wrapped);
         }
-        ColumnWrapper<E> archived =
-                new ColumnWrapper<>(ArchivedColumn.instance(), (e) -> e.lifecycleFlags()
-                                                                       .getArchived());
-        ColumnWrapper<E> deleted =
-                new ColumnWrapper<>(DeletedColumn.instance(), (e) -> e.lifecycleFlags()
-                                                                      .getDeleted());
-        ColumnWrapper<E> version =
-                new ColumnWrapper<>(VersionColumn.instance(), Entity::version);
 
-        accumulator.add(archived);
-        accumulator.add(deleted);
-        accumulator.add(version);
+        accumulator.add(wrap(ArchivedColumn.instance(), Entity::isArchived));
+        accumulator.add(wrap(DeletedColumn.instance(), Entity::isDeleted));
+        accumulator.add(wrap(VersionColumn.instance(), Entity::version));
 
         Columns<E> columns = new Columns<>(accumulator);
         return columns;
     }
 
+    @NotNull
+    private AsEntityColumn<E> wrap(Column<?, ?> origin, Function<E, Object> getter) {
+        return new AsEntityColumn<>(origin, getter);
+    }
+
     /**
      * Obtains the {@linkplain EntityColumn entity-state-based} columns of the class.
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")  // Treating all exceptions equally.
+    @VisibleForTesting
+    @SuppressWarnings("OverlyBroadCatchBlock")   /* Treating all exceptions equally. */
     StateColumns<S> stateColumns() {
         Class<? extends EntityState<?>> stateClass = entityClass.stateClass();
         Class<?> columnClass = findColumnsClass(stateClass);
@@ -146,32 +150,5 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
             }
         }
         return columnClass;
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static final class ColumnWrapper<E extends Entity<?, ?>> implements Column<E, Object> {
-
-        private final Column<?, ?> column;
-        private final Function<E, Object> getter;
-
-        private ColumnWrapper(Column<?, ?> column, Function<E, Object> getter) {
-            this.column = column;
-            this.getter = getter;
-        }
-
-        @Override
-        public ColumnName name() {
-            return column.name();
-        }
-
-        @Override
-        public Class type() {
-            return column.type();
-        }
-
-        @Override
-        public @Nullable Object valueIn(E source) {
-            return getter.apply(source);
-        }
     }
 }
