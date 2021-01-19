@@ -58,6 +58,7 @@ public abstract class EntityLifecycleColumn<V> extends CustomColumn<Supplier<V>,
     }
 
     EntityLifecycleColumn(String name) {
+        super();
         this.name = ColumnName.of(name);
     }
 
