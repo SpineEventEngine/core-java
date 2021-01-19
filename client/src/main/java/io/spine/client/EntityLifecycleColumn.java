@@ -39,8 +39,13 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A common type for the lifecycle column definitions which are declared as a part of a client-side
  * query language.
+ *
+ * @apiNote Unlike other types of {@link io.spine.query.Column Column}s, the descendants of
+ *         this type are intended just to introduce the definitions of columns into the query DSL.
+ *         Therefore, the API for obtaining the column values from entities and entity records
+ *         is disabled by explicit throwing an {@code IllegalStateException}s in respective method.
  */
-@SuppressWarnings({"Immutable"})  //TODO:2021-01-18:alex.tymchenko: document!
+@SuppressWarnings("Immutable")
 @Internal
 public abstract class EntityLifecycleColumn<V> extends CustomColumn<Supplier<V>, V> {
 
@@ -49,7 +54,7 @@ public abstract class EntityLifecycleColumn<V> extends CustomColumn<Supplier<V>,
     private volatile @MonotonicNonNull Class<V> valueType;
 
     @Override
-    @SuppressWarnings("unchecked")   // Ensured by the declaration of the generic parameter.
+    @SuppressWarnings("unchecked")   /* Ensured by the declaration of the generic parameter. */
     public Class<V> type() {
         if (valueType == null) {
             valueType = (Class<V>) GenericParameter.VALUE.argumentIn(getClass());
@@ -57,6 +62,9 @@ public abstract class EntityLifecycleColumn<V> extends CustomColumn<Supplier<V>,
         return valueType;
     }
 
+    /**
+     * Creates an instance of this class with the passed name of the column.
+     */
     EntityLifecycleColumn(String name) {
         super();
         this.name = ColumnName.of(name);
@@ -67,6 +75,16 @@ public abstract class EntityLifecycleColumn<V> extends CustomColumn<Supplier<V>,
         return name;
     }
 
+    /**
+     * Always throws an {@code IllegalStateException}.
+     *
+     * The descendant types of this class are designed to be a part of the query DSL,
+     * but not the real means to extract column values. Therefore, the implementation of this method
+     * prohibits obtaining the column values.
+     *
+     * @throws IllegalStateException
+     *         always
+     */
     @Override
     public final V valueIn(Supplier<V> source) {
         throw newIllegalStateException("`EntityLifecycleColumn.valueIn(..)` " +
