@@ -28,23 +28,47 @@ package io.spine.client;
 
 import io.spine.core.Version;
 
-//TODO:2021-01-18:alex.tymchenko: document
 /**
- * A column of storing the version of an entity.
+ * A column of an entity holding the entity version.
+ *
+ * <p>Extends the client-side query language to provide an ability to query entities
+ * by their versions.
+ *
+ * <pre>
+ *  Query query =
+ *        ReportView.query()
+ *                    // ...
+ *                  .where(Version.is(), previousVersion)
+ *                  .build(...);
+ *  List<...> result = execute(query);
+ * </pre>
+ *
+ * <p>This type is a singleton.
  */
 public class VersionColumn extends EntityLifecycleColumn<Version> {
 
     private static final VersionColumn instance = new VersionColumn();
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
+    /**
+     * Creates an instance of this column.
+     */
+    @SuppressWarnings("DuplicateStringLiteralInspection")   /* Used in a different context. */
     private VersionColumn() {
         super("version");
     }
 
+    /**
+     * Returns a singleton instance of this type.
+     */
     public static VersionColumn instance() {
         return instance;
     }
 
+    /**
+     * Returns a singleton instance of this type.
+     *
+     * <p>Serves as a more DSL-friendly alternative to {@link #instance() instance()}.
+     */
     public static VersionColumn is() {
         return instance;
     }

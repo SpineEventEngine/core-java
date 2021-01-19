@@ -26,27 +26,56 @@
 
 package io.spine.client;
 
-//TODO:2021-01-18:alex.tymchenko: document
 /**
- * A column of an entity, which tells if the entity is archived.
+ * A column of an entity, which tells if an entity is archived.
+ *
+ * <p>The sole purpose of this type is to provide an extension for the client-side query language,
+ * allowing to query for archived/non-archived entities.
+ *
+ * <pre>
+ *  Query query =
+ *      MyProjection.query()
+ *                  // ...
+ *                  .where(ArchivedColumn.is(), true)   // Only include archived.
+ *                  .build(...);
+ *  List<...> result = execute(query);
+ * </pre>
+ *
+ * <p>This type is a singleton.
  */
 public final class ArchivedColumn extends EntityLifecycleColumn<Boolean> {
 
     private static final ArchivedColumn instance = new ArchivedColumn();
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
+    /**
+     * Creates an instance of this column.
+     */
+    @SuppressWarnings("DuplicateStringLiteralInspection")   /* Used in a different context. */
     private ArchivedColumn() {
         super("archived");
     }
 
+    /**
+     * Returns a singleton instance of this type.
+     */
     public static ArchivedColumn instance() {
         return instance;
     }
 
+    /**
+     * Returns a singleton instance of this type.
+     *
+     * <p>Serves as a more DSL-friendly alternative to {@link #instance() instance()}.
+     */
     public static ArchivedColumn is() {
         return instance();
     }
 
+    /**
+     * A shortcut method returning the name of this column.
+     *
+     * <p>Returns the same value as {@code ArchivedColumn.instance().name().value()}.
+     */
     public static String nameAsString() {
         return instance().name().value();
     }

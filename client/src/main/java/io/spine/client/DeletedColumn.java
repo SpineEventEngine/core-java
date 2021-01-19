@@ -26,28 +26,58 @@
 
 package io.spine.client;
 
-//TODO:2021-01-18:alex.tymchenko: document
 /**
- * A column of an entity, which tells if the entity is deleted.
+ * A column of an entity, which tells if it is deleted.
+ *
+ * <p>This type is an extension of the client-side query language, allowing to filter queried
+ * entities for deleted/non-deleted items.
+ *
+ * <pre>
+ *  Query query =
+ *      SomeProjection.query()
+ *                    // ...
+ *                    .where(DeletedColumn.is(), true)   // Only include deleted.
+ *                    .build(...);
+ *  List<...> result = execute(query);
+ * </pre>
+ *
+ * <p>This type is a singleton.
  */
 public class DeletedColumn extends EntityLifecycleColumn<Boolean> {
 
     private static final DeletedColumn instance = new DeletedColumn();
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
+    /**
+     * Creates an instance of this column.
+     */
+    @SuppressWarnings("DuplicateStringLiteralInspection")   /* Used in a different context. */
     private DeletedColumn() {
         super("deleted");
     }
 
+    /**
+     * Returns a singleton instance of this type.
+     */
     public static DeletedColumn instance() {
         return instance;
     }
 
+    /**
+     * Returns a singleton instance of this type.
+     *
+     * <p>Serves as a more DSL-friendly alternative to {@link #instance() instance()}.
+     */
     public static DeletedColumn is() {
         return instance();
     }
 
+    /**
+     * A shortcut method returning the name of this column.
+     *
+     * <p>Returns the same value as {@code DeletedColumn.instance().name().value()}.
+     */
     public static String nameAsString() {
-        return instance().name().value();
+        return instance().name()
+                         .value();
     }
 }

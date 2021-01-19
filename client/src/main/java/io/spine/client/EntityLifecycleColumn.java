@@ -37,9 +37,10 @@ import java.util.function.Supplier;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * @author Alex Tymchenko
+ * A common type for the lifecycle column definitions which are declared as a part of a client-side
+ * query language.
  */
-@SuppressWarnings({"Immutable", "MissingSummary"})  //TODO:2021-01-18:alex.tymchenko: document!
+@SuppressWarnings({"Immutable"})  //TODO:2021-01-18:alex.tymchenko: document!
 @Internal
 public abstract class EntityLifecycleColumn<V> extends CustomColumn<Supplier<V>, V> {
 
