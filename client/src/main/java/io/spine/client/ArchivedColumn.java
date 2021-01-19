@@ -38,7 +38,7 @@ package io.spine.client;
  *                  // ...
  *                  .where(ArchivedColumn.is(), true)   // Only include archived.
  *                  .build(...);
- *  List<...> result = execute(query);
+ *  ... result = execute(query);
  * </pre>
  *
  * <p>This type is a singleton.

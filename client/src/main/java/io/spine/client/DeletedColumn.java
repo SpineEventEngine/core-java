@@ -38,7 +38,7 @@ package io.spine.client;
  *                    // ...
  *                    .where(DeletedColumn.is(), true)   // Only include deleted.
  *                    .build(...);
- *  List<...> result = execute(query);
+ *  ... result = execute(query);
  * </pre>
  *
  * <p>This type is a singleton.

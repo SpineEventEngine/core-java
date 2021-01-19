@@ -40,7 +40,7 @@ import io.spine.core.Version;
  *                    // ...
  *                  .where(Version.is(), previousVersion)
  *                  .build(...);
- *  List<...> result = execute(query);
+ *  ... = execute(query);
  * </pre>
  *
  * <p>This type is a singleton.
