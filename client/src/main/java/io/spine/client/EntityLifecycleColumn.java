@@ -30,7 +30,6 @@ import io.spine.annotation.Internal;
 import io.spine.query.ColumnName;
 import io.spine.query.CustomColumn;
 import io.spine.reflect.GenericTypeIndex;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.function.Supplier;
 
@@ -45,29 +44,27 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         Therefore, the API for obtaining the column values from entities and entity records
  *         is disabled by explicit throwing an {@code IllegalStateException}s in respective method.
  */
-@SuppressWarnings("Immutable")
 @Internal
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")    /* Must not be instantiated. */
 public abstract class EntityLifecycleColumn<V> extends CustomColumn<Supplier<V>, V> {
 
     private final ColumnName name;
 
-    private volatile @MonotonicNonNull Class<V> valueType;
-
-    @Override
-    @SuppressWarnings("unchecked")   /* Ensured by the declaration of the generic parameter. */
-    public Class<V> type() {
-        if (valueType == null) {
-            valueType = (Class<V>) GenericParameter.VALUE.argumentIn(getClass());
-        }
-        return valueType;
-    }
+    private final Class<V> valueType;
 
     /**
      * Creates an instance of this class with the passed name of the column.
      */
+    @SuppressWarnings("unchecked")   /* Ensured by the declaration of the generic parameter. */
     EntityLifecycleColumn(String name) {
         super();
         this.name = ColumnName.of(name);
+        this.valueType = (Class<V>) GenericParameter.VALUE.argumentIn(getClass());
+    }
+
+    @Override
+    public Class<V> type() {
+        return valueType;
     }
 
     @Override
