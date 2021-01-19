@@ -92,7 +92,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
                                StorageFactory factory,
                                Class<? extends Entity<I, S>> entityClass) {
         super(context, factory.createRecordStorage(context, spec(entityClass)));
-        this.findActiveRecordsQuery = findActiveEntities();
+        this.findActiveRecordsQuery = findActiveRecords();
     }
 
     private static <I, S extends EntityState<I>> EntityRecordSpec<I, S, ?>
@@ -305,7 +305,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
         return name.equals(archived.name()) || name.equals(deleted.name());
     }
 
-    private RecordQuery<I, EntityRecord> findActiveEntities() {
+    private RecordQuery<I, EntityRecord> findActiveRecords() {
         RecordQuery<I, EntityRecord> result =
                 RecordQuery.newBuilder(idType(), EntityRecord.class)
                            .where(archived).is(false)
