@@ -46,8 +46,27 @@ import java.util.function.Function;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Scans and extracts the {@link EntityRecordSpec specification} of the stored record
- * from the passed {@link io.spine.server.entity.Entity Entity}.
+ * Scans and extracts the definitions of {@link Column}s to be stored
+ * for a particular {@code Entity}.
+ *
+ * <p>The resulting columns include both the entity state-based columns declared with
+ * {@link io.spine.option.OptionsProto#column (column)} Proto option and the columns
+ * storing lifecycle and version attributes of an {@code Entity}.
+ *
+ * @param <E>
+ *         the type of an {@code Entity} to scan
+ * @param <S>
+ *         the type of the state for the scanned {@code Entity}
+ * @implNote Client-side API includes generic definitions of lifecycle and version columns
+ *         (such as {@link ArchivedColumn}). However, their code cannot depend on the {@code Entity}
+ *         type directly, as the {@code client} module has no dependency on {@code server} module.
+ *         Therefore, this column scanning process wires those generic column definitions with an
+ *         actual {@code Entity} type, instances of which serve as a data source for each column.
+ *         Also, instead of scanning the {@code (column)} options from an entity state
+ *         {@code Message} directly, this scanner uses a Spine compiler-generated shortcut method
+ *         called {@code definitions()} which returns the set of {@link EntityColumn}s.
+ *         Such an approach improves the scanning performance and preserve the types of generic
+ *         parameters code-generated for each {@code EntityColumn}.
  */
 final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
 
