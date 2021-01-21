@@ -27,6 +27,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.query.Column;
 import io.spine.server.entity.Entity;
 
@@ -35,9 +36,13 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * @author Alex Tymchenko
+ * A container for the columns which values are calculated on top of an {@code Entity} instance.
+ *
+ * @param <E>
+ *         the type of {@code Entity} serving as a source for the column values
  */
-@SuppressWarnings({"MissingSummary", "Immutable"})  //TODO:2021-01-18:alex.tymchenko: address!
+@Immutable
+@SuppressWarnings("Immutable")      /* Effectively immutable. */
 public final class Columns<E extends Entity<?, ?>> implements Iterable<Column<E, ?>> {
 
     private final ImmutableSet<Column<E, ?>> columns;

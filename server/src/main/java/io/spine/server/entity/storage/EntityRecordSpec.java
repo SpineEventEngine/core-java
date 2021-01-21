@@ -58,7 +58,6 @@ import static java.util.Collections.unmodifiableMap;
  */
 @Immutable
 @Internal
-@SuppressWarnings("Immutable")  //TODO:2021-01-18:alex.tymchenko: address!
 public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entity<I, S>>
         extends RecordSpec<I, EntityRecord, E> {
 
