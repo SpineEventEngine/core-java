@@ -85,10 +85,13 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
     private static final String COL_DEFS_METHOD_NAME = "definitions";
 
     /**
-     * The target entity class.
+     * The target entity class to scan.
      */
     private final EntityClass<E> entityClass;
 
+    /**
+     * Creates an instance of scanner for a given type of {@code Entity}.
+     */
     Scanner(EntityClass<E> entityClass) {
         this.entityClass = entityClass;
     }
