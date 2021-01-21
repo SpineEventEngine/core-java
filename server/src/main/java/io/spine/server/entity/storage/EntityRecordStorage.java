@@ -31,8 +31,6 @@ import com.google.protobuf.FieldMask;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.query.Column;
-import io.spine.query.ColumnName;
 import io.spine.query.EntityQuery;
 import io.spine.query.Query;
 import io.spine.query.QueryPredicate;
@@ -52,6 +50,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
+import static io.spine.server.entity.storage.EntityRecordColumn.isLifecycleColumn;
 import static io.spine.server.entity.storage.ToEntityRecordQuery.transform;
 
 /**
@@ -298,11 +297,6 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
             }
         }
         return true;
-    }
-
-    private static boolean isLifecycleColumn(Column<?, ?> column) {
-        ColumnName name = column.name();
-        return name.equals(archived.name()) || name.equals(deleted.name());
     }
 
     private RecordQuery<I, EntityRecord> findActiveRecords() {
