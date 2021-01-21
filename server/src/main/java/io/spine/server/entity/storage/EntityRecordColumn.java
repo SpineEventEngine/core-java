@@ -27,17 +27,24 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.client.VersionColumn;
 import io.spine.core.Version;
+import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.query.CustomColumn;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.WithLifecycle;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  * //TODO:2020-12-15:alex.tymchenko: update the description.
@@ -52,13 +59,22 @@ import io.spine.server.entity.EntityRecord;
 final class EntityRecordColumn {
 
     static final RecordColumn<EntityRecord, Boolean> archived =
-            AsEntityRecordColumn.apply(ArchivedColumn.instance(), Boolean.class);
+            AsEntityRecordColumn.apply(ArchivedColumn.instance(),
+                                       Boolean.class,
+                                       WithLifecycle::isArchived);
 
     static final RecordColumn<EntityRecord, Boolean> deleted =
-            AsEntityRecordColumn.apply(DeletedColumn.instance(), Boolean.class);
+            AsEntityRecordColumn.apply(DeletedColumn.instance(),
+                                       Boolean.class,
+                                       WithLifecycle::isDeleted);
 
     static final RecordColumn<EntityRecord, Version> version =
-            AsEntityRecordColumn.apply(VersionColumn.instance(), Version.class);
+            AsEntityRecordColumn.apply(VersionColumn.instance(),
+                                       Version.class,
+                                       EntityRecord::getVersion);
+
+    private static final ImmutableSet<RecordColumn<EntityRecord, ?>> all =
+            ImmutableSet.of(archived, deleted, version);
 
     /**
      * Prevents instantiation of this column holder type.
@@ -71,6 +87,16 @@ final class EntityRecordColumn {
      */
     @VisibleForTesting
     static ImmutableSet<ColumnName> names() {
-        return ImmutableSet.of(archived.name(), deleted.name(), version.name());
+        return all.stream()
+                  .map(Column::name)
+                  .collect(toImmutableSet());
+    }
+
+    static ImmutableMap<ColumnName, Object> valuesIn(EntityRecord record) {
+        checkNotNull(record);
+        ImmutableMap<ColumnName, Object> values =
+                all.stream()
+                   .collect(toImmutableMap(Column::name, c -> c.valueIn(record)));
+        return values;
     }
 }

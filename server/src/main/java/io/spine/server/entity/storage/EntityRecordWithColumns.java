@@ -31,9 +31,6 @@ import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.SPI;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.client.ArchivedColumn;
-import io.spine.client.DeletedColumn;
-import io.spine.client.VersionColumn;
 import io.spine.query.ColumnName;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -101,14 +98,7 @@ public final class EntityRecordWithColumns<I>
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
         checkNotNull(id);
         checkNotNull(record);
-        LifecycleFlags flags = record.getLifecycleFlags();
-        ImmutableMap<ColumnName, Object> lifecycleValues =
-                ImmutableMap.of(ArchivedColumn.instance()
-                                              .name(), flags.getArchived(),
-                                DeletedColumn.instance()
-                                             .name(), flags.getDeleted(),
-                                VersionColumn.instance()
-                                             .name(), record.getVersion());
+        ImmutableMap<ColumnName, Object> lifecycleValues = EntityRecordColumn.valuesIn(record);
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 
