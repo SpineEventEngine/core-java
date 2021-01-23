@@ -166,8 +166,7 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
         Class<?>[] innerClasses = stateClass.getDeclaredClasses();
         Class<?> columnClass = null;
         for (Class<?> aClass : innerClasses) {
-            if (aClass.getSimpleName()
-                      .equals(COLS_NESTED_CLASSNAME)) {
+            if (COLS_NESTED_CLASSNAME.equals(aClass.getSimpleName())) {
                 columnClass = aClass;
             }
         }
