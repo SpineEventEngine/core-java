@@ -43,7 +43,7 @@ package io.spine.client;
  *
  * <p>This type is a singleton.
  */
-public class DeletedColumn extends EntityLifecycleColumn<Boolean> {
+public final class DeletedColumn extends EntityLifecycleColumn<Boolean> {
 
     private static final DeletedColumn instance = new DeletedColumn();
 

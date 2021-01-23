@@ -45,7 +45,7 @@ import io.spine.core.Version;
  *
  * <p>This type is a singleton.
  */
-public class VersionColumn extends EntityLifecycleColumn<Version> {
+public final class VersionColumn extends EntityLifecycleColumn<Version> {
 
     private static final VersionColumn instance = new VersionColumn();
 
