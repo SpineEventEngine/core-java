@@ -160,8 +160,8 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
          *
          * This method differs from its parent by the fact it never returns {@code null}.
          */
-        @CanIgnoreReturnValue
         @Override
+        @CanIgnoreReturnValue
         I apply(@Nullable R input);
     }
 }
