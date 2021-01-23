@@ -34,7 +34,6 @@ import io.spine.server.entity.EntityRecord;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.query.RecordColumn.create;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -58,26 +57,6 @@ final class AsEntityRecordColumn {
      * Creates a view on the given column as on a record column of an {@link EntityRecord}
      * with the given type of values.
      *
-     * <p>The resulting view loses an ability to {@linkplain Column#valueIn(Object) obtain
-     * the values from the record instance}.
-     *
-     * @param original
-     *         the column to create a view for
-     * @param typeOfValues
-     *         the type of the column values
-     * @param <V>
-     *         the type of the column values
-     * @return a view on the column
-     */
-    @SuppressWarnings("BadImport")       // `create` looks fine in this context.
-    static <V> RecordColumn<EntityRecord, V> apply(Column<?, ?> original, Class<V> typeOfValues) {
-        return apply(original, typeOfValues, new NoGetter<>());
-    }
-
-    /**
-     * Creates a view on the given column as on a record column of an {@link EntityRecord}
-     * with the given type of values.
-     *
      * <p>A value of the resulting column is determined by the passed getter.
      *
      * @param original
@@ -90,13 +69,12 @@ final class AsEntityRecordColumn {
      *         the type of the column values
      * @return a view on the column
      */
-    @SuppressWarnings("BadImport")       // `create` looks fine in this context.
     static <V> RecordColumn<EntityRecord, V>
     apply(Column<?, ?> original, Class<V> typeOfValues, Function<EntityRecord, V> getter) {
         checkNotNull(original);
         checkNotNull(typeOfValues);
         String columnName = columnName(original);
-        return create(columnName, typeOfValues, getter::apply);
+        return RecordColumn.create(columnName, typeOfValues, getter::apply);
     }
 
     /**
@@ -114,11 +92,30 @@ final class AsEntityRecordColumn {
         return apply(original, Object.class);
     }
 
+    /**
+     * Creates a view on the given column as on a record column of an {@link EntityRecord}
+     * with the given type of values.
+     *
+     * <p>The resulting view loses an ability to {@linkplain Column#valueIn(Object) obtain
+     * the values from the record instance}.
+     *
+     * @param original
+     *         the column to create a view for
+     * @param typeOfValues
+     *         the type of the column values
+     * @param <V>
+     *         the type of the column values
+     * @return a view on the column
+     */
+    private static <V> RecordColumn<EntityRecord, V>
+    apply(Column<?, ?> original, Class<V> typeOfValues) {
+        return apply(original, typeOfValues, new NoGetter<>());
+    }
+
     private static String columnName(Column<?, ?> original) {
         return original.name()
                        .value();
     }
-
     /**
      * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
      */
