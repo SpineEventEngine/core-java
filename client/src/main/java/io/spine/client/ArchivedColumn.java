@@ -70,13 +70,4 @@ public final class ArchivedColumn extends EntityLifecycleColumn<Boolean> {
     public static ArchivedColumn is() {
         return instance();
     }
-
-    /**
-     * A shortcut method returning the name of this column.
-     *
-     * <p>Returns the same value as {@code ArchivedColumn.instance().name().value()}.
-     */
-    public static String nameAsString() {
-        return instance().toString();
-    }
 }

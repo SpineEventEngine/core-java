@@ -70,13 +70,4 @@ public final class DeletedColumn extends EntityLifecycleColumn<Boolean> {
     public static DeletedColumn is() {
         return instance();
     }
-
-    /**
-     * A shortcut method returning the name of this column.
-     *
-     * <p>Returns the same value as {@code DeletedColumn.instance().name().value()}.
-     */
-    public static String nameAsString() {
-        return instance().toString();
-    }
 }

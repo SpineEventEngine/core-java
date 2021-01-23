@@ -28,6 +28,7 @@ package io.spine.server.aggregate.given.repo;
 
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
+import io.spine.client.EntityLifecycleColumn;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -54,12 +55,18 @@ public class AggregateWithLifecycle
     @Apply
     private void on(Evaluated eventMessage) {
         String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
-        if (ArchivedColumn.nameAsString().equalsIgnoreCase(msg)) {
+        if (namedAfterColumn(msg, ArchivedColumn.instance())) {
             setArchived(true);
         }
-        if (DeletedColumn.nameAsString().equalsIgnoreCase(msg)) {
+        if (namedAfterColumn(msg, DeletedColumn.instance())) {
             setDeleted(true);
         }
         builder().setValue(eventMessage.hashCode());
+    }
+
+    private static boolean namedAfterColumn(String msg, EntityLifecycleColumn<?> column) {
+        return column
+                .toString()
+                .equalsIgnoreCase(msg);
     }
 }
