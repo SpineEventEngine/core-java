@@ -35,7 +35,6 @@ import io.spine.query.EntityQuery;
 import io.spine.query.Query;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
-import io.spine.query.RecordQueryBuilder;
 import io.spine.query.Subject;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
@@ -276,10 +275,10 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     private RecordQuery<I, EntityRecord> onlyActive(RecordQuery<I, EntityRecord> query) {
         RecordQuery<I, EntityRecord> result = query;
         if (hasNoIds(query) && hasNoLifecycleCols(query)) {
-            RecordQueryBuilder<I, EntityRecord> builder = query.toBuilder();
-            builder.where(archived).is(false)
-                   .where(deleted).is(false);
-            result = builder.build();
+            result = query.toBuilder()
+                          .where(archived).is(false)
+                          .where(deleted).is(false)
+                          .build();
         }
         return result;
     }
