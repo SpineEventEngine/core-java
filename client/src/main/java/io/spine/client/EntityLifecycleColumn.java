@@ -89,6 +89,14 @@ public abstract class EntityLifecycleColumn<V> extends CustomColumn<Supplier<V>,
     }
 
     /**
+     * Returns the name of the column as a {@code String}.
+     */
+    @Override
+    public String toString() {
+        return name.value();
+    }
+
+    /**
      * Enumeration of generic type parameters of this class.
      */
     @SuppressWarnings("rawtypes")

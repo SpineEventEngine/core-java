@@ -77,7 +77,6 @@ public class DeletedColumn extends EntityLifecycleColumn<Boolean> {
      * <p>Returns the same value as {@code DeletedColumn.instance().name().value()}.
      */
     public static String nameAsString() {
-        return instance().name()
-                         .value();
+        return instance().toString();
     }
 }

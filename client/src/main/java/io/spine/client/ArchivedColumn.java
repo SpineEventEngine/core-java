@@ -77,6 +77,6 @@ public final class ArchivedColumn extends EntityLifecycleColumn<Boolean> {
      * <p>Returns the same value as {@code ArchivedColumn.instance().name().value()}.
      */
     public static String nameAsString() {
-        return instance().name().value();
+        return instance().toString();
     }
 }
