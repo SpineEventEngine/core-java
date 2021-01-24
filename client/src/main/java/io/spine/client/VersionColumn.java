@@ -70,6 +70,6 @@ public final class VersionColumn extends EntityLifecycleColumn<Version> {
      * <p>Serves as a more DSL-friendly alternative to {@link #instance() instance()}.
      */
     public static VersionColumn is() {
-        return instance;
+        return instance();
     }
 }
