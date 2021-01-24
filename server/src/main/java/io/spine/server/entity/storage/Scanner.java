@@ -36,7 +36,6 @@ import io.spine.query.EntityColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -119,7 +118,6 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
         return columns;
     }
 
-    @NotNull
     private AsEntityColumn<E> wrap(Column<?, ?> origin, Function<E, Object> getter) {
         return new AsEntityColumn<>(origin, getter);
     }
