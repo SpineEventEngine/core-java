@@ -65,8 +65,6 @@ public class AggregateWithLifecycle
     }
 
     private static boolean namedAfterColumn(String msg, EntityLifecycleColumn<?> column) {
-        return column
-                .toString()
-                .equalsIgnoreCase(msg);
+        return msg.equalsIgnoreCase(column.toString());
     }
 }
