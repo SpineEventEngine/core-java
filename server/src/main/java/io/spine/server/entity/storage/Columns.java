@@ -26,34 +26,50 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.query.ColumnName;
-import io.spine.query.CustomColumn;
+import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.query.Column;
 import io.spine.server.entity.Entity;
 
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Stream;
+
 /**
- * A column of an entity, which tells if the entity is archived.
+ * A container for the columns which values are calculated on top of an {@code Entity} instance.
+ *
+ * @param <E>
+ *         the type of {@code Entity} serving as a source for the column values
  */
-final class ArchivedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
+@Immutable
+@SuppressWarnings("Immutable")      /* Effectively immutable. */
+public final class Columns<E extends Entity<?, ?>> implements Iterable<Column<E, ?>> {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
-    private static final ColumnName ARCHIVED = ColumnName.of("archived");
+    private final ImmutableSet<Column<E, ?>> columns;
 
-    ArchivedColumn() {
-        super();
+    /**
+     * Creates a new instance from the passed columns.
+     */
+    Columns(Set<Column<E, ?>> columns) {
+        this.columns = ImmutableSet.copyOf(columns);
     }
 
     @Override
-    public ColumnName name() {
-        return ARCHIVED;
+    public Iterator<Column<E, ?>> iterator() {
+        return columns.iterator();
     }
 
-    @Override
-    public Class<Boolean> type() {
-        return Boolean.class;
+    /**
+     * Returns the number of columns.
+     */
+    int size() {
+        return columns.size();
     }
 
-    @Override
-    public Boolean valueIn(Entity<?, ?> entity) {
-        return entity.lifecycleFlags().getArchived();
+    /**
+     * Returns a new stream on top of the stored columns.
+     */
+    Stream<Column<E, ?>> stream() {
+        return columns.stream();
     }
 }

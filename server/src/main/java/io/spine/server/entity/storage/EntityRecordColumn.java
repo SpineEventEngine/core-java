@@ -27,105 +27,107 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import io.spine.annotation.Internal;
+import io.spine.client.ArchivedColumn;
+import io.spine.client.DeletedColumn;
+import io.spine.client.VersionColumn;
+import io.spine.core.Version;
+import io.spine.query.Column;
 import io.spine.query.ColumnName;
-import io.spine.query.CustomColumn;
 import io.spine.query.RecordColumn;
-import io.spine.server.entity.Entity;
+import io.spine.query.RecordColumns;
 import io.spine.server.entity.EntityRecord;
 
-import java.util.function.Supplier;
-
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static java.util.Arrays.stream;
 
 /**
- * Columns storing the internal framework-specific attributes of an {@code Entity}.
+ * Defines the columns to store along with the {@link EntityRecord}.
  *
- * <p>As they are not declared in the Proto messages of entity states, they are implemented as
- * several {@linkplain CustomColumn custom columns}. Their actual values are obtained from
- * the entity attributes at the very moment of persisting a corresponding {@code Entity} instance.
+ * <p>Includes the columns for the {@code Entity} lifecycle and version.
+ *
+ * <p>Primary usage scenario of the definitions is a low-level querying of records
+ * of {@code Entity} states.
+ *
+ * @implNote The columns are defined on top of the column types declared as a part of
+ *         client-side query language. Since {@code Entity} and {@code EntityRecord} types
+ *         are not available on the client, the enumeration of columns declared here is,
+ *         in some way, a wiring between a generic declaration of the column
+ *         (e.g. {@link ArchivedColumn}) and its {@code EntityRecord}-based counterpart
+ *         (i.e. {@link EntityRecordColumn#archived EntityRecordColumn.archived}.
  */
-@Internal
-public enum EntityRecordColumn implements Supplier<CustomColumn<Entity<?, ?>, ?>> {
+@RecordColumns(ofType = EntityRecord.class)
+final class EntityRecordColumn {
 
     /**
-     * The column storing the {@code boolean} attribute telling if an entity is archived.
+     * An {@link ArchivedColumn} which uses {@link EntityRecord} as a source for its values.
      */
-    archived(new ArchivedColumn()),
+    static final RecordColumn<EntityRecord, Boolean> archived =
+            AsEntityRecordColumn.apply(ArchivedColumn.instance(),
+                                       Boolean.class,
+                                       EntityRecord::isArchived);
 
     /**
-     * The column storing the {@code boolean} attribute telling if an entity is deleted.
+     * A {@link DeletedColumn} which uses {@link EntityRecord} as a source for its values.
      */
-    deleted(new DeletedColumn()),
+    static final RecordColumn<EntityRecord, Boolean> deleted =
+            AsEntityRecordColumn.apply(DeletedColumn.instance(),
+                                       Boolean.class,
+                                       EntityRecord::isDeleted);
 
     /**
-     * The column storing the entity version.
+     * A {@link VersionColumn} which uses {@link EntityRecord} as a source for its values.
      */
-    version(new VersionColumn());
-
-    private final CustomColumn<Entity<?, ?>, ?> column;
-
-    EntityRecordColumn(CustomColumn<Entity<?, ?>, ?> column) {
-        this.column = column;
-    }
+    static final RecordColumn<EntityRecord, Version> version =
+            AsEntityRecordColumn.apply(VersionColumn.instance(),
+                                       Version.class,
+                                       EntityRecord::getVersion);
 
     /**
-     * Returns the definition of the column.
-     */
-    @Override
-    public CustomColumn<Entity<?, ?>, ?> get() {
-        return column;
-    }
-
-    /**
-     * Returns the name of the column.
-     */
-    public ColumnName columnName() {
-        return get().name();
-    }
-
-    /**
-     * Obtains the column treating it as a lifecycle column with {@code Boolean} values.
+     * Set of all columns declared for {@code EntityRecord}.
      *
-     * <p>If the column has the type of values different from {@code Boolean},
-     * the {@link ClassCastException} is thrown.
+     * <p>Serves as a performance improvement to avoid creating extra collections.
      */
-    @SuppressWarnings("unchecked")
-    public CustomColumn<Entity<?, ?>, Boolean> lifecycle() {
-        CustomColumn<Entity<?, ?>, Boolean> boolColumn =
-                (CustomColumn<Entity<?, ?>, Boolean>) this.column;
-        return boolColumn;
+    private static final ImmutableSet<RecordColumn<EntityRecord, ?>> all =
+            ImmutableSet.of(archived, deleted, version);
+
+    /**
+     * Prevents instantiation of this column holder type.
+     */
+    private EntityRecordColumn() {
     }
 
     /**
-     * Returns the column as a {@link RecordColumn}.
-     *
-     * <p>This is required in order to reuse a querying mechanism defined for all stored messages.
-     *
-     * @param <V> the type of the column values
-     */
-    <V> RecordColumn<EntityRecord, V> asRecordColumn(Class<V> valueType) {
-        return AsEntityRecordColumn.apply(column, valueType);
-    }
-
-    /**
-     * Returns the names of all columns.
+     * Returns the names of all columns defined for storing of {@link EntityRecord}.
      */
     @VisibleForTesting
     static ImmutableSet<ColumnName> names() {
-        return ImmutableSet.of(archived.columnName(), deleted.columnName(), version.columnName());
+        return all.stream()
+                  .map(Column::name)
+                  .collect(toImmutableSet());
     }
 
     /**
-     * Returns all the columns which store system attributes of an {@code Entity}.
+     * Evaluates the columns against the passed record and returns the value of each column
+     * along the with its name.
      */
-    @VisibleForTesting
-    static ImmutableSet<CustomColumn<Entity<?, ?>, ?>> all() {
-        ImmutableSet<CustomColumn<Entity<?, ?>, ?>> result =
-                stream(values()).map(EntityRecordColumn::get)
-                                .collect(toImmutableSet());
-        return result;
+    static ImmutableMap<ColumnName, Object> valuesIn(EntityRecord record) {
+        checkNotNull(record);
+        ImmutableMap<ColumnName, Object> values =
+                all.stream()
+                   .collect(toImmutableMap(Column::name, c -> c.valueIn(record)));
+        return values;
+    }
+
+    /**
+     * Tells whether the passed column is either {@linkplain ArchivedColumn archived}
+     * or {@linkplain DeletedColumn deleted}.
+     */
+    static boolean isLifecycleColumn(Column<?, ?> column) {
+        checkNotNull(column);
+        ColumnName name = column.name();
+        return name.equals(archived.name()) || name.equals(deleted.name());
     }
 }

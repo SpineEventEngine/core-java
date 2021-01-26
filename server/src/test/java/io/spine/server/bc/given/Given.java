@@ -80,8 +80,8 @@ public class Given {
             return ImmutableSet.of(commandClass);
         }
 
-        @CanIgnoreReturnValue
         @Override
+        @CanIgnoreReturnValue
         public void dispatch(CommandEnvelope envelope) {
             // Do nothing.
         }
@@ -106,8 +106,8 @@ public class Given {
             return union(externalEventClasses(), domesticEventClasses()).immutableCopy();
         }
 
-        @CanIgnoreReturnValue
         @Override
+        @CanIgnoreReturnValue
         public void dispatch(EventEnvelope envelope) {
             // Do nothing.
         }

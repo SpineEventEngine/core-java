@@ -107,8 +107,8 @@ public final class ForeignContextConfig {
             return EventClass.emptySet();
         }
 
-        @CanIgnoreReturnValue
         @Override
+        @CanIgnoreReturnValue
         public void dispatch(EventEnvelope envelope) {
             // Do nothing.
         }

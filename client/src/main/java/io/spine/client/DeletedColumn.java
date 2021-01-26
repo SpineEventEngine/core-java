@@ -24,36 +24,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
-
-import io.spine.query.ColumnName;
-import io.spine.query.CustomColumn;
-import io.spine.server.entity.Entity;
+package io.spine.client;
 
 /**
- * A column of an entity, which tells if the entity is deleted.
+ * A column of an entity, which tells if it is deleted.
+ *
+ * <p>This type is an extension of the client-side query language, allowing to filter queried
+ * entities for deleted/non-deleted items.
+ *
+ * <pre>
+ *  Query query =
+ *      SomeProjection.query()
+ *                    // ...
+ *                    .where(DeletedColumn.is(), true)   // Only include deleted.
+ *                    .build(...);
+ *  ... result = execute(query);
+ * </pre>
+ *
+ * <p>This type is a singleton.
  */
-final class DeletedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
+public final class DeletedColumn extends EntityLifecycleColumn<Boolean> {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
-    private static final ColumnName DELETED = ColumnName.of("deleted");
+    private static final DeletedColumn instance = new DeletedColumn();
 
-    DeletedColumn() {
-        super();
+    /**
+     * Creates an instance of this column.
+     */
+    @SuppressWarnings("DuplicateStringLiteralInspection")   /* Used in a different context. */
+    private DeletedColumn() {
+        super("deleted");
     }
 
-    @Override
-    public ColumnName name() {
-        return DELETED;
+    /**
+     * Returns a singleton instance of this type.
+     */
+    public static DeletedColumn instance() {
+        return instance;
     }
 
-    @Override
-    public Class<Boolean> type() {
-        return Boolean.class;
-    }
-
-    @Override
-    public Boolean valueIn(Entity<?, ?> entity) {
-        return entity.lifecycleFlags().getDeleted();
+    /**
+     * Returns a singleton instance of this type.
+     *
+     * <p>Serves as a more DSL-friendly alternative to {@link #instance() instance()}.
+     */
+    public static DeletedColumn is() {
+        return instance();
     }
 }

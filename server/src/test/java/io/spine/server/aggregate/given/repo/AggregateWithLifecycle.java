@@ -26,15 +26,15 @@
 
 package io.spine.server.aggregate.given.repo;
 
+import io.spine.client.ArchivedColumn;
+import io.spine.client.DeletedColumn;
+import io.spine.client.EntityLifecycleColumn;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.test.aggregate.cli.Evaluate;
 import io.spine.test.aggregate.cli.Evaluated;
-
-import static io.spine.server.entity.storage.EntityRecordColumn.archived;
-import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 
 /**
  * The aggregate that can handle status flags.
@@ -55,14 +55,16 @@ public class AggregateWithLifecycle
     @Apply
     private void on(Evaluated eventMessage) {
         String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
-        if (archived.name()
-                    .equalsIgnoreCase(msg)) {
+        if (namedAfterColumn(msg, ArchivedColumn.instance())) {
             setArchived(true);
         }
-        if (deleted.name()
-                   .equalsIgnoreCase(msg)) {
+        if (namedAfterColumn(msg, DeletedColumn.instance())) {
             setDeleted(true);
         }
         builder().setValue(eventMessage.hashCode());
+    }
+
+    private static boolean namedAfterColumn(String msg, EntityLifecycleColumn<?> column) {
+        return msg.equalsIgnoreCase(column.toString());
     }
 }

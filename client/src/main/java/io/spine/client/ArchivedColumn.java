@@ -24,43 +24,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.Immutable;
-import io.spine.query.CustomColumn;
-import io.spine.server.entity.Entity;
-
-import java.util.Iterator;
-import java.util.Set;
+package io.spine.client;
 
 /**
- * Describes the system columns defined for this type of {@link Entity}.
+ * A column of an entity, which tells if an entity is archived.
  *
- * @param <E>
- *         the type of entity which columns are described
+ * <p>The sole purpose of this type is to provide an extension for the client-side query language,
+ * allowing to query for archived/non-archived entities.
+ *
+ * <pre>
+ *  Query query =
+ *      MyProjection.query()
+ *                  // ...
+ *                  .where(ArchivedColumn.is(), true)   // Only include archived.
+ *                  .build(...);
+ *  ... result = execute(query);
+ * </pre>
+ *
+ * <p>This type is a singleton.
  */
-@Immutable
-final class SystemColumns<E extends Entity<?, ?>> implements Iterable<CustomColumn<E, ?>> {
+public final class ArchivedColumn extends EntityLifecycleColumn<Boolean> {
 
-    private final ImmutableSet<CustomColumn<E, ?>> columns;
+    private static final ArchivedColumn instance = new ArchivedColumn();
 
     /**
-     * Creates a new instance from the passed columns.
+     * Creates an instance of this column.
      */
-    SystemColumns(Set<CustomColumn<E, ?>> columns) {
-        this.columns = ImmutableSet.copyOf(columns);
-    }
-
-    @Override
-    public Iterator<CustomColumn<E, ?>> iterator() {
-        return columns.iterator();
+    @SuppressWarnings("DuplicateStringLiteralInspection")   /* Used in a different context. */
+    private ArchivedColumn() {
+        super("archived");
     }
 
     /**
-     * Returns the number of columns.
+     * Returns a singleton instance of this type.
      */
-    int size() {
-        return columns.size();
+    public static ArchivedColumn instance() {
+        return instance;
+    }
+
+    /**
+     * Returns a singleton instance of this type.
+     *
+     * <p>Serves as a more DSL-friendly alternative to {@link #instance() instance()}.
+     */
+    public static ArchivedColumn is() {
+        return instance();
     }
 }

@@ -29,7 +29,9 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
+import io.spine.client.ArchivedColumn;
 import io.spine.client.CommandFactory;
+import io.spine.client.DeletedColumn;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.core.Command;
@@ -64,8 +66,6 @@ import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.new
 import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.projectLogo1000by800;
 import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.spineLogo200by200;
 import static io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.upload;
-import static io.spine.server.entity.storage.EntityRecordColumn.archived;
-import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.test.aggregate.query.MRPhotoType.CROP_FRAME;
 import static io.spine.test.aggregate.query.MRPhotoType.FULL_FRAME;
 import static java.util.stream.Collectors.toList;
@@ -124,7 +124,7 @@ class AggregateQueryingTest {
             Query query =
                     MRPhoto.query()
                            .id().is(targetId)
-                           .where(archived.lifecycle(), true)
+                           .where(ArchivedColumn.is(), true)
                            .build(transformWith(queries));
             checkRead(query, target);
         }
@@ -138,7 +138,7 @@ class AggregateQueryingTest {
             Query query =
                     MRPhoto.query()
                            .id().is(targetId)
-                           .where(deleted.lifecycle(), true)
+                           .where(DeletedColumn.is(), true)
                            .build(transformWith(queries));
             checkRead(query, target);
         }
@@ -152,8 +152,8 @@ class AggregateQueryingTest {
             archiveItem(secondPhoto);
             Query query =
                     MRPhoto.query()
-                           .where(archived.lifecycle(), true)
-                           .where(deleted.lifecycle(), false)
+                           .where(ArchivedColumn.is(), true)
+                           .where(DeletedColumn.is(), false)
                            .build(transformWith(queries));
             checkRead(query, firstPhoto, secondPhoto);
         }
@@ -166,8 +166,8 @@ class AggregateQueryingTest {
             deleteItem(firstPhoto);
             deleteItem(secondPhoto);
             Query query = MRPhoto.query()
-                                 .where(archived.lifecycle(), false)
-                                 .where(deleted.lifecycle(), true)
+                                 .where(ArchivedColumn.is(), false)
+                                 .where(DeletedColumn.is(), true)
                                  .build(transformWith(queries));
             checkRead(query, firstPhoto, secondPhoto);
         }
@@ -230,7 +230,7 @@ class AggregateQueryingTest {
             archiveItem(projectLogo1000by800());
             Query query =
                     MRPhoto.query()
-                           .either(q -> q.where(archived.lifecycle(), true),
+                           .either(q -> q.where(ArchivedColumn.is(), true),
                                    q -> q.height().isGreaterThan(1000))
                            .width().isLessThan(7000)
                            .build(transformWith(queries));

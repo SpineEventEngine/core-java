@@ -24,31 +24,52 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.client;
 
-import io.spine.annotation.Internal;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import io.spine.core.Version;
 
 /**
- * Marks an entity column declared by the Spine Framework.
+ * A column of an entity holding the entity version.
  *
- * <p>Such columns may be shared across entities and are used internally by the Spine routines.
+ * <p>Extends the client-side query language to provide an ability to query entities
+ * by their versions.
  *
- * <p>This annotation should not be used in the client code. The users should rely on the
- * {@code (column)} option to declare entity columns instead.
+ * <pre>
+ *  Query query =
+ *        ReportView.query()
+ *                    // ...
+ *                  .where(Version.is(), previousVersion)
+ *                  .build(...);
+ *  ... = execute(query);
+ * </pre>
+ *
+ * <p>This type is a singleton.
  */
-@Target(METHOD)
-@Retention(RUNTIME)
-@Internal
-public @interface SystemColumn {
+public final class VersionColumn extends EntityLifecycleColumn<Version> {
+
+    private static final VersionColumn instance = new VersionColumn();
 
     /**
-     * The implementation of the column.
+     * Creates an instance of this column.
      */
-    EntityRecordColumn impl();
+    @SuppressWarnings("DuplicateStringLiteralInspection")   /* Used in a different context. */
+    private VersionColumn() {
+        super("version");
+    }
+
+    /**
+     * Returns a singleton instance of this type.
+     */
+    public static VersionColumn instance() {
+        return instance;
+    }
+
+    /**
+     * Returns a singleton instance of this type.
+     *
+     * <p>Serves as a more DSL-friendly alternative to {@link #instance() instance()}.
+     */
+    public static VersionColumn is() {
+        return instance();
+    }
 }

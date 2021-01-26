@@ -26,39 +26,55 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.ImmutableSet;
+import io.spine.client.ArchivedColumn;
+import io.spine.client.DeletedColumn;
+import io.spine.client.VersionColumn;
+import io.spine.query.Column;
+import io.spine.query.ColumnName;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.test.entity.TaskListView;
+import io.spine.test.entity.TaskView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.entity.storage.AssertColumns.assertContains;
 
-@SuppressWarnings({"rawtypes", "unchecked"}) // using `Scanner` with no generic args for simplicity
 @DisplayName("`Scanner` should")
 class ScannerTest {
 
     @Test
-    @DisplayName("extract system columns from the entity class")
+    @DisplayName("include `Entity` lifecycle columns into the scan results")
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-        Scanner scanner = new Scanner(entityClass);
-        SystemColumns<TaskViewProjection> systemColumns = scanner.systemColumns();
+        Scanner<TaskView, TaskViewProjection> scanner = new Scanner<>(entityClass);
+        Columns<TaskViewProjection> columns = scanner.columns();
 
-        assertThat(systemColumns)
-                .containsExactlyElementsIn(EntityRecordColumn.all());
+        ImmutableSet<ColumnName> names =
+                columns.stream()
+                       .map(Column::name)
+                       .collect(toImmutableSet());
+
+        assertThat(names).containsAtLeastElementsIn(
+                ImmutableSet.of(
+                        ArchivedColumn.instance().name(),
+                        DeletedColumn.instance().name(),
+                        VersionColumn.instance().name()
+                )
+        );
     }
 
-
     @Test
-    @DisplayName("extract simple Protobuf field based columns")
+    @DisplayName("extract the columns declared with `(column)` option in the Protobuf message")
     void extractSimpleColumns() {
         EntityClass<TaskListViewProjection> entityClass =
                 asEntityClass(TaskListViewProjection.class);
-        Scanner scanner = new Scanner(entityClass);
+        Scanner<TaskListView, TaskListViewProjection> scanner = new Scanner<>(entityClass);
 
         StateColumns<TaskListView> columns = scanner.stateColumns();
 
