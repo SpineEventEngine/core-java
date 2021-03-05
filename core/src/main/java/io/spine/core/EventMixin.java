@@ -25,8 +25,8 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
-import io.spine.base.KnownMessage;
 import io.spine.protobuf.Messages;
+import io.spine.type.KnownMessage;
 import io.spine.validate.FieldAwareMessage;
 
 import java.util.Optional;

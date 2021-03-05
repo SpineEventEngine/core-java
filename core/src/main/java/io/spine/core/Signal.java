@@ -26,10 +26,10 @@ import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.base.KnownMessage;
 import io.spine.base.MessageContext;
-import io.spine.base.SerializableMessage;
 import io.spine.protobuf.AnyPacker;
+import io.spine.type.KnownMessage;
+import io.spine.type.SerializableMessage;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;

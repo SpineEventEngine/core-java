@@ -45,8 +45,8 @@ val coreJava = "2.0.0-jdk8.SNAPSHOT.9"
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "2.0.0-jdk8.SNAPSHOT.10"
-val time = "2.0.0-jdk8.SNAPSHOT.8"
+val base = "2.0.0-SNAPSHOT.2"
+val time = "2.0.0-SNAPSHOT.0"
 
 project.extra.apply {
     this["kotlinVersion"] = "1.4.21"
