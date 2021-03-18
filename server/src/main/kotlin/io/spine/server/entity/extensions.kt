@@ -74,7 +74,7 @@ fun <I,
  * because of this can access its `protected` API.
  */
 private fun <I,
-        S : EntityState<I, ValidatingBuilder<S>, S>,
+        S : EntityState<I, B, S>,
         B : ValidatingBuilder<S>>
         builderOf(e: TransactionalEntity<I, S, B>): B = e.builder()
 
